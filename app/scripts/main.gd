@@ -923,6 +923,19 @@ func set_menu_shown(shown: bool) -> void:
 	update_controller_labels()
 
 
+## Foveation ([xr] in project.godot, D22) is off while the panel or the agent pane is in front of the viewer: at Low
+## the sharp area is small enough that the edges of the panel's text soften. Text is cheap to draw, so the saving isn't
+## missed then. Called with the controller labels, which change exactly when either opens or closes.
+func _update_foveation() -> void:
+	var xr := XRServer.find_interface("OpenXR")
+	if not use_xr or xr == null or not "foveation_level" in xr:
+		return
+	var text_in_view := menu_shown or (local_agents != null and local_agents.pane_shown())
+	var want := 0 if text_in_view else int(ProjectSettings.get_setting("xr/openxr/foveation_level", 0))
+	if xr.foveation_level != want:
+		xr.foveation_level = want
+
+
 func _update_overlay_visibility() -> void:
 	overlay.visible = overlay_on and not _overlay_suppressed
 
@@ -1072,6 +1085,7 @@ func _stick_seek(key: Variant, x: float, delta: float) -> void:
 ## Sets each controller's label texts from CONTROL_LABELS and the bindings of the profile the runtime bound for it
 ## (menu shown or not). Called when a profile changes and when the menu shows / hides, never per frame.
 func update_controller_labels() -> void:
+	_update_foveation()
 	var on_window := window_pointer != null and window_pointer.is_active()
 	var terminal := local_agents != null and (local_agents.waiting() and local_agents.pane_shown()
 			or local_agents.looking() or local_agents.on_big_screen())

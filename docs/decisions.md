@@ -363,7 +363,8 @@ had no effect.
 
 Measured on 2026-11-03 with a fill-heavy test sphere around the viewer (GPU time per frame, both eyes, median of 360
 frames): off 8.4 ms, Low 3.6 ms, Medium 3.6 ms, High 3.1 ms. The viewer could not see Low; High showed blocks at the
-edges of the view, on our flat high-contrast surfaces. Low takes almost all of the saving.
+edges of the view, on our flat high-contrast surfaces. Low takes almost all of the saving. At Low the edges of the
+panel's text still softened, so foveation is off while the panel or the agent pane shows (text is cheap to draw).
 
 Rejected: subsampled images (Godot's default), which the Frame doesn't support yet: with them the whole picture warps
 as the head turns (Godot issue 124520); dynamic foveation, which the runtime ignores. Would change if: the Frame adds
