@@ -3,7 +3,7 @@ extends ScrollContainer
 ## The System tab (docs/ui-design.md): the info overlay and the stats view; the panel's layout (size, distance,
 ## recentre hold, follow the head, left-handed, reset) so the numbers can be tuned in the headset; accessibility (#74);
 ## test patterns, calibration cards and the bandwidth meter (#48); the benchmark (#82); hardware 10-bit video (which way
-## it plays, read-only, ui/hw_video_row.gd); haptics; the phone remote with
+## it plays, read-only, ui/hw_video_row.gd); foveation (D22); haptics; the phone remote with
 ## its address and QR code (#13); the assistant (ui/assistant_row.gd); the dev tools when dev mode is on (theme, remote changes and their undo); about.
 ##
 ## Hooks used: scripts/dev/stats.gd (made here while the stats view is on, freed when it goes off or the tab hides),
@@ -33,6 +33,10 @@ signal reload_theme_requested
 
 const REMOTE_MODES := ["ask", "allow", "deny"]
 const REMOTE_WORDS := ["Ask", "Allow", "Deny"]
+## main.gd's FOVEATION_LEVELS, in order.
+const FOVEATION_WORDS := ["Off", "Low", "Medium", "High"]
+const FOVEATION_HELP := "Saves GPU time at the edges of your view. High can look blocky."
+const FOVEATION_UNAVAILABLE := "Foveation isn't available: this build starts without it."
 
 var app: Node
 var box: VBoxContainer
@@ -48,6 +52,9 @@ var _jog_turn: HBoxContainer
 var _zoom_lens: Button
 var _magnification: HBoxContainer
 var _left_handed: Button
+var _foveation: HBoxContainer
+var _foveation_help: Label
+var _foveation_sharp: Button
 ## [pane] world_locked off: the panel follows the head lazily.
 var _follow_head: Button
 var _layout_rows := {}
@@ -180,6 +187,16 @@ func bind(p_app: Node) -> void:
 		var hw_row := HwVideoRow.new()
 		box.add_child(hw_row)
 		hw_row.bind(app.features.hwvideo)
+
+	# Foveation (D22): main.gd's [view] foveation and foveation_sharp_panel; both apply at once.
+	box.add_child(W.section("Rendering"))
+	_foveation = W.choices(FOVEATION_WORDS, func(i: int) -> void: app.set_foveation(app.FOVEATION_LEVELS[i]))
+	box.add_child(W.hbox([W.label("Foveation"), _foveation]))
+	_foveation_help = W.help(FOVEATION_HELP)
+	box.add_child(_foveation_help)
+	_foveation_sharp = W.toggle("Sharp while the panel shows", func(on: bool) -> void:
+		app.set_foveation_sharp_panel(on))
+	box.add_child(W.hbox([_foveation_sharp]))
 
 	box.add_child(W.section("Controllers"))
 	var haptics: Node = app.features.haptics
@@ -316,6 +333,7 @@ func sync() -> void:
 	W.set_choice(_monocular_eye, int(access.get_value("monocular_eye")))
 	_monocular_eye.visible = bool(access.get_value("monocular"))
 	W.set_on(_subs_always, bool(access.get_value("subtitles_always")))
+	_sync_foveation()
 	_sync_benchmark()
 	_sync_remote()
 	_sync_dev()
@@ -353,6 +371,17 @@ func _stop_stats() -> void:
 		_stats_label.visible = false
 	if _stats_toggle != null:
 		W.set_on(_stats_toggle, false)
+
+
+## Without a foveated swapchain (xr/openxr/foveation_level 0 at start) the row says so and takes no input.
+func _sync_foveation() -> void:
+	var available: bool = app.foveation_available()
+	W.set_choice(_foveation, app.FOVEATION_LEVELS.find(app.foveation) if available else -1)
+	W.set_on(_foveation_sharp, bool(app.foveation_sharp_panel))
+	for b: Button in _foveation.get_children():
+		b.disabled = not available
+	_foveation_sharp.disabled = not available
+	_foveation_help.text = FOVEATION_HELP if available else FOVEATION_UNAVAILABLE
 
 
 ## The remote and the file share are one server (remote_server.gd); each switch shows its own part of it.

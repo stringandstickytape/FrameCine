@@ -127,7 +127,7 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 
 | Section | Keys (default) | What |
 |---|---|---|
-| `[view]` | `environment` ("void"), `overlay` (false) | Start environment; info overlay |
+| `[view]` | `environment` ("void"), `overlay` (false), `foveation` ("low"; or "off", "medium", "high"), `foveation_sharp_panel` (true) | Start environment; info overlay; foveated rendering (D22): the level, and off while the panel or the agent pane shows. Also in System, Rendering: Foveation (Off / Low / Medium / High; applies at once; High can look blocky at the edges) and Sharp while the panel shows. A build whose project.godot has `xr/openxr/foveation_level` 0 starts without foveation; the row then says it isn't available. |
 | `[audio]` | `volume` (1.0), `av_offset` (0.0 s), `av_offset_<rate>` (s, per display refresh rate; `av_offset` is the fallback) | A/V offset per refresh rate (#24) |
 | `[sound]` | `night_mode` (false), `night_strength` (1.0), `dialogue_boost_db` (0) | Night mode and dialogue boost (#26) |
 | `[player]` | `last_file` | |

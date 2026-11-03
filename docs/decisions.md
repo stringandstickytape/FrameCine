@@ -365,6 +365,9 @@ Measured on 2026-11-03 with a fill-heavy test sphere around the viewer (GPU time
 frames): off 8.4 ms, Low 3.6 ms, Medium 3.6 ms, High 3.1 ms. The viewer could not see Low; High showed blocks at the
 edges of the view, on our flat high-contrast surfaces. Low takes almost all of the saving. At Low the edges of the
 panel's text still softened, so foveation is off while the panel or the agent pane shows (text is cheap to draw).
+The viewer can change both in System, Rendering (`[view] foveation`, default "low", and `foveation_sharp_panel`, default
+on; the `foveation` command): project.godot keeps level 1 so the swapchain is made foveated, and the app sets
+`OpenXRInterface.foveation_level` from the setting at run time.
 
 Rejected: subsampled images (Godot's default), which the Frame doesn't support yet: with them the whole picture warps
 as the head turns (Godot issue 124520); dynamic foveation, which the runtime ignores. Would change if: the Frame adds

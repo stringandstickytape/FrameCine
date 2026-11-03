@@ -65,7 +65,7 @@ signal file_opened(path: String)
 signal mode_changed(mode: VideoMode, auto_text: String)
 signal screen_changed(width: float, distance: float, height_offset: float)
 signal environment_changed(id: String, light_scale: float)
-## Volume, A/V offset or overlay changed.
+## Volume, A/V offset, overlay or foveation changed.
 signal audio_settings_changed
 ## The file ended and nothing plays next.
 signal playback_ended
@@ -162,6 +162,8 @@ const AUTO_RESUME_DELAY := 0.3
 const PREVIEW_PROFILE := "/interaction_profiles/valve/frame_controller_valve"
 ## Binding path segment -> label anchor of controller_visual.gd, where the names differ.
 const INPUT_ALIASES := {"select": "trigger", "primary": "a", "secondary": "b"}
+## [view] foveation: the words for OpenXRInterface.foveation_level 0 to 3 (D22).
+const FOVEATION_LEVELS := ["off", "low", "medium", "high"]
 
 @onready var xr_origin: XROrigin3D = $XROrigin3D
 @onready var xr_camera: XRCamera3D = $XROrigin3D/XRCamera3D
@@ -208,6 +210,12 @@ var screen_pose_override: Callable
 var screen_turn := NAN
 var overlay_on := false
 var volume := 1.0
+## [view] foveation: one of FOVEATION_LEVELS (D22).
+var foveation := "low"
+## [view] foveation_sharp_panel: foveation off while the panel or the agent pane shows.
+var foveation_sharp_panel := true
+## What foveation is set on: the OpenXR interface in XR (_setup_view), else null. Tests put a stand-in here.
+var foveation_xr: Object
 
 ## Screen / sphere drag: {"ray": Callable -> [origin, dir], "hand": XRHand or null, "distance", "yaw", "start_dir",
 ## "start_msec"}
@@ -276,6 +284,7 @@ func _ready() -> void:
 	volume = float(settings.get_value("audio", "volume", 1.0))
 	player.av_offset = float(settings.get_value("audio", "av_offset", 0.0))
 	_apply_volume()
+	load_foveation()
 
 	_setup_view(not _args.has("no-xr"))
 	screen.head = camera
@@ -444,8 +453,10 @@ func _setup_view(want_xr: bool) -> void:
 		# The XR runtime paces frames.
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 		get_viewport().use_xr = true
-		# Foveation ([xr] in project.godot, level Low): the runtime's density map shapes the eye images only with VRS XR.
+		# Foveation ([xr] in project.godot; the level is [view] foveation): the runtime's density map shapes the eye
+		# images only with VRS XR.
 		get_viewport().vrs_mode = Viewport.VRS_XR
+		foveation_xr = xr
 		xr_camera.current = true
 		camera = xr_camera
 		use_xr = true
@@ -923,17 +934,54 @@ func set_menu_shown(shown: bool) -> void:
 	update_controller_labels()
 
 
-## Foveation ([xr] in project.godot, D22) is off while the panel or the agent pane is in front of the viewer: at Low
-## the sharp area is small enough that the edges of the panel's text soften. Text is cheap to draw, so the saving isn't
-## missed then. Called with the controller labels, which change exactly when either opens or closes.
-func _update_foveation() -> void:
-	var xr := XRServer.find_interface("OpenXR")
-	if not use_xr or xr == null or not "foveation_level" in xr:
+## [view] foveation and foveation_sharp_panel (the System tab's Foveation row, D22). Unknown words read as "low".
+func load_foveation() -> void:
+	var level := str(settings.get_value("view", "foveation", "low"))
+	foveation = level if level in FOVEATION_LEVELS else "low"
+	foveation_sharp_panel = bool(settings.get_value("view", "foveation_sharp_panel", true))
+
+
+## level: one of FOVEATION_LEVELS. Applies at once (the runtime takes a new profile for the swapchain).
+func set_foveation(level: String) -> void:
+	if not level in FOVEATION_LEVELS:
 		return
-	var text_in_view := menu_shown or (local_agents != null and local_agents.pane_shown())
-	var want := 0 if text_in_view else int(ProjectSettings.get_setting("xr/openxr/foveation_level", 0))
-	if xr.foveation_level != want:
-		xr.foveation_level = want
+	foveation = level
+	settings.set_value("view", "foveation", level)
+	_update_foveation()
+	audio_settings_changed.emit()
+
+
+func set_foveation_sharp_panel(on: bool) -> void:
+	foveation_sharp_panel = on
+	settings.set_value("view", "foveation_sharp_panel", on)
+	_update_foveation()
+	audio_settings_changed.emit()
+
+
+## The swapchain is foveated only if xr/openxr/foveation_level was above 0 at start; after that the level can change,
+## but foveation can't be turned on for a swapchain made without it.
+static func foveation_available() -> bool:
+	return int(ProjectSettings.get_setting("xr/openxr/foveation_level", 0)) > 0
+
+
+## The level to set (0 off to 3 High): `level`, except 0 while the panel or the agent pane is in front of the viewer and
+## `sharp_panel` is on. At Low the sharp area is small enough that the edges of the panel's text soften; text is cheap
+## to draw, so the saving isn't missed then.
+static func foveation_choice(level: int, sharp_panel: bool, panel_shown: bool, pane_shown: bool) -> int:
+	if sharp_panel and (panel_shown or pane_shown):
+		return 0
+	return clampi(level, 0, FOVEATION_LEVELS.size() - 1)
+
+
+## Sets the runtime's foveation level from [view] foveation and the panel rule. Called with the controller labels,
+## which change exactly when the panel or the agent pane opens or closes, and when either setting changes.
+func _update_foveation() -> void:
+	if foveation_xr == null or not "foveation_level" in foveation_xr or not foveation_available():
+		return
+	var want := foveation_choice(FOVEATION_LEVELS.find(foveation), foveation_sharp_panel, menu_shown,
+			local_agents != null and local_agents.pane_shown())
+	if foveation_xr.foveation_level != want:
+		foveation_xr.foveation_level = want
 
 
 func _update_overlay_visibility() -> void:
