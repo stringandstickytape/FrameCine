@@ -68,4 +68,11 @@ openxr/extensions/eye_gaze_interaction=true
 openxr/default_action_map="res://xr/openxr_action_map.tres"
 ; Without a runtime (or with --xr-mode off) the app falls back to a flat camera instead of showing an alert.
 openxr/startup_alert=false
+; Foveation, measured on the headset (docs/decisions.md D22): Low halves the GPU time of a fill-heavy scene and can't be
+; seen; High shows blocks at the edges. Subsampled images warp the picture on the Frame and stay off; dynamic does
+; nothing there. Needs the engine's by-region subpass dependencies (fork frame/foveation), or it has no effect.
+openxr/foveation_level=1
+openxr/foveation_dynamic=false
+openxr/foveation_eye_tracked=true
+openxr/foveation_with_subsampled_images=false
 shaders/enabled=true

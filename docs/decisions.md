@@ -354,6 +354,21 @@ and `tools/package.sh --no-kernel-modules` are accepted and do nothing.
 Would change if: a SteamOS update breaks Q10C through the sampler before its kernel offers P010 (then 10-bit up to
 1080p plays in software until it does; a module would come back only if that gap is long).
 
+## D22. Foveated rendering at Low, eye-tracked, without subsampled images (2026-11-03)
+
+The headset renders the eye images with eye-tracked foveation at level Low (`[xr]` in project.godot), and the main
+viewport uses VRS XR. The engine fork carries one line from upstream PR 124811 (branch `frame/foveation`): subpass
+dependencies by region. Without it the Frame's Mesa driver leaves tiled mode and ignores the density map, so foveation
+had no effect.
+
+Measured on 2026-11-03 with a fill-heavy test sphere around the viewer (GPU time per frame, both eyes, median of 360
+frames): off 8.4 ms, Low 3.6 ms, Medium 3.6 ms, High 3.1 ms. The viewer could not see Low; High showed blocks at the
+edges of the view, on our flat high-contrast surfaces. Low takes almost all of the saving.
+
+Rejected: subsampled images (Godot's default), which the Frame doesn't support yet: with them the whole picture warps
+as the head turns (Godot issue 124520); dynamic foveation, which the runtime ignores. Would change if: the Frame adds
+subsampled images, or a later engine merges PR 124811 (then the fork's line goes).
+
 ## Open
 
 - Quad layer for flat video vs. drawing in the projection layer: sharpness and bandwidth comparison (spike 03-layer).

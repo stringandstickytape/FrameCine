@@ -444,6 +444,8 @@ func _setup_view(want_xr: bool) -> void:
 		# The XR runtime paces frames.
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 		get_viewport().use_xr = true
+		# Foveation ([xr] in project.godot, level Low): the runtime's density map shapes the eye images only with VRS XR.
+		get_viewport().vrs_mode = Viewport.VRS_XR
 		xr_camera.current = true
 		camera = xr_camera
 		use_xr = true
