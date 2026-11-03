@@ -1,0 +1,494 @@
+{
+ "RoomDocument": {
+  "type": "object",
+  "required": [
+   "schema"
+  ],
+  "additionalProperties": false,
+  "description": "A room, or a change to the room on show (docs/assistant.md, Rooms). Data only.",
+  "properties": {
+   "schema": {
+    "const": 1
+   },
+   "name": {
+    "type": "string",
+    "maxLength": 40,
+    "pattern": "^[A-Za-z0-9 _-]+$"
+   },
+   "base": {
+    "type": "string",
+    "description": "new_room: a room id from room_state's bases"
+   },
+   "base_model": {
+    "type": "string",
+    "contentEncoding": "base64",
+    "description": "new_room: a .glb room"
+   },
+   "light": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+     "ambient": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+     },
+     "screen_glow": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 2
+     },
+     "key": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "the sun or moon: one directional light, with shadows (on by default)",
+      "properties": {
+       "direction": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3, "description": "the way the light travels; or elevation and azimuth"},
+       "elevation": {"type": "number", "minimum": 0, "maximum": 90, "description": "degrees above the horizon it comes from (default 50)"},
+       "azimuth": {"type": "number", "minimum": -360, "maximum": 360, "description": "degrees round from the front (-Z) towards the right (+X) it comes from (default 30)"},
+       "color": {"type": "string", "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"},
+       "energy": {"type": "number", "minimum": 0, "maximum": 1.5},
+       "shadows": {"type": "boolean"}
+      }
+     },
+     "sky": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "hemisphere fill: a colour from above, one from below",
+      "properties": {
+       "top": {"type": "string", "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"},
+       "bottom": {"type": "string", "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"},
+       "energy": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+     },
+     "screen": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "description": "the film's light on the room, its colour and brightness, smoothed",
+      "properties": {
+       "energy": {"type": "number", "minimum": 0, "maximum": 2}
+      }
+     },
+     "contact_shadows": {"type": "boolean", "description": "soft darkening under parts on the floor (default true)"}
+    }
+   },
+   "sky": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+     "color": {
+      "oneOf": [
+       {
+        "type": "string",
+        "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+       },
+       {
+        "type": "array",
+        "items": {
+         "type": "number",
+         "minimum": 0,
+         "maximum": 1
+        },
+        "minItems": 3,
+        "maxItems": 4
+       }
+      ]
+     },
+     "image": {
+      "type": "string",
+      "contentEncoding": "base64"
+     },
+     "stars": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "twinkling stars above the horizon; twinkle at most 0.4 (the photosensitivity ceiling)",
+      "properties": {
+       "density": {"type": "number", "minimum": 0, "maximum": 1},
+       "twinkle": {"type": "number", "minimum": 0, "maximum": 0.4},
+       "color": {"type": "string", "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"}
+      }
+     },
+     "clouds": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "a drifting cloud layer, thinning to the horizon",
+      "properties": {
+       "cover": {"type": "number", "minimum": 0, "maximum": 1},
+       "speed": {"type": "number", "minimum": 0, "maximum": 3},
+       "color": {"type": "string", "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"}
+      }
+     }
+    }
+   },
+   "seats": {
+    "type": "array",
+    "maxItems": 12,
+    "description": "where a viewer can sit; the viewer chooses (suggest_seat asks them)",
+    "items": {
+     "type": "object",
+     "additionalProperties": false,
+     "required": ["name", "position"],
+     "properties": {
+      "name": {"type": "string", "maxLength": 40},
+      "position": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3, "description": "the floor point under the viewer, metres"},
+      "facing": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3, "description": "the way they look (level); default towards the screen"}
+     }
+    }
+   },
+   "default_seat": {"type": ["string", "null"], "description": "a seat's name: where a viewer opening the room starts"},
+   "screen": {
+    "type": ["object", "null"],
+    "additionalProperties": false,
+    "required": ["center", "size"],
+    "description": "the room's own screen (its home); refused when narrower than 12 or wider than 100 degrees from a seat",
+    "properties": {
+     "center": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+     "size": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2, "description": "[width, height] metres; the height follows the film"},
+     "facing": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+     "curve": {"type": "number", "minimum": 0, "maximum": 1},
+     "home": {"type": "boolean"}
+    }
+   },
+   "atmosphere": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+     "fog": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "low fog near the floor, drifting slowly, fitted to the room's walls",
+      "properties": {
+       "density": {"type": "number", "minimum": 0, "maximum": 1},
+       "height": {"type": "number", "minimum": 0.1, "maximum": 1.5, "description": "metres above the floor"},
+       "speed": {"type": "number", "minimum": 0, "maximum": 2},
+       "color": {"type": "string", "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"}
+      }
+     }
+    }
+   },
+   "parts": {
+    "type": "array",
+    "maxItems": 512,
+    "items": {
+     "$ref": "#/components/schemas/Part"
+    }
+   },
+   "recolour": {
+    "type": "array",
+    "items": {
+     "type": "object",
+     "required": [
+      "match"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "match": {
+       "type": "string"
+      },
+      "material": {
+       "$ref": "#/components/schemas/Material"
+      }
+     }
+    }
+   },
+   "remove": {
+    "type": "array",
+    "items": {
+     "type": "string"
+    }
+   },
+   "lights": {
+    "type": "array",
+    "maxItems": 4,
+    "description": "torches, braziers, lamps: no shadows; cost grows with range",
+    "items": {
+     "type": "object",
+     "additionalProperties": false,
+     "properties": {
+      "name": {"type": "string"},
+      "type": {"enum": ["point", "spot"]},
+      "position": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+      "attach": {"type": "string", "description": "a part's name: the light moves with it"},
+      "offset": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+      "color": {"type": "string", "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"},
+      "energy": {"type": "number", "minimum": 0, "maximum": 6},
+      "range": {"type": "number", "minimum": 0.5, "maximum": 16},
+      "direction": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+      "angle": {"type": "number", "minimum": 5, "maximum": 80},
+      "flicker": {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "rate": {"type": "number", "minimum": 0.1, "maximum": 3},
+        "swing": {"type": "number", "minimum": 0, "maximum": 0.4}
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "Part": {
+  "type": "object",
+  "required": [
+   "name",
+   "type"
+  ],
+  "additionalProperties": false,
+  "properties": {
+   "name": {
+    "type": "string",
+    "maxLength": 40,
+    "pattern": "^[A-Za-z0-9 _-]+$"
+   },
+   "type": {
+    "enum": [
+     "box",
+     "sphere",
+     "cylinder",
+     "plane",
+     "model",
+     "text",
+     "particles"
+    ]
+   },
+   "particles": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["preset"],
+    "description": "type particles: the part's size is the area (a box, at most 30 m a side)",
+    "properties": {
+     "preset": {"enum": ["snow", "rain", "leaves", "embers", "fireflies", "dust"]},
+     "rate": {"type": "number", "minimum": 0.5, "description": "a second; at most: snow 150, rain 600, leaves 40, embers 120, fireflies 20, dust 60"},
+     "color": {"description": "#rrggbb or [r, g, b] 0..1: tints the preset's own colours"},
+     "size": {"type": "number", "minimum": 0.002, "maximum": 0.3, "description": "one particle, metres"},
+     "speed": {"type": "number", "minimum": 0.25, "maximum": 3, "description": "times the preset's own"}
+    }
+   },
+   "motion": {
+    "description": "one motion or a list of up to 3 (the guide lists them with their bounds)",
+    "oneOf": [
+     {"$ref": "#/components/schemas/Motion"},
+     {"type": "array", "minItems": 1, "maxItems": 3, "items": {"$ref": "#/components/schemas/Motion"}}
+    ]
+   },
+   "text": {
+    "type": "string",
+    "maxLength": 1000,
+    "description": "type text: the words; \\n starts a new line"
+   },
+   "text_options": {
+    "type": "object",
+    "additionalProperties": false,
+    "description": "type text",
+    "properties": {
+     "color": {
+      "type": "string",
+      "description": "#rrggbb or #rrggbbaa, or [r, g, b] 0..1; default #f2f2f2"
+     },
+     "background": {
+      "type": "string",
+      "description": "a panel behind the text, #rrggbb or #rrggbbaa; none when left out"
+     },
+     "weight": {
+      "enum": [
+       "regular",
+       "bold"
+      ]
+     },
+     "align": {
+      "enum": [
+       "left",
+       "center",
+       "right"
+      ]
+     },
+     "max_width": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 50,
+      "description": "metres; longer lines wrap at word breaks; 0: no wrapping"
+     }
+    }
+   },
+   "size": {
+    "type": "array",
+    "items": {
+     "type": "number",
+     "exclusiveMinimum": 0,
+     "maximum": 200
+    },
+    "minItems": 1,
+    "maxItems": 3
+   },
+   "model": {
+    "type": "string",
+    "contentEncoding": "base64"
+   },
+   "position": {
+    "type": "array",
+    "items": {
+     "type": "number"
+    },
+    "minItems": 3,
+    "maxItems": 3
+   },
+   "rotation": {
+    "type": "array",
+    "items": {
+     "type": "number"
+    },
+    "minItems": 3,
+    "maxItems": 3
+   },
+   "scale": {
+    "oneOf": [
+     {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 100
+     },
+     {
+      "type": "array",
+      "items": {
+       "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+     }
+    ]
+   },
+   "material": {
+    "$ref": "#/components/schemas/Material"
+   },
+   "widget": {
+    "enum": [
+     "battery",
+     "clock",
+     "end_time",
+     "film_progress",
+     "now_playing",
+     "screen_glow"
+    ]
+   },
+   "widget_options": {
+    "type": "object"
+   }
+  }
+ },
+ "Motion": {
+  "type": "object",
+  "required": ["type"],
+  "additionalProperties": false,
+  "properties": {
+   "type": {"enum": ["spin", "bob", "sway", "orbit", "flap", "move_to"]},
+   "sync": {"type": "string", "description": "parts with the same sync move in step (a pair of wings)"},
+   "axis": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+   "speed": {"type": "number", "minimum": -180, "maximum": 180, "description": "spin: degrees a second"},
+   "height": {"type": "number", "minimum": 0, "maximum": 1, "description": "bob: metres, top to bottom"},
+   "angle": {"type": "number", "minimum": 0, "maximum": 80, "description": "sway (at most 60), flap: degrees"},
+   "period": {"type": "number", "minimum": 0.2, "maximum": 600, "description": "seconds a cycle (bob, sway 0.5..120; orbit 2..600; flap 0.2..20)"},
+   "center": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+   "radius": {"type": "number", "minimum": 0, "maximum": 20},
+   "face": {"type": "boolean", "description": "orbit: turn with the orbit"},
+   "hinge": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3, "description": "flap: the hinge, in the part's own frame"},
+   "mirror": {"type": "boolean", "description": "flap: beat the other way (the other wing)"},
+   "position": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+   "rotation": {"type": "array", "items": {"type": "number"}, "minItems": 3, "maxItems": 3},
+   "duration": {"type": "number", "minimum": 0.1, "maximum": 600},
+   "easing": {"enum": ["sine_in_out", "cubic_in_out", "ease_out", "ease_in", "linear"]},
+   "at": {"oneOf": [{"type": "number", "minimum": 0}, {"type": "string", "pattern": "^end(-[0-9.]+)?$"}], "description": "move_to: when, on the film's clock: seconds, \"end\" or \"end-30\""}
+  }
+ },
+ "Material": {
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+   "color": {
+    "oneOf": [
+     {
+      "type": "string",
+      "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+     },
+     {
+      "type": "array",
+      "items": {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 1
+      },
+      "minItems": 3,
+      "maxItems": 4
+     }
+    ]
+   },
+   "emission": {
+    "oneOf": [
+     {
+      "type": "string",
+      "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"
+     },
+     {
+      "type": "array",
+      "items": {
+       "type": "number",
+       "minimum": 0,
+       "maximum": 1
+      },
+      "minItems": 3,
+      "maxItems": 4
+     }
+    ]
+   },
+   "emission_strength": {
+    "type": "number",
+    "minimum": 0,
+    "maximum": 10
+   },
+   "texture": {
+    "type": "string",
+    "contentEncoding": "base64"
+   },
+   "alpha": {
+    "enum": [
+     "opaque",
+     "cutout",
+     "blend"
+    ],
+    "description": "transparency: cutout (each pixel drawn or not by its alpha; the default for a picture with transparent pixels), blend (see-through; the default for a colour with alpha below 1), opaque"
+   },
+   "uv": {
+    "enum": [
+     "atlas",
+     "each_face",
+     "front_only"
+    ],
+    "description": "box only: atlas (default; one picture cut into six pieces, BoxMesh's 3 x 2 layout), each_face (the whole picture on every face), front_only (the whole picture on the +Z face, the others plain colour)"
+   },
+   "self_lit": {
+    "type": "boolean",
+    "description": "shown at its own brightness, not darkened by the room's light; default true with a texture, false without"
+   },
+   "effect": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["name"],
+    "description": "a named effect the app draws (never code): rim_glow {color, strength}, hologram {color, strength}, glass {}, metal {strength}, toon_outline {color, width}, dissolve {amount, color, strength}, pulse {color, strength, rate, swing}, flicker {color, strength, rate, swing}. Photosensitivity ceiling: rate at most 3 Hz, swing at most 0.4 of the surface's own brightness",
+    "properties": {
+     "name": {"enum": ["rim_glow", "hologram", "glass", "metal", "toon_outline", "dissolve", "pulse", "flicker"]},
+     "color": {"type": "string", "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"},
+     "strength": {"type": "number", "minimum": 0, "maximum": 3},
+     "width": {"type": "number", "minimum": 0.5, "maximum": 4, "description": "toon_outline: pixels, the same near and far"},
+     "amount": {"type": "number", "minimum": 0, "maximum": 1, "description": "dissolve: 0 whole, 1 gone"},
+     "rate": {"type": "number", "minimum": 0.05, "maximum": 3, "description": "pulse, flicker: Hz, at most 3"},
+     "swing": {"type": "number", "minimum": 0, "maximum": 0.4, "description": "pulse, flicker: how far brightness swings"}
+    }
+   },
+   "roughness": {
+    "type": "number",
+    "minimum": 0,
+    "maximum": 1
+   }
+  }
+ }
+}

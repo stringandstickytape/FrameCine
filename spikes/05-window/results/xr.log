@@ -1,0 +1,135 @@
+Godot Engine v4.7.2.stable.custom_build.9818abd06 (2026-10-31 02:48:27 UTC) - https://godotengine.org
+fdm_injection: XR layer loaded
+Error [GENERAL | xrCreateInstance | OpenXR-Loader] : LoaderInstance::CreateInstance chained CreateInstance call failed
+Error [GENERAL | xrCreateInstance | OpenXR-Loader] : xrCreateInstance failed
+fdm_injection: XR layer loaded
+OpenXR: Created instance for OpenXR 1.0.54
+OpenXR: Running on OpenXR runtime:  SteamVR/OpenXR   2.18.2
+OpenXR: XrGraphicsRequirementsVulkan2KHR:
+ - minApiVersionSupported:  1.0.0
+ - maxApiVersionSupported:  1.2.0
+Vulkan 1.4.362 - Forward Mobile - Using Device #0: Qualcomm - Turnip Adreno (TM) 750
+
+ERROR: Could not load global script cache.
+   at: get_global_class_list (core/config/project_settings.cpp:1458)
+X11WindowSource: connected to ":0": Composite 0.4, DAMAGE 1.1, XFixes 5.0, XTEST 2.2, DRI3 1.2, MIT-SHM 1.2 (fd passing).
+X extensions: { "display": ":0", "connected": true, "composite": "0.4", "damage": "1.1", "xfixes": "5.0", "xtest": "2.2", "dri3": "1.2", "shm": "1.2", "shm_fd_passing": true }
+Own window: 0x3e00002 (toplevel 0x3e00002)
+Windows (bottom to top):
+  0x2400014 1281x419  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - Keyboard"
+  0x2400016 1800x120  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.bar (99590000)"
+  0x2400018  450x1536 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.barpopup.99590001 (99590001)"
+  0x240001a  600x60   +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.tooltip.99590002 (99590002)"
+  0x240001c  375x150  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.volumelevel (99590003)"
+  0x240001e  900x60   +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.floatingfooter (99590004)"
+  0x2400020  450x1200 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.frame.menu.99590005 (99590005)"
+  0x2400022  510x120  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - Notifications"
+  0x2400005 1920x1080 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR"
+  0x2400029  450x1536 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.barpopup.99590006 (99590006)"
+  0x4000003 1920x1080 +0+0 depth 32  class org.chromium.Chromium/Org.chromium.Chromium  pid 2  steam_game 0  "New Tab - Chromium"
+  0x3e00002 1920x1080 +0+0 depth 24  class Godot_Engine/Spike 05 - window  pid 92437  steam_game 0  "Spike 05 - window (DEBUG)"  <- this program
+View: OpenXR
+Launched flatpak run org.chromium.Chromium --ozone-platform=x11 --window-size=1920,1080 --window-position=0,0 --no-first-run --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-background-timer-throttling --autoplay-policy=no-user-gesture-required --app=data:text/html;base64,PCFkb2N0eXBlIGh0bWw+CjxodG1sPgo8aGVhZD4KPG1ldGEgY2hhcnNldD0idXRmLTgiPgo8dGl0bGU+eDExd2luZG93IGlucHV0IHRlc3Q8L3RpdGxlPgo8c3R5bGU+CmJvZHkgeyBiYWNrZ3JvdW5kOiAjMTIzOyBjb2xvcjogI2ZmZjsgZm9udDogMzBweCBzYW5zLXNlcmlmOyBtYXJnaW46IDI0cHg7IG92ZXJmbG93OiBoaWRkZW47IH0KaDEgeyBmb250LXNpemU6IDQwcHg7IG1hcmdpbjogMCAwIDEycHggMDsgfQppbnB1dCB7IGZvbnQtc2l6ZTogMzRweDsgd2lkdGg6IDkwMHB4OyB9CiNzdGF0dXMgeyBjb2xvcjogI2ZmMDsgbWFyZ2luOiAxMnB4IDA7IH0KI2xvZyB7IGZvbnQtZmFtaWx5OiBtb25vc3BhY2U7IGZvbnQtc2l6ZTogMjhweDsgbGluZS1oZWlnaHQ6IDM2cHg7IH0KI2JveCB7IHBvc2l0aW9uOiBhYnNvbHV0ZTsgd2lkdGg6IDgwcHg7IGhlaWdodDogODBweDsgYmFja2dyb3VuZDogI2Y4MDsgYm90dG9tOiA0MHB4OyB9CiNkb3QgeyBwb3NpdGlvbjogYWJzb2x1dGU7IHdpZHRoOiAxNnB4OyBoZWlnaHQ6IDE2cHg7IG1hcmdpbjogLThweCAwIDAgLThweDsgYm9yZGVyLXJhZGl1czogOHB4OyBiYWNrZ3JvdW5kOiAjMGYwOyB9Cjwvc3R5bGU+CjwvaGVhZD4KPGJvZHk+CjxoMT54MTF3aW5kb3cgaW5wdXQgdGVzdDwvaDE+CjxpbnB1dCBpZD0idGV4dCIgYXV0b2ZvY3VzIHBsYWNlaG9sZGVyPSJ0eXBlZCB0ZXh0IGFwcGVhcnMgaGVyZSI+CjxkaXYgaWQ9InN0YXR1cyI+bm8gaW5wdXQgeWV0PC9kaXY+CjxkaXYgaWQ9ImxvZyI+PC9kaXY+CjxkaXYgaWQ9ImJveCI+PC9kaXY+CjxkaXYgaWQ9ImRvdCI+PC9kaXY+CjxzY3JpcHQ+Ci8vIFNwaWtlIDA1OiBzaG93cyB3aGF0IGlucHV0IHJlYWNoZXMgdGhlIHBhZ2UuIFRoZSBvcmFuZ2UgYm94IG1vdmVzIGV2ZXJ5IGZyYW1lIChzbyB0aGUgd2luZG93IGlzIGFsd2F5cyBkYW1hZ2VkKS4KY29uc3QgbGluZXMgPSBbXTsKbGV0IG1vdmVzID0gMCwgbGFzdCA9ICcnOwpjb25zdCB0ZXh0ID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3RleHQnKTsKZnVuY3Rpb24gYWRkKHMpIHsKCWxpbmVzLnVuc2hpZnQocyk7CglsaW5lcy5sZW5ndGggPSBNYXRoLm1pbihsaW5lcy5sZW5ndGgsIDE0KTsKCWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdsb2cnKS5pbm5lckhUTUwgPSBsaW5lcy5qb2luKCc8YnI+Jyk7Cn0KZnVuY3Rpb24gc3RhdHVzKCkgewoJZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3N0YXR1cycpLnRleHRDb250ZW50ID0gJ21vdmVzICcgKyBtb3ZlcyArICcgbGFzdCAnICsgbGFzdCArICcgKENTUyBweCksIGZvY3VzICcgKyBkb2N1bWVudC5oYXNGb2N1cygpICsgJywgZGV2aWNlUGl4ZWxSYXRpbyAnICsgZGV2aWNlUGl4ZWxSYXRpbyArICcsIHZpZXdwb3J0ICcgKyBpbm5lcldpZHRoICsgJ3gnICsgaW5uZXJIZWlnaHQ7Cn0KYWRkRXZlbnRMaXN0ZW5lcignbW91c2Vtb3ZlJywgZSA9PiB7Cgltb3ZlcysrOwoJbGFzdCA9IGUuY2xpZW50WCArICcsJyArIGUuY2xpZW50WTsKCWNvbnN0IGRvdCA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdkb3QnKTsKCWRvdC5zdHlsZS5sZWZ0ID0gZS5jbGllbnRYICsgJ3B4JzsKCWRvdC5zdHlsZS50b3AgPSBlLmNsaWVudFkgKyAncHgnOwoJc3RhdHVzKCk7Cn0sIHRydWUpOwphZGRFdmVudExpc3RlbmVyKCdtb3VzZWRvd24nLCBlID0+IHsKCWFkZCgnbW91c2Vkb3duIGJ1dHRvbiAnICsgZS5idXR0b24gKyAnIGF0ICcgKyBlLmNsaWVudFggKyAnLCcgKyBlLmNsaWVudFkgKyAnIHRydXN0ZWQgJyArIGUuaXNUcnVzdGVkKTsKCXNldFRpbWVvdXQoKCkgPT4gdGV4dC5mb2N1cygpLCAwKTsKfSwgdHJ1ZSk7CmFkZEV2ZW50TGlzdGVuZXIoJ21vdXNldXAnLCBlID0+IGFkZCgnbW91c2V1cCBidXR0b24gJyArIGUuYnV0dG9uKSwgdHJ1ZSk7CmFkZEV2ZW50TGlzdGVuZXIoJ2tleWRvd24nLCBlID0+IGFkZCgna2V5ZG93biAnICsgSlNPTi5zdHJpbmdpZnkoZS5rZXkpICsgJyBjb2RlICcgKyBlLmNvZGUgKyAoZS5zaGlmdEtleSA/ICcgc2hpZnQnIDogJycpKSwgdHJ1ZSk7CmFkZEV2ZW50TGlzdGVuZXIoJ3doZWVsJywgZSA9PiBhZGQoJ3doZWVsIGR5ICcgKyBlLmRlbHRhWSArICcgZHggJyArIGUuZGVsdGFYKSwgdHJ1ZSk7CmFkZEV2ZW50TGlzdGVuZXIoJ2ZvY3VzJywgKCkgPT4geyBhZGQoJ3dpbmRvdyBmb2N1cycpOyBzdGF0dXMoKTsgfSk7CmFkZEV2ZW50TGlzdGVuZXIoJ2JsdXInLCAoKSA9PiB7IGFkZCgnd2luZG93IGJsdXInKTsgc3RhdHVzKCk7IH0pOwpsZXQgeCA9IDA7CmZ1bmN0aW9uIGZyYW1lKCkgewoJeCA9ICh4ICsgNikgJSBNYXRoLm1heChpbm5lcldpZHRoIC0gODAsIDEpOwoJZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2JveCcpLnN0eWxlLmxlZnQgPSB4ICsgJ3B4JzsKCXJlcXVlc3RBbmltYXRpb25GcmFtZShmcmFtZSk7Cn0KZnJhbWUoKTsKc3RhdHVzKCk7Cjwvc2NyaXB0Pgo8L2JvZHk+CjwvaHRtbD4K (pid 92485); waiting for its window.
+WARNING: Object picking can't be used when stereo rendering, this will be turned off!
+     at: _process_picking (scene/main/viewport.cpp:801)
+fdm_injection: added swapchain size 1728 (1 total sizes)
+Opening in existing browser session.
+X11WindowSource: capturing 0x400002d "x11window input test" (), 1920x1080, depth 32, dmabuf (zero copy); mapped.
+Capture 0x400002d: OK 
+X11WindowSource: importing the window's buffers: 1920x1080 AR24, modifier 0x500000000000001, 1 plane(s), pitch 7680, offset 0.
+[    2.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 50.2/s, updates 49.8/s, deferred 2, imports 3 (cached 3, switches 100), copy 0.0 MB/s, fetch avg 0.24 max 0.74 ms, render 68 fps, input 0, X errors 0
+[    4.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 59.5/s, updates 46.5/s, deferred 40, imports 3 (cached 3, switches 183), copy 0.0 MB/s, fetch avg 0.22 max 0.86 ms, render 71 fps, input 0, X errors 0
+[    6.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 55.5/s, updates 45.0/s, deferred 75, imports 3 (cached 3, switches 265), copy 0.0 MB/s, fetch avg 0.21 max 0.87 ms, render 72 fps, input 0, X errors 0
+[    8.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 55.5/s, updates 50.5/s, deferred 93, imports 3 (cached 3, switches 361), copy 0.0 MB/s, fetch avg 0.21 max 0.87 ms, render 72 fps, input 0, X errors 0
+[   10.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 57.6/s, updates 50.7/s, deferred 117, imports 3 (cached 3, switches 458), copy 0.0 MB/s, fetch avg 0.21 max 0.87 ms, render 72 fps, input 0, X errors 0
+[   12.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 56.0/s, updates 48.0/s, deferred 148, imports 3 (cached 3, switches 547), copy 0.0 MB/s, fetch avg 0.21 max 0.87 ms, render 72 fps, input 0, X errors 0
+[   14.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 52.5/s, updates 45.0/s, deferred 182, imports 3 (cached 3, switches 628), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   16.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 54.5/s, updates 46.5/s, deferred 211, imports 3 (cached 3, switches 715), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   18.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 63.0/s, updates 53.5/s, deferred 238, imports 3 (cached 3, switches 813), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   20.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 60.5/s, updates 48.5/s, deferred 270, imports 3 (cached 3, switches 903), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   22.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 60.0/s, updates 47.5/s, deferred 307, imports 3 (cached 3, switches 987), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   24.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 56.1/s, updates 49.7/s, deferred 330, imports 3 (cached 3, switches 1077), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   26.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 58.1/s, updates 45.7/s, deferred 362, imports 3 (cached 3, switches 1157), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   28.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 56.5/s, updates 42.5/s, deferred 404, imports 3 (cached 3, switches 1233), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   30.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 52.5/s, updates 47.5/s, deferred 427, imports 3 (cached 3, switches 1322), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   32.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 55.0/s, updates 50.5/s, deferred 451, imports 3 (cached 3, switches 1418), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   34.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 56.5/s, updates 46.5/s, deferred 481, imports 3 (cached 3, switches 1503), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   36.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 57.5/s, updates 46.5/s, deferred 514, imports 3 (cached 3, switches 1588), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   38.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 57.5/s, updates 50.5/s, deferred 537, imports 3 (cached 3, switches 1682), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   40.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 56.0/s, updates 49.0/s, deferred 567, imports 3 (cached 3, switches 1774), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   42.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 56.5/s, updates 47.5/s, deferred 597, imports 3 (cached 3, switches 1864), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   44.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 58.0/s, updates 53.0/s, deferred 614, imports 3 (cached 3, switches 1967), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   46.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 57.5/s, updates 50.0/s, deferred 638, imports 3 (cached 3, switches 2060), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   48.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 57.5/s, updates 45.5/s, deferred 671, imports 3 (cached 3, switches 2141), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   50.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 57.5/s, updates 50.0/s, deferred 696, imports 3 (cached 3, switches 2229), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   52.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 56.5/s, updates 46.5/s, deferred 726, imports 3 (cached 3, switches 2314), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   54.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 56.5/s, updates 48.0/s, deferred 748, imports 3 (cached 3, switches 2406), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   56.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 55.6/s, updates 45.7/s, deferred 778, imports 3 (cached 3, switches 2492), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   58.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 57.0/s, updates 48.0/s, deferred 804, imports 3 (cached 3, switches 2585), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   60.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 59.1/s, updates 48.7/s, deferred 832, imports 3 (cached 3, switches 2672), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   62.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 56.5/s, updates 46.0/s, deferred 865, imports 3 (cached 3, switches 2752), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   64.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 58.0/s, updates 48.0/s, deferred 891, imports 3 (cached 3, switches 2840), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   66.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 55.5/s, updates 45.5/s, deferred 920, imports 3 (cached 3, switches 2921), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   68.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 53.0/s, updates 45.0/s, deferred 954, imports 3 (cached 3, switches 3001), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   70.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 56.5/s, updates 47.5/s, deferred 980, imports 3 (cached 3, switches 3088), copy 0.0 MB/s, fetch avg 0.21 max 2.03 ms, render 72 fps, input 0, X errors 0
+[   72.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 57.5/s, updates 51.5/s, deferred 1002, imports 3 (cached 3, switches 3187), copy 0.0 MB/s, fetch avg 0.21 max 3.53 ms, render 72 fps, input 0, X errors 0
+[   74.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 56.0/s, updates 41.5/s, deferred 1041, imports 3 (cached 3, switches 3258), copy 0.0 MB/s, fetch avg 0.21 max 3.53 ms, render 72 fps, input 0, X errors 0
+[   76.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 55.5/s, updates 46.5/s, deferred 1070, imports 3 (cached 3, switches 3345), copy 0.0 MB/s, fetch avg 0.21 max 3.53 ms, render 72 fps, input 0, X errors 0
+[   78.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 54.5/s, updates 42.5/s, deferred 1116, imports 3 (cached 3, switches 3418), copy 0.0 MB/s, fetch avg 0.21 max 3.53 ms, render 72 fps, input 105, X errors 0
+[   80.9 s] dmabuf AR24 0x500000000000001 1920x1080: damage 55.5/s, updates 44.5/s, deferred 1154, imports 3 (cached 3, switches 3500), copy 0.0 MB/s, fetch avg 0.21 max 3.53 ms, render 72 fps, input 245, X errors 0
+[   83.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 54.6/s, updates 46.2/s, deferred 1196, imports 3 (cached 3, switches 3589), copy 0.0 MB/s, fetch avg 0.21 max 3.53 ms, render 72 fps, input 384, X errors 0
+[   85.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 57.5/s, updates 54.5/s, deferred 1218, imports 3 (cached 3, switches 3696), copy 0.0 MB/s, fetch avg 0.21 max 3.53 ms, render 72 fps, input 505, X errors 0
+[   87.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 60.5/s, updates 55.5/s, deferred 1244, imports 3 (cached 3, switches 3801), copy 0.0 MB/s, fetch avg 0.21 max 3.53 ms, render 72 fps, input 616, X errors 0
+[   89.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 57.0/s, updates 54.0/s, deferred 1268, imports 3 (cached 3, switches 3906), copy 0.0 MB/s, fetch avg 0.22 max 3.53 ms, render 72 fps, input 729, X errors 0
+[   91.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 55.6/s, updates 46.2/s, deferred 1310, imports 3 (cached 3, switches 3987), copy 0.0 MB/s, fetch avg 0.22 max 3.53 ms, render 72 fps, input 871, X errors 0
+[   93.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 57.1/s, updates 49.2/s, deferred 1345, imports 3 (cached 3, switches 4080), copy 0.0 MB/s, fetch avg 0.22 max 3.53 ms, render 72 fps, input 1002, X errors 0
+[   95.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 58.1/s, updates 52.2/s, deferred 1377, imports 3 (cached 3, switches 4178), copy 0.0 MB/s, fetch avg 0.22 max 3.53 ms, render 72 fps, input 1128, X errors 0
+[   97.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 66.0/s, updates 63.0/s, deferred 1391, imports 3 (cached 3, switches 4304), copy 0.0 MB/s, fetch avg 0.22 max 3.53 ms, render 72 fps, input 1239, X errors 0
+[   99.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 62.0/s, updates 59.0/s, deferred 1411, imports 3 (cached 3, switches 4420), copy 0.0 MB/s, fetch avg 0.22 max 3.53 ms, render 72 fps, input 1358, X errors 0
+[  101.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 65.1/s, updates 58.2/s, deferred 1437, imports 3 (cached 3, switches 4532), copy 0.0 MB/s, fetch avg 0.22 max 3.53 ms, render 72 fps, input 1481, X errors 0
+[  103.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 62.5/s, updates 59.5/s, deferred 1451, imports 3 (cached 3, switches 4648), copy 0.0 MB/s, fetch avg 0.22 max 3.53 ms, render 72 fps, input 1602, X errors 0
+[  105.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 59.0/s, updates 52.5/s, deferred 1482, imports 3 (cached 3, switches 4748), copy 0.0 MB/s, fetch avg 0.22 max 3.53 ms, render 72 fps, input 1744, X errors 0
+[  107.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 65.0/s, updates 56.5/s, deferred 1508, imports 4 (cached 4, switches 4856), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 1885, X errors 0
+[  109.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 57.7/s, updates 52.2/s, deferred 1531, imports 4 (cached 4, switches 4954), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 2033, X errors 0
+[  111.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 61.4/s, updates 50.4/s, deferred 1571, imports 4 (cached 4, switches 5052), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 2179, X errors 0
+[  113.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 58.1/s, updates 52.2/s, deferred 1609, imports 4 (cached 4, switches 5154), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 2309, X errors 0
+[  115.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 63.0/s, updates 61.5/s, deferred 1626, imports 4 (cached 4, switches 5276), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 2463, X errors 0
+[  117.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 71.5/s, updates 68.5/s, deferred 1633, imports 4 (cached 4, switches 5413), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 2620, X errors 0
+[  119.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 64.1/s, updates 36.2/s, deferred 1697, imports 4 (cached 4, switches 5478), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 2749, X errors 0
+[  121.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 64.0/s, updates 54.0/s, deferred 1728, imports 4 (cached 4, switches 5579), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 2891, X errors 0
+[  123.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 62.5/s, updates 51.5/s, deferred 1758, imports 4 (cached 4, switches 5679), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 3034, X errors 0
+[  125.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 70.5/s, updates 68.0/s, deferred 1763, imports 4 (cached 4, switches 5814), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 3179, X errors 0
+[  127.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 70.5/s, updates 63.5/s, deferred 1778, imports 4 (cached 4, switches 5937), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 3321, X errors 0
+[  129.0 s] dmabuf AR24 0x500000000000001 1920x1080: damage 65.5/s, updates 41.0/s, deferred 1834, imports 4 (cached 4, switches 6010), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 3455, X errors 0
+[  131.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 65.6/s, updates 41.3/s, deferred 1889, imports 4 (cached 4, switches 6084), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 71 fps, input 3583, X errors 0
+[  133.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 64.4/s, updates 50.4/s, deferred 1929, imports 4 (cached 4, switches 6176), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 3671, X errors 0
+[  135.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 71.0/s, updates 58.0/s, deferred 1956, imports 4 (cached 4, switches 6285), copy 0.0 MB/s, fetch avg 0.22 max 3.89 ms, render 72 fps, input 3671, X errors 0
+[  137.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 71.1/s, updates 60.6/s, deferred 1978, imports 4 (cached 4, switches 6404), copy 0.0 MB/s, fetch avg 0.22 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  139.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 65.9/s, updates 55.4/s, deferred 2009, imports 4 (cached 4, switches 6512), copy 0.0 MB/s, fetch avg 0.22 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  141.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 70.5/s, updates 60.0/s, deferred 2031, imports 4 (cached 4, switches 6629), copy 0.0 MB/s, fetch avg 0.22 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  143.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 70.0/s, updates 60.5/s, deferred 2050, imports 4 (cached 4, switches 6748), copy 0.0 MB/s, fetch avg 0.22 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  145.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 71.5/s, updates 64.5/s, deferred 2064, imports 4 (cached 4, switches 6876), copy 0.0 MB/s, fetch avg 0.22 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  147.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 72.0/s, updates 69.5/s, deferred 2069, imports 4 (cached 4, switches 7015), copy 0.0 MB/s, fetch avg 0.22 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  149.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 72.0/s, updates 71.0/s, deferred 2071, imports 4 (cached 4, switches 7157), copy 0.0 MB/s, fetch avg 0.22 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  151.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 72.0/s, updates 72.0/s, deferred 2071, imports 4 (cached 4, switches 7302), copy 0.0 MB/s, fetch avg 0.22 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  153.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 72.0/s, updates 70.0/s, deferred 2075, imports 4 (cached 4, switches 7442), copy 0.0 MB/s, fetch avg 0.22 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  155.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 71.0/s, updates 67.5/s, deferred 2083, imports 4 (cached 4, switches 7576), copy 0.0 MB/s, fetch avg 0.22 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  157.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 72.0/s, updates 71.0/s, deferred 2085, imports 4 (cached 4, switches 7719), copy 0.0 MB/s, fetch avg 0.22 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  159.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 71.0/s, updates 71.0/s, deferred 2085, imports 4 (cached 4, switches 7861), copy 0.0 MB/s, fetch avg 0.22 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  161.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 72.0/s, updates 69.5/s, deferred 2090, imports 4 (cached 4, switches 8000), copy 0.0 MB/s, fetch avg 0.22 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  163.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 72.0/s, updates 72.0/s, deferred 2090, imports 4 (cached 4, switches 8144), copy 0.0 MB/s, fetch avg 0.23 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  165.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 71.0/s, updates 70.5/s, deferred 2091, imports 4 (cached 4, switches 8285), copy 0.0 MB/s, fetch avg 0.23 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  167.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 72.0/s, updates 71.0/s, deferred 2093, imports 4 (cached 4, switches 8427), copy 0.0 MB/s, fetch avg 0.23 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  169.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 72.0/s, updates 70.5/s, deferred 2096, imports 4 (cached 4, switches 8568), copy 0.0 MB/s, fetch avg 0.23 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  171.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 71.0/s, updates 68.0/s, deferred 2102, imports 4 (cached 4, switches 8703), copy 0.0 MB/s, fetch avg 0.23 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  173.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 72.0/s, updates 71.5/s, deferred 2103, imports 4 (cached 4, switches 8846), copy 0.0 MB/s, fetch avg 0.23 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  175.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 71.0/s, updates 69.0/s, deferred 2107, imports 4 (cached 4, switches 8983), copy 0.0 MB/s, fetch avg 0.23 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  177.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 71.5/s, updates 70.0/s, deferred 2110, imports 4 (cached 4, switches 9123), copy 0.0 MB/s, fetch avg 0.23 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  179.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 72.0/s, updates 70.5/s, deferred 2113, imports 4 (cached 4, switches 9264), copy 0.0 MB/s, fetch avg 0.23 max 4.13 ms, render 72 fps, input 3671, X errors 0
+[  181.1 s] dmabuf AR24 0x500000000000001 1920x1080: damage 71.5/s, updates 71.0/s, deferred 2114, imports 4 (cached 4, switches 9406), copy 0.0 MB/s, fetch avg 0.23 max 4.13 ms, render 72 fps, input 3671, X errors 0
+Quitting after 12990 frames
+Final: mode dmabuf, 11222 damage events, 9886 updates, 2114 deferred, 4 imports, 0 copies (0.0 MB), 3671 input events, 0 X errors ()
+Closing the browser window 0x400002d
+ERROR: Attempt to disconnect a nonexistent connection from '<OpenXRSpatialEntityExtension#3909091536>'. Signal: 'spatial_discovery_recommended', callable: 'OpenXRSpatialMarkerTrackingCapability::_on_spatial_discovery_recommended'.
+   at: _disconnect (core/object/object.cpp:1640)
+ERROR: 5 RID allocations of type 'N9OpenXRAPI18InteractionProfileE' were leaked at exit.

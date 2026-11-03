@@ -1,0 +1,96 @@
+{
+ "note": "Our controller models: model space = the runtime render model's space; model_in_aim places it relative to the aim pose. Derived from Valve's controller CAD, CC BY-NC-SA 4.0.",
+ "sides": {
+  "right": {
+   "model_in_aim": [
+    [
+     1.0,
+     0.0,
+     0.0,
+     0.01269
+    ],
+    [
+     0.0,
+     0.76604,
+     -0.64279,
+     0.03262
+    ],
+    [
+     0.0,
+     0.64279,
+     0.76604,
+     0.00036
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "registration": {
+    "body_mean_mm": 0.73,
+    "body_p95_mm": 2.05,
+    "parts_rms_mm": 1.62
+   },
+   "parts": [
+    "button_y",
+    "button_x",
+    "button_b",
+    "button_a",
+    "button_system",
+    "button_menu",
+    "button_grip",
+    "trigger",
+    "thumbstick",
+    "battery_door",
+    "body"
+   ],
+   "triangles": 4956
+  },
+  "left": {
+   "model_in_aim": [
+    [
+     1.0,
+     0.0,
+     0.0,
+     -0.01269
+    ],
+    [
+     0.0,
+     0.76604,
+     -0.64279,
+     0.03262
+    ],
+    [
+     0.0,
+     0.64279,
+     0.76604,
+     0.00036
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "registration": {
+    "body_mean_mm": 0.79,
+    "body_p95_mm": 2.21,
+    "parts_rms_mm": 1.48
+   },
+   "parts": [
+    "dpad",
+    "button_system",
+    "button_view",
+    "button_grip",
+    "trigger",
+    "thumbstick",
+    "battery_door",
+    "body"
+   ],
+   "triangles": 4716
+  }
+ }
+}

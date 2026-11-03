@@ -1,0 +1,18 @@
+# Scripts and sources are copied verbatim to the Steam Frame (Linux); keep them LF on every platform.
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.patch text eol=lf
+Makefile text eol=lf
+tools/pre-push.sample text eol=lf
+*.gd text eol=lf
+*.gdshader text eol=lf
+*.tscn text eol=lf
+*.godot text eol=lf
+*.md text eol=lf
+*.ps1 text eol=crlf
+*.png binary
+*.raw binary
+*.wav binary

@@ -1,0 +1,431 @@
+WorkerThreadPool: 8 threads, 2 max low-priority.
+Godot Engine v4.7.2.stable.custom_build.b9f0db12c (2026-10-31 03:35:14 UTC) - https://godotengine.org
+TextServer: Added interface "Dummy"
+TextServer: Added interface "ICU / HarfBuzz / Graphite (Built-in)"
+Xshape 1.1 detected.
+Xinerama 1.1 detected.
+Xrandr 1.6 detected.
+Xrender 0.11 detected.
+Xinput 2.2 detected.
+XInput: Refreshing devices.
+XInput: Absolute pointing device: xwayland-pointer:21
+XInput: Using touch device: xwayland-touch:21
+XInput: Absolute pointing device: xwayland-touch:21
+Input method started.
+Vulkan: keeping /usr/lib/libvulkan_freedreno.so loaded until exit.
+Devices:
+  #0: Qualcomm Turnip Adreno (TM) 750 - Supported, Integrated
+Optional Vulkan device extension VK_EXT_fragment_density_map2 not found
+Optional Vulkan device extension VK_EXT_astc_decode_mode not found
+Optional Vulkan device extension VK_KHR_ray_tracing_pipeline not found
+Optional Vulkan device extension VK_NV_ray_tracing_validation not found
+Optional Vulkan device extension VK_EXT_device_fault not found
+- Vulkan Variable Rate Shading not supported
+- Vulkan Fragment Density Map supported, min texel size: (32, 32), max texel size: (1024, 1024)
+  - non-subsampled images supported
+- Vulkan multiview supported:
+  max view count: 6
+  max instances: 2147483647
+- Vulkan subgroup:
+  size: 128
+  min size: 64
+  max size: 128
+  stages: STAGE_VERTEX, STAGE_TESSELLATION_CONTROL, STAGE_TESSELLATION_EVALUATION, STAGE_GEOMETRY, STAGE_FRAGMENT, STAGE_COMPUTE
+  supported ops: FEATURE_BASIC, FEATURE_VOTE, FEATURE_ARITHMETIC, FEATURE_BALLOT, FEATURE_SHUFFLE, FEATURE_SHUFFLE_RELATIVE, FEATURE_CLUSTERED, FEATURE_QUAD
+- Vulkan Acceleration Structure supported
+  min acceleration structure scratch offset alignment: 128
+- Vulkan Raytracing not supported
+Vulkan 1.4.362 - Forward Mobile - Using Device #0: Qualcomm - Turnip Adreno (TM) 750
+Startup PSO cache (0.5 MiB)
+XcursorGetTheme could not get cursor theme
+Failed loading custom cursor: crossed_circle
+DBus 1.14.10 detected.
+FreeDesktopScreenSaver: Acquired screensaver inhibition cookie: 122
+Using "default" pen tablet driver...
+Creating VMA small objects pool for memory type index 0
+Shader 'CanvasSdfShaderRD' (group 0) SHA256: c1d733457a265cc36af8d6f0ca5ec5517ef87450a244b2d2ccbe2cf2162237e8
+Loading cache for shader CanvasSdfShaderRD, variant 0
+Loading cache for shader CanvasSdfShaderRD, variant 1
+Loading cache for shader CanvasSdfShaderRD, variant 2
+Loading cache for shader CanvasSdfShaderRD, variant 3
+Loading cache for shader CanvasSdfShaderRD, variant 4
+Loading cache for shader CanvasSdfShaderRD, variant 5
+Shader 'SkeletonShaderRD' (group 0) SHA256: a3d41622a8e1c3c1d58e73f056461190038cf9b44a329124b9895efa52e534ba
+Loading cache for shader SkeletonShaderRD, variant 0
+Loading cache for shader SkeletonShaderRD, variant 1
+Shader 'SortShaderRD' (group 0) SHA256: eaca618e3173ee5c288127b21b923f29cedde183cbe5891e348e978e06271ebe
+Loading cache for shader SortShaderRD, variant 0
+Loading cache for shader SortShaderRD, variant 1
+Loading cache for shader SortShaderRD, variant 2
+Shader 'ParticlesShaderRD' (group 0) SHA256: 0ec1c5c919822db790c20e90e963a6329f56dff151e3bdfe49f32698f112066b
+Loading cache for shader ParticlesShaderRD, variant 0
+Shader 'ParticlesCopyShaderRD' (group 0) SHA256: b9c8f92f7cb6ec646d57b2d04b3e23dd9fc683115319c32666cb870435d71e01
+Loading cache for shader ParticlesCopyShaderRD, variant 0
+Loading cache for shader ParticlesCopyShaderRD, variant 1
+Loading cache for shader ParticlesCopyShaderRD, variant 2
+Loading cache for shader ParticlesCopyShaderRD, variant 3
+Loading cache for shader ParticlesCopyShaderRD, variant 4
+Loading cache for shader ParticlesCopyShaderRD, variant 5
+Loading cache for shader ParticlesCopyShaderRD, variant 6
+Loading cache for shader ParticlesCopyShaderRD, variant 7
+Loading cache for shader ParticlesCopyShaderRD, variant 8
+Loading cache for shader ParticlesCopyShaderRD, variant 9
+Loading cache for shader ParticlesCopyShaderRD, variant 10
+Loading cache for shader ParticlesCopyShaderRD, variant 11
+Loading cache for shader ParticlesCopyShaderRD, variant 12
+Loading cache for shader ParticlesCopyShaderRD, variant 13
+Loading cache for shader ParticlesCopyShaderRD, variant 14
+Loading cache for shader ParticlesCopyShaderRD, variant 15
+Loading cache for shader ParticlesCopyShaderRD, variant 16
+Loading cache for shader ParticlesCopyShaderRD, variant 17
+Loading cache for shader ParticlesCopyShaderRD, variant 18
+Loading cache for shader ParticlesCopyShaderRD, variant 19
+Loading cache for shader ParticlesCopyShaderRD, variant 20
+Shader 'CanvasShaderRD' (group 0) SHA256: 286ab7e6f925e09369b3ffecc755c2b39ee9703a359444b5f61dc29c4d839931
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+Shader 'CanvasOcclusionShaderRD' (group 0) SHA256: c1a5d5672959221469e81ab583bae0bd0cce61df9bbbc7337d41dd3ba243a3dd
+Loading cache for shader CanvasOcclusionShaderRD, variant 0
+Loading cache for shader CanvasOcclusionShaderRD, variant 1
+Loading cache for shader CanvasOcclusionShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+Shader 'TexBlitShaderRD' (group 0) SHA256: 2b8d46cef9335176799526b9268baf069905fa7275bc3b47d911f40858b6fb0d
+Loading cache for shader TexBlitShaderRD, variant 0
+Loading cache for shader TexBlitShaderRD, variant 1
+Loading cache for shader TexBlitShaderRD, variant 2
+Loading cache for shader TexBlitShaderRD, variant 3
+Ubershaders: Enabled
+Shader 'SceneForwardMobileShaderRD' (group 0) SHA256: f9727aa6bee20a1fd78ac6e5d2dc256a7fa0625e084c1e6437b22ab8f3318dfa
+Shader 'SceneForwardMobileShaderRD' (group 1) SHA256: bea86d6ec5c470f5d78d014b285766b1843e2d36596a70067c98a83db58d7d8d
+Shader 'SceneForwardMobileShaderRD' (group 2) SHA256: 66bd58650c598c612300382766e86c1ae3eecc3049a7c53769e8a08b07efc6f4
+Shader 'SceneForwardMobileShaderRD' (group 3) SHA256: be9fde9ad04dbb1c8712aa2582c58233d6e63173b1501d950ed055e2da1319f3
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Shader 'SkyShaderRD' (group 0) SHA256: 7904859ffc7b99cb8d0001e5103ed05c498a9704e23b431b6d473b4a88e2d7ae
+Loading cache for shader SkyShaderRD, variant 0
+Loading cache for shader SkyShaderRD, variant 1
+Loading cache for shader SkyShaderRD, variant 2
+Loading cache for shader SkyShaderRD, variant 3
+Loading cache for shader SkyShaderRD, variant 4
+Loading cache for shader SkyShaderRD, variant 5
+Loading cache for shader SkyShaderRD, variant 0
+Loading cache for shader SkyShaderRD, variant 1
+Loading cache for shader SkyShaderRD, variant 2
+Loading cache for shader SkyShaderRD, variant 3
+Loading cache for shader SkyShaderRD, variant 4
+Loading cache for shader SkyShaderRD, variant 5
+Shader 'BokehDofRasterShaderRD' (group 0) SHA256: 74ef62550c11ada58f4d65bfedad7326e5127d05d2db15b0fec1ec47e78f987b
+Loading cache for shader BokehDofRasterShaderRD, variant 0
+Loading cache for shader BokehDofRasterShaderRD, variant 1
+Loading cache for shader BokehDofRasterShaderRD, variant 2
+Loading cache for shader BokehDofRasterShaderRD, variant 3
+Loading cache for shader BokehDofRasterShaderRD, variant 4
+Loading cache for shader BokehDofRasterShaderRD, variant 5
+Loading cache for shader BokehDofRasterShaderRD, variant 6
+Shader 'BlurRasterShaderRD' (group 0) SHA256: e243f4f8795360a542f3d689b918159e50e2284f61176d253504da33ed103461
+Loading cache for shader BlurRasterShaderRD, variant 0
+Loading cache for shader BlurRasterShaderRD, variant 1
+Loading cache for shader BlurRasterShaderRD, variant 2
+Loading cache for shader BlurRasterShaderRD, variant 3
+Loading cache for shader BlurRasterShaderRD, variant 4
+Loading cache for shader BlurRasterShaderRD, variant 5
+Loading cache for shader BlurRasterShaderRD, variant 6
+Shader 'CopyShaderRD' (group 0) SHA256: d02c8e61b39f9436e007bc2ff5f78b21d846f6fa2d0bbbbeffd8d587f19e3d44
+Loading cache for shader CopyShaderRD, variant 0
+Loading cache for shader CopyShaderRD, variant 1
+Loading cache for shader CopyShaderRD, variant 2
+Loading cache for shader CopyShaderRD, variant 3
+Loading cache for shader CopyShaderRD, variant 4
+Loading cache for shader CopyShaderRD, variant 5
+Loading cache for shader CopyShaderRD, variant 6
+Loading cache for shader CopyShaderRD, variant 7
+Loading cache for shader CopyShaderRD, variant 8
+Loading cache for shader CopyShaderRD, variant 9
+Loading cache for shader CopyShaderRD, variant 10
+Loading cache for shader CopyShaderRD, variant 11
+Loading cache for shader CopyShaderRD, variant 12
+Shader 'CopyToFbShaderRD' (group 0) SHA256: f6fa8a41960e98a5f115c99bc1b38de65cd10740d7c91f0fd9b0517dc641a893
+Loading cache for shader CopyToFbShaderRD, variant 0
+Loading cache for shader CopyToFbShaderRD, variant 1
+Loading cache for shader CopyToFbShaderRD, variant 2
+Loading cache for shader CopyToFbShaderRD, variant 3
+Shader 'CubeToDpShaderRD' (group 0) SHA256: 05bf7705a347583cdb1c81e00bb378b1db5fe778d37fbe7cc8ca7580e920e03d
+Loading cache for shader CubeToDpShaderRD, variant 0
+Shader 'CubeToOctmapShaderRD' (group 0) SHA256: bb8aa5ed8e69c910d550c56e490696aefbbf097bdc4565bbe1fcea2ab3cffe1f
+Loading cache for shader CubeToOctmapShaderRD, variant 0
+Shader 'OctmapDownsamplerShaderRD' (group 0) SHA256: 08cb02f3bdd56092e51735031f6a34b9dd0173871c2fa9dc6555245c71e404f9
+Loading cache for shader OctmapDownsamplerShaderRD, variant 0
+Loading cache for shader OctmapDownsamplerShaderRD, variant 1
+Shader 'OctmapFilterShaderRD' (group 0) SHA256: 4f6dc8e1250c9051e8c16ca11afd7edd9666f26edbb8353274b35885b7edfebd
+Loading cache for shader OctmapFilterShaderRD, variant 0
+Loading cache for shader OctmapFilterShaderRD, variant 1
+Loading cache for shader OctmapFilterShaderRD, variant 2
+Loading cache for shader OctmapFilterShaderRD, variant 3
+Loading cache for shader OctmapFilterShaderRD, variant 4
+Loading cache for shader OctmapFilterShaderRD, variant 5
+Loading cache for shader OctmapFilterShaderRD, variant 6
+Loading cache for shader OctmapFilterShaderRD, variant 7
+Shader 'OctmapRoughnessShaderRD' (group 0) SHA256: 13e9ebd39894d49ad0da6f182fd053797b4c8993eccfd7e8e605119dfaae5eb9
+Loading cache for shader OctmapRoughnessShaderRD, variant 0
+Loading cache for shader OctmapRoughnessShaderRD, variant 1
+Shader 'SpecularMergeShaderRD' (group 0) SHA256: fe92dfdf4c339225947fe4c172223d59831d2ea214e633d73d45c0de2ad3e8e8
+Loading cache for shader SpecularMergeShaderRD, variant 0
+Loading cache for shader SpecularMergeShaderRD, variant 1
+Loading cache for shader SpecularMergeShaderRD, variant 2
+Loading cache for shader SpecularMergeShaderRD, variant 3
+Shader 'ShadowFrustumShaderRD' (group 0) SHA256: 07999bb1144b5638b1529e09d4434ec4bce434935e0b1ce8c956cd6e744007f0
+Loading cache for shader ShadowFrustumShaderRD, variant 0
+Shader 'MotionVectorsShaderRD' (group 0) SHA256: 35652dc2a101327218481e7a9a100e70c8f3dc6917bea93af1f986270f15d430
+Loading cache for shader MotionVectorsShaderRD, variant 0
+Shader 'LuminanceReduceRasterShaderRD' (group 0) SHA256: 89d04fd82c54924471a3318352b915277dab321b906d1cf88cac43ca2bcdf140
+Loading cache for shader LuminanceReduceRasterShaderRD, variant 0
+Loading cache for shader LuminanceReduceRasterShaderRD, variant 1
+Loading cache for shader LuminanceReduceRasterShaderRD, variant 2
+Shader 'SmaaEdgeDetectionShaderRD' (group 0) SHA256: 0a4f5e3bdcc3e9dbe3dc17f52f4d3ff34af0e926ab96ac2206e7818a841ba1d9
+Loading cache for shader SmaaEdgeDetectionShaderRD, variant 0
+Shader 'SmaaWeightCalculationShaderRD' (group 0) SHA256: 1fa8013919ec17795eddc5c576df66ebb05d7b79c96a9b301d957c9881da41fe
+Loading cache for shader SmaaWeightCalculationShaderRD, variant 0
+Shader 'SmaaBlendingShaderRD' (group 0) SHA256: 474cab23a6573dd3eff23a26b603b231a0f19d3f837e46c945a0f2f14e4283a0
+Loading cache for shader SmaaBlendingShaderRD, variant 0
+Shader 'TonemapMobileShaderRD' (group 0) SHA256: a785be8c24fdece4dc1846f4b9018b6f04451f02ebf969e506c7869f1a277163
+Loading cache for shader TonemapMobileShaderRD, variant 0
+Loading cache for shader TonemapMobileShaderRD, variant 1
+Loading cache for shader TonemapMobileShaderRD, variant 2
+Loading cache for shader TonemapMobileShaderRD, variant 3
+Shader 'VrsShaderRD' (group 0) SHA256: 188e35f6a30a06f3711691db5b13716313bfbf3cd697b42541935676c0bad680
+Loading cache for shader VrsShaderRD, variant 0
+Loading cache for shader VrsShaderRD, variant 2
+Loading cache for shader VrsShaderRD, variant 3
+Shader 'ResolveRasterShaderRD' (group 0) SHA256: 291da6f41ae01d3da032e3b78ffa16bb7c8639f543c12034028570a2c1e296f0
+Loading cache for shader ResolveRasterShaderRD, variant 0
+Shader 'BlitShaderRD' (group 0) SHA256: 7e23fd07b2334d70819b4b9d7ab1fbc831ba2dc5ce68a6a001d4c12121e55b48
+PulseAudio 17.0.0 detected.
+PulseAudio: context other
+PulseAudio: context other
+PulseAudio: context other
+PulseAudio: context ready
+PulseAudio: Detecting channels for device: alsa_loopback_device.stereo.alsa_output.platform-sound.HiFi__Speaker__sink
+PulseAudio: detected 2 output channels
+PulseAudio: audio buffer frames: 512 calculated output latency: 11ms
+
+Loading cache for shader BlitShaderRD, variant 0
+Loading cache for shader BlitShaderRD, variant 1
+Loading cache for shader BlitShaderRD, variant 2
+Loading cache for shader BlitShaderRD, variant 3
+TextServer: Primary interface set to: "ICU / HarfBuzz / Graphite (Built-in)".
+ERROR: Could not load global script cache.
+   at: get_global_class_list (core/config/project_settings.cpp:1458)
+CORE API HASH: 1313131463
+EDITOR API HASH: 3612401625
+SceneTreeFTI: traversal method DEFAULT
+Loaded system CA certificates
+Loading resource: res://main.tscn remapped: res://main.tscn
+Loading resource: res://main.gd remapped: res://main.gd
+Completed load for: 'res://main.gd' remapped 'res://main.gd' at thread -1
+Loading resource: res://video.gdshader remapped: res://video.gdshader
+Completed load for: 'res://video.gdshader' remapped 'res://video.gdshader' at thread -1
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Completed load for: 'res://main.tscn' remapped 'res://main.tscn' at thread -1
+View: flat camera
+MediaSource: audio track 0: dca decoder.
+MediaSource: /home/steamos/Videos/Documentary.3D.Full-SBS.mkv: matroska,webm, 2640.6 s, video h264 3840x1080 23.976 fps 8-bit (SPS 3840x1088), audio track 0 of 1: dts 5.1(side) 48000 Hz, 2 subtitle track(s).
+MediaSource.open() took 1 ms
+Media: matroska,webm, 2640.6 s, video { "stream_index": 0, "codec": "h264", "codec_name": "h264", "width": 3840, "height": 1080, "fps": 23.976023976024, "sample_aspect_ratio": 1.0, "display_aspect": 3.55555555555556, "bit_depth": 8, "profile": "High", "pixel_format": "yuv420p", "is_h264": true, "is_hevc": false, "is_vp9": false, "is_av1": false, "hw_decodable": true, "annexb_filter": true, "coded_width": 3840, "coded_height": 1088, "display_width": 3840, "display_height": 1080, "chroma_format": 1 }
+  audio track 0: dts 5.1(side) 48000 Hz eng 
+Audio: none, the video runs on the frame clock
+Decoder: CAPTURE format Q08C
+Video: /home/steamos/Videos/Documentary.3D.Full-SBS.mkv from the container, side-by-side 3D
+V4L2Decoder: /home/steamos/Videos/Documentary.3D.Full-SBS.mkv: H.264 3840x1088 (display 3840x1080), 8-bit, 23.976 fps, from a MediaSource (frame times from PTS).
+MediaSource: audio fltp, 5.1(side), 48000 Hz -> stereo float, 44100 Hz.
+V4L2Decoder: opened /dev/video-dec0: driver 'iris_driver', card 'iris_decoder', device_caps 0x4204000.
+V4L2Decoder: S_FMT OUTPUT H264 3840x1088: sizeimage 7077888 (asked 3133440).
+V4L2Decoder: OUTPUT: 8 MMAP buffers of 7077888 bytes.
+V4L2Decoder: OUTPUT streaming, 7 access units queued; waiting for SOURCE_CHANGE.
+V4L2Decoder: SOURCE_CHANGE #1 (changes 0x1).
+V4L2Decoder: G_FMT CAPTURE after SOURCE_CHANGE: NV12 3840x1088, 1 plane(s).
+V4L2Decoder:   CAPTURE format 0: Q08C 'QCOM Compressed 8-bit Format'.
+V4L2Decoder:   CAPTURE format 1: NV12 'Y/UV 4:2:0'.
+V4L2Decoder:   CAPTURE format 2: NV21 'Y/VU 4:2:0'.
+MultiUmaBuffer 'RENDER_LIST_OPAQUE' used a total of 0 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+V4L2Decoder:   CAPTURE[0]: dmabuf fd 28, 6299648 bytes.
+V4L2Decoder:   CAPTURE[1]: dmabuf fd 29, 6299648 bytes.
+V4L2Decoder:   CAPTURE[2]: dmabuf fd 30, 6299648 bytes.
+V4L2Decoder:   CAPTURE[3]: dmabuf fd 31, 6299648 bytes.
+V4L2Decoder:   CAPTURE[4]: dmabuf fd 32, 6299648 bytes.
+V4L2Decoder:   CAPTURE[5]: dmabuf fd 33, 6299648 bytes.
+V4L2Decoder:   CAPTURE[6]: dmabuf fd 34, 6299648 bytes.
+V4L2Decoder:   CAPTURE[7]: dmabuf fd 35, 6299648 bytes.
+V4L2Decoder:   CAPTURE[8]: dmabuf fd 36, 6299648 bytes.
+V4L2Decoder:   CAPTURE[9]: dmabuf fd 37, 6299648 bytes.
+V4L2Decoder:   CAPTURE[10]: dmabuf fd 38, 6299648 bytes.
+V4L2Decoder:   CAPTURE[11]: dmabuf fd 39, 6299648 bytes.
+V4L2Decoder: QC08C layout: Y metadata 20480 bytes, Y 4177920, UV metadata 12288, UV 2088960; total 6299648 (sizeimage 6299648).
+V4L2Decoder: CAPTURE generation 1: Q08C 3840x1088, pitch 3840, chroma at 4198400, sizeimage 6299648, visible 3840x1080+0+0, 12 buffers (asked 12, MIN_BUFFERS_FOR_CAPTURE 0); setup took 3.6 ms.
+DmabufImage: NV12 + modifier 0x500000000000001 can't have R8 and R8G8 views on one image (VkResult -11); importing it as two images.
+DmabufImage: imported 3840x1088 NV12 (image 1 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: imported 3840x1088 NV12 (image 2 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: NV12 + modifier 0x500000000000001 can't have R8 and R8G8 views on one image (VkResult -11); importing it as two images.
+DmabufImage: imported 3840x1088 NV12 (image 1 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: imported 3840x1088 NV12 (image 2 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: NV12 + modifier 0x500000000000001 can't have R8 and R8G8 views on one image (VkResult -11); importing it as two images.
+DmabufImage: imported 3840x1088 NV12 (image 1 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: imported 3840x1088 NV12 (image 2 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: NV12 + modifier 0x500000000000001 can't have R8 and R8G8 views on one image (VkResult -11); importing it as two images.
+DmabufImage: imported 3840x1088 NV12 (image 1 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: imported 3840x1088 NV12 (image 2 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: NV12 + modifier 0x500000000000001 can't have R8 and R8G8 views on one image (VkResult -11); importing it as two images.
+DmabufImage: imported 3840x1088 NV12 (image 1 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: imported 3840x1088 NV12 (image 2 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: NV12 + modifier 0x500000000000001 can't have R8 and R8G8 views on one image (VkResult -11); importing it as two images.
+DmabufImage: imported 3840x1088 NV12 (image 1 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: imported 3840x1088 NV12 (image 2 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: NV12 + modifier 0x500000000000001 can't have R8 and R8G8 views on one image (VkResult -11); importing it as two images.
+DmabufImage: imported 3840x1088 NV12 (image 1 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: imported 3840x1088 NV12 (image 2 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: NV12 + modifier 0x500000000000001 can't have R8 and R8G8 views on one image (VkResult -11); importing it as two images.
+DmabufImage: imported 3840x1088 NV12 (image 1 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: imported 3840x1088 NV12 (image 2 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: NV12 + modifier 0x500000000000001 can't have R8 and R8G8 views on one image (VkResult -11); importing it as two images.
+DmabufImage: imported 3840x1088 NV12 (image 1 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: imported 3840x1088 NV12 (image 2 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: NV12 + modifier 0x500000000000001 can't have R8 and R8G8 views on one image (VkResult -11); importing it as two images.
+DmabufImage: imported 3840x1088 NV12 (image 1 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: imported 3840x1088 NV12 (image 2 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: NV12 + modifier 0x500000000000001 can't have R8 and R8G8 views on one image (VkResult -11); importing it as two images.
+DmabufImage: imported 3840x1088 NV12 (image 1 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: imported 3840x1088 NV12 (image 2 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: NV12 + modifier 0x500000000000001 can't have R8 and R8G8 views on one image (VkResult -11); importing it as two images.
+DmabufImage: imported 3840x1088 NV12 (image 1 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+DmabufImage: imported 3840x1088 NV12 (image 2 of 2), modifier 0x500000000000001, 6299648 bytes, memory type 0.
+DmabufImage:   memory plane 0: offset 0, pitch 3840, size 4177920.
+DmabufImage:   memory plane 1: offset 0, pitch 3840, size 2088960.
+HWVideoTexture: imported 12 decoder buffers (generation 1): Q08C (UBWC) 3840x1088, pitch 3840, UV metadata at 4198400, visible 3840x1080+0+0, 2 Vulkan image(s) per buffer.
+Video format: buffers (3840, 1088), visible [P: (0, 0), S: (3840, 1080)] (uv [P: (0.0, 0.0), S: (1.0, 0.992647)])
+Playback started at frame 3 (0.34 s after launch)
+[    2.3 s] decoding: decode 25.4 fps, shown 23.9 fps, dropped 0 (total 0), A/V offset +27 ms (clock 1.987, frame 1.960), render 90 fps, latency avg 120 max 379 ms, queued rate 23.9, in driver 0 out/7 cap, ready 3, retiring 1, demux queue 17 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.0 s, GPU 0.57 ms avg / 0.59 max
+[    4.3 s] decoding: decode 24.5 fps, shown 24.0 fps, dropped 0 (total 0), A/V offset +25 ms (clock 3.987, frame 3.962), render 90 fps, latency avg 118 max 379 ms, queued rate 24.8, in driver 0 out/6 cap, ready 4, retiring 1, demux queue 20 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.0 s, GPU 0.60 ms avg / 1.42 max
+[    6.3 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 0), A/V offset +23 ms (clock 5.987, frame 5.964), render 90 fps, latency avg 120 max 379 ms, queued rate 23.3, in driver 0 out/6 cap, ready 4, retiring 1, demux queue 22 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.0 s, GPU 0.59 ms avg / 0.59 max
+Screenshot (offscreen) /home/steamos/spike03/ubwc-Q08C.png (1920x1080) at frame time 6.632: OK
+[    8.3 s] decoding: decode 23.5 fps, shown 24.0 fps, dropped 1 (total 1), A/V offset +2 ms (clock 8.010, frame 8.008), render 85 fps, latency avg 119 max 379 ms, queued rate 25.8, in driver 0 out/7 cap, ready 2, retiring 2, demux queue 17 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.1 s, GPU 0.59 ms avg / 1.44 max
+[   10.3 s] decoding: decode 24.4 fps, shown 23.9 fps, dropped 0 (total 1), A/V offset +11 ms (clock 10.021, frame 10.010), render 90 fps, latency avg 119 max 379 ms, queued rate 24.8, in driver 0 out/6 cap, ready 3, retiring 1, demux queue 23 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.1 s, GPU 0.60 ms avg / 1.44 max
+[   12.3 s] decoding: decode 23.5 fps, shown 24.0 fps, dropped 0 (total 1), A/V offset +9 ms (clock 12.021, frame 12.012), render 90 fps, latency avg 119 max 379 ms, queued rate 24.8, in driver 0 out/7 cap, ready 2, retiring 1, demux queue 19 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.1 s, GPU 0.59 ms avg / 0.60 max
+[   14.3 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 1), A/V offset +7 ms (clock 14.021, frame 14.014), render 90 fps, latency avg 120 max 379 ms, queued rate 24.1, in driver 0 out/7 cap, ready 2, retiring 1, demux queue 18 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.1 s, GPU 0.60 ms avg / 1.43 max
+[   16.3 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 1), A/V offset +5 ms (clock 16.021, frame 16.016), render 90 fps, latency avg 119 max 379 ms, queued rate 24.8, in driver 0 out/7 cap, ready 2, retiring 1, demux queue 21 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.1 s, GPU 0.59 ms avg / 0.59 max
+[   18.4 s] decoding: decode 24.9 fps, shown 23.9 fps, dropped 0 (total 1), A/V offset +14 ms (clock 18.032, frame 18.018), render 90 fps, latency avg 120 max 379 ms, queued rate 24.8, in driver 0 out/6 cap, ready 4, retiring 1, demux queue 17 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.1 s, GPU 0.60 ms avg / 1.46 max
+[   20.4 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 1), A/V offset +12 ms (clock 20.032, frame 20.020), render 90 fps, latency avg 120 max 379 ms, queued rate 24.1, in driver 0 out/5 cap, ready 4, retiring 1, demux queue 22 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.1 s, GPU 0.59 ms avg / 0.60 max
+Quitting after 1800 frames
+Final: 485 frames decoded, 480 shown, 1 dropped, 0 stale, 0 decoder errors, state decoding
+V4L2Decoder: CAPTURE teardown (session end).
+V4L2Decoder:   STREAMOFF CAPTURE: ok.
+V4L2Decoder:   REQBUFS(CAPTURE, 0) for 12 buffer(s): ok.
+V4L2Decoder: STREAMOFF OUTPUT: ok.
+V4L2Decoder: decoder closed (session end).
+XR: Clearing primary interface
+DmabufImage: leaving 12 image(s) to be released at exit.
+XR: Removed interface "Native mobile"
+XR: Removed interface "OpenXR"
+PulseAudio: context terminated
+Freeing Default Tex_Blit Shader
+MultiUmaBuffer 'SceneState::uniform_buffers' used a total of 4 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'RENDER_LIST_OPAQUE' used a total of 2 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'RENDER_LIST_ALPHA' used a total of 0 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'RENDER_LIST_SECONDARY' used a total of 0 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'CANVAS_INSTANCE_DATA' used a total of 0 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.

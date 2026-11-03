@@ -1,0 +1,37 @@
+Godot Engine v4.7.2.stable.custom_build.9818abd06 (2026-10-31 02:48:27 UTC) - https://godotengine.org
+Vulkan 1.4.362 - Forward Mobile - Using Device #0: Qualcomm - Turnip Adreno (TM) 750
+
+ERROR: Could not load global script cache.
+   at: get_global_class_list (core/config/project_settings.cpp:1458)
+X11WindowSource: connected to ":0": Composite 0.4, DAMAGE 1.1, XFixes 5.0, XTEST 2.2, DRI3 1.2, MIT-SHM 1.2 (fd passing).
+X extensions: { "display": ":0", "connected": true, "composite": "0.4", "damage": "1.1", "xfixes": "5.0", "xtest": "2.2", "dri3": "1.2", "shm": "1.2", "shm_fd_passing": true }
+Own window: 0x3c00002 (toplevel 0x3c00002)
+Windows (bottom to top):
+  0x2400014 1281x419  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - Keyboard"
+  0x2400016 1800x120  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.bar (99590000)"
+  0x2400018  450x1536 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.barpopup.99590001 (99590001)"
+  0x240001a  600x60   +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.tooltip.99590002 (99590002)"
+  0x240001c  375x150  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.volumelevel (99590003)"
+  0x240001e  900x60   +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.floatingfooter (99590004)"
+  0x2400020  450x1200 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.frame.menu.99590005 (99590005)"
+  0x2400022  510x120  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - Notifications"
+  0x2400005 1920x1080 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR"
+  0x2400029  450x1536 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.barpopup.99590006 (99590006)"
+  0x4000003 1920x1080 +0+0 depth 32  class org.chromium.Chromium/Org.chromium.Chromium  pid 2  steam_game 0  "New Tab - Chromium"
+  0x3c00002 1920x1080 +0+0 depth 24  class Godot_Engine/Spike 05 - window  pid 90902  steam_game 0  "Spike 05 - window (DEBUG)"  <- this program
+View: flat camera
+Launched flatpak run org.chromium.Chromium --ozone-platform=x11 --window-size=1920,1080 --window-position=0,0 --no-first-run --disable-backgrounding-occluded-windows --disable-renderer-backgrounding --disable-background-timer-throttling --autoplay-policy=no-user-gesture-required --app=data:text/html;base64,PCFkb2N0eXBlIGh0bWw+CjxodG1sPgo8aGVhZD4KPG1ldGEgY2hhcnNldD0idXRmLTgiPgo8dGl0bGU+eDExd2luZG93IGlucHV0IHRlc3Q8L3RpdGxlPgo8c3R5bGU+CmJvZHkgeyBiYWNrZ3JvdW5kOiAjMTIzOyBjb2xvcjogI2ZmZjsgZm9udDogMzBweCBzYW5zLXNlcmlmOyBtYXJnaW46IDI0cHg7IG92ZXJmbG93OiBoaWRkZW47IH0KaDEgeyBmb250LXNpemU6IDQwcHg7IG1hcmdpbjogMCAwIDEycHggMDsgfQppbnB1dCB7IGZvbnQtc2l6ZTogMzRweDsgd2lkdGg6IDkwMHB4OyB9CiNzdGF0dXMgeyBjb2xvcjogI2ZmMDsgbWFyZ2luOiAxMnB4IDA7IH0KI2xvZyB7IGZvbnQtZmFtaWx5OiBtb25vc3BhY2U7IGZvbnQtc2l6ZTogMjhweDsgbGluZS1oZWlnaHQ6IDM2cHg7IH0KI2JveCB7IHBvc2l0aW9uOiBhYnNvbHV0ZTsgd2lkdGg6IDgwcHg7IGhlaWdodDogODBweDsgYmFja2dyb3VuZDogI2Y4MDsgYm90dG9tOiA0MHB4OyB9CiNkb3QgeyBwb3NpdGlvbjogYWJzb2x1dGU7IHdpZHRoOiAxNnB4OyBoZWlnaHQ6IDE2cHg7IG1hcmdpbjogLThweCAwIDAgLThweDsgYm9yZGVyLXJhZGl1czogOHB4OyBiYWNrZ3JvdW5kOiAjMGYwOyB9Cjwvc3R5bGU+CjwvaGVhZD4KPGJvZHk+CjxoMT54MTF3aW5kb3cgaW5wdXQgdGVzdDwvaDE+CjxpbnB1dCBpZD0idGV4dCIgYXV0b2ZvY3VzIHBsYWNlaG9sZGVyPSJ0eXBlZCB0ZXh0IGFwcGVhcnMgaGVyZSI+CjxkaXYgaWQ9InN0YXR1cyI+bm8gaW5wdXQgeWV0PC9kaXY+CjxkaXYgaWQ9ImxvZyI+PC9kaXY+CjxkaXYgaWQ9ImJveCI+PC9kaXY+CjxkaXYgaWQ9ImRvdCI+PC9kaXY+CjxzY3JpcHQ+Ci8vIFNwaWtlIDA1OiBzaG93cyB3aGF0IGlucHV0IHJlYWNoZXMgdGhlIHBhZ2UuIFRoZSBvcmFuZ2UgYm94IG1vdmVzIGV2ZXJ5IGZyYW1lIChzbyB0aGUgd2luZG93IGlzIGFsd2F5cyBkYW1hZ2VkKS4KY29uc3QgbGluZXMgPSBbXTsKbGV0IG1vdmVzID0gMCwgbGFzdCA9ICcnOwpjb25zdCB0ZXh0ID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3RleHQnKTsKZnVuY3Rpb24gYWRkKHMpIHsKCWxpbmVzLnVuc2hpZnQocyk7CglsaW5lcy5sZW5ndGggPSBNYXRoLm1pbihsaW5lcy5sZW5ndGgsIDE0KTsKCWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdsb2cnKS5pbm5lckhUTUwgPSBsaW5lcy5qb2luKCc8YnI+Jyk7Cn0KZnVuY3Rpb24gc3RhdHVzKCkgewoJZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3N0YXR1cycpLnRleHRDb250ZW50ID0gJ21vdmVzICcgKyBtb3ZlcyArICcgbGFzdCAnICsgbGFzdCArICcsIGZvY3VzICcgKyBkb2N1bWVudC5oYXNGb2N1cygpOwp9CmFkZEV2ZW50TGlzdGVuZXIoJ21vdXNlbW92ZScsIGUgPT4gewoJbW92ZXMrKzsKCWxhc3QgPSBlLmNsaWVudFggKyAnLCcgKyBlLmNsaWVudFk7Cgljb25zdCBkb3QgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnZG90Jyk7Cglkb3Quc3R5bGUubGVmdCA9IGUuY2xpZW50WCArICdweCc7Cglkb3Quc3R5bGUudG9wID0gZS5jbGllbnRZICsgJ3B4JzsKCXN0YXR1cygpOwp9LCB0cnVlKTsKYWRkRXZlbnRMaXN0ZW5lcignbW91c2Vkb3duJywgZSA9PiB7CglhZGQoJ21vdXNlZG93biBidXR0b24gJyArIGUuYnV0dG9uICsgJyBhdCAnICsgZS5jbGllbnRYICsgJywnICsgZS5jbGllbnRZICsgJyB0cnVzdGVkICcgKyBlLmlzVHJ1c3RlZCk7CglzZXRUaW1lb3V0KCgpID0+IHRleHQuZm9jdXMoKSwgMCk7Cn0sIHRydWUpOwphZGRFdmVudExpc3RlbmVyKCdtb3VzZXVwJywgZSA9PiBhZGQoJ21vdXNldXAgYnV0dG9uICcgKyBlLmJ1dHRvbiksIHRydWUpOwphZGRFdmVudExpc3RlbmVyKCdrZXlkb3duJywgZSA9PiBhZGQoJ2tleWRvd24gJyArIEpTT04uc3RyaW5naWZ5KGUua2V5KSArICcgY29kZSAnICsgZS5jb2RlICsgKGUuc2hpZnRLZXkgPyAnIHNoaWZ0JyA6ICcnKSksIHRydWUpOwphZGRFdmVudExpc3RlbmVyKCd3aGVlbCcsIGUgPT4gYWRkKCd3aGVlbCBkeSAnICsgZS5kZWx0YVkgKyAnIGR4ICcgKyBlLmRlbHRhWCksIHRydWUpOwphZGRFdmVudExpc3RlbmVyKCdmb2N1cycsICgpID0+IHsgYWRkKCd3aW5kb3cgZm9jdXMnKTsgc3RhdHVzKCk7IH0pOwphZGRFdmVudExpc3RlbmVyKCdibHVyJywgKCkgPT4geyBhZGQoJ3dpbmRvdyBibHVyJyk7IHN0YXR1cygpOyB9KTsKbGV0IHggPSAwOwpmdW5jdGlvbiBmcmFtZSgpIHsKCXggPSAoeCArIDYpICUgTWF0aC5tYXgoaW5uZXJXaWR0aCAtIDgwLCAxKTsKCWRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdib3gnKS5zdHlsZS5sZWZ0ID0geCArICdweCc7CglyZXF1ZXN0QW5pbWF0aW9uRnJhbWUoZnJhbWUpOwp9CmZyYW1lKCk7CnN0YXR1cygpOwo8L3NjcmlwdD4KPC9ib2R5Pgo8L2h0bWw+Cg== (pid 90940); waiting for its window.
+Opening in existing browser session.
+X11WindowSource: capturing 0x4000027 "x11window input test" (), 1920x1080, depth 32, dmabuf (zero copy); mapped.
+Capture 0x4000027: OK 
+X11WindowSource: importing the window's buffers: 1920x1080 AR24, modifier 0x500000000000001, 1 plane(s), pitch 7680, offset 0.
+Test input: pointer sweep to the centre 960,540
+Test input: left click
+[    2.3 s] dmabuf AR24 0x500000000000001 1920x1080: damage 66.8/s, updates 66.3/s, deferred 1, imports 3 (cached 3, switches 133), copy 0.0 MB/s, fetch avg 0.21 max 1.00 ms, render 90 fps, input 7, X errors 0
+Test input: text "Hi!" and Enter
+Test input: scroll 3 down
+Test input: done (21 input events sent)
+Screenshot (offscreen) /home/steamos/spike05/logs/input.png (1920x1080): OK
+Quitting after 345 frames
+Final: mode dmabuf, 273 damage events, 258 updates, 31 deferred, 3 imports, 0 copies (0.0 MB), 21 input events, 0 X errors ()
+Closing the browser window 0x4000027

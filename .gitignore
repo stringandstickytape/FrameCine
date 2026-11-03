@@ -1,0 +1,19 @@
+build/out/
+build/dist/
+build/sysroot/
+spikes/01-decode/v4l2dec
+spikes/**/streams/
+spikes/00-probe/results/
+# raw frame dumps are 12-44 MB each; keep the .txt notes and PNG previews only
+*.raw
+*.o
+*.so
+*.log
+.godot/
+__pycache__/
+spikes/02-import/results/shader_cache_device.tgz
+spikes/04-q10c-probe/q10c-probe
+spikes/04-q10c-probe/q10c-probe-x86_64
+
+# Claude Code: local settings and agent worktrees
+.claude/

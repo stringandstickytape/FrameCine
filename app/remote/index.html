@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<!-- The phone remote's page (docs/remote.md), served by scripts/remote/remote_server.gd. One file, no external
+     resources. Every action is one POST to /api with {cmd, args}: the same commands as the PC link (describe lists
+     them). The pairing code comes from the QR code's URL (?k=...) and is kept in this browser. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Remote</title>
+<style>
+  :root { --surface: #0C0F13; --raised: #151a20; --text: #E6EAEE; --muted: #8B95A1; --accent: #9CCBE8;
+          --rule: rgba(255,255,255,0.09); --radius: 8px; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--surface); color: var(--text); font: 16px/1.4 system-ui, sans-serif;
+         padding: 16px max(16px, env(safe-area-inset-right)) 32px max(16px, env(safe-area-inset-left)); }
+  h2 { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 500;
+       margin: 24px 0 8px; }
+  #title { font-size: 20px; font-weight: 600; margin: 4px 0; overflow: hidden; text-overflow: ellipsis;
+           white-space: nowrap; }
+  #time { color: var(--muted); font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 100%; accent-color: var(--accent); height: 36px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row > * { flex: 1; }
+  button { background: var(--raised); color: var(--text); border: 1px solid var(--rule); border-radius: var(--radius);
+           font: inherit; min-height: 48px; padding: 0 12px; }
+  button:active { background: rgba(156,203,232,0.14); border-color: var(--accent); }
+  button.main { border-color: var(--accent); font-weight: 600; }
+  input[type=text], input[type=url] { width: 100%; min-height: 48px; border-radius: var(--radius); font: inherit;
+           background: var(--raised); color: var(--text); border: 1px solid var(--rule); padding: 0 12px; }
+  #places { display: flex; flex-wrap: wrap; gap: 6px; }
+  #places button { flex: 0 0 auto; min-height: 40px; font-size: 14px; }
+  #path { color: var(--muted); font-size: 13px; margin: 8px 0; word-break: break-all; }
+  #list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+  #list li { padding: 12px 4px; border-bottom: 1px solid var(--rule); overflow: hidden; text-overflow: ellipsis;
+             white-space: nowrap; }
+  #list li.dir { color: var(--accent); }
+  #list li.current { border-left: 2px solid var(--accent); padding-left: 8px; }
+  #status { position: fixed; left: 0; right: 0; bottom: 0; padding: 8px 16px; font-size: 13px;
+            background: var(--raised); color: var(--muted); border-top: 1px solid var(--rule); min-height: 32px; }
+  #status.error { color: #e8a39c; }
+  label { color: var(--muted); font-size: 14px; display: flex; gap: 6px; align-items: center; }
+</style>
+</head>
+<body>
+<div id="title">Not connected</div>
+<div id="time">-</div>
+<input id="seek" type="range" min="0" max="1" step="0.1" value="0" aria-label="Position">
+<div class="row">
+  <button id="prev">Prev</button>
+  <button id="back">-10 s</button>
+  <button id="play" class="main">Play</button>
+  <button id="fwd">+10 s</button>
+  <button id="next">Next</button>
+</div>
+
+<h2>Volume</h2>
+<input id="volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volume">
+
+<h2>Files</h2>
+<div id="places"></div>
+<div id="path"></div>
+<ul id="list"></ul>
+
+<h2>Type into the headset</h2>
+<div class="row"><input id="text" type="text" autocomplete="off" autocapitalize="off" spellcheck="false"
+  placeholder="Text for the focused field"></div>
+<div class="row" style="margin-top:8px">
+  <label><input id="submit" type="checkbox"> then Enter</label>
+  <label><input id="replace" type="checkbox"> replace</label>
+  <button id="type">Type</button>
+</div>
+
+<h2>Web page</h2>
+<div class="row"><input id="url" type="url" autocomplete="off" autocapitalize="off" placeholder="example.com"></div>
+<div class="row" style="margin-top:8px"><button id="openurl">Open on the screen</button></div>
+
+<div id="status"></div>
+
+<script>
+"use strict";
+const params = new URLSearchParams(location.search);
+if (params.get("k")) localStorage.setItem("remote-key", params.get("k"));
+const key = localStorage.getItem("remote-key") || "";
+const $ = (id) => document.getElementById(id);
+let state = {}, seeking = false, volumeDragging = false, folder = "";
+
+function say(text, error) { $("status").textContent = text || ""; $("status").className = error ? "error" : ""; }
+
+async function api(cmd, args) {
+  try {
+    const r = await fetch("/api", { method: "POST", headers: { "Content-Type": "application/json", "X-Remote-Key": key },
+                                    body: JSON.stringify({ cmd, args: args || {} }) });
+    const j = await r.json();
+    if (!j.ok) say(j.error, true);
+    return j;
+  } catch (e) {
+    say("No answer from the headset", true);
+    return { ok: false, error: String(e) };
+  }
+}
+
+function clock(t) {
+  t = Math.max(0, Math.floor(t || 0));
+  const h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60, s = t % 60;
+  return h + ":" + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+}
+
+async function refresh() {
+  const j = await api("get");
+  if (!j.ok) return;
+  state = j.result.state || {};
+  $("title").textContent = state.title || "Nothing open";
+  $("time").textContent = clock(state.position) + " / " + clock(state.duration) + (state.playing ? "" : "  paused");
+  $("play").textContent = state.playing ? "Pause" : "Play";
+  $("seek").max = Math.max(state.duration || 0, 1);
+  $("seek").disabled = !state.can_seek;
+  if (!seeking) $("seek").value = state.position || 0;
+  if (!volumeDragging && j.result.settings) $("volume").value = j.result.settings.volume;
+  for (const li of $("list").children) li.classList.toggle("current", li.dataset.path === state.path);
+  if (!$("status").classList.contains("error")) say("");
+}
+
+$("play").onclick = () => api(state.playing ? "pause" : "play").then(refresh);
+$("back").onclick = () => api("seek", { seconds: -10, relative: true }).then(refresh);
+$("fwd").onclick = () => api("seek", { seconds: 10, relative: true }).then(refresh);
+$("prev").onclick = () => api("previous").then(refresh);
+$("next").onclick = () => api("next").then(refresh);
+$("seek").oninput = () => { seeking = true; $("time").textContent = clock($("seek").value) + " / " + clock(state.duration); };
+$("seek").onchange = () => api("seek", { seconds: Number($("seek").value) }).then(() => { seeking = false; refresh(); });
+$("volume").oninput = () => { volumeDragging = true; };
+$("volume").onchange = () => api("set", { setting: "volume", value: Number($("volume").value) })
+  .then(() => { volumeDragging = false; });
+
+async function openFolder(path) {
+  say("Loading...");
+  const j = await api("list_dir", { path });
+  if (!j.ok) return;
+  folder = j.result.path;
+  $("path").textContent = folder + (j.result.simulated ? "  (simulated)" : "");
+  const list = $("list");
+  list.replaceChildren();
+  if (j.result.parent) addRow("..", j.result.parent, true);
+  for (const e of j.result.entries) addRow(e.name, e.path, e.is_dir);
+  if (j.result.error) say(j.result.error, true); else say(j.result.entries.length + " items");
+}
+
+function addRow(name, path, isDir) {
+  const li = document.createElement("li");
+  li.textContent = isDir ? name + "/" : name;
+  li.dataset.path = path;
+  if (isDir) li.className = "dir";
+  li.onclick = async () => {
+    if (isDir) return openFolder(path);
+    say("Opening " + name + "...");
+    const j = await api("open", { path });
+    if (j.ok) { say(j.result.opening ? "Still connecting..." : "Playing " + name); refresh(); }
+  };
+  $("list").appendChild(li);
+}
+
+async function loadPlaces() {
+  const j = await api("places");
+  if (!j.ok) return;
+  for (const p of j.result) {
+    const b = document.createElement("button");
+    b.textContent = p.label;
+    b.onclick = () => openFolder(p.path);
+    $("places").appendChild(b);
+  }
+}
+
+$("type").onclick = async () => {
+  const j = await api("type_text", { text: $("text").value, submit: $("submit").checked, replace: $("replace").checked });
+  if (j.ok) { say("Typed into " + j.result.field); $("text").value = ""; }
+};
+$("text").onkeydown = (e) => { if (e.key === "Enter") $("type").click(); };
+$("openurl").onclick = async () => {
+  const j = await api("open_url", { url: $("url").value });
+  if (j.ok) say("Opening " + j.result.opening.replace("browser://", "") + " ...");
+};
+
+if (!key) say("Scan the QR code in the headset to pair this phone", true);
+loadPlaces();
+refresh();
+setInterval(refresh, 1000);
+</script>
+</body>
+</html>

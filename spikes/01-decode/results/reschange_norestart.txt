@@ -1,0 +1,64 @@
+[   0.004   ] streams/reschange.h265: 7434060 bytes, 360 access units, max AU 106136 bytes, codec hevc
+[   0.004   ] stream header: coded 1920x1080, display 1920x1080, 8-bit, chroma_format 1
+[   0.006 s0] opened /dev/video-dec0: driver 'iris_driver' card 'iris_decoder' bus 'platform:iris_bus' version 6.18.0 device_caps 0x04204000
+[   0.006 s0]   OUTPUT[0] H264 flags 0x0001 COMPRESSED  'H.264'
+[   0.006 s0]   OUTPUT[1] HEVC flags 0x0001 COMPRESSED  'HEVC'
+[   0.006 s0]   OUTPUT[2] VP90 flags 0x0001 COMPRESSED  'VP9'
+[   0.006 s0]   framesizes HEVC: 128x128 .. 8192x8192 step 1/1
+[   0.006 s0]   (the fork is known not to set DYN_RESOLUTION; this client does not need it)
+[   0.006 s0] S_FMT OUTPUT HEVC 1920x1080: got 1920x1088 planes=1 sizeimage 8847360 (asked 1048576, max AU 106136)
+[   0.009 s0] OUTPUT: 8 MMAP buffers of 8847360 bytes
+[   0.009 s0] G_FMT CAPTURE before SOURCE_CHANGE (fork reports a placeholder): NV12 384x256 planes=1 field=1 colorspace=0
+[   0.009 s0]     plane 0: bytesperline 384 sizeimage 147456
+[   0.011 s0] OUTPUT streaming, 7 AUs queued; waiting for SOURCE_CHANGE
+[   0.012 s0] SOURCE_CHANGE #1 changes 0x1 (RESOLUTION)
+[   0.012 s0] G_FMT CAPTURE after SOURCE_CHANGE: NV12 1920x1088 planes=1 field=1 colorspace=0
+[   0.012 s0]     plane 0: bytesperline 1920 sizeimage 3133440
+[   0.012 s0]   CAPTURE[0] Q08C flags 0x0001 COMPRESSED  'QCOM Compressed 8-bit Format'
+[   0.012 s0]   CAPTURE[1] NV12 flags 0x0000  'Y/UV 4:2:0'
+[   0.012 s0]   CAPTURE[2] NV21 flags 0x0000  'Y/VU 4:2:0'
+[   0.012 s0] visible rect (G_SELECTION COMPOSE): 1920x1080+0+0
+[   0.013 s0] REQBUFS CAPTURE MMAP: asked 4 (MIN_BUFFERS_FOR_CAPTURE 0), got 7
+[   0.013 s0]   CAPTURE[ 0] length 3133440 p0: fd 4 (dmabuf 3133440 bytes)
+[   0.013 s0]   CAPTURE[ 1] length 3133440 p0: fd 5 (dmabuf 3133440 bytes)
+[   0.013 s0]   CAPTURE[ 2] length 3133440 p0: fd 6 (dmabuf 3133440 bytes)
+[   0.013 s0]   CAPTURE[ 3] length 3133440 p0: fd 7 (dmabuf 3133440 bytes)
+[   0.013 s0]   CAPTURE[ 4] length 3133440 p0: fd 8 (dmabuf 3133440 bytes)
+[   0.013 s0]   CAPTURE[ 5] length 3133440 p0: fd 9 (dmabuf 3133440 bytes)
+[   0.014 s0]   CAPTURE[ 6] length 3133440 p0: fd 10 (dmabuf 3133440 bytes)
+[   0.014 s0] VIDIOC_EXPBUF: 7 ok, 0 failed
+[   0.015 s0] CAPTURE streaming (setup took 3.7 ms)
+[   0.131 s0] SOURCE_CHANGE #2 changes 0x1 (RESOLUTION)
+[   0.131 s0] draining CAPTURE until LAST before reallocating (input paused)
+[   0.135 s0] CAPTURE buffer with V4L2_BUF_FLAG_LAST (bytesused 0)
+[   0.135 s0] CAPTURE teardown (resolution change)
+[   0.136 s0]   STREAMOFF CAPTURE: ok
+[   0.137 s0]   munmap 7 plane(s) (0 failed), closed 7 EXPBUF fd(s), 0 imported fd(s), destroyed 0 dumb buffer(s)
+[   0.140 s0]   REQBUFS(CAPTURE, 0) for 7 buffer(s): ok
+[   0.140 s0] G_FMT CAPTURE after SOURCE_CHANGE: NV12 3840x2176 planes=1 field=1 colorspace=0
+[   0.140 s0]     plane 0: bytesperline 3840 sizeimage 12533760
+[   0.140 s0] visible rect (G_SELECTION COMPOSE): 3840x2160+0+0
+[   0.140 s0] VIDIOC_REQBUFS failed: Cannot allocate memory (ENOMEM)
+[   0.140 s0] REQBUFS CAPTURE ENOMEM: most likely the fork's admission check, not memory: mbpf 32640 x max(30, queued rate ~1509 fps) x 1 session(s) = 49261473 vs MAX_MBPS 7833600. Look for 'current session not supported(-12)' in dmesg. Pace the input (--realtime) or keep --reconfig-rate on.
+[   0.140 s0] reconfig path: in-place re-setup failed, --no-restart given
+[   0.141 s0]   STREAMOFF OUTPUT: ok
+[   0.147 s0]   munmap 8 OUTPUT buffer(s), REQBUFS(OUTPUT, 0): ok
+[   0.153 s0]   decoder fd closed
+[   0.153 s0] closed
+
+===== session 0 summary =====
+  result            error
+  device            /dev/video-dec0 (driver 'iris_driver', card 'iris_decoder')
+  input             181 AUs queued, 0 loops, 0 skipped (too large), 0 OUTPUT error flags
+  OUTPUT            HEVC 1920x1080, 8 buffers of 8847360 bytes (sizeimage 8847360)
+  CAPTURE           NV12 3840x2176, 1 plane(s), MMAP, 7 buffers (min 0), 1 setup(s)
+    plane 0         bytesperline 3840, sizeimage 12533760
+  visible           3840x2160+0+0
+  VIDIOC_EXPBUF     7 ok, 0 failed
+  SOURCE_CHANGE     2 event(s), EOS events 0
+  frames            180 decoded, 0 with ERROR flag
+  wall time         0.149 s open->close, 0.116 s first->last frame
+  decode fps        1546.30 (first->last frame), 1209.18 (open->close)
+  latency           min 5.12 / avg 6.99 / max 15.15 ms (OUTPUT QBUF -> CAPTURE DQBUF, 180 matched)
+  frame interval    min 0.01 / avg 0.65 / max 1.37 ms (between CAPTURE DQBUFs)
+  ioctl error       VIDIOC_REQBUFS: Cannot allocate memory (ENOMEM) x1

@@ -1,0 +1,24 @@
+; Spike 02: dmabuf -> VkImage -> RenderingDevice textures, sampled on a quad.
+; Needs our engine fork (modules/hwvideo). See ../README.md.
+
+config_version=5
+
+[application]
+
+config/name="Spike 02 - dmabuf import"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.7", "Mobile")
+
+[rendering]
+
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+rendering_device/driver="vulkan"
+rendering_device/driver.linuxbsd="vulkan"
+
+[xr]
+
+openxr/enabled=true
+; Without a runtime (or with --xr-mode off), main.gd falls back to a flat camera instead of showing an alert.
+openxr/startup_alert=false
+shaders/enabled=true

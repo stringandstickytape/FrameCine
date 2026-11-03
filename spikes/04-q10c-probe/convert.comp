@@ -1,0 +1,46 @@
+#version 450
+// Spike 04: reads a 2-plane 4:2:0 image through a sampler with a YCbCr conversion (RGB_IDENTITY: the raw samples, no
+// range expansion, no matrix) and writes every sample as an integer code, one uint per sample: the luma plane (w x h),
+// then Cb (w/2 x h/2), then Cr. NEAREST filtering everywhere: luma is sampled at its texel centres, chroma at the
+// centre of each 2x2 luma block, which is the centre of its chroma texel for MIDPOINT and inside it for COSITED_EVEN.
+// One invocation per chroma sample. Built into convert.spv.h by the Makefile (glslangValidator).
+layout(local_size_x = 8, local_size_y = 8) in;
+
+layout(set = 0, binding = 0) uniform sampler2D picture; // Immutable sampler with the YCbCr conversion.
+layout(set = 0, binding = 1, std430) writeonly buffer Codes {
+	uint codes[];
+};
+
+layout(push_constant) uniform Params {
+	uvec2 size; // Luma size of the image (even).
+	// code = floor(sample * scale + bias). 8 and 16 bits: scale 2^bits - 1, bias 0.5 (rounding). 10 and 12 bits in a
+	// 16-bit container: scale 65535 / 2^(16 - bits), bias 0.0005, which gives the code whether the driver normalises by
+	// 2^bits - 1 (as the spec says) or reads the container as 16-bit unorm (Mesa maps R10X6 to R16: lavapipe, Turnip).
+	float scale;
+	float bias;
+} params;
+
+uint code(float v) {
+	return uint(floor(clamp(v, 0.0, 1.0) * params.scale + params.bias));
+}
+
+void main() {
+	const uvec2 c = gl_GlobalInvocationID.xy;
+	const uvec2 half_size = params.size / 2u;
+	if (c.x >= half_size.x || c.y >= half_size.y) {
+		return;
+	}
+	const vec2 inv = 1.0 / vec2(params.size);
+	for (uint dy = 0u; dy < 2u; dy++) {
+		for (uint dx = 0u; dx < 2u; dx++) {
+			const uvec2 p = c * 2u + uvec2(dx, dy);
+			const vec4 s = textureLod(picture, (vec2(p) + 0.5) * inv, 0.0);
+			codes[p.y * params.size.x + p.x] = code(s.g); // G = Y
+		}
+	}
+	const vec4 s = textureLod(picture, (vec2(c * 2u) + 1.0) * inv, 0.0);
+	const uint luma = params.size.x * params.size.y;
+	const uint chroma = half_size.x * half_size.y;
+	codes[luma + c.y * half_size.x + c.x] = code(s.b); // B = Cb
+	codes[luma + chroma + c.y * half_size.x + c.x] = code(s.r); // R = Cr
+}

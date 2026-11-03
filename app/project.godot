@@ -1,0 +1,71 @@
+; VR Video Player: the application. Runs on the headset with our engine fork (hardware video through
+; modules/hwvideo) and on any desktop build of the engine (4.7) with a generated test-pattern source. See README.md.
+
+config_version=5
+
+[application]
+
+config/name="VR Video Player"
+config/description="VR video player for a standalone headset."
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.7", "Mobile")
+; --hands writes this file to switch hand tracking on at the next start (scripts/xr_spikes/xr_spikes.gd).
+config/project_settings_override="user://xr_override.cfg"
+
+[audio]
+
+driver/enable_input=true
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+
+[rendering]
+
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+rendering_device/driver="vulkan"
+rendering_device/driver.linuxbsd="vulkan"
+rendering_device/driver.windows="vulkan"
+environment/defaults/default_clear_color=Color(0, 0, 0, 1)
+anti_aliasing/quality/msaa_3d=0
+lights_and_shadows/directional_shadow/size=256
+lights_and_shadows/positional_shadow/atlas_size=256
+
+[shader_globals]
+
+env_light={
+"type": "float",
+"value": 0.1
+}
+screen_center={
+"type": "vec3",
+"value": Vector3(0, 1.2, -3)
+}
+screen_glow={
+"type": "float",
+"value": 0.6
+}
+screen_thumb={
+"type": "sampler2D",
+"value": ""
+}
+screen_tint={
+"type": "float",
+"value": 0.0
+}
+screen_axis={
+"type": "vec3",
+"value": Vector3(0.333, 0, 0)
+}
+
+[xr]
+
+openxr/enabled=true
+openxr/extensions/render_model=true
+openxr/extensions/eye_gaze_interaction=true
+openxr/default_action_map="res://xr/openxr_action_map.tres"
+; Without a runtime (or with --xr-mode off) the app falls back to a flat camera instead of showing an alert.
+openxr/startup_alert=false
+shaders/enabled=true

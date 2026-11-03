@@ -1,0 +1,56 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/xr/xr_hand.gd" id="2_hand"]
+[ext_resource type="Script" path="res://scripts/video_screen.gd" id="3_screen"]
+[ext_resource type="Script" path="res://ui/ui_layer.gd" id="4_ui"]
+[ext_resource type="Script" path="res://scripts/playback_controller.gd" id="5_player"]
+[ext_resource type="Script" path="res://scripts/info_overlay.gd" id="6_overlay"]
+
+[sub_resource type="Environment" id="Environment_black"]
+background_mode = 1
+background_color = Color(0, 0, 0, 1)
+ambient_light_source = 1
+reflected_light_source = 1
+tonemap_mode = 0
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_black")
+
+[node name="XROrigin3D" type="XROrigin3D" parent="."]
+
+[node name="XRCamera3D" type="XRCamera3D" parent="XROrigin3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+far = 200.0
+
+[node name="LeftHand" type="XRController3D" parent="XROrigin3D"]
+tracker = &"left_hand"
+pose = &"aim"
+script = ExtResource("2_hand")
+
+[node name="RightHand" type="XRController3D" parent="XROrigin3D"]
+tracker = &"right_hand"
+pose = &"aim"
+script = ExtResource("2_hand")
+
+[node name="FlatCamera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+fov = 75.0
+far = 200.0
+
+[node name="EnvironmentRoot" type="Node3D" parent="."]
+
+[node name="VideoScreen" type="Node3D" parent="."]
+script = ExtResource("3_screen")
+
+[node name="UILayer" type="Node3D" parent="."]
+script = ExtResource("4_ui")
+
+[node name="Player" type="Node" parent="."]
+script = ExtResource("5_player")
+
+[node name="InfoOverlay" type="Node3D" parent="."]
+script = ExtResource("6_overlay")

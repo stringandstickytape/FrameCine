@@ -1,0 +1,50 @@
+[   0.030   ] streams/hevc8_3840x2160_60.h265: 75799993 bytes, 600 access units, max AU 1281014 bytes, codec hevc
+[   0.030   ] stream header: coded 3840x2160, display 3840x2160, 8-bit, chroma_format 1
+[   0.030 s0] CAPTURE DMABUF source: /dev/dri/card0
+[   0.033 s0] opened /dev/video-dec0: driver 'iris_driver' card 'iris_decoder' bus 'platform:iris_bus' version 6.18.0 device_caps 0x04204000
+[   0.033 s0]   OUTPUT[0] H264 flags 0x0001 COMPRESSED  'H.264'
+[   0.033 s0]   OUTPUT[1] HEVC flags 0x0001 COMPRESSED  'HEVC'
+[   0.033 s0]   OUTPUT[2] VP90 flags 0x0001 COMPRESSED  'VP9'
+[   0.033 s0]   framesizes HEVC: 128x128 .. 8192x8192 step 1/1
+[   0.033 s0]   (the fork is known not to set DYN_RESOLUTION; this client does not need it)
+[   0.033 s0] S_FMT OUTPUT HEVC 3840x2160: got 3840x2176 planes=1 sizeimage 8847360 (asked 1441792, max AU 1281014)
+[   0.043 s0] OUTPUT: 8 MMAP buffers of 8847360 bytes
+[   0.043 s0] G_FMT CAPTURE before SOURCE_CHANGE (fork reports a placeholder): NV12 384x256 planes=1 field=1 colorspace=0
+[   0.043 s0]     plane 0: bytesperline 384 sizeimage 147456
+[   0.048 s0] OUTPUT streaming, 8 AUs queued; waiting for SOURCE_CHANGE
+[   0.049 s0] SOURCE_CHANGE #1 changes 0x1 (RESOLUTION)
+[   0.049 s0] G_FMT CAPTURE after SOURCE_CHANGE: NV12 3840x2176 planes=1 field=1 colorspace=0
+[   0.049 s0]     plane 0: bytesperline 3840 sizeimage 12533760
+[   0.049 s0]   CAPTURE[0] Q08C flags 0x0001 COMPRESSED  'QCOM Compressed 8-bit Format'
+[   0.049 s0]   CAPTURE[1] NV12 flags 0x0000  'Y/UV 4:2:0'
+[   0.049 s0]   CAPTURE[2] NV21 flags 0x0000  'Y/VU 4:2:0'
+[   0.049 s0] visible rect (G_SELECTION COMPOSE): 3840x2160+0+0
+[   0.049 s0] REQBUFS CAPTURE DMABUF: asked 4 (MIN_BUFFERS_FOR_CAPTURE 0), got 7
+[   0.049 s0]   CAPTURE[ 0] length 12533760 p0: imported fd 5 (12533760 bytes)
+[   0.049 s0]   CAPTURE[ 1] length 12533760 p0: imported fd 6 (12533760 bytes)
+[   0.049 s0]   CAPTURE[ 2] length 12533760 p0: imported fd 7 (12533760 bytes)
+[   0.049 s0]   CAPTURE[ 3] length 12533760 p0: imported fd 8 (12533760 bytes)
+[   0.049 s0]   CAPTURE[ 4] length 12533760 p0: imported fd 9 (12533760 bytes)
+[   0.049 s0]   CAPTURE[ 5] length 12533760 p0: imported fd 10 (12533760 bytes)
+[   0.049 s0]   CAPTURE[ 6] length 12533760 p0: imported fd 11 (12533760 bytes)
+[   0.059 s0] CAPTURE streaming (setup took 10.1 ms)
+[   2.387 s0] input done (end of file) after 600 access units
+[   2.387 s0] V4L2_DEC_CMD_STOP sent; draining
+[   2.418 s0] CAPTURE buffer with V4L2_BUF_FLAG_LAST (bytesused 0)
+[   2.436 s0] closed
+
+===== session 0 summary =====
+  result            ok
+  device            /dev/video-dec0 (driver 'iris_driver', card 'iris_decoder')
+  input             600 AUs queued, 0 loops, 0 skipped (too large), 0 OUTPUT error flags
+  OUTPUT            HEVC 3840x2160, 8 buffers of 8847360 bytes (sizeimage 8847360)
+  CAPTURE           NV12 3840x2176, 1 plane(s), DMABUF, 7 buffers (min 0), 1 setup(s)
+    plane 0         bytesperline 3840, sizeimage 12533760
+  visible           3840x2160+0+0
+  SOURCE_CHANGE     1 event(s), EOS events 0
+  frames            600 decoded, 0 with ERROR flag
+  wall time         2.406 s open->close, 2.318 s first->last frame
+  decode fps        258.37 (first->last frame), 249.42 (open->close)
+  latency           min 23.49 / avg 41.27 / max 76.77 ms (OUTPUT QBUF -> CAPTURE DQBUF, 600 matched)
+  frame interval    min 0.02 / avg 3.87 / max 21.72 ms (between CAPTURE DQBUFs)
+  ioctl errors      none

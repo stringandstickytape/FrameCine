@@ -1,0 +1,50 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://environments/vr_environment.gd" id="1_env"]
+[ext_resource type="Shader" path="res://shaders/env_unlit.gdshader" id="2_unlit"]
+[ext_resource type="Shader" path="res://shaders/grid.gdshader" id="3_grid"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_walls"]
+render_priority = 0
+shader = ExtResource("2_unlit")
+shader_parameter/albedo = Color(0.42, 0.4, 0.38, 1)
+shader_parameter/spill = 1.0
+shader_parameter/floor_darkening = 0.35
+
+[sub_resource type="BoxMesh" id="BoxMesh_room"]
+material = SubResource("ShaderMaterial_walls")
+flip_faces = true
+size = Vector3(8, 3, 8)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_floor"]
+render_priority = 0
+shader = ExtResource("3_grid")
+shader_parameter/base_color = Color(0.2, 0.2, 0.22, 1)
+shader_parameter/line_color = Color(0.55, 0.6, 0.65, 1)
+shader_parameter/cell = 1.0
+shader_parameter/fade_distance = 10.0
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
+material = SubResource("ShaderMaterial_floor")
+size = Vector2(7.98, 7.98)
+
+[node name="DimRoom" type="Node3D" node_paths=PackedStringArray("screen_anchor")]
+script = ExtResource("1_env")
+display_name = "Dim room"
+ambient_level = 0.12
+screen_glow = 0.5
+default_screen_width = 2.6
+screen_anchor = NodePath("ScreenAnchor")
+
+[node name="ScreenAnchor" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.3, -3)
+
+[node name="Room" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -0.6)
+cast_shadow = 0
+mesh = SubResource("BoxMesh_room")
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.005, -0.6)
+cast_shadow = 0
+mesh = SubResource("PlaneMesh_floor")

@@ -1,0 +1,95 @@
+== gamescope
+1978 /bin/sh /usr/bin/start-gamescope-session gamescope-session.target
+2027 gamescope --allow-deferred-backend --backend openvr -T /run/user/1000/gamescope.kc4hBNs/stats.pipe --cursor-hotspot 5,3 --cursor /usr/share/holo/holo-cursor.png --cursor-scale-height 720 --default-touch-mode 4 --fade-out-duration 200 --framerate-limit 0 --hide-cursor-delay 3000 --max-scale 2 --vr-overlay-enable-click-stabilization --vr-overlay-enable-control-bar --vr-overlay-enable-control-bar-keyboard --vr-overlay-icon /usr/share/steamos/steam_icon.png --vr-overlay-physical-width 2.67 --vr-overlay-show-immediately --vr-session-manager --xwayland-count 2 --nested-width 1280 --nested-height 720 --output-width 1920 --output-height 1080 --keep-alive --mangoapp --steam --virtual-connector-strategy PerAppId --vr-overlay-key valve.steam.gamepadui.fallback --vr-app-overlay-key valve.steam.desktopgame -- /usr/lib/steamos/gamescope-onready
+== root properties
+GAMESCOPE_INPUT_COUNTER(CARDINAL) = 2976
+STEAM_TOUCH_CLICK_MODE(CARDINAL) = 1
+GAMESCOPE_COMPOSITE_FORCE(CARDINAL) = 0
+GAMESCOPE_COMPOSITE_DEBUG(CARDINAL) = 0
+GAMESCOPE_ALLOW_TEARING(CARDINAL) = 0
+GAMESCOPE_COLOR_MURA_CORRECTION_DISABLED(CARDINAL) = 0
+GAMESCOPE_DISPLAY_DYNAMIC_REFRESH_BASED_ON_GAME_PRESENCE(CARDINAL) = 1
+GAMESCOPE_RESHADE_TECHNIQUE_IDX(CARDINAL) = 0
+GAMESCOPE_RESHADE_EFFECT(UTF8_STRING) = 
+GAMESCOPE_DEBUG_HDR_HEATMAP(CARDINAL) = 0
+GAMESCOPE_DISPLAY_HDR_ENABLED(CARDINAL) = 1
+GAMESCOPE_NEW_SCALING_SCALER(CARDINAL) = 0
+GAMESCOPE_NEW_SCALING_FILTER(CARDINAL) = 0
+GAMESCOPE_FPS_LIMIT(CARDINAL) = 60
+GAMESCOPE_DYNAMIC_REFRESH_IN_STEAM(CARDINAL) = 0
+GAMESCOPE_SDR_ON_HDR_CONTENT_BRIGHTNESS(CARDINAL) = 1128965079
+GAMESCOPE_HDR_ON_SDR_TONEMAP_OPERATOR(CARDINAL) = 0
+GAMESCOPE_DISPLAY_VIRTUAL_WHITE(CARDINAL) = 1050682510, 1051232957
+GAMESCOPE_COLOR_SDR_GAMUT_WIDENESS(CARDINAL) = 1056964608
+GAMESCOPE_COLOR_NIGHT_MODE(CARDINAL) = 0, 1032730852, 1064514355
+_NET_ACTIVE_WINDOW(WINDOW): window id # 0x3e00002
+GAMESCOPE_HDR_OUTPUT_FEEDBACK(CARDINAL) = 0
+GAMESCOPE_MAIN_STEAMVR_OVERLAY(UTF8_STRING) = "valve.steam.gamepadui.fallback"
+GAMESCOPE_VRR_ENABLED(CARDINAL) = 0
+GAMESCOPE_DISPLAY_REFRESH_RATE_FEEDBACK(CARDINAL) = 72
+GAMESCOPE_VRR_FEEDBACK(CARDINAL) = 0
+GAMESCOPE_DISPLAY_SUPPORTS_HDR(CARDINAL) = 0
+GAMESCOPE_VRR_CAPABLE(CARDINAL) = 0
+GAMESCOPE_KEYBOARD_FOCUS_DISPLAY(CARDINAL) = 12346, 0, 56
+GAMESCOPE_MOUSE_FOCUS_DISPLAY(CARDINAL) = 12346, 0, 56
+GAMESCOPE_FOCUS_DISPLAY(CARDINAL) = 12346, 0, 56
+GAMESCOPE_FOCUSED_WINDOW(CARDINAL) = 65011714
+GAMESCOPE_FOCUSED_APP_GFX(CARDINAL) = 
+GAMESCOPE_FOCUSED_APP(CARDINAL) = 
+GAMESCOPE_FOCUSABLE_WINDOWS(CARDINAL) = 65011714, 0, 88134, 67108867, 0, 84463
+GAMESCOPE_FOCUSABLE_APPS(CARDINAL) = 
+GAMESCOPE_CURSOR_VISIBLE_FEEDBACK(CARDINAL) = 0
+GAMESCOPE_LIMITER_FEEDBACK(CARDINAL) = 1
+GAMESCOPE_VROVERLAY_FORWARDING(CARDINAL) = 3
+GAMESCOPE_PID(CARDINAL) = 2027
+GAMESCOPE_XWAYLAND_SERVER_ID(CARDINAL) = 0
+_NET_SUPPORTING_WM_CHECK(WINDOW): window id # 0x200001
+== X server
+vendor string:    The X.Org Foundation
+vendor release number:    12401009
+X.Org version: 24.1.9
+    Composite  (opcode: 142)
+    DAMAGE  (opcode: 143, base event: 91, base error: 152)
+    DRI3  (opcode: 147)
+    MIT-SHM  (opcode: 130, base event: 65, base error: 128)
+    Present  (opcode: 146)
+    XFIXES  (opcode: 138, base event: 87, base error: 140)
+    XTEST  (opcode: 132)
+== xcb libraries
+lrwxrwxrwx 1 root root 25 Oct 16  2025 /usr/lib/libxcb-composite.so.0 -> libxcb-composite.so.0.0.0
+lrwxrwxrwx 1 root root 22 Oct 16  2025 /usr/lib/libxcb-damage.so.0 -> libxcb-damage.so.0.0.0
+lrwxrwxrwx 1 root root 20 Oct 16  2025 /usr/lib/libxcb-dri3.so.0 -> libxcb-dri3.so.0.1.0
+lrwxrwxrwx 1 root root 19 Oct 16  2025 /usr/lib/libxcb-shm.so.0 -> libxcb-shm.so.0.0.0
+lrwxrwxrwx 1 root root 22 Oct 16  2025 /usr/lib/libxcb-xfixes.so.0 -> libxcb-xfixes.so.0.0.0
+lrwxrwxrwx 1 root root 21 Oct 16  2025 /usr/lib/libxcb-xtest.so.0 -> libxcb-xtest.so.0.0.0
+lrwxrwxrwx 1 root root 15 Oct 16  2025 /usr/lib/libxcb.so.1 -> libxcb.so.1.1.0
+== chromium
+     Version: 154.0.8037.57
+     Runtime: org.freedesktop.Platform/aarch64/25.08
+      Commit: 37d6094f4aae8f33d6947691eefacbe4013036b41e13409e6c0967884f9717fb
+84427 bwrap --args 41 -- /app/bin/chromium
+84462 bwrap --args 41 -- /app/bin/chromium
+84463 /app/chromium/chrome --enable-features=WebRTCPipeWireCapturer --disable-features=WebAssemblyTrapHandler,DesktopPWAsRunOnOsLogin
+== windows (engine, headless)
+Godot Engine v4.7.2.stable.custom_build.9818abd06 (2026-10-31 02:48:27 UTC) - https://godotengine.org
+
+ERROR: Could not load global script cache.
+   at: get_global_class_list (core/config/project_settings.cpp:1458)
+X11WindowSource: connected to ":0": Composite 0.4, DAMAGE 1.1, XFixes 5.0, XTEST 2.2, DRI3 1.2, MIT-SHM 1.2 (fd passing).
+X extensions: { "display": ":0", "connected": true, "composite": "0.4", "damage": "1.1", "xfixes": "5.0", "xtest": "2.2", "dri3": "1.2", "shm": "1.2", "shm_fd_passing": true }
+Own window: 0x0 (toplevel 0x0)
+Windows (bottom to top):
+  0x2400014 1281x419  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - Keyboard"
+  0x2400016 1800x120  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.bar (99590000)"
+  0x2400018  450x1536 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.barpopup.99590001 (99590001)"
+  0x240001a  600x60   +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.tooltip.99590002 (99590002)"
+  0x240001c  375x150  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.volumelevel (99590003)"
+  0x240001e  900x60   +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.floatingfooter (99590004)"
+  0x2400020  450x1200 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.frame.menu.99590005 (99590005)"
+  0x2400022  510x120  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - Notifications"
+  0x2400005 1920x1080 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR"
+  0x2400029  450x1536 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.barpopup.99590006 (99590006)"
+  0x4000003 1920x1080 +0+0 depth 32  class org.chromium.Chromium/Org.chromium.Chromium  pid 2  steam_game 0  "New Tab - Chromium"
+  0x3e00002 1920x1080 +0+0 depth 24  class Godot_Engine/Frame VR Player  pid 88134  steam_game 0  "Frame VR Player (DEBUG)"
+Focus state: GAMESCOPE_FOCUSED_WINDOW=[0x3e00002], GAMESCOPE_FOCUSED_APP=[], GAMESCOPE_FOCUSED_APP_GFX=[], GAMESCOPE_FOCUSABLE_WINDOWS=[0x3e00002, 0, 0x15846, 0x4000003, 0, 0x149ef], GAMESCOPE_FOCUSABLE_APPS=[], GAMESCOPECTRL_BASELAYER_WINDOW=<null>, GAMESCOPECTRL_BASELAYER_APPID=<null>, _NET_ACTIVE_WINDOW=[0x3e00002], x_input_focus=0x3e00002, own_window=0, own_toplevel=0, captured_window=0, root=623
+Final: mode none, 0 damage events, 0 updates, 0 deferred, 0 imports, 0 copies (0.0 MB), 0 input events, 0 X errors ()

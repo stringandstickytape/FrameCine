@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://environments/home_theatre.gd" id="1_home"]
+
+[node name="HomeTheatre" type="Node3D" node_paths=PackedStringArray("screen_anchor")]
+script = ExtResource("1_home")
+display_name = "Home theatre"
+ambient_level = 0.14
+screen_glow = 0.6
+default_screen_width = 2.6
+screen_anchor = NodePath("ScreenAnchor")
+
+[node name="ScreenAnchor" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -4.2)

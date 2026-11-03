@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://environments/planetarium.gd" id="1_planetarium"]
+
+[node name="Planetarium" type="Node3D" node_paths=PackedStringArray("screen_anchor")]
+script = ExtResource("1_planetarium")
+display_name = "Planetarium"
+ambient_level = 0.05
+screen_glow = 0.7
+default_screen_width = 7.0
+screen_anchor = NodePath("ScreenAnchor")
+
+[node name="ScreenAnchor" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6, -7.2)

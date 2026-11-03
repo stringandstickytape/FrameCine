@@ -1,0 +1,10 @@
+; Headless test of MediaSource (FFmpeg demux + audio decode in modules/hwvideo). Runs on a host (x86_64) build of the
+; player engine, no decoder or GPU needed. See ../README.md, "Container input (MediaSource)".
+
+config_version=5
+
+[application]
+
+config/name="Spike 03 - demux test"
+run/main_scene="res://test.tscn"
+config/features=PackedStringArray("4.7")

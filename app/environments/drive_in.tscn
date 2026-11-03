@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://environments/drive_in.gd" id="1_drive_in"]
+
+[node name="DriveIn" type="Node3D" node_paths=PackedStringArray("screen_anchor")]
+script = ExtResource("1_drive_in")
+display_name = "Drive-in"
+ambient_level = 0.04
+screen_glow = 0.9
+default_screen_width = 20.0
+screen_anchor = NodePath("ScreenAnchor")
+
+[node name="ScreenAnchor" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, -38)

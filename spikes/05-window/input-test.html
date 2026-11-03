@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>x11window input test</title>
+<style>
+body { background: #123; color: #fff; font: 30px sans-serif; margin: 24px; overflow: hidden; }
+h1 { font-size: 40px; margin: 0 0 12px 0; }
+input { font-size: 34px; width: 900px; }
+#status { color: #ff0; margin: 12px 0; }
+#log { font-family: monospace; font-size: 28px; line-height: 36px; }
+#box { position: absolute; width: 80px; height: 80px; background: #f80; bottom: 40px; }
+#dot { position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 8px; background: #0f0; }
+</style>
+</head>
+<body>
+<h1>x11window input test</h1>
+<input id="text" autofocus placeholder="typed text appears here">
+<div id="status">no input yet</div>
+<div id="log"></div>
+<div id="box"></div>
+<div id="dot"></div>
+<script>
+// Spike 05: shows what input reaches the page. The orange box moves every frame (so the window is always damaged).
+const lines = [];
+let moves = 0, last = '';
+const text = document.getElementById('text');
+function add(s) {
+	lines.unshift(s);
+	lines.length = Math.min(lines.length, 14);
+	document.getElementById('log').innerHTML = lines.join('<br>');
+}
+function status() {
+	document.getElementById('status').textContent = 'moves ' + moves + ' last ' + last + ' (CSS px), focus ' + document.hasFocus() + ', devicePixelRatio ' + devicePixelRatio + ', viewport ' + innerWidth + 'x' + innerHeight;
+}
+addEventListener('mousemove', e => {
+	moves++;
+	last = e.clientX + ',' + e.clientY;
+	const dot = document.getElementById('dot');
+	dot.style.left = e.clientX + 'px';
+	dot.style.top = e.clientY + 'px';
+	status();
+}, true);
+addEventListener('mousedown', e => {
+	add('mousedown button ' + e.button + ' at ' + e.clientX + ',' + e.clientY + ' trusted ' + e.isTrusted);
+	setTimeout(() => text.focus(), 0);
+}, true);
+addEventListener('mouseup', e => add('mouseup button ' + e.button), true);
+addEventListener('keydown', e => add('keydown ' + JSON.stringify(e.key) + ' code ' + e.code + (e.shiftKey ? ' shift' : '')), true);
+addEventListener('wheel', e => add('wheel dy ' + e.deltaY + ' dx ' + e.deltaX), true);
+addEventListener('focus', () => { add('window focus'); status(); });
+addEventListener('blur', () => { add('window blur'); status(); });
+let x = 0;
+function frame() {
+	x = (x + 6) % Math.max(innerWidth - 80, 1);
+	document.getElementById('box').style.left = x + 'px';
+	requestAnimationFrame(frame);
+}
+frame();
+status();
+</script>
+</body>
+</html>

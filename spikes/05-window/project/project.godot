@@ -1,0 +1,31 @@
+; Spike 05: an X11 window of the desktop (e.g. Chromium) on a virtual screen, zero-copy, with input forwarded to it.
+; Needs our engine fork (modules/x11window, branch frame/window). See ../README.md.
+
+config_version=5
+
+[application]
+
+config/name="Spike 05 - window"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.7", "Mobile")
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+
+[rendering]
+
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+rendering_device/driver="vulkan"
+rendering_device/driver.linuxbsd="vulkan"
+
+[xr]
+
+openxr/enabled=true
+; The app's action map (Frame, KHR generic, Index, Touch, simple profiles): trigger, squeeze, thumbstick, next_file (A), prev_file (B).
+openxr/default_action_map="res://xr/openxr_action_map.tres"
+; Without a runtime (or with --xr-mode off), main.gd falls back to a flat camera instead of showing an alert.
+openxr/startup_alert=false
+shaders/enabled=true

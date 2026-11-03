@@ -1,0 +1,103 @@
+[gd_resource type="Resource" format=3]
+
+[ext_resource type="Script" path="res://scripts/xr/label_layout.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+entries = Array[Dictionary]([{
+"depth": 0.024,
+"input": "trigger",
+"line_height": 0.006,
+"node": "trigger",
+"side": "left",
+"transform": Transform3D(0, -1, 0, 0.64278805, 0, -0.7660441, 0.7660441, 0, 0.64278805, -0.0175, -0.008637207, 0.05815839),
+"width": 0.034491666
+}, {
+"depth": 0.024,
+"input": "squeeze",
+"line_height": 0.005,
+"node": "button_grip",
+"side": "left",
+"transform": Transform3D(0, 1, 0, -0.64278805, 0, -0.7660441, -0.7660441, 0, 0.64278805, 0.0175, -0.00921192, 0.10442519),
+"width": 0.031173613
+}, {
+"depth": 0.012,
+"input": "thumbstick",
+"line_height": 0.006,
+"node": "thumbstick",
+"side": "left",
+"transform": Transform3D(0.9959533, -2.5971506e-08, -0.089872, 0.05776895, 0.76604146, 0.6401901, 0.06884565, -0.6427913, 0.76294154, 0.017352443, -0.012935764, 0.026791126),
+"width": 0.0370875
+}, {
+"depth": 0.024,
+"input": "bumper",
+"line_height": 0.006,
+"node": "bumper",
+"side": "left",
+"transform": Transform3D(0, -1, 0, 0.64278805, 0, -0.7660441, 0.7660441, 0, 0.64278805, -0.0175, -0.004217133, 0.054449506),
+"width": 0.018604167
+}, {
+"depth": 0.012,
+"input": "view",
+"line_height": 0.0048,
+"node": "button_view",
+"side": "left",
+"transform": Transform3D(0.9959533, -2.5971506e-08, -0.089872, 0.05776895, 0.76604146, 0.6401901, 0.06884565, -0.6427913, 0.76294154, 0.013908137, -0.0044951667, 0.037240688),
+"width": 0.012890001
+}, {
+"depth": 0.024,
+"input": "trigger",
+"line_height": 0.006,
+"node": "trigger",
+"side": "right",
+"transform": Transform3D(0, 1, 0, -0.64278805, 0, -0.7660441, -0.7660441, 0, 0.64278805, 0.0175, -0.008637207, 0.05815839),
+"width": 0.034491666
+}, {
+"depth": 0.024,
+"input": "squeeze",
+"line_height": 0.005,
+"node": "button_grip",
+"side": "right",
+"transform": Transform3D(0, -1, 0, 0.64278805, 0, -0.7660441, 0.7660441, 0, 0.64278805, -0.0175, -0.00921192, 0.10442519),
+"width": 0.031173613
+}, {
+"depth": 0.012,
+"input": "thumbstick",
+"line_height": 0.006,
+"node": "thumbstick",
+"side": "right",
+"transform": Transform3D(0.99595314, 2.5971502e-08, 0.089873806, -0.057770107, 0.76604146, 0.64019, -0.06884703, -0.6427913, 0.7629414, -0.017352419, -0.01293574, 0.026791142),
+"width": 0.0370875
+}, {
+"depth": 0.024,
+"input": "bumper",
+"line_height": 0.006,
+"node": "bumper",
+"side": "right",
+"transform": Transform3D(0, 1, 0, -0.64278805, 0, -0.7660441, -0.7660441, 0, 0.64278805, 0.0175, -0.004217133, 0.054449506),
+"width": 0.018604167
+}, {
+"depth": 0.012,
+"input": "menu",
+"line_height": 0.0048,
+"node": "button_menu",
+"side": "right",
+"transform": Transform3D(0.99595314, 2.5971502e-08, 0.089873806, -0.057770107, 0.76604146, 0.64019, -0.06884703, -0.6427913, 0.7629414, -0.013908091, -0.004494839, 0.037240446),
+"width": 0.012890001
+}, {
+"depth": 0.012,
+"input": "a",
+"line_height": 0.0052,
+"node": "button_a",
+"side": "right",
+"transform": Transform3D(0.99595314, 2.5971502e-08, 0.089873806, -0.057770107, 0.76604146, 0.64019, -0.06884703, -0.6427913, 0.7629414, 0.009026118, 0.010463421, 0.052956246),
+"width": 0.01378361
+}, {
+"depth": 0.012,
+"input": "b",
+"line_height": 0.0052,
+"node": "button_b",
+"side": "right",
+"transform": Transform3D(0.99595314, 2.5971502e-08, 0.089873806, -0.057770107, 0.76604146, 0.64019, -0.06884703, -0.6427913, 0.7629414, 0.016823525, 0.0056188963, 0.04453745),
+"width": 0.0117144445
+}])

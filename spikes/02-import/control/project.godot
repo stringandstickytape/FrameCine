@@ -1,0 +1,21 @@
+; Control project for spike 02: no engine patches needed. A red unshaded quad in front of a Camera3D
+; plus a 2D red square. If the quad is missing from the screenshot, 3D rendering is broken on this
+; engine build / device independently of our hwvideo module.
+
+config_version=5
+
+[application]
+
+config/name="Spike 02 control - plain 3D quad"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.7", "Mobile")
+
+[rendering]
+
+renderer/rendering_method="mobile"
+rendering_device/driver="vulkan"
+rendering_device/driver.linuxbsd="vulkan"
+
+[xr]
+
+openxr/enabled=false

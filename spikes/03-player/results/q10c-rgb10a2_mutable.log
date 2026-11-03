@@ -1,0 +1,2376 @@
+WorkerThreadPool: 8 threads, 2 max low-priority.
+Godot Engine v4.7.2.stable.custom_build.50e9a68f3 (2026-10-31 03:50:36 UTC) - https://godotengine.org
+TextServer: Added interface "Dummy"
+TextServer: Added interface "ICU / HarfBuzz / Graphite (Built-in)"
+Xshape 1.1 detected.
+Xinerama 1.1 detected.
+Xrandr 1.6 detected.
+Xrender 0.11 detected.
+Xinput 2.2 detected.
+XInput: Refreshing devices.
+XInput: Absolute pointing device: xwayland-pointer:21
+XInput: Using touch device: xwayland-touch:21
+XInput: Absolute pointing device: xwayland-touch:21
+Input method started.
+Vulkan: keeping /usr/lib/libvulkan_freedreno.so loaded until exit.
+Devices:
+  #0: Qualcomm Turnip Adreno (TM) 750 - Supported, Integrated
+Optional Vulkan device extension VK_EXT_fragment_density_map2 not found
+Optional Vulkan device extension VK_EXT_astc_decode_mode not found
+Optional Vulkan device extension VK_KHR_ray_tracing_pipeline not found
+Optional Vulkan device extension VK_NV_ray_tracing_validation not found
+Optional Vulkan device extension VK_EXT_device_fault not found
+- Vulkan Variable Rate Shading not supported
+- Vulkan Fragment Density Map supported, min texel size: (32, 32), max texel size: (1024, 1024)
+  - non-subsampled images supported
+- Vulkan multiview supported:
+  max view count: 6
+  max instances: 2147483647
+- Vulkan subgroup:
+  size: 128
+  min size: 64
+  max size: 128
+  stages: STAGE_VERTEX, STAGE_TESSELLATION_CONTROL, STAGE_TESSELLATION_EVALUATION, STAGE_GEOMETRY, STAGE_FRAGMENT, STAGE_COMPUTE
+  supported ops: FEATURE_BASIC, FEATURE_VOTE, FEATURE_ARITHMETIC, FEATURE_BALLOT, FEATURE_SHUFFLE, FEATURE_SHUFFLE_RELATIVE, FEATURE_CLUSTERED, FEATURE_QUAD
+- Vulkan Acceleration Structure supported
+  min acceleration structure scratch offset alignment: 128
+- Vulkan Raytracing not supported
+Vulkan 1.4.362 - Forward Mobile - Using Device #0: Qualcomm - Turnip Adreno (TM) 750
+Startup PSO cache (0.5 MiB)
+XcursorGetTheme could not get cursor theme
+Failed loading custom cursor: crossed_circle
+DBus 1.14.10 detected.
+FreeDesktopScreenSaver: Acquired screensaver inhibition cookie: 129
+Using "default" pen tablet driver...
+Creating VMA small objects pool for memory type index 0
+Shader 'CanvasSdfShaderRD' (group 0) SHA256: 52acd8b03402b259501407f8fce56fb27c60949965214b8bddf3fce9b95af902
+Loading cache for shader CanvasSdfShaderRD, variant 0
+Loading cache for shader CanvasSdfShaderRD, variant 1
+Loading cache for shader CanvasSdfShaderRD, variant 2
+Loading cache for shader CanvasSdfShaderRD, variant 3
+Loading cache for shader CanvasSdfShaderRD, variant 4
+Loading cache for shader CanvasSdfShaderRD, variant 5
+Shader 'SkeletonShaderRD' (group 0) SHA256: 31c0460c8f4aa3aa992a4c30129a09dacaae68aceedd9c1a9959c40e9823c39c
+Loading cache for shader SkeletonShaderRD, variant 0
+Loading cache for shader SkeletonShaderRD, variant 1
+Shader 'SortShaderRD' (group 0) SHA256: f8cdae79a573eaa281804d80ad7da55da8bde9a70ceef633bed8d5473881f4b8
+Loading cache for shader SortShaderRD, variant 0
+Loading cache for shader SortShaderRD, variant 1
+Loading cache for shader SortShaderRD, variant 2
+Shader 'ParticlesShaderRD' (group 0) SHA256: 6e5db64fc53f4ba15bebfce036cdb6967e540e87eda45e0ef07fb9fcda26f728
+Loading cache for shader ParticlesShaderRD, variant 0
+Shader 'ParticlesCopyShaderRD' (group 0) SHA256: a440bc33deef74812691f61783f0c0ff549745b21d43a477412fb424c8a48604
+Loading cache for shader ParticlesCopyShaderRD, variant 0
+Loading cache for shader ParticlesCopyShaderRD, variant 1
+Loading cache for shader ParticlesCopyShaderRD, variant 2
+Loading cache for shader ParticlesCopyShaderRD, variant 3
+Loading cache for shader ParticlesCopyShaderRD, variant 4
+Loading cache for shader ParticlesCopyShaderRD, variant 5
+Loading cache for shader ParticlesCopyShaderRD, variant 6
+Loading cache for shader ParticlesCopyShaderRD, variant 7
+Loading cache for shader ParticlesCopyShaderRD, variant 8
+Loading cache for shader ParticlesCopyShaderRD, variant 9
+Loading cache for shader ParticlesCopyShaderRD, variant 10
+Loading cache for shader ParticlesCopyShaderRD, variant 11
+Loading cache for shader ParticlesCopyShaderRD, variant 12
+Loading cache for shader ParticlesCopyShaderRD, variant 13
+Loading cache for shader ParticlesCopyShaderRD, variant 14
+Loading cache for shader ParticlesCopyShaderRD, variant 15
+Loading cache for shader ParticlesCopyShaderRD, variant 16
+Loading cache for shader ParticlesCopyShaderRD, variant 17
+Loading cache for shader ParticlesCopyShaderRD, variant 18
+Loading cache for shader ParticlesCopyShaderRD, variant 19
+Loading cache for shader ParticlesCopyShaderRD, variant 20
+Shader 'CanvasShaderRD' (group 0) SHA256: fd2fa1eb3438452ac5b2a8d0f65c47f7f141024933b4e997ac9ab0727162c5e0
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+Shader 'CanvasOcclusionShaderRD' (group 0) SHA256: fa2d999401142eeefcee44e3f6cd915a1599618f8d56b71dcc1490db7f5c1c7c
+Loading cache for shader CanvasOcclusionShaderRD, variant 0
+Loading cache for shader CanvasOcclusionShaderRD, variant 1
+Loading cache for shader CanvasOcclusionShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+Loading cache for shader CanvasShaderRD, variant 0
+Loading cache for shader CanvasShaderRD, variant 1
+Loading cache for shader CanvasShaderRD, variant 2
+Loading cache for shader CanvasShaderRD, variant 3
+Loading cache for shader CanvasShaderRD, variant 4
+Loading cache for shader CanvasShaderRD, variant 5
+Shader 'TexBlitShaderRD' (group 0) SHA256: 8187125f0148a83297a17b25444a4c1fa589c5f5651ce8c710506dc80ae22efd
+Loading cache for shader TexBlitShaderRD, variant 0
+Loading cache for shader TexBlitShaderRD, variant 1
+Loading cache for shader TexBlitShaderRD, variant 2
+Loading cache for shader TexBlitShaderRD, variant 3
+Ubershaders: Enabled
+Shader 'SceneForwardMobileShaderRD' (group 0) SHA256: b4da76cb6b60955b3e83df40a9ed08bf46a4593b81240ef7d03a227bb5a1c448
+Shader 'SceneForwardMobileShaderRD' (group 1) SHA256: b6425b34ecee1eb6a7bf446dd6220462180d87508a90c145a3f89569784d2d1d
+Shader 'SceneForwardMobileShaderRD' (group 2) SHA256: 296f388457681574462b17137c9298bd054a214bca1ba040e28123be015f66b8
+Shader 'SceneForwardMobileShaderRD' (group 3) SHA256: 4045dae32477df7ba1870c962bdb051836bb0455b382e636d9c9d9ecf0a28eb0
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Shader 'SkyShaderRD' (group 0) SHA256: 40cf4c341a71d172dbde9a93c1600f0d2f1a8ab8850a51367f5a12bcd80f8fbe
+Loading cache for shader SkyShaderRD, variant 0
+Loading cache for shader SkyShaderRD, variant 1
+Loading cache for shader SkyShaderRD, variant 2
+Loading cache for shader SkyShaderRD, variant 3
+Loading cache for shader SkyShaderRD, variant 4
+Loading cache for shader SkyShaderRD, variant 5
+Loading cache for shader SkyShaderRD, variant 0
+Loading cache for shader SkyShaderRD, variant 1
+Loading cache for shader SkyShaderRD, variant 2
+Loading cache for shader SkyShaderRD, variant 3
+Loading cache for shader SkyShaderRD, variant 4
+Loading cache for shader SkyShaderRD, variant 5
+Shader 'BokehDofRasterShaderRD' (group 0) SHA256: 61d87814509871ca553ec8edd92f313953740351daf70b41ce9abc162dfe7193
+Loading cache for shader BokehDofRasterShaderRD, variant 0
+Loading cache for shader BokehDofRasterShaderRD, variant 1
+Loading cache for shader BokehDofRasterShaderRD, variant 2
+Loading cache for shader BokehDofRasterShaderRD, variant 3
+Loading cache for shader BokehDofRasterShaderRD, variant 4
+Loading cache for shader BokehDofRasterShaderRD, variant 5
+Loading cache for shader BokehDofRasterShaderRD, variant 6
+Shader 'BlurRasterShaderRD' (group 0) SHA256: 62529596b64616cd107785a5dd1bd2a4be7e447f8b162e188a32b3b1e8240599
+Loading cache for shader BlurRasterShaderRD, variant 0
+Loading cache for shader BlurRasterShaderRD, variant 1
+Loading cache for shader BlurRasterShaderRD, variant 2
+Loading cache for shader BlurRasterShaderRD, variant 3
+Loading cache for shader BlurRasterShaderRD, variant 4
+Loading cache for shader BlurRasterShaderRD, variant 5
+Loading cache for shader BlurRasterShaderRD, variant 6
+Shader 'CopyShaderRD' (group 0) SHA256: 7eeaedd96b21bb6c84e7926815bb86ce6e883b41491aae40441b5f250aa5dcc2
+Loading cache for shader CopyShaderRD, variant 0
+Loading cache for shader CopyShaderRD, variant 1
+Loading cache for shader CopyShaderRD, variant 2
+Loading cache for shader CopyShaderRD, variant 3
+Loading cache for shader CopyShaderRD, variant 4
+Loading cache for shader CopyShaderRD, variant 5
+Loading cache for shader CopyShaderRD, variant 6
+Loading cache for shader CopyShaderRD, variant 7
+Loading cache for shader CopyShaderRD, variant 8
+Loading cache for shader CopyShaderRD, variant 9
+Loading cache for shader CopyShaderRD, variant 10
+Loading cache for shader CopyShaderRD, variant 11
+Loading cache for shader CopyShaderRD, variant 12
+Shader 'CopyToFbShaderRD' (group 0) SHA256: 201f62f6f0d4700f97911e093117c7e3d5e7abdd2ad9c7afa67d209f885a0fc2
+Loading cache for shader CopyToFbShaderRD, variant 0
+Loading cache for shader CopyToFbShaderRD, variant 1
+Loading cache for shader CopyToFbShaderRD, variant 2
+Loading cache for shader CopyToFbShaderRD, variant 3
+Shader 'CubeToDpShaderRD' (group 0) SHA256: 3fd672c61b3d9c978f0488df4ebe6209ea2cbb61cdbcec272439cd23ee48edc6
+Loading cache for shader CubeToDpShaderRD, variant 0
+Shader 'CubeToOctmapShaderRD' (group 0) SHA256: 58fbfab58303eaf2ac8a8351207bb753cc33f205e30af476fef565cf855f60a5
+Loading cache for shader CubeToOctmapShaderRD, variant 0
+Shader 'OctmapDownsamplerShaderRD' (group 0) SHA256: 70c21cbca15cffc897bf350614e41f48722476503496b175f00a5af59c3c3ebb
+Loading cache for shader OctmapDownsamplerShaderRD, variant 0
+Loading cache for shader OctmapDownsamplerShaderRD, variant 1
+Shader 'OctmapFilterShaderRD' (group 0) SHA256: b0c1cc0564e80560e5455a87551bc2b428d88a73953ac7db0fcfea45ea2cbd87
+Loading cache for shader OctmapFilterShaderRD, variant 0
+Loading cache for shader OctmapFilterShaderRD, variant 1
+Loading cache for shader OctmapFilterShaderRD, variant 2
+Loading cache for shader OctmapFilterShaderRD, variant 3
+Loading cache for shader OctmapFilterShaderRD, variant 4
+Loading cache for shader OctmapFilterShaderRD, variant 5
+Loading cache for shader OctmapFilterShaderRD, variant 6
+Loading cache for shader OctmapFilterShaderRD, variant 7
+Shader 'OctmapRoughnessShaderRD' (group 0) SHA256: 738c5959e4838bd173cb0e893e1a09731f0d7e2eab0c56d14c36a6b1e9dfd229
+Loading cache for shader OctmapRoughnessShaderRD, variant 0
+Loading cache for shader OctmapRoughnessShaderRD, variant 1
+Shader 'SpecularMergeShaderRD' (group 0) SHA256: e522f2dd84cc5bf006921fedec0b857d4ed196e77b520ecfa0033ff570b65ec5
+Loading cache for shader SpecularMergeShaderRD, variant 0
+Loading cache for shader SpecularMergeShaderRD, variant 1
+Loading cache for shader SpecularMergeShaderRD, variant 2
+Loading cache for shader SpecularMergeShaderRD, variant 3
+Shader 'ShadowFrustumShaderRD' (group 0) SHA256: e74ff03f14722ecf4a4ca08b5cc91b045d151fb29eea5930fa520d2412a37a82
+Loading cache for shader ShadowFrustumShaderRD, variant 0
+Shader 'MotionVectorsShaderRD' (group 0) SHA256: 1f2b051f058c00a9ff92a37e3a25c5f986e5f5ef33c6bd14d9823999211ce190
+Loading cache for shader MotionVectorsShaderRD, variant 0
+Shader 'LuminanceReduceRasterShaderRD' (group 0) SHA256: 26f8aac360ccb0c79d3cc0c28898452292d5a5988fe462f139be9d7abe66e5a3
+Loading cache for shader LuminanceReduceRasterShaderRD, variant 0
+Loading cache for shader LuminanceReduceRasterShaderRD, variant 1
+Loading cache for shader LuminanceReduceRasterShaderRD, variant 2
+Shader 'SmaaEdgeDetectionShaderRD' (group 0) SHA256: 2c84813065fe43d041a458546ec7ab2a4b89bad72b6285b8aaa5e8c5877a50aa
+Loading cache for shader SmaaEdgeDetectionShaderRD, variant 0
+Shader 'SmaaWeightCalculationShaderRD' (group 0) SHA256: b00ffec1021c69851c1964b24a46e7f7a0d4ab34dc614090672cf7efa0f8efe5
+Loading cache for shader SmaaWeightCalculationShaderRD, variant 0
+Shader 'SmaaBlendingShaderRD' (group 0) SHA256: 3ec2cf82503230ccb0c94e66558b489e443c1f4922177c4fd87d13803536b832
+Loading cache for shader SmaaBlendingShaderRD, variant 0
+Shader 'TonemapMobileShaderRD' (group 0) SHA256: 9670ecd1f52359fd98ce648528459df098f8e0dd28485503db0796c650756b6a
+Loading cache for shader TonemapMobileShaderRD, variant 0
+Loading cache for shader TonemapMobileShaderRD, variant 1
+Loading cache for shader TonemapMobileShaderRD, variant 2
+Loading cache for shader TonemapMobileShaderRD, variant 3
+Shader 'VrsShaderRD' (group 0) SHA256: ea24e5629939355d4bce19fd23f264b48c33729f7b8f25acfe4e747912eb5713
+Loading cache for shader VrsShaderRD, variant 0
+Loading cache for shader VrsShaderRD, variant 2
+Loading cache for shader VrsShaderRD, variant 3
+Shader 'ResolveRasterShaderRD' (group 0) SHA256: 5297bf8abc48a2d4b23ac8c5deac2f39ca65ca3d1a830b2a6161dc3f75973ee8
+Loading cache for shader ResolveRasterShaderRD, variant 0
+Shader 'BlitShaderRD' (group 0) SHA256: 1a89af285aec9be8c87631aadaa80cab63566e2c9066ad2b48032d23e0e2a75d
+PulseAudio 17.0.0 detected.
+PulseAudio: context other
+PulseAudio: context other
+PulseAudio: context other
+PulseAudio: context ready
+PulseAudio: Detecting channels for device: alsa_loopback_device.stereo.alsa_output.platform-sound.HiFi__Speaker__sink
+PulseAudio: detected 2 output channels
+PulseAudio: audio buffer frames: 512 calculated output latency: 11ms
+
+Loading cache for shader BlitShaderRD, variant 0
+Loading cache for shader BlitShaderRD, variant 1
+Loading cache for shader BlitShaderRD, variant 2
+Loading cache for shader BlitShaderRD, variant 3
+TextServer: Primary interface set to: "ICU / HarfBuzz / Graphite (Built-in)".
+ERROR: Could not load global script cache.
+   at: get_global_class_list (core/config/project_settings.cpp:1458)
+CORE API HASH: 1095242179
+EDITOR API HASH: 3612401625
+SceneTreeFTI: traversal method DEFAULT
+Loaded system CA certificates
+Loading resource: res://main.tscn remapped: res://main.tscn
+Loading resource: res://main.gd remapped: res://main.gd
+Completed load for: 'res://main.gd' remapped 'res://main.gd' at thread -1
+Loading resource: res://video.gdshader remapped: res://video.gdshader
+Completed load for: 'res://video.gdshader' remapped 'res://video.gdshader' at thread -1
+Loading cache for shader SceneForwardMobileShaderRD, variant 0
+Loading cache for shader SceneForwardMobileShaderRD, variant 1
+Loading cache for shader SceneForwardMobileShaderRD, variant 2
+Loading cache for shader SceneForwardMobileShaderRD, variant 3
+Loading cache for shader SceneForwardMobileShaderRD, variant 4
+Loading cache for shader SceneForwardMobileShaderRD, variant 5
+Loading cache for shader SceneForwardMobileShaderRD, variant 6
+Loading cache for shader SceneForwardMobileShaderRD, variant 7
+Loading cache for shader SceneForwardMobileShaderRD, variant 8
+Loading cache for shader SceneForwardMobileShaderRD, variant 9
+Completed load for: 'res://main.tscn' remapped 'res://main.tscn' at thread -1
+SMB: 192.168.1.21 as USER, no domain (password from /home/steamos/.smb-password, 16 characters)
+View: flat camera
+MediaSource: smb://192.168.1.21/Movies/Comedy.2160p.10bit.SDR.mkv: 8.99 GB over SMB 3.1.1, AES-CMAC signing with ARMv8 Crypto Extensions, reads of 1024 KiB, 4 in flight, 16 MiB buffer.
+MediaSource: audio track 0: ac3 decoder.
+MediaSource: smb://192.168.1.21/Movies/Comedy.2160p.10bit.SDR.mkv: matroska,webm, 5801.0 s, video hevc 3832x1596 23.976 fps 10-bit (SPS 3832x1600), audio track 0 of 1: ac3 5.1(side) 48000 Hz, 3 subtitle track(s).
+MediaSource.open() took 47 ms
+Media: matroska,webm, 5801.0 s, video { "stream_index": 0, "codec": "hevc", "codec_name": "hevc", "width": 3832, "height": 1596, "fps": 23.976023976024, "sample_aspect_ratio": 1.0, "display_aspect": 2.40100250626566, "bit_depth": 10, "profile": "", "pixel_format": "yuv420p10le", "is_h264": false, "is_hevc": true, "is_vp9": false, "is_av1": false, "hw_decodable": false, "hw_unsupported_reason": "10-bit video is not supported yet on this kernel: the decoder writes it only in a compressed 10-bit format (Q10C) that the player can\'t display yet.", "annexb_filter": true, "coded_width": 3832, "coded_height": 1600, "display_width": 3832, "display_height": 1596, "chroma_format": 1 }
+  audio track 0: ac3 5.1(side) 48000 Hz eng English
+Audio: none, the video runs on the frame clock
+Decoder: experimental 10-bit (Q10C), planes imported as rgb10a2_mutable
+Video: smb://192.168.1.21/Movies/Comedy.2160p.10bit.SDR.mkv from the container
+V4L2Decoder: smb://192.168.1.21/Movies/Comedy.2160p.10bit.SDR.mkv: HEVC 3832x1600 (display 3832x1596), 10-bit, 23.976 fps, from a MediaSource (frame times from PTS).
+V4L2Decoder: opened /dev/video-dec0: driver 'iris_driver', card 'iris_decoder', device_caps 0x4204000.
+V4L2Decoder: S_FMT OUTPUT HEVC 3832x1600: sizeimage 8847360 (asked 4599808).
+V4L2Decoder: OUTPUT: 8 MMAP buffers of 8847360 bytes.
+MultiUmaBuffer 'RENDER_LIST_OPAQUE' used a total of 0 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+V4L2Decoder: OUTPUT streaming, 1 access units queued; waiting for SOURCE_CHANGE.
+V4L2Decoder: SOURCE_CHANGE #1 (changes 0x1).
+V4L2Decoder: G_FMT CAPTURE after SOURCE_CHANGE: Q10C 3840x1600, 1 plane(s).
+V4L2Decoder:   CAPTURE format 0: Q10C 'QCOM Compressed 10-bit Format'.
+V4L2Decoder: CAPTURE formats offered for this 10-bit stream: Q10C.
+V4L2Decoder:   CAPTURE[0]: dmabuf fd 29, 12369920 bytes.
+V4L2Decoder:   CAPTURE[1]: dmabuf fd 30, 12369920 bytes.
+V4L2Decoder:   CAPTURE[2]: dmabuf fd 31, 12369920 bytes.
+V4L2Decoder:   CAPTURE[3]: dmabuf fd 32, 12369920 bytes.
+V4L2Decoder:   CAPTURE[4]: dmabuf fd 33, 12369920 bytes.
+V4L2Decoder:   CAPTURE[5]: dmabuf fd 34, 12369920 bytes.
+V4L2Decoder:   CAPTURE[6]: dmabuf fd 35, 12369920 bytes.
+V4L2Decoder:   CAPTURE[7]: dmabuf fd 36, 12369920 bytes.
+V4L2Decoder:   CAPTURE[8]: dmabuf fd 37, 12369920 bytes.
+V4L2Decoder:   CAPTURE[9]: dmabuf fd 38, 12369920 bytes.
+V4L2Decoder:   CAPTURE[10]: dmabuf fd 39, 12369920 bytes.
+V4L2Decoder:   CAPTURE[11]: dmabuf fd 40, 12369920 bytes.
+V4L2Decoder: QC10C layout: Y metadata 53248 bytes, Y 8192000, UV metadata 28672, UV 4096000; total 12369920 (sizeimage 12369920).
+V4L2Decoder: CAPTURE generation 1: Q10C 3840x1600, pitch 5120, chroma at 8245248, sizeimage 12369920, visible 3832x1596+0+0, 12 buffers (asked 12, MIN_BUFFERS_FOR_CAPTURE 0); setup took 15.0 ms.
+DmabufImage: the driver reports VkFormat 64 + modifier 0x500000000000001, mutable to VkFormat 98, as unsupported (VkResult -11); creating it anyway (experiment).
+DmabufImage: plane 0 imported as 1280x1600 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 8192000 (image needs 8245248 bytes).
+DmabufImage: plane 1 imported as 1280x800 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 4096000 (image needs 12369920 bytes).
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+DmabufImage: the driver reports VkFormat 64 + modifier 0x500000000000001, mutable to VkFormat 98, as unsupported (VkResult -11); creating it anyway (experiment).
+DmabufImage: plane 0 imported as 1280x1600 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 8192000 (image needs 8245248 bytes).
+DmabufImage: plane 1 imported as 1280x800 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 4096000 (image needs 12369920 bytes).
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+DmabufImage: the driver reports VkFormat 64 + modifier 0x500000000000001, mutable to VkFormat 98, as unsupported (VkResult -11); creating it anyway (experiment).
+DmabufImage: plane 0 imported as 1280x1600 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 8192000 (image needs 8245248 bytes).
+DmabufImage: plane 1 imported as 1280x800 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 4096000 (image needs 12369920 bytes).
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+DmabufImage: the driver reports VkFormat 64 + modifier 0x500000000000001, mutable to VkFormat 98, as unsupported (VkResult -11); creating it anyway (experiment).
+DmabufImage: plane 0 imported as 1280x1600 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 8192000 (image needs 8245248 bytes).
+DmabufImage: plane 1 imported as 1280x800 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 4096000 (image needs 12369920 bytes).
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+DmabufImage: the driver reports VkFormat 64 + modifier 0x500000000000001, mutable to VkFormat 98, as unsupported (VkResult -11); creating it anyway (experiment).
+DmabufImage: plane 0 imported as 1280x1600 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 8192000 (image needs 8245248 bytes).
+DmabufImage: plane 1 imported as 1280x800 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 4096000 (image needs 12369920 bytes).
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+DmabufImage: the driver reports VkFormat 64 + modifier 0x500000000000001, mutable to VkFormat 98, as unsupported (VkResult -11); creating it anyway (experiment).
+DmabufImage: plane 0 imported as 1280x1600 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 8192000 (image needs 8245248 bytes).
+DmabufImage: plane 1 imported as 1280x800 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 4096000 (image needs 12369920 bytes).
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+DmabufImage: the driver reports VkFormat 64 + modifier 0x500000000000001, mutable to VkFormat 98, as unsupported (VkResult -11); creating it anyway (experiment).
+DmabufImage: plane 0 imported as 1280x1600 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 8192000 (image needs 8245248 bytes).
+DmabufImage: plane 1 imported as 1280x800 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 4096000 (image needs 12369920 bytes).
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+DmabufImage: the driver reports VkFormat 64 + modifier 0x500000000000001, mutable to VkFormat 98, as unsupported (VkResult -11); creating it anyway (experiment).
+DmabufImage: plane 0 imported as 1280x1600 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 8192000 (image needs 8245248 bytes).
+DmabufImage: plane 1 imported as 1280x800 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 4096000 (image needs 12369920 bytes).
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+DmabufImage: the driver reports VkFormat 64 + modifier 0x500000000000001, mutable to VkFormat 98, as unsupported (VkResult -11); creating it anyway (experiment).
+DmabufImage: plane 0 imported as 1280x1600 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 8192000 (image needs 8245248 bytes).
+DmabufImage: plane 1 imported as 1280x800 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 4096000 (image needs 12369920 bytes).
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+DmabufImage: the driver reports VkFormat 64 + modifier 0x500000000000001, mutable to VkFormat 98, as unsupported (VkResult -11); creating it anyway (experiment).
+DmabufImage: plane 0 imported as 1280x1600 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 8192000 (image needs 8245248 bytes).
+DmabufImage: plane 1 imported as 1280x800 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 4096000 (image needs 12369920 bytes).
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+DmabufImage: the driver reports VkFormat 64 + modifier 0x500000000000001, mutable to VkFormat 98, as unsupported (VkResult -11); creating it anyway (experiment).
+DmabufImage: plane 0 imported as 1280x1600 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 8192000 (image needs 8245248 bytes).
+DmabufImage: plane 1 imported as 1280x800 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 4096000 (image needs 12369920 bytes).
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+DmabufImage: the driver reports VkFormat 64 + modifier 0x500000000000001, mutable to VkFormat 98, as unsupported (VkResult -11); creating it anyway (experiment).
+DmabufImage: plane 0 imported as 1280x1600 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 8192000 (image needs 8245248 bytes).
+DmabufImage: plane 1 imported as 1280x800 VkFormat 64 (mutable), modifier 0x500000000000001: offset 0, pitch 5120, size 4096000 (image needs 12369920 bytes).
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Unsupported image format
+   at: _texture_format_from_rd (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:3320)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Condition "imfmt.image_format == Image::FORMAT_MAX" is true.
+   at: texture_rd_initialize (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:2174)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+HWVideoTexture: imported 12 decoder buffers (generation 1): Q10C (UBWC TP10, planes as RGB10A2, mutable) 3840x1600, pitch 5120, UV metadata at 8245248, visible 3832x1596+0+0, 2 Vulkan image(s) per buffer.
+Video format: buffers (3840, 1600), visible [P: (0, 0), S: (3832, 1596)] (uv [P: (0.0, 0.0), S: (0.997917, 0.9975)]), packing 2
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+Playback started at frame 24 (0.66 s after launch)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+[    2.4 s] decoding: decode 76.7 fps, shown 21.4 fps, dropped 0 (total 0), A/V offset +19 ms (clock 601.746, frame 601.727), render 90 fps, latency avg 60 max 174 ms, queued rate 23.9, in driver 0 out/7 cap, ready 3, retiring 1, demux queue 19 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.0 s, network 111 Mbit/s avg (293 while reading, 288 in refills), buffer 14.7 MB ahead, stalls 0 (0.0 s) + 15 waits in 3 refills, reconnects 0, errors 0, readahead CPU 0.0 s
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+Screenshot (offscreen) /home/steamos/spike03/q10c-rgb10a2_mutable.png (1920x1080) at frame time 603.061: OK
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+[    4.4 s] decoding: decode 23.0 fps, shown 23.5 fps, dropped 1 (total 1), A/V offset +8 ms (clock 603.737, frame 603.729), render 86 fps, latency avg 86 max 198 ms, queued rate 23.9, in driver 0 out/8 cap, ready 1, retiring 1, demux queue 19 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.0 s, network 63 Mbit/s avg (293 while reading, 288 in refills), buffer 14.7 MB ahead, stalls 0 (0.0 s) + 15 waits in 3 refills, reconnects 0, errors 0, readahead CPU 0.1 s
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+ERROR: Parameter "proxy_to" is null.
+   at: texture_proxy_update (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:1688)
+   GDScript backtrace (most recent call first):
+       [0] _process (res://main.gd:385)
+Quitting after 400 frames
+Final: 212 frames decoded, 101 shown, 1 dropped, 0 stale, 0 decoder errors, state decoding
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Attempting to use an uninitialized RID
+   at: get_or_null (./core/templates/rid_owner.h:247)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+ERROR: Parameter "t" is null.
+   at: texture_free (servers/rendering/renderer_rd/storage_rd/texture_storage.cpp:967)
+   GDScript backtrace (most recent call first):
+       [0] _exit_tree (res://main.gd:526)
+V4L2Decoder: CAPTURE teardown (session end).
+V4L2Decoder:   STREAMOFF CAPTURE: ok.
+V4L2Decoder:   REQBUFS(CAPTURE, 0) for 12 buffer(s): ok.
+V4L2Decoder: STREAMOFF OUTPUT: ok.
+V4L2Decoder: decoder closed (session end).
+XR: Clearing primary interface
+DmabufImage: leaving 12 image(s) to be released at exit.
+XR: Removed interface "Native mobile"
+XR: Removed interface "OpenXR"
+PulseAudio: context terminated
+Freeing Default Tex_Blit Shader
+MultiUmaBuffer 'SceneState::uniform_buffers' used a total of 4 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'RENDER_LIST_OPAQUE' used a total of 2 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'RENDER_LIST_ALPHA' used a total of 0 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'RENDER_LIST_SECONDARY' used a total of 0 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+MultiUmaBuffer 'CANVAS_INSTANCE_DATA' used a total of 0 buffers. A large number may indicate a waste of VRAM and can be brought down by tweaking MAX_EXTRA_BUFFERS for this buffer.
+ERROR: 24 RID allocations of type 'N10RendererRD14TextureStorage7TextureE' were leaked at exit.

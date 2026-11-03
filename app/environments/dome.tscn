@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://environments/dome.gd" id="1_dome"]
+
+[node name="Dome" type="Node3D" node_paths=PackedStringArray("screen_anchor")]
+script = ExtResource("1_dome")
+display_name = "Dome"
+ambient_level = 0.1
+screen_glow = 0.5
+default_screen_width = 8.0
+screen_anchor = NodePath("ScreenAnchor")
+
+[node name="ScreenAnchor" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, -8)

@@ -1,0 +1,35 @@
+Godot Engine v4.7.2.stable.custom_build.6d48ab681 (2026-10-31 02:11:13 UTC) - https://godotengine.org
+Vulkan 1.4.362 - Forward Mobile - Using Device #0: Qualcomm - Turnip Adreno (TM) 750
+
+ERROR: Could not load global script cache.
+   at: get_global_class_list (core/config/project_settings.cpp:1458)
+View: flat camera
+[aac @ 0xaaab0bc1c050] This stream seems to incorrectly report its last channel as LFE[6], mapping to LFE[0]
+MediaSource: audio track 0: aac decoder.
+MediaSource: /home/steamos/Videos/ts/action_90s.ts: mpegts, 90.4 s, video h264 1280x720 23.976 fps 8-bit (SPS 1280x720), audio track 0 of 1: aac 5.1 48000 Hz, 0 subtitle track(s).
+Media: mpegts, 90.4 s, video { "stream_index": 0, "codec": "h264", "codec_name": "h264", "width": 1280, "height": 720, "fps": 23.976023976024, "sample_aspect_ratio": 1.0, "display_aspect": 1.77777777777778, "bit_depth": 8, "profile": "Main", "pixel_format": "yuv420p", "is_h264": true, "is_hevc": false, "is_vp9": false, "is_av1": false, "hw_decodable": true, "annexb_filter": false, "coded_width": 1280, "coded_height": 720, "display_width": 1280, "display_height": 720, "chroma_format": 1 }
+  audio track 0: aac 5.1 48000 Hz und 
+Audio: track 0 of the file (44100 Hz), master clock
+Video: /home/steamos/Videos/ts/action_90s.ts from the container
+V4L2Decoder: /home/steamos/Videos/ts/action_90s.ts: H.264 1280x720 (display 1280x720), 8-bit, 23.976 fps, from a MediaSource (frame times from PTS).
+[aac @ 0xaaab0bc1c050] This stream seems to incorrectly report its last channel as LFE[6], mapping to LFE[0]
+MediaSource: audio fltp, 5.1, 48000 Hz -> stereo float, 44100 Hz.
+V4L2Decoder: opened /dev/video-dec0: driver 'iris_driver', card 'iris_decoder', device_caps 0x4204000.
+V4L2Decoder: S_FMT OUTPUT H264 1280x720: sizeimage 7077888 (asked 1048576).
+V4L2Decoder: SOURCE_CHANGE #1 (changes 0x1).
+V4L2Decoder: CAPTURE generation 1: NV12 1280x736, pitch 1280, chroma at 942080, sizeimage 1413120, visible 1280x720+0+0, 12 buffers (asked 12, MIN_BUFFERS_FOR_CAPTURE 0); setup took 15.9 ms.
+HWVideoTexture: imported 12 decoder buffers (generation 1): NV12 1280x736, pitch 1280, chroma at 942080, visible 1280x720+0+0.
+Video format: buffers (1280, 736), visible [P: (0, 0), S: (1280, 720)] (uv [P: (0.0, 0.0), S: (1.0, 0.978261)])
+Playback started at frame 5 (0.77 s after launch)
+[    2.7 s] decoding: decode 38.9 fps, shown 14.5 fps, dropped 17 (total 17), A/V offset +21 ms (clock 46.864, frame 46.843), render 90 fps, latency avg 31 max 903 ms, queued rate 15.9, in driver 0 out/5 cap, ready 4, retiring 1, demux queue 16 AUs / audio 0.98 s, underruns 0, decoder errors 0, demux CPU 0.0 s, decoder CPU 0.0 s
+[    4.7 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 17), A/V offset +1 ms (clock 48.846, frame 48.845), render 90 fps, latency avg 36 max 903 ms, queued rate 23.5, in driver 0 out/5 cap, ready 4, retiring 1, demux queue 18 AUs / audio 1.03 s, underruns 0, decoder errors 0, demux CPU 0.0 s, decoder CPU 0.0 s
+Screenshot (offscreen) /home/steamos/spike03/ts.png (1920x1080) at frame time 49.262: OK
+[    6.7 s] decoding: decode 24.0 fps, shown 22.0 fps, dropped 3 (total 20), A/V offset +39 ms (clock 50.844, frame 50.805), render 81 fps, latency avg 38 max 903 ms, queued rate 24.3, in driver 0 out/5 cap, ready 5, retiring 1, demux queue 19 AUs / audio 1.08 s, underruns 0, decoder errors 0, demux CPU 0.1 s, decoder CPU 0.0 s
+[    8.7 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 20), A/V offset +18 ms (clock 52.825, frame 52.807), render 90 fps, latency avg 39 max 903 ms, queued rate 24.1, in driver 0 out/5 cap, ready 5, retiring 1, demux queue 20 AUs / audio 1.11 s, underruns 0, decoder errors 0, demux CPU 0.1 s, decoder CPU 0.1 s
+[   10.7 s] decoding: decode 23.9 fps, shown 24.4 fps, dropped 0 (total 20), A/V offset +3 ms (clock 54.854, frame 54.851), render 90 fps, latency avg 40 max 903 ms, queued rate 24.1, in driver 0 out/5 cap, ready 4, retiring 2, demux queue 20 AUs / audio 1.13 s, underruns 0, decoder errors 0, demux CPU 0.1 s, decoder CPU 0.1 s
+[   12.7 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 20), A/V offset +3 ms (clock 56.856, frame 56.853), render 90 fps, latency avg 40 max 903 ms, queued rate 24.1, in driver 0 out/5 cap, ready 4, retiring 2, demux queue 21 AUs / audio 1.18 s, underruns 0, decoder errors 0, demux CPU 0.1 s, decoder CPU 0.1 s
+Quitting after 1200 frames
+Final: 353 frames decoded, 300 shown, 20 dropped, 0 stale, 0 decoder errors, state decoding
+V4L2Decoder: decoder closed (session end).
+WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)

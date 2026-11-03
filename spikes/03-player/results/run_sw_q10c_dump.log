@@ -1,0 +1,43 @@
+== sw-comedy1080
+ERROR: Could not load global script cache.
+MediaSource: smb://192.168.1.21/Movies/Comedy.1080p.10bit.DTS-HD.mkv: 7.65 GB over SMB 3.1.1, AES-CMAC signing with ARMv8 Crypto Extensions, reads of 1024 KiB, 4 in flight, 16 MiB buffer.
+MediaSource: audio track 0: dca decoder.
+MediaSource: smb://192.168.1.21/Movies/Comedy.1080p.10bit.DTS-HD.mkv: matroska,webm, 6066.9 s, video hevc 1920x1080 24.000 fps 10-bit (SPS 1920x1080), audio track 0 of 1: dts 5.1(side) 48000 Hz, 1 subtitle track(s).
+Media: matroska,webm, 6066.9 s, video { "stream_index": 0, "codec": "hevc", "codec_name": "hevc", "width": 1920, "height": 1080, "fps": 24.0, "sample_aspect_ratio": 1.0, "display_aspect": 1.77777777777778, "bit_depth": 10, "profile": "Main 10", "pixel_format": "yuv420p10le", "is_h264": false, "is_hevc": true, "is_vp9": false, "is_av1": false, "hw_decodable": false, "hw_unsupported_reason": "10-bit video is not suppor
+MediaSource: audio s32p, 5.1(side), 48000 Hz -> stereo float, 44100 Hz.
+SoftwareVideoDecoder: hevc 1920x1080 10-bit, 24.000 fps: software hevc (FFmpeg hevc, 4 threads).
+HWVideoTexture: software decode (software hevc (FFmpeg hevc, 4 threads)): 10-bit video is not supported yet on this kernel: the decoder writes it only in a compressed 10-bit format (Q10C) that the player can't display yet.
+HWVideoTexture: software frames 1920x1080 (limited range).
+Final: 17 frames decoded, 7 shown, 0 dropped, 0 stale, 0 decoder errors, state decoding
+== sw-feature720
+ERROR: Could not load global script cache.
+MediaSource: smb://192.168.1.21/Movies/Feature.720p.10bit.mkv: 0.84 GB over SMB 3.1.1, AES-CMAC signing with ARMv8 Crypto Extensions, reads of 1024 KiB, 4 in flight, 16 MiB buffer.
+MediaSource: audio track 0: aac decoder.
+MediaSource: smb://192.168.1.21/Movies/Feature.720p.10bit.mkv: matroska,webm, 5255.9 s, video hevc 1280x536 23.976 fps 10-bit (SPS 1280x536), audio track 0 of 1: aac 5.1 48000 Hz, 3 subtitle track(s).
+Media: matroska,webm, 5255.9 s, video { "stream_index": 0, "codec": "hevc", "codec_name": "hevc", "width": 1280, "height": 536, "fps": 23.976023976024, "sample_aspect_ratio": 1.0, "display_aspect": 2.38805970149254, "bit_depth": 10, "profile": "Main 10", "pixel_format": "yuv420p10le", "is_h264": false, "is_hevc": true, "is_vp9": false, "is_av1": false, "hw_decodable": false, "hw_unsupported_reason": "10-bit video is 
+MediaSource: audio fltp, 5.1, 48000 Hz -> stereo float, 44100 Hz.
+SoftwareVideoDecoder: hevc 1280x536 10-bit, 23.976 fps: software hevc (FFmpeg hevc, 4 threads).
+HWVideoTexture: software decode (software hevc (FFmpeg hevc, 4 threads)): 10-bit video is not supported yet on this kernel: the decoder writes it only in a compressed 10-bit format (Q10C) that the player can't display yet.
+HWVideoTexture: software frames 1280x536 (limited range).
+Final: 20 frames decoded, 9 shown, 0 dropped, 0 stale, 0 decoder errors, state decoding
+== hw-documentary-baseline
+ERROR: Could not load global script cache.
+MediaSource: audio track 0: dca decoder.
+MediaSource: /home/steamos/Videos/Documentary.3D.Full-SBS.mkv: matroska,webm, 2640.6 s, video h264 3840x1080 23.976 fps 8-bit (SPS 3840x1088), audio track 0 of 1: dts 5.1(side) 48000 Hz, 2 subtitle track(s).
+Media: matroska,webm, 2640.6 s, video { "stream_index": 0, "codec": "h264", "codec_name": "h264", "width": 3840, "height": 1080, "fps": 23.976023976024, "sample_aspect_ratio": 1.0, "display_aspect": 3.55555555555556, "bit_depth": 8, "profile": "High", "pixel_format": "yuv420p", "is_h264": true, "is_hevc": false, "is_vp9": false, "is_av1": false, "hw_decodable": true, "hw_unsupported_reason": "", "software_decodable":
+MediaSource: audio fltp, 5.1(side), 48000 Hz -> stereo float, 44100 Hz.
+Final: 98 frames decoded, 0 shown, 0 dropped, 0 stale, 0 decoder errors, state decoding
+== q10c-dump
+ERROR: Could not load global script cache.
+MediaSource: smb://192.168.1.21/Movies/Comedy.2160p.10bit.SDR.mkv: 8.99 GB over SMB 3.1.1, AES-CMAC signing with ARMv8 Crypto Extensions, reads of 1024 KiB, 4 in flight, 16 MiB buffer.
+MediaSource: audio track 0: ac3 decoder.
+MediaSource: smb://192.168.1.21/Movies/Comedy.2160p.10bit.SDR.mkv: matroska,webm, 5801.0 s, video hevc 3832x1596 23.976 fps 10-bit (SPS 3832x1600), audio track 0 of 1: ac3 5.1(side) 48000 Hz, 3 subtitle track(s).
+Media: matroska,webm, 5801.0 s, video { "stream_index": 0, "codec": "hevc", "codec_name": "hevc", "width": 3832, "height": 1596, "fps": 23.976023976024, "sample_aspect_ratio": 1.0, "display_aspect": 2.40100250626566, "bit_depth": 10, "profile": "Main 10", "pixel_format": "yuv420p10le", "is_h264": false, "is_hevc": true, "is_vp9": false, "is_av1": false, "hw_decodable": false, "hw_unsupported_reason": "10-bit video is
+[    2.4 s] decoding: decode 73.7 fps, shown 18.9 fps, dropped 0 (total 0), A/V offset +4 ms (clock 601.522, frame 601.518), render 90 fps, latency avg 60 max 174 ms, queued rate 24.1, in driver 0 out/7 cap, ready 2, retiring 1, demux queue 19 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.0 s, network 109 Mbit/s avg (173 while reading, 152 in refills), buffer
+Plane dump /tmp/q10c-plane0.png: 1280x1600 5, frame time 602.811000, packing 1: OK
+Plane dump /tmp/q10c-plane1.png: 1280x800 5, frame time 602.811000, packing 1: OK
+[    5.1 s] decoding: decode 11.7 fps, shown 11.7 fps, dropped 2 (total 2), A/V offset +40 ms (clock 602.976, frame 602.936), render 90 fps, latency avg 80 max 182 ms, queued rate 24.1, in driver 0 out/8 cap, ready 0, retiring 1, demux queue 17 AUs / audio 0.00 s, underruns 0 (+0 waits after seeks), decoder errors 0, demux CPU 0.0 s, decoder CPU 0.0 s, network 51 Mbit/s avg (173 while reading, 152 in refills), buffer
+Final: 208 frames decoded, 96 shown, 2 dropped, 0 stale, 0 decoder errors, state decoding
+-rw-r--r-- 1 steamos steamos 4375761 Oct 31 04:19 /tmp/q10c-plane0.png
+-rw-r--r-- 1 steamos steamos 1919673 Oct 31 04:19 /tmp/q10c-plane1.png
+ALLDONE

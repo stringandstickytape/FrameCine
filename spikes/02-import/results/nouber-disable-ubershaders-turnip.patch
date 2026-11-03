@@ -1,0 +1,76 @@
+# NOUBER diagnostic (spike 02): disable ubershaders on Turnip, Mobile + Forward+.
+# Result on the Steam Frame: 'Ubershaders: Disabled' printed, meshes still not drawn. Reverted from the tree.
+# Apply on top of the spike 02 tree with: git apply nouber-disable-ubershaders-turnip.patch
+--- a/drivers/vulkan/rendering_device_driver_vulkan.cpp
++++ b/drivers/vulkan/rendering_device_driver_vulkan.cpp
+@@ -752,6 +752,14 @@
+ 				p_device_properties.vendorID == RenderingContextDriver::Vendor::VENDOR_QUALCOMM &&
+ 				strstr(p_driver_properties->driverInfo, "Compiler Version: EV031.32.02.") != nullptr;
+ 	}
++
++	// FRAME WORKAROUND (steam-frame-vr-video-player, spike 02): on the Steam Frame (Adreno 750, Mesa Turnip 26.3-devel),
++	// meshes don't draw in either renderer while full-screen passes (sky) do. Disable ubershaders on Turnip to test whether
++	// the ubershader pipelines are the cause. Diagnostic variant; remove or narrow once the cause is known.
++	const bool is_turnip = (p_driver_properties != nullptr && p_driver_properties->driverID == VK_DRIVER_ID_MESA_TURNIP) || strstr(p_device_properties.deviceName, "Turnip") != nullptr;
++	if (is_turnip) {
++		driver_workarounds.disable_ubershaders = true;
++	}
+ }
+ 
+ void RenderingDeviceDriverVulkan::_get_device_properties() {
+diff --git a/servers/rendering/renderer_rd/forward_clustered/render_forward_clustered.cpp b/servers/rendering/renderer_rd/forward_clustered/render_forward_clustered.cpp
+index 370d3b66ce..277c17e6f0 100644
+--- a/servers/rendering/renderer_rd/forward_clustered/render_forward_clustered.cpp
++++ b/servers/rendering/renderer_rd/forward_clustered/render_forward_clustered.cpp
+@@ -493,7 +493,7 @@ void RenderForwardClustered::_render_list_template(RenderingDevice::DrawListID p
+ 		RID vertex_array_rd;
+ 		RID index_array_rd;
+ 		RID pipeline_rd;
+-		const uint32_t ubershader_iterations = 2;
++		const uint32_t ubershader_iterations = (disable_ubershaders ? 1 : 2);
+ 		bool pipeline_valid = false;
+ 		while (pipeline_key.ubershader < ubershader_iterations) {
+ 			// Skeleton and blend shape.
+@@ -520,7 +520,7 @@ void RenderForwardClustered::_render_list_template(RenderingDevice::DrawListID p
+ 
+ 			if (shader != prev_shader || pipeline_hash != prev_pipeline_hash) {
+ 				RSE::PipelineSource pipeline_source = pipeline_key.ubershader ? RSE::PIPELINE_SOURCE_DRAW : RSE::PIPELINE_SOURCE_SPECIALIZATION;
+-				pipeline_rd = shader->pipeline_hash_map.get_pipeline(pipeline_key, pipeline_hash, pipeline_key.ubershader, pipeline_source);
++				pipeline_rd = shader->pipeline_hash_map.get_pipeline(pipeline_key, pipeline_hash, pipeline_key.ubershader == (ubershader_iterations - 1), pipeline_source);
+ 
+ 				if (pipeline_rd.is_valid()) {
+ 					pipeline_valid = true;
+@@ -4655,6 +4655,10 @@ static RD::FramebufferFormatID _get_reflection_probe_depth_framebuffer_format_fo
+ }
+ 
+ void RenderForwardClustered::_mesh_compile_pipeline_for_surface(SceneShaderForwardClustered::ShaderData *p_shader, void *p_mesh_surface, bool p_ubershader, bool p_instanced_surface, RSE::PipelineSource p_source, SceneShaderForwardClustered::ShaderData::PipelineKey &r_pipeline_key, Vector<ShaderPipelinePair> *r_pipeline_pairs) {
++	if (p_ubershader && disable_ubershaders) {
++		return;
++	}
++
+ 	RendererRD::MeshStorage *mesh_storage = RendererRD::MeshStorage::get_singleton();
+ 	uint64_t input_mask = p_shader->get_vertex_input_mask(r_pipeline_key.version, r_pipeline_key.color_pass_flags, p_ubershader);
+ 	bool pipeline_motion_vectors = r_pipeline_key.color_pass_flags & SceneShaderForwardClustered::PIPELINE_COLOR_PASS_FLAG_MOTION_VECTORS;
+@@ -5103,6 +5107,9 @@ void RenderForwardClustered::_update_shader_quality_settings() {
+ RenderForwardClustered::RenderForwardClustered() {
+ 	singleton = this;
+ 
++	disable_ubershaders = RD::get_singleton()->get_driver_workarounds().disable_ubershaders;
++	print_verbose(disable_ubershaders ? "Ubershaders: Disabled" : "Ubershaders: Enabled");
++
+ 	/* SCENE SHADER */
+ 
+ 	{
+diff --git a/servers/rendering/renderer_rd/forward_clustered/render_forward_clustered.h b/servers/rendering/renderer_rd/forward_clustered/render_forward_clustered.h
+index be97ee2d96..1e054d77f7 100644
+--- a/servers/rendering/renderer_rd/forward_clustered/render_forward_clustered.h
++++ b/servers/rendering/renderer_rd/forward_clustered/render_forward_clustered.h
+@@ -447,6 +447,8 @@ private:
+ 
+ 	static RenderForwardClustered *singleton;
+ 
++	bool disable_ubershaders = false;
++
+ 	uint32_t _setup_environment(const RenderDataRD *p_render_data, bool p_no_fog, const Size2i &p_screen_size, const Size2 &p_viewport_size, const Color &p_default_bg_color, bool p_opaque_render_buffers = false, bool p_apply_alpha_multiplier = false, bool p_pancake_shadows = false);
+ 	void _setup_voxelgis(const PagedArray<RID> &p_voxelgis);
+ 	void _setup_lightmaps(const RenderDataRD *p_render_data, const PagedArray<RID> &p_lightmaps, const Transform3D &p_cam_transform);

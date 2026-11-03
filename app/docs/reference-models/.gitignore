@@ -1,0 +1,3 @@
+# The runtime controller models dumped from the device (--dump-render-models) are Valve's assets: never commit them.
+*
+!.gitignore

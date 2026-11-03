@@ -1,0 +1,17 @@
+[   0.033   ] streams/hevc8_3840x2160_60.h265: 75799993 bytes, 600 access units, max AU 1281014 bytes, codec hevc
+[   0.033   ] stream header: coded 3840x2160, display 3840x2160, 8-bit, chroma_format 1
+[   0.033 s0] open /dev/dma_heap/system: Permission denied
+
+===== session 0 summary =====
+  result            error
+  device            /dev/video-dec0 (driver '', card '')
+  input             0 AUs queued, 0 loops, 0 skipped (too large), 0 OUTPUT error flags
+  OUTPUT            HEVC 0x0, 8 buffers of 0 bytes (sizeimage 0)
+  CAPTURE           never configured
+  SOURCE_CHANGE     0 event(s), EOS events 0
+  frames            0 decoded, 0 with ERROR flag
+  wall time         0.000 s open->close, 0.000 s first->last frame
+  decode fps        0.00 (first->last frame), 0.00 (open->close)
+  latency           min 0.00 / avg 0.00 / max 0.00 ms (OUTPUT QBUF -> CAPTURE DQBUF, 0 matched)
+  frame interval    min 0.00 / avg 0.00 / max 0.00 ms (between CAPTURE DQBUFs)
+  ioctl errors      none

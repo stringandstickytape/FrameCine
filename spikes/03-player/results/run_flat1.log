@@ -1,0 +1,31 @@
+Godot Engine v4.7.2.stable.custom_build.ffe09b3d8 (2026-10-30 23:41:39 UTC) - https://godotengine.org
+Vulkan 1.4.362 - Forward Mobile - Using Device #0: Qualcomm - Turnip Adreno (TM) 750
+
+ERROR: Could not load global script cache.
+   at: get_global_class_list (core/config/project_settings.cpp:1458)
+View: flat camera
+Audio: /home/steamos/spike01/streams/documentary.ogg (2639.7 s), master clock
+Video: /home/steamos/spike01/streams/documentary_sbs.h264, h264 at 23.976 fps, side-by-side 3D
+V4L2Decoder: /home/steamos/spike01/streams/documentary_sbs.h264: 5979727214 bytes, H.264 3840x1088 (display 3840x1080), 8-bit, 23.976 fps.
+V4L2Decoder: opened /dev/video-dec0: driver 'iris_driver', card 'iris_decoder', device_caps 0x4204000.
+V4L2Decoder: S_FMT OUTPUT H264 3840x1088: sizeimage 7077888 (asked 3133440).
+V4L2Decoder: SOURCE_CHANGE #1 (changes 0x1).
+V4L2Decoder: CAPTURE generation 1: NV12 3840x1088, pitch 3840, chroma at 4177920, sizeimage 6266880, visible 3840x1080+0+0, 12 buffers (asked 12, MIN_BUFFERS_FOR_CAPTURE 0); setup took 8.2 ms.
+HWVideoTexture: imported 12 decoder buffers (generation 1): NV12 3840x1088, pitch 3840, chroma at 4177920, visible 3840x1080+0+0.
+Video format: buffers (3840, 1088), visible [P: (0, 0), S: (3840, 1080)] (uv [P: (0.0, 0.0), S: (1.0, 0.992647)])
+Playback started at frame 2 (2.66 s after launch)
+[    4.6 s] decoding: decode 23.9 fps, shown 22.9 fps, dropped 0 (total 0), A/V offset +21 ms (clock 1.898, frame 1.877), render 72 fps, latency avg 128 max 460 ms, queued rate 23.5, in driver 0 out/7 cap, ready 2, retiring 2
+[    6.6 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 0), A/V offset +3 ms (clock 3.882, frame 3.879), render 72 fps, latency avg 125 max 460 ms, queued rate 24.3, in driver 0 out/7 cap, ready 2, retiring 2
+[    8.6 s] decoding: decode 23.8 fps, shown 23.8 fps, dropped 0 (total 0), A/V offset +11 ms (clock 5.892, frame 5.881), render 72 fps, latency avg 124 max 460 ms, queued rate 24.3, in driver 0 out/7 cap, ready 2, retiring 1
+[   10.6 s] decoding: decode 24.8 fps, shown 23.8 fps, dropped 0 (total 0), A/V offset +17 ms (clock 7.900, frame 7.883), render 72 fps, latency avg 123 max 460 ms, queued rate 24.0, in driver 0 out/5 cap, ready 4, retiring 1
+Screenshot (offscreen) /home/steamos/spike03/flat.png (1920x1080) at frame time 8.217: OK
+[   12.7 s] decoding: decode 23.9 fps, shown 21.4 fps, dropped 6 (total 6), A/V offset +5 ms (clock 9.932, frame 9.927), render 51 fps, latency avg 122 max 460 ms, queued rate 24.2, in driver 0 out/6 cap, ready 3, retiring 2
+[   14.7 s] decoding: decode 23.9 fps, shown 23.9 fps, dropped 0 (total 6), A/V offset +3 ms (clock 11.932, frame 11.929), render 88 fps, latency avg 122 max 460 ms, queued rate 24.0, in driver 0 out/6 cap, ready 3, retiring 1
+[   16.7 s] decoding: decode 23.9 fps, shown 23.9 fps, dropped 0 (total 6), A/V offset +29 ms (clock 13.959, frame 13.931), render 91 fps, latency avg 122 max 460 ms, queued rate 24.1, in driver 0 out/6 cap, ready 3, retiring 1
+[   18.7 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 6), A/V offset +11 ms (clock 15.943, frame 15.933), render 90 fps, latency avg 122 max 460 ms, queued rate 24.1, in driver 0 out/7 cap, ready 3, retiring 1
+[   20.7 s] decoding: decode 23.9 fps, shown 23.9 fps, dropped 0 (total 6), A/V offset +33 ms (clock 17.968, frame 17.935), render 90 fps, latency avg 122 max 460 ms, queued rate 24.2, in driver 0 out/7 cap, ready 3, retiring 1
+Quitting after 1500 frames
+Final: 458 frames decoded, 449 shown, 6 dropped, 0 stale, 0 decoder errors, state decoding
+V4L2Decoder: decoder closed (session end).
+WARNING: 4 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)

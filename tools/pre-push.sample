@@ -1,0 +1,8 @@
+#!/bin/sh
+# Sample pre-push hook: runs tools/privacy-check.sh on what `git push` is about to send, and stops the push on a hit.
+# Not installed by anything. To install it in this clone (from Git Bash or WSL, in the repository):
+#   cp tools/pre-push.sample "$(git rev-parse --git-path hooks)/pre-push"
+#   chmod +x "$(git rev-parse --git-path hooks)/pre-push"
+# Your own patterns (titles, share and host names) go in ~/.config/vrvp/private-patterns, one regex per line.
+# `git push --no-verify` skips the hook.
+exec "$(git rev-parse --show-toplevel)/tools/privacy-check.sh" --pre-push

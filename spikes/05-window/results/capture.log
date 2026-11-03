@@ -1,0 +1,37 @@
+Godot Engine v4.7.2.stable.custom_build.9818abd06 (2026-10-31 02:48:27 UTC) - https://godotengine.org
+Vulkan 1.4.362 - Forward Mobile - Using Device #0: Qualcomm - Turnip Adreno (TM) 750
+
+ERROR: Could not load global script cache.
+   at: get_global_class_list (core/config/project_settings.cpp:1458)
+X11WindowSource: connected to ":0": Composite 0.4, DAMAGE 1.1, XFixes 5.0, XTEST 2.2, DRI3 1.2, MIT-SHM 1.2 (fd passing).
+X extensions: { "display": ":0", "connected": true, "composite": "0.4", "damage": "1.1", "xfixes": "5.0", "xtest": "2.2", "dri3": "1.2", "shm": "1.2", "shm_fd_passing": true }
+Own window: 0x3c00002 (toplevel 0x3c00002)
+Windows (bottom to top):
+  0x2400014 1281x419  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - Keyboard"
+  0x2400016 1800x120  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.bar (99590000)"
+  0x2400018  450x1536 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.barpopup.99590001 (99590001)"
+  0x240001a  600x60   +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.tooltip.99590002 (99590002)"
+  0x240001c  375x150  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.volumelevel (99590003)"
+  0x240001e  900x60   +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.floatingfooter (99590004)"
+  0x2400020  450x1200 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.frame.menu.99590005 (99590005)"
+  0x2400022  510x120  +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - Notifications"
+  0x2400005 1920x1080 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR"
+  0x2400029  450x1536 +0+0 depth 32  class /  pid 3136  steam_game 0  "SteamVR - valve.steam.gamepadui.barpopup.99590006 (99590006)"
+  0x4000003 1920x1080 +0+0 depth 32  class org.chromium.Chromium/Org.chromium.Chromium  pid 2  steam_game 0  "New Tab - Chromium"
+  0x3c00002 1920x1080 +320+180 depth 24  class Godot_Engine/Spike 05 - window  pid 90602  steam_game 0  "Spike 05 - window (DEBUG)"  <- this program
+  0x3e00002 1920x1080 +0+0 depth 24  class Godot_Engine/VR Video Player  pid 90231  steam_game 0  "VR Video Player (DEBUG)"
+View: flat camera
+X11WindowSource: capturing 0x4000003 "New Tab - Chromium" (Org.chromium.Chromium), 1920x1080, depth 32, dmabuf (zero copy); mapped.
+Capture 0x4000003: OK 
+X11WindowSource: importing the window's buffers: 1920x1080 AR24, modifier 0x500000000000001, 1 plane(s), pitch 7680, offset 0.
+[    2.7 s] dmabuf AR24 0x500000000000001 1920x1080: damage 0.5/s, updates 0.5/s, deferred 0, imports 1 (cached 1, switches 1), copy 0.0 MB/s, fetch avg 0.34 max 0.34 ms, render 72 fps, input 0, X errors 0
+[    4.7 s] dmabuf AR24 0x500000000000001 1920x1080: damage 0.0/s, updates 0.0/s, deferred 0, imports 1 (cached 1, switches 1), copy 0.0 MB/s, fetch avg 0.34 max 0.34 ms, render 72 fps, input 0, X errors 0
+[    6.7 s] dmabuf AR24 0x500000000000001 1920x1080: damage 0.0/s, updates 0.0/s, deferred 0, imports 1 (cached 1, switches 1), copy 0.0 MB/s, fetch avg 0.34 max 0.34 ms, render 72 fps, input 0, X errors 0
+[    8.7 s] dmabuf AR24 0x500000000000001 1920x1080: damage 0.0/s, updates 0.0/s, deferred 0, imports 1 (cached 1, switches 1), copy 0.0 MB/s, fetch avg 0.34 max 0.34 ms, render 72 fps, input 0, X errors 0
+[   10.7 s] dmabuf AR24 0x500000000000001 1920x1080: damage 0.0/s, updates 0.0/s, deferred 0, imports 1 (cached 1, switches 1), copy 0.0 MB/s, fetch avg 0.34 max 0.34 ms, render 72 fps, input 0, X errors 0
+[   12.7 s] dmabuf AR24 0x500000000000001 1920x1080: damage 0.0/s, updates 0.0/s, deferred 0, imports 1 (cached 1, switches 1), copy 0.0 MB/s, fetch avg 0.34 max 0.34 ms, render 72 fps, input 0, X errors 0
+Screenshot (offscreen) /home/steamos/spike05/logs/capture.png (1920x1080): OK
+[   14.7 s] dmabuf AR24 0x500000000000001 1920x1080: damage 0.0/s, updates 0.0/s, deferred 0, imports 1 (cached 1, switches 1), copy 0.0 MB/s, fetch avg 0.34 max 0.34 ms, render 67 fps, input 0, X errors 0
+[   16.7 s] dmabuf AR24 0x500000000000001 1920x1080: damage 0.0/s, updates 0.0/s, deferred 0, imports 1 (cached 1, switches 1), copy 0.0 MB/s, fetch avg 0.34 max 0.34 ms, render 72 fps, input 0, X errors 0
+Quitting after 1215 frames
+Final: mode dmabuf, 1 damage events, 1 updates, 0 deferred, 1 imports, 0 copies (0.0 MB), 0 input events, 0 X errors ()

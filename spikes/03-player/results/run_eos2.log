@@ -1,0 +1,62 @@
+Godot Engine v4.7.2.stable.custom_build.6d48ab681 (2026-10-31 02:11:13 UTC) - https://godotengine.org
+Vulkan 1.4.362 - Forward Mobile - Using Device #0: Qualcomm - Turnip Adreno (TM) 750
+
+ERROR: Could not load global script cache.
+   at: get_global_class_list (core/config/project_settings.cpp:1458)
+View: flat camera
+MediaSource: audio track 0: dca decoder.
+MediaSource: /home/steamos/Videos/Documentary.3D.Full-SBS.mkv: matroska,webm, 2640.6 s, video h264 3840x1080 23.976 fps 8-bit (SPS 3840x1088), audio track 0 of 1: dts 5.1(side) 48000 Hz, 2 subtitle track(s).
+Media: matroska,webm, 2640.6 s, video { "stream_index": 0, "codec": "h264", "codec_name": "h264", "width": 3840, "height": 1080, "fps": 23.976023976024, "sample_aspect_ratio": 1.0, "display_aspect": 3.55555555555556, "bit_depth": 8, "profile": "High", "pixel_format": "yuv420p", "is_h264": true, "is_hevc": false, "is_vp9": false, "is_av1": false, "hw_decodable": true, "annexb_filter": true, "coded_width": 3840, "coded_height": 1088, "display_width": 3840, "display_height": 1080, "chroma_format": 1 }
+  audio track 0: dts 5.1(side) 48000 Hz eng 
+Audio: track 0 of the file (44100 Hz), master clock
+Decoder: seek_eos 2
+Video: /home/steamos/Videos/Documentary.3D.Full-SBS.mkv from the container
+V4L2Decoder: /home/steamos/Videos/Documentary.3D.Full-SBS.mkv: H.264 3840x1088 (display 3840x1080), 8-bit, 23.976 fps, from a MediaSource (frame times from PTS).
+V4L2Decoder: opened /dev/video-dec0: driver 'iris_driver', card 'iris_decoder', device_caps 0x4204000.
+MediaSource: audio fltp, 5.1(side), 48000 Hz -> stereo float, 44100 Hz.
+V4L2Decoder: S_FMT OUTPUT H264 3840x1088: sizeimage 7077888 (asked 3133440).
+V4L2Decoder: SOURCE_CHANGE #1 (changes 0x1).
+V4L2Decoder: CAPTURE generation 1: NV12 3840x1088, pitch 3840, chroma at 4177920, sizeimage 6266880, visible 3840x1080+0+0, 12 buffers (asked 12, MIN_BUFFERS_FOR_CAPTURE 0); setup took 20.7 ms.
+HWVideoTexture: imported 12 decoder buffers (generation 1): NV12 3840x1088, pitch 3840, chroma at 4177920, visible 3840x1080+0+0.
+Video format: buffers (3840, 1088), visible [P: (0, 0), S: (3840, 1080)] (uv [P: (0.0, 0.0), S: (1.0, 0.992647)])
+Playback started at frame 5 (0.37 s after launch)
+[    2.3 s] decoding: decode 22.5 fps, shown 17.5 fps, dropped 7 (total 7), A/V offset +11 ms (clock 1.721, frame 1.710), render 90 fps, latency avg 136 max 725 ms, queued rate 16.3, in driver 0 out/7 cap, ready 3, retiring 1, demux queue 23 AUs / audio 1.31 s, underruns 0, decoder errors 0, demux CPU 0.0 s, decoder CPU 0.0 s
+[    4.3 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +2 ms (clock 3.714, frame 3.712), render 90 fps, latency avg 125 max 725 ms, queued rate 23.1, in driver 0 out/7 cap, ready 3, retiring 1, demux queue 18 AUs / audio 0.98 s, underruns 0, decoder errors 0, demux CPU 0.0 s, decoder CPU 0.0 s
+[    6.3 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +10 ms (clock 5.724, frame 5.714), render 90 fps, latency avg 125 max 725 ms, queued rate 24.1, in driver 0 out/7 cap, ready 3, retiring 1, demux queue 21 AUs / audio 1.14 s, underruns 0, decoder errors 0, demux CPU 0.1 s, decoder CPU 0.0 s
+[    8.3 s] decoding: decode 24.5 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +5 ms (clock 7.721, frame 7.716), render 90 fps, latency avg 123 max 725 ms, queued rate 24.1, in driver 0 out/5 cap, ready 4, retiring 1, demux queue 23 AUs / audio 1.31 s, underruns 0, decoder errors 0, demux CPU 0.1 s, decoder CPU 0.1 s
+[   10.3 s] decoding: decode 23.5 fps, shown 23.5 fps, dropped 0 (total 7), A/V offset +41 ms (clock 9.717, frame 9.676), render 90 fps, latency avg 123 max 725 ms, queued rate 24.8, in driver 0 out/6 cap, ready 4, retiring 0, demux queue 21 AUs / audio 1.19 s, underruns 0, decoder errors 0, demux CPU 0.1 s, decoder CPU 0.1 s
+Seek 1: to 46.834
+ERROR: Formatting error in string "seek (serial %d): first access unit at %.3f s, %s%s, %s.": not all arguments converted during string formatting.
+   at: vformat (./core/variant/variant.h:917)
+V4L2Decoder: 
+Seek 1 settled in 399 ms: frame 46.797 for target 46.834, 122 frames skipped so far, decoder errors during the seek 0, end-of-sequence NAL units 1
+[   12.3 s] decoding: decode 83.0 fps, shown 19.5 fps, dropped 0 (total 7), A/V offset +21 ms (clock 48.319, frame 48.298), render 90 fps, latency avg 94 max 725 ms, queued rate 23.7, in driver 0 out/7 cap, ready 3, retiring 1, demux queue 23 AUs / audio 1.21 s, underruns 1, decoder errors 0, demux CPU 0.2 s, decoder CPU 0.1 s
+[   14.3 s] decoding: decode 24.5 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +27 ms (clock 50.327, frame 50.300), render 90 fps, latency avg 97 max 725 ms, queued rate 24.5, in driver 0 out/6 cap, ready 4, retiring 1, demux queue 20 AUs / audio 1.12 s, underruns 1, decoder errors 0, demux CPU 0.2 s, decoder CPU 0.1 s
+[   16.3 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +20 ms (clock 52.322, frame 52.302), render 90 fps, latency avg 99 max 725 ms, queued rate 23.9, in driver 0 out/6 cap, ready 4, retiring 1, demux queue 22 AUs / audio 1.21 s, underruns 1, decoder errors 0, demux CPU 0.2 s, decoder CPU 0.1 s
+[   18.3 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +19 ms (clock 54.323, frame 54.304), render 90 fps, latency avg 101 max 725 ms, queued rate 24.1, in driver 0 out/6 cap, ready 4, retiring 1, demux queue 21 AUs / audio 1.10 s, underruns 1, decoder errors 0, demux CPU 0.2 s, decoder CPU 0.1 s
+[   20.3 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +29 ms (clock 56.335, frame 56.306), render 90 fps, latency avg 103 max 725 ms, queued rate 24.1, in driver 0 out/6 cap, ready 4, retiring 1, demux queue 19 AUs / audio 1.01 s, underruns 1, decoder errors 0, demux CPU 0.2 s, decoder CPU 0.1 s
+Seek 2: to 93.435
+ERROR: Formatting error in string "seek (serial %d): first access unit at %.3f s, %s%s, %s.": not all arguments converted during string formatting.
+   at: vformat (./core/variant/variant.h:917)
+V4L2Decoder: 
+Seek 2 settled in 466 ms: frame 93.427 for target 93.435, 362 frames skipped so far, decoder errors during the seek 0, end-of-sequence NAL units 2
+[   22.3 s] decoding: decode 141.5 fps, shown 18.5 fps, dropped 0 (total 7), A/V offset +12 ms (clock 94.857, frame 94.845), render 90 fps, latency avg 80 max 725 ms, queued rate 24.8, in driver 0 out/7 cap, ready 3, retiring 1, demux queue 22 AUs / audio 1.18 s, underruns 2, decoder errors 0, demux CPU 0.3 s, decoder CPU 0.1 s
+[   24.3 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +5 ms (clock 96.852, frame 96.847), render 90 fps, latency avg 82 max 725 ms, queued rate 23.7, in driver 0 out/6 cap, ready 3, retiring 1, demux queue 20 AUs / audio 1.12 s, underruns 2, decoder errors 0, demux CPU 0.3 s, decoder CPU 0.1 s
+[   26.3 s] decoding: decode 25.0 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +0 ms (clock 98.849, frame 98.849), render 90 fps, latency avg 84 max 725 ms, queued rate 24.8, in driver 0 out/4 cap, ready 5, retiring 1, demux queue 20 AUs / audio 1.19 s, underruns 2, decoder errors 0, demux CPU 0.3 s, decoder CPU 0.2 s
+[   28.3 s] decoding: decode 23.5 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +6 ms (clock 100.857, frame 100.851), render 90 fps, latency avg 86 max 725 ms, queued rate 24.1, in driver 0 out/5 cap, ready 4, retiring 1, demux queue 18 AUs / audio 1.15 s, underruns 2, decoder errors 0, demux CPU 0.4 s, decoder CPU 0.2 s
+[   30.3 s] decoding: decode 23.0 fps, shown 23.5 fps, dropped 0 (total 7), A/V offset +41 ms (clock 102.852, frame 102.811), render 90 fps, latency avg 87 max 725 ms, queued rate 23.9, in driver 0 out/7 cap, ready 3, retiring 0, demux queue 19 AUs / audio 1.08 s, underruns 2, decoder errors 0, demux CPU 0.4 s, decoder CPU 0.2 s
+Seek 3: to 139.955
+ERROR: Formatting error in string "seek (serial %d): first access unit at %.3f s, %s%s, %s.": not all arguments converted during string formatting.
+   at: vformat (./core/variant/variant.h:917)
+V4L2Decoder: 
+Seek 3 settled in 378 ms: frame 139.931 for target 139.955, 467 frames skipped so far, decoder errors during the seek 0, end-of-sequence NAL units 3
+[   32.3 s] decoding: decode 76.0 fps, shown 19.5 fps, dropped 0 (total 7), A/V offset +32 ms (clock 141.465, frame 141.433), render 90 fps, latency avg 83 max 725 ms, queued rate 24.1, in driver 0 out/6 cap, ready 4, retiring 0, demux queue 18 AUs / audio 1.08 s, underruns 3, decoder errors 0, demux CPU 0.4 s, decoder CPU 0.2 s
+[   34.3 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +25 ms (clock 143.460, frame 143.435), render 90 fps, latency avg 85 max 725 ms, queued rate 23.9, in driver 0 out/6 cap, ready 4, retiring 1, demux queue 22 AUs / audio 1.20 s, underruns 3, decoder errors 0, demux CPU 0.4 s, decoder CPU 0.2 s
+[   36.3 s] decoding: decode 23.5 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +32 ms (clock 145.469, frame 145.437), render 90 fps, latency avg 86 max 725 ms, queued rate 24.5, in driver 0 out/7 cap, ready 3, retiring 1, demux queue 22 AUs / audio 1.12 s, underruns 3, decoder errors 0, demux CPU 0.5 s, decoder CPU 0.2 s
+[   38.3 s] decoding: decode 24.5 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +26 ms (clock 147.465, frame 147.439), render 90 fps, latency avg 87 max 725 ms, queued rate 23.3, in driver 0 out/6 cap, ready 4, retiring 1, demux queue 21 AUs / audio 1.20 s, underruns 3, decoder errors 0, demux CPU 0.5 s, decoder CPU 0.2 s
+[   40.3 s] decoding: decode 24.0 fps, shown 24.0 fps, dropped 0 (total 7), A/V offset +20 ms (clock 149.461, frame 149.441), render 90 fps, latency avg 89 max 725 ms, queued rate 24.1, in driver 0 out/6 cap, ready 4, retiring 1, demux queue 19 AUs / audio 1.12 s, underruns 3, decoder errors 0, demux CPU 0.5 s, decoder CPU 0.2 s
+Quitting after 3600 frames
+Final: 1414 frames decoded, 916 shown, 7 dropped, 20 stale, 0 decoder errors, state decoding
+V4L2Decoder: decoder closed (session end).
+WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)

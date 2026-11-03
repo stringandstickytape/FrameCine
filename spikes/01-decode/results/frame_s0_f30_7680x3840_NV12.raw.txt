@@ -1,0 +1,13 @@
+format NV12
+width 7680
+height 3840
+num_planes 1
+plane0_bytesperline 7680
+plane0_sizeimage 44236800
+plane0_bytesused 44236800
+visible 7680x3840+0+0
+bytes_written 44236800
+# convert (stride as width, luma height as G_FMT height):
+ffmpeg -f rawvideo -pix_fmt nv12 -video_size 7680x3840 -i frame_s0_f30_7680x3840_NV12.raw -vf crop=7680:3840:0:0 -frames:v 1 frame_s0_f30_7680x3840_NV12.raw.png
+# if chroma is shifted, the luma plane is padded to 32 lines; try:
+ffmpeg -f rawvideo -pix_fmt nv12 -video_size 7680x3840 -i frame_s0_f30_7680x3840_NV12.raw -vf crop=7680:3840:0:0 -frames:v 1 frame_s0_f30_7680x3840_NV12.raw.png

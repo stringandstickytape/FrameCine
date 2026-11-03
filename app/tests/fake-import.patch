@@ -1,0 +1,22 @@
+diff --git a/modules/hwvideo/hw_video_texture.cpp b/modules/hwvideo/hw_video_texture.cpp
+index 53c46ed35f..53bead9a59 100644
+--- a/modules/hwvideo/hw_video_texture.cpp
++++ b/modules/hwvideo/hw_video_texture.cpp
+@@ -234,7 +234,7 @@ Error HWVideoTexture::_import_generation(uint32_t p_generation) {
+ 	for (uint32_t i = 0; i < layout.fds.size(); i++) {
+ 		Buffer &buffer = buffers[i];
+ 		buffer = Buffer();
+-		if (err == OK) {
++		if (err == OK && OS::get_singleton()->get_environment("HWVIDEO_TEST_FAKE_IMPORT") != "1") {
+ 			buffer.image.instantiate();
+ 			if (q10c) {
+ 				err = buffer.image->import_planes(layout.fds[i], q10c_format, (int64_t)modifier, new_plane_sizes, q10c_offsets, q10c_pitches, DmabufImage::MAX_PLANES, q10c_mutable);
+@@ -271,7 +271,7 @@ Error HWVideoTexture::_import_generation(uint32_t p_generation) {
+ 		const String format_name = q10c ? vformat("Q10C (UBWC TP10, planes as %s%s)", new_packing == PACKING_TP10_RGBA8 ? "RGBA8" : "RGB10A2", q10c_mutable ? ", mutable" : "") : (layout.ubwc ? String("Q08C (UBWC)") : String(p010 ? "P010" : "NV12"));
+ 		print_line(vformat("HWVideoTexture: imported %d decoder buffers (generation %d): %s %dx%d, pitch %d, %s at %d, visible %dx%d+%d+%d, %d Vulkan image(s) per buffer.", buffers.size(), p_generation,
+ 				format_name, layout.size.width, layout.size.height, layout.pitch, layout.ubwc ? "UV metadata" : "chroma", layout.chroma_offset,
+-				visible_rect.size.x, visible_rect.size.y, visible_rect.position.x, visible_rect.position.y, buffers.is_empty() ? 0 : buffers[0].image->get_image_count()));
++				visible_rect.size.x, visible_rect.size.y, visible_rect.position.x, visible_rect.position.y, buffers.is_empty() || buffers[0].image.is_null() ? 0 : buffers[0].image->get_image_count()));
+ 	}
+ 	if (!to_free.is_empty()) {
+ 		RS::get_singleton()->call_on_render_thread(callable_mp_static(&HWVideoTexture::_render_thread_swap).bind(Ref<DmabufImage>(), Ref<DmabufImage>(), to_free));
