@@ -82,6 +82,7 @@ sections of `user://settings.cfg`; `<environment id>` and `<id>` sections hold o
 | [Agents on the headset](#agents-on-the-headset) | | `[assistant] voice_to` | on demand, from Files |
 | [The Library](#the-library) | | none | on; a place in Files, made on first use |
 | [Android apps](#android-apps) | | none | on demand, from Files |
+| [Effect library](#effect-library) | | none | data and shaders; a room names an effect (`docs/effects.md`) |
 | [Every format: old and other codecs in software](#every-format-old-and-other-codecs-in-software) | none | none | on (engine branch `frame/codecs`) |
 
 ## #36 Wall-clock end time
@@ -1996,3 +1997,16 @@ the login. `--activity-clear-top` left a full-screen player.
   `docs/materials.md`; credits: `app/materials/CREDITS.md`.
 - **Tested:** `test_materials` (33 checks); renders before and after in `docs/shots/materials/` (lavapipe). Not yet
   run on the headset.
+
+## Effect library
+
+About forty procedural looks a surface can name by id: energy (plasma, aurora, force field, neon...), natural (water,
+lava, embers, smoke, caustics, wind sway...), procedural materials (pearl, velvet, brushed metal, marble, crystal...),
+stylised (hatching, halftone, pixel, wireframe, stained glass, duotone), transitions (dissolve, wipe, scan-in, a
+selection outline), reactive (the film's sound and colours) and skies (aurora, stars, nebula, sunset, cloud layers).
+Each has a description written for an assistant to choose by, bounded options, a measured cost tier, how it animates
+(always under the photosensitivity ceiling) and a preview in `docs/shots/effects/`. The assistant reads them with
+`effects` and `effect_info`; a room names one once the room document is connected to the library. All of it, with the
+performance and photosensitivity rules and how to add an effect: `docs/effects.md`.
+
+Untested: on the headset (each effect's cost there, and how the slow motions read in the lenses).
