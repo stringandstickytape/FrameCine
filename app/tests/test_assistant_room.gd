@@ -72,7 +72,7 @@ func _run() -> void:
 	allow_room = true
 
 	# --- Validation: every problem with its JSON path. ---
-	var r: Dictionary = await commands.run("room_apply", {"room": {"schema": 2, "parts": [
+	var r: Dictionary = await commands.run("room_apply", {"room": {"schema": 9, "parts": [
 		{"name": "x", "type": "pyramid"}, {"name": "y", "type": "box", "size": [1, 2]},
 		{"name": "z", "type": "cylinder", "size": [1, 1], "widget": "weather"},
 		{"name": "w", "type": "box", "size": [1, 1, 1], "widget": "clock", "widget_options": {"style": "sundial"}}],

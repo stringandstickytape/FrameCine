@@ -35,6 +35,7 @@ const AssistantPlaces := preload("res://scripts/assistant/assistant_places.gd")
 const AssistantBrowse := preload("res://scripts/assistant/assistant_browse.gd")
 const LibraryCopy := preload("res://scripts/library/library_copy.gd")
 const LibraryIndex := preload("res://scripts/library/library_index.gd")
+const ObjectCommands := preload("res://scripts/assistant/object_commands.gd")
 const SELF := "res://scripts/assistant/assistant_commands.gd"
 const SERVICE_NODE := "AssistantService"
 
@@ -312,14 +313,14 @@ static func register_commands() -> void:
 			+ "document, the base room's own parts and colours, light, the screen (centre, size, facing), the viewer "
 			+ "(seat, eyes, head), the seats, the bases a new room can start from, limits and supported_widgets.",
 			"returns": "{doc, stock_parts, screen, viewer, seats, bases, limits, supported_widgets, allowed, ...}"})
-	var doc := "a room document (schema 1; its JSON Schema is RoomDocument in GET /openapi.json)"
+	var doc := "a room document (schema 2, 1 still read; its JSON Schema is RoomDocument in GET /openapi.json)"
 	R.register("room_apply", _handler("room_apply"), {"assistant": "room", "level": "change",
-			"description": "Changes the room on show with a room document (schema 1): parts added or replaced by "
+			"description": "Changes the room on show with a room document (schema 2): parts added or replaced by "
 			+ "name, remove, recolour, light, sky.",
 			"params": [{"name": "room", "type": "object", "required": true, "description": doc}],
 			"returns": "{state: kept, name, warnings, perf, ...}"})
 	R.register("new_room", _handler("new_room"), {"assistant": "room", "level": "change", "destructive": true,
-			"description": "A whole new room from a room document (schema 1): a base (a room id) or base_model (a "
+			"description": "A whole new room from a room document (schema 2): a base (a room id) or base_model (a "
 			+ ".glb room), and parts.",
 			"params": [{"name": "room", "type": "object", "required": true, "description": doc}],
 			"returns": "{state: kept, name, warnings, perf, ...}"})
@@ -360,12 +361,18 @@ static func register_commands() -> void:
 			"returns": "{state: kept, name, warnings, perf, ...}"})
 	R.register("recolour", _handler("recolour"), {"assistant": "room", "level": "change",
 			"description": "Colour, emission or a picture on every part whose name matches (* and ?): the "
-			+ "assistant's parts and the base room's own.", "params": [
-			{"name": "match", "type": "string", "required": true, "description": "a name pattern (* and ?)"},
+			+ "assistant's parts and the base room's own, a whole placed object by its name, or one part inside a "
+			+ "placed object as \"<name>/<part>\" (object_info lists its parts).", "params": [
+			{"name": "match", "type": "string", "required": true, "description": "a name pattern (* and ?), or "
+			+ "\"<placed name>/<part name>\" (patterns on both sides) for parts inside placed objects"},
 			{"name": "color", "type": "any", "default": null, "description": "#rrggbb or [r, g, b]"},
 			{"name": "emission", "type": "any", "default": null, "description": "#rrggbb or [r, g, b]"},
 			{"name": "emission_strength", "type": "float", "default": 1.0, "description": "0..10"},
-			{"name": "texture", "type": "string", "default": "", "description": "a PNG or JPEG, base64"}],
+			{"name": "texture", "type": "string", "default": "", "description": "a PNG or JPEG, base64"},
+			{"name": "material", "type": "string", "default": "", "description": "a library material's id; an id "
+			+ "the headset doesn't know is left out with a warning"},
+			{"name": "reset", "type": "bool", "default": false, "description": "back to the model's own colours "
+			+ "(the part-level colours the match covers go; a whole object's colour too)"}],
 			"returns": "{state: kept, name, warnings, perf, ...}"})
 	R.register("set_lighting", _handler("set_lighting"), {"assistant": "room", "level": "change",
 			"description": "The room's light (ambient 0..1, screen_glow 0..2) and the sky: a colour, a picture "
@@ -572,34 +579,68 @@ func _room(cmd: String, a: Dictionary) -> Dictionary:
 				mat["emission_strength"] = a["emission_strength"]
 			if str(a["texture"]) != "":
 				mat["texture"] = a["texture"]
-			if mat.is_empty():
-				return {"ok": false, "error": "recolour: give color, emission or texture"}
+			if str(a["material"]) != "":
+				mat["library_material"] = a["material"]
+			var reset := bool(a["reset"])
+			if mat.is_empty() and not reset:
+				return {"ok": false, "error": "recolour: give color, emission, texture, material or reset"}
 			var pattern: String = a["match"]
+			var current: Dictionary = room.current_doc()
+			summary = ("reset %s" if reset else "recolour %s") % pattern
+			if pattern.contains("/"):
+				# A part inside a placed object ("Shelf/Board"): a part-level entry (scripts/assistant/object_library.gd).
+				if RoomSchema.split_match(pattern).is_empty():
+					return {"ok": false, "error": "recolour: a part is \"<placed name>/<part name>\""}
+				var main := _main()
+				var layer: Node = main.env.get_node_or_null("AssistantLayer") if main.env != null else null
+				if ((load("res://scripts/assistant/assistant_room.gd") as GDScript).call("part_targets", layer, pattern)
+						as Array).is_empty():
+					return {"ok": false, "error": "recolour: no part of anything placed matches %s (object_info with "
+							% pattern + "placed lists the parts)"}
+				var entries: Array = ObjectCommands.recolour_entries(current, pattern, null if reset else mat)
+				if entries.is_empty():
+					return {"ok": false, "error": "recolour: %s has no colour of its own to reset" % pattern}
+				doc["recolour"] = entries
+				return await room.apply(mode, doc, summary)
 			var parts: Array = []
-			for p: Dictionary in room.current_doc().get("parts", []):
+			var dropped: Array = []
+			for p: Dictionary in current.get("parts", []):
 				if str(p["name"]).match(pattern):
 					var q := p.duplicate(true)
 					if str(q.get("type", "")) == "text":
 						# Words take their colour from text_options.
-						if mat.has("color"):
+						if mat.has("color") or reset:
 							var o: Dictionary = q.get("text_options", {})
-							o["color"] = mat["color"]
+							if reset:
+								o.erase("color")
+							else:
+								o["color"] = mat["color"]
 							q["text_options"] = o
 							parts.append(q)
 						continue
-					var m: Dictionary = q.get("material", {})
-					m.merge(mat, true)
-					q["material"] = m
+					if reset:
+						q.erase("material")
+					else:
+						var m: Dictionary = q.get("material", {})
+						m.merge(mat, true)
+						q["material"] = m
 					parts.append(q)
+					# A whole placed object takes the new colour all over: its part-level colours go.
+					for r: Dictionary in current.get("recolour", []):
+						var s := RoomSchema.split_match(str(r["match"]))
+						if not s.is_empty() and s[0] == str(p["name"]):
+							dropped.append({"match": r["match"], "material": null})
 			var stock: Array = room.state()["stock_parts"]
 			var hits := stock.filter(func(x: Dictionary) -> bool: return str(x["name"]).match(pattern))
 			if parts.is_empty() and hits.is_empty():
 				return {"ok": false, "error": "recolour: nothing is called %s (room_state lists the parts)" % pattern}
 			if not parts.is_empty():
 				doc["parts"] = parts
+			var rec: Array = dropped
 			if not hits.is_empty():
-				doc["recolour"] = [{"match": pattern, "material": mat}]
-			summary = "recolour %s" % pattern
+				rec.append({"match": pattern, "material": null if reset else mat})
+			if not rec.is_empty():
+				doc["recolour"] = rec
 		"set_lighting":
 			var light := {}
 			if float(a["ambient"]) >= 0.0:

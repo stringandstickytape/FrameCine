@@ -99,6 +99,7 @@ func state() -> Dictionary:
 		"room": m.env_id, "name": str(env.get("display_name")),
 		"made_by_assistant": env.get_script() == AssistantRoom,
 		"document": RoomSchema.summary(doc),
+		"objects": AssistantRoom.placed_objects(env),
 		"base": {"id": key, "interior": inside},
 		"stock_parts": stock,
 		"stock_parts_total": geom.size(),
@@ -265,9 +266,13 @@ func _used(doc: Dictionary, assets := {}) -> Dictionary:
 			emitters += 1
 			particles += RoomParticles.amount(p)
 		var model: Dictionary = assets.get("models", {}).get(str(p["name"]), {})
-		cost += RoomSchema.part_cost(p, int(model.get("triangles", 0)))
+		cost += RoomSchema.part_cost(p, int(model.get("triangles", 0)), (model.get("parts", [0]) as Array).size())
+	var recolours: Array = doc.get("recolour", []) if doc.get("recolour") is Array else []
+	for r: Variant in recolours:
+		if r is Dictionary and not RoomSchema.split_match(str(r.get("match", ""))).is_empty():
+			cost += RoomSchema.COSTS["part_recolour"]
 	return {"parts": (doc.get("parts", []) as Array).size(), "widgets": widgets, "texts": texts,
-			"emitters": emitters, "particles": particles, "cost": snappedf(cost, 0.1)}
+			"emitters": emitters, "particles": particles, "recolours": recolours.size(), "cost": snappedf(cost, 0.1)}
 
 
 # --- Changes ---------------------------------------------------------------------------------------------------------
@@ -315,6 +320,8 @@ func apply(mode: String, patch: Dictionary, summary: String) -> Dictionary:
 		return _limit("emitters", used["emitters"])
 	if int(used["particles"]) > int(RoomSchema.LIMITS["particles"]):
 		return _limit("particles", used["particles"])
+	if int(used["recolours"]) > int(RoomSchema.LIMITS["recolours"]):
+		return _limit("recolours", used["recolours"])
 	_busy = true
 	var cache := _cache
 	var r: Dictionary = await WorkerTask.run(get_tree(), func() -> Variant: return load_assets_now(doc, cache),
@@ -437,7 +444,22 @@ func warnings(doc: Dictionary) -> Array:
 			out.append({"part": p["name"], "kind": "emission_on_picture", "warning": "emission adds light on top of "
 					+ "the picture and washes it out (white makes it white); a picture already shows at its own "
 					+ "brightness, so leave emission out"})
+		_material_warnings(mat, str(p["name"]), out)
+	for r: Dictionary in doc.get("recolour", []):
+		var mat: Dictionary = r.get("material", {}) if r.get("material") is Dictionary else {}
+		_material_warnings(mat, str(r["match"]), out)
+		var split := RoomSchema.split_match(str(r["match"]))
+		if not split.is_empty() and layer != null and AssistantRoom.part_targets(layer, str(r["match"])).is_empty():
+			out.append({"part": r["match"], "kind": "no_such_part", "warning": "%s matches no part of a placed model "
+					% r["match"] + "(object_info with placed lists them); kept, and applied if one comes"})
 	return out
+
+
+## A library material the app does not know (yet): left out, said once.
+static func _material_warnings(mat: Dictionary, where: String, out: Array) -> void:
+	if mat.has("library_material") and AssistantRoom.library_material(str(mat["library_material"])).is_empty():
+		out.append({"part": where, "kind": "unknown_material", "warning": "no library material %s here; the rest "
+				% mat["library_material"] + "of the material applies without it"})
 
 
 static func _limit(name: String, value: Variant) -> Dictionary:
@@ -499,6 +521,10 @@ static func load_assets_now(doc: Dictionary, cache := {}) -> Dictionary:
 			if int(r["texture_size"]) > int(lim["texture_size"]):
 				return {"error": "$.parts[%d].model: texture_size: %d px, at most %d" % [i, r["texture_size"],
 						lim["texture_size"]], "limit": "texture_size"}
+			if (r.get("parts", []) as Array).size() > int(lim["model_parts"]):
+				return {"error": "$.parts[%d].model: model_parts: %d, at most %d (join meshes that need no colour "
+						% [i, (r["parts"] as Array).size(), lim["model_parts"]] + "of their own)",
+						"limit": "model_parts"}
 			out["models"][p["name"]] = r
 			out["triangles"] += int(r["triangles"])
 			out["textures"] += int(r["textures"])

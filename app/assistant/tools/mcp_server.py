@@ -63,7 +63,8 @@ INSTRUCTIONS = (
     "in a loop: each result is what they said with the film's context; reply with answer_viewer. Keep card text to a "
     "few lines. For the room, room_state first; you send data, never code; each change shows in the headset at once "
     "and is kept (change it back if the viewer asks); look at it with look_at_room. Files on this machine can stand "
-    "in for base64 fields: model_path, texture_path, image_path, base_model_path, sky_image_path.")
+    "in for base64 fields: model_path, texture_path, image_path, base_model_path, sky_image_path, data_path "
+    "(object_import's file).")
 
 CAPABILITIES = {"tools": {"listChanged": True}, "resources": {"subscribe": True, "listChanged": False}}
 
@@ -140,7 +141,7 @@ OWN = {t[0]: t for t in OWN_TOOLS}
 
 # Fields that may name a file on this machine instead of carrying base64: path field -> base64 field.
 PATH_FIELDS = {"model_path": "model", "texture_path": "texture", "image_path": "image",
-               "base_model_path": "base_model", "sky_image_path": "sky_image"}
+               "base_model_path": "base_model", "sky_image_path": "sky_image", "data_path": "data"}
 MAX_FILE = 20 * 1024 * 1024
 
 

@@ -192,7 +192,8 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 Other files in the same folder: `resume.cfg` (one section per file: path, title, position, duration, updated,
 finished), `xr_override.cfg` (only after `--hands`, `docs/xr-spikes.md`), `assistant_clients.cfg` (the paired
 assistants), `assistant_tls.key` and `assistant_tls.crt` (the assistant service's certificate), `tours/`, `rooms/`, `skyboxes/`, `recipes/` (also the rooms an assistant made and you kept:
-`<name>.room.json` and `<name>.files/`), `screenshots/`.
+`<name>.room.json` and `<name>.files/`), `objects/` (the object library's imported objects: `<id>/object.glb`,
+`manifest.json`, `thumb.png`), `screenshots/`.
 
 ## Controls
 
@@ -232,6 +233,31 @@ right primary is next, right secondary is previous, left primary or right stick 
 left stick click is the overlay. On the two third-party profiles, a stick click (both sticks on the one with A/B; the
 right stick on the one with A/B/X/Y, whose left menu button is the menu too) opens the panel. The full detail,
 including the pause when the headset loses focus, is in `app/README.md`, "Controls".
+
+## The Room tab: objects
+
+The Room tab's **Objects** section is the object library (`docs/assistant.md`, "Objects"): things to put in the room,
+built in (a picture frame, a wall shelf, a pot plant, a wall clock) and imported (by an assistant, or with
+`object_import` from the dev link: a `.glb`, or an SVG drawing made solid). One controller does it all.
+
+1. Pick a thumbnail. The line under the thumbnails says its name, how it sits (wall, floor, ...) and how many parts it
+   has.
+2. **Place**. The panel goes. The object shows where the laser meets a wall (back to the wall) or the floor (standing,
+   facing you); with nothing there, it waits 2 m along the laser.
+3. Stick left or right turns it, up or down makes it bigger or smaller. The trigger sets it there; B or the menu
+   button cancels.
+4. The panel comes back with Undo in its footer. A stock room becomes a kept room of its own, "<room> with objects",
+   in the Environment list.
+
+**In this room** lists what the room has from the library. Pick one:
+
+- **Move** (as Place, for this one) and **Remove** (asked first in the footer: Remove or Keep).
+- Its parts, each with a swatch of its colour. **Colour** opens a palette under the part; pick a colour. **Picture**
+  puts the picture on show (a picture file on the headset, opened in Files) on the part. **Material** (only when the
+  app has a material library) lists its materials. **Reset** gives the part its own colours back. Each change has Undo
+  in the footer.
+
+**Delete** (imported objects only) asks first in the footer; copies already in rooms stay.
 
 ## The Library
 

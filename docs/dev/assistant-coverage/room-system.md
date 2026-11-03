@@ -17,7 +17,9 @@ The commands are in `app/scripts/dev/room_tab_commands.gd` and `app/scripts/dev/
 an undo. A change command takes only what it changes: a parameter left out stays as it is. Values are kept to the
 slider's range, as the tab keeps them.
 
-Test: `app/tests/test_assistant_coverage_system.gd`.
+Test: `app/tests/test_assistant_coverage_system.gd`; the object library's commands and the Room tab's objects:
+`app/tests/test_object_library.gd`. The object commands are in `app/scripts/assistant/object_commands.gd`, and the
+Room tab's objects call the same functions (`app/ui/object_section.gd`, `app/ui/object_placer.gd`).
 
 ## Room tab (`app/ui/room_tab.gd`)
 
@@ -38,6 +40,15 @@ Test: `app/tests/test_assistant_coverage_system.gd`.
 | Dim while playing, Dimmed to | `dim_while_playing` {on, level} (room) |
 | Reset room | `reset_room` (control; registered by the core agent) |
 | Reset screen | Picture tab: see playback.md |
+| Objects: the thumbnails (built in and imported) | `object_library` {tag, source} (read); one: `object_info` {id} (read) |
+| Objects: Place (laser, stick turns and sizes, trigger sets) | `object_place` {id, at, position, rotation, turn, scale} (room) |
+| Objects: Delete (imported only, asked first) | `object_delete` {id} (room; destructive; undo restores it) |
+| Objects: importing (no panel control: an assistant or the dev link brings the file) | `object_import` {name, data, format, tags, mount, width, depth, bevel, part_names} (room); `path` instead of `data`: the dev link only |
+| In this room: the list, a pick's parts and their colours | `room_state` objects (read); `object_info` {placed} (read) |
+| In this room: Move | `object_move` {name, at, position, rotation, turn, scale} (room) |
+| In this room: Remove (asked first) | `remove` {name} (room) |
+| In this room: a part's Colour (palette), Picture, Material | `recolour` {match: "<placed>/<part>", color, texture, material} (room) |
+| In this room: a part's Reset | `recolour` {match: "<placed>/<part>", reset: true} (room) |
 | Curtains | `curtains` {on} (room) |
 | Up next countdown, Up next in | `up_next` {on, seconds} (room) |
 | Intermission, its minutes | `intermission` {on, minutes} (room) |

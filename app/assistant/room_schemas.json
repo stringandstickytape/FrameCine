@@ -8,7 +8,8 @@
   "description": "A room, or a change to the room on show (docs/assistant.md, Rooms). Data only.",
   "properties": {
    "schema": {
-    "const": 1
+    "enum": [1, 2],
+    "description": "2 (1 is still read: 2 without objects, part addressing and library materials)"
    },
    "name": {
     "type": "string",
@@ -183,10 +184,11 @@
      "additionalProperties": false,
      "properties": {
       "match": {
-       "type": "string"
+       "type": "string",
+       "description": "a name pattern (* and ?); schema 2: \"<placed name>/<part name>\" for a part inside a placed model (object_info lists them)"
       },
       "material": {
-       "$ref": "#/components/schemas/Material"
+       "oneOf": [{"$ref": "#/components/schemas/Material"}, {"type": "null", "description": "in a change: takes the entry out (the part shows its own colours)"}]
       }
      }
     }
@@ -324,6 +326,11 @@
    "model": {
     "type": "string",
     "contentEncoding": "base64"
+   },
+   "object": {
+    "type": "string",
+    "pattern": "^[a-z0-9_-]{1,64}$",
+    "description": "type model, schema 2: the object library id it was placed from (object_place sets it)"
    },
    "position": {
     "type": "array",
@@ -488,6 +495,11 @@
     "type": "number",
     "minimum": 0,
     "maximum": 1
+   },
+   "library_material": {
+    "type": "string",
+    "pattern": "^[a-z0-9_-]{1,64}$",
+    "description": "schema 2: a material library id; its fields under the ones given here; an id the headset doesn't know is left out with a warning"
    }
   }
  }

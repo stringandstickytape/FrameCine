@@ -237,7 +237,7 @@ curl -s -k --pinnedpubkey "<<PIN>>" -H "Authorization: Bearer TOKEN" <<URL>>/car
 ## Rooms
 
 With the viewer's "Let the assistant change the room" on, you can rebuild the room around the screen, add to it or
-recolour it. You send data, never code: a **room document** (JSON, `"schema": 1`), or the shortcut commands
+recolour it. You send data, never code: a **room document** (JSON, `"schema": 2`; 1 is still read), or the shortcut commands
 (`add_shape`, `add_model`, `recolour`, `set_lighting`, `remove`), which make one. Each change shows in the headset at
 once and is kept (saved as a room in the viewer's Room tab, under the document's `name`); the reply says
 `"state": "kept"`. There is no undo: to go back, send the change that reverses it (the viewer's Reset room returns
@@ -261,7 +261,7 @@ For motion, particles and effects, look at a clip: `GET /snapshot_clip.png?secon
 the frames side by side (8 a second, read left to right, then down).
 
 ```
-{"schema": 1,
+{"schema": 2,
  "name": "Lounge at dusk",                         the name the viewer keeps it under
  "base": "dim_room",                               new_room only: a room id from room_state's bases
  "base_model": "<base64 .glb>",                    new_room only, instead of base: a whole room as glTF
@@ -471,6 +471,28 @@ costs 1 plus 1 per 100 particles.
 word breaks; 0, the default, never wraps). `\n` starts a new line. The text faces +Z and is centred on `position`:
 unrotated in front of the viewer it reads straight on. It is self-lit (no `material`) and can't carry a widget.
 `add_text` is the shortcut.
+
+**Objects: the object library and their parts.** The headset keeps a library of things to put in a room:
+`object_library` lists them (a few built in, and what the viewer or you imported), `object_info {id}` gives one's
+parts (the meshes inside it, by name), size and `mount` (wall, floor, table, ceiling or free). `object_import {name,
+data}` adds a `.glb` as it is, or an SVG drawing made solid (`width` and `depth` in metres; each top-level path or
+group a part, named by its `id`, else `part_1`, `part_2`, ...; `part_names` renames them in order and joins those
+given one name; gradients become one flat colour; strokes, text and pictures are left out, with warnings).
+`object_place {id}` puts one in the room: `at` `wall` (the wall the viewer looks at), `floor` (in front of them),
+`ceiling`, `front` (at eye height), or `position` and `rotation`; `scale`; `turn` (degrees). It is a `model` part
+with `"object": "<id>"`, so `room_state`'s `objects` lists it with its parts. `object_move {name}` moves it
+(`at`, `position`, `rotation`, `scale`), `remove {name}` takes it out, `object_delete {id}` deletes an imported
+object from the library (placed copies stay).
+
+**Part addressing.** A part inside a placed object is `"<placed name>/<part name>"`, a pattern on each side
+(`"Shelf*/Board"`). `recolour {match: "Wall shelf/Board", color: "#c0392b"}` changes that part only and keeps the
+rest of the object; `recolour {match: "Wall shelf", ...}` (a bare name) changes the whole object as before, and its
+part-level colours go. A part-level change takes the part's colour as it was and puts its fields on top (an
+`emission` alone keeps the colour; a `texture` replaces it). `reset: true` puts the part's own colours back.
+`material: "<id>"` names a library material (`library_material` in a document); an id the headset doesn't know is
+left out, with a warning (`unknown_material`). In a document these are `recolour` entries; `"material": null` in a
+change takes an entry out; one that reaches no part is kept, with a `no_such_part` warning (the `recolour`
+command refuses it instead).
 
 Widgets (the app draws them on the part; you only name them):
 

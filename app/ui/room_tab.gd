@@ -3,7 +3,7 @@ extends ScrollContainer
 ## The Room tab (docs/ui-design.md): environment (with photo rooms and glTF rooms, #18 / #53, and "use this picture
 ## as the room"), seat (#19), floor reflection (#62), the room's effects (bias light #29, reacting to the film #81,
 ## the projector beam #92, time of day #84), room light (and whether it dims while the film plays), screen
-## placement reset, recentre, the showing (curtains #37, up next #34, intermission #39), the sleep timer (#17), and the
+## placement reset, recentre, the objects (the object library: ui/object_section.gd), the showing (curtains #37, up next #34, intermission #39), the sleep timer (#17), and the
 ## watch party (#51, scripts/party/watch_party.gd): host, join, leave, who is in it, and "the host plays a file that
 ## isn't open here". Each control is also a command (scripts/dev/room_tab_commands.gd), which calls the same code and
 ## then sync().
@@ -12,6 +12,7 @@ const W := preload("res://ui/pane_widgets.gd")
 const EnvLibrary := preload("res://scripts/env/env_library.gd")
 const SearchForm := preload("res://ui/search_form.gd")
 const WatchParty := preload("res://scripts/party/watch_party.gd")
+const ObjectSection := preload("res://ui/object_section.gd")
 
 ## Find it: the Files tab searches for the host's file by name.
 signal find_requested(query: String)
@@ -69,6 +70,8 @@ var _party_form: SearchForm
 var _party_asking := ""
 var _party_ended := ""
 var _needed: Dictionary = {}
+## The object library's part of the tab (ui/object_section.gd).
+var objects: ObjectSection
 
 
 func _init() -> void:
@@ -173,6 +176,11 @@ func bind(p_app: Node) -> void:
 			W.button("Reset screen", func() -> void: app.reset_screen())]))
 	box.add_child(W.help("Reset room: back to the room's own seat, facing the screen, view recentred."))
 
+	# The object library (ui/object_section.gd): place things in the room and recolour their parts.
+	objects = ObjectSection.new()
+	box.add_child(objects)
+	objects.bind(app)
+
 	box.add_child(W.section("The showing"))
 	var preshow: Node = app.features.preshow
 	_curtains = W.toggle("Curtains", func(on: bool) -> void: preshow.set_enabled(on))
@@ -226,6 +234,7 @@ func bind(p_app: Node) -> void:
 func sync() -> void:
 	_sync_envs()
 	_sync_room_parts()
+	sync_objects()
 	_sync_showing()
 	W.set_slider(_light, app.room_light)
 	var follow: Node = app.features.light_follow
@@ -235,6 +244,12 @@ func sync() -> void:
 	_sync_sleep()
 	check_party()
 	_sync_party()
+
+
+## The objects section reads the library and the room again (object_commands.gd calls it after a change).
+func sync_objects() -> void:
+	if objects != null and not _form_open():
+		objects.sync_objects()
 
 
 func _sync_sleep() -> void:

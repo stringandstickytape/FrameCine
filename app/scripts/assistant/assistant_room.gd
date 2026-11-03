@@ -57,6 +57,8 @@ func _ready() -> void:
 			if n.has_node("Model"):
 				light_surfaces(n.get_node("Model"))
 	for r: Dictionary in doc.get("recolour", []):
+		if not RoomSchema.split_match(str(r["match"])).is_empty():
+			continue  # a placed model's part ("Shelf/Board"): done in build()
 		var mat := material(r.get("material", {}), _assets, "recolour:" + str(r["match"]))
 		for n in _base.find_children(str(r["match"]), "GeometryInstance3D", true, false):
 			(n as GeometryInstance3D).material_override = mat
@@ -197,11 +199,13 @@ static func build(p_doc: Dictionary, base: Node3D, assets: Dictionary, p_base_id
 		layer.add_child(fog(atmosphere["fog"]))
 	var motion: Node = RoomMotion.new()
 	motion.name = "Motion"
+	_shared_materials.clear()
 	for p: Dictionary in p_doc.get("parts", []):
 		var node := _part(p, assets)
 		layer.add_child(node)
 		if p.has("motion"):
 			motion.add(node, p)
+	_recolour_parts(layer, p_doc, assets)
 	if motion.count() > 0:
 		room.add_child(motion)
 	else:
@@ -343,6 +347,112 @@ static func _add_contact_shadows(layer: Node3D, p_doc: Dictionary) -> void:
 		mi.position = Vector3(box.get_center().x, 0.004, box.get_center().z)
 		mi.scale = Vector3(half.x + reach, 1.0, half.y + reach)
 		layer.add_child(mi)
+
+
+## Part-level recolours ("Shelf/Board", room_schema.gd): each entry's material fields over what the part showed (the
+## whole model's material when it has one, else the part's own colour), in the document's order, so an entry with only
+## an emission keeps the part's colour and a later entry wins where two set the same field. A picture replaces the
+## colour unless the entry gives one. Parts that end up alike share one material (two shelves painted the same).
+static func _recolour_parts(layer: Node3D, p_doc: Dictionary, assets: Dictionary) -> void:
+	var looks := {}
+	var whole := {}
+	for p: Dictionary in p_doc.get("parts", []):
+		if p.get("material") is Dictionary and not (p["material"] as Dictionary).is_empty():
+			whole[str(p["name"])] = p["material"]
+	for r: Dictionary in p_doc.get("recolour", []):
+		var split := RoomSchema.split_match(str(r["match"]))
+		if split.is_empty():
+			continue
+		var m: Dictionary = r.get("material", {}) if r.get("material") is Dictionary else {}
+		for mi: MeshInstance3D in part_targets(layer, str(r["match"])):
+			if not looks.has(mi):
+				var node: Node = mi
+				while node != null and node.get_parent() != layer:
+					node = node.get_parent()
+				var placed := str(node.name) if node != null else ""
+				var base: Dictionary = (whole[placed] as Dictionary).duplicate(true) if whole.has(placed) \
+						else {"color": _colour_of(mi) if _colour_of(mi) != "" else "#b0b0b0"}
+				# The whole model's picture, read under its part's key.
+				looks[mi] = {"m": base, "image": "part:" + placed if base.has("texture") or base.has("texture_file")
+						else ""}
+			var look: Dictionary = looks[mi]
+			var merged: Dictionary = (look["m"] as Dictionary).duplicate(true)
+			if m.has("texture") or m.has("texture_file"):
+				merged.erase("color")
+				look["image"] = "recolour:" + str(r["match"])
+			merged.merge(m, true)
+			look["m"] = merged
+	for mi: MeshInstance3D in looks:
+		var look: Dictionary = looks[mi]
+		var key: String = look["image"]
+		var plain: Dictionary = (look["m"] as Dictionary).duplicate()
+		plain.erase("texture")
+		plain.erase("texture_file")
+		var share := JSON.stringify(plain, "", true) + key
+		if not _shared_materials.has(share):
+			_shared_materials[share] = material(look["m"], assets, key)
+		mi.material_override = _shared_materials[share]
+
+
+## Materials shared by the parts of the room being built (cleared at each build).
+static var _shared_materials := {}
+
+
+## The parts of placed models a part-level match reaches ("Shelf*/Board?": a pattern on each side), in the layer.
+static func part_targets(layer: Node, match: String) -> Array:
+	var s := RoomSchema.split_match(match)
+	var out: Array = []
+	if s.is_empty() or layer == null:
+		return out
+	for n in layer.get_children():
+		if not (n is Node3D) or not n.has_node("Model") or not str(n.name).match(s[0]):
+			continue
+		var parts := RoomModel.parts_of(n.get_node("Model"))
+		for pn: String in parts:
+			if pn.match(s[1]):
+				out.append(parts[pn])
+	return out
+
+
+## The models placed from the object library (parts with "object"), for room_state and the Room tab:
+## [{name, object, parts: [{name, color, recolour: the entry that sets it last, or null}]}].
+static func placed_objects(env: Node) -> Array:
+	var out: Array = []
+	if env == null or env.get_script() != load("res://scripts/assistant/assistant_room.gd"):
+		return out
+	var d: Dictionary = env.get("doc")
+	var layer: Node = env.get_node_or_null(LAYER)
+	for p: Dictionary in d.get("parts", []):
+		if not p.has("object"):
+			continue
+		var node: Node = layer.get_node_or_null(str(p["name"])) if layer != null else null
+		var parts: Array = []
+		var by_name := RoomModel.parts_of(node.get_node_or_null("Model") if node != null else null)
+		for pn: String in by_name:
+			var set_by: Variant = null
+			for r: Dictionary in d.get("recolour", []):
+				var s := RoomSchema.split_match(str(r["match"]))
+				if not s.is_empty() and str(p["name"]).match(s[0]) and pn.match(s[1]):
+					set_by = r["match"]
+			parts.append({"name": pn, "color": _colour_of(by_name[pn]), "recolour": set_by})
+		out.append({"name": p["name"], "object": p["object"], "position": p.get("position", [0, 0, 0]),
+				"rotation": p.get("rotation", [0, 0, 0]), "scale": p.get("scale", 1.0), "parts": parts})
+	return out
+
+
+## Where a material library would live (another part of the app may add it): material_for(id) -> material object
+## fields, or {} when it doesn't know the id. Until then every id is unknown: left out, with a warning.
+const MATERIAL_LIBRARY := "res://scripts/assistant/material_library.gd"
+
+
+static func library_material(id: String) -> Dictionary:
+	if not ResourceLoader.exists(MATERIAL_LIBRARY):
+		return {}
+	var s := load(MATERIAL_LIBRARY) as GDScript
+	if s == null or not s.get_script_method_list().any(func(f: Dictionary) -> bool: return f["name"] == "material_for"):
+		return {}
+	var found: Variant = s.call("material_for", id)
+	return found if found is Dictionary else {}
 
 
 func _enter_tree() -> void:
@@ -628,6 +738,12 @@ static func _aabb(n: Node3D) -> AABB:
 ## self_lit: the surface shows at its own brightness whatever the room's light. A part with a texture is self_lit
 ## unless it says "self_lit": false, and its colour defaults to white, so a picture looks like the picture.
 static func material(m: Dictionary, assets: Dictionary, image_key: String) -> Material:
+	if m.has("library_material"):
+		# A library material's fields under the ones given; an unknown id adds nothing (room_editor.gd warns).
+		var merged := library_material(str(m["library_material"])).duplicate(true)
+		merged.merge(m, true)
+		merged.erase("library_material")
+		m = merged
 	var mat := ShaderMaterial.new()
 	var img: Image = assets.get("images", {}).get(image_key)
 	var textured := img != null or m.has("texture") or m.has("texture_file")
@@ -933,7 +1049,12 @@ static func save(p_doc: Dictionary, name: String) -> String:
 	var out := p_doc.duplicate(true)
 	out["name"] = name
 	var n := [0]
+	# The same data twice (a library object placed twice) is one file.
+	var written := {}
 	var write := func(b64: String, ext: String) -> String:
+		var key := b64.md5_text()
+		if written.has(key):
+			return written[key]
 		n[0] += 1
 		var file := "%02d.%s" % [n[0], ext]
 		var f := FileAccess.open(files_dir(name).path_join(file), FileAccess.WRITE)
@@ -941,6 +1062,7 @@ static func save(p_doc: Dictionary, name: String) -> String:
 			return ""
 		f.store_buffer(Marshalls.base64_to_raw(b64))
 		f.close()
+		written[key] = file
 		return file
 	if out.has("base_model"):
 		out["base_model_file"] = write.call(out["base_model"], "glb")
@@ -958,7 +1080,7 @@ static func save(p_doc: Dictionary, name: String) -> String:
 			m["texture_file"] = write.call(m["texture"], "img")
 			m.erase("texture")
 	for r: Dictionary in out.get("recolour", []):
-		var m: Dictionary = r.get("material", {})
+		var m: Dictionary = r.get("material", {}) if r.get("material") is Dictionary else {}
 		if m.has("texture"):
 			m["texture_file"] = write.call(m["texture"], "img")
 			m.erase("texture")

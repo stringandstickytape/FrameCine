@@ -21,6 +21,7 @@ const AndroidApps := preload("res://scripts/android/android_apps.gd")
 const RoomTabCommands := preload("res://scripts/dev/room_tab_commands.gd")
 const SystemTabCommands := preload("res://scripts/dev/system_tab_commands.gd")
 const FilesCommands := preload("res://scripts/dev/files_commands.gd")
+const ObjectCommands := preload("res://scripts/assistant/object_commands.gd")
 const NODE_NAME := "CommandHost"
 
 ## The main scene (scripts/main.gd): the tree's current scene.
@@ -82,6 +83,8 @@ func _register() -> void:
 	files = FilesCommands.new()
 	files.host = self
 	files.register_all()
+	# The object library (scripts/assistant/object_library.gd): the Room tab's objects as commands.
+	ObjectCommands.register_commands(self)
 	# Loaded, not preloaded: the agents reach the assistant service, which preloads this file.
 	load("res://scripts/agents/local_agents.gd").register_commands(self)
 

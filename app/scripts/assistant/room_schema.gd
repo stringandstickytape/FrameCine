@@ -2,22 +2,26 @@ extends RefCounted
 
 ## The room document (docs/assistant.md, "Rooms"): the data an assistant sends to build or change the room. Data only:
 ## nothing in it is run, evaluated or loaded as a script; models are glTF binaries read with the engine's GLTFDocument
-## and checked (assistant_room.gd). Schema 1:
+## and checked (assistant_room.gd). Schema 2 (schema 1 is still read: it is schema 2 without objects and part
+## addressing):
 ##
-##   {"schema": 1,
+##   {"schema": 2,
 ##    "name": "Lounge at dusk",                    what the kept room is called (letters, digits, space, - _; <= 40)
 ##    "base": "dim_room",                          new_room: a stock room id (room_state lists them), or
 ##    "base_model": "<base64 .glb>",               new_room: a whole room as glTF (app/docs/rooms.md convention)
 ##    "light": {"ambient": 0.2, "screen_glow": 0.6},
 ##    "sky": {"color": "#0a1020"} or {"image": "<base64 PNG/JPEG>"} or {} (none),
 ##    "parts": [part, ...],                        added, or replaced when the name exists
-##    "recolour": [{"match": "Wall*", "material": material}, ...],   the base room's own parts, by name pattern
+##    "recolour": [{"match": "Wall*", "material": material}, ...],   the base room's own parts, by name pattern;
+##                 "Shelf/Board" (schema 2): the part Board inside the placed model Shelf (both sides patterns);
+##                 "material": null in a change takes an entry out again (the part shows its own colours)
 ##    "remove": ["lamp"],                          patch: parts the assistant added before
 ##    "lights": []}                                always empty: the rooms are unlit (use emission)
 ##   part: {"name": "lamp", "type": "box" | "sphere" | "cylinder" | "plane" | "model" | "text",
 ##          "size": [w, h, d] (box) / [diameter] (sphere) / [diameter, height] (cylinder) / [width, depth] (plane)
 ##                  / [line height] (text, default 0.1),
 ##          "model": "<base64 .glb>" (type model),
+##          "object": "shelf" (type model, schema 2): the object library's id it was placed from (object_library.gd),
 ##          "text": "Now showing", "text_options": {color, background, weight, align, max_width} (type text),
 ##          "position": [x, y, z] metres (the room frame: the seat at the origin facing -Z, the floor at y = 0),
 ##          "rotation": [x, y, z] degrees, "scale": s or [x, y, z],
@@ -25,7 +29,9 @@ extends RefCounted
 ##   material: {"color": "#rrggbb" or [r, g, b], "emission": "#rrggbb", "emission_strength": 0..10,
 ##              "texture": "<base64 PNG/JPEG>", "self_lit": bool (default: true with a texture),
 ##              "uv": "atlas" | "each_face" | "front_only" (box only; how the picture lies on it),
-##              "roughness": 0..1 (accepted; the rooms are unlit)}
+##              "roughness": 0..1 (accepted; the rooms are unlit),
+##              "library_material": "oak" (schema 2): a material library's id; its fields under the ones given here;
+##                                  an id the app doesn't know is left out with a warning (assistant_room.gd)}
 ##   shown = color x texture x (self_lit ? 1 : the room's light) + emission x emission_strength (assistant_room.gd)
 ##
 ## validate(doc, mode) checks a whole document and returns every problem with its JSON path, so an assistant can fix
@@ -33,7 +39,11 @@ extends RefCounted
 ## back from disk, where models and pictures are files next to it: model_file, texture_file, image_file,
 ## base_model_file).
 
-const VERSION := 1
+const VERSION := 2
+## The versions read: 1 is 2 without objects ("object"), part addressing ("Shelf/Board") and library materials.
+const VERSIONS: Array[int] = [1, 2]
+## An object library id (object_library.gd) or a library material's: lower-case letters, digits, - and _.
+const ID_MAX := 64
 const PART_TYPES: Array[String] = ["box", "sphere", "cylinder", "plane", "model", "text", "particles"]
 const PARTICLES_SCRIPT := "res://scripts/assistant/room_particles.gd"
 const NAME_MAX := 40
@@ -94,6 +104,8 @@ const COSTS := {
 	"part": 0.2,
 	"model": 2.0,              # a model's draws, plus model_per_10k_triangles
 	"model_per_10k_triangles": 1.0,
+	"model_part": 0.2,         # each part of a model past the first: a draw call, as a shape
+	"part_recolour": 0.05,     # a part-level recolour: one more material (its draw call is counted already)
 	"text": 1.0,               # a Label3D
 	"widget": 2.0,             # a canvas redrawn now and then, and its quad
 	"blend": 1.0,              # see-through: drawn in the transparent pass, over what is behind
@@ -147,6 +159,10 @@ const LIMITS := {
 	"lights": 4,
 	"extent_m": 200.0,
 	"seats": 12,
+	# A model's parts (its mesh nodes, each addressable as "<name>/<part>") and the room's recolour entries: each part
+	# is a draw call of its own, and each recolour a material.
+	"model_parts": 128,
+	"recolours": 256,
 }
 
 ## The room's screen, as seen from each seat's eyes (the seat's floor point + NOMINAL_EYE_HEIGHT): its width at least
@@ -275,8 +291,12 @@ static func validate(doc: Variant, mode: String) -> Dictionary:
 	for k: Variant in d:
 		if not (str(k) in known):
 			errors.append(_e("$.%s" % k, "unknown key (known: %s)" % ", ".join(known)))
-	if int(_num(d.get("schema", 0))) != VERSION:
-		errors.append(_e("$.schema", "must be %d" % VERSION))
+	var version := int(_num(d.get("schema", 0))) if is_finite(_num(d.get("schema", 0))) else 0
+	if not (version in VERSIONS):
+		errors.append(_e("$.schema", "must be %d (%d is still read)" % [VERSION, VERSIONS[0]]))
+	elif version < 2:
+		for p: String in _schema2_paths(d):
+			errors.append(_e(p, "needs \"schema\": 2 (objects, \"name/part\" matches and library materials)"))
 	if d.has("name") and not _name_ok(d["name"]):
 		errors.append(_e("$.name", "letters, digits, space, - and _, at most %d" % NAME_MAX))
 	if mode == "patch" and (d.has("base") or d.has("base_model")):
@@ -322,6 +342,8 @@ static func validate(doc: Variant, mode: String) -> Dictionary:
 			errors.append(_e("$.recolour", "a list of {match, material}"))
 		else:
 			var rs: Array = d["recolour"]
+			if rs.size() > int(LIMITS["recolours"]):
+				errors.append(_e("$.recolour", "recolours: %d, at most %d" % [rs.size(), LIMITS["recolours"]]))
 			for i in rs.size():
 				var p := "$.recolour[%d]" % i
 				if not (rs[i] is Dictionary):
@@ -333,6 +355,11 @@ static func validate(doc: Variant, mode: String) -> Dictionary:
 						errors.append(_e("%s.%s" % [p, k], "unknown key"))
 				if not (r.get("match") is String) or str(r.get("match")).strip_edges() == "":
 					errors.append(_e(p + ".match", "a part name or pattern (* and ?)"))
+				elif str(r["match"]).contains("/") and split_match(str(r["match"])).is_empty():
+					errors.append(_e(p + ".match", "\"<placed name>/<part name>\": one / with a pattern on each side "
+							+ "(object_info lists a placed object's parts)"))
+				if r.has("material") and r["material"] == null and mode != "patch":
+					errors.append(_e(p + ".material", "null takes an entry out: only in a change to the room on show"))
 				_material(r.get("material"), p + ".material", mode, errors)
 	if d.has("remove"):
 		if mode != "patch":
@@ -344,6 +371,44 @@ static func validate(doc: Variant, mode: String) -> Dictionary:
 
 static func _e(path: String, error: String) -> Dictionary:
 	return {"path": path, "error": error}
+
+
+## A part-level match ("Shelf*/Board") as [object pattern, part pattern]; [] for a bare name or a malformed one.
+static func split_match(match: String) -> Array:
+	var bits := match.split("/")
+	if bits.size() != 2 or bits[0].strip_edges() == "" or bits[1].strip_edges() == "":
+		return []
+	return [bits[0], bits[1]]
+
+
+## A library id (an object's, a material's): lower-case letters, digits, - and _, at most ID_MAX.
+static func id_ok(v: Variant) -> bool:
+	if not (v is String) or (v as String).is_empty() or (v as String).length() > ID_MAX:
+		return false
+	for c in v as String:
+		if not ((c >= "a" and c <= "z") or (c >= "0" and c <= "9") or c in "-_"):
+			return false
+	return true
+
+
+## Where a document uses what schema 1 lacks: a part's "object", a "name/part" match, "library_material".
+static func _schema2_paths(d: Dictionary) -> Array:
+	var out: Array = []
+	var parts: Array = d.get("parts", []) if d.get("parts") is Array else []
+	for i in parts.size():
+		if parts[i] is Dictionary:
+			if (parts[i] as Dictionary).has("object"):
+				out.append("$.parts[%d].object" % i)
+			if parts[i].get("material") is Dictionary and (parts[i]["material"] as Dictionary).has("library_material"):
+				out.append("$.parts[%d].material.library_material" % i)
+	var rs: Array = d.get("recolour", []) if d.get("recolour") is Array else []
+	for i in rs.size():
+		if rs[i] is Dictionary:
+			if str(rs[i].get("match", "")).contains("/"):
+				out.append("$.recolour[%d].match" % i)
+			if rs[i].get("material") is Dictionary and (rs[i]["material"] as Dictionary).has("library_material"):
+				out.append("$.recolour[%d].material.library_material" % i)
+	return out
 
 
 static func _num(v: Variant) -> float:
@@ -712,9 +777,12 @@ static func _material(v: Variant, path: String, mode: String, errors: Array) -> 
 					_file(m[k], p, errors)
 				else:
 					errors.append(_e(p, "unknown key"))
+			"library_material":
+				if not id_ok(m[k]):
+					errors.append(_e(p, "a library material's id: lower-case letters, digits, - and _"))
 			_:
 				errors.append(_e(p, "unknown key (color, emission, emission_strength, texture, self_lit, alpha, uv, "
-						+ "effect, roughness)"))
+						+ "effect, roughness, library_material)"))
 
 
 static func _part(v: Variant, path: String, mode: String, names: Dictionary, errors: Array) -> void:
@@ -723,9 +791,12 @@ static func _part(v: Variant, path: String, mode: String, names: Dictionary, err
 		return
 	var p: Dictionary = v
 	var known := ["name", "type", "size", "model", "text", "text_options", "position", "rotation", "scale",
-			"material", "widget", "widget_options", "motion", "particles"]
+			"material", "widget", "widget_options", "motion", "particles", "object"]
 	if mode == "saved":
 		known.append("model_file")
+	if p.has("object") and (str(p.get("type", "")) != "model" or not id_ok(p["object"])):
+		errors.append(_e(path + ".object", "type model only: the object library's id it was placed from "
+				+ "(object_library lists them)"))
 	for k: Variant in p:
 		if not (str(k) in known):
 			errors.append(_e("%s.%s" % [path, k], "unknown key (known: %s)" % ", ".join(known)))
@@ -900,12 +971,13 @@ static func with_defaults(spec: Dictionary, given: Variant) -> Dictionary:
 	return out
 
 
-## What a part costs (COSTS); model_triangles: the model's, once read.
-static func part_cost(p: Dictionary, model_triangles := 0) -> float:
+## What a part costs (COSTS); model_triangles and model_parts: the model's, once read.
+static func part_cost(p: Dictionary, model_triangles := 0, model_parts := 1) -> float:
 	var c: float = COSTS["part"]
 	match str(p.get("type", "")):
 		"model":
-			c = COSTS["model"] + COSTS["model_per_10k_triangles"] * model_triangles / 10000.0
+			c = COSTS["model"] + COSTS["model_per_10k_triangles"] * model_triangles / 10000.0 \
+					+ COSTS["model_part"] * maxi(model_parts - 1, 0)
 		"text":
 			c = COSTS["text"]
 		"particles":
@@ -1000,7 +1072,14 @@ static func merge(current: Dictionary, patch: Dictionary) -> Dictionary:
 	var rec: Array = out.get("recolour", []).duplicate()
 	for r: Dictionary in patch.get("recolour", []):
 		rec = rec.filter(func(x: Dictionary) -> bool: return x["match"] != r["match"])
-		rec.append(r.duplicate(true))
+		# "material": null takes the entry out (the part shows its own colours again).
+		if not (r.has("material") and r["material"] == null):
+			rec.append(r.duplicate(true))
+	# A removed part's own part-level entries ("Shelf/Board" when Shelf goes) go with it.
+	for name: Variant in patch.get("remove", []):
+		rec = rec.filter(func(x: Dictionary) -> bool:
+			var s := split_match(str(x["match"]))
+			return s.is_empty() or s[0] != str(name))
 	out["recolour"] = rec
 	return out
 

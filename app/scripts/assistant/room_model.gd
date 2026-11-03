@@ -6,9 +6,15 @@ extends RefCounted
 ## loading runs on a worker thread (room_editor.gd), so the frame never waits for it.
 ##
 ##   precheck(bytes) -> "" or why it is refused                  (the GLB container, its JSON, extensions, URIs)
-##   load_glb(bytes) -> {node, triangles, textures, removed, turned} or {error}   (worker-safe: nodes not in a tree)
+##   load_glb(bytes) -> {node, triangles, textures, removed, turned, parts} or {error}   (worker-safe: not in a tree)
 ##   turn_inside_out_shapes(mesh) -> [the fixed ArrayMesh or null, how many shapes were turned]
 ##   decode_image(bytes) -> {image} or {error}
+##   parts_of(node) -> {part name: MeshInstance3D}                 a read model's parts (meta PART_META)
+##
+## A model's parts (docs/assistant.md, "Objects"): every mesh node of the file, named by its glTF node name, else its
+## mesh's name, else part_1, part_2, ... in the file's node order; made plain (letters, digits, space, - and _) and
+## unique (Board, Board_2). The name is kept on the MeshInstance3D as meta PART_META, so a placed copy's parts can be
+## addressed as "<placed name>/<part name>".
 
 const GltfRoom := preload("res://scripts/env/gltf_room.gd")
 const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
@@ -24,6 +30,9 @@ const ALLOWED_EXTENSIONS: Array[String] = [
 ]
 ## Keys in a file's "extras" that ask for code to run somewhere: refused outright.
 const SCRIPT_KEYS: Array[String] = ["script", "gdscript", "code", "eval", "javascript", "shader"]
+## The meta on a model's MeshInstance3D that holds its part name.
+const PART_META := "object_part"
+const PART_NAME_MAX := 40
 
 
 static func precheck(bytes: PackedByteArray) -> String:
@@ -85,6 +94,7 @@ static func load_glb(bytes: PackedByteArray) -> Dictionary:
 	var scene := doc.generate_scene(state)
 	if scene == null:
 		return {"error": "the .glb has no scene"}
+	_name_parts(_json_of(bytes), state, scene)
 	var removed: Array[String] = []
 	for n in scene.find_children("*", "", true, false):
 		if n is AnimationPlayer or n is AnimationTree or n is Camera3D or n is Light3D or n is AudioStreamPlayer3D \
@@ -104,22 +114,90 @@ static func load_glb(bytes: PackedByteArray) -> Dictionary:
 				turned += int(t[1])
 	var triangles := 0
 	var textures := {}
+	var parts: Array = []
 	for mi: MeshInstance3D in scene.find_children("*", "MeshInstance3D", true, false):
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		if mi.mesh == null:
 			continue
+		var part := {"name": str(mi.get_meta(PART_META, mi.name)), "color": "", "texture": false, "triangles": 0}
 		for s in mi.mesh.get_surface_count():
 			var idx: int = mi.mesh.surface_get_array_index_len(s)
-			triangles += (idx if idx > 0 else mi.mesh.surface_get_array_len(s)) / 3
+			var n: int = (idx if idx > 0 else mi.mesh.surface_get_array_len(s)) / 3
+			triangles += n
+			part["triangles"] += n
 			var src := mi.get_active_material(s) as BaseMaterial3D
 			if src != null and src.albedo_texture != null:
 				textures[src.albedo_texture.get_rid()] = src.albedo_texture
+				part["texture"] = true
+			if s == 0:
+				part["color"] = "#" + (src.albedo_color.to_html(false) if src != null else "808080")
 			mi.set_surface_override_material(s, GltfRoom.convert_material(mi.get_active_material(s)))
+		parts.append(part)
 	var biggest := 0
 	for t: Texture2D in textures.values():
 		biggest = maxi(biggest, maxi(t.get_width(), t.get_height()))
 	return {"node": scene, "triangles": triangles, "textures": textures.size(), "texture_size": biggest,
-			"removed": removed, "turned": turned}
+			"removed": removed, "turned": turned, "parts": parts}
+
+
+## The .glb's JSON chunk (precheck() has read it already), or {}.
+static func _json_of(bytes: PackedByteArray) -> Dictionary:
+	var json_len := bytes.decode_u32(12)
+	var j := JSON.new()
+	if j.parse(bytes.slice(20, 20 + json_len).get_string_from_utf8()) != OK or not (j.data is Dictionary):
+		return {}
+	return j.data
+
+
+## Names each mesh node's part (meta PART_META): its glTF node name, else its mesh's, else part_N; plain and unique.
+static func _name_parts(g: Dictionary, state: GLTFState, scene: Node) -> void:
+	var nodes: Array = g.get("nodes", []) if g.get("nodes") is Array else []
+	var meshes: Array = g.get("meshes", []) if g.get("meshes") is Array else []
+	# The engine names each scene node after its GLTFNode, unique in the file (the state's own node map points at
+	# the importer's nodes, freed once the scene is made).
+	var gltf_nodes := state.get_nodes()
+	var taken := {}
+	var unnamed := 0
+	for i in nodes.size():
+		var n: Variant = nodes[i]
+		if not (n is Dictionary) or not (n as Dictionary).has("mesh") or i >= gltf_nodes.size():
+			continue
+		var godot_name := String(gltf_nodes[i].resource_name)
+		var scene_node: Node = scene if String(scene.name) == godot_name else scene.find_child(godot_name, true, false)
+		if not (scene_node is MeshInstance3D):
+			continue
+		var name := plain_part_name(str(n.get("name", "")))
+		var m := int(n["mesh"])
+		if name == "" and m >= 0 and m < meshes.size() and meshes[m] is Dictionary:
+			name = plain_part_name(str(meshes[m].get("name", "")))
+		if name == "":
+			unnamed += 1
+			name = "part_%d" % unnamed
+		var unique := name
+		var k := 2
+		while taken.has(unique):
+			unique = "%s_%d" % [name.left(PART_NAME_MAX - 4), k]
+			k += 1
+		taken[unique] = true
+		scene_node.set_meta(PART_META, unique)
+
+
+## A part name made plain: letters, digits, space, - and _ (anything else becomes _), at most PART_NAME_MAX.
+static func plain_part_name(text: String) -> String:
+	var out := ""
+	for c in text.strip_edges():
+		out += c if c.is_valid_identifier() or c.is_valid_int() or c in " -_" else "_"
+	return out.strip_edges().left(PART_NAME_MAX)
+
+
+## A read model's parts by name (its MeshInstance3D nodes with PART_META; a node without it, by its own name).
+static func parts_of(node: Node) -> Dictionary:
+	var out := {}
+	if node == null:
+		return out
+	for mi: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
+		out[str(mi.get_meta(PART_META, mi.name))] = mi
+	return out
 
 
 ## Closed shapes built inside out (normals in, triangles wound the wrong way) turned the right way. Seen on the Frame

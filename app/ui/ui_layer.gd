@@ -118,6 +118,10 @@ const SEAT_RING_RADIUS := 0.32
 var _seat_pick := false
 var _seat_aim := {}
 var _seat_ring: MeshInstance3D
+## Placing or moving a library object (the Room tab's Place and Move): ui/object_placer.gd, made on first use. Like
+## seat picking, it takes the laser, the trigger and the pointer controller's stick; B or menu cancels.
+var _placer: ObjectPlacer
+const ObjectPlacer := preload("res://ui/object_placer.gd")
 
 
 ## Called by the app once its nodes are ready.
@@ -453,7 +457,7 @@ func hide_panel() -> void:
 
 ## Opens or closes the panel (seat picking: cancels that instead). hand: the pointer when it opens.
 func toggle_panel(hand: XRHand = null) -> void:
-	if cancel_seat_pick():
+	if cancel_seat_pick() or cancel_object_place():
 		return
 	if _open:
 		hide_panel()
@@ -472,10 +476,11 @@ func recentre() -> void:
 ## brings it in front of the head (with that controller as the pointer). Seat picking: the press cancels it.
 func on_menu(hand: XRHand, pressed: bool) -> bool:
 	if pressed:
-		var cancel := _seat_pick
+		var cancel := _seat_pick or is_placing_object()
 		match menu.press(hand, _open, cancel):
 			"cancel":
 				cancel_seat_pick()
+				cancel_object_place()
 			"open":
 				show_panel(hand)
 	elif menu.release(hand) == "close":
@@ -552,7 +557,10 @@ func _update_pointer() -> void:
 	var laser_on := _pointed or _card_pointed
 	if not (_seat_pick and not laser_on) and seat_ring_shown():
 		_seat_ring.visible = false
-	if _seat_pick and not laser_on and pointer_hand.get_is_active():
+	if is_placing_object() and not laser_on and pointer_hand.get_is_active():
+		pointer_hand.set_laser(true, _placer.update(pointer_hand), true, PaneStyle.color(&"laser"),
+				PaneStyle.color(&"laser_dot"))
+	elif _seat_pick and not laser_on and pointer_hand.get_is_active():
 		var o := pointer_hand.get_ray_origin()
 		var d := pointer_hand.get_ray_direction()
 		_seat_aim = aimed_seat(o, d)
@@ -667,9 +675,64 @@ func cancel_seat_pick() -> bool:
 	return true
 
 
-## The main.gd hook for B (the right hand's "previous file" button): cancels seat picking.
+## The main.gd hook for B (the right hand's "previous file" button): cancels seat picking or placing an object.
 func on_back(_hand: XRHand) -> bool:
-	return cancel_seat_pick()
+	return cancel_seat_pick() or cancel_object_place()
+
+
+## Place (the Room tab's objects): the panel goes, and the object follows the laser on the walls and the floor until
+## the trigger sets it (ui/object_placer.gd).
+func start_object_place(id: String) -> bool:
+	return _start_placer(_ensure_placer().start_place(id))
+
+
+## Move: the same for something already in the room.
+func start_object_move(placed_name: String) -> bool:
+	return _start_placer(_ensure_placer().start_move(placed_name))
+
+
+func _start_placer(started: bool) -> bool:
+	if not started:
+		notify("That object can't be placed here")
+		return false
+	cancel_seat_pick()
+	hide_panel()
+	notify("Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels.")
+	return true
+
+
+func _ensure_placer() -> ObjectPlacer:
+	if _placer == null:
+		_placer = ObjectPlacer.new()
+		_placer.name = "ObjectPlacer"
+		_placer.app = app
+		add_child(_placer)
+	return _placer
+
+
+func is_placing_object() -> bool:
+	return _placer != null and _placer.active()
+
+
+## B or menu while placing: nothing changes. True when it was placing (the button is used up).
+func cancel_object_place() -> bool:
+	if _placer == null or not _placer.cancel():
+		return false
+	notify("Nothing placed")
+	return true
+
+
+## The trigger while placing: sets the object where it shows. The panel comes back (the object's parts are there) and
+## its footer says so, with Undo.
+func _commit_object() -> void:
+	var r: Dictionary = await _placer.commit()
+	if r.get("ok") == true:
+		var said := str(r.get("summary", "placed"))
+		show_panel()
+		ui.show_toast(said.left(1).to_upper() + said.substr(1), "Undo" if r.get("undo") is Callable else "",
+				r.get("undo", Callable()), 8.0)
+	else:
+		notify(str(r.get("error", "Not placed")))
 
 
 func is_picking_seat() -> bool:
@@ -750,6 +813,11 @@ func seat_ring_shown() -> bool:
 func on_trigger(hand: XRHand, pressed: bool) -> bool:
 	if hand != pointer_hand:
 		return false
+	if is_placing_object() and not _pointed and not _card_pointed:
+		if pressed:
+			_commit_object()
+			hand.pulse()
+		return true
 	if _seat_pick and not _pointed and not _card_pointed:
 		if pressed:
 			pick_seat(_seat_aim)
@@ -786,6 +854,12 @@ func on_stick(hand: XRHand, stick: Vector2, delta: float) -> bool:
 	var gaze: Node = app.features.get_node_or_null("EyeGaze") if app.features != null else null
 	if gaze != null and gaze.calibrating:
 		return true
+	if is_placing_object() and not _pointed:
+		# The pointer controller's stick turns and sizes the object; the other one's is left alone.
+		if hand == pointer_hand:
+			_placer.on_stick(stick, delta)
+			return true
+		return false
 	if _pointed:
 		var axis := stick.y
 		if panel.hovered_control() is Slider and absf(stick.x) > absf(stick.y):

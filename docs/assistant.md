@@ -194,7 +194,7 @@ The headset serves two Python files (3.8+, standard library), kept in `app/assis
   - Hand-made tools: `get_status`, `wait_for_viewer_message`, `get_recent_viewer_messages`, `answer_viewer`,
     `look_at_room` (the snapshot as an image).
   - Any base64 field also takes a file on that machine: `model_path`, `texture_path`, `image_path`,
-    `base_model_path`, `sky_image_path`.
+    `base_model_path`, `sky_image_path`, `data_path` (`object_import`'s file).
   - `--config FILE` takes a JSON file from `pair --save` or a curl config such as `.assistant-link`.
   - The tools take the commands' own names (`state`, `card`, `room_apply`); older adapters had `get_state`,
     `show_card`, `change_room`.
@@ -209,10 +209,14 @@ With "Let the assistant change the room" on, the assistant can rebuild the room 
 recolour it. It sends data, never code. Nothing it sends is run, evaluated or loaded as a script on the headset. An
 assistant can run any code on its own machine and send only the result (a model, a picture, a document).
 
-### The room document (schema 1)
+### The room document (schema 2)
+
+Schema 2 is schema 1 with objects (a model part's `object`), part addressing (`"Shelf/Board"` in `recolour`) and
+library materials (`library_material`); a schema 1 document is still read, and one that uses those is refused with
+"needs schema 2". Kept rooms are written as schema 2.
 
 ```json
-{"schema": 1,
+{"schema": 2,
  "name": "Lounge at dusk",
  "base": "dim_room",
  "light": {"ambient": 0.2, "screen_glow": 0.6},
@@ -227,7 +231,7 @@ assistant can run any code on its own machine and send only the result (a model,
 
 | Key | What |
 |---|---|
-| `schema` | 1 |
+| `schema` | 2 (1 is still read) |
 | `name` | what the viewer keeps the room as (letters, digits, space, - and _; up to 40) |
 | `base` | `new_room` only: a room id from `room_state`'s `bases` (void, dim room, cinema, the built-in rooms, photo and glTF rooms, recipes) |
 | `base_model` | `new_room` only, instead of `base`: a whole room as a `.glb`, base64 (`app/docs/rooms.md` convention) |
@@ -238,13 +242,14 @@ assistant can run any code on its own machine and send only the result (a model,
 | `default_seat` | a seat's name: where a viewer opening the room starts (never on an assistant's change) |
 | `screen` | `{center, size [w, h], facing, curve 0..1, home}`: the room's own screen, its home placement |
 | `parts` | added, or replaced when the name exists |
-| `recolour` | the base room's own parts by name pattern (`*`, `?`; case matters); `room_state` lists them |
+| `recolour` | the base room's own parts by name pattern (`*`, `?`; case matters); `room_state` lists them. `"<placed>/<part>"`: a part inside a placed model (below, "Objects"); `"material": null` in a change takes an entry out |
 | `remove` | `room_apply` only: parts the assistant added |
 | `light` | `ambient`, `screen_glow` (the flat look); `key`, `sky`, `screen`, `contact_shadows` (real lighting, below) |
 | `lights` | at most 4 point or spot lights: `position` or `attach`, color, energy, range, flicker; no shadows |
 
 A part: `name`, `type` (`box` size [w, h, d]; `sphere` [diameter]; `cylinder` [diameter, height], round faces up
-and down; `plane` [w, d], facing up; `model` with `"model": base64 .glb`), `position` [x, y, z] in metres (the room
+and down; `plane` [w, d], facing up; `model` with `"model": base64 .glb`, and `"object": "<library id>"` when it was
+placed from the object library), `position` [x, y, z] in metres (the room
 frame, below), `rotation` [x, y, z] in degrees, `scale` (a number or [x, y, z]), `material` (`color`, `texture`
 base64 PNG/JPEG, `self_lit`, `emission`, `emission_strength` 0..10, `roughness` accepted but the rooms are unlit),
 `widget` and `widget_options`.
@@ -390,6 +395,103 @@ refused); no outside files (a `uri` that is not `data:`); no script, code or eva
 reads it with GLTFDocument on a worker thread (the frame never waits). After reading: animation players, cameras,
 lights and audio players are removed, and the materials become the rooms' unlit ones.
 
+A model's **parts** are its mesh nodes (`room_model.gd`): each named by its glTF node name, else its mesh's name, else
+`part_1`, `part_2`, ... in the file's node order; made plain (letters, digits, space, - and _; anything else `_`) and
+unique (`Board`, `Board_2`). The name stays on the MeshInstance3D (meta `object_part`), so it is stable however the
+model was made.
+
+### Objects (the object library)
+
+"However objects were created, the app must be able to identify their parts and do whatever with them." The object
+library (`scripts/assistant/object_library.gd`) keeps things to put in a room: each a `.glb` and a small manifest.
+
+| Where | What |
+|---|---|
+| Built in (`object_builtins.gd`) | Made in the app from primitive meshes, so the repository holds no model files and nothing anyone else made: Picture frame (Frame, Mount, Picture: a quad that takes a picture whole), Wall shelf (Board, Brackets), Pot plant (Pot, Soil, Leaves), Wall clock (Rim, Face, with the `clock` widget drawing the hands). Written as a `.glb` once a session and read back like any import. |
+| The viewer's (`user://objects/<id>/`) | `object.glb`, `manifest.json`, `thumb.png`. Never under `res://`: an imported object may hold anything the viewer gave, logos too, so it stays in the user's data. A deleted one waits in `user://objects/.deleted/` until its undo is dropped. |
+
+A manifest: `{id, name, tags, source (builtin or user), mount (wall, floor, table, ceiling or free), size [w, h, d],
+bounds {min, max}, triangles, parts: [{name, color, texture, triangles}], widget?, widget_options?}`. The catalogue is
+the built-ins and the folder as it is on disk, so it survives restarts. Thumbnails are drawn in the app without the GPU
+(`object_thumb.gd`: the triangles from the front, a little from above and the right, in the parts' colours, shaded,
+on a clear background), on a worker thread: they never wait for a frame or stall the headset.
+
+**Importing.** A `.glb` is taken as it is, checked like any room model (no scripts, no outside files, only material
+and geometry extensions) and against the limits (`model_triangles`, `model_parts`, `texture_size`). An **SVG** is made
+solid in the app (`svg_extrude.gd`, GDScript, no outside tools):
+
+- Path data `M L H V C S Q T A Z` (absolute and relative, implicit repeats, arc flags without separators), `rect`
+  (rounded too), `circle`, `ellipse`, `polygon`, `polyline`; transforms on paths and groups; the root's `viewBox`;
+  fills from attributes, a `<style>` block's `.class` and `#id` rules and `style=""`; `fill-rule` nonzero and evenodd.
+- Curves flattened to within 0.4 mm at the model's size. A shape's outlines are sorted by its fill rule into outer
+  edges and holes (a sample just inside and just outside each outline's longest edge), its faces cut into pieces
+  without holes (a vertical cut through each hole, the engine's polygon clipping) and triangulated (Geometry2D), then
+  extruded to `depth` (2 cm) with a chamfer of `bevel` (by default the smaller of 8 % of the depth and 0.2 % of the
+  width; none where it would turn an outline inside out). UVs: front and back planar over the whole drawing (a picture
+  lies on the front as on the drawing), the sides wrapped round each outline. Later shapes stand a hair forward, so
+  overlapping colours never fight. The front faces +Z, the back is at z = 0.
+- Each top-level element (a path, or a group with all in it) is a part: its `id`, else `part_1`, ...; a drawing whose
+  top level is one group (an editor's layer) has its parts one level down. `part_names` renames them in order;
+  elements given one name are joined into one part.
+- Clip paths and masks are ignored; gradients and patterns become one flat colour (the first stop); strokes, text,
+  `<use>` and pictures are left out. Each with a warning in the reply. An outline that crosses itself can't be filled
+  and is left out (said too).
+
+**Placing.** `object_place {id}` adds a `model` part with `"object": "<id>"` and the model as base64 (kept as a file
+beside the kept room; two copies of one object are one file, and in the headset one mesh). Where: `at` `wall` (the
+wall the viewer looks at: the head's level direction against the room's interior box, `RoomBounds.interior`), `floor`
+(1.3 m ahead of the head, on the floor), `ceiling`, `front` (1.5 m ahead at eye height); or `position` and `rotation`.
+A wall object's back goes on the wall, its front out (`turn` spins it about the wall's normal); a floor or table
+object's bottom on the floor, facing the viewer (`turn` about up); a ceiling object's top on the ceiling. Without
+`at` or `position`, its mount decides. A stock room becomes a kept room of its own, "<room> with objects". Every object
+change (`object_place`, `object_move`, `object_import`, `object_delete`, and the Room tab's) has a summary and an undo:
+the room as it was (a kept room built again from its document, a stock room shown again), the import deleted, the
+deleted object back.
+
+**Part addressing.** A part inside a placed object is `"<placed name>/<part name>"`, a pattern on each side:
+
+| `match` | Reaches |
+|---|---|
+| `Wall shelf` | the whole placed object, as before (and its part-level colours go) |
+| `Wall shelf/Board` | the board of that shelf only |
+| `Wall shelf*/B*` | every part starting with B of every shelf |
+| `Chair/part_1` | the first unnamed mesh of an imported model placed as Chair |
+
+A part-level entry is a `recolour` entry of the document; `material`'s fields go on top of what the part showed (the
+whole object's material when it has one, else the part's own colour), so an `emission` alone keeps the colour, a
+`texture` replaces it, and a later entry wins where two set the same field. `reset: true` (the command) or
+`"material": null` (a document change) takes entries out: the part's own colours again. Removing a placed object takes
+its part-level entries with it. They are saved in the kept room's document and built again when it loads
+(`assistant_room.gd _recolour_parts`); parts that end up alike share one material. A part-level match that reaches
+nothing is kept with a `no_such_part` warning; the `recolour` command refuses it.
+
+**Library materials.** A material object may name `"library_material": "<id>"` (the `recolour` command's `material`).
+The app has no material library yet: `assistant_room.gd library_material()` looks for
+`scripts/assistant/material_library.gd` with `material_for(id) -> material fields` (and `list() -> [{id, name}]` for
+the Room tab's Material button). Its fields go under the ones given; an id it doesn't know is left out, with an
+`unknown_material` warning.
+
+**Commands** (`object_commands.gd`, registered by `command_host.gd` for every client):
+
+| Command | Level | What |
+|---|---|---|
+| `object_library {tag, source}` | read | the catalogue: id, name, tags, source, mount, size, parts |
+| `object_info {id}` or `{placed}` | read | a library object's manifest, or a placed one's parts as they show and which entry sets each |
+| `object_import {name, data, format, tags, mount, width, depth, bevel, part_names}` | room | a `.glb` or an SVG into the library; `path` instead of `data` is the dev link's only |
+| `object_place {id, name, at, position, rotation, turn, scale}` | room | into the room |
+| `object_move {name, at, position, rotation, turn, scale}` | room | what is left out stays |
+| `object_delete {id}` | room | an imported object out of the library (destructive; built-ins can't go; placed copies stay) |
+| `recolour {match, color, emission, emission_strength, texture, material, reset}` | room | a part as `"<placed>/<part>"` |
+| `remove {name}` | room | a placed object out of the room |
+
+`room_state` has `objects`: each placed object with its parts. The MCP adapter takes `data_path` for `data`.
+
+**Performance.** Placed copies of one object share its meshes (the room editor reads a model once per session by its
+data, and each copy is a duplicate of that); parts painted alike share one material. A model's parts are capped
+(`model_parts`, 128) and cost a draw call each past the first (`COSTS.model_part`, 0.2), a part-level recolour a
+material (`part_recolour`, 0.05), the room's recolour entries are capped (`recolours`, 256), and triangles count as
+for any model. The measured guard (`RoomPerf`) applies after each change as before.
+
 ### Lighting
 
 A room is flat (unlit shaders, `env_unlit*.gdshader`) unless its document has `light.key`, `light.sky`,
@@ -418,7 +520,8 @@ A room is flat (unlit shaders, `env_unlit*.gdshader`) unless its document has `l
 ### Limits
 
 Per room, for what the assistant added: 512 parts (64 until 2026-11-01; parts measured cheap on the Frame), 300 000 triangles, 150 000 triangles per model, 20 MB per model,
-8 MB per picture, 4096 x 4096 pixels per texture, 32 textures, 8 widgets, 4 lights, everything within 200 m. A
+8 MB per picture, 4096 x 4096 pixels per texture, 32 textures, 8 widgets, 4 lights, 128 parts per model, 256 recolour
+entries, everything within 200 m. A
 refusal names the limit and its value ("model_triangles: 160000, at most 150000"), so the assistant can retry with
 less.
 
@@ -765,6 +868,7 @@ godot --headless --xr-mode off --path app --script res://tests/test_assistant.gd
 python3 tools/assistant/test_assistant.py    # end to end: the headless app on 127.0.0.1, a fresh assistant over HTTPS
 python tools/assistant/test_mcp_server.py    # the MCP adapter on stdio against a stand-in (fake_service.py)
 godot --headless --xr-mode off --path app --script res://tests/test_assistant_room.gd   # rooms: permission, schema, models, kept at once, frame, pictures, restart, snapshot
+godot --headless --xr-mode off --path app --script res://tests/test_object_library.gd   # objects: catalogue, SVG import, part addressing, kept part colours, the commands, the Room tab
 godot --headless --xr-mode off --path app --script res://tests/test_assistant_fetch.gd  # fetch: download, progress, refusals, disk, cancel; the browser page from DevTools
 godot --headless --xr-mode off --path app --script res://tests/test_assistant_places.gd # add_place / remove_place: the card, where each kind is kept, refusals
 godot --headless --xr-mode off --path app --script res://tests/test_local_agents.gd     # agents on the headset, against a stand-in for the X display
@@ -809,3 +913,8 @@ the headset, forgets itself, and checks the engine's log holds neither the token
 - Whether Claude Code skips its question about the project's MCP server on the first start once the folder is
   trusted, and whether Codex reads `~/Codex/.codex/config.toml` in a folder that isn't a git repository.
 - The three new switches (settings, files, apps) have not been looked at in the headset's System tab yet.
+- Objects: not run on the headset yet (placing with the laser, the thumbnails' look, the cost of many parts). The SVG
+  import leaves out outlines that cross themselves (a pentagram drawn as one line); its faces cut round holes meet the
+  sides with T-junctions (vertices on an edge, not at its ends), which may sparkle at a seam. A part-level picture
+  replaces a textured model part's own picture. There is no import in the headset's own panel yet (an assistant or
+  the dev link brings the file), and no material library (the field is ready for one).

@@ -53,3 +53,16 @@ black around it. The room light setting sets the photo's brightness.
 
 From the app, `EnvLibrary.add_skybox(path)` copies a picture into that folder and returns its environment id
 (`main.set_environment(id)` shows it).
+
+## An object for the object library
+
+An object (a shelf, a lamp, a sign) is a `.glb` too, imported into the object library (`docs/assistant.md`,
+"Objects"): the Room tab places it on a wall or the floor, and each of its parts can take a colour or a picture of its
+own. The same units as a room, and:
+
+- **Front:** +Z. A wall object hangs with its back (its lowest z) on the wall; a floor object stands on its lowest y;
+  a ceiling object hangs from its highest y. Where its origin is does not matter.
+- **Parts:** each mesh node is a part, named by the node's name (else its mesh's, else `part_1`, `part_2`, ...).
+  Name the meshes you want to recolour on their own (`Board`, `Brackets`), and join the ones that never need a
+  colour of their own: each part is a draw call, and a model has at most 128.
+- An SVG drawing can be imported as it is: the app makes it solid, each top-level path or group a part.
