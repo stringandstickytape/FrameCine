@@ -128,6 +128,8 @@ func _test_command_spec() -> void:
 			str(params["material"]["description"]).contains("materials command")
 			and str(params["material"]["description"]).contains("leather"))
 	_check("the materials command is there for the assistant", DevCommands.assistant_level("materials") == "read")
+	_check("recolour: effect and effect_options, described", params.has("effect") and params.has("effect_options")
+			and str(params["effect"]["description"]).contains("effects command"))
 
 
 # --- Parts, recolour, room_state -------------------------------------------------------------------------------------
@@ -191,6 +193,24 @@ func _test_parts() -> void:
 	r = await commands.run("recolour", {"match": "Crate A", "reset": true})
 	_check("reset: the library material goes", r.get("ok") == true and MaterialLibrary.id_of(_material_of("Crate A"))
 			== "" and not _doc_part("Crate A").has("material"))
+
+	# An effect through recolour: the id and its options; one that layers keeps the library material under it.
+	r = await commands.run("recolour", {"match": "Crate B", "effect": "plasma", "effect_options": {"speed": 0.2}})
+	var fx: Variant = (_doc_part("Crate B").get("material", {}) as Dictionary).get("effect")
+	_check("recolour effect: the effect and its options in the document (%s, %s)" % [r.get("error",
+			r.get("errors", "")), fx], r.get("ok") == true and fx is Dictionary and fx.get("name") == "plasma"
+			and is_equal_approx(float(fx.get("speed", 0.0)), 0.2))
+	r = await commands.run("recolour", {"match": "Crate B", "material": "velvet"})
+	r = await commands.run("recolour", {"match": "Crate B", "effect": "rim_glow"})
+	var mb: Dictionary = _doc_part("Crate B").get("material", {})
+	_check("a layering effect keeps the library material under it (%s)" % mb, r.get("ok") == true
+			and mb.get("library_material") == "velvet" and (mb.get("effect", {}) as Dictionary).get("name")
+			== "rim_glow")
+	r = await commands.run("recolour", {"match": "Crate B", "effect": "sky_aurora"})
+	_check("a sky effect on a part is refused (%s)" % r.get("errors", r.get("error", "")), r.get("ok") == false
+			and str(r).contains("sky"))
+	r = await commands.run("recolour", {"match": "Crate B", "effect": "pulse", "effect_options": {"rate": 9.0}})
+	_check("an option past its bound is refused", r.get("ok") == false)
 
 	# An unknown id: warned, the rest applies.
 	r = await commands.run("recolour", {"match": "Crate A", "material": "no_such_wood", "color": "#3366cc"})

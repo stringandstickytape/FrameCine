@@ -505,7 +505,9 @@ it, `tiling` sets metres per repeat, `triplanar: true` suits curved models with 
 `color`, `tint`, `tiling` and `emission` change it and `texture` replaces it. In a document it is
 `{"library_material": "velvet", "color": "#5a1830", "tiling": 0.25}`; it works on parts, placed objects, their parts
 and the base room's surfaces, lit rooms included. `room_state` gives each surface's `material` id. An id the headset
-doesn't know is left out, with a warning (`unknown_material`). In a document these are `recolour` entries; `"material": null` in a
+doesn't know is left out, with a warning (`unknown_material`). `effect: "<id>"` puts an effect from the effect library on
+it (`effects` lists them, `effect_info` gives the options), with `effect_options` such as `{"color": "#ff40c0"}`; one
+that layers keeps the colour or library material under it. In a document these are `recolour` entries; `"material": null` in a
 change takes an entry out; one that reaches no part is kept, with a `no_such_part` warning (the `recolour`
 command refuses it instead).
 

@@ -362,7 +362,8 @@ static func register_commands() -> void:
 			+ "library_material, ..."}],
 			"returns": "{state: kept, name, warnings, perf, ...}"})
 	R.register("recolour", _handler("recolour"), {"assistant": "room", "level": "change",
-			"description": "Colour, emission, a picture or a library material (materials lists them) on every part "
+			"description": "Colour, emission, a picture, a library material (materials lists them) or an effect "
+			+ "(effects lists them) on every part "
 			+ "whose name matches (* and ?): the assistant's parts and the base room's own, a whole placed object "
 			+ "by its name, or one part inside a placed object as \"<name>/<part>\" (object_info lists its parts).",
 			"params": [
@@ -385,6 +386,13 @@ static func register_commands() -> void:
 			{"name": "triplanar", "type": "bool", "default": false, "description": "a library material blended "
 			+ "from three directions, for curved models without usable UVs (three times the texture reads: only "
 			+ "where the plain one shows seams)"},
+			{"name": "effect", "type": "string", "default": "", "description": "an effect from the effect library "
+			+ "(plasma, marble, neon, hologram...): its id, from the effects command (effect_info gives its "
+			+ "options). One that layers goes over the part's colour or library material; one that draws its own "
+			+ "surface replaces the material. Sky effects are for set_lighting's sky, not parts"},
+			{"name": "effect_options", "type": "object", "default": {}, "description": "the effect's options "
+			+ "within their bounds (effect_info), e.g. {\"color\": \"#ff40c0\", \"speed\": 0.2}; the rest keep "
+			+ "their defaults"},
 			{"name": "reset", "type": "bool", "default": false, "description": "back to the model's own colours "
 			+ "(the part-level colours the match covers go; a whole object's colour too)"}],
 			"returns": "{state: kept, name, warnings, perf, ...}"})
@@ -601,10 +609,14 @@ func _room(cmd: String, a: Dictionary) -> Dictionary:
 				mat["tiling"] = a["tiling"]
 			if bool(a["triplanar"]):
 				mat["triplanar"] = true
+			if str(a["effect"]) != "":
+				var fx: Dictionary = (a["effect_options"] as Dictionary).duplicate(true) 						if a["effect_options"] is Dictionary else {}
+				fx["name"] = str(a["effect"])
+				mat["effect"] = fx
 			var reset := bool(a["reset"])
 			if mat.is_empty() and not reset:
-				return {"ok": false, "error": "recolour: give color, emission, texture, material (with tint, tiling) "
-						+ "or reset"}
+				return {"ok": false, "error": "recolour: give color, emission, texture, material (with tint, tiling), "
+						+ "effect or reset"}
 			var pattern: String = a["match"]
 			var current: Dictionary = room.current_doc()
 			summary = ("reset %s" if reset else "recolour %s") % pattern
