@@ -1,0 +1,31 @@
+{
+	"id": "brass",
+	"name": "Polished brass",
+	"tags": [
+		"metal",
+		"accent",
+		"rail"
+	],
+	"size": 1024,
+	"tiling": 1.0,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#ffe39d",
+	"maps": {
+		"albedo": "textures/brass_albedo.mtex",
+		"normal": "textures/brass_normal.mtex",
+		"orm": "textures/brass_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Metal048A",
+		"title": "Metal 048 A",
+		"url": "https://ambientcg.com/view?id=Metal048A",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

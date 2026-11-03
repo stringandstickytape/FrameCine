@@ -1,7 +1,8 @@
 extends "res://scripts/env/primitive_room.gd"
 
 ## A geodesic dome at dusk (ideas #52): an open frame of struts overhead on a wide plain, the sky fading from a warm
-## horizon to night, the first stars, a low platform you sit on. The screen hangs inside the frame.
+## horizon to night, the first stars, a low platform you sit on (wooden planks and a steel rail: library materials,
+## docs/materials.md). The screen hangs inside the frame.
 
 const RADIUS := 16.0
 const SKY_RADIUS := 120.0
@@ -53,8 +54,10 @@ func _build() -> void:
 
 	# A low platform with a rail in front; spots to stand on it.
 	seats = [Vector3(-2, 0.3, 0.5), Vector3(0, 0.3, 0.5), Vector3(2, 0.3, 0.5), Vector3(0, 0.3, 2.0)]
-	add_box("Platform", Vector3(6, 0.3, 4), Vector3(0, 0.15, 0.5), material(Color(0.25, 0.2, 0.16), 1.0, 0.0))
-	add_box("Rail", Vector3(5, 0.06, 0.06), Vector3(0, 0.95, -1.4), material(Color(0.4, 0.4, 0.42), 1.0, 0.0))
+	add_box("Platform", Vector3(6, 0.3, 4), Vector3(0, 0.15, 0.5),
+			textured("rustic_planks", Color(0.25, 0.2, 0.16), 1.0, 0.0))
+	add_box("Rail", Vector3(5, 0.06, 0.06), Vector3(0, 0.95, -1.4),
+			textured("brushed_steel", Color(0.4, 0.4, 0.42), 1.0, 0.0))
 
 
 ## Edges [a, b] of an icosahedron subdivided once, on a sphere of radius r (each edge once).

@@ -1,0 +1,30 @@
+{
+	"id": "red_brick",
+	"name": "Red brick",
+	"tags": [
+		"wall",
+		"brick"
+	],
+	"size": 1024,
+	"tiling": 1.5,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#a27560",
+	"maps": {
+		"albedo": "textures/red_brick_albedo.mtex",
+		"normal": "textures/red_brick_normal.mtex",
+		"orm": "textures/red_brick_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Bricks101",
+		"title": "Bricks 101",
+		"url": "https://ambientcg.com/view?id=Bricks101",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

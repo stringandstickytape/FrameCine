@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3]
 
-[ext_resource type="Script" path="res://environments/vr_environment.gd" id="1_env"]
+[ext_resource type="Script" path="res://environments/dim_room.gd" id="1_env"]
 [ext_resource type="Shader" path="res://shaders/env_unlit.gdshader" id="2_unlit"]
 [ext_resource type="Shader" path="res://shaders/grid.gdshader" id="3_grid"]
 

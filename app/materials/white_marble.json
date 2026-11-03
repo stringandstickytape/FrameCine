@@ -1,0 +1,32 @@
+{
+	"id": "white_marble",
+	"name": "White marble",
+	"tags": [
+		"stone",
+		"marble",
+		"floor",
+		"wall"
+	],
+	"size": 1024,
+	"tiling": 2.0,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#adaeb7",
+	"maps": {
+		"albedo": "textures/white_marble_albedo.mtex",
+		"normal": "textures/white_marble_normal.mtex",
+		"orm": "textures/white_marble_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Marble012",
+		"title": "Marble 012",
+		"url": "https://ambientcg.com/view?id=Marble012",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

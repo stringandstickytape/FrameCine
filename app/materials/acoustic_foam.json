@@ -1,0 +1,31 @@
+{
+	"id": "acoustic_foam",
+	"name": "Acoustic foam",
+	"tags": [
+		"wall",
+		"acoustic",
+		"panel"
+	],
+	"size": 1024,
+	"tiling": 1.0,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.05,
+	"sheen": 0.0,
+	"swatch": "#1c1c1c",
+	"maps": {
+		"albedo": "textures/acoustic_foam_albedo.mtex",
+		"normal": "textures/acoustic_foam_normal.mtex",
+		"orm": "textures/acoustic_foam_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "AcousticFoam003",
+		"title": "Acoustic Foam 003",
+		"url": "https://ambientcg.com/view?id=AcousticFoam003",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

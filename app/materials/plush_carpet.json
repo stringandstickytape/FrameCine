@@ -1,0 +1,31 @@
+{
+	"id": "plush_carpet",
+	"name": "Plush carpet",
+	"tags": [
+		"floor",
+		"carpet",
+		"fabric"
+	],
+	"size": 2048,
+	"tiling": 1.0,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.1,
+	"sheen": 0.0,
+	"swatch": "#3f444f",
+	"maps": {
+		"albedo": "textures/plush_carpet_albedo.mtex",
+		"normal": "textures/plush_carpet_normal.mtex",
+		"orm": "textures/plush_carpet_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Carpet012",
+		"title": "Carpet 012",
+		"url": "https://ambientcg.com/view?id=Carpet012",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

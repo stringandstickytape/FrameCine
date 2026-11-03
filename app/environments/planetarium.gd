@@ -2,7 +2,8 @@ extends "res://scripts/env/primitive_room.gd"
 
 ## A planetarium (ideas #52): a round room under a dark dome full of projected stars, a skyline silhouette around the
 ## dome's foot, a soft cove light, reclined seats in rows, and the star projector on its pedestal behind you. Flat
-## video goes high on the dome ahead; 180 and 360 video replace the room anyway.
+## video goes high on the dome ahead; 180 and 360 video replace the room anyway. Velvet seats and a carpeted floor
+## (library materials, docs/materials.md).
 
 const RADIUS := 9.0
 const WALL := 2.4
@@ -72,10 +73,11 @@ func _build() -> void:
 				backs.append(Transform3D(recline, Vector3(x, 0.52, z + 0.48)))
 			seats.append(Vector3(x, 0.0, z))
 			x += 0.65
-	var upholstery := material(Color(0.16, 0.18, 0.3), 1.0, 0.0)
+	var upholstery := textured("velvet", Color(0.16, 0.18, 0.3), 1.0, 0.0)
 	add_multimesh("Seats", seat, seat_xforms, upholstery)
 	add_multimesh("SeatBacks", back, backs, upholstery)
-	add_box("Floor", Vector3(RADIUS * 2.0, 0.02, RADIUS * 2.0), Vector3(0, 0.0, 0), material(Color(0.08, 0.08, 0.09), 1.0, 0.0))
+	add_box("Floor", Vector3(RADIUS * 2.0, 0.02, RADIUS * 2.0), Vector3(0, 0.0, 0),
+			textured("plush_carpet", Color(0.08, 0.08, 0.09), 1.0, 0.0))
 
 	# The star projector behind.
 	var dark := material(Color(0.12, 0.12, 0.13), 1.0, 0.0)

@@ -1,0 +1,31 @@
+{
+	"id": "smooth_plaster",
+	"name": "Smooth plaster",
+	"tags": [
+		"wall",
+		"plaster",
+		"ceiling"
+	],
+	"size": 1024,
+	"tiling": 3.2,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 0.6,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#8d8a88",
+	"maps": {
+		"albedo": "textures/smooth_plaster_albedo.mtex",
+		"normal": "textures/smooth_plaster_normal.mtex",
+		"orm": "textures/smooth_plaster_orm.mtex"
+	},
+	"source": {
+		"site": "polyhaven",
+		"asset": "plastered_wall_04",
+		"title": "Plastered Wall 04",
+		"url": "https://polyhaven.com/a/plastered_wall_04",
+		"author": "Rob Tuytel (all)",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

@@ -1,0 +1,31 @@
+{
+	"id": "cream_carpet",
+	"name": "Cream carpet",
+	"tags": [
+		"floor",
+		"carpet",
+		"fabric"
+	],
+	"size": 1024,
+	"tiling": 1.0,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.1,
+	"sheen": 0.0,
+	"swatch": "#bcb094",
+	"maps": {
+		"albedo": "textures/cream_carpet_albedo.mtex",
+		"normal": "textures/cream_carpet_normal.mtex",
+		"orm": "textures/cream_carpet_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Carpet016",
+		"title": "Carpet 016",
+		"url": "https://ambientcg.com/view?id=Carpet016",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

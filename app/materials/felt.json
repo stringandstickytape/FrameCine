@@ -1,0 +1,32 @@
+{
+	"id": "felt",
+	"name": "Felt",
+	"tags": [
+		"fabric",
+		"acoustic",
+		"panel",
+		"wall"
+	],
+	"size": 1024,
+	"tiling": 0.5,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.05,
+	"sheen": 0.1,
+	"swatch": "#a2a0a6",
+	"maps": {
+		"albedo": "textures/felt_albedo.mtex",
+		"normal": "textures/felt_normal.mtex",
+		"orm": "textures/felt_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Fabric034",
+		"title": "Fabric 034",
+		"url": "https://ambientcg.com/view?id=Fabric034",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

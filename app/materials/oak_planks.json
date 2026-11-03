@@ -1,0 +1,31 @@
+{
+	"id": "oak_planks",
+	"name": "Oak floor planks",
+	"tags": [
+		"floor",
+		"wood",
+		"planks"
+	],
+	"size": 2048,
+	"tiling": 2.0,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#9b7c5f",
+	"maps": {
+		"albedo": "textures/oak_planks_albedo.mtex",
+		"normal": "textures/oak_planks_normal.mtex",
+		"orm": "textures/oak_planks_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "WoodFloor051",
+		"title": "Wood Floor 051",
+		"url": "https://ambientcg.com/view?id=WoodFloor051",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

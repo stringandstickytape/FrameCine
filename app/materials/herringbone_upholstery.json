@@ -1,0 +1,31 @@
+{
+	"id": "herringbone_upholstery",
+	"name": "Herringbone upholstery",
+	"tags": [
+		"fabric",
+		"seat",
+		"sofa"
+	],
+	"size": 1024,
+	"tiling": 0.27,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.1,
+	"sheen": 0.2,
+	"swatch": "#7a7672",
+	"maps": {
+		"albedo": "textures/herringbone_upholstery_albedo.mtex",
+		"normal": "textures/herringbone_upholstery_normal.mtex",
+		"orm": "textures/herringbone_upholstery_orm.mtex"
+	},
+	"source": {
+		"site": "polyhaven",
+		"asset": "poly_wool_herringbone",
+		"title": "Poly Wool Herringbone",
+		"url": "https://polyhaven.com/a/poly_wool_herringbone",
+		"author": "colormass (photography), Rico Cilliers (processing)",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

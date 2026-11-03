@@ -1,0 +1,31 @@
+{
+	"id": "dark_metal",
+	"name": "Dark metal",
+	"tags": [
+		"metal",
+		"speaker",
+		"frame"
+	],
+	"size": 1024,
+	"tiling": 1.0,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#606262",
+	"maps": {
+		"albedo": "textures/dark_metal_albedo.mtex",
+		"normal": "textures/dark_metal_normal.mtex",
+		"orm": "textures/dark_metal_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Metal038",
+		"title": "Metal 038",
+		"url": "https://ambientcg.com/view?id=Metal038",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

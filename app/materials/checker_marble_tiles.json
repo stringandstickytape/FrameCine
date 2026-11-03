@@ -1,0 +1,32 @@
+{
+	"id": "checker_marble_tiles",
+	"name": "Checkered marble tiles",
+	"tags": [
+		"floor",
+		"tiles",
+		"stone",
+		"marble"
+	],
+	"size": 1024,
+	"tiling": 1.2,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#706256",
+	"maps": {
+		"albedo": "textures/checker_marble_tiles_albedo.mtex",
+		"normal": "textures/checker_marble_tiles_normal.mtex",
+		"orm": "textures/checker_marble_tiles_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Tiles074",
+		"title": "Tiles 074",
+		"url": "https://ambientcg.com/view?id=Tiles074",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

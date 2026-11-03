@@ -1,0 +1,31 @@
+{
+	"id": "wood_panelling",
+	"name": "Dark wood panelling",
+	"tags": [
+		"wall",
+		"wood",
+		"panelling"
+	],
+	"size": 1024,
+	"tiling": 1.4,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#2b1612",
+	"maps": {
+		"albedo": "textures/wood_panelling_albedo.mtex",
+		"normal": "textures/wood_panelling_normal.mtex",
+		"orm": "textures/wood_panelling_orm.mtex"
+	},
+	"source": {
+		"site": "polyhaven",
+		"asset": "dark_paneled_wood",
+		"title": "Dark Paneled Wood",
+		"url": "https://polyhaven.com/a/dark_paneled_wood",
+		"author": "Dimitrios Savva (all)",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

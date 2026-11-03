@@ -78,6 +78,8 @@ pane, the environments and the playback features. The results behind each part:
 - The controller models in `app/models/controllers/` are derived from Valve Corporation's Steam Frame controller CAD
   and are under their own licence, CC BY-NC-SA 4.0 (non-commercial, share-alike; no endorsement by Valve implied):
   see `app/models/controllers/LICENSE-controller.md`. The rest of the repository is not covered by it.
+- The room textures in `app/materials/` are CC0 1.0 (public domain), from Poly Haven and ambientCG: each one's source
+  and author are in `app/materials/CREDITS.md` (`docs/materials.md`).
 - FFmpeg and libsmb2 are linked statically under the LGPL-2.1, and dav1d (AV1) under the BSD-2-Clause licence: see
   `docs/BUILD.md` and `docs/packaging.md`.
 - Everything else in this repository is MIT (`LICENSE`).

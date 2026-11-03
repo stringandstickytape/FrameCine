@@ -1,0 +1,31 @@
+{
+	"id": "terrazzo",
+	"name": "Terrazzo",
+	"tags": [
+		"floor",
+		"stone",
+		"tiles"
+	],
+	"size": 1024,
+	"tiling": 2.0,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#8b6f59",
+	"maps": {
+		"albedo": "textures/terrazzo_albedo.mtex",
+		"normal": "textures/terrazzo_normal.mtex",
+		"orm": "textures/terrazzo_orm.mtex"
+	},
+	"source": {
+		"site": "polyhaven",
+		"asset": "terrazzo_tiles",
+		"title": "Terrazzo Tiles",
+		"url": "https://polyhaven.com/a/terrazzo_tiles",
+		"author": "Amal Kumar (all)",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

@@ -12,6 +12,7 @@ extends "res://environments/vr_environment.gd"
 ##                        under the seated eyes, room coordinates; a subclass fills `seats` in _build()
 
 const ENV_SHADER := preload("res://shaders/env_unlit.gdshader")
+const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 
 var reflection_floor_y := NAN
 var seats: Array[Vector3] = []
@@ -37,6 +38,18 @@ func material(albedo: Color, spill := 1.0, floor_darkening := 0.2) -> ShaderMate
 	m.set_shader_parameter("spill", spill)
 	m.set_shader_parameter("floor_darkening", floor_darkening)
 	return m
+
+
+## A library material (scripts/env/material_library.gd, docs/materials.md) in this room's light: its pattern at
+## `colour` on average, spill and floor_darkening as material(); material(colour, ...) if the library lacks it, or in
+## an assistant's lit room (which relights plain materials only).
+func textured(id: String, colour: Color, spill := 1.0, floor_darkening := 0.2, options := {}) -> Material:
+	if MaterialLibrary.in_lit_room(self):
+		return material(colour, spill, floor_darkening)
+	var o := options.duplicate()
+	o.merge({"colour": colour, "spill": spill, "floor_darkening": floor_darkening})
+	var m := MaterialLibrary.get_material(id, o)
+	return m if m != null else material(colour, spill, floor_darkening)
 
 
 ## A light that doesn't follow the room's level: lamps, stars, signs (unshaded colour).

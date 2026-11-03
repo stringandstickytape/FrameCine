@@ -1,0 +1,30 @@
+{
+	"id": "concrete_panels",
+	"name": "Concrete panels",
+	"tags": [
+		"wall",
+		"concrete"
+	],
+	"size": 1024,
+	"tiling": 2.71,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#8d8670",
+	"maps": {
+		"albedo": "textures/concrete_panels_albedo.mtex",
+		"normal": "textures/concrete_panels_normal.mtex",
+		"orm": "textures/concrete_panels_orm.mtex"
+	},
+	"source": {
+		"site": "polyhaven",
+		"asset": "concrete_wall_008",
+		"title": "Concrete Wall 008",
+		"url": "https://polyhaven.com/a/concrete_wall_008",
+		"author": "Dario Barresi (processing), Charlotte Baglioni (photography)",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

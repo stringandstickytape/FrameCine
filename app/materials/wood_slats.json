@@ -1,0 +1,32 @@
+{
+	"id": "wood_slats",
+	"name": "Wood slat panelling",
+	"tags": [
+		"wall",
+		"wood",
+		"panelling",
+		"acoustic"
+	],
+	"size": 1024,
+	"tiling": 1.8,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#b5a79e",
+	"maps": {
+		"albedo": "textures/wood_slats_albedo.mtex",
+		"normal": "textures/wood_slats_normal.mtex",
+		"orm": "textures/wood_slats_orm.mtex"
+	},
+	"source": {
+		"site": "polyhaven",
+		"asset": "white_planks_clean",
+		"title": "White Planks Clean",
+		"url": "https://polyhaven.com/a/white_planks_clean",
+		"author": "Rob Tuytel (all)",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

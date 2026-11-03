@@ -1,0 +1,31 @@
+{
+	"id": "smooth_concrete",
+	"name": "Smooth concrete",
+	"tags": [
+		"wall",
+		"floor",
+		"concrete"
+	],
+	"size": 1024,
+	"tiling": 2.0,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#b8b8b8",
+	"maps": {
+		"albedo": "textures/smooth_concrete_albedo.mtex",
+		"normal": "textures/smooth_concrete_normal.mtex",
+		"orm": "textures/smooth_concrete_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Concrete034",
+		"title": "Concrete 034",
+		"url": "https://ambientcg.com/view?id=Concrete034",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

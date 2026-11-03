@@ -1978,3 +1978,21 @@ the login. `--activity-clear-top` left a full-screen player.
 - That the container goes when `systemctl --user stop` is the way the unit ended, not force-stop.
 - That the compositor's window doesn't take the desktop's focus from a paired keyboard.
 - A folder under `~/Android` with spaces in its name is quoted by our scripts, but Lepton's handling of it is untested.
+
+## The material library
+
+- **What:** 42 CC0 texture sets (Poly Haven, ambientCG) for room surfaces: wood floors and parquet, carpet, velvet,
+  upholstery, leather, plaster, concrete, brick, marble and tiles, metals, felt, acoustic foam, wicker. Each is a
+  catalogue entry (`app/materials/<id>.json`: name, tags, tiling in metres, tunables, source) and three maps
+  (base colour, normal, ambient occlusion / roughness / metallic) stored as ASTC 8 x 8 with mip levels, which the
+  headset's GPU samples as they are: no import step, no compression on the device. About 52 MB in the repository.
+- **Look:** `shaders/room_material.gdshader` keeps the rooms' fake light (ambient plus the screen's spill, no lights or
+  shadows) and adds the maps' detail: relief from the normal map, ambient occlusion, a soft highlight from the screen,
+  sheen on fabrics, pleats for curtains. Box projection in metres (one fetch per map); mesh UVs or triplanar on demand.
+- **Rooms:** the cinema (felt walls, carpeted tiers, velvet seats, a wooden stage, new pleated curtains), the home
+  theatre, the dim room's walls, the planetarium's seats and floor and the dome's platform, in their old colours.
+- **API:** `scripts/env/material_library.gd`: `list()`, `entry(id)`, `get_material(id, options)`,
+  `apply(mesh, id, options, surface)`; the `materials` command (read). Details, the cost and how to add a material:
+  `docs/materials.md`; credits: `app/materials/CREDITS.md`.
+- **Tested:** `test_materials` (33 checks); renders before and after in `docs/shots/materials/` (lavapipe). Not yet
+  run on the headset.

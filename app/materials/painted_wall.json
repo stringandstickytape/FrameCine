@@ -1,0 +1,32 @@
+{
+	"id": "painted_wall",
+	"name": "Painted wall",
+	"tags": [
+		"wall",
+		"plaster",
+		"paint",
+		"ceiling"
+	],
+	"size": 1024,
+	"tiling": 3.0,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 0.6,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#9d8c78",
+	"maps": {
+		"albedo": "textures/painted_wall_albedo.mtex",
+		"normal": "textures/painted_wall_normal.mtex",
+		"orm": "textures/painted_wall_orm.mtex"
+	},
+	"source": {
+		"site": "polyhaven",
+		"asset": "beige_wall_001",
+		"title": "Beige Wall 001",
+		"url": "https://polyhaven.com/a/beige_wall_001",
+		"author": "Dimitrios Savva (photography), Rico Cilliers (processing)",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

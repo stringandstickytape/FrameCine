@@ -1,0 +1,31 @@
+{
+	"id": "walnut_veneer",
+	"name": "Walnut veneer",
+	"tags": [
+		"wood",
+		"furniture",
+		"veneer"
+	],
+	"size": 1024,
+	"tiling": 1.8,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#8a6a51",
+	"maps": {
+		"albedo": "textures/walnut_veneer_albedo.mtex",
+		"normal": "textures/walnut_veneer_normal.mtex",
+		"orm": "textures/walnut_veneer_orm.mtex"
+	},
+	"source": {
+		"site": "polyhaven",
+		"asset": "walnut_veneer",
+		"title": "Walnut Veneer",
+		"url": "https://polyhaven.com/a/walnut_veneer",
+		"author": "Jenelle van Heerden (all)",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

@@ -1,0 +1,31 @@
+{
+	"id": "brown_wood_floor",
+	"name": "Brown wood floor",
+	"tags": [
+		"floor",
+		"wood",
+		"planks"
+	],
+	"size": 2048,
+	"tiling": 1.7,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#816043",
+	"maps": {
+		"albedo": "textures/brown_wood_floor_albedo.mtex",
+		"normal": "textures/brown_wood_floor_normal.mtex",
+		"orm": "textures/brown_wood_floor_orm.mtex"
+	},
+	"source": {
+		"site": "polyhaven",
+		"asset": "wood_floor",
+		"title": "Wood Floor",
+		"url": "https://polyhaven.com/a/wood_floor",
+		"author": "Dimitrios Savva (all)",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

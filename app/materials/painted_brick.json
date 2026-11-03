@@ -1,0 +1,31 @@
+{
+	"id": "painted_brick",
+	"name": "Painted brick",
+	"tags": [
+		"wall",
+		"brick",
+		"paint"
+	],
+	"size": 1024,
+	"tiling": 2.0,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#98a5ae",
+	"maps": {
+		"albedo": "textures/painted_brick_albedo.mtex",
+		"normal": "textures/painted_brick_normal.mtex",
+		"orm": "textures/painted_brick_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "PaintedBricks004",
+		"title": "Painted Bricks 004",
+		"url": "https://ambientcg.com/view?id=PaintedBricks004",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

@@ -22,6 +22,7 @@ const RoomTabCommands := preload("res://scripts/dev/room_tab_commands.gd")
 const SystemTabCommands := preload("res://scripts/dev/system_tab_commands.gd")
 const FilesCommands := preload("res://scripts/dev/files_commands.gd")
 const ObjectCommands := preload("res://scripts/assistant/object_commands.gd")
+const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const NODE_NAME := "CommandHost"
 
 ## The main scene (scripts/main.gd): the tree's current scene.
@@ -74,6 +75,7 @@ func _register() -> void:
 	PCAudio.register_commands(self)
 	RoomPerf.register_commands(self)
 	AndroidApps.register_commands(self)
+	MaterialLibrary.register_commands(self)
 	room_tab = RoomTabCommands.new()
 	room_tab.host = self
 	room_tab.register_all()

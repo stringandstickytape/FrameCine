@@ -1,0 +1,31 @@
+{
+	"id": "oak_veneer",
+	"name": "Oak veneer",
+	"tags": [
+		"wood",
+		"furniture",
+		"veneer"
+	],
+	"size": 1024,
+	"tiling": 1.83,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#a27f58",
+	"maps": {
+		"albedo": "textures/oak_veneer_albedo.mtex",
+		"normal": "textures/oak_veneer_normal.mtex",
+		"orm": "textures/oak_veneer_orm.mtex"
+	},
+	"source": {
+		"site": "polyhaven",
+		"asset": "oak_veneer_01",
+		"title": "Oak Veneer 01",
+		"url": "https://polyhaven.com/a/oak_veneer_01",
+		"author": "Jenelle van Heerden (all)",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

@@ -1,0 +1,31 @@
+{
+	"id": "corduroy",
+	"name": "Corduroy",
+	"tags": [
+		"fabric",
+		"seat",
+		"sofa"
+	],
+	"size": 1024,
+	"tiling": 0.27,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.1,
+	"sheen": 0.3,
+	"swatch": "#8d9481",
+	"maps": {
+		"albedo": "textures/corduroy_albedo.mtex",
+		"normal": "textures/corduroy_normal.mtex",
+		"orm": "textures/corduroy_orm.mtex"
+	},
+	"source": {
+		"site": "polyhaven",
+		"asset": "ribbed_corduroy",
+		"title": "Ribbed Corduroy",
+		"url": "https://polyhaven.com/a/ribbed_corduroy",
+		"author": "colormass (photography), Rico Cilliers (processing)",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

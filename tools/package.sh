@@ -201,6 +201,7 @@ EOF
 # --- Licences ------------------------------------------------------------------------------------------------------
 cp LICENSE "$STAGE/LICENSES/vr-video-player-MIT.txt"
 cp app/models/controllers/LICENSE-controller.md "$STAGE/LICENSES/controller-models-CC-BY-NC-SA-4.0.md"
+cp app/materials/CREDITS.md "$STAGE/LICENSES/material-textures-CC0-credits.md"
 wsl_cat src/godot-player/LICENSE.txt > "$STAGE/LICENSES/engine-LICENSE.txt"
 wsl_cat src/godot-player/COPYRIGHT.txt > "$STAGE/LICENSES/engine-COPYRIGHT.txt"
 wsl_cat src/ffmpeg/COPYING.LGPLv2.1 > "$STAGE/LICENSES/FFmpeg-LGPL-2.1.txt"
@@ -223,6 +224,7 @@ cat > "$STAGE/LICENSES/THIRD-PARTY.md" <<EOF
 | whisper.cpp (whisper/whisper-server, a separate program the app starts) | MIT (whisper.cpp-MIT.txt) | $WHISPER_VERSION | https://github.com/ggml-org/whisper.cpp; built by build/whisper-build.sh |
 | Whisper speech models (whisper/models, ggml format) | MIT (whisper-models-MIT.txt) | pinned in build/whisper-models.sh | OpenAI's Whisper (https://github.com/openai/whisper), converted to ggml: https://huggingface.co/ggerganov/whisper.cpp |
 | Controller models (app/models/controllers) | CC BY-NC-SA 4.0 (controller-models-CC-BY-NC-SA-4.0.md); non-commercial | see that file | see that file |
+| Room textures (app/materials) | CC0 1.0, public domain (material-textures-CC0-credits.md) | see that file | Poly Haven and ambientCG; each asset's page in that file |
 
 The LGPL parts are linked statically. To relink the engine with a modified FFmpeg or libsmb2, use the build scripts
 named above with the same engine source revision; the source of every part is available as listed. Ask the

@@ -1,0 +1,31 @@
+{
+	"id": "woven_upholstery",
+	"name": "Woven upholstery",
+	"tags": [
+		"fabric",
+		"seat",
+		"sofa"
+	],
+	"size": 1024,
+	"tiling": 0.4,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.1,
+	"sheen": 0.2,
+	"swatch": "#928c86",
+	"maps": {
+		"albedo": "textures/woven_upholstery_albedo.mtex",
+		"normal": "textures/woven_upholstery_normal.mtex",
+		"orm": "textures/woven_upholstery_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Fabric061",
+		"title": "Fabric 061",
+		"url": "https://ambientcg.com/view?id=Fabric061",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

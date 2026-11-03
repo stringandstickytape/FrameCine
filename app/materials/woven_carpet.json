@@ -1,0 +1,32 @@
+{
+	"id": "woven_carpet",
+	"name": "Woven carpet",
+	"tags": [
+		"floor",
+		"carpet",
+		"rug",
+		"fabric"
+	],
+	"size": 1024,
+	"tiling": 0.6,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.1,
+	"sheen": 0.0,
+	"swatch": "#9e5f48",
+	"maps": {
+		"albedo": "textures/woven_carpet_albedo.mtex",
+		"normal": "textures/woven_carpet_normal.mtex",
+		"orm": "textures/woven_carpet_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Carpet015",
+		"title": "Carpet 015",
+		"url": "https://ambientcg.com/view?id=Carpet015",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

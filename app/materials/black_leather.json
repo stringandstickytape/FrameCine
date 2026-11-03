@@ -1,0 +1,31 @@
+{
+	"id": "black_leather",
+	"name": "Black leather",
+	"tags": [
+		"leather",
+		"seat",
+		"sofa"
+	],
+	"size": 1024,
+	"tiling": 0.5,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#1a1919",
+	"maps": {
+		"albedo": "textures/black_leather_albedo.mtex",
+		"normal": "textures/black_leather_normal.mtex",
+		"orm": "textures/black_leather_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Leather026",
+		"title": "Leather 026",
+		"url": "https://ambientcg.com/view?id=Leather026",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

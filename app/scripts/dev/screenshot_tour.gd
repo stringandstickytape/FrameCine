@@ -2,6 +2,7 @@ extends Node
 
 ## Screenshot tour (--shots=DIR): opens each test pattern in its mode, and a few environment / menu views, and saves
 ## both eyes side by side as small PNGs (desktop, flat camera, eyes forced through the shaders' force_eye). Then quits.
+## --shots-only=PREFIX takes only the shots whose names start with it (env_: the rooms).
 
 const VideoMode := preload("res://scripts/video_mode.gd")
 const PaneUI := preload("res://ui/pane_ui.gd")
@@ -30,6 +31,11 @@ const SHOTS: Array = [
 	["env_dim_room", "stub://flat_sbs", "dim_room", Vector2(0, -5), 75.0, ""],
 	["env_cinema", "stub://flat_mono", "cinema", Vector2(0, 5), 75.0, ""],
 	["env_cinema_side", "stub://flat_mono", "cinema", Vector2(-50, -10), 75.0, ""],
+	["env_cinema_seats", "stub://flat_mono", "cinema", Vector2(-35, -20), 75.0, ""],
+	["env_home_theatre", "stub://flat_mono", "home_theatre", Vector2(0, -15), 75.0, ""],
+	["env_home_theatre_side", "stub://flat_mono", "home_theatre", Vector2(-70, -20), 75.0, ""],
+	["env_planetarium", "stub://flat_mono", "planetarium", Vector2(-30, -25), 75.0, ""],
+	["env_dome", "stub://flat_mono", "dome", Vector2(20, -25), 75.0, ""],
 	["ui_files", "stub://flat_mono", "dim_room", Vector2(0, 0), 44.0, "ui_files"],
 	["ui_picture", "stub://flat_sbs", "void", Vector2(0, 0), 44.0, "ui_picture"],
 	["ui_room", "stub://flat_mono", "cinema", Vector2(0, 0), 44.0, "ui_room"],
@@ -70,8 +76,15 @@ func _run() -> void:
 	main.set_overlay(true)
 	var saved := 0
 	var skipped := 0
+	var only := ""
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shots-only="):
+			only = a.trim_prefix("--shots-only=")
 	for shot: Array in SHOTS:
 		var shot_name: String = shot[0]
+		if not shot_name.begins_with(only):
+			skipped += 1
+			continue
 		if not str(shot[1]).begins_with("stub://") and not FileAccess.file_exists(shot[1]):
 			print("Shot %s skipped: %s not found" % [shot_name, shot[1]])
 			skipped += 1

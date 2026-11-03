@@ -1,0 +1,31 @@
+{
+	"id": "pale_laminate",
+	"name": "Pale laminate floor",
+	"tags": [
+		"floor",
+		"wood",
+		"laminate"
+	],
+	"size": 2048,
+	"tiling": 1.7,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#9c8164",
+	"maps": {
+		"albedo": "textures/pale_laminate_albedo.mtex",
+		"normal": "textures/pale_laminate_normal.mtex",
+		"orm": "textures/pale_laminate_orm.mtex"
+	},
+	"source": {
+		"site": "polyhaven",
+		"asset": "laminate_floor_02",
+		"title": "Laminate Floor 02",
+		"url": "https://polyhaven.com/a/laminate_floor_02",
+		"author": "Dario Barresi (processing), Charlotte Baglioni (photography)",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

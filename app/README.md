@@ -605,6 +605,9 @@ tools/label_proof.gd     proves the labels at the headset's pixels: measures eac
 tools/controller_model/  our controller model from the CAD: cad/ (tessellate, split, decimate), export_legends.gd, render.gd,
                          bake.py (register, unwrap, print the legends) -> models/controllers/
 models/controllers/      our controller models (CC BY-NC-SA 4.0, LICENSE-controller.md)
+materials/               the material library: <id>.json entries, textures/*.mtex (ASTC), CREDITS.md (CC0;
+                         ../docs/materials.md); loaded by scripts/env/material_library.gd
+tools/material_sheet.gd  a contact sheet of the materials; tools/material_bench.gd their shader's cost
 tests/                   unit tests (headless --script)
 docs/screenshots/        desktop screenshots of every mode (both eyes side by side)
 ```

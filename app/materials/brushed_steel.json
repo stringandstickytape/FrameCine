@@ -1,0 +1,30 @@
+{
+	"id": "brushed_steel",
+	"name": "Brushed steel",
+	"tags": [
+		"metal",
+		"accent"
+	],
+	"size": 1024,
+	"tiling": 1.0,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#929598",
+	"maps": {
+		"albedo": "textures/brushed_steel_albedo.mtex",
+		"normal": "textures/brushed_steel_normal.mtex",
+		"orm": "textures/brushed_steel_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Metal009",
+		"title": "Metal 009",
+		"url": "https://ambientcg.com/view?id=Metal009",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}

@@ -1,0 +1,32 @@
+{
+	"id": "tufted_leather",
+	"name": "Tufted leather",
+	"tags": [
+		"leather",
+		"seat",
+		"sofa",
+		"accent"
+	],
+	"size": 1024,
+	"tiling": 0.6,
+	"tint": "#ffffff",
+	"roughness_scale": 1.0,
+	"normal_strength": 1.0,
+	"specular": 0.5,
+	"sheen": 0.0,
+	"swatch": "#430f0f",
+	"maps": {
+		"albedo": "textures/tufted_leather_albedo.mtex",
+		"normal": "textures/tufted_leather_normal.mtex",
+		"orm": "textures/tufted_leather_orm.mtex"
+	},
+	"source": {
+		"site": "ambientcg",
+		"asset": "Leather011",
+		"title": "Leather 011",
+		"url": "https://ambientcg.com/view?id=Leather011",
+		"author": "",
+		"licence": "CC0 1.0",
+		"checked": "2026-11-03"
+	}
+}
