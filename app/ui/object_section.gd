@@ -138,7 +138,8 @@ func _tile(m: Dictionary, group: ButtonGroup) -> void:
 	b.add_child(title)
 	b.pressed.connect(func() -> void:
 		_selected = id
-		_sync_chosen())
+		_sync_chosen()
+		_show_place())
 	_grid.add_child(b)
 	_tiles[id] = b
 
@@ -153,6 +154,15 @@ func _sync_chosen() -> void:
 				"  ·  imported" if m["source"] == "user" else ""]
 	_place.disabled = m.is_empty()
 	_delete.visible = not m.is_empty() and m["source"] == "user"
+
+
+## The panel scrolls so that Place shows: it sits under the grid, often below the visible part of the tab.
+func _show_place() -> void:
+	var p: Node = get_parent()
+	while p != null and not (p is ScrollContainer):
+		p = p.get_parent()
+	if p != null:
+		(p as ScrollContainer).ensure_control_visible(_place)
 
 
 func _start_place() -> void:
