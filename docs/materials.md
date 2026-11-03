@@ -19,7 +19,7 @@ app/materials/<id>.json              one catalogue entry per material
 app/materials/textures/<id>_<map>.mtex   albedo, normal, orm: ASTC 8 x 8, every mip level
 app/materials/CREDITS.md             the source of every material
 app/scripts/env/material_library.gd  the loader and the API
-app/shaders/room_material.gdshader(inc), room_material_triplanar.gdshader
+app/shaders/room_material.gdshader(inc), room_material_triplanar.gdshader, room_material_lit(_triplanar).gdshader
 tools/materials/                     build_materials.py, mtex_pack.cpp, make-packer.sh
 app/tools/material_sheet.gd, material_bench.gd   a contact sheet, the cost benchmark
 ```
@@ -119,9 +119,30 @@ The drive-in and the passthrough room are unchanged. Before (above) and after (b
 tour (`--shots=DIR --shots-only=env_`, lavapipe): `docs/shots/materials/env_*.png`; every material on a box
 and a floor (`app/tools/material_sheet.gd`): `docs/shots/materials/catalogue.jpg`.
 
-In an assistant's room with real lighting (`docs/assistant.md`, "Lighting") the built-in rooms keep their plain
-materials (`MaterialLibrary.in_lit_room()`): that room relights `env_unlit` surfaces as `room_lit` ones and has no
-lit form of a library material yet.
+In an assistant's room with real lighting (`docs/assistant.md`, "Lighting") the built-in rooms keep their library
+materials in their lit form: that room relights `env_unlit` surfaces as `room_lit` ones and library surfaces with
+`MaterialLibrary.lit_variant()` (below).
+
+## In the assistant's rooms and the Objects tab
+
+A room document's material object may name a library material (`"library_material": "velvet"`, with `color`, `tint`,
+`tiling`, `triplanar`; `docs/assistant.md`, "Library materials"): on a part, a whole placed object, one part of it or
+a base room surface. `recolour {match, material: "<id>"}` puts one there; the Objects tab's parts editor has a
+**Material** picker (each material's swatch and name, by kind; `docs/USAGE.md`, "The Objects tab"). Every surface
+with the same material and options shares one `ShaderMaterial`. `room_state` reports each surface's material id and
+its mean colour (`MaterialLibrary.id_of()`, `shown_colour()`).
+
+### The lit form
+
+`room_material_lit.gdshader` and `room_material_lit_triplanar.gdshader` are the same include with `LIT` defined, for
+an assistant's room with real lighting (a key light, a sky fill, the screen's light, point lights): not unshaded, the
+engine's lights and shadows fall on the maps' colour, roughness (`roughness_scale`), metalness (half: there is
+nothing to reflect) and normals (`normal_strength`, pleats included), and room_lit.gdshader's hemisphere fill, film
+light and contact darkening are added as emission, times ambient occlusion; sheen at grazing angles from the fill.
+`get_material(id, {"lit": {sky_top, sky_bottom, screen}})` makes one directly (the assistant's parts);
+`lit_variant(material, lighting)` turns an unlit library material into its lit form with every setting copied (a
+built-in room's surfaces when that room is lit), one per material and lighting, shared. Not yet measured on the
+headset: it adds the engine's per-light work to the three fetches.
 
 ## Using it
 
@@ -135,7 +156,8 @@ MaterialLibrary.apply(mesh_instance, "felt", {}, 2)                          # o
 ```
 
 Options: `colour`, `tint`, `tiling`, `offset`, `uv`, `repeat`, `triplanar`, `roughness_scale`, `normal_strength`,
-`specular`, `sheen`, `pleats`, `pleat_depth`, `spill`, `floor_darkening`. A primitive room has
+`specular`, `sheen`, `pleats`, `pleat_depth`, `spill`, `floor_darkening`, `emission` (added on top), `lit` (the lit
+form, above). A primitive room has
 `textured(id, colour, spill, floor_darkening, options)`, which falls back to its plain material. The returned
 material is shared: `duplicate()` it before changing it for one surface.
 

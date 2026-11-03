@@ -10,7 +10,8 @@ extends RefCounted
 ##    "base": "dim_room",                          new_room: a stock room id (room_state lists them), or
 ##    "base_model": "<base64 .glb>",               new_room: a whole room as glTF (app/docs/rooms.md convention)
 ##    "light": {"ambient": 0.2, "screen_glow": 0.6},
-##    "sky": {"color": "#0a1020"} or {"image": "<base64 PNG/JPEG>"} or {} (none),
+##    "sky": {"color": "#0a1020"} or {"image": "<base64 PNG/JPEG>"} or {} (none); "effect": {"name": "sky_aurora",
+##           ...options}: a sky from the effect library (docs/effects.md; effects surface=sky),
 ##    "parts": [part, ...],                        added, or replaced when the name exists
 ##    "recolour": [{"match": "Wall*", "material": material}, ...],   the base room's own parts, by name pattern;
 ##                 "Shelf/Board" (schema 2): the part Board inside the placed model Shelf (both sides patterns);
@@ -30,8 +31,15 @@ extends RefCounted
 ##              "texture": "<base64 PNG/JPEG>", "self_lit": bool (default: true with a texture),
 ##              "uv": "atlas" | "each_face" | "front_only" (box only; how the picture lies on it),
 ##              "roughness": 0..1 (accepted; the rooms are unlit),
-##              "library_material": "oak" (schema 2): a material library's id; its fields under the ones given here;
-##                                  an id the app doesn't know is left out with a warning (assistant_room.gd)}
+##              "library_material": "oak_planks" (schema 2): a textured material from the material library
+##                                  (scripts/env/material_library.gd; the materials command lists the ids); with it
+##                                  "color" is the colour it shows on average (its pattern kept), "tint": "#rrggbb"
+##                                  multiplies it, "tiling": metres per repeat (0.02..20), "triplanar": true for
+##                                  curved meshes without usable UVs; not with texture; with an effect only one
+##                                  that layers (a layered look); an id the app doesn't know is left out with a
+##                                  warning (the rest applies),
+##              "effect": {"name": "plasma", ...options}: a look from the effect library (docs/effects.md; the
+##                        effects command lists them, effect_info gives the options)}
 ##   shown = color x texture x (self_lit ? 1 : the room's light) + emission x emission_strength (assistant_room.gd)
 ##
 ## validate(doc, mode) checks a whole document and returns every problem with its JSON path, so an assistant can fix
@@ -44,6 +52,10 @@ const VERSION := 2
 const VERSIONS: Array[int] = [1, 2]
 ## An object library id (object_library.gd) or a library material's: lower-case letters, digits, - and _.
 const ID_MAX := 64
+## A library material's own options in a material object (only with library_material), and its tiling's range.
+const LIBRARY_OPTIONS: Array[String] = ["tint", "tiling", "triplanar"]
+const TILING_MIN := 0.02
+const TILING_MAX := 20.0
 const PART_TYPES: Array[String] = ["box", "sphere", "cylinder", "plane", "model", "text", "particles"]
 const PARTICLES_SCRIPT := "res://scripts/assistant/room_particles.gd"
 const NAME_MAX := 40
@@ -60,39 +72,11 @@ const ALPHA_MODES: Array[String] = ["opaque", "cutout", "blend"]
 ## every effect and widget stays under it (the photosensitivity ceiling; the shaders clamp too).
 const MAX_HZ := 3.0
 const MAX_SWING := 0.4
-## Material effects the app draws (shaders/room_effect.gdshader): {name: {description, options}}.
-const EFFECTS := {
-	"rim_glow": {"description": "a soft glowing rim where the surface turns away (fresnel)", "options": {
-		"color": {"type": "color", "default": "#88ccff"},
-		"strength": {"type": "float", "min": 0.0, "max": 3.0, "default": 1.0}}},
-	"hologram": {"description": "see-through light with fine drifting scanlines, brighter edges, a faint flicker",
-			"options": {
-		"color": {"type": "color", "default": "#66ddff"},
-		"strength": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0}}},
-	"glass": {"description": "clear in the middle, reflective at grazing angles, tinted by the material's color",
-			"options": {}},
-	"metal": {"description": "a polished look: the room's light above, dark below, the screen's glint", "options": {
-		"strength": {"type": "float", "min": 0.0, "max": 3.0, "default": 1.0}}},
-	"toon_outline": {"description": "cel shading (three hard-edged tones of the colour) with a dark outline",
-			"options": {
-		"color": {"type": "color", "default": "#101010"},
-		"width": {"type": "float", "min": 0.5, "max": 4.0, "default": 2.0,
-			"description": "pixels, the same near and far"}}},
-	"dissolve": {"description": "eaten away by noise, with a glowing edge (amount 0: whole, 1: gone)", "options": {
-		"amount": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5},
-		"color": {"type": "color", "default": "#ff8833"},
-		"strength": {"type": "float", "min": 0.0, "max": 3.0, "default": 1.5}}},
-	"pulse": {"description": "a glow that swells and fades smoothly", "options": {
-		"color": {"type": "color", "default": "#ffcc88"},
-		"strength": {"type": "float", "min": 0.0, "max": 3.0, "default": 0.6},
-		"rate": {"type": "float", "min": 0.05, "max": MAX_HZ, "default": 0.5, "description": "Hz, at most 3"},
-		"swing": {"type": "float", "min": 0.0, "max": MAX_SWING, "default": 0.3}}},
-	"flicker": {"description": "candlelight: a glow wandering on several slow waves, never a strobe", "options": {
-		"color": {"type": "color", "default": "#ffaa55"},
-		"strength": {"type": "float", "min": 0.0, "max": 3.0, "default": 0.6},
-		"rate": {"type": "float", "min": 0.2, "max": MAX_HZ, "default": 1.5, "description": "Hz, at most 3"},
-		"swing": {"type": "float", "min": 0.0, "max": MAX_SWING, "default": 0.25}}},
-}
+const EffectLibrary := preload("res://scripts/effects/effect_library.gd")
+## Material effects (docs/effects.md): {name: {description, options}}, the effect library's surface effects; the
+## sky's (sky.effect) are SKY_EFFECTS.
+static var EFFECTS: Dictionary = EffectLibrary.schema_effects(false)
+static var SKY_EFFECTS: Dictionary = EffectLibrary.schema_effects(true)
 
 ## What each thing costs the headset's frame, in the units of LIMITS.cost (the room's total is capped so the film keeps
 ## its frame rate: 72 Hz on the Frame). Relative weights, set from what each draws per frame.
@@ -112,6 +96,10 @@ const COSTS := {
 	"motion": 0.25,            # moved every frame: a few multiplies on the CPU
 	"effect": 1.0,             # a shader with more arithmetic than the plain one
 	"effect_second_pass": 1.0, # toon_outline: the part drawn twice
+	# A library material (docs/materials.md, "Cost"): three texture fetches and about 100 operations a pixel, some
+	# 8-10x env_unlit on the software renderer; triplanar three times the fetches.
+	"library_material": 0.5,
+	"library_triplanar": 1.0,
 	# Lighting, from the GPU time measured on the Frame (2026-11-01: both eyes, a 4K film playing, 150 lit boxes):
 	# one cost is about 0.05 ms. A directional light 0.8 ms, its orthogonal shadows 0.5-0.6 ms more, a point light
 	# about 0.25 ms when its range (8 m) covers the room. Change these when the measurements change.
@@ -360,7 +348,10 @@ static func validate(doc: Variant, mode: String) -> Dictionary:
 							+ "(object_info lists a placed object's parts)"))
 				if r.has("material") and r["material"] == null and mode != "patch":
 					errors.append(_e(p + ".material", "null takes an entry out: only in a change to the room on show"))
-				_material(r.get("material"), p + ".material", mode, errors)
+				# A part-level entry changes what the part shows (its object's library material too): tint and tiling
+				# without library_material are fine there.
+				_material(r.get("material"), p + ".material", mode, errors, not split_match(str(r.get("match",
+						""))).is_empty())
 	if d.has("remove"):
 		if mode != "patch":
 			errors.append(_e("$.remove", "only in a change to the room on show"))
@@ -726,16 +717,30 @@ static func _sky(v: Variant, mode: String, errors: Array) -> void:
 					errors.append(_e("$.sky.image_file", "unknown key"))
 			"stars", "clouds":
 				_options(SKY_OPTIONS[str(k)], str(k), s[k], "$.sky.%s" % k, errors)
+			"effect":
+				# A sky from the effect library (effects surface=sky), drawn on the sky sphere.
+				var opts: Dictionary = (s[k] as Dictionary).duplicate() if s[k] is Dictionary else {}
+				var fx_name := str(opts.get("name", ""))
+				opts.erase("name")
+				if EffectLibrary.has(fx_name) and str(EffectLibrary.entry(fx_name)["surfaces"]) != "sky":
+					errors.append(_e("$.sky.effect.name", "%s is for parts (material.effect); the sky's: %s"
+							% [fx_name, ", ".join(SKY_EFFECTS.keys())]))
+				elif not EffectLibrary.has(fx_name):
+					errors.append(_e("$.sky.effect.name", "{name, ...options}: name one of %s"
+							% ", ".join(SKY_EFFECTS.keys())))
+				else:
+					errors.append_array(EffectLibrary.validate(fx_name, opts, "$.sky.effect").map(
+							func(x: Dictionary) -> Dictionary: return _e(x["path"], x["error"])))
 			_:
-				errors.append(_e("$.sky.%s" % k, "unknown key (color, image, stars, clouds)"))
+				errors.append(_e("$.sky.%s" % k, "unknown key (color, image, stars, clouds, effect)"))
 
 
-static func _material(v: Variant, path: String, mode: String, errors: Array) -> void:
+static func _material(v: Variant, path: String, mode: String, errors: Array, layered := false) -> void:
 	if v == null:
 		return
 	if not (v is Dictionary):
 		errors.append(_e(path, "{color, emission, emission_strength, texture, self_lit, alpha, uv, effect, "
-				+ "roughness}"))
+				+ "roughness, library_material, tint, tiling, triplanar}"))
 		return
 	var m: Dictionary = v
 	for k: Variant in m:
@@ -758,14 +763,20 @@ static func _material(v: Variant, path: String, mode: String, errors: Array) -> 
 				if not (m[k] is String and m[k] in ALPHA_MODES):
 					errors.append(_e(p, "one of %s" % ", ".join(ALPHA_MODES)))
 			"effect":
+				# The effect library checks it (docs/effects.md), in this schema's words.
 				var fx: Variant = m[k]
-				var fx_name := str(fx.get("name", "")) if fx is Dictionary else ""
-				if not EFFECTS.has(fx_name):
-					errors.append(_e(p + ".name", "{name, ...options}: name one of %s" % ", ".join(EFFECTS.keys())))
+				var opts: Dictionary = (fx as Dictionary).duplicate() if fx is Dictionary else {}
+				var fx_name := str(opts.get("name", ""))
+				opts.erase("name")
+				if EffectLibrary.has(fx_name) and str(EffectLibrary.entry(fx_name)["surfaces"]) == "sky":
+					errors.append(_e(p + ".name", "%s is for the sky (sky.effect)" % fx_name))
 				else:
-					var opts: Dictionary = (fx as Dictionary).duplicate()
-					opts.erase("name")
-					_options(EFFECTS[fx_name]["options"], fx_name, opts, p, errors)
+					errors.append_array(EffectLibrary.validate(fx_name, opts, p).map(
+							func(x: Dictionary) -> Dictionary: return _e(x["path"], x["error"])))
+					if m.has("library_material") and EffectLibrary.has(fx_name) \
+							and not bool(EffectLibrary.entry(fx_name)["layers"]):
+						errors.append(_e(p + ".name", "%s draws its own surface: it does not layer over a material "
+								% fx_name + "(effects lists those that do: layers true)"))
 			"roughness":
 				var x := _num(m[k])
 				if not (x >= 0.0 and x <= 1.0):
@@ -779,10 +790,26 @@ static func _material(v: Variant, path: String, mode: String, errors: Array) -> 
 					errors.append(_e(p, "unknown key"))
 			"library_material":
 				if not id_ok(m[k]):
-					errors.append(_e(p, "a library material's id: lower-case letters, digits, - and _"))
+					errors.append(_e(p, "a library material's id (the materials command lists them): lower-case "
+							+ "letters, digits, - and _"))
+				elif m.has("texture") or m.has("texture_file"):
+					errors.append(_e(p, "one of library_material, texture"))
+			"tint":
+				if not is_color(m[k]):
+					errors.append(_e(p, "#rrggbb or [r, g, b] 0..1"))
+			"tiling":
+				var x := _num(m[k])
+				if not (x >= TILING_MIN and x <= TILING_MAX):
+					errors.append(_e(p, "metres per repeat, %s..%s" % [TILING_MIN, TILING_MAX]))
+			"triplanar":
+				if not (m[k] is bool):
+					errors.append(_e(p, "true or false"))
 			_:
 				errors.append(_e(p, "unknown key (color, emission, emission_strength, texture, self_lit, alpha, uv, "
-						+ "effect, roughness, library_material)"))
+						+ "effect, roughness, library_material, tint, tiling, triplanar)"))
+	for k in LIBRARY_OPTIONS:
+		if m.has(k) and not m.has("library_material") and not layered:
+			errors.append(_e("%s.%s" % [path, k], "only with library_material"))
 
 
 static func _part(v: Variant, path: String, mode: String, names: Dictionary, errors: Array) -> void:
@@ -957,6 +984,8 @@ static func room_cost(doc: Dictionary) -> float:
 			c += COSTS["sky_stars"]
 		if (sky as Dictionary).has("clouds"):
 			c += COSTS["sky_clouds"]
+		if (sky as Dictionary).get("effect") is Dictionary:
+			c += EffectLibrary.cost_units(str(sky["effect"].get("name", ""))) * COSTS["effect"]
 	var atmosphere: Variant = doc.get("atmosphere")
 	if atmosphere is Dictionary and (atmosphere as Dictionary).has("fog"):
 		c += COSTS["fog_layer"] * FOG_LAYERS
@@ -995,12 +1024,17 @@ static func part_cost(p: Dictionary, model_triangles := 0, model_parts := 1) -> 
 		var col: Variant = (m as Dictionary).get("color")
 		var fx: Variant = (m as Dictionary).get("effect")
 		var fx_name := str(fx.get("name", "")) if fx is Dictionary else ""
-		if a == "blend" or (a == "" and col != null and to_color(col).a < 0.999) or fx_name in ["glass", "hologram"]:
+		# The effect's units (its measured tier, a second pass, see-through) replace the fixed costs; they come out
+		# the same for the first eight (glass and hologram 2, toon_outline 2, the rest 1).
+		var transparent_fx := fx_name != "" and str(EffectLibrary.entry(fx_name).get("blend", "")) in ["alpha", "add"]
+		if not transparent_fx and (a == "blend" or (a == "" and col != null and to_color(col).a < 0.999)):
 			c += COSTS["blend"]
 		if fx_name != "":
-			c += COSTS["effect"]
-		if fx_name == "toon_outline":
-			c += COSTS["effect_second_pass"]
+			c += EffectLibrary.cost_units(fx_name) * COSTS["effect"]
+		if (m as Dictionary).has("library_material"):
+			c += COSTS["library_material"]
+			if bool((m as Dictionary).get("triplanar", false)):
+				c += COSTS["library_triplanar"]
 	return c
 
 
@@ -1036,6 +1070,36 @@ static func supported_effects() -> Array:
 	for n: String in EFFECTS:
 		out.append({"name": n, "description": EFFECTS[n]["description"], "options": EFFECTS[n]["options"]})
 	return out
+
+
+## A material object with a change's fields on top. A library material and a picture exclude each other, and a
+## library material goes under an effect only when the effect layers (EffectLibrary entry "layers"): a change naming
+## a library material drops the old picture, an effect that doesn't layer, and the old library material's colour and
+## options (a new material shows as itself unless the change gives a colour); a picture, or an effect that doesn't
+## layer, drops the library material. Everything else (colour, tint, tiling, emission, a layering effect) changes
+## what is there.
+static func merge_material(old: Dictionary, change: Dictionary) -> Dictionary:
+	var out := old.duplicate(true)
+	var drop: Array = []
+	if change.has("library_material"):
+		drop = ["texture", "texture_file", "uv", "color"]
+		drop.append_array(LIBRARY_OPTIONS)
+		if not _layers(change.get("effect", out.get("effect"))):
+			drop.append("effect")
+	elif change.has("texture") or change.has("texture_file") or (change.has("effect")
+			and not _layers(change["effect"])):
+		drop = ["library_material"]
+		drop.append_array(LIBRARY_OPTIONS)
+	for k: String in drop:
+		out.erase(k)
+	out.merge(change.duplicate(true), true)
+	return out
+
+
+## Whether an effect object ({name, ...}) keeps the surface under it, so it goes over a library material.
+static func _layers(fx: Variant) -> bool:
+	var fx_name := str(fx.get("name", "")) if fx is Dictionary else ""
+	return EffectLibrary.has(fx_name) and bool(EffectLibrary.entry(fx_name)["layers"])
 
 
 ## The room after a patch: parts replaced or added by name, removed ones gone, light / sky / recolour merged.

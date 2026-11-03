@@ -118,6 +118,14 @@
        "speed": {"type": "number", "minimum": 0, "maximum": 3},
        "color": {"type": "string", "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"}
       }
+     },
+     "effect": {
+      "type": "object",
+      "required": ["name"],
+      "description": "a sky from the effect library (effects surface=sky: sky_aurora, sky_starfield, sky_nebula, sky_sunset, sky_clouds), with its options (effect_info lists them and their bounds)",
+      "properties": {
+       "name": {"type": "string"}
+      }
      }
     }
    },
@@ -478,17 +486,12 @@
    },
    "effect": {
     "type": "object",
-    "additionalProperties": false,
     "required": ["name"],
-    "description": "a named effect the app draws (never code): rim_glow {color, strength}, hologram {color, strength}, glass {}, metal {strength}, toon_outline {color, width}, dissolve {amount, color, strength}, pulse {color, strength, rate, swing}, flicker {color, strength, rate, swing}. Photosensitivity ceiling: rate at most 3 Hz, swing at most 0.4 of the surface's own brightness",
+    "description": "a look from the effect library (never code): name is an id from the effects command (surface any: rim_glow, hologram, glass, metal, toon_outline, dissolve, pulse, flicker, plasma, caustics, water, marble, neon, wipe, ... 43 in all), the rest its options (effect_info gives each one's type, bounds and default). With library_material only an effect whose layers is true. Photosensitivity ceiling: rate at most 3 Hz, swing at most 0.4 of the surface's own brightness",
     "properties": {
-     "name": {"enum": ["rim_glow", "hologram", "glass", "metal", "toon_outline", "dissolve", "pulse", "flicker"]},
-     "color": {"type": "string", "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$"},
-     "strength": {"type": "number", "minimum": 0, "maximum": 3},
-     "width": {"type": "number", "minimum": 0.5, "maximum": 4, "description": "toon_outline: pixels, the same near and far"},
-     "amount": {"type": "number", "minimum": 0, "maximum": 1, "description": "dissolve: 0 whole, 1 gone"},
-     "rate": {"type": "number", "minimum": 0.05, "maximum": 3, "description": "pulse, flicker: Hz, at most 3"},
-     "swing": {"type": "number", "minimum": 0, "maximum": 0.4, "description": "pulse, flicker: how far brightness swings"}
+     "name": {"type": "string"},
+     "rate": {"type": "number", "maximum": 3, "description": "Hz, at most 3"},
+     "swing": {"type": "number", "minimum": 0, "maximum": 0.4}
     }
    },
    "roughness": {
@@ -499,7 +502,22 @@
    "library_material": {
     "type": "string",
     "pattern": "^[a-z0-9_-]{1,64}$",
-    "description": "schema 2: a material library id; its fields under the ones given here; an id the headset doesn't know is left out with a warning"
+    "description": "schema 2: a textured material from the material library (the materials command lists the ids); with it color is the colour it shows on average, its pattern kept; not with texture or effect; an id the headset doesn't know is left out with a warning"
+   },
+   "tint": {
+    "type": "string",
+    "pattern": "^#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$",
+    "description": "with library_material: multiplies its colours"
+   },
+   "tiling": {
+    "type": "number",
+    "minimum": 0.02,
+    "maximum": 20,
+    "description": "with library_material: metres per repeat of its pattern (default: the material's own)"
+   },
+   "triplanar": {
+    "type": "boolean",
+    "description": "with library_material: three blended projections, for curved models without usable UVs (three times the texture reads)"
    }
   }
  }

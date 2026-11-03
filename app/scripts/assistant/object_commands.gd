@@ -330,17 +330,31 @@ static func recolour_part(tree: SceneTree, caller: Object, match: String, materi
 	return r
 
 
-## The recolour entries a part-level change needs: the pattern with its material; or, to reset (material null), a
-## removal of every entry the pattern covers.
+## The recolour entries a part-level change needs: the pattern with its material (entry_material()); or, to reset
+## (material null), a removal of every entry the pattern covers.
 static func recolour_entries(doc: Dictionary, match: String, material: Variant) -> Array:
 	if material is Dictionary:
-		return [{"match": match, "material": material}]
+		return [{"match": match, "material": entry_material(doc, match, material)}]
 	var out: Array = []
 	for r: Dictionary in doc.get("recolour", []):
 		var m := str(r["match"])
 		if not RoomSchema.split_match(m).is_empty() and (m == match or m.match(match)):
 			out.append({"match": m, "material": null})
 	return out
+
+
+## The material a recolour entry for `match` gets: the change itself (it replaces the entry with the same match), or,
+## when that entry shows a library material or an effect, or the change brings one, the change on top of it
+## (RoomSchema.merge_material()): a colour, tint, tiling or emission then changes the material instead of replacing
+## it, and an effect keeps the colour (or the library material, when it layers) under it.
+static func entry_material(doc: Dictionary, match: String, change: Dictionary) -> Dictionary:
+	for r: Dictionary in doc.get("recolour", []):
+		if str(r["match"]) == match and r.get("material") is Dictionary:
+			var old: Dictionary = r["material"]
+			if old.has("library_material") or old.has("effect") or change.has("library_material") \
+					or change.has("effect"):
+				return RoomSchema.merge_material(old, change)
+	return change
 
 
 # --- Where, names, undo ----------------------------------------------------------------------------------------------

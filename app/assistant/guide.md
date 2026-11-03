@@ -360,6 +360,15 @@ and an outline, `width` in pixels, the same near and far), `dissolve` (eaten awa
 pulse or flicker starts at its own phase, so a row of candles doesn't beat together. An effect costs 1; glass and
 hologram 1 more (see-through), toon_outline 1 more (drawn twice).
 
+Those are the first eight of the effect library: `effects` lists all of them (energy, nature, materials, stylised,
+transitions, reactive, skies; `group`, `tag` and `surface` filter), each with a one-line description, whether it is
+see-through, whether it keeps the surface under it (`layers`), its cost units and whether it animates;
+`effect_info {id}` gives one's options and bounds. A part's effect costs its `cost_units`. One that layers can go over
+a library material: `{"library_material": "white_marble", "effect": {"name": "caustics"}}` (one that draws its own
+surface can't). wipe and scan_in take their `size`, wind_sway its `base` and `height`, from the part's own extent
+when you leave them out. A sky effect (`effects surface=sky`) goes on the sky: `"sky": {"effect": {"name":
+"sky_aurora"}}`. `room_state` names each surface's `effect`.
+
 **The photosensitivity ceiling** holds for every effect and widget, and the app enforces it: brightness changes no
 faster than 3 times a second (`rate` at most 3) and swings by no more than 0.4 of the surface's own brightness
 (`swing` at most 0.4); a document asking for more is refused with the reason. Nothing strobes or flashes. The
@@ -489,8 +498,14 @@ object from the library (placed copies stay).
 rest of the object; `recolour {match: "Wall shelf", ...}` (a bare name) changes the whole object as before, and its
 part-level colours go. A part-level change takes the part's colour as it was and puts its fields on top (an
 `emission` alone keeps the colour; a `texture` replaces it). `reset: true` puts the part's own colours back.
-`material: "<id>"` names a library material (`library_material` in a document); an id the headset doesn't know is
-left out, with a warning (`unknown_material`). In a document these are `recolour` entries; `"material": null` in a
+`material: "<id>"` puts a textured material from the material library on it (wood floors, carpet, velvet, leather,
+plaster, brick, marble, metal...; `materials` lists the ids, `tag` filters: floor, wall, fabric, wood, leather,
+metal, stone). It shows as itself; with `color` it shows that colour on average, its pattern kept; `tint` multiplies
+it, `tiling` sets metres per repeat, `triplanar: true` suits curved models with seams. On a surface that has one,
+`color`, `tint`, `tiling` and `emission` change it and `texture` replaces it. In a document it is
+`{"library_material": "velvet", "color": "#5a1830", "tiling": 0.25}`; it works on parts, placed objects, their parts
+and the base room's surfaces, lit rooms included. `room_state` gives each surface's `material` id. An id the headset
+doesn't know is left out, with a warning (`unknown_material`). In a document these are `recolour` entries; `"material": null` in a
 change takes an entry out; one that reaches no part is kept, with a `no_such_part` warning (the `recolour`
 command refuses it instead).
 

@@ -156,8 +156,13 @@ hard edge sweeping past is never allowed. Room_react's slew limit is the same id
 
 ## Connecting it
 
-The library is its own module; the room document does not name its new effects yet. What connects it (the room
-schema, the room builder and the material library are other work; these are the exact changes):
+Connected (2026-11-03): the room document names every effect, the sky takes the sky effects, and the Objects tab's
+parts editor has an Effect picker (each effect's preview, `app/textures/fx/swatches/<id>.png`, made small from the
+previews by `app/tools/fx_swatches.gd`; run it again when the previews change). `docs/assistant.md` ("Effects")
+says how it works in the rooms; `tests/test_room_materials.gd` checks it. Steps 1 to 7, 9 and 10 below are as
+written, with these differences: a layered look is `{"library_material": "<id>", "effect": {...}}` (the room
+document's key), its picture is mapped by UV on spheres and cylinders (as the library material itself) and falls back
+to UV for the first eight; the `looks` listing (8) is not made (`materials` and `effects` list each). What was done:
 
 1. **`room_schema.gd` EFFECTS, derived.** Replace the `const EFFECTS := {...}` block with
 

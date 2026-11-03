@@ -11,8 +11,11 @@
 // Texture coordinates: by default the surface's own axes in metres ("box": each face takes the two axes across it,
 // one fetch per map, exact on boxes and planes), or the mesh's UVs; room_material_triplanar.gdshader blends three
 // projections for meshes without either (three times the fetches).
-// Included by room_material.gdshader and room_material_triplanar.gdshader (TRIPLANAR defined), after their
-// shader_type and render_mode.
+// LIT defined (room_material_lit.gdshader, room_material_lit_triplanar.gdshader): the same maps in an assistant's room
+// with real lighting, as room_lit.gdshader lights it: the engine's lights and shadows on the maps' colour, roughness,
+// metalness and normals, plus the hemisphere fill, the film's light and the contact darkening added as emission.
+// Included by room_material.gdshader and room_material_triplanar.gdshader (TRIPLANAR defined) and their lit forms,
+// after their shader_type and render_mode.
 
 uniform sampler2D albedo_map : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 // X in RGB, Y in alpha (the packer's normal mode); Z is rebuilt.
@@ -41,6 +44,18 @@ uniform float pleat_depth = 0.5;
 // As env_unlit: how much this surface catches the screen's light, and the darkening towards the floor.
 uniform float spill = 1.0;
 uniform float floor_darkening = 0.2;
+// Added on top (the room document's emission x emission_strength): a library surface can glow too.
+uniform vec3 emission : source_color = vec3(0.0);
+#ifdef LIT
+// As room_lit.gdshader: the hemisphere fill (colours as picked, times light.sky.energy), the film's light, and the
+// contact darkening near the floor.
+uniform vec3 sky_top = vec3(0.0);
+uniform vec3 sky_bottom = vec3(0.0);
+uniform float screen_light = 0.0;
+uniform float contact_height = 0.5;
+uniform float contact_strength = 0.35;
+uniform float floor_y = 0.0;
+#endif
 
 // env_light, screen_center, screen_glow and the bias light's tint (ideas #29).
 #include "res://shaders/env_spill.gdshaderinc"
@@ -151,6 +166,43 @@ void fragment() {
 	across_dir = tan_u;
 #endif
 
+#ifdef LIT
+	float fold = 1.0;
+	if (pleats > 0.0) {
+		float phase = across * pleats * TAU;
+		n = normalize(n + across_dir * cos(phase) * pleat_depth);
+		fold = 1.0 - pleat_depth * 0.35 * (1.0 - sin(phase));
+	}
+	vec3 base = tint * t.albedo;
+	float metallic = t.orm.b;
+	float ao = mix(1.0, t.orm.r, ao_strength) * fold;
+	float occlusion = mix(1.0 - contact_strength, 1.0, smoothstep(0.0, contact_height, world_pos.y - floor_y));
+	// Metals: no environment to reflect, so a dimmer copy of their colour stands in for it (as unlit).
+	ALBEDO = base * mix(1.0, 0.45, metallic);
+	METALLIC = metallic * 0.5;
+	ROUGHNESS = clamp(t.orm.g * roughness_scale, 0.05, 1.0);
+	SPECULAR = clamp(specular * 0.5, 0.0, 1.0);
+	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
+	vec3 fill = mix(sky_bottom, sky_top, n.y * 0.5 + 0.5);
+	vec3 film = vec3(0.0);
+	if (screen_light > 0.0) {
+		vec3 to = screen_center - world_pos;
+		float d = length(to);
+		float facing = clamp(dot(n, to / max(d, 0.001)) * 0.75 + 0.25, 0.0, 1.0);
+		// The picture's colour nearest this point (room_lit.gdshader's film_colour()).
+		float u = clamp(0.5 + dot(world_pos - screen_center, screen_axis), 0.125, 0.875);
+		vec3 c = spill_srgb_to_linear(textureLod(screen_thumb, vec2(u, 0.5), 0.0).rgb);
+		film = min(c / SPILL_REFERENCE, vec3(SPILL_MAX)) * screen_light * facing / (1.0 + 0.08 * d * d);
+	}
+	vec3 own = ALBEDO * (fill + film) * occlusion * ao;
+	if (sheen > 0.0) {
+		float rim = 1.0 - max(dot(n, normalize(CAMERA_POSITION_WORLD - world_pos)), 0.0);
+		own += base * (fill + film) * sheen * rim * rim * rim * 2.0;
+	}
+	EMISSION = own + emission;
+	AO = occlusion * ao;
+	AO_LIGHT_AFFECT = 0.6;
+#else
 	// The room's light, split as env_unlit has it: ambient, and the screen's spill towards the screen.
 	vec3 to_screen = screen_center - world_pos;
 	float d = length(to_screen);
@@ -187,5 +239,6 @@ void fragment() {
 		float rim = 1.0 - nv;
 		colour += base * light * sheen * rim * rim * rim * 2.0;
 	}
-	ALBEDO = min(colour, vec3(1.0));
+	ALBEDO = min(colour + emission, vec3(1.0));
+#endif
 }

@@ -22,6 +22,7 @@ const VREnvironment := preload("res://environments/vr_environment.gd")
 const RoomBounds := preload("res://scripts/assistant/room_bounds.gd")
 const RoomParticles := preload("res://scripts/assistant/room_particles.gd")
 const RoomPerf := preload("res://scripts/assistant/room_perf.gd")
+const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 ## Stock parts listed in room_state (a glTF room can have hundreds); stock_parts_total says how many there are.
 const STOCK_LISTED := 100
 const LOAD_TIMEOUT := 60.0
@@ -81,11 +82,22 @@ func state() -> Dictionary:
 	var base := _base(env)
 	var geom := RoomBounds.geometry(base, to_room(m))
 	var colours := {}
+	var materials := {}
+	var effects := {}
 	if base != null:
 		for n in base.find_children("*", "GeometryInstance3D", true, false):
 			colours[str(n.name)] = AssistantRoom._colour_of(n as GeometryInstance3D)
+			if AssistantRoom.material_id_of(n as GeometryInstance3D) != "":
+				materials[str(n.name)] = AssistantRoom.material_id_of(n as GeometryInstance3D)
+			if AssistantRoom.effect_id_of(n as GeometryInstance3D) != "":
+				effects[str(n.name)] = AssistantRoom.effect_id_of(n as GeometryInstance3D)
 	for s: Dictionary in RoomBounds.describe(geom).slice(0, STOCK_LISTED):
 		s["color"] = colours.get(s["name"], "")
+		if materials.has(s["name"]):
+			# The library material it shows (the materials command lists them; recolour's material changes it).
+			s["material"] = materials[s["name"]]
+		if effects.has(s["name"]):
+			s["effect"] = effects[s["name"]]
 		stock.append(s)
 	var key := base_key(m)
 	var inside := RoomBounds.interior(geom, key, base)
@@ -455,11 +467,12 @@ func warnings(doc: Dictionary) -> Array:
 	return out
 
 
-## A library material the app does not know (yet): left out, said once.
+## A library material the app does not know: left out, said once.
 static func _material_warnings(mat: Dictionary, where: String, out: Array) -> void:
-	if mat.has("library_material") and AssistantRoom.library_material(str(mat["library_material"])).is_empty():
-		out.append({"part": where, "kind": "unknown_material", "warning": "no library material %s here; the rest "
-				% mat["library_material"] + "of the material applies without it"})
+	if mat.has("library_material") and not MaterialLibrary.has(str(mat["library_material"])):
+		out.append({"part": where, "kind": "unknown_material", "warning": "no library material %s here (the "
+				% mat["library_material"] + "materials command lists them); the rest of the material applies "
+				+ "without it"})
 
 
 static func _limit(name: String, value: Variant) -> Dictionary:

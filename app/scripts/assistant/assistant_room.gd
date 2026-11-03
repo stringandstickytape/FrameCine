@@ -17,6 +17,7 @@ const RoomMotion := preload("res://scripts/assistant/room_motion.gd")
 const RoomParticles := preload("res://scripts/assistant/room_particles.gd")
 const RoomBounds := preload("res://scripts/assistant/room_bounds.gd")
 const GltfRoom := preload("res://scripts/env/gltf_room.gd")
+const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const UNLIT_TEX := preload("res://shaders/env_unlit_tex.gdshader")
 const RECIPE_DIR := "user://recipes"
 const LAYER := "AssistantLayer"
@@ -123,20 +124,52 @@ func on_screen_changed(screen_transform: Transform3D, size: Vector2) -> void:
 		_base.on_screen_changed(screen_transform, size)
 
 
-## The room's own parts (the base's meshes) and the assistant's, for room_state.
+## The room's own parts (the base's meshes) and the assistant's, for room_state: each one's colour, and its library
+## material's id when it shows one.
 func describe_parts() -> Dictionary:
 	var stock: Array = []
 	if _base != null:
 		for n in _base.find_children("*", "GeometryInstance3D", true, false):
-			stock.append({"name": str(n.name), "color": _colour_of(n as GeometryInstance3D)})
+			var d := {"name": str(n.name), "color": _colour_of(n as GeometryInstance3D)}
+			if material_id_of(n as GeometryInstance3D) != "":
+				d["material"] = material_id_of(n as GeometryInstance3D)
+			if effect_id_of(n as GeometryInstance3D) != "":
+				d["effect"] = effect_id_of(n as GeometryInstance3D)
+			stock.append(d)
 	return {"stock": stock}
 
 
-static func _colour_of(g: GeometryInstance3D) -> String:
+## What a surface shows: its override, else its first surface's material.
+static func _shown_material(g: GeometryInstance3D) -> Material:
 	var m: Material = g.material_override
 	if m == null and g is MeshInstance3D and (g as MeshInstance3D).mesh != null \
 			and (g as MeshInstance3D).mesh.get_surface_count() > 0:
 		m = (g as MeshInstance3D).get_active_material(0)
+	return m
+
+
+## The library material a surface shows ("oak_planks"; under an effect too), "" when none.
+static func material_id_of(g: GeometryInstance3D) -> String:
+	var m := _shown_material(g)
+	if m != null and m.has_meta("library_material"):
+		return str(m.get_meta("library_material"))
+	return MaterialLibrary.id_of(m)
+
+
+## The effect a surface shows ("plasma"), "" when none.
+static func effect_id_of(g: GeometryInstance3D) -> String:
+	var m := _shown_material(g)
+	return str(m.get_meta("effect", "")) if m != null else ""
+
+
+## A surface's colour as "#rrggbb": its plain colour, or what its library material shows on average (the swatch
+## times the tint, under an effect too); "" when it has none the app can read.
+static func _colour_of(g: GeometryInstance3D) -> String:
+	var m := _shown_material(g)
+	if MaterialLibrary.is_library(m):
+		return "#" + MaterialLibrary.shown_colour(m).to_html(false)
+	if m != null and m.has_meta("shown_colour"):
+		return "#" + (m.get_meta("shown_colour") as Color).to_html(false)
 	if m is ShaderMaterial and (m as ShaderMaterial).get_shader_parameter("albedo") is Color:
 		return "#" + ((m as ShaderMaterial).get_shader_parameter("albedo") as Color).to_html(false)
 	if m is BaseMaterial3D:
@@ -182,7 +215,8 @@ static func build(p_doc: Dictionary, base: Node3D, assets: Dictionary, p_base_id
 	layer.name = LAYER
 	room.add_child(layer)
 	var sky: Dictionary = p_doc.get("sky", {})
-	if sky.has("color") or assets.get("images", {}).has("sky") or sky.has("stars") or sky.has("clouds"):
+	if sky.has("color") or assets.get("images", {}).has("sky") or sky.has("stars") or sky.has("clouds") \
+			or sky.get("effect") is Dictionary:
 		var sphere := SphereMesh.new()
 		sphere.radius = 400.0
 		sphere.height = 800.0
@@ -376,12 +410,14 @@ static func _recolour_parts(layer: Node3D, p_doc: Dictionary, assets: Dictionary
 				looks[mi] = {"m": base, "image": "part:" + placed if base.has("texture") or base.has("texture_file")
 						else ""}
 			var look: Dictionary = looks[mi]
-			var merged: Dictionary = (look["m"] as Dictionary).duplicate(true)
+			var before: Dictionary = (look["m"] as Dictionary).duplicate(true)
 			if m.has("texture") or m.has("texture_file"):
-				merged.erase("color")
+				before.erase("color")
 				look["image"] = "recolour:" + str(r["match"])
-			merged.merge(m, true)
-			look["m"] = merged
+			elif m.has("library_material"):
+				look["image"] = ""
+			# A library material and a picture exclude each other (RoomSchema.merge_material()).
+			look["m"] = RoomSchema.merge_material(before, m)
 	for mi: MeshInstance3D in looks:
 		var look: Dictionary = looks[mi]
 		var key: String = look["image"]
@@ -415,7 +451,8 @@ static func part_targets(layer: Node, match: String) -> Array:
 
 
 ## The models placed from the object library (parts with "object"), for room_state and the Room tab:
-## [{name, object, parts: [{name, color, recolour: the entry that sets it last, or null}]}].
+## [{name, object, parts: [{name, color, material: the library material's id or "", effect: the effect's id or "",
+## recolour: the entry that sets it last, or null}]}].
 static func placed_objects(env: Node) -> Array:
 	var out: Array = []
 	if env == null or env.get_script() != load("res://scripts/assistant/assistant_room.gd"):
@@ -434,25 +471,11 @@ static func placed_objects(env: Node) -> Array:
 				var s := RoomSchema.split_match(str(r["match"]))
 				if not s.is_empty() and str(p["name"]).match(s[0]) and pn.match(s[1]):
 					set_by = r["match"]
-			parts.append({"name": pn, "color": _colour_of(by_name[pn]), "recolour": set_by})
+			parts.append({"name": pn, "color": _colour_of(by_name[pn]), "material": material_id_of(by_name[pn]),
+					"effect": effect_id_of(by_name[pn]), "recolour": set_by})
 		out.append({"name": p["name"], "object": p["object"], "position": p.get("position", [0, 0, 0]),
 				"rotation": p.get("rotation", [0, 0, 0]), "scale": p.get("scale", 1.0), "parts": parts})
 	return out
-
-
-## Where a material library would live (another part of the app may add it): material_for(id) -> material object
-## fields, or {} when it doesn't know the id. Until then every id is unknown: left out, with a warning.
-const MATERIAL_LIBRARY := "res://scripts/assistant/material_library.gd"
-
-
-static func library_material(id: String) -> Dictionary:
-	if not ResourceLoader.exists(MATERIAL_LIBRARY):
-		return {}
-	var s := load(MATERIAL_LIBRARY) as GDScript
-	if s == null or not s.get_script_method_list().any(func(f: Dictionary) -> bool: return f["name"] == "material_for"):
-		return {}
-	var found: Variant = s.call("material_for", id)
-	return found if found is Dictionary else {}
 
 
 func _enter_tree() -> void:
@@ -464,6 +487,11 @@ func _exit_tree() -> void:
 	if has_meta("key_shadows"):
 		RenderingServer.directional_shadow_atlas_set_size(int(ProjectSettings.get_setting(
 				"rendering/lights_and_shadows/directional_shadow/size", 4096)), true)
+
+
+## CylinderMesh's side takes the top half of the UV square (v 0..0.5; the caps the bottom half): so many repeats of the
+## UVs' v per metre of height, for a pattern in metres.
+const CYLINDER_SIDE_V := 2.0
 
 
 static func _part(p: Dictionary, assets: Dictionary) -> Node3D:
@@ -479,7 +507,14 @@ static func _part(p: Dictionary, assets: Dictionary) -> Node3D:
 	var type := str(p["type"])
 	var size: Array = p.get("size", [1.0])
 	var widget := str(p.get("widget", ""))
-	var mat: Material = material(p.get("material", {}), assets, "part:" + str(p["name"]))
+	# A library material lies on boxes, planes and models by their own axes in metres; spheres and cylinders have no
+	# flat faces, so their UVs, repeated to keep the pattern's size in metres (as SphereMesh and CylinderMesh lay them).
+	var mesh_uv := Vector2.ZERO
+	if type == "sphere":
+		mesh_uv = Vector2(PI * float(size[0]) * scale.x, PI * float(size[0]) * 0.5 * scale.y)
+	elif type == "cylinder":
+		mesh_uv = Vector2(PI * float(size[0]) * scale.x, float(size[1]) * CYLINDER_SIDE_V * scale.y)
+	var mat: Material = material(p.get("material", {}), assets, "part:" + str(p["name"]), mesh_uv)
 	if widget == "screen_glow":
 		mat = glow_material(RoomSchema.to_color(p.get("material", {}).get("color", "#ffffff")),
 				RoomSchema.widget_options("screen_glow", p.get("widget_options", {})))
@@ -494,7 +529,7 @@ static func _part(p: Dictionary, assets: Dictionary) -> Node3D:
 		"box":
 			var bs := Vector3(float(size[0]), float(size[1]), float(size[2]))
 			var uv := str(p.get("material", {}).get("uv", "atlas")) if p.get("material") is Dictionary else "atlas"
-			if uv == "atlas":
+			if uv == "atlas" or MaterialLibrary.is_library(mat):
 				var b := BoxMesh.new()
 				b.size = bs
 				mesh = b
@@ -562,6 +597,7 @@ static func _part(p: Dictionary, assets: Dictionary) -> Node3D:
 			node.add_child(RoomParticles.build(p))
 			local = AABB(-area * 0.5, area)
 	node.set_meta("local_aabb", local)
+	fit_effect(mat, (p["material"] as Dictionary).get("effect") if p.get("material") is Dictionary else null, local)
 	if mesh != null:
 		var mi := MeshInstance3D.new()
 		mi.name = "Mesh"
@@ -569,10 +605,11 @@ static func _part(p: Dictionary, assets: Dictionary) -> Node3D:
 		if not per_surface:
 			mi.material_override = mat
 		# Solid parts cast the key light's shadow; see-through ones and glows do not.
-		var see_through: bool = mat is ShaderMaterial and (mat as ShaderMaterial).shader != null \
-				and ((mat as ShaderMaterial).shader.code.contains("#define ALPHA_BLEND")
-				or (mat as ShaderMaterial).shader.code.contains("blend_add")
-				or (mat as ShaderMaterial).shader.code.contains("#define FX_GLASS"))
+		var fx: Variant = (p["material"] as Dictionary).get("effect") if p.get("material") is Dictionary else null
+		var fx_blend := str(EffectLibrary.entry(str(fx.get("name", ""))).get("blend", "")) if fx is Dictionary else ""
+		var see_through: bool = fx_blend in ["alpha", "add"] or (mat is ShaderMaterial
+				and (mat as ShaderMaterial).shader != null
+				and (mat as ShaderMaterial).shader.code.contains("#define ALPHA_BLEND"))
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if see_through or widget == "screen_glow" \
 				else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		node.add_child(mi)
@@ -737,13 +774,26 @@ static func _aabb(n: Node3D) -> AABB:
 ## light is the room's light (its ambient level and the screen's spill, as on the stock rooms' walls), or 1 when
 ## self_lit: the surface shows at its own brightness whatever the room's light. A part with a texture is self_lit
 ## unless it says "self_lit": false, and its colour defaults to white, so a picture looks like the picture.
-static func material(m: Dictionary, assets: Dictionary, image_key: String) -> Material:
+## With "library_material" the material library's shared material instead (library_surface()); an id it doesn't know
+## is left out and the rest applies (room_editor.gd warns). mesh_uv: see library_surface().
+static func material(m: Dictionary, assets: Dictionary, image_key: String, mesh_uv := Vector2.ZERO) -> Material:
+	if m.has("library_material") and MaterialLibrary.has(str(m["library_material"])) and m.get("effect") is Dictionary:
+		# A layered look: the effect over the library material's picture (its own material, not shared).
+		var layered := ShaderMaterial.new()
+		if _effect_layered(layered, m, image_key, mesh_uv) == "":
+			layered.set_shader_parameter("self_lit", bool(m.get("self_lit", false)))
+			if m.has("emission"):
+				layered.set_shader_parameter("emission", RoomSchema.to_color(m["emission"])
+						* float(m.get("emission_strength", 1.0)))
+			return layered
 	if m.has("library_material"):
-		# A library material's fields under the ones given; an unknown id adds nothing (room_editor.gd warns).
-		var merged := library_material(str(m["library_material"])).duplicate(true)
-		merged.merge(m, true)
-		merged.erase("library_material")
-		m = merged
+		var lib := library_surface(m, mesh_uv)
+		if lib != null and not (m.get("effect") is Dictionary):
+			return lib
+		m = m.duplicate()
+		m.erase("library_material")
+		for k: String in RoomSchema.LIBRARY_OPTIONS:
+			m.erase(k)
 	var mat := ShaderMaterial.new()
 	var img: Image = assets.get("images", {}).get(image_key)
 	var textured := img != null or m.has("texture") or m.has("texture_file")
@@ -773,41 +823,113 @@ static func material(m: Dictionary, assets: Dictionary, image_key: String) -> Ma
 	return mat
 
 
-const EFFECT_SHADER := preload("res://shaders/room_effect.gdshader")
-const OUTLINE_SHADER := preload("res://shaders/room_outline.gdshader")
-static var _effect_shaders := {}
-
-
-## A named effect (RoomSchema.EFFECTS) on a material: its shader (room_effect.gdshader compiled with FX_<NAME>), its
-## options with their defaults, a seed from the part so copies don't pulse in step; toon_outline adds a second pass.
-static func _effect(mat: ShaderMaterial, fx: Dictionary, key: String) -> void:
-	var name := str(fx["name"])
-	if not _effect_shaders.has(name):
-		var s := Shader.new()
-		s.code = EFFECT_SHADER.code.replace("shader_type spatial;", "shader_type spatial;\n#define FX_%s"
-				% ("TOON" if name == "toon_outline" else name.to_upper()))
-		_effect_shaders[name] = s
-	mat.shader = _effect_shaders[name]
+## A material object's library material (scripts/env/material_library.gd) as the library's shared ShaderMaterial, so
+## every surface with the same material and options shares one material and its textures: "color" is the colour it
+## shows on average (the library's colour option), "tint" multiplies it, "tiling" metres per repeat, "triplanar",
+## emission x emission_strength added; in a room with real lighting (and not self_lit) its lit form. mesh_uv: metres
+## the mesh's UV square spans (spheres, cylinders: no flat faces), so the pattern keeps its size in metres there;
+## zero: the surface's own axes in metres (boxes, planes, models). Null when the library doesn't know the id.
+static func library_surface(m: Dictionary, mesh_uv := Vector2.ZERO) -> ShaderMaterial:
+	var id := str(m.get("library_material", ""))
+	if not MaterialLibrary.has(id):
+		return null
 	var o := {}
-	for k: String in RoomSchema.EFFECTS[name]["options"]:
-		o[k] = fx.get(k, RoomSchema.EFFECTS[name]["options"][k]["default"])
-	if o.has("color") and name != "toon_outline":
-		mat.set_shader_parameter("fx_color", RoomSchema.to_color(o["color"]))
-	if o.has("strength"):
-		mat.set_shader_parameter("fx_strength", float(o["strength"]))
-	if o.has("rate"):
-		mat.set_shader_parameter("fx_rate", minf(float(o["rate"]), RoomSchema.MAX_HZ))
-	if o.has("swing"):
-		mat.set_shader_parameter("fx_depth", minf(float(o["swing"]), RoomSchema.MAX_SWING))
-	if o.has("amount"):
-		mat.set_shader_parameter("fx_amount", float(o["amount"]))
-	mat.set_shader_parameter("fx_seed", float(key.md5_text().substr(0, 4).hex_to_int()) / 65535.0)
-	if name == "toon_outline":
-		var line := ShaderMaterial.new()
-		line.shader = OUTLINE_SHADER
-		line.set_shader_parameter("outline_color", RoomSchema.to_color(o["color"]))
-		line.set_shader_parameter("width", float(o["width"]))
-		mat.next_pass = line
+	if m.has("color"):
+		o["colour"] = RoomSchema.to_color(m["color"])
+	if m.has("tint"):
+		o["tint"] = RoomSchema.to_color(m["tint"])
+	if m.has("tiling"):
+		o["tiling"] = float(m["tiling"])
+	if bool(m.get("triplanar", false)):
+		o["triplanar"] = true
+	elif mesh_uv != Vector2.ZERO:
+		var tiling := float(m.get("tiling", MaterialLibrary.entry(id).get("tiling", 1.0)))
+		# Whole repeats round the circumference, so the UVs' seam doesn't show.
+		o["uv"] = true
+		o["repeat"] = Vector2(maxf(roundf(mesh_uv.x / tiling), 1.0), maxf(snappedf(mesh_uv.y / tiling, 0.01), 0.01))
+	if m.has("emission"):
+		o["emission"] = RoomSchema.to_color(m["emission"]) * float(m.get("emission_strength", 1.0))
+	if bool(_lighting.get("lit", false)) and not bool(m.get("self_lit", false)):
+		o["lit"] = {"sky_top": _lighting["sky_top"], "sky_bottom": _lighting["sky_bottom"],
+				"screen": _lighting["screen"]}
+	return MaterialLibrary.get_material(id, o)
+
+
+const EffectLibrary := preload("res://scripts/effects/effect_library.gd")
+
+
+## A named effect (the effect library, docs/effects.md; RoomSchema.EFFECTS) on a material: its shader and options
+## (EffectLibrary.apply: the group shader compiled with the effect's define, the defaults for what isn't given, a seed
+## from the part so copies don't pulse in step, a second pass for toon_outline), and for a reactive one the film's path
+## (meta "react": build() hands it to the room's RoomReact node).
+static func _effect(mat: ShaderMaterial, fx: Dictionary, key: String) -> void:
+	var opts := fx.duplicate()
+	opts.erase("name")
+	EffectLibrary.apply(mat, str(fx["name"]), opts, EffectLibrary.seed_of(key))
+	mat.set_meta("effect", str(fx["name"]))
+	var react := str(EffectLibrary.entry(str(fx["name"])).get("react", ""))
+	if react != "":
+		mat.set_meta("react", react)
+
+
+## A layered look: an effect that keeps the surface under it over a library material's picture (its albedo map, in
+## its colour or tint, repeating at its tiling): on the part's own axes in metres (triplanar), or by the mesh's UVs
+## where it has no flat faces (mesh_uv, as library_surface()) and for the first eight (UV only). "" or why it can't.
+static func _effect_layered(mat: ShaderMaterial, m: Dictionary, key: String, mesh_uv: Vector2) -> String:
+	var id := str(m["library_material"])
+	var fx: Dictionary = m["effect"]
+	var opts := fx.duplicate()
+	opts.erase("name")
+	var e := MaterialLibrary.entry(id)
+	var tint := MaterialLibrary.tint_for(id, RoomSchema.to_color(m["color"])) if m.has("color") \
+			else Color.from_string(str(e.get("tint", "#ffffff")), Color.WHITE)
+	if m.has("tint"):
+		tint *= RoomSchema.to_color(m["tint"])
+	var tiling := maxf(float(m.get("tiling", e.get("tiling", 1.0))), 0.01)
+	var base := {"texture": MaterialLibrary.textures(id).get("albedo"), "color": tint, "triplanar": tiling}
+	if mesh_uv != Vector2.ZERO:
+		base = {"texture": base["texture"], "color": tint, "uv_scale": mesh_uv / tiling}
+	var seed_value := EffectLibrary.seed_of(key)
+	var why := EffectLibrary.apply_layered(mat, str(fx["name"]), opts, seed_value, base)
+	if why != "" and base.has("triplanar"):
+		base.erase("triplanar")
+		base["uv_scale"] = Vector2.ONE
+		why = EffectLibrary.apply_layered(mat, str(fx["name"]), opts, seed_value, base)
+	var react := str(EffectLibrary.entry(str(fx["name"])).get("react", ""))
+	if why == "" and react != "":
+		mat.set_meta("react", react)
+	if why == "":
+		# What it shows, for room_state: the effect over the library material.
+		mat.set_meta("effect", str(fx["name"]))
+		mat.set_meta("library_material", id)
+		mat.set_meta("shown_colour", (Color.from_string(str(e.get("swatch", "#ffffff")), Color.WHITE).srgb_to_linear()
+				* tint.srgb_to_linear()).linear_to_srgb())
+	return why
+
+
+## Sizes an effect's shader can't know, from the part's own extent (its frame before rotation and scale) when the
+## document leaves them out: wipe's and scan_in's size (the length along their axis), wind_sway's foot and height.
+static func fit_effect(mat: Material, fx: Variant, local: AABB) -> void:
+	if not (mat is ShaderMaterial) or not (fx is Dictionary) or local.size == Vector3.ZERO:
+		return
+	var f: Dictionary = fx
+	var name := str(f.get("name", ""))
+	var spec: Dictionary = EffectLibrary.entry(name).get("options", {})
+	var fill := {}
+	match name:
+		"wipe":
+			fill["size"] = local.size[["x", "y", "z"].find(str(f.get("axis", "y")))]
+		"scan_in":
+			fill["size"] = local.size.y
+		"wind_sway":
+			fill["base"] = local.position.y
+			fill["height"] = local.size.y
+	for k: String in fill:
+		if f.has(k) or not spec.has(k):
+			continue
+		var o: Dictionary = spec[k]
+		(mat as ShaderMaterial).set_shader_parameter(str(o["uniform"]), clampf(float(fill[k]), float(o["min"]),
+				float(o["max"])))
 
 
 ## How a material treats transparency: its "alpha" when given; else a picture with transparent pixels is a cut-out,
@@ -858,7 +980,8 @@ static func _light_material(mat: ShaderMaterial) -> void:
 
 
 ## The base room's (or a model's) unlit surfaces as lit ones: env_unlit / env_unlit_tex materials become
-## room_lit.gdshader with their colour, picture and emission.
+## room_lit.gdshader with their colour, picture and emission; library materials (the built-in rooms' floors, walls and
+## seats) their lit form (MaterialLibrary.lit_variant(): the same maps, shared).
 static func light_surfaces(root_node: Node) -> void:
 	for n in root_node.find_children("*", "GeometryInstance3D", true, false):
 		var g := n as GeometryInstance3D
@@ -866,7 +989,8 @@ static func light_surfaces(root_node: Node) -> void:
 			var lm := _lit_from(g.material_override)
 			if lm != null:
 				g.material_override = lm
-		if g is MeshInstance3D and (g as MeshInstance3D).mesh != null:
+		# Under an override the surfaces' own materials don't show: they are left as they are.
+		elif g is MeshInstance3D and (g as MeshInstance3D).mesh != null:
 			var mi := g as MeshInstance3D
 			for s in mi.mesh.get_surface_count():
 				var src: Material = mi.get_surface_override_material(s)
@@ -883,6 +1007,8 @@ static func light_surfaces(root_node: Node) -> void:
 static func _lit_from(src: Material) -> Material:
 	if not (src is ShaderMaterial) or (src as ShaderMaterial).shader == null:
 		return null
+	if MaterialLibrary.is_library(src):
+		return MaterialLibrary.lit_variant(src, _lighting)
 	var path := (src as ShaderMaterial).shader.resource_path
 	var code := (src as ShaderMaterial).shader.code
 	if not (path.ends_with("env_unlit.gdshader") or path.ends_with("env_unlit_tex.gdshader")
@@ -915,8 +1041,19 @@ static func unlit_shader(mode: String) -> Shader:
 	return _alpha_shaders[mode]
 
 
-## The sky's material (shaders/room_sky.gdshader): a colour or a picture, with STARS and CLOUDS defined when named.
+## The sky's material (shaders/room_sky.gdshader): a colour or a picture, with STARS and CLOUDS defined when named; or
+## a sky from the effect library (sky.effect: its shader on the same sphere).
 static func sky_material(sky: Dictionary, image: Variant) -> ShaderMaterial:
+	if sky.get("effect") is Dictionary and EffectLibrary.has(str(sky["effect"].get("name", ""))):
+		var fx := (sky["effect"] as Dictionary).duplicate()
+		var name := str(fx["name"])
+		fx.erase("name")
+		var em := ShaderMaterial.new()
+		EffectLibrary.apply(em, name, fx, EffectLibrary.seed_of("sky"))
+		var react := str(EffectLibrary.entry(name).get("react", ""))
+		if react != "":
+			em.set_meta("react", react)
+		return em
 	var defines := ""
 	for k in ["stars", "clouds"]:
 		if sky.has(k):

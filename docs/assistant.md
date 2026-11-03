@@ -312,6 +312,18 @@ under the film; the cap is a ceiling, not a target.
   broad and a sharp highlight), toon_outline (three cel tones from a fixed key light; the outline pushed out in
   pixels, so it stays 2 px near and far), dissolve (two octaves of value noise, alpha-tested), pulse and flicker (a light inside,
   brighter facing you). Each part gets a seed from its name, so copies are out of phase.
+- **The effect library** (`docs/effects.md`): those eight and 40 more, connected. `RoomSchema.EFFECTS` is
+  `EffectLibrary.schema_effects(false)` (the sky's: `SKY_EFFECTS`), a part's `material.effect` is checked by
+  `EffectLibrary.validate` (a sky id is refused there, with a pointer to `sky.effect`) and costs its
+  `cost_units` x `COSTS.effect` (the first eight as before); `assistant_room.gd _effect` calls `EffectLibrary.apply`
+  and gives a reactive effect's film path to the room's `RoomReact` (meta `react`). `"sky": {"effect": {...}}` puts a
+  sky effect on the sky sphere (validated and costed alike). A layered look, a library material under an effect
+  whose `layers` is true, uses `EffectLibrary.apply_layered` with the material's albedo map, its colour or tint and
+  its tiling, mapped on the part's own axes (by UV on spheres and cylinders, and for the first eight); an effect that
+  draws its own surface over a library material is refused. wipe's and scan_in's `size` and wind_sway's `base` and
+  `height` come from the part's own extent when the document leaves them out (`fit_effect`). `room_state` names each
+  surface's `effect` (`stock_parts[].effect`, `objects[].parts[].effect`). See-through effects (blend alpha or add)
+  cast no shadow.
 - **Photosensitivity ceiling**, for every effect and widget: brightness changes no faster than 3 Hz and swings by at
   most 0.4 of the surface's own brightness (`RoomSchema.MAX_HZ`, `MAX_SWING`). The schema refuses more, naming the
   ceiling; the shaders clamp again. Candle flicker is four sines at the rate and below it (1, 0.71, 0.43, 0.23 times,
@@ -465,11 +477,38 @@ its part-level entries with it. They are saved in the kept room's document and b
 (`assistant_room.gd _recolour_parts`); parts that end up alike share one material. A part-level match that reaches
 nothing is kept with a `no_such_part` warning; the `recolour` command refuses it.
 
-**Library materials.** A material object may name `"library_material": "<id>"` (the `recolour` command's `material`).
-The app has no material library yet: `assistant_room.gd library_material()` looks for
-`scripts/assistant/material_library.gd` with `material_for(id) -> material fields` (and `list() -> [{id, name}]` for
-the Room tab's Material button). Its fields go under the ones given; an id it doesn't know is left out, with an
-`unknown_material` warning.
+**Library materials.** A material object may name `"library_material": "<id>"` (the `recolour` command's
+`material`): a textured surface from the material library (`docs/materials.md`: 42 CC0 sets of wood floors, carpet,
+velvet, leather, plaster, brick, marble, metal...). The `materials` command lists the ids (`tag`: floor, wall, fabric,
+wood, leather, metal, stone, ...). With it a material object takes:
+
+| Key | What |
+|---|---|
+| `color` | the colour it shows on average, its pattern kept (the library's `colour` option) |
+| `tint` | `#rrggbb`, multiplies its colours (after `color`) |
+| `tiling` | metres per repeat of its pattern, 0.02..20 (default: the material's own, `materials` lists it) |
+| `triplanar` | `true`: three blended projections, for curved models without usable UVs; three times the texture reads |
+| `emission`, `emission_strength` | added on top, as on any material |
+
+It can't go with `texture` in one material object, and goes under an `effect` only when that effect layers (a
+layered look, above); `tint`, `tiling` and `triplanar` need it (except in a
+part-level entry, which may tint its object's library material). A part, a whole placed object, one part of it
+(`"Sofa/Seat"`) and a base room surface `recolour` reaches can all take one. A box, a plane and a model take the
+pattern on their own axes in metres (the instance's scale included); a sphere and a cylinder on their UVs, repeated so
+the pattern keeps its size (whole repeats round them). Every surface with the same material and options shares one
+`ShaderMaterial` and its textures (`assistant_room.gd library_surface()` -> `MaterialLibrary.get_material()`); in a
+room with real lighting it is the lit form (below, "Lighting"). An id the headset doesn't know is left out with an
+`unknown_material` warning, and the rest of the material applies.
+
+Changing it with `recolour`: `material` names one, which shows as itself (the old colour, tint, tiling, picture and
+an effect that doesn't layer go; an emission stays) unless `color` comes with it. On a part that has one, `color`, `tint`, `tiling` and
+`emission` change it; `texture` replaces it; `reset` takes it away. The same holds for a part-level or a base surface's
+entry that has one (`RoomSchema.merge_material()`, `ObjectCommands.entry_material()`); other entries are replaced as
+before. For example `recolour {match: "Sofa/Seat", material: "velvet", color: "#5a1830", tiling: 0.25}` keeps
+`{"match": "Sofa/Seat", "material": {"library_material": "velvet", "color": "#5a1830", "tiling": 0.25}}` in the room
+document. `room_state` reports what a surface shows: `stock_parts[].material` and `objects[].parts[].material` (the
+id, "" for none) with `color` its mean colour (the swatch times the tint). A library material costs
+`COSTS.library_material` (0.5), triplanar `library_triplanar` (1.0) more.
 
 **Commands** (`object_commands.gd`, registered by `command_host.gd` for every client):
 
@@ -481,7 +520,7 @@ the Room tab's Material button). Its fields go under the ones given; an id it do
 | `object_place {id, name, at, position, rotation, turn, scale}` | room | into the room |
 | `object_move {name, at, position, rotation, turn, scale}` | room | what is left out stays |
 | `object_delete {id}` | room | an imported object out of the library (destructive; built-ins can't go; placed copies stay) |
-| `recolour {match, color, emission, emission_strength, texture, material, reset}` | room | a part as `"<placed>/<part>"` |
+| `recolour {match, color, emission, emission_strength, texture, material, tint, tiling, triplanar, reset}` | room | a part as `"<placed>/<part>"`; `material` a library material's id (`materials` lists them) |
 | `remove {name}` | room | a placed object out of the room |
 
 `room_state` has `objects`: each placed object with its parts. The MCP adapter takes `data_path` for `data`.
@@ -502,7 +541,11 @@ A room is flat (unlit shaders, `env_unlit*.gdshader`) unless its document has `l
   normal; the colours as picked, not linearised), the film's light (`light.screen`: the bias light's 4 x 2 copy
   of the picture, the side nearest the surface, 0.25 s smoothing, so never faster than the ceiling; falling off
   with distance and facing) and a contact darkening near the floor. Textured parts are lit too unless `self_lit`.
-  Effects (`material.effect`) keep their own shaders.
+  Effects (`material.effect`) keep their own shaders. Library materials (the parts' `library_material`, and the
+  built-in rooms' own floors, walls and seats) use their lit form, `shaders/room_material_lit.gdshader`: the same
+  maps with the engine's lights and shadows on their colour, roughness, metalness and normals, and the same fill,
+  film light and contact darkening as emission (`MaterialLibrary.lit_variant()`, shared per material and lighting).
+  A surface under a material override keeps its own surface materials as they are.
 - `light.key` is a DirectionalLight3D, shadows on by default: orthogonal, the max distance fitted to the parts
   (`shadow_distance`, 8-60 m), the directional atlas raised to `RoomSchema.KEY_SHADOW_ATLAS` (2048) while the
   room is in the tree and set back after. Solid parts cast; see-through, glow, text and particle parts do not.
@@ -868,7 +911,8 @@ godot --headless --xr-mode off --path app --script res://tests/test_assistant.gd
 python3 tools/assistant/test_assistant.py    # end to end: the headless app on 127.0.0.1, a fresh assistant over HTTPS
 python tools/assistant/test_mcp_server.py    # the MCP adapter on stdio against a stand-in (fake_service.py)
 godot --headless --xr-mode off --path app --script res://tests/test_assistant_room.gd   # rooms: permission, schema, models, kept at once, frame, pictures, restart, snapshot
-godot --headless --xr-mode off --path app --script res://tests/test_object_library.gd   # objects: catalogue, SVG import, part addressing, kept part colours, the commands, the Room tab
+godot --headless --xr-mode off --path app --script res://tests/test_object_library.gd   # objects: catalogue, SVG import, part addressing, kept part colours, the commands, the Objects tab
+godot --headless --xr-mode off --path app --script res://tests/test_room_materials.gd   # library materials on parts, objects and base surfaces; kept, lit, the material picker
 godot --headless --xr-mode off --path app --script res://tests/test_assistant_fetch.gd  # fetch: download, progress, refusals, disk, cancel; the browser page from DevTools
 godot --headless --xr-mode off --path app --script res://tests/test_assistant_places.gd # add_place / remove_place: the card, where each kind is kept, refusals
 godot --headless --xr-mode off --path app --script res://tests/test_local_agents.gd     # agents on the headset, against a stand-in for the X display
@@ -917,4 +961,6 @@ the headset, forgets itself, and checks the engine's log holds neither the token
   import leaves out outlines that cross themselves (a pentagram drawn as one line); its faces cut round holes meet the
   sides with T-junctions (vertices on an edge, not at its ends), which may sparkle at a seam. A part-level picture
   replaces a textured model part's own picture. There is no import in the headset's own panel yet (an assistant or
-  the dev link brings the file), and no material library (the field is ready for one).
+  the dev link brings the file).
+- Library materials in assistant rooms: not run on the headset yet (the lit form's look and cost under the key light,
+  the Objects tab's material picker at arm's length).

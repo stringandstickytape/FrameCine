@@ -106,11 +106,8 @@ func _material(albedo: Color, spill: float, floor_darkening: float) -> ShaderMat
 	return m
 
 
-## A library material in the room's light (as primitive_room.gd's textured()); _material() if the library lacks it,
-## or in an assistant's lit room.
+## A library material in the room's light (as primitive_room.gd's textured()); _material() if the library lacks it.
 func _textured(id: String, colour: Color, spill: float, floor_darkening: float, options := {}) -> Material:
-	if MaterialLibrary.in_lit_room(self):
-		return _material(colour, spill, floor_darkening)
 	var o := options.duplicate()
 	o.merge({"colour": colour, "spill": spill, "floor_darkening": floor_darkening})
 	var m := MaterialLibrary.get_material(id, o)

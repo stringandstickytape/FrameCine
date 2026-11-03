@@ -244,7 +244,7 @@ func _classic_checks() -> void:
 			" (%s)" % ", ".join(diff) if not diff.is_empty() else ""), same)
 	same = true
 	diff.clear()
-	for id: String in RoomSchema.EFFECTS:
+	for id: String in _classic():
 		var opts := {}
 		for k: String in RoomSchema.EFFECTS[id]["options"]:
 			var o: Dictionary = RoomSchema.EFFECTS[id]["options"][k]
@@ -285,6 +285,16 @@ func _same_material(a: ShaderMaterial, b: ShaderMaterial) -> String:
 				pb.get_shader_parameter("outline_color")):
 			return "second pass's shader or uniforms"
 	return ""
+
+
+## The first eight (catalogue/classic.gd): room_effect.gdshader's, which the room builder drew itself before the
+## library; room_schema.gd's EFFECTS has every surface effect now.
+func _classic() -> Array[String]:
+	var out: Array[String] = []
+	for id in EffectLibrary.ids():
+		if str(EffectLibrary.entry(id)["group"]) == "classic":
+			out.append(id)
+	return out
 
 
 ## A layered look: an effect over a colour or a library material's picture.
@@ -448,7 +458,7 @@ func _photosensitivity_measured() -> void:
 ## (the same clock), pixel for pixel.
 func _classic_pixels() -> void:
 	var bad: Array[String] = []
-	for id: String in RoomSchema.EFFECTS:
+	for id: String in _classic():
 		var a := ShaderMaterial.new()
 		AssistantRoom._effect(a, {"name": id}, "part:" + id)
 		a.set_shader_parameter("albedo", EffectLab.BASE_COLOR)

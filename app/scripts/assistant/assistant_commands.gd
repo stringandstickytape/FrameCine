@@ -335,7 +335,8 @@ static func register_commands() -> void:
 			{"name": "position", "type": "array", "default": [0, 0, -2], "description": "[x, y, z] metres"},
 			{"name": "rotation", "type": "array", "default": [0, 0, 0], "description": "[x, y, z] degrees"},
 			{"name": "scale", "type": "any", "default": 1.0, "description": "a number or [x, y, z]"},
-			{"name": "material", "type": "object", "default": {}, "description": "color, texture, emission, ..."},
+			{"name": "material", "type": "object", "default": {}, "description": "color, texture, emission, "
+			+ "library_material (an id from materials), ..."},
 			{"name": "widget", "type": "string", "default": "", "description": "a widget (supported_widgets)"},
 			{"name": "widget_options", "type": "object", "default": {}, "description": "the widget's options"}],
 			"returns": "{state: kept, name, warnings, perf, ...}"})
@@ -357,20 +358,33 @@ static func register_commands() -> void:
 			{"name": "position", "type": "array", "default": [0, 0, -2], "description": "[x, y, z] metres"},
 			{"name": "rotation", "type": "array", "default": [0, 0, 0], "description": "[x, y, z] degrees"},
 			{"name": "scale", "type": "any", "default": 1.0, "description": "a number or [x, y, z]"},
-			{"name": "material", "type": "object", "default": {}, "description": "color, texture, emission, ..."}],
+			{"name": "material", "type": "object", "default": {}, "description": "color, texture, emission, "
+			+ "library_material, ..."}],
 			"returns": "{state: kept, name, warnings, perf, ...}"})
 	R.register("recolour", _handler("recolour"), {"assistant": "room", "level": "change",
-			"description": "Colour, emission or a picture on every part whose name matches (* and ?): the "
-			+ "assistant's parts and the base room's own, a whole placed object by its name, or one part inside a "
-			+ "placed object as \"<name>/<part>\" (object_info lists its parts).", "params": [
+			"description": "Colour, emission, a picture or a library material (materials lists them) on every part "
+			+ "whose name matches (* and ?): the assistant's parts and the base room's own, a whole placed object "
+			+ "by its name, or one part inside a placed object as \"<name>/<part>\" (object_info lists its parts).",
+			"params": [
 			{"name": "match", "type": "string", "required": true, "description": "a name pattern (* and ?), or "
 			+ "\"<placed name>/<part name>\" (patterns on both sides) for parts inside placed objects"},
 			{"name": "color", "type": "any", "default": null, "description": "#rrggbb or [r, g, b]"},
 			{"name": "emission", "type": "any", "default": null, "description": "#rrggbb or [r, g, b]"},
 			{"name": "emission_strength", "type": "float", "default": 1.0, "description": "0..10"},
 			{"name": "texture", "type": "string", "default": "", "description": "a PNG or JPEG, base64"},
-			{"name": "material", "type": "string", "default": "", "description": "a library material's id; an id "
-			+ "the headset doesn't know is left out with a warning"},
+			{"name": "material", "type": "string", "default": "", "description": "a textured material from the "
+			+ "material library (wood floors, carpet, velvet, leather, plaster, brick, marble, metal...): its id, "
+			+ "from the materials command (tag to filter: floor, wall, fabric, wood, leather, metal, stone). It "
+			+ "shows as itself; with color it shows that colour on average, its pattern kept. On a part that has "
+			+ "one, color, tint, tiling and emission change it; texture replaces it. An id the headset doesn't know "
+			+ "is left out with a warning"},
+			{"name": "tint", "type": "any", "default": null, "description": "#rrggbb or [r, g, b]: multiplies a "
+			+ "library material's colours (white: unchanged)"},
+			{"name": "tiling", "type": "float", "default": 0.0, "description": "a library material's metres per "
+			+ "repeat of its pattern (0.02..20; 0: the material's own, from the materials command)"},
+			{"name": "triplanar", "type": "bool", "default": false, "description": "a library material blended "
+			+ "from three directions, for curved models without usable UVs (three times the texture reads: only "
+			+ "where the plain one shows seams)"},
 			{"name": "reset", "type": "bool", "default": false, "description": "back to the model's own colours "
 			+ "(the part-level colours the match covers go; a whole object's colour too)"}],
 			"returns": "{state: kept, name, warnings, perf, ...}"})
@@ -581,9 +595,16 @@ func _room(cmd: String, a: Dictionary) -> Dictionary:
 				mat["texture"] = a["texture"]
 			if str(a["material"]) != "":
 				mat["library_material"] = a["material"]
+			if a["tint"] != null:
+				mat["tint"] = a["tint"]
+			if float(a["tiling"]) > 0.0:
+				mat["tiling"] = a["tiling"]
+			if bool(a["triplanar"]):
+				mat["triplanar"] = true
 			var reset := bool(a["reset"])
 			if mat.is_empty() and not reset:
-				return {"ok": false, "error": "recolour: give color, emission, texture, material or reset"}
+				return {"ok": false, "error": "recolour: give color, emission, texture, material (with tint, tiling) "
+						+ "or reset"}
 			var pattern: String = a["match"]
 			var current: Dictionary = room.current_doc()
 			summary = ("reset %s" if reset else "recolour %s") % pattern
@@ -621,9 +642,8 @@ func _room(cmd: String, a: Dictionary) -> Dictionary:
 					if reset:
 						q.erase("material")
 					else:
-						var m: Dictionary = q.get("material", {})
-						m.merge(mat, true)
-						q["material"] = m
+						var m: Dictionary = q.get("material", {}) if q.get("material") is Dictionary else {}
+						q["material"] = RoomSchema.merge_material(m, mat)
 					parts.append(q)
 					# A whole placed object takes the new colour all over: its part-level colours go.
 					for r: Dictionary in current.get("recolour", []):
@@ -638,7 +658,8 @@ func _room(cmd: String, a: Dictionary) -> Dictionary:
 				doc["parts"] = parts
 			var rec: Array = dropped
 			if not hits.is_empty():
-				rec.append({"match": pattern, "material": null if reset else mat})
+				rec.append({"match": pattern, "material": null if reset else ObjectCommands.entry_material(current,
+						pattern, mat)})
 			if not rec.is_empty():
 				doc["recolour"] = rec
 		"set_lighting":

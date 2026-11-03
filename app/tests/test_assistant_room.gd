@@ -825,13 +825,18 @@ func _lighting_checks() -> void:
 	r = await commands.run("new_room", {"room": {"schema": 1, "name": BOUNDS_NAME, "base": "dim_room",
 			"light": {"key": {"elevation": 60, "shadows": false}, "sky": {}}}})
 	var lit_base := 0
+	var lit_library := 0
 	for g in (main.env.get_node("Base") as Node).find_children("*", "MeshInstance3D", true, false):
 		var m := (g as MeshInstance3D).material_override
 		if m == null and (g as MeshInstance3D).mesh != null and (g as MeshInstance3D).mesh.get_surface_count() > 0:
 			m = (g as MeshInstance3D).get_surface_override_material(0)
 		if m is ShaderMaterial and (m as ShaderMaterial).shader.resource_path.ends_with("room_lit.gdshader"):
 			lit_base += 1
-	_check("a stock room's own surfaces are lit too (%d)" % lit_base, r.get("ok") == true and lit_base > 0)
+		if m is ShaderMaterial and (m as ShaderMaterial).shader == AssistantRoom.MaterialLibrary.SHADER_LIT:
+			lit_library += 1
+	_check("a stock room's own surfaces are lit too (%d plain, %d library)" % [lit_base, lit_library],
+			r.get("ok") == true and lit_base + lit_library > 0)
+	_check("its library surfaces (the plaster walls) in their lit form", lit_library > 0)
 	await _true_to_life_check()
 
 
@@ -1304,7 +1309,8 @@ func _effect_checks() -> void:
 	_check("toon_outline draws an outline pass", toon != null and toon.next_pass is ShaderMaterial)
 	var st: Dictionary = (await commands.run("room_state", {}))["result"]
 	_check("effects cost (%s)" % st["used"]["cost"], float(st["used"]["cost"]) >= 8 * RoomSchema.COSTS["part"] + 8 + 2 + 1)
-	_check("room_state lists the effects and the ceiling", st.get("effects", []).size() == 8
+	_check("room_state lists the effects and the ceiling", st.get("effects", []).size()
+			== RoomSchema.EffectLibrary.schema_effects(false).size()
 			and st.get("photosensitivity", {}).get("max_hz") == RoomSchema.MAX_HZ)
 	# screen_glow follows the film through the bias light, low-passed: its cut-off (1 / 2 pi tau) is under 3 Hz.
 	var tau: float = (load("res://scripts/env/bias_light.gd") as GDScript).get_script_constant_map()["BLEND_SECONDS"]

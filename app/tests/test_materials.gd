@@ -2,8 +2,8 @@ extends SceneTree
 
 ## Tests for the material library (scripts/env/material_library.gd, docs/materials.md): the catalogue loads, every
 ## entry's map files exist with the right header, size and format, the shaders parse, a material applies to a mesh
-## and to one surface, the cache shares textures and materials, rooms keep plain materials inside an assistant's lit
-## room, the credits list every material, the repository's size budget holds, and the `materials` command lists them.
+## and to one surface, the cache shares textures and materials, the lit form for an assistant's lit room, the
+## credits list every material, the repository's size budget holds, and the `materials` command lists them.
 ## Headless (the shaders are parsed, not drawn; the renders in docs/shots/materials are the drawn check).
 ##   godot --headless --xr-mode off --path app --script res://tests/test_materials.gd
 
@@ -131,10 +131,13 @@ func _files() -> void:
 
 
 func _shaders() -> void:
-	for s: Shader in [MaterialLibrary.SHADER, MaterialLibrary.SHADER_TRIPLANAR]:
+	for s: Shader in [MaterialLibrary.SHADER, MaterialLibrary.SHADER_TRIPLANAR, MaterialLibrary.SHADER_LIT,
+			MaterialLibrary.SHADER_LIT_TRIPLANAR]:
 		var names: Array = s.get_shader_uniform_list().map(func(u: Dictionary) -> String: return u["name"])
 		var want := ["albedo_map", "normal_map", "orm_map", "tint", "tiling", "use_mesh_uv", "roughness_scale",
-				"normal_strength", "specular", "sheen", "pleats", "spill", "floor_darkening"]
+				"normal_strength", "specular", "sheen", "pleats", "spill", "floor_darkening", "emission"]
+		if s in [MaterialLibrary.SHADER_LIT, MaterialLibrary.SHADER_LIT_TRIPLANAR]:
+			want.append_array(["sky_top", "sky_bottom", "screen_light", "contact_strength"])
 		_check("%s parses with its uniforms (%d)" % [s.resource_path.get_file(), names.size()],
 				want.all(func(n: String) -> bool: return n in names))
 
@@ -192,24 +195,36 @@ func _cache() -> void:
 			and MaterialLibrary.loads == 3)
 
 
-## Inside an assistant's lit room the built-in rooms keep their plain materials (that room relights only those).
+## An assistant's room with real lighting: the lit form of a library material (the same maps and settings on
+## room_material_lit.gdshader, with the room's fill and film light), shared; options lit, emission; what a surface
+## shows (id_of, shown_colour).
 func _lit_rooms() -> void:
-	var s := GDScript.new()
-	s.source_code = "extends Node3D\nvar doc := {}\nstatic func lighting_of(d: Dictionary) -> Dictionary:\n" \
-			+ "\treturn {\"lit\": d.has(\"light\")}\n"
-	s.reload()
-	var holder: Node3D = s.new()
-	var base := Node3D.new()
-	var part := Node3D.new()
-	holder.add_child(base)
-	base.add_child(part)
-	_check("an unlit assistant room: textures", not MaterialLibrary.in_lit_room(part))
-	holder.set("doc", {"light": {"key": {}}})
-	_check("a lit one: plain materials", MaterialLibrary.in_lit_room(part))
-	var alone := Node3D.new()
-	_check("no assistant room: textures", not MaterialLibrary.in_lit_room(alone))
-	alone.free()
-	holder.free()
+	var lighting := {"lit": true, "sky_top": Color(0.3, 0.3, 0.4), "sky_bottom": Color(0.1, 0.1, 0.1), "screen": 0.5}
+	var src := MaterialLibrary.get_material("felt", {"colour": Color(0.4, 0.1, 0.1), "spill": 0.6, "pleats": 4.0})
+	var lit := MaterialLibrary.lit_variant(src, lighting)
+	_check("lit_variant: the lit shader with the same maps and settings", lit != null
+			and lit.shader == MaterialLibrary.SHADER_LIT and lit.get_shader_parameter("albedo_map")
+			== src.get_shader_parameter("albedo_map") and is_equal_approx(lit.get_shader_parameter("pleats"), 4.0)
+			and (lit.get_shader_parameter("tint") as Color).is_equal_approx(src.get_shader_parameter("tint")))
+	_check("it takes the room's fill and film light", (lit.get_shader_parameter("sky_top") as Color)
+			.is_equal_approx(Color(0.3, 0.3, 0.4)) and is_equal_approx(lit.get_shader_parameter("screen_light"), 0.5))
+	_check("one lit form per material and lighting", MaterialLibrary.lit_variant(src, lighting) == lit
+			and MaterialLibrary.lit_variant(src, {"lit": true, "screen": 1.0}) != lit)
+	_check("only unlit library materials have one", MaterialLibrary.lit_variant(lit, lighting) == null
+			and MaterialLibrary.lit_variant(StandardMaterial3D.new(), lighting) == null)
+	var tri := MaterialLibrary.get_material("brushed_steel", {"triplanar": true, "lit": lighting})
+	_check("option lit: the lit form directly (triplanar too)", tri.shader == MaterialLibrary.SHADER_LIT_TRIPLANAR
+			and MaterialLibrary.lit_variant(MaterialLibrary.get_material("brushed_steel", {"triplanar": true}),
+			lighting).shader == MaterialLibrary.SHADER_LIT_TRIPLANAR)
+	var glow := MaterialLibrary.get_material("felt", {"emission": Color(0.2, 0.1, 0.0)})
+	_check("option emission", (glow.get_shader_parameter("emission") as Color).is_equal_approx(Color(0.2, 0.1, 0.0)))
+	_check("id_of: the library id of a surface's material, lit or not", MaterialLibrary.id_of(src) == "felt"
+			and MaterialLibrary.id_of(lit) == "felt" and MaterialLibrary.id_of(StandardMaterial3D.new()) == ""
+			and MaterialLibrary.id_of(null) == "")
+	var shown := MaterialLibrary.shown_colour(src)
+	_check("shown_colour: the colour asked for (%s)" % shown.to_html(false), shown.is_equal_approx(Color(0.4, 0.1, 0.1)))
+	_check("shown_colour of a plain one: the swatch", MaterialLibrary.shown_colour(MaterialLibrary.get_material("felt"))
+			.is_equal_approx(Color.from_string(str(MaterialLibrary.entry("felt")["swatch"]), Color.BLACK)))
 
 
 func _credits() -> void:

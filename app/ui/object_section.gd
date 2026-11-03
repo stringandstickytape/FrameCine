@@ -3,9 +3,11 @@ extends VBoxContainer
 ## The Objects tab (ui/objects_tab.gd; docs/assistant.md "Objects", docs/USAGE.md "Objects"): the object library as
 ## thumbnails with names, built in and imported; Place, which hands the laser to ui/object_placer.gd; Delete for an
 ## imported one (asked first, in the footer, as the panel's other choices are). Under them, what this room has from the
-## library: pick one for its parts, each with its colour, a palette, the picture on show as its picture, a library
-## material when the app has a material library, and Reset; and Move and Remove (asked first). Everything here calls
-## what the commands call (scripts/assistant/object_commands.gd), so a change has the same undo.
+## library: pick one for its parts, each with its colour, a palette, the picture on show as its picture, a material
+## from the material library (a picker: each material's swatch and name, filtered by kind), an effect from the effect
+## library (a picker: each effect's preview and name, filtered by group, its options at their defaults), and Reset;
+## and Move and Remove (asked first). Everything here calls what the commands call
+## (scripts/assistant/object_commands.gd), so a change has the same undo, cost limits and checks.
 
 const W := preload("res://ui/pane_widgets.gd")
 const PaneStyle := preload("res://ui/pane_style.gd")
@@ -13,6 +15,8 @@ const ObjectLibrary := preload("res://scripts/assistant/object_library.gd")
 const ObjectCommands := preload("res://scripts/assistant/object_commands.gd")
 const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
 const WorkerTask := preload("res://scripts/dev/worker_task.gd")
+const MaterialLibrary := preload("res://scripts/env/material_library.gd")
+const EffectLibrary := preload("res://scripts/effects/effect_library.gd")
 
 const COLUMNS := 4
 ## Pixels on the pane: the thumbnail, and the name under it.
@@ -23,6 +27,15 @@ const SWATCH := Vector2(28, 28)
 const PALETTE := ["#f4f1ea", "#c8a27a", "#8b5a3c", "#3b2a1e", "#222222", "#7d7d7d", "#b5653d", "#c0392b",
 		"#e8a33c", "#4f8a3c", "#2f6f8f", "#3366cc", "#6b4c9a", "#d98cb3"]
 const ASSISTANT_ROOM := "res://scripts/assistant/assistant_room.gd"
+## The material picker's kinds: [label, the library's tag ("" all)].
+const MATERIAL_KINDS := [["All", ""], ["Floors", "floor"], ["Walls", "wall"], ["Fabric", "fabric"], ["Wood", "wood"],
+		["Leather", "leather"], ["Metal", "metal"], ["Stone", "stone"]]
+const MATERIAL_COLUMNS := 3
+## The swatch on a material's button (its mean colour, from the catalogue: nothing is loaded to show it).
+const MATERIAL_SWATCH := 22
+## The effect picker's swatches: each effect's preview made small (tools/fx_swatches.gd), shipped with the app.
+const EFFECT_SWATCHES := "res://textures/fx/swatches"
+const EFFECT_SWATCH := 32
 
 ## scripts/main.gd
 var app: Node
@@ -37,8 +50,14 @@ var _placed_box: VBoxContainer
 var _placed_names: Array = []
 var _picked := ""
 var _parts_box: VBoxContainer
-## The part whose palette is open, or "".
+## The part whose palette is open, or "" ("material:<part>", "effect:<part>": its material or effect picker).
 var _palette_for := ""
+## The material picker's kind (a library tag, "" all).
+var _material_tag := ""
+## The effect picker's group ("" all).
+var _effect_group := ""
+static var _swatches := {}
+static var _effect_swatches := {}
 var _loading := false
 var _empty: Label
 
@@ -220,8 +239,8 @@ func _sync_placed() -> void:
 	_sync_parts()
 
 
-## The picked object's parts: a swatch of each one's colour, Colour (the palette under it), Picture, Material, Reset;
-## and Move and Remove.
+## The picked object's parts: a swatch of each one's colour, Colour (the palette under it), Picture, Material, Effect,
+## Reset; and Move and Remove.
 func _sync_parts() -> void:
 	for c in _parts_box.get_children():
 		_parts_box.remove_child(c)
@@ -244,7 +263,11 @@ func _sync_parts() -> void:
 		swatch.custom_minimum_size = SWATCH
 		swatch.color = RoomSchema.to_color(str(part["color"]) if str(part["color"]) != "" else "#7d7d7d")
 		swatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var label := W.ellipsis(W.label(str(part["name"]) + ("  (changed)" if part.get("recolour") != null else "")))
+		var shows := str(part.get("material", ""))
+		var effect := str(part.get("effect", ""))
+		var label := W.ellipsis(W.label(str(part["name"]) + ("  ·  " + _material_name(shows) if shows != "" else "")
+				+ ("  ·  " + _effect_name(effect) if effect != "" else "")
+				+ ("  (changed)" if part.get("recolour") != null else "")))
 		var row: Array = [swatch, label, W.button("Colour", func() -> void:
 			_palette_for = target if _palette_for != target else ""
 			_sync_parts())]
@@ -253,6 +276,9 @@ func _sync_parts() -> void:
 			row.append(W.button("Material", func() -> void:
 				_palette_for = "material:" + target if _palette_for != "material:" + target else ""
 				_sync_parts()))
+		row.append(W.button("Effect", func() -> void:
+			_palette_for = "effect:" + target if _palette_for != "effect:" + target else ""
+			_sync_parts()))
 		var reset := W.button("Reset", func() -> void: _apply(target, null))
 		reset.disabled = part.get("recolour") == null
 		row.append(reset)
@@ -260,11 +286,9 @@ func _sync_parts() -> void:
 		if _palette_for == target:
 			_parts_box.add_child(_palette(target))
 		elif _palette_for == "material:" + target:
-			var buttons: Array = []
-			for mat: Dictionary in materials:
-				var id := str(mat.get("id", ""))
-				buttons.append(W.button(str(mat.get("name", id)), func() -> void: _apply(target, {"library_material": id})))
-			_parts_box.add_child(W.hbox(buttons))
+			_parts_box.add_child(_material_picker(target, shows, materials))
+		elif _palette_for == "effect:" + target:
+			_parts_box.add_child(_effect_picker(target, effect))
 
 
 ## A row of colour buttons: each a swatch on a button, so the stick's focus and the trigger reach it.
@@ -286,16 +310,125 @@ func _palette(target: String) -> Control:
 	return grid
 
 
-## The material library's materials ({id, name}) when the app has one (assistant_room.gd MATERIAL_LIBRARY), else [].
+## The material library's materials ([{id, name, tags, swatch, ...}], by name; scripts/env/material_library.gd).
 static func _materials() -> Array:
-	var path: String = (load(ASSISTANT_ROOM) as GDScript).get_script_constant_map().get("MATERIAL_LIBRARY", "")
-	if path == "" or not ResourceLoader.exists(path):
-		return []
-	var s := load(path) as GDScript
-	if s == null or not s.get_script_method_list().any(func(f: Dictionary) -> bool: return f["name"] == "list"):
-		return []
-	var list: Variant = s.call("list")
-	return list if list is Array else []
+	return MaterialLibrary.list()
+
+
+static func _material_name(id: String) -> String:
+	return str(MaterialLibrary.entry(id).get("name", id))
+
+
+## The material picker under a part: a row of kinds (All, Floors, Walls, Fabric, Wood, Leather, Metal, Stone), then
+## the materials of that kind, each a button with its swatch and name; the one the part shows is pressed. Choosing
+## one puts it on the part (with Undo in the footer); the stick's focus and the trigger reach every button.
+func _material_picker(target: String, shows: String, materials: Array) -> Control:
+	var box := W.vbox()
+	var kinds := W.choices(MATERIAL_KINDS.map(func(k: Array) -> String: return k[0]), func(i: int) -> void:
+		_material_tag = MATERIAL_KINDS[i][1]
+		_sync_parts())
+	W.set_choice(kinds, MATERIAL_KINDS.map(func(k: Array) -> String: return k[1]).find(_material_tag))
+	box.add_child(kinds)
+	var grid := GridContainer.new()
+	grid.columns = MATERIAL_COLUMNS
+	grid.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
+	grid.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	for mat: Dictionary in materials:
+		if _material_tag != "" and not (_material_tag in mat.get("tags", [])):
+			continue
+		var id := str(mat["id"])
+		var b := W.button(str(mat.get("name", id)), func() -> void: _apply(target, {"library_material": id}),
+				&"RowButton")
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.toggle_mode = true
+		b.set_pressed_no_signal(id == shows)
+		b.icon = swatch_icon(str(mat.get("swatch", "#808080")))
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.tooltip_text = "%s: %s" % [id, ", ".join(mat.get("tags", []))]
+		b.set_meta("material", id)
+		grid.add_child(b)
+	box.add_child(grid)
+	return box
+
+
+static func _effect_name(id: String) -> String:
+	return str(EffectLibrary.entry(id).get("name", id))
+
+
+## The effect picker under a part: a row of groups (All, then the library's: Classic, Energy, Nature, ...; the skies'
+## are for the sky only), then that group's effects, each a button with its preview and name (its description as the
+## tooltip); the one the part shows is pressed. Choosing one puts it on the part with its options at their defaults
+## (with Undo in the footer); over a library material only those that layer keep the material under them. The room's
+## checks apply as for any change: the photosensitivity ceiling (the defaults are within it) and the cost limit.
+func _effect_picker(target: String, shows: String) -> Control:
+	var box := W.vbox()
+	# The groups with part effects (the skies' are for the sky).
+	var groups: Array = [""]
+	for id in EffectLibrary.ids():
+		var e := EffectLibrary.entry(id)
+		if str(e["surfaces"]) == "any" and not (str(e["group"]) in groups):
+			groups.append(str(e["group"]))
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
+	row.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	var group := ButtonGroup.new()
+	for g: String in groups:
+		var b := W.button("All" if g == "" else g.capitalize(), Callable())
+		b.toggle_mode = true
+		b.button_group = group
+		b.set_pressed_no_signal(g == _effect_group)
+		b.set_meta("effect_group", g)
+		b.pressed.connect(func() -> void:
+			_effect_group = g
+			_sync_parts())
+		row.add_child(b)
+	box.add_child(row)
+	var grid := GridContainer.new()
+	grid.columns = MATERIAL_COLUMNS
+	grid.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
+	grid.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	for id in EffectLibrary.ids():
+		var e := EffectLibrary.entry(id)
+		if str(e["surfaces"]) != "any" or (_effect_group != "" and str(e["group"]) != _effect_group):
+			continue
+		var b := W.button(str(e.get("name", id)), func() -> void: _apply(target, {"effect": {"name": id}}),
+				&"RowButton")
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.toggle_mode = true
+		b.set_pressed_no_signal(id == shows)
+		b.icon = effect_icon(id)
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.tooltip_text = str(e.get("description", ""))
+		b.set_meta("effect", id)
+		grid.add_child(b)
+	box.add_child(grid)
+	return box
+
+
+## An effect's preview, small (textures/fx/swatches/<id>.png, read once; the app runs from its folder, so the PNG is
+## read as it is); an empty square when it is missing.
+static func effect_icon(id: String) -> Texture2D:
+	if not _effect_swatches.has(id):
+		var img := Image.new()
+		if img.load_png_from_buffer(FileAccess.get_file_as_bytes(EFFECT_SWATCHES.path_join(id + ".png"))) != OK:
+			img = Image.create_empty(EFFECT_SWATCH, EFFECT_SWATCH, false, Image.FORMAT_RGBA8)
+		if img.get_width() != EFFECT_SWATCH:
+			img.resize(EFFECT_SWATCH, EFFECT_SWATCH, Image.INTERPOLATE_BILINEAR)
+		_effect_swatches[id] = ImageTexture.create_from_image(img)
+	return _effect_swatches[id]
+
+
+## A square of the material's mean colour, for its button's icon (made once per colour).
+static func swatch_icon(hex: String) -> Texture2D:
+	if not _swatches.has(hex):
+		var img := Image.create_empty(MATERIAL_SWATCH, MATERIAL_SWATCH, false, Image.FORMAT_RGBA8)
+		img.fill(RoomSchema.to_color(hex))
+		_swatches[hex] = ImageTexture.create_from_image(img)
+	return _swatches[hex]
 
 
 ## The picture on show (a picture file on the headset) as the part's picture.
@@ -316,7 +449,12 @@ func _picture(target: String) -> void:
 func _apply(target: String, material: Variant) -> void:
 	var r: Dictionary = await ObjectCommands.recolour_part(get_tree(), null, target, material)
 	_palette_for = ""
-	_toast(r, "%s: %s" % [target.get_slice("/", 1), "its own colour" if material == null else "changed"])
+	var said := "its own colour" if material == null else "changed"
+	if material is Dictionary and (material as Dictionary).has("library_material"):
+		said = _material_name(str(material["library_material"]))
+	elif material is Dictionary and (material as Dictionary).get("effect") is Dictionary:
+		said = _effect_name(str(material["effect"].get("name", "")))
+	_toast(r, "%s: %s" % [target.get_slice("/", 1), said])
 	sync_objects()
 
 

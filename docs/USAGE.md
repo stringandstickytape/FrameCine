@@ -253,9 +253,17 @@ built in (a picture frame, a wall shelf, a pot plant, a wall clock) and imported
 
 - **Move** (as Place, for this one) and **Remove** (asked first in the footer: Remove or Keep).
 - Its parts, each with a swatch of its colour. **Colour** opens a palette under the part; pick a colour. **Picture**
-  puts the picture on show (a picture file on the headset, opened in Files) on the part. **Material** (only when the
-  app has a material library) lists its materials. **Reset** gives the part its own colours back. Each change has Undo
-  in the footer.
+  puts the picture on show (a picture file on the headset, opened in Files) on the part. **Material** opens the
+  material library under the part (`docs/materials.md`): a row of kinds (All, Floors, Walls, Fabric, Wood, Leather,
+  Metal, Stone), then each material of that kind as a button with a swatch of its colour and its name; the one the
+  part shows is lit. Pick one and the part takes it, as the material shows itself; Colour afterwards gives it that
+  colour with its pattern kept. **Effect** opens the effect library under the part (`docs/effects.md`): a row of
+  groups (All, Classic, Energy, Nature, Materials, Stylised, Transitions, Reactive), then each effect of that group
+  as a button with a small preview and its name (its description shows when you point at it); the one the part shows
+  is lit. Pick one and the part takes it with its options at their defaults; over a material, an effect that keeps
+  the surface under it (caustics, rim glow, velvet, ...) keeps the material. The part's line names its material and
+  effect. A change that would take the room past its cost limit is refused with a note. **Reset** gives the part its
+  own colours back. Each change has Undo in the footer.
 
 **Delete** (imported objects only) asks first in the footer; copies already in rooms stay.
 

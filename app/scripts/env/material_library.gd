@@ -19,12 +19,17 @@ extends RefCounted
 ## metres), uv (true: the mesh's UVs, repeated `repeat` (Vector2) times; default: the surface's own axes in metres),
 ## triplanar (true: three blended projections, for meshes with neither flat faces nor UVs; three times the fetches),
 ## roughness_scale, normal_strength, specular, sheen, pleats (folds per metre, curtains), pleat_depth, spill and
-## floor_darkening (as env_unlit.gdshader). Materials with the same id and options are one shared ShaderMaterial:
-## duplicate() it before changing it for one surface only.
+## floor_darkening (as env_unlit.gdshader), emission (Color, added on top), lit ({sky_top, sky_bottom, screen}: an
+## assistant's room with real lighting, room_material_lit.gdshader; assistant_room.gd lighting_of()). Materials with
+## the same id and options are one shared ShaderMaterial: duplicate() it before changing it for one surface only.
+##   MaterialLibrary.lit_variant(material, lighting)  a library material as its lit form (shared too)
+##   MaterialLibrary.id_of(material), shown_colour(material)   which library material a surface shows, and its colour
 
 const DIR := "res://materials"
 const SHADER := preload("res://shaders/room_material.gdshader")
 const SHADER_TRIPLANAR := preload("res://shaders/room_material_triplanar.gdshader")
+const SHADER_LIT := preload("res://shaders/room_material_lit.gdshader")
+const SHADER_LIT_TRIPLANAR := preload("res://shaders/room_material_lit_triplanar.gdshader")
 const MAPS: Array[String] = ["albedo", "normal", "orm"]
 ## .mtex: "MTEX", version, block size (x | y << 16), width, height, mip levels, flags, data size; then the data.
 const MTEX_MAGIC := "MTEX"
@@ -98,6 +103,11 @@ static func get_material(id: String, options := {}) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.resource_name = id
 	m.shader = SHADER_TRIPLANAR if options.get("triplanar", false) else SHADER
+	if options.get("lit") is Dictionary:
+		m.shader = SHADER_LIT_TRIPLANAR if options.get("triplanar", false) else SHADER_LIT
+		_light(m, options["lit"])
+	if options.has("emission"):
+		m.set_shader_parameter("emission", _colour(options["emission"]))
 	m.set_shader_parameter("albedo_map", tex["albedo"])
 	m.set_shader_parameter("normal_map", tex["normal"])
 	m.set_shader_parameter("orm_map", tex["orm"])
@@ -133,16 +143,59 @@ static func _colour(v: Variant) -> Color:
 	return v if v is Color else Color.from_string(str(v), Color.WHITE)
 
 
-## True when `node` is (inside) the base of an assistant's room with real lighting (scripts/assistant/assistant_room.gd,
-## found by its lighting_of() and doc): that room relights the base's plain materials, which it can't do with library
-## materials yet, so the built-in rooms keep their plain ones there.
-static func in_lit_room(node: Node) -> bool:
-	var p := node.get_parent() if node != null else null
-	while p != null:
-		if p.has_method("lighting_of") and p.get("doc") is Dictionary:
-			return bool((p.call("lighting_of", p.get("doc")) as Dictionary).get("lit", false))
-		p = p.get_parent()
-	return false
+static func _light(m: ShaderMaterial, lighting: Dictionary) -> void:
+	m.set_shader_parameter("sky_top", _colour(lighting.get("sky_top", Color.BLACK)))
+	m.set_shader_parameter("sky_bottom", _colour(lighting.get("sky_bottom", Color.BLACK)))
+	m.set_shader_parameter("screen_light", float(lighting.get("screen", 0.0)))
+
+
+## True when `m` is a library material (either shader, lit or not).
+static func is_library(m: Material) -> bool:
+	return m is ShaderMaterial and (m as ShaderMaterial).shader in [SHADER, SHADER_TRIPLANAR, SHADER_LIT,
+			SHADER_LIT_TRIPLANAR]
+
+
+## The library material's id a surface's material shows, "" when it is not one.
+static func id_of(m: Material) -> String:
+	return str(m.resource_name) if is_library(m) else ""
+
+
+## The colour a library material shows on average: its swatch (the base colour map's mean) times its tint, as sRGB.
+static func shown_colour(m: Material) -> Color:
+	if not is_library(m):
+		return Color.WHITE
+	var swatch := Color.from_string(str(_entries().get(id_of(m), {}).get("swatch", "#ffffff")), Color.WHITE)
+	var tint: Variant = (m as ShaderMaterial).get_shader_parameter("tint")
+	var t := (tint as Color) if tint is Color else Color.WHITE
+	var c := swatch.srgb_to_linear() * t.srgb_to_linear()
+	return Color(minf(c.r, 1.0), minf(c.g, 1.0), minf(c.b, 1.0)).linear_to_srgb()
+
+
+static var _lit_variants := {}
+
+
+## A library material (unlit) as its lit form for an assistant's room with real lighting (lighting: {sky_top,
+## sky_bottom, screen}, assistant_room.gd lighting_of()): the same maps and settings on room_material_lit.gdshader. A
+## built-in room's surfaces are made this way when that room is lit. One lit form per material and lighting, shared;
+## null when `src` is not an unlit library material.
+static func lit_variant(src: Material, lighting: Dictionary) -> ShaderMaterial:
+	if not (src is ShaderMaterial) or not ((src as ShaderMaterial).shader in [SHADER, SHADER_TRIPLANAR]):
+		return null
+	var s := src as ShaderMaterial
+	var key := "%d %s" % [s.get_instance_id(), var_to_str(lighting)]
+	if _lit_variants.has(key) and is_instance_valid(_lit_variants[key][1]):
+		return _lit_variants[key][1]
+	var m := ShaderMaterial.new()
+	m.resource_name = s.resource_name
+	m.shader = SHADER_LIT_TRIPLANAR if s.shader == SHADER_TRIPLANAR else SHADER_LIT
+	for u: Dictionary in s.shader.get_shader_uniform_list():
+		var v: Variant = s.get_shader_parameter(u["name"])
+		if v != null:
+			m.set_shader_parameter(u["name"], v)
+	_light(m, lighting)
+	# The source kept with it, so its instance id isn't given to another material while this entry lives.
+	_lit_variants[key] = [s, m]
+	return m
 
 
 ## Puts a library material on a mesh: on one surface (its surface override) or, with surface -1, on all of it
@@ -226,6 +279,7 @@ static func mtex_info(bytes: PackedByteArray) -> Dictionary:
 static func clear_cache() -> void:
 	_textures.clear()
 	_materials.clear()
+	_lit_variants.clear()
 	_catalogue.clear()
 	loads = 0
 	hits = 0

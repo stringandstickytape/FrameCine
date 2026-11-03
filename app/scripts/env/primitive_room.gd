@@ -41,11 +41,9 @@ func material(albedo: Color, spill := 1.0, floor_darkening := 0.2) -> ShaderMate
 
 
 ## A library material (scripts/env/material_library.gd, docs/materials.md) in this room's light: its pattern at
-## `colour` on average, spill and floor_darkening as material(); material(colour, ...) if the library lacks it, or in
-## an assistant's lit room (which relights plain materials only).
+## `colour` on average, spill and floor_darkening as material(); material(colour, ...) if the library lacks it. In an
+## assistant's lit room the room relights it (MaterialLibrary.lit_variant()).
 func textured(id: String, colour: Color, spill := 1.0, floor_darkening := 0.2, options := {}) -> Material:
-	if MaterialLibrary.in_lit_room(self):
-		return material(colour, spill, floor_darkening)
 	var o := options.duplicate()
 	o.merge({"colour": colour, "spill": spill, "floor_darkening": floor_darkening})
 	var m := MaterialLibrary.get_material(id, o)
