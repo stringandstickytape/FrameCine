@@ -2,7 +2,8 @@ extends SceneTree
 
 ## Tests for scripts/play/night_mode.gd (ideas #26) in the real main scene: settings, and the values reaching the
 ## engine's MediaSource when a file opens and on a change. Needs an engine with MediaSource.night_mode and the 5.1 file
-## of tests/test_speakers.gd; without them only the settings checks run. Settings are read-only.
+## app-features/vp9_51side.mkv (docs/features.md, #21, says how it was made); without them only the settings checks
+## run. Settings are read-only.
 ## Run: godot --headless --xr-mode off --path app --script res://tests/test_night.gd
 
 const NightMode := preload("res://scripts/play/night_mode.gd")

@@ -25,6 +25,13 @@ var _boost: HBoxContainer
 var _speakers: Button
 var _lfe: Button
 var _speakers_status: Label
+var _spatial_box: VBoxContainer
+var _reverb: HBoxContainer
+var _output: HBoxContainer
+var _hrtf_list: VBoxContainer
+var _hrtf_get: Button
+var _hrtf_offer := "" # A set not downloaded yet, its licence shown: _hrtf_get fetches it.
+var _hrtf_note := ""
 var _pc_toggle: Button
 var _pc_address: Button
 var _pc_status: Label
@@ -83,20 +90,46 @@ func bind(p_app: Node) -> void:
 	_night_box.add_child(_boost)
 	night.changed.connect(_sync_night)
 
-	# Speakers in the room (#21, #47): turning them on reopens the file at its place.
-	box.add_child(W.section("Speakers"))
+	# Spatial sound (#21, #47; docs/features.md #21): turning it on reopens the file at its place.
+	box.add_child(W.section("Spatial sound"))
 	var speakers: Node = app.features.speakers
-	_speakers = W.toggle("Speakers in the room", func(on: bool) -> void:
+	_speakers = W.toggle("Spatial sound", func(on: bool) -> void:
 		speakers.set_enabled(on)
 		_sync_speakers())
 	_lfe = W.toggle("Bass channel", func(on: bool) -> void:
 		speakers.set_lfe(on)
 		_sync_speakers())
 	box.add_child(W.hbox([_speakers, _lfe]))
+	_spatial_box = W.vbox()
+	box.add_child(_spatial_box)
+	_reverb = W.slider_row("Room sound", 0.0, 200.0, 5.0, func(v: float) -> String: return "%d %%" % roundi(v),
+			func(v: float) -> void: speakers.set_reverb(v / 100.0))
+	_spatial_box.add_child(_reverb)
+	_spatial_box.add_child(W.label("Sound plays on", &"MutedLabel"))
+	_output = W.choices(["Auto", "Headset speakers", "Headphones"], func(i: int) -> void:
+		speakers.set_output(["auto", "speakers", "headphones"][i])
+		_sync_speakers())
+	_spatial_box.add_child(_output)
+	_spatial_box.add_child(W.label("Head measurements (HRTF)", &"MutedLabel"))
+	_hrtf_list = VBoxContainer.new()
+	_hrtf_list.add_theme_constant_override("separation", 0)
+	_spatial_box.add_child(_hrtf_list)
+	_hrtf_get = W.button("", func() -> void:
+		var error: String = speakers.download_hrtf(_hrtf_offer)
+		_hrtf_note = error if error != "" else "Fetching..."
+		_sync_speakers())
+	_spatial_box.add_child(W.hbox([_hrtf_get]))
+	if "spatial_tune" in app.features:
+		_spatial_box.add_child(W.hbox([W.button("Tune spatial sound", func() -> void:
+			app.features.spatial_tune.start())]))
 	_speakers_status = W.label("", &"MutedLabel")
 	_speakers_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_speakers_status)
 	speakers.changed.connect(func(_a: bool) -> void: _sync_speakers())
+	speakers.download_finished.connect(func(id: String, error: String) -> void:
+		_hrtf_note = ("Fetched; choose it above." if error == "" else "Could not fetch %s: %s" % [id, error])
+		_hrtf_offer = ""
+		_sync_speakers())
 	_build_pc_audio()
 	app.audio_settings_changed.connect(sync)
 	app.file_opened.connect(func(_p: String) -> void:
@@ -173,21 +206,71 @@ func _sync_night() -> void:
 	W.slider_of(_boost).editable = bool(night.boost_applies())
 
 
-## The speakers' state: which channels play from where, or why the stereo mix plays instead.
+## Spatial sound's state: the settings, the HRTF sets, which channels play from where, or why the stereo mix plays.
 func _sync_speakers() -> void:
 	if _speakers == null:
 		return
 	var speakers: Node = app.features.speakers
-	W.set_on(_speakers, bool(speakers.enabled))
+	var on := bool(speakers.enabled)
+	W.set_on(_speakers, on)
 	W.set_on(_lfe, bool(speakers.lfe))
-	_lfe.visible = bool(speakers.enabled)
-	if not bool(speakers.enabled):
-		_speakers_status.text = "Each channel from its place in the room: dialogue from the screen, surrounds beside " \
-				+ "and behind you."
+	_lfe.visible = on
+	_spatial_box.visible = on
+	W.set_slider(_reverb, float(speakers.reverb) * 100.0)
+	W.set_choice(_output, ["auto", "speakers", "headphones"].find(str(speakers.output)))
+	_sync_hrtf_list()
+	var speed_one := is_equal_approx(float(app.features.speed.speed), 1.0)
+	if not on:
+		_speakers_status.text = "Sound from speakers in the room, in front, behind and above you, outside your " \
+				+ "head; dialogue from the screen. It stays put when you turn your head."
+	elif not bool(speakers.available()):
+		_speakers_status.text = "This player has no spatial sound (an older engine): the stereo mix plays."
 	elif bool(speakers.active):
-		_speakers_status.text = "Playing from the room: %s." % ", ".join(speakers.channels())
+		var names: Array[String] = speakers.channels()
+		var what := "the 360 sound field" if int(speakers.sound_field()) > 0 else ", ".join(names)
+		_speakers_status.text = "From the room: %s. %s." % [what, "Headphones" if speakers.profile() == "headphones"
+				else "The headset's speakers"]
+		if not speed_one:
+			_speakers_status.text += " At this speed the stereo mix plays."
 	else:
-		_speakers_status.text = "The stereo mix plays for now (another speed than 1x, PC sound on, or no file open)."
+		_speakers_status.text = "The stereo mix plays for now (PC sound on, or no file open)."
+	var tuned: Dictionary = speakers.profile_settings().tuning
+	if on and tuned.has("after_deg"):
+		_speakers_status.text += " Tuned to your ears: off by %d degrees on average, %d before." % [
+				roundi(float(tuned.after_deg)), roundi(float(tuned.get("before_deg", 0.0)))]
+	if _hrtf_note != "":
+		_speakers_status.text += " " + _hrtf_note
+
+
+## The HRTF sets: bundled and fetched ones to choose, the others to fetch (their licence shown first).
+func _sync_hrtf_list() -> void:
+	var speakers: Node = app.features.speakers
+	for c in _hrtf_list.get_children():
+		_hrtf_list.remove_child(c)
+		c.queue_free()
+	var group := ButtonGroup.new()
+	for s: Dictionary in speakers.hrtf_sets():
+		var id := str(s.id)
+		var ready := bool(s.downloaded)
+		var b := W.button(str(s.name) if ready else "Fetch: %s" % s.name, func() -> void:
+			if ready:
+				_hrtf_offer = ""
+				_hrtf_note = ""
+				speakers.set_hrtf(id)
+			else:
+				_hrtf_offer = id
+				_hrtf_note = "Licence: %s" % s.licence
+			_sync_speakers(), &"RowButton")
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		if ready:
+			b.toggle_mode = true
+			b.button_group = group
+			b.set_pressed_no_signal(id == str(speakers.hrtf))
+		_hrtf_list.add_child(b)
+	_hrtf_get.visible = _hrtf_offer != "" and str(speakers.downloading) == ""
+	for s: Dictionary in speakers.hrtf_sets():
+		if str(s.id) == _hrtf_offer:
+			_hrtf_get.text = "Download %s" % s.name
 
 
 # --- Sound on a PC (#9) ---------------------------------------------------------------------------------------------

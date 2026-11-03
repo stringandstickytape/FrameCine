@@ -90,6 +90,14 @@ func get_seats() -> Array[Vector3]:
 	return out
 
 
+## Spatial audio: screen speakers behind the screen, surround arrays of three along the side walls and on the back
+## wall, 4 m above the seat's floor, the heights on the ceiling. Fabric-lined walls and a carpet: little reflection,
+## a short, dead reverb for its size.
+func get_sound_room() -> Dictionary:
+	return {"box": AABB(ROOM_MIN, ROOM_MAX - ROOM_MIN), "reflect": [0.3, 0.3, 0.25, 0.35, 0.2, 0.3], "rt60": 0.7,
+			"wet": 0.55, "surround_height": 4.0, "array": 3, "array_spacing": 3.0}
+
+
 func on_screen_changed(screen_transform: Transform3D, size: Vector2) -> void:
 	if _border == null:
 		return

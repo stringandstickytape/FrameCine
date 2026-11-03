@@ -9,6 +9,13 @@ const RADIUS := 9.0
 const WALL := 2.4
 
 
+## Spatial audio: a ring of speakers behind the dome's foot, 8 m round, the heights and the top one behind the dome
+## overhead. A hard dome over a carpeted floor: a long, smooth reverb.
+func get_sound_room() -> Dictionary:
+	return {"box": AABB(Vector3(-RADIUS, 0, -RADIUS), Vector3(RADIUS * 2.0, WALL + RADIUS, RADIUS * 2.0)), "ring": true,
+			"distance": 8.0, "reflect": [0.5, 0.5, 0.25, 0.6, 0.5, 0.5], "rt60": 1.2, "wet": 0.5}
+
+
 func _build() -> void:
 	var wall := CylinderMesh.new()
 	wall.top_radius = RADIUS

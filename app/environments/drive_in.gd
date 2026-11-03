@@ -26,6 +26,18 @@ var _star_mat: StandardMaterial3D
 var _stars: Node3D
 
 
+## Spatial audio: the film on the car's radio. Front speakers low in the doors with tweeters on the dashboard's
+## corners, the centre on the dashboard, the surrounds in the rear doors and on the parcel shelf, the heights in the
+## headlining. The cabin's glass and seats: a few quick, close reflections, almost no reverb.
+func get_sound_room() -> Dictionary:
+	return {"box": AABB(Vector3(-0.8, 0.3, -1.0), Vector3(1.6, 1.15, 2.4)), "reflect": [0.45, 0.45, 0.2, 0.3, 0.6, 0.4],
+			"rt60": 0.12, "wet": 0.35,
+			"speakers": {"FL": Vector3(-0.66, 0.9, -0.72), "FR": Vector3(0.66, 0.9, -0.72), "FC": Vector3(0, 0.92, -0.78),
+				"SL": Vector3(-0.75, 0.6, 0.75), "SR": Vector3(0.75, 0.6, 0.75), "BL": Vector3(-0.5, 0.95, 1.3),
+				"BR": Vector3(0.5, 0.95, 1.3), "TFL": Vector3(-0.45, 1.4, -0.35), "TFR": Vector3(0.45, 1.4, -0.35),
+				"TBL": Vector3(-0.45, 1.4, 0.7), "TBR": Vector3(0.45, 1.4, 0.7)}}
+
+
 func _build() -> void:
 	# Under an open sky: thunder in the film flashes the lot (scripts/env/film_react.gd, ideas #81).
 	reacts_to_film = true

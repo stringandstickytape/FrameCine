@@ -48,7 +48,8 @@ extends Node
 ##   dual_fisheye scripts/play/dual_fisheye.gd: dual fisheye 360 lens profiles (a 360 camera's, generic) and alignment
 ##   folder_modes scripts/play/folder_modes.gd: a mode per folder for files without their own (#83)
 ##   deinterlace scripts/play/deinterlace.gd: GPU bob or edge deinterlace for interlaced video (#95)
-##   speakers   scripts/play/cinema_speakers.gd: each audio channel from its place in the room (#21, #47)
+##   speakers   scripts/play/spatial_audio.gd: spatial audio, every channel from its place in the room (#21, #47)
+##   spatial_tune scripts/play/spatial_tune.gd: "Tune spatial sound", the HRTF fitted to the ears by pointing (#21)
 ##   bias       scripts/env/bias_light.gd: the screen's light on the room takes the picture's colour (#29)
 ##   night      scripts/play/night_mode.gd: night mode (levelled loudness) and dialogue boost (#26)
 ##   react      scripts/env/film_react.gd: bass pulses in the controllers, room flashes on loud moments (#81)
@@ -107,7 +108,8 @@ const FisheyeLens := preload("res://scripts/play/fisheye_lens.gd")
 const DualFisheye := preload("res://scripts/play/dual_fisheye.gd")
 const FolderModes := preload("res://scripts/play/folder_modes.gd")
 const Deinterlace := preload("res://scripts/play/deinterlace.gd")
-const CinemaSpeakers := preload("res://scripts/play/cinema_speakers.gd")
+const SpatialAudio := preload("res://scripts/play/spatial_audio.gd")
+const SpatialTune := preload("res://scripts/play/spatial_tune.gd")
 const BiasLight := preload("res://scripts/env/bias_light.gd")
 const NightMode := preload("res://scripts/play/night_mode.gd")
 const FilmReact := preload("res://scripts/env/film_react.gd")
@@ -168,7 +170,8 @@ var lens: FisheyeLens
 var dual_fisheye: DualFisheye
 var folder_modes: FolderModes
 var deinterlace: Deinterlace
-var speakers: CinemaSpeakers
+var speakers: SpatialAudio
+var spatial_tune: SpatialTune
 var bias: BiasLight
 var night: NightMode
 var react: FilmReact
@@ -231,7 +234,8 @@ func _ready() -> void:
 	dual_fisheye = _add(DualFisheye.new(), "DualFisheye")
 	folder_modes = _add(FolderModes.new(), "FolderModes")
 	deinterlace = _add(Deinterlace.new(), "Deinterlace")
-	speakers = _add(CinemaSpeakers.new(), "CinemaSpeakers")
+	speakers = _add(SpatialAudio.new(), "SpatialAudio")
+	spatial_tune = _add(SpatialTune.new(), "SpatialTune")
 	bias = _add(BiasLight.new(), "BiasLight")
 	night = _add(NightMode.new(), "NightMode")
 	react = _add(FilmReact.new(), "FilmReact")

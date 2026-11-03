@@ -61,7 +61,7 @@ sections of `user://settings.cfg`; `<environment id>` and `<id>` sections hold o
 | [Up next, pre-show, intermission, jog wheel, stereo screenshots](#34-up-next-37-pre-show-39-intermission-63-jog-wheel-66-stereo-screenshots) | #34, #37, #39, #63, #66 | `[up_next]`, `[preshow]`, `[intermission]`, `[jog]` | on (intermission off by default) |
 | [Fisheye lens profiles, folder rules, light sharpen, deinterlace](#73-fisheye-lens-profiles-83-folder-rules-90-light-sharpen-95-deinterlace) | #73, #83, #90, #95 | `[lens]`, `[lens_files]`, `[folder_modes]`, `[picture_<environment id>]`, `[picture]` | on (sharpen and deinterlace off by default) |
 | [Dual fisheye 360](#dual-fisheye-360) | none | `[dual_fisheye]`, `[dual_fisheye_files]`, `[dual_fisheye_<profile>]` | on (guessed for 360 camera names and dual fisheye tags) |
-| [Virtual cinema speakers, world-locked sound for 180 / 360](#21-virtual-cinema-speakers-47-world-locked-sound-for-180--360) | #21, #47 | `[speakers]` | off by default |
+| [Virtual cinema speakers, world-locked sound for 180 / 360](#21-virtual-cinema-speakers-47-world-locked-sound-for-180--360) (spatial audio) | #21, #47 | `[speakers]`, `[spatial]` | off by default (until the headset check) |
 | [Bias light from the picture](#29-bias-light-from-the-picture) | #29 | `[bias_light]` | off by default |
 | [Night mode and dialogue boost](#26-night-mode-and-dialogue-boost) | #26 | `[sound]` | off by default |
 | [Quad layers (a spike behind flags)](#70-quad-layers-a-spike-behind-flags) | #70 | none (flags `--pane-layer`, `--video-layer`) | spike behind flags |
@@ -1241,50 +1241,183 @@ stereo fisheye (one circle per eye): both wrong.
 
 ## #21 Virtual cinema speakers, #47 world-locked sound for 180 / 360
 
-Each channel of the film's sound plays from its own place in the room, not as a stereo mix inside the head. Turn
-the head and the sound stays where it is.
+Spatial audio: the film's sound comes from speakers in the room, heard through a head-related transfer function
+(HRTF). Sound comes from in front, from behind and from above, outside the head, and it stays where it is when the
+head turns. This works for every channel layout and for the sound field (ambisonics) of 360 videos.
 
-- **Where the speakers are:**
-  - Flat screens: the centre channel (dialogue) at the screen's middle, front left and right at its edges.
-  - Surrounds: 2.5 m from the seat, at 110 degrees left and right for 5.1 (whichever pair the track has). For 7.1,
-    the sides are at 90 degrees and the backs at 145 degrees.
-  - 180 / 360 (#47): every speaker 2.5 m round the seat, facing the picture's front (the screen yaw). The fronts are
-    at 30 degrees left and right.
-  - A stereo track gets the two fronts only, which is world-locked stereo.
-  - LFE is left out by default, as in the engine's stereo mix. `[speakers] lfe` adds it as a non-positional player.
-- **How:** the engine keeps the channels apart when the file opens (`MediaSource.discrete_channels`, engine commit
-  c875566) and gives one mono stream per channel. `scripts/play/cinema_speakers.gd` puts each present channel on an
-  `AudioStreamPlayer3D` with distance attenuation off, so only the direction changes.
-  - The player's stereo stream keeps playing as the clock, on a muted bus (`SpeakersClock`). Play, pause, seek and
-    the sleep fade are copied to the speakers each frame.
-  - At a speed other than 1x the engine time-stretches only the stereo stream, so the stereo mix comes back until
-    the speed is 1x again.
-  - If another feature takes the player's bus (the PC audio sink), the speakers stop while it has it. When it gives
-    the bus back, they start again.
-  - `scripts/video/hw_video_source.gd` has a static `discrete_channels` flag, read when a file opens, and forwards
-    `has_discrete_channels()`, `get_audio_channels()` and `get_audio_channel_stream(n)`. Engine builds without
-    them leave the speakers off.
-- **Off by default:** the cost of up to eight 3D players on the headset is not measured yet. Turning it on reopens
-  the open file at the same place, because the channels are chosen when a file opens.
-- **API:** `main.features.speakers`: `enabled`, `set_enabled(on)`, `lfe`, `set_lfe(on)`, `active`, `channels()`,
-  `speaker(name)`, static `angles(present)`, signal `changed(active)`.
-- **Settings:** `[speakers] enabled, lfe` (both default off).
-- **Tested:** `tests/test_speakers.gd`, with a WSLg renderer (headless never starts the audio clock). The file is a
-  VP9 picture with a 5.1(side) FLAC track, one tone per channel (FL 300, FR 400, FC 500, LFE 60, SL 700, SR 800 Hz).
-  It was made with FFmpeg from a generated six-channel WAVE with a channel mask.
-  - The angles for 5.1 side, 5.1 back and 7.1.
-  - Turning it on reopens the file at its place, with five speakers and the stereo clock on the muted bus.
-  - Placement on the flat screen and round the seat, unchanged by a head turn, and in 360 facing the yaw.
-  - Each speaker carries its own channel's tone, captured from its bus: FC 500 Hz, FL 300 Hz, SR 800 Hz, each at
-    least 20 times the neighbouring tone.
-  - Pause, play and seek copied (with the sound after the seek), stereo at 1.5x and speakers again at 1x, the
-    volume copied, LFE on, and off restoring the stereo mix.
-  - Another owner taking the bus stops the speakers, and giving it back starts them again.
-  - `test_features`, `test_media_features`, `test_pane`, `test_comfort` and `test_picture` still pass.
-- **Untested:**
-  - The headset: how the directions sound through Godot's panning, and the level against the stereo mix.
-  - The CPU cost of five to eight 3D players.
-  - A real film's 5.1 and 7.1 tracks, and audio track changes during playback.
+- **How it sounds where it is:** the engine's `BinauralRenderer` (fork branch `frame/binaural`, `docs/decisions.md`
+  D23) renders each channel as a virtual speaker:
+  - The direction from the head to the speaker, in the head's axes, every 64 frames (1.3 ms). The head pose comes
+    from the XR camera each frame and is interpolated in between.
+  - That direction's HRTF: a fractional delay per ear (the interaural time difference) and a 128-tap filter, both
+    interpolated bilinearly from a grid of 48 azimuths by 14 elevations (-40 to 90 degrees). When the direction
+    changes, the old and new filters are crossfaded over the 64 frames, so a head turn makes no click.
+  - No FFT and no blocks, so no latency is added (an impulse from the front leaves after about 0.5 ms, the HRTF's
+    own onset). The binaural mix is the film's stereo stream itself: the same player and the same clock. The A/V
+    offset and the latency compensation hold as before, and nothing needs compensating.
+- **Layouts:** every layout FFmpeg gives for the decoded track, up to 16 channels, in the track's own order
+  (`MediaSource.get_audio_channels()`). Tracks with more channels are mixed to 7.1.4. Each channel's direction comes
+  from its name (`scripts/play/speaker_layouts.gd`, ITU-R BS.775 and BS.2051):
+  - FC 0, FL / FR 30 degrees left / right, FLC / FRC 15, WL / WR 60.
+  - The one surround pair of 5.x (side or back) at 110. With both pairs (7.x), the sides at 90 and the backs at 135.
+    BC at 180.
+  - Heights 40 degrees up: TFL / TFR at 45, TSL / TSR at 90, TBL / TBR at 135, TFC, TBC. TC is straight up.
+    Bottoms (BFL, BFC, BFR) 30 degrees down.
+  - LFE: no direction. It is left out unless Bass channel is on; then it goes to both ears.
+  - Channels without a name are spread round the listener in order.
+  - Mono, stereo (world-locked stereo), 3.0, quad, 5.0, 5.1 side and back, 6.1, 7.1, 7.1 wide, 5.1.2, 5.1.4,
+    7.1.2, 7.1.4, 9.1.6 and 22.2 are covered.
+- **Ambisonics:** first, second and third order AmbiX (ACN order, SN3D), recognised from the track's own layout: an
+  MP4 `SA3D` box (360 video from YouTube and the cameras) or Opus channel mapping 2. This works even when the
+  decoder labels its frames as a plain layout (AAC). Higher orders are cut to third.
+  - The engine decodes the sound field to world-fixed virtual speakers (a cube for first order, an icosahedron for
+    second, Lebedev's 26 points for third) with max-rE weights, and renders those through the HRTF. The field turns
+    with the picture's front and stays put when the head turns.
+  - A head-locked stereo pair after the ambisonic channels (SA3D `head_locked_stereo`) plays straight to the ears.
+  - Object-based formats (Dolby Atmos objects in E-AC-3 JOC or TrueHD, DTS:X objects) have no open decoder. Their
+    channel bed plays (5.1 or 7.1), placed as above. The objects' height and movement are lost; there is no
+    proprietary code here.
+- **Where the speakers stand:** each room declares its speakers and its acoustics
+  (`VREnvironment.get_sound_room()`, in the room's own frame).
+  - Cinema: the screen channels 0.3 m behind the screen; the front pair kept between 22 and 35 degrees however
+    small or far the screen. Surround arrays of three speakers, 3 m apart, on the side and back walls, 4 m up; the
+    heights on the ceiling.
+  - Home theatre: the fronts from the two towers' tweeters, the centre from the speaker under the screen; surrounds on
+    the walls at 1.8 m, heights in the ceiling.
+  - Dim room: the screen channels on the screen, the rest on the walls at 1.6 m and on the ceiling.
+  - Dome and planetarium: a ring of 6 m (in the dome's frame) and 8 m (behind the planetarium dome's foot), the
+    heights and the top channel overhead.
+  - Drive-in: the car's own speakers. Doors and dashboard at the front, rear doors and the parcel shelf behind, the
+    headlining above.
+  - Passthrough: the standard layout (ITU angles) 2 m round the seat.
+  - The void: the standard layout, 2.5 m round the seat.
+  - Assistant rooms and kept rooms: the layout of the built-in room they are built on, or the standard layout for a
+    glTF base. The room document has no say in it, and the room schema is unchanged.
+  - 180 / 360 (#47): a ring round the head facing the picture's front (the screen yaw). For ambisonics, the field
+    is turned the same way.
+- **Distance and outside the head:** each room's reflections and reverb:
+  - First-order reflections off the room box's six walls, each wall with its own reflection amount. They are image
+    sources, delayed by the extra path, panned by a spherical-head model of time and level, and low-passed.
+  - A late reverb: an 8-line feedback delay network sized to the room's mean free path, with the room's decay time.
+  - The amounts: cinema RT60 0.7 s, wet 0.55; home theatre 0.35 s, 0.5; dim room 0.55 s, 0.55; planetarium 1.2 s,
+    0.5; dome 0.3 s, 0.25 (open air, the ground reflects); drive-in 0.12 s, 0.35 (the car); passthrough 0.4 s,
+    0.45; standard 0.35 s, 0.35 (reverb only).
+  - In 180 / 360 the picture is the room: a light reverb only (0.3 s, wet 0.25).
+  - Room sound in the Sound tab scales the wet amount from 0 to 200 %.
+- **Output profiles:** the headset's own speakers, or headphones and earbuds. Auto asks PulseAudio / PipeWire for
+  the default sink every 10 s (`pactl`). Bluetooth, USB or a headphone port count as headphones; anything else is
+  the speakers. Each profile has its own HRTF set, an EQ hook (`[spatial] eq_<profile>`, up to 8 peak or shelf
+  bands, for a measured correction) and the tuning of "Tune spatial sound".
+- **HRTF sets:** see `app/audio/hrtf/CREDITS.md`.
+  - Bundled (2 MB): six sets of the SADIE II database (University of York, Apache License 2.0): "Dummy head A"
+    (the default), "Dummy head B", and listeners H3 to H6.
+  - Fetched on request: the MIT dummy head, HUTUBS listener 1, ARI listener NH2 and CIPIC subject 003. They come
+    from the SOFA collection (sofacoustics.org) and are converted on the headset into `user://hrtf`. Each licence is
+    shown before the download: the MIT dummy head free with citation; HUTUBS CC BY 4.0; ARI CC BY-SA 4.0; CIPIC the
+    database's own terms.
+  - Ids of earlier versions in settings are read as their new ids.
+  - Not offered: LISTEN (its terms are not clear).
+  - `app/tools/hrtf_pack.gd` converts any SOFA file (AES69 SimpleFreeFieldHRIR). The steps: resample to 48 kHz,
+    equalise to the diffuse field, take the delay out of each response, put it on the grid, and store it as 16-bit.
+- **Tuning ("Tune spatial sound", `scripts/play/spatial_tune.gd`):** a pointing test that fits the HRTF to the
+  viewer's ears, for the output profile in use.
+  - Short pink-noise bursts (150 to 250 ms, level jittered by up to 3 dB) come from 18 directions: the horizontal
+    ring, above and below at the front and back, and straight up. Each burst is rendered in the head's frame, so it
+    doesn't move if the head turns while it plays (head tracking frozen).
+  - The viewer points either controller's laser where they heard it and pulls the trigger. The menu button cancels,
+    and then nothing changes. The film pauses while it runs.
+  - Each answer is scored in the head's frame at the burst: the angle off, the azimuth and elevation off, and a front
+    / back mix-up (both off the side by more than 20 degrees, on opposite halves, the answer nearer the mirror image).
+  - The search, tournament style, 72 bursts (about 3 to 4 minutes):
+    1. Every HRTF set (bundled and fetched) gets 5 bursts, interleaved. The best two go on.
+    2. The two get 6 more each. The lower mean angle off over all their bursts wins.
+    3. The winner's ITD scale (head size, steps of 0.1), pinna warp (the notch frequencies, steps of 7 %) and concha
+       gain (steps of 3 dB), one at a time: a step down and a step up, 5 bursts each. A step is kept only if it is
+       2 degrees better than what stands.
+  - The result is saved for the profile: the set (`[spatial] hrtf_<profile>`) and `[spatial] tuning_<profile>`
+    (`itd_scale`, `pinna_warp`, `concha_db`, `before_deg`, `after_deg`, `flips_before`, `flips_after`, `trials`,
+    `tuned_at`).
+  - A card shows the result: the mean error and the front / back mix-ups, before (the profile's set as it was) and
+    after. The Sound tab's line repeats the mean error.
+  - Started from the Sound tab, or by the `spatial_tune` command (assistant level control).
+- **Sync and speed:** at a speed other than 1x the engine time-stretches the stereo mix only, so the stereo mix
+  plays until the speed is 1x again. With the sound on a PC (#9) the renderer is taken off, and the PC's speakers get
+  the plain mix. A seek clears the room's echoes.
+- **Off by default** until checked on the headset (`SpatialAudio.DEFAULT_ON`). Turning it on reopens the open file
+  at its place, because the channels are chosen when a file opens.
+- **API:** `main.features.speakers` (`scripts/play/spatial_audio.gd`):
+  - `enabled`, `set_enabled(on)`, `lfe`, `set_lfe(on)`, `hrtf`, `set_hrtf(id)`, `reverb`, `set_reverb(x)`, `output`,
+    `set_output(mode)`.
+  - `profile()`, `profile_settings()`, `set_profile_eq()`, `set_profile_tuning()`.
+  - `active`, `available()`, `channels()`, `speaker_position(name)`, `sources()`, `sound_field()`, `stats()`.
+  - `hrtf_sets()`, `download_hrtf(id)`.
+  - Signals `changed(active)` and `download_finished(id, error)`.
+- **Commands:** `sound` and `set_sound` (`speakers`, `bass_channel`, `output_profile`, `hrtf`, `room_reverb`),
+  `download_hrtf` and `spatial_tune`, all tagged for the assistant.
+- **Settings:** `[speakers] enabled, lfe`; `[spatial] reverb` (1.0), `output` ("auto"), `hrtf_<profile>`,
+  `eq_<profile>`, `tuning_<profile>`.
+- **CPU, measured on the desktop** (x86_64 WSL, template_debug at -O3, 512-frame blocks at 48 kHz). The head turns
+  all the time, which is the costlier path (two filters crossfaded), and the room is on (`tests/test_binaural.gd`):
+
+  | Input | Per block | One core |
+  |---|---|---|
+  | 2 channels | 74 us | 0.7 % |
+  | 6 channels | 218 us | 2.0 % |
+  | 8 channels | 296 us | 2.8 % |
+  | 12 channels | 416 us | 3.9 % |
+  | Ambisonics, first order (8 virtual speakers) | 186 us | 1.8 % |
+  | Ambisonics, third order (26 virtual speakers) | 667 us | 6.3 % |
+
+  - The cinema's surround arrays add sources: 7.1.4 there is 20 sources, about 6.5 %.
+  - The convolution is vectorised on arm64 too (NEON, 4 lanes). The headset's cores should be within 2x of the
+    desktop's, so expect about 4 to 8 % of one core for 5.1 to 7.1.4 and up to 13 % for third-order ambisonics. That
+    is well under one core next to hardware HEVC decoding. To be measured; see On the headset.
+- **Tested:**
+  - `tests/test_binaural.gd` (51 checks):
+    - The packs, and the HRTF lookup and its interpolation.
+    - The time and level differences between the ears of rendered noise from the front, back, left, right and above.
+      Left: the left ear leads by 39 samples and is 16 dB louder. Front and back are centred, with 3.7 dB of
+      timbre between them.
+    - A head turn keeps a source where it is in the room, and gives no clicks.
+    - Ambisonic decoding at first and third order, turning with the head and with the picture's front.
+    - LFE and head-locked channels, no added latency, the room's tail, the tuning, and the CPU.
+  - `tests/test_spatial_audio.gd` (93 checks):
+    - Every layout's directions, the ring, and every room's 7.1.4 placement and acoustics.
+    - The settings, the commands and the output sink's classification.
+    - In the engine, with the files of `tests/make-spatial-media.py`: every WAV layout's channels; the SA3D box as
+      first-order ambisonics, with and without the head-locked pair; each 7.1.4 tone from its side; the sound field
+      and the head-locked tone on the left; the binaural mix's loudness against the stereo mix (0.4 dB); the audio
+      clock unchanged.
+  - `tests/test_spatial_tune.gd` (18 checks):
+    - The scoring: angles, azimuth wrap-round, elevation, front / back mix-ups.
+    - The search against simulated listeners whose scatter and mix-ups depend on the set and the tuning, over 10
+      seeded runs: the best-fitting set wins 8 of 10, the error falls in 10 of 10, and the ITD scale reaches the
+      listener's in 7 of 10. A perfect listener changes nothing.
+    - The pink noise and its WAV.
+    - The step in the main scene with simulated trigger pulls: every burst played, and the result saved.
+  - `test_features`, `test_night`, `test_media_features`, `test_pane`, `test_assistant_coverage_playback` and
+    `test_assistant` still pass. `test_media_features`' "events arrive" fails now and then on the base engine as on
+    this one (1 run in 6 on the base engine, 2 runs in 8 here). It is a subtitle timing check, headless.
+  - `test_night` uses `app-features/vp9_51side.mkv`: a VP9 picture with a 5.1(side) FLAC track, one tone per channel
+    (FL 300, FR 400, FC 500, LFE 60, SL 700, SR 800 Hz). It was made with FFmpeg from a generated six-channel WAVE
+    with a channel mask.
+- **On the headset** (for the lead; the app never touches the device itself):
+  - Deploy `PLAYER_BINAURAL` and turn on Spatial sound with a 5.1 or 7.1 film. Check that dialogue sits on the screen,
+    the surrounds beside and behind, and that nothing sits inside the head, on the headset's speakers and on
+    earbuds. Turn the head: the sound should stay put, with no clicks.
+  - A 360 video with spatial audio (SA3D): sounds should come from where their source is in the picture.
+  - Read the CPU: the `sound` command, or `main.features.speakers.stats()` (`load` is the share of one core) while
+    4K HEVC plays.
+  - Lip sync with the A/V calibration card (lab://av_sync), spatial sound on and off: the offsets should match.
+  - The loudness against the stereo mix (`SpatialAudio.GAIN`), and which output `pactl` reports for the speakers and
+    for earbuds (it decides the profile).
+  - Run Tune spatial sound once on the speakers and once on earbuds. Check that the laser answers are taken in the
+    right frame (an answer pointed at a front burst scores near 0), and note the before and after errors.
+  - Then set `DEFAULT_ON` to true.
+- **Untested:** the headset (all of the above); 44.1 kHz output (the HRTF is resampled to the mix rate, but checked
+  only at 48 kHz); real films' Atmos beds; Opus ambisonics (no encoder here, so the test file is PCM in MP4); the
+  downloads from sofacoustics.org (the code path is the same as the bundled conversion, but no download was made
+  here).
 
 ## #29 Bias light from the picture
 

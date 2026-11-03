@@ -114,6 +114,13 @@ func has_home_screen() -> bool:
 	return doc.get("screen") is Dictionary and bool((doc["screen"] as Dictionary).get("home", true))
 
 
+## Spatial audio (scripts/play/spatial_audio.gd): a stock base room's speakers and acoustics; a glTF base, the
+## standard layout. The room document has no say in it (the schema is unchanged).
+func get_sound_room() -> Dictionary:
+	var base := get_node_or_null("Base")
+	return base.get_sound_room() if base != null and base.has_method("get_sound_room") else {}
+
+
 ## The room's own screen curve (0..1), or -1 to leave the viewer's.
 func get_home_curve() -> float:
 	return float(doc["screen"].get("curve", 0.0)) if has_home_screen() else -1.0

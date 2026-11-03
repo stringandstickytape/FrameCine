@@ -23,6 +23,13 @@ var _saved_clear := Color.BLACK
 var _world_env: Environment
 
 
+## Spatial audio: the real room is unknown, so the standard layout 2 m round the seat (ITU angles, the screen pair on
+## the screen) in an ordinary living room's acoustics: a box about 5 x 2.6 x 5.5 m, a short reverb.
+func get_sound_room() -> Dictionary:
+	return {"box": AABB(Vector3(-2.5, 0, -3.2), Vector3(5.0, 2.6, 5.5)), "ring": true, "distance": 2.0, "reflect": 0.45,
+			"rt60": 0.4, "wet": 0.45}
+
+
 func _ready() -> void:
 	_build_shell()
 	_xr = XRServer.find_interface("OpenXR")

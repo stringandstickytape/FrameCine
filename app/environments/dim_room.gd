@@ -9,6 +9,12 @@ const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const WALLS := Color(0.42, 0.4, 0.38)
 
 
+## Spatial audio: the box of dim_room.tscn's Room (8 x 3 x 8 m), bare plaster: the liveliest of the rooms.
+func get_sound_room() -> Dictionary:
+	return {"box": AABB(Vector3(-4, 0, -4.6), Vector3(8, 3, 8)), "reflect": 0.6, "rt60": 0.55, "wet": 0.55,
+			"surround_height": 1.6}
+
+
 func _ready() -> void:
 	var room := get_node_or_null("Room") as MeshInstance3D
 	if room != null:

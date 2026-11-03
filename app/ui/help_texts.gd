@@ -65,8 +65,13 @@ const SOUND := {
 	"Night mode": "Loud scenes quieter, quiet speech louder: for late at night.",
 	"Evening out": "How strongly night mode evens out loud and quiet.",
 	"Dialogue boost": "Makes voices louder. Only for 5.1 sound and more.",
-	"Speakers in the room": "Sound from speakers placed in the room.",
+	"Spatial sound": "Sound from speakers around you and above you, not inside your head.",
 	"Bass channel": "Plays the film's separate bass channel (the .1 of 5.1) too.",
+	"Room sound": "How much echo of the room you hear. More: the speakers seem farther.",
+	"Auto": "The headset sees what the sound plays on: its own speakers or headphones.",
+	"Headset speakers": "Settings for the headset's own speakers.",
+	"Headphones": "Settings for earbuds or headphones.",
+	"Tune spatial sound": "Point to where you hear sounds; the sound then fits your ears.",
 	"Play sound on a PC": "The sound plays on a PC, in time with the picture.",
 }
 

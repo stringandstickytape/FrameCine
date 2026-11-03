@@ -8,6 +8,13 @@ const RADIUS := 16.0
 const SKY_RADIUS := 120.0
 
 
+## Spatial audio: a ring of speakers hung in the frame 6 m round the seat, the heights and the top one in the struts
+## overhead. Open air: only the ground reflects, and a faint tail off the plain.
+func get_sound_room() -> Dictionary:
+	return {"box": AABB(Vector3(-RADIUS, 0, -RADIUS), Vector3(RADIUS * 2.0, RADIUS, RADIUS * 2.0)), "ring": true,
+			"distance": 6.0, "reflect": [0.0, 0.0, 0.35, 0.0, 0.0, 0.0], "rt60": 0.3, "wet": 0.25}
+
+
 func _build() -> void:
 	var ground := PlaneMesh.new()
 	ground.size = Vector2(260, 260)

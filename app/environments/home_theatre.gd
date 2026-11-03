@@ -10,6 +10,15 @@ const MIN_CORNER := Vector3(-3.0, 0.0, -4.3)
 const MAX_CORNER := Vector3(3.0, 2.8, 2.2)
 
 
+## Spatial audio: the fronts from the towers' tweeters, the centre from the speaker under the screen; surrounds on
+## the side and back walls at 1.8 m, heights in the ceiling. A furnished room with felt panels: a short reverb.
+func get_sound_room() -> Dictionary:
+	return {"box": AABB(MIN_CORNER, MAX_CORNER - MIN_CORNER), "reflect": [0.35, 0.35, 0.5, 0.6, 0.5, 0.45],
+			"rt60": 0.35, "wet": 0.5, "surround_height": 1.8,
+			"speakers": {"FL": Vector3(-1.75, 0.95, MIN_CORNER.z + 0.45), "FR": Vector3(1.75, 0.95, MIN_CORNER.z + 0.45),
+				"FC": Vector3(0, 0.6, MIN_CORNER.z + 0.3)}}
+
+
 func _build() -> void:
 	reflection_floor_y = 0.0
 	add_shell("Room", MIN_CORNER, MAX_CORNER, textured("smooth_plaster", Color(0.16, 0.17, 0.22), 1.0, 0.3))

@@ -719,14 +719,61 @@ static func _register_sound(host: Node) -> void:
 				+ "channel only", func(m: Node) -> float: return float(m.features.night.boost_db),
 				func(m: Node, v: float) -> void: m.features.night.set_dialogue_boost(v),
 				{"min": 0.0, "max": 12.0, "needs": night_ok}),
-		_field("speakers", "bool", "each audio channel plays from its place in the room: dialogue from the screen, "
-				+ "surrounds beside and behind (turning it on reopens the file at its place)",
+		_field("speakers", "bool", "spatial sound: each audio channel (or a 360 video's sound field) plays from its "
+				+ "place in the room, in front, behind and above, and stays put when the head turns (turning it on "
+				+ "reopens the file at its place)",
 				func(m: Node) -> bool: return bool(m.features.speakers.enabled),
 				func(m: Node, v: bool) -> void: m.features.speakers.set_enabled(v)),
-		_field("bass_channel", "bool", "with speakers on: the bass (LFE) channel plays too",
+		_field("bass_channel", "bool", "with spatial sound on: the bass (LFE) channel plays too",
 				func(m: Node) -> bool: return bool(m.features.speakers.lfe),
 				func(m: Node, v: bool) -> void: m.features.speakers.set_lfe(v)),
-	], "sound", "sound", func(m: Node) -> Dictionary: return _sound_state(m))
+		_field("output_profile", "string", "what the sound plays on: auto (the sound device decides), speakers (the "
+				+ "headset's own) or headphones; each has its own HRTF set and tuning",
+				func(m: Node) -> String: return str(m.features.speakers.output),
+				func(m: Node, v: String) -> void: m.features.speakers.set_output(v),
+				{"enum": ["auto", "speakers", "headphones"]}),
+		_field("hrtf", "string", "the set of head measurements spatial sound uses for the output profile in use (sound "
+				+ "lists them as speakers.hrtf_sets; sets not downloaded yet need download_hrtf first)",
+				func(m: Node) -> String: return str(m.features.speakers.hrtf),
+				func(m: Node, v: String) -> void: m.features.speakers.set_hrtf(v)),
+		_field("room_reverb", "float", "how much of the room's reflections and reverb spatial sound adds, 0 (none) "
+				+ "to 2 (twice the room's own); 1 is the room as designed",
+				func(m: Node) -> float: return float(m.features.speakers.reverb),
+				func(m: Node, v: float) -> void: m.features.speakers.set_reverb(v), {"min": 0.0, "max": 2.0}),
+	], "sound", "sound", func(m: Node) -> Dictionary: return _sound_state(m), {"check": func(args: Dictionary) -> String:
+		var sp: Node = host.main.features.speakers
+		if args.has("hrtf") and sp.hrtf_file(str(args["hrtf"])) == "":
+			return "no HRTF set %s here (sound lists them as speakers.hrtf_sets; download_hrtf fetches one)" % args["hrtf"]
+		if args.has("output_profile") and not str(args["output_profile"]) in ["auto", "speakers", "headphones"]:
+			return "output_profile is auto, speakers or headphones"
+		return ""})
+	DevCommands.register("download_hrtf", func(args: Dictionary, ctx: DevCommands.Call) -> Variant:
+		var sp: Node = host.main.features.speakers
+		var id := str(args["id"])
+		var error: String = sp.download_hrtf(id)
+		if error != "":
+			return ctx.fail(error)
+		ctx.summary = "fetching HRTF set %s" % id
+		return {"fetching": id}, {
+		"description": "Fetches an HRTF set that is not bundled (sound lists them as speakers.hrtf_sets with their "
+				+ "licences: tell the user the licence first), converts it and keeps it; set_sound hrtf then uses it. "
+				+ "Takes a few seconds; sound shows it as downloaded when done.",
+		"level": "control", "assistant": "settings",
+		"params": [{"name": "id", "type": "string", "required": true,
+				"description": "the set's id, one of speakers.hrtf_sets whose bundled is false"}],
+		"returns": "{fetching}"})
+	DevCommands.register("spatial_tune", func(_args: Dictionary, ctx: DevCommands.Call) -> Variant:
+		var t: Node = host.main.features.spatial_tune
+		if not bool(host.main.features.speakers.available()):
+			return ctx.fail("this player has no spatial sound")
+		t.start()
+		ctx.summary = "tune spatial sound"
+		return t.status(), {
+		"description": "Starts Tune spatial sound in the headset: short hisses from all round; the viewer points the "
+				+ "controller where each came from and pulls the trigger (about 70, 3 to 4 minutes; the menu button "
+				+ "cancels). The best HRTF set and tuning are then kept for the output in use; sound shows the result "
+				+ "as speakers.tuning (errors before and after).",
+		"level": "control", "assistant": "control", "returns": "{running, stage, trial, trials}"})
 
 
 static func _sound_state(m: Node) -> Dictionary:
@@ -742,7 +789,10 @@ static func _sound_state(m: Node) -> Dictionary:
 		"night": {"available": bool(night.available()), "on": bool(night.night), "strength": float(night.strength),
 				"dialogue_boost": float(night.boost_db), "boost_applies": bool(night.boost_applies())},
 		"speakers": {"on": bool(sp.enabled), "bass_channel": bool(sp.lfe), "active": bool(sp.active),
-				"channels": Array(sp.channels())},
+				"available": bool(sp.available()), "channels": Array(sp.channels()), "hrtf": str(sp.hrtf),
+				"room_reverb": float(sp.reverb), "output_profile": str(sp.output), "profile_in_use": str(sp.profile()),
+				"hrtf_sets": sp.hrtf_sets(), "downloading": str(sp.downloading),
+				"tuning": sp.profile_settings().tuning, "tuning_running": bool(f.spatial_tune.running)},
 		"pc_audio": pc.status() if pc != null and not pc.is_queued_for_deletion() else {"on": false},
 	}
 

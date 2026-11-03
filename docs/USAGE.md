@@ -163,7 +163,8 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 | `[intermission]` | `enabled` (false), `minutes` (10.0), `min_film_minutes` (100.0) | |
 | `[folder_modes]` | `rules` ({}) | The mode for every file in a folder |
 | `[jog]` | `enabled` (true), `seconds_per_turn` (60.0) | |
-| `[speakers]` | `enabled` (false), `lfe` (false) | Virtual cinema speakers |
+| `[speakers]` | `enabled` (false), `lfe` (false) | Spatial sound (#21, #47) on, and the bass channel |
+| `[spatial]` | `reverb` (0 to 2, 1.0), `output` ("auto", "speakers", "headphones"), `hrtf_<profile>` ("sadie2_d1"; ids of earlier versions are read as their new ids), `eq_<profile>` ([] of {type, freq, gain_db, q}), `tuning_<profile>` ({itd_scale, pinna_warp, concha_db}, and the tuning's result) | Spatial sound's room sound, output profile, HRTF set, EQ and tuning per profile ("speakers" or "headphones") |
 | `[resume]` | `mode` ("auto") | Positions are in `resume.cfg` |
 | `[images]` | `slideshow` (false), `seconds` (2 to 60, 8.0), `crossfade` (0 to 3 s, 1.0) | Pictures and slideshow (#22) |
 | `[sidecar]` | `write` (false) | Write the chosen mode next to the file |
@@ -233,6 +234,29 @@ right primary is next, right secondary is previous, left primary or right stick 
 left stick click is the overlay. On the two third-party profiles, a stick click (both sticks on the one with A/B; the
 right stick on the one with A/B/X/Y, whose left menu button is the menu too) opens the panel. The full detail,
 including the pause when the headset loses focus, is in `app/README.md`, "Controls".
+
+## The Sound tab: spatial sound
+
+The Sound tab's **Spatial sound** section (`docs/features.md`, #21) plays the film's sound from speakers in the room.
+You hear it in front of you, behind you and above you, outside your head, and it stays put when you turn your head.
+It needs the `PLAYER_BINAURAL` engine or a later one. On older engines the tab says so and the stereo mix plays.
+
+- **Spatial sound:** on or off. Turning it on opens the playing file again at the same place.
+- **Bass channel:** also plays the film's separate bass channel (the .1 of 5.1), to both ears.
+- **Room sound:** how much of the room's echo you hear, 0 to 200 %. More echo makes the speakers seem farther away.
+  100 % is the room as designed: the cinema's dead hall, the home theatre's short reverb, the car at the drive-in.
+- **Sound plays on:** Auto (the headset sees whether its own speakers or headphones play), Headset speakers, or
+  Headphones. Each has its own head measurements and tuning.
+- **Head measurements (HRTF):** the set of measured ears the sound goes through. "Dummy head A" is the
+  default. Try the others if sounds behind you seem to come from in front.
+  - Sets marked "Fetch" are not part of the app. Choosing one shows its licence and a Download button. After the
+    download the set is converted on the headset and listed like the others.
+- **Tune spatial sound:** a short test that fits the sound to your ears (`docs/features.md`, #21, "Tuning").
+- The line under the section says what plays from where: the channels, or the 360 sound field. At a speed other than
+  1x the stereo mix plays.
+
+The same settings are in the dev link and for an assistant: `set_sound` with `speakers`, `bass_channel`,
+`output_profile`, `hrtf` and `room_reverb`, and `download_hrtf`.
 
 ## The Objects tab
 

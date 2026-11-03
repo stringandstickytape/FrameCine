@@ -32,8 +32,8 @@ var hold_end := false
 ## The chained next item took over at this item's end (HWVideoTexture.next_started): adopt `next` as the source,
 ## from the next frame on, then close this one.
 signal next_started(next: Object)
-## Keep the audio's channels apart (MediaSource.discrete_channels, set before a file opens) for the cinema speakers
-## (scripts/play/cinema_speakers.gd, ideas #21 / #47). Engine builds without it ignore it.
+## Keep the audio's channels apart (MediaSource.discrete_channels, set before a file opens) for the spatial audio
+## (scripts/play/spatial_audio.gd, ideas #21 / #47). Engine builds without it ignore it.
 static var discrete_channels := false
 ## Look for letterbox or pillarbox bars (MediaSource.letterbox_detection, set before a file opens) for the auto crop
 ## (scripts/play/auto_crop.gd, ideas #42). A nice-10 thread decodes a keyframe now and then; engine builds without it
@@ -338,12 +338,32 @@ func has_discrete_channels() -> bool:
 	return _media != null and "discrete_channels" in _media and bool(_media.get("discrete_channels")) 			and _media.has_method("get_audio_channel_stream")
 
 
-## The eight channel slots (FL FR FC LFE BL BR SL SR) and which the track has: [{name, present}, ...] (the engine's).
+## The engine's channels: [{index, name, label, present}, ...]. With spatial audio engines (frame/binaural) the
+## audio's own channels in their order (FL, FR, FC, LFE, ..., TFL, ..., ACN0, ...); older ones the eight 7.1 slots.
 func get_audio_channels() -> Array:
 	return _media.get_audio_channels() if _media != null and _media.has_method("get_audio_channels") else []
 
 
-## Channel n (0..7, order above) as a mono stream, or null.
+## {channels, ambisonic_order, ambisonic_channels, remapped, names} (MediaSource.get_audio_layout()), or {} on an
+## engine without spatial audio.
+func get_audio_layout() -> Dictionary:
+	return _media.get_audio_layout() if _media != null and _media.has_method("get_audio_layout") else {}
+
+
+## Spatial audio: the stereo stream plays `renderer`'s binaural mix of the channels (null: the downmix). False on an
+## engine without it.
+func set_spatial_renderer(renderer: Object) -> bool:
+	if _media == null or not _media.has_method("set_spatial_renderer"):
+		return false
+	_media.set_spatial_renderer(renderer)
+	return true
+
+
+func get_spatial_renderer() -> Object:
+	return _media.get_spatial_renderer() if _media != null and _media.has_method("get_spatial_renderer") else null
+
+
+## Channel n (the order above) as a mono stream, or null.
 func get_audio_channel_stream(n: int) -> AudioStream:
 	if _media != null and _media.has_method("get_audio_channel_stream"):
 		return _media.get_audio_channel_stream(n)

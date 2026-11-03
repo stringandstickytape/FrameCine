@@ -46,3 +46,20 @@ func apply_light(user_scale: float) -> void:
 ## The screen moved or resized (flat mode). screen_transform: centre, facing +Z; size in metres.
 func on_screen_changed(_screen_transform: Transform3D, _size: Vector2) -> void:
 	pass
+
+
+## Spatial audio (scripts/play/spatial_audio.gd, docs/features.md #21): how this room sounds and where its speakers
+## stand, in the room's own frame (the seat at the origin facing -Z, the floor at y 0). Every key is optional:
+##   box: AABB                 the walls: the reflections come off them and wall speakers stand on them; without
+##                             one the speakers stand in a ring round the seat
+##   reflect: float or [left, right, floor, ceiling, front, back]   how much each wall reflects, 0-1
+##   rt60: seconds             the reverb's decay time
+##   wet: 0-1                  how much of the room is heard against the direct sound (the Sound tab scales it)
+##   surround_height: metres   the height of wall speakers (surrounds, backs)
+##   distance: metres          the ring's radius without walls
+##   ring: true                a ring of `distance` even with a box (the box only reflects)
+##   speakers: {name: Vector3} speakers the room shows: these channels come from there
+##   array: n, array_spacing   each side and back surround is n speakers along its wall, spacing metres apart
+## {}: the standard layout (ITU angles, 2.5 m round the seat) in a small, neutral room.
+func get_sound_room() -> Dictionary:
+	return {}

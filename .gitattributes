@@ -17,6 +17,7 @@ tools/pre-push.sample text eol=lf
 *.raw binary
 *.wav binary
 *.mtex binary
+*.fhrtf binary
 *.jpg binary
 *.gdshaderinc text eol=lf
 *.cpp text eol=lf

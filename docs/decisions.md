@@ -373,8 +373,36 @@ Rejected: subsampled images (Godot's default), which the Frame doesn't support y
 as the head turns (Godot issue 124520); dynamic foveation, which the runtime ignores. Would change if: the Frame adds
 subsampled images, or a later engine merges PR 124811 (then the fork's line goes).
 
+## D23. Spatial audio: our own binaural renderer in the engine, not Steam Audio (2026-11-03)
+
+The film's channels and the sound field of 360 videos are rendered binaurally by `BinauralRenderer` in the fork's
+hwvideo module (branch `frame/binaural`, `docs/features.md` #21). Godot's own 3D audio only pans with volume and has
+no HRTF: front and back, up and down sound alike, and the sound sits inside the head.
+
+- **How:** each virtual speaker gets a fractional delay per ear and a 128-tap FIR, direct convolution with no FFT.
+  Both come from an HRTF grid of 48 x 14 directions, interpolated bilinearly and crossfaded when the head moves.
+  - The renderer runs inside `MediaSource`'s mix, as the audio is taken, so it adds no latency and the audio clock
+    stays the A/V master (D5).
+  - Ambisonics are decoded to virtual speakers through the same path.
+  - The room is first-order image-source reflections and an 8-line FDN.
+  - HRTFs come from SOFA files through a vendored libmysofa (BSD-3-Clause), converted to a 350 KB grid pack.
+  - CPU on the desktop: 3.9 % of a core for 12 channels with the head moving, 6.3 % for third-order ambisonics.
+- **Rejected: Steam Audio** (Apache 2.0, so the licence was fine).
+  - No Linux arm64 build is published. It would be a new CMake dependency (with its own FFT and flatbuffers) to
+    cross-build and keep.
+  - It processes fixed frames, so it adds a block of latency and needs a second clock path beside the media ring.
+  - Its reflections need scene geometry and ray tracing on the CPU that decodes the video.
+  - It has no hooks for tuning to a listener (the ITD scale, the pinna warp, the concha gain of phase 2).
+- **Rejected: partitioned FFT convolution** (the "libmysofa plus FFT" plan). At 128 taps, direct convolution
+  vectorises well (NEON, 4 lanes). It has no block latency and crossfades per 64 frames, for a few percent of a core.
+- **Bundled data:** SADIE II (Apache 2.0), six sets, 2 MB. Sets under other licences (CC BY, CC BY-SA, CIPIC's own
+  terms) are fetched on request with the licence shown, never committed. Object-based audio (Atmos, DTS:X objects)
+  has no open decoder; its channel bed plays.
+- **Would change if:** the headset's CPU proves short (then partitioned FFT convolution, or the sources summed into
+  a third-order sound field and decoded once); or Steam Audio ships arm64 Linux, if its reflections were wanted.
+
 ## Open
 
 - Quad layer for flat video vs. drawing in the projection layer: sharpness and bandwidth comparison (spike 03-layer).
 - 120 Hz panel mode vs. 72 Hz: power cost for video.
-- Subtitle rendering (libass and PGS/VobSub → quad layer), ambisonic audio, environments: not started.
+- Subtitle rendering (libass and PGS/VobSub → quad layer), environments: not started. Ambisonic audio: D23.
