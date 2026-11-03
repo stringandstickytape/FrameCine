@@ -17,9 +17,9 @@ The commands are in `app/scripts/dev/room_tab_commands.gd` and `app/scripts/dev/
 an undo. A change command takes only what it changes: a parameter left out stays as it is. Values are kept to the
 slider's range, as the tab keeps them.
 
-Test: `app/tests/test_assistant_coverage_system.gd`; the object library's commands and the Room tab's objects:
+Test: `app/tests/test_assistant_coverage_system.gd`; the object library's commands and the Objects tab:
 `app/tests/test_object_library.gd`. The object commands are in `app/scripts/assistant/object_commands.gd`, and the
-Room tab's objects call the same functions (`app/ui/object_section.gd`, `app/ui/object_placer.gd`).
+Objects tab calls the same functions (`app/ui/object_section.gd`, `app/ui/object_placer.gd`).
 
 ## Room tab (`app/ui/room_tab.gd`)
 

@@ -1,6 +1,6 @@
 extends Node3D
 
-## Placing an object with the laser (the Room tab's Place and Move, ui/object_section.gd; docs/USAGE.md "Room"). The
+## Placing an object with the laser (the Objects tab's Place and Move, ui/object_section.gd; docs/USAGE.md "Objects"). The
 ## panel goes out of the way and the object shows where the pointer controller's ray meets the room: on a wall with its
 ## back to the wall, on the floor standing and facing the viewer, in the air 2 m along the ray when the ray meets
 ## nothing. The pointer controller's stick turns it (left and right) and sizes it (up and down); the trigger sets it

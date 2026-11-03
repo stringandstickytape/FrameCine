@@ -445,11 +445,11 @@ static func _vec(a: Variant) -> Vector3:
 	return Vector3(float(a[0]), float(a[1]), float(a[2])) if a is Array and (a as Array).size() == 3 else Vector3.ZERO
 
 
-## The Room tab shows the change (its objects section reads the room again).
+## The Objects tab shows the change (it reads the room again).
 static func _sync_tab() -> void:
 	var m := _main()
 	var layer: Node = m.get("ui") if m != null else null
 	var pane: Node = layer.get("ui") if layer != null else null
-	var tab: Node = pane.get("room") if pane != null else null
+	var tab: Node = pane.get("objects") if pane != null else null
 	if tab != null and tab.has_method("sync_objects"):
 		tab.sync_objects()

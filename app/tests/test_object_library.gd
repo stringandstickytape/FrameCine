@@ -56,7 +56,7 @@ func _run() -> void:
 	await _test_commands()
 	await _test_parts()
 	await _test_kept()
-	await _test_room_tab()
+	await _test_objects_tab()
 	_cleanup()
 	main.queue_free()
 	await _frames(2)
@@ -463,7 +463,7 @@ class FakeHand extends Node3D:
 		return dir
 
 
-func _test_room_tab() -> void:
+func _test_objects_tab() -> void:
 	var layer: Node = main.ui
 	if layer == null:
 		_check("the panel layer is there", false)
@@ -471,14 +471,14 @@ func _test_room_tab() -> void:
 	main.set_environment("dim_room")
 	await _frames(3)
 	layer.show_panel()
-	layer.ui.show_tab(layer.ui.Tab.ROOM)
-	var section: Node = layer.ui.room.objects
+	layer.ui.show_tab(layer.ui.Tab.OBJECTS)
+	var section: Node = layer.ui.objects.section
 	section.sync_objects()
 	for i in 600:
 		await process_frame
 		if not section._ids.is_empty() and not section._loading:
 			break
-	_check("the Room tab's objects: a tile for each (%d)" % section._ids.size(), section._ids.size()
+	_check("the Objects tab: a tile for each (%d)" % section._ids.size(), section._ids.size()
 			== ObjectLibrary.list().size() and section._grid.get_child_count() == section._ids.size())
 	var tile: Button = section._tiles.get("pot_plant")
 	_check("a tile has its thumbnail and name", tile != null and tile.find_children("*", "TextureRect", true,

@@ -19,6 +19,7 @@ const PictureTab := preload("res://ui/picture_tab.gd")
 const SoundTab := preload("res://ui/sound_tab.gd")
 const SubtitlesTab := preload("res://ui/subtitles_tab.gd")
 const RoomTab := preload("res://ui/room_tab.gd")
+const ObjectsTab := preload("res://ui/objects_tab.gd")
 const SystemTab := preload("res://ui/system_tab.gd")
 const EndTime := preload("res://scripts/play/end_time.gd")
 
@@ -28,8 +29,8 @@ signal next_requested
 signal seek_requested(seconds: float)
 signal skip_requested(delta_seconds: float)
 
-enum Tab { FILES, PICTURE, SOUND, SUBTITLES, ROOM, SYSTEM }
-const TAB_NAMES: Array[String] = ["Files", "Picture", "Sound", "Subtitles", "Room", "System"]
+enum Tab { FILES, PICTURE, SOUND, SUBTITLES, ROOM, OBJECTS, SYSTEM }
+const TAB_NAMES: Array[String] = ["Files", "Picture", "Sound", "Subtitles", "Room", "Objects", "System"]
 
 var app: Node
 var files: FilesTab
@@ -37,6 +38,7 @@ var picture: PictureTab
 var sound: SoundTab
 var subtitles: SubtitlesTab
 var room: RoomTab
+var objects: ObjectsTab
 var system: SystemTab
 var tabs: Array[Control] = []
 var tab_buttons: Array[Button] = []
@@ -232,12 +234,13 @@ func bind(p_app: Node) -> void:
 	sound = SoundTab.new()
 	subtitles = SubtitlesTab.new()
 	room = RoomTab.new()
+	objects = ObjectsTab.new()
 	system = SystemTab.new()
-	tabs = [files, picture, sound, subtitles, room, system]
+	tabs = [files, picture, sound, subtitles, room, objects, system]
 	for t in tabs:
 		t.visible = false
 		_body.add_child(t)
-	for t in [picture, sound, subtitles, room, system]:
+	for t in [picture, sound, subtitles, room, objects, system]:
 		t.bind(app)
 	files.form_shown.connect(set_form_mode)
 	files.listing_changed.connect(_update_footer)

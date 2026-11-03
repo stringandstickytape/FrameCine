@@ -444,7 +444,7 @@ wall the viewer looks at: the head's level direction against the room's interior
 A wall object's back goes on the wall, its front out (`turn` spins it about the wall's normal); a floor or table
 object's bottom on the floor, facing the viewer (`turn` about up); a ceiling object's top on the ceiling. Without
 `at` or `position`, its mount decides. A stock room becomes a kept room of its own, "<room> with objects". Every object
-change (`object_place`, `object_move`, `object_import`, `object_delete`, and the Room tab's) has a summary and an undo:
+change (`object_place`, `object_move`, `object_import`, `object_delete`, and the Objects tab's) has a summary and an undo:
 the room as it was (a kept room built again from its document, a stock room shown again), the import deleted, the
 deleted object back.
 

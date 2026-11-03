@@ -234,9 +234,9 @@ left stick click is the overlay. On the two third-party profiles, a stick click 
 right stick on the one with A/B/X/Y, whose left menu button is the menu too) opens the panel. The full detail,
 including the pause when the headset loses focus, is in `app/README.md`, "Controls".
 
-## The Room tab: objects
+## The Objects tab
 
-The Room tab's **Objects** section is the object library (`docs/assistant.md`, "Objects"): things to put in the room,
+The **Objects** tab (after Room) is the object library (`docs/assistant.md`, "Objects"): things to put in the room,
 built in (a picture frame, a wall shelf, a pot plant, a wall clock) and imported (by an assistant, or with
 `object_import` from the dev link: a `.glb`, or an SVG drawing made solid). One controller does it all.
 

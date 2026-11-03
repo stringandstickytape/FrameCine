@@ -1,6 +1,6 @@
 extends VBoxContainer
 
-## The Room tab's objects (ui/room_tab.gd; docs/assistant.md "Objects", docs/USAGE.md "Room"): the object library as
+## The Objects tab (ui/objects_tab.gd; docs/assistant.md "Objects", docs/USAGE.md "Objects"): the object library as
 ## thumbnails with names, built in and imported; Place, which hands the laser to ui/object_placer.gd; Delete for an
 ## imported one (asked first, in the footer, as the panel's other choices are). Under them, what this room has from the
 ## library: pick one for its parts, each with its colour, a palette, the picture on show as its picture, a library
