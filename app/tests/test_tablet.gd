@@ -240,8 +240,8 @@ func _run() -> void:
 	patterns_button.pressed.emit()
 	await _frames(2)
 	_check("a place opens there and its row is marked", pui.files.current == "stub://" and patterns_button.button_pressed)
-	_check("the view selector sits in the browser's title row", pui._views.is_visible_in_tree()
-			and pui._views.get_parent() == pui.files._in_corner.get_parent())
+	_check("the view selector sits in the footer by the count", pui._views.is_visible_in_tree()
+			and pui._views.get_parent() == pui._footer_count.get_parent())
 	_check("the tab takes the rest of the width (%.0f of %d px)" % [pui._body.size.x, panel.resolution.x],
 			pui._body.size.x > panel.resolution.x - pui.TABLET_TABS_WIDTH - 120)
 	_check("the rail has icons", pui.tablet_tab_buttons.all(func(b: Button) -> bool: return b.icon != null)

@@ -108,7 +108,7 @@ var _tablet_theme: Theme
 var _tabs_box: VBoxContainer
 var _tablet_row: HBoxContainer
 var tablet_tab_buttons: Array[Button] = []
-## The browser's view selector (VIEWS), in the files tab's title row on the tablet.
+## The browser's view selector (VIEWS), in the footer on the tablet while Source shows.
 var _views: HBoxContainer
 var _view_buttons: Array[Button] = []
 
@@ -347,6 +347,8 @@ func show_tab(index: int) -> void:
 		tab_buttons[i].set_pressed_no_signal(i == current_tab)
 	for i in tablet_tab_buttons.size():
 		tablet_tab_buttons[i].set_pressed_no_signal(i == current_tab)
+	if _views != null:
+		_views.visible = tablet_layout and current_tab == Tab.FILES
 	if tablet_layout:
 		_refresh_rail()
 		if current_tab != Tab.FILES:
@@ -401,7 +403,7 @@ func set_tablet_layout(on: bool) -> void:
 	if not on:
 		_open.move_child(_body, _tablet_row.get_index())
 	if _views != null:
-		_views.visible = on
+		_views.visible = on and current_tab == Tab.FILES
 	if on:
 		# No backdrop: the tablet's pane shows through (its own margins kept).
 		add_theme_stylebox_override("panel", _clear(get_theme_stylebox("panel")))
@@ -455,8 +457,9 @@ func _build_tablet_row() -> void:
 		b.tooltip_text = v.capitalize()
 		_views.add_child(b)
 		_view_buttons.append(b)
-	if files != null:
-		files.add_to_bar(_views)
+	# In the footer, at the right by the count: the title row has no room for it at the tablet's text size.
+	_footer_count.get_parent().add_child(_views)
+	_footer_count.get_parent().move_child(_views, _footer_count.get_index())
 	if app != null:
 		view = str(app.settings.get_value("browser", "view", "details"))
 		if not view in VIEWS:

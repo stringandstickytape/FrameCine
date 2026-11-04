@@ -303,11 +303,6 @@ func set_places_width(px: float) -> void:
 	_places_scroll.custom_minimum_size.x = px
 
 
-## Adds a control at the right end of the title row (the tablet's view selector, ui/pane_ui.gd).
-func add_to_bar(control: Control) -> void:
-	_in_corner.get_parent().add_child(control)
-
-
 ## The places in order: the library and the lists first, then the network, the folders on the headset, the agents,
 ## and the test patterns last.
 static func places_in_order() -> Array[Dictionary]:
