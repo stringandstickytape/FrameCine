@@ -103,23 +103,16 @@ lens-corrected view.
   - The laser and the controller show behind the pane where they cross it.
   - The pane cannot fade, so its fades show as a cut. The layer is on above 50 % opacity.
   - Pointing still works, because it uses the pane's maths, not its mesh.
-- **`--video-layer`:** the flat screen as two quad layers, one per eye (`eye_visibility`). Each has a SubViewport
-  the size of one eye's picture, at most 3840 px a side, drawn by the video shader with the screen's uniforms for
-  that eye.
-  - The layers sit behind the scene with a hole punched where the screen is (`sort_order` -1,
-    `enable_hole_punch`), so the pane, the laser and subtitles in front still cover the picture.
-  - The screen's quad in the scene is not drawn (render layers 0); everything else about the screen stays.
-  - Flat screens only, without the curve. 180, 360 and the curved screen keep the normal path.
-  - Cost: two extra passes of the video shader at the picture's resolution each frame (one per eye), plus the
-    runtime's composition of two more layers. The eye buffers no longer draw the screen's pixels, which saves part
-    of that.
+- **`--video-layer`:** turns on the film layer for this run, without saving it. The film layer is the setting
+  `[view] film_layer` and the System tab's "Film drawn by the headset (test)" (`app/scripts/play/film_layer.gd`;
+  `docs/features.md`, "Film layer"). It replaced this flag's own two-quad code on 2026-11-04. The film layer draws
+  only on new video frames, uses one layer for 2D films, and follows the screen as its child.
 - **Without XR** (a desktop) the flags print that they do nothing. The startup log says whether the runtime
   supports the layers natively ("natively supported: true"). If not, Godot draws them as ordinary meshes.
 
-Tested on the desktop, forced on without an XR session (15 checks): the layers are built under the XR origin with
-the right viewport, size, eye and order, and follow the pane and the screen. The scene's own quads stop being drawn
-and come back when the layers go (360, or the spike removed). With WSLg, the two eyes' viewports of a 3D pattern
-show different pictures.
+Tested on the desktop, forced on without an XR session (10 checks): the pane's layer is built under the XR origin
+with the pane's viewport, size and order, and follows the pane. The pane's own quad stops being drawn and comes back
+when the spike goes. `--video-layer` turns the film layer on without saving it.
 
 Untested: everything the runtime does. That covers whether the Frame's runtime takes quad layers and hole punching,
 how much sharper text and picture look, and the GPU cost.

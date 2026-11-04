@@ -37,6 +37,8 @@ var lens_profile := {}
 var dual_lens := {}
 ## The flat screen's size times this (the auto crop's growth, scripts/play/auto_crop.gd, ideas #42); 1 = as set.
 var size_scale := 1.0
+## False while an OpenXR layer shows the flat picture instead (scripts/play/film_layer.gd): the quad is not drawn.
+var flat_drawn := true
 var material: ShaderMaterial
 
 ## The render layer of what never leaves the headset: the snapshot cameras leave it out.
@@ -126,6 +128,11 @@ func rebuild() -> void:
 	_apply()
 
 
+func set_flat_drawn(on: bool) -> void:
+	flat_drawn = on
+	_apply()
+
+
 func set_curve_radius(r: float) -> void:
 	curve_radius = maxf(r, 0.0)
 	_apply()
@@ -155,7 +162,7 @@ func _apply() -> void:
 	material.set_shader_parameter("dual_fisheye", dual)
 	material.set_shader_parameter("wrap_x", mode.projection == VideoMode.Proj.EQUIRECT_360)
 	var flat := mode.projection == VideoMode.Proj.FLAT
-	_flat.visible = _shown and flat
+	_flat.visible = _shown and flat and flat_drawn
 	_sphere.visible = _shown and not flat
 	if flat:
 		var size := get_flat_size()

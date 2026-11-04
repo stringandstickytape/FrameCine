@@ -65,6 +65,7 @@ sections of `user://settings.cfg`; `<environment id>` and `<id>` sections hold o
 | [Bias light from the picture](#29-bias-light-from-the-picture) | #29 | `[bias_light]` | off by default |
 | [Night mode and dialogue boost](#26-night-mode-and-dialogue-boost) | #26 | `[sound]` | off by default |
 | [Quad layers (a spike behind flags)](#70-quad-layers-a-spike-behind-flags) | #70 | none (flags `--pane-layer`, `--video-layer`) | spike behind flags |
+| [Film layer (a prototype behind a setting)](#70-film-layer-a-prototype-behind-a-setting) | #70 | `[view] film_layer` | off by default |
 | [The environment reacts to the film](#81-the-environment-reacts-to-the-film) | #81 | `[react]` | off by default |
 | [Projector mode](#92-projector-mode) | #92 | `[projector]` | off by default |
 | [Time of day for the outdoor rooms](#84-time-of-day-for-the-outdoor-rooms) | #84 | `[time_of_day]` | on, "night" by default (the room as designed) |
@@ -1507,11 +1508,81 @@ lets the room go dark. Each side of the room takes the colour of the picture's s
 
 ## #70 Quad layers (a spike behind flags)
 
-`--pane-layer` puts the pane, and `--video-layer` the flat screen, into OpenXR quad layers that the runtime samples
-once into the lens view, for sharper text and picture. The normal path stays the default. Details, limits, tests
-and the cost are in `docs/xr-spikes.md`, "Quad layers". Code: `app/scripts/xr_spikes/quad_layers.gd`.
-- **API:** `QuadLayers.attach(main, args, force)` (static), `pane_layer`, `video_layers`, `video_viewports`,
-  `video_applies()`, `eye_pixels()`. No settings: flags only.
+`--pane-layer` puts the pane into an OpenXR quad layer that the runtime samples once into the lens view, for
+sharper text. `--video-layer` turns on the film layer (below) for one run, without saving it. The normal path stays
+the default. Details, limits, tests and the cost are in `docs/xr-spikes.md`, "Quad layers". Code:
+`app/scripts/xr_spikes/quad_layers.gd`.
+- **API:** `QuadLayers.attach(main, args, force)` (static), `pane_layer`. No settings: flags only.
+
+## #70 Film layer (a prototype behind a setting)
+
+The flat film as an OpenXR composition layer instead of a mesh in the room, so the lead can compare the two on the
+headset. Off by default. Code: `app/scripts/play/film_layer.gd`, `app/shaders/video_layer.gdshader`.
+
+- **Why:** in the room, the film is resampled twice: into the eye buffers, then again by the runtime's lens
+  distortion. With foveation on (D22), the eye buffers have lower resolution away from the centre. As a layer, the
+  runtime samples the film's own pixels once, at display resolution. Small text and fine detail should be sharper,
+  and foveation no longer touches the film.
+- **How:** each layer has a SubViewport the size of one eye's picture (at most 3840 px a side). A 2D pass of the
+  screen's own picture code (`video_common.gdshaderinc`) draws into it, with the screen's uniforms copied over. The
+  pass runs only on a frame with a new video frame (`VideoSource.frame_key()`) or a changed uniform. On other
+  frames the runtime shows the last image again. The layers are children of the screen node, so they follow moves,
+  resizes and recentring.
+- **Modes:**
+  - Flat 2D, and 3D shown as 2D (#59): one quad layer for both eyes.
+  - Flat 3D (side by side, top / bottom): two quad layers, one for each eye.
+  - Curved screen: a cylinder layer when the runtime has it. The Frame's runtime has no cylinder layers, so on the
+    Frame the curved screen stays a mesh.
+  - 180, 360 and fisheye: always the mesh. The Frame has no equirect layers, and fisheye would need a reprojection
+    pass.
+- **Depth:** a layer has no depth test. The layers sit behind the room (`sort_order` -1) with a hole punched where
+  the screen is: the engine's hole-punch mesh writes depth and alpha 0, and the runtime shows the layer there.
+  - The pane, the laser, the controllers, subtitles and room objects in front of the screen still cover the film.
+    Half-transparent ones blend over it.
+  - Objects behind the screen stay hidden by the hole's depth.
+- **Same as before:** colour (BT.709 / 601 / 2020, PQ and HLG tone mapping, 10-bit planes), picture controls,
+  sharpen, deinterlace, zoom and pan, 3D depth shift, edge fade, film grain, and the dimming when the menu opens or
+  the sleep timer fades. The bias light, the floor reflection and the room's light from the screen read the video
+  planes, not the screen mesh, so they do not change. The swapchain is 8-bit sRGB, like the eye buffers.
+- **Lost:**
+  - A room's fog or glow no longer sees the film. Fog colour over the hole adds onto the film instead of mixing with
+    it.
+  - Room snapshots and other cameras in the scene show no film on the screen. Layers exist only in the headset.
+  - When the app misses frames and the runtime reprojects the room, the hole and the layer can part at the
+    screen's edge for a moment.
+  - Nothing else in the scene can draw behind the film and show through it.
+- **Cost:** the 2D pass runs once per video frame, at the film's resolution. A 1080p film at 24 fps is about
+  50 Mpx/s. The mesh path runs the same shader on every screen pixel of both eyes at the display rate, which is more
+  pixels for most screen sizes. The swapchains take memory: 3 images of the layer's size each. That is about 25 MB
+  at 1080p and 100 MB at 4K, doubled for 3D. The runtime composites one or two more layers.
+- **Fallback:** setting off, no XR session (a desktop), an engine without the layer nodes, or a mode without a
+  layer: the screen's mesh, as always. Switching at run time keeps playback going.
+- **What to compare on the headset:** the same film and room, with the setting off and then on.
+  - Small text: subtitles burnt into the film, end credits, a captured browser window.
+  - Fine detail at the edge of the view, where foveation works hardest.
+  - Colour and black level of an HDR film (the two paths should match).
+  - Shimmer on a 4K film shown small: there are no mipmaps on either path.
+  - GPU frame time in the overlay stats.
+  - The pane, the laser and subtitles over the film.
+  - The screen's edges while you turn your head fast.
+- **API:** `main.features.film_layer`: `enabled`, `set_enabled(on, save := true)`, `kind` ("quad", "cylinder" or
+  ""), `layers`, `viewports`, `updates`, `status()`, `wanted_kind()`, static `available()`, static
+  `eye_pixels(frame_px, flat_size, mode)`, signal `changed`. The System tab, Rendering: "Film drawn by the headset
+  (test)", with a status line under it.
+- **Settings:** `[view] film_layer` (default off).
+- **Tested:** `tests/test_film_layer.gd`, 33 checks headless, 35 with a renderer (WSLg), forced on without an XR
+  session:
+  - the setting and its round trip;
+  - the mesh without an XR session;
+  - layer kind, eyes, sort order, hole punch, size and place for flat 2D, 3D, 3D shown as 2D, curved and 360;
+  - drawing only on new pictures or changed uniforms;
+  - switching off and on while playing;
+  - the sizing helper.
+
+  With a renderer, the layer's colour bars match the screen shader's within 4 of 255 per channel (the check allows
+  0.02), and the two eyes differ on a 3D pattern.
+- **Untested:** everything the runtime does. That covers whether the hole punch shows the layer, how much sharper
+  the picture is, the GPU cost, and cylinder layers (no runtime here has them).
 
 ## #81 The environment reacts to the film
 

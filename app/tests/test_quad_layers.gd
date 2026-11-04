@@ -1,9 +1,9 @@
 extends SceneTree
 
 ## Tests for the quad layer spike (scripts/xr_spikes/quad_layers.gd, ideas #70) in the real main scene, forced on
-## without an XR session: the layers are built, placed and sized, the scene's own pane quad and screen quad stop being
-## drawn, and everything comes back when the layers go. The runtime's composition itself needs the headset. With a
-## renderer, the two eyes' viewports of a 3D pattern are checked to show different pictures.
+## without an XR session: the pane's layer is built, placed and sized, the pane's own quad stops being drawn and comes
+## back when the spike goes. --video-layer turns the film layer on for the run (its own tests:
+## tests/test_film_layer.gd). The runtime's composition itself needs the headset.
 ## Run: godot --xr-mode off --path app --script res://tests/test_quad_layers.gd
 
 const QuadLayers := preload("res://scripts/xr_spikes/quad_layers.gd")
@@ -29,7 +29,10 @@ func _run() -> void:
 		return
 	_check("no flags: nothing added", QuadLayers.attach(main, {}, true) == null)
 	_check("no XR session: nothing added", QuadLayers.attach(main, {"pane-layer": true}) == null)
-	var q: Node = QuadLayers.attach(main, {"pane-layer": true, "video-layer": true}, true)
+	_check("--video-layer alone: no spike node", QuadLayers.attach(main, {"video-layer": true}, true) == null)
+	_check("--video-layer: the film layer on for the run, not saved", main.features.film_layer.enabled
+			and not main.settings.has_value("view", "film_layer"))
+	var q: Node = QuadLayers.attach(main, {"pane-layer": true}, true)
 	main.set_environment("void")
 	main.open_path("stub://flat_sbs")
 	await _frames(5)
@@ -43,38 +46,10 @@ func _run() -> void:
 	await create_timer(0.6).timeout
 	_check("pane layer follows the pane (shown %s)" % pane.visible, layer.global_transform.origin.distance_to(
 			pane.global_transform.origin) < 0.001 and layer.visible == (pane.visible and pane.opacity > 0.5))
-
-	_check("video layers: two, one per eye", q.video_layers.size() == 2
-			and q.video_layers[0].get("eye_visibility") == 1 and q.video_layers[1].get("eye_visibility") == 2)
-	_check("behind the scene with a hole punched", q.video_layers[0].get("enable_hole_punch")
-			and q.video_layers[0].get("sort_order") == -1)
-	var px: Vector2i = q.eye_pixels()
-	_check("each eye's viewport is one eye's picture (%s)" % px, px == Vector2i(1920, 1080)
-			and q.video_viewports[0].size == px and q.video_viewports[1].size == px)
-	_check("at the screen's pose and size", q.video_layers[1].global_transform.origin.distance_to(
-			main.screen.global_position) < 0.001 and q.video_layers[1].get("quad_size") == main.screen.get_flat_size())
-	_check("the screen's own quad is not drawn", main.screen.get_node("Flat").layers == 0)
-	if DisplayServer.get_name() != "headless":
-		await RenderingServer.frame_post_draw
-		var l: Image = q.video_viewports[0].get_texture().get_image()
-		var r: Image = q.video_viewports[1].get_texture().get_image()
-		var differ := 0
-		for y in range(0, l.get_height(), 97):
-			for x in range(0, l.get_width(), 97):
-				if not l.get_pixel(x, y).is_equal_approx(r.get_pixel(x, y)):
-					differ += 1
-		_check("the eyes' pictures differ on a 3D pattern (%d samples)" % differ, differ > 5)
-	main.open_path("stub://360_mono")
-	await _frames(3)
-	_check("360: no video layers, the screen drawn again", q.video_layers.is_empty()
-			and main.screen.get_node("Flat").layers == 1)
-	main.open_path("stub://flat_mono")
-	await _frames(3)
-	_check("flat again: layers back", q.video_layers.size() == 2)
+	_check("no XR session: the screen keeps its quad", main.screen.get_node("Flat").visible)
 	q.queue_free()
 	await _frames(2)
-	_check("spike removed: pane quad and screen drawn", pane.get_node("Quad").visible
-			and main.screen.get_node("Flat").layers == 1)
+	_check("spike removed: pane quad drawn", pane.get_node("Quad").visible)
 	print("test_quad_layers: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	quit(_failures)
 

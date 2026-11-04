@@ -3,7 +3,7 @@ extends ScrollContainer
 ## The System tab (docs/ui-design.md): the info overlay and the stats view; the panel's layout (size, distance,
 ## recentre hold, follow the head, left-handed, reset) so the numbers can be tuned in the headset; accessibility (#74);
 ## test patterns, calibration cards and the bandwidth meter (#48); the benchmark (#82); hardware 10-bit video (which way
-## it plays, read-only, ui/hw_video_row.gd); foveation (D22); haptics; the phone remote with
+## it plays, read-only, ui/hw_video_row.gd); foveation (D22) and the film layer (#70, a prototype); haptics; the phone remote with
 ## its address and QR code (#13); the assistant (ui/assistant_row.gd); the dev tools when dev mode is on (theme, remote changes and their undo); about.
 ##
 ## Hooks used: scripts/dev/stats.gd (made here while the stats view is on, freed when it goes off or the tab hides),
@@ -55,6 +55,8 @@ var _left_handed: Button
 var _foveation: HBoxContainer
 var _foveation_help: Label
 var _foveation_sharp: Button
+var _film_layer: Button
+var _film_layer_help: Label
 ## [pane] world_locked off: the panel follows the head lazily.
 var _follow_head: Button
 var _layout_rows := {}
@@ -197,6 +199,14 @@ func bind(p_app: Node) -> void:
 	_foveation_sharp = W.toggle("Sharp while the panel shows", func(on: bool) -> void:
 		app.set_foveation_sharp_panel(on))
 	box.add_child(W.hbox([_foveation_sharp]))
+	# Film layer (#70, a prototype): the flat film drawn by the headset's compositor, for comparison.
+	var film_layer: Node = app.features.film_layer
+	_film_layer = W.toggle("Film drawn by the headset (test)", func(on: bool) -> void:
+		film_layer.set_enabled(on)
+		_film_layer_help.text = film_layer.status())
+	box.add_child(W.hbox([_film_layer]))
+	_film_layer_help = W.help(film_layer.status())
+	box.add_child(_film_layer_help)
 
 	box.add_child(W.section("Controllers"))
 	var haptics: Node = app.features.haptics
@@ -313,6 +323,8 @@ func sync() -> void:
 	W.set_on(_haptics, haptics.enabled)
 	W.set_slider(_strength, haptics.strength)
 	W.set_on(_thumbs, bool(app.features.thumbs.enabled))
+	W.set_on(_film_layer, bool(app.features.film_layer.enabled))
+	_film_layer_help.text = app.features.film_layer.status()
 	var jog: Node = app.features.jog
 	W.set_on(_jog, bool(jog.enabled))
 	W.set_slider(_jog_turn, float(jog.seconds_per_turn))
@@ -349,6 +361,7 @@ func tick() -> void:
 	if _ring != null and float(_ring.allowed_seconds()) > 0.0:
 		_sync_dev()
 	_sync_tour()
+	_film_layer_help.text = app.features.film_layer.status()
 	assistant_row.tick()
 
 

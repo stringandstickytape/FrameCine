@@ -59,7 +59,8 @@ extends Node3D
 ##   --hands / --passthrough  XR spikes, untested on the device: hand tracking (pinch = trigger, index = laser), the
 ##                          runtime's camera view behind the scene (scripts/xr_spikes/, docs/xr-spikes.md)
 ##   --pane-layer / --video-layer  XR spike #70, untested on the device: the pane, or the flat screen, as OpenXR quad
-##                          layers the runtime composites itself (scripts/xr_spikes/quad_layers.gd)
+##                          layers the runtime composites itself (scripts/xr_spikes/quad_layers.gd; the screen's
+##                          layer is the film layer, scripts/play/film_layer.gd, on for the run)
 
 signal file_opened(path: String)
 signal mode_changed(mode: VideoMode, auto_text: String)

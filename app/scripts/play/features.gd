@@ -66,6 +66,7 @@ extends Node
 ##   thumbs     scripts/play/seek_thumbnails.gd: pictures for the seek bar from a second session (#40), off by default
 ##   crossfade  scripts/play/crossfade.gd: music and videos overlap into the next item (#94), off by default
 ##   hwvideo    scripts/play/hw_video.gd: which way 10-bit video plays (P010, Q10C or software; read-only), hw_vp9
+##   film_layer scripts/play/film_layer.gd: the flat film as an OpenXR layer (#70, a prototype), off by default
 
 const EndTime := preload("res://scripts/play/end_time.gd")
 const BatteryForecast := preload("res://scripts/comfort/battery_forecast.gd")
@@ -127,6 +128,7 @@ const SeekThumbnails := preload("res://scripts/play/seek_thumbnails.gd")
 const Crossfade := preload("res://scripts/play/crossfade.gd")
 const MusicSource := preload("res://scripts/play/music_source.gd")
 const HwVideo := preload("res://scripts/play/hw_video.gd")
+const FilmLayer := preload("res://scripts/play/film_layer.gd")
 
 ## The app core (scripts/main.gd). Untyped: main.gd preloads this script, so a typed reference would be circular.
 var main: Node3D
@@ -188,6 +190,7 @@ var pip: PictureInPicture
 var thumbs: SeekThumbnails
 var crossfade: Crossfade
 var hwvideo: HwVideo
+var film_layer: FilmLayer
 
 
 func _ready() -> void:
@@ -252,6 +255,7 @@ func _ready() -> void:
 	thumbs = _add(SeekThumbnails.new(), "SeekThumbnails")
 	crossfade = _add(Crossfade.new(), "Crossfade")
 	hwvideo = _add(HwVideo.new(), "HwVideo")
+	film_layer = _add(FilmLayer.new(), "FilmLayer")
 
 
 func _add(node: Node, node_name: String) -> Node:

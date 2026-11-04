@@ -86,7 +86,7 @@ talks on the LAN; each is off unless given (or switched on in the pane).
 | **`--pc-audio=HOST[:PORT]`** | Connect out to `tools/audio_sink.py`; the film's sound plays on the PC and the headset is silent. | `docs/pc-audio.md` |
 | **`--pc-audio-mode=MODE`** | With `--pc-audio`: `auto` (the default) takes the sound straight from the engine when it can, else from the player; `pull` or `capture` picks one. | `docs/pc-audio.md` |
 | `--hands`, `--passthrough` | XR spikes, untested on the device: hand tracking (pinch is the trigger, the index finger the laser), and the runtime's camera view behind the scene. | `docs/xr-spikes.md` |
-| `--pane-layer`, `--video-layer` | XR spike, untested on the device: the pane, or the flat screen, as an OpenXR quad layer (sharper text and picture). | `docs/xr-spikes.md` |
+| `--pane-layer`, `--video-layer` | XR spike, untested on the device: the pane, or the flat screen, as an OpenXR quad layer (sharper text and picture). `--video-layer` turns on the film layer (`[view] film_layer`) for one run. | `docs/xr-spikes.md`, `docs/features.md` |
 | **Development** | | |
 | **`--listener=HOST[:PORT]`** | Connect out to the dev listener on a PC (`tools/listener.py`): events out, commands in. Also `[dev] listener_host`. | `docs/dev/control-protocol.md` |
 | `--dev` | Hot-reload: changed scripts, shaders, environments and resources reload in place. | `docs/dev/hot-reload.md` |

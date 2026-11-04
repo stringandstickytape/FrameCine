@@ -127,6 +127,12 @@ func get_stats() -> Dictionary:
 	return {}
 
 
+## A number that changes with every new picture in the plane textures (the film layer redraws only then,
+## scripts/play/film_layer.gd). NAN: this source can't tell, so every frame counts as new.
+func frame_key() -> float:
+	return NAN
+
+
 ## [{index, codec, language, title, text, bitmap, default, forced}] (MediaSource's get_subtitle_tracks()).
 func get_subtitle_tracks() -> Array[Dictionary]:
 	return []

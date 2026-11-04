@@ -279,6 +279,11 @@ func get_stats() -> Dictionary:
 			"frame_time": _position}
 
 
+## Moves on the redraw's frame and on the next (the planes are encoded on both).
+func frame_key() -> float:
+	return float(_redraws * 3 + _encode_frames)
+
+
 func get_known_mode() -> VideoMode:
 	return _known_mode
 

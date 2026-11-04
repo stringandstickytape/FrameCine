@@ -306,6 +306,11 @@ func has_frame() -> bool:
 	return _tex != null and _tex.has_frame()
 
 
+## The media time of the frame on show: it moves with every new frame, and with a seek while paused.
+func frame_key() -> float:
+	return _tex.get_frame_time() if _tex != null else NAN
+
+
 func is_ended() -> bool:
 	# A chained next item takes over at the end (one frame after the input ends): no end to report.
 	if _tex == null or _handed_over or _next != null or hold_end:
