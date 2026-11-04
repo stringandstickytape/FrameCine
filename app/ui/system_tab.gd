@@ -69,6 +69,7 @@ var _foveation: HFlowContainer
 var _foveation_help: Label
 var _foveation_sharp: Button
 var _film_layer: Button
+var _cylinder_layers: Button
 var _film_layer_help: Label
 ## [pane] world_locked off: the panel follows the head lazily.
 var _follow_head: Button
@@ -224,7 +225,11 @@ func bind(p_app: Node) -> void:
 	_film_layer = W.toggle("Film drawn by the headset", func(on: bool) -> void:
 		film_layer.set_enabled(on)
 		_film_layer_help.text = film_layer.status())
-	box.add_child(W.hbox([_film_layer]))
+	_cylinder_layers = W.toggle("Curved screen too", func(on: bool) -> void:
+		film_layer.set_cylinder_layers(on)
+		_film_layer_help.text = film_layer.status())
+	_cylinder_layers.tooltip_text = "A curved screen as the headset's cylinder layer; off: drawn in the room, where things in front of it cover it"
+	box.add_child(W.flow([_film_layer, _cylinder_layers]))
 	_film_layer_help = W.help(film_layer.status())
 	box.add_child(_film_layer_help)
 
@@ -372,6 +377,7 @@ func sync() -> void:
 	W.set_slider(_strength, haptics.strength)
 	W.set_on(_thumbs, bool(app.features.thumbs.enabled))
 	W.set_on(_film_layer, bool(app.features.film_layer.enabled))
+	W.set_on(_cylinder_layers, bool(app.features.film_layer.cylinder_layers))
 	_film_layer_help.text = app.features.film_layer.status()
 	var jog: Node = app.features.jog
 	W.set_on(_jog, bool(jog.enabled))
