@@ -380,7 +380,9 @@ hwvideo module (branch `frame/binaural`, `docs/features.md` #21). Godot's own 3D
 no HRTF: front and back, up and down sound alike, and the sound sits inside the head.
 
 - **How:** each virtual speaker gets a fractional delay per ear and a 128-tap FIR, direct convolution with no FFT.
-  Both come from an HRTF grid of 48 x 14 directions, interpolated bilinearly and crossfaded when the head moves.
+  Both come from an HRTF grid of 192 x 14 directions, interpolated bilinearly and crossfaded when the head moves.
+  The filters are minimum-phase and smoothed across azimuth, and the delays are a spherical head's fitted to the
+  measured ones: the measured data made head turns pulse in pitch and brightness (2026-11-03).
   - The renderer runs inside `MediaSource`'s mix, as the audio is taken, so it adds no latency and the audio clock
     stays the A/V master (D5).
   - Ambisonics are decoded to virtual speakers through the same path.

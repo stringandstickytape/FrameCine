@@ -1248,10 +1248,14 @@ head turns. This works for every channel layout and for the sound field (ambison
 - **How it sounds where it is:** the engine's `BinauralRenderer` (fork branch `frame/binaural`, `docs/decisions.md`
   D23) renders each channel as a virtual speaker:
   - The direction from the head to the speaker, in the head's axes, every 64 frames (1.3 ms). The head pose comes
-    from the XR camera each frame and is interpolated in between.
+    from the XR camera each frame; between poses the head is carried on at its last speed and smoothed (10 ms),
+    because the audio callbacks come in bursts.
   - That direction's HRTF: a fractional delay per ear (the interaural time difference) and a 128-tap filter, both
-    interpolated bilinearly from a grid of 48 azimuths by 14 elevations (-40 to 90 degrees). When the direction
+    interpolated bilinearly from a grid of 192 azimuths by 14 elevations (-40 to 90 degrees). When the direction
     changes, the old and new filters are crossfaded over the 64 frames, so a head turn makes no click.
+  - The filters are minimum-phase and smoothed across azimuth, and the delays are a spherical head's fitted to the
+    measured ones. With the measured data as it was, a head turn pulsed in pitch and brightness each time it crossed
+    a grid point.
   - No FFT and no blocks, so no latency is added (an impulse from the front leaves after about 0.5 ms, the HRTF's
     own onset). The binaural mix is the film's stereo stream itself: the same player and the same clock. The A/V
     offset and the latency compensation hold as before, and nothing needs compensating.

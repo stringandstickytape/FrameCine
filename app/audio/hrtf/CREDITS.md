@@ -10,8 +10,10 @@ Evaluation of Individual and Non-Individual HRTFs: A Case Study of the SADIE II 
 
 Changes made (the Apache License's section 4): each set was converted by `app/tools/hrtf_pack.gd` with the engine's
 BinauralRenderer: equalised to the diffuse field, the interaural delay taken out of each response, cut to 128 taps,
-interpolated onto a grid of 48 azimuths (7.5 degrees apart) by 14 elevations (-40 to 90 degrees, 10 apart), and
-stored as 16-bit samples with the delays beside them (`.fhrtf`).
+interpolated onto a grid of 48 azimuths (7.5 degrees apart) by 14 elevations (-40 to 90 degrees, 10 apart), made
+minimum-phase, smoothed across azimuth (log magnitudes, weights -1, 4, 10, 4, -1 over 16), the measured delays
+replaced by a spherical head's fitted to them, and stored as 16-bit samples with the delays beside them (`.fhrtf`,
+version 3). On loading, the engine fills in the azimuths between (1.875 degrees apart).
 
 | File | SADIE II subject | What |
 |---|---|---|
