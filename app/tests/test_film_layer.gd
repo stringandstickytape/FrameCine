@@ -3,7 +3,8 @@ extends SceneTree
 ## Tests for the film layer (scripts/play/film_layer.gd, ideas #70) in the real main scene: the setting, the fallback
 ## to the screen's mesh without an XR session, and, forced on without one, the layers' kind, eyes, order, hole punch,
 ## size and place for flat 2D, flat 3D, 3D shown as 2D, the curved screen and 360, drawing only on new pictures or
-## changed uniforms, and switching at run time while playing. The runtime's composition itself needs the headset.
+## changed uniforms, switching at run time while playing, and hiding while the menu is open. The runtime's
+## composition itself needs the headset.
 ## Run: godot --headless --xr-mode off --path app --script res://tests/test_film_layer.gd
 
 const FilmLayer := preload("res://scripts/play/film_layer.gd")
@@ -55,7 +56,8 @@ func _run() -> void:
 	_check("no XR session: no layers, the quad drawn", film.layers.is_empty() and flat.visible)
 	_check("no XR session: the status says so", "headset" in film.status())
 
-	# Forced on: flat 2D.
+	# Forced on: flat 2D. The panel is open at launch; closed, so the layer isn't held for the menu.
+	main.ui.hide_panel()
 	film.force = true
 	await _frames(2)
 	var size: Vector2 = main.screen.get_flat_size()
@@ -177,6 +179,17 @@ func _run() -> void:
 	film.set_enabled(true, false)
 	await _frames(1)
 	_check("and on again", film.layers.size() == 1 and not flat.visible and main.player.source == source)
+
+	# The menu: the layer hides and the mesh draws, then back; nothing remade, the setting untouched.
+	var held_layer: Node3D = film.layers[0]
+	main.set_menu_shown(true)
+	await _frames(1)
+	_check("menu open: the layer hidden, the quad drawn", film.held and not held_layer.visible and flat.visible
+			and film.layers[0] == held_layer and film.enabled and "menu" in film.status())
+	main.set_menu_shown(false)
+	await _frames(1)
+	_check("menu closed: the same layer back, the quad not drawn", not film.held and held_layer.visible
+			and not flat.visible and film.layers[0] == held_layer)
 
 	# The pure sizing helper.
 	var m := VideoMode.new()

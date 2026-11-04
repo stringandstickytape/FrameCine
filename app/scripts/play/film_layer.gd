@@ -24,6 +24,9 @@ extends Node
 ## before, half-transparent ones blend over it, and what is behind the screen stays hidden by the hole's depth.
 ## Off, without an XR session, without layers in the engine, or with no layer for the mode: the screen's mesh, as
 ## always. Switching at run time keeps playback going.
+## While the menu is open (main.menu_shown) the layers hide and the mesh draws the film: the runtime drew the layer
+## over the panels (the user, 2026-11-04). They come back when it closes; nothing is remade and the setting is not
+## touched.
 ##
 ##   enabled, set_enabled(on, save := true)
 ##   force                  tests: build the layers without an XR session (they don't show then)
@@ -49,6 +52,8 @@ const EYES_BOTH := 0
 
 var main: Node3D
 var enabled := false
+## The layers are hidden for the menu (see the header).
+var held := false
 var force := false
 var layers: Array[Node3D] = []
 var viewports: Array[SubViewport] = []
@@ -123,6 +128,8 @@ func status() -> String:
 			return "This headset has no curved layers: a curved screen is drawn in the room."
 		return "On; nothing to show."
 	var px: Vector2i = viewports[0].size
+	if held:
+		return "On; the room draws the film while the menu is open, so the menu shows in front."
 	if layers.size() == 2:
 		return "In use: two %s layers, one per eye, %d x %d px each." % [kind, px.x, px.y]
 	return "In use: one %s layer, %d x %d px." % [kind, px.x, px.y]
@@ -167,6 +174,16 @@ func _update() -> void:
 			_make(want, eyes)
 		changed.emit()
 	if kind == "":
+		held = false
+		return
+	var hold := bool(main.get("menu_shown"))
+	if hold != held:
+		held = hold
+		for layer in layers:
+			layer.visible = not held
+		main.screen.set_flat_drawn(held)
+		_dirty = true
+	if held:
 		return
 	_place()
 	var px := eye_pixels(main.screen.frame_size, main.screen.get_flat_size(), main.screen.mode)
@@ -224,6 +241,7 @@ func _make(p_kind: String, eyes: int) -> void:
 		_materials.append(m)
 	_copied.clear()
 	_dirty = true
+	held = false
 	main.screen.set_flat_drawn(false)
 	print("Film layer: %d %s layer(s), %d x %d px, natively supported: %s" % [eyes, kind, px.x, px.y,
 			layers[0].call("is_natively_supported")])

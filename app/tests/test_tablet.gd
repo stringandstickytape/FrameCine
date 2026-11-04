@@ -68,8 +68,8 @@ func _run() -> void:
 	var st := tablet.style()
 	var powder := Color(0.69, 0.878, 0.902)
 	var fill: Color = st["fill"]
-	_check("default fill: powder blue at 50 %%: %s" % fill, absf(fill.r - powder.r) < 0.01 and absf(fill.g - powder.g) < 0.01
-			and absf(fill.b - powder.b) < 0.01 and absf(fill.a - 0.5) < 0.01)
+	_check("default fill: powder blue at 10 %%: %s" % fill, absf(fill.r - powder.r) < 0.01 and absf(fill.g - powder.g) < 0.01
+			and absf(fill.b - powder.b) < 0.01 and absf(fill.a - 0.1) < 0.01)
 	_check("default border: 75 %% opaque", absf((st["border"] as Color).a - 0.75) < 0.01)
 	_check("default corner and border in metres", is_equal_approx(float(st["corner_radius"]), 0.024)
 			and is_equal_approx(float(st["border_width"]), 0.006))
