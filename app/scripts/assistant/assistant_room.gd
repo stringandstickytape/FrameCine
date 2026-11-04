@@ -35,6 +35,10 @@ const CONTACT_REACH := 0.25
 static var _lighting := {}
 static var _lit_shaders := {}
 const WALL_GAP := 0.15
+## The sky sphere's radius: inside the cameras' far plane (200 m, scenes/main.tscn), or it is clipped away and the sky
+## shows black (it was 400 m until 2026-11-04: beyond the far plane, so a room's sky showed only in snapshots, whose
+## camera reaches 500 m).
+const SKY_RADIUS := 180.0
 
 ## The room document this was built from (base64 data included until it is saved).
 var doc := {}
@@ -225,8 +229,8 @@ static func build(p_doc: Dictionary, base: Node3D, assets: Dictionary, p_base_id
 	if sky.has("color") or assets.get("images", {}).has("sky") or sky.has("stars") or sky.has("clouds") \
 			or sky.get("effect") is Dictionary:
 		var sphere := SphereMesh.new()
-		sphere.radius = 400.0
-		sphere.height = 800.0
+		sphere.radius = SKY_RADIUS
+		sphere.height = SKY_RADIUS * 2.0
 		sphere.flip_faces = true
 		var sm := sky_material(sky, assets.get("images", {}).get("sky"))
 		var smi := MeshInstance3D.new()

@@ -1,0 +1,39 @@
+{
+	"base": "void",
+	"light": {
+		"ambient": 0.3,
+		"contact_shadows": false
+	},
+	"name": "Nebula sky",
+	"parts": [
+		{
+			"name": "About",
+			"position": [
+				1.915,
+				1.3,
+				-1.607
+			],
+			"rotation": [
+				0,
+				-50.0,
+				0
+			],
+			"size": [
+				0.06
+			],
+			"text": "Nebula sky\ndeep space all round: clouds of glowing gas in two colours with dark dust and stars, changing shape very slowly; science fiction, dreamlike",
+			"text_options": {
+				"color": "#e6e6e6",
+				"max_width": 1.2
+			},
+			"type": "text"
+		}
+	],
+	"recolour": [],
+	"schema": 2,
+	"sky": {
+		"effect": {
+			"name": "sky_nebula"
+		}
+	}
+}

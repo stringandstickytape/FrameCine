@@ -18,6 +18,9 @@ extends Node
 ##                                              N copies of a part built by the real room builder into a temporary
 ##                                              node, measured, removed (dev link: perf_calibrate, or run)
 ##   static verdict(report) -> Array[String]    the guard's warnings
+##   static await measure_rooms(main, rooms, levels, options) -> Dictionary
+##                                              rooms one after another at each foveation level (dev link:
+##                                              perf_rooms; the showrooms, docs/showrooms.md)
 
 const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
 const AssistantRoom := preload("res://scripts/assistant/assistant_room.gd")
@@ -38,6 +41,12 @@ const HELD := 0.97
 ## Calibration: the baseline and the loaded measurement, seconds each (the caller may give its own).
 const CALIBRATE_SECONDS := 3.0
 const CALIBRATE_MAX := 400
+## Rooms one after another (measure_rooms): the foveation levels, the wait after each change (the room's shaders
+## compile, the runtime takes the new level) and the measurement, seconds.
+const ROOMS_LEVELS := ["off", "low", "high"]
+const ROOMS_SETTLE := 3.0
+const ROOMS_SECONDS := 5.0
+const Showrooms := preload("res://scripts/env/showrooms.gd")
 
 var _on := false
 var _keep_until := 0.0
@@ -66,7 +75,7 @@ static func ensure(tree: SceneTree) -> Node:
 	return n
 
 
-## The dev link's commands (scripts/dev/command_host.gd registers them): perf and perf_calibrate.
+## The dev link's commands (scripts/dev/command_host.gd registers them): perf, perf_calibrate and perf_rooms.
 static func register_commands(host: Node) -> void:
 	var DevCommands := load("res://scripts/dev/dev_commands.gd")
 	DevCommands.register("perf", func(_a: Dictionary, _ctx: RefCounted) -> Variant:
@@ -88,6 +97,35 @@ static func register_commands(host: Node) -> void:
 				{"name": "options", "type": "object", "default": {},
 					"description": "seconds, spacing, radius, center [x, y, z]"}],
 		"level": "change", "returns": "{delta_gpu_ms, per_part_ms, baseline, loaded, cost, ms_per_cost}"})
+	DevCommands.register("perf_rooms", func(a: Dictionary, ctx: RefCounted) -> Variant:
+			var r: Dictionary = await measure_rooms(host.main, _list(a["rooms"]), _list(a["foveation"]), {
+				"baseline": a["baseline"], "settle": a["settle"], "seconds": a["seconds"]})
+			return ctx.call("fail", r["error"]) if r.has("error") else r, {
+		"description": "Measures rooms one after another (the showrooms by default, docs/showrooms.md) at each "
+				+ "foveation level: shows the room, sets the level, waits settle s, measures the GPU for seconds s; "
+				+ "a baseline room first. Then the room and foveation the viewer had. Takes about (rooms + 1) x levels "
+				+ "x (settle + seconds) s: give the dev link's send a long timeout. Play a film first.",
+		"params": [{"name": "rooms", "type": "any", "default": ["showrooms"],
+					"description": "room ids (room_settings lists them) as a list or comma-separated; showrooms: "
+					+ "every showroom"},
+				{"name": "foveation", "type": "any", "default": ROOMS_LEVELS,
+					"description": "the levels, a list or comma-separated: off, low, medium, high"},
+				{"name": "baseline", "type": "string", "default": "void",
+					"description": "a room measured first at each level, for the differences; empty for none"},
+				{"name": "settle", "type": "float", "default": ROOMS_SETTLE},
+				{"name": "seconds", "type": "float", "default": ROOMS_SECONDS}],
+		"level": "change", "returns": "{rows: [{room, name, foveation, foveation_applied, gpu_ms, gpu_ms_p95, "
+				+ "delta_gpu_ms, cpu_ms, fps, dropped, frames}], table, film_playing, budget_ms, notes}"})
+
+
+## A list argument: a list, or words separated by commas.
+static func _list(v: Variant) -> Array:
+	if v is Array:
+		return v
+	var out: Array = []
+	for s in str(v).split(",", false):
+		out.append(s.strip_edges())
+	return out
 
 
 ## Keeps measuring for `seconds` from now (at least).
@@ -464,6 +502,112 @@ static func calibrate(main: Node, part: Dictionary, count := 20, arrangement := 
 	if not bool(out["film_playing"]):
 		out["note"] = "no film playing: measure with one for numbers that count"
 	return out
+
+
+## Rooms measured one after another (docs/showrooms.md, "Measuring"): for each room (the baseline first), shown as
+## the Room tab shows it, then at each foveation level (set as the System tab does, but not saved, and kept even while
+## the panel shows): wait settle s, measure seconds s. Then the room and the foveation the viewer had. rooms: ids, or
+## "showrooms" for every showroom; levels: main.FOVEATION_LEVELS words; options: baseline (a room id, "" for none),
+## settle, seconds. Returns {rows: [{room, name, foveation, foveation_applied, gpu_ms, gpu_ms_p95, delta_gpu_ms, cpu_ms,
+## fps, frames, dropped}], table (a line per room), film_playing, refresh_hz, budget_ms, renderer, notes} or {error}.
+static func measure_rooms(main: Node, rooms: Array, levels: Array, options := {}) -> Dictionary:
+	if main == null or not main.has_method("all_environments"):
+		return {"error": "no app"}
+	var names := {}
+	for e: Array in main.all_environments():
+		names[str(e[0])] = str(e[1])
+	var ids: Array[String] = []
+	for r: Variant in rooms:
+		if str(r) == "showrooms":
+			for e: Array in Showrooms.environments():
+				ids.append(str(e[0]))
+		elif names.has(str(r)):
+			ids.append(str(r))
+		else:
+			return {"error": "no room %s (room_settings lists them; showrooms: every showroom)" % r}
+	var baseline := str(options.get("baseline", "void"))
+	if baseline != "":
+		if not names.has(baseline):
+			return {"error": "no room %s for the baseline" % baseline}
+		ids.erase(baseline)
+		ids.push_front(baseline)
+	if ids.is_empty():
+		return {"error": "no rooms to measure"}
+	var words: Array = (main.get_script() as GDScript).get_script_constant_map().get("FOVEATION_LEVELS", [])
+	for l: Variant in levels:
+		if not str(l) in words:
+			return {"error": "foveation: %s is not one of %s" % [l, ", ".join(words)]}
+	if levels.is_empty():
+		return {"error": "foveation: give at least one level"}
+	var settle := clampf(float(options.get("settle", ROOMS_SETTLE)), 0.2, 30.0)
+	var seconds := clampf(float(options.get("seconds", ROOMS_SECONDS)), 0.2, 60.0)
+	var tree: SceneTree = main.get_tree()
+	var perf: Node = ensure(tree)
+	var was := {"room": str(main.env_id), "foveation": str(main.foveation), "sharp": bool(main.foveation_sharp_panel)}
+	var panel_open := bool(main.get("menu_shown"))
+	# Not saved: the viewer's own setting comes back at the end, whatever happens to the dev link meanwhile.
+	main.foveation_sharp_panel = false
+	var rows: Array = []
+	for id in ids:
+		main.set_environment(id)
+		for l: Variant in levels:
+			main.foveation = str(l)
+			main._update_foveation()
+			perf.want()
+			await _wait(tree, settle)
+			var t0: float = perf._now()
+			var d0: int = perf.dropped_total()
+			await _wait(tree, seconds)
+			var row := {"room": id, "name": names[id], "foveation": str(l), "foveation_applied": _applied(main),
+					"dropped": maxi(0, perf.dropped_total() - d0)}
+			row.merge(perf.window(t0, perf._now()))
+			rows.append(row)
+	main.foveation = was["foveation"]
+	main.foveation_sharp_panel = was["sharp"]
+	main._update_foveation()
+	if names.has(was["room"]) and str(main.env_id) != was["room"]:
+		main.set_environment(was["room"])
+	# Each row against the baseline at the same level.
+	var base := {}
+	for r: Dictionary in rows:
+		if r["room"] == baseline and r.has("gpu_ms"):
+			base[r["foveation"]] = float(r["gpu_ms"])
+	var table: Array[String] = []
+	for id in ids:
+		var cells: Array[String] = []
+		for r: Dictionary in rows:
+			if r["room"] != id:
+				continue
+			if r.has("gpu_ms") and base.has(r["foveation"]) and id != baseline:
+				r["delta_gpu_ms"] = snappedf(float(r["gpu_ms"]) - float(base[r["foveation"]]), 0.01)
+			cells.append("%s %s ms%s" % [r["foveation"], r.get("gpu_ms", "?"), " (%+.2f)" % r["delta_gpu_ms"]
+					if r.has("delta_gpu_ms") else ""])
+		table.append("%s: %s" % [names[id], ", ".join(cells)])
+	var hz: Array = perf.refresh()
+	var out := {"rows": rows, "table": table, "baseline": baseline, "levels": levels, "settle": settle,
+			"seconds": seconds, "film_playing": perf.film()["playing"], "refresh_hz": hz[0],
+			"budget_ms": snappedf(1000.0 / float(hz[0]), 0.01), "renderer": DisplayServer.get_name() != "headless",
+			"foveation_available": bool(main.foveation_available())}
+	var notes: Array[String] = []
+	if not bool(out["renderer"]):
+		notes.append("no renderer (headless): nothing to measure")
+	if not bool(out["film_playing"]):
+		notes.append("no film playing: the numbers are without the decoder and the film's texture; play one first")
+	if rows.any(func(r: Dictionary) -> bool: return int(r["foveation_applied"]) < 0):
+		notes.append("foveation was not applied (no XR, or this build starts without it): the levels are the same")
+	if panel_open:
+		notes.append("the panel was open: it is in the numbers; close it for the rooms alone")
+	if not notes.is_empty():
+		out["notes"] = notes
+	return out
+
+
+## The foveation level the runtime has now (0 off .. 3 high), or -1 when it isn't applied.
+static func _applied(main: Node) -> int:
+	var xr: Object = main.get("foveation_xr")
+	if xr == null or not "foveation_level" in xr or not bool(main.foveation_available()):
+		return -1
+	return int(xr.foveation_level)
 
 
 static func _wait(tree: SceneTree, seconds: float) -> void:

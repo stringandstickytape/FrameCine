@@ -1,0 +1,1334 @@
+{
+	"base": "void",
+	"light": {
+		"ambient": 0.7,
+		"contact_shadows": false,
+		"screen_glow": 0.3
+	},
+	"name": "Effects gallery",
+	"parts": [
+		{
+			"material": {
+				"color": "#1b1d22"
+			},
+			"name": "Floor",
+			"position": [
+				0,
+				0,
+				0
+			],
+			"size": [
+				8.19096628650082,
+				8.19096628650082
+			],
+			"type": "plane"
+		},
+		{
+			"name": "About",
+			"position": [
+				2.182,
+				1.315,
+				-1.903
+			],
+			"rotation": [
+				0.0,
+				-48.905,
+				0.0
+			],
+			"size": [
+				0.045
+			],
+			"text": "Effects gallery\n43 effects of the effect library, each on a sphere with its preview's options. The skies have showrooms of their own: Aurora sky, Starfield sky, Nebula sky, Sunset sky, Cloud layers sky.",
+			"text_options": {
+				"color": "#e6e6e6",
+				"max_width": 0.9
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "rim_glow"
+				}
+			},
+			"name": "fx rim_glow",
+			"position": [
+				2.715,
+				1.7,
+				-1.005
+			],
+			"rotation": [
+				0.0,
+				-69.682,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "hologram"
+				}
+			},
+			"name": "fx hologram",
+			"position": [
+				2.715,
+				1.315,
+				-1.005
+			],
+			"rotation": [
+				0.0,
+				-69.682,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "glass"
+				}
+			},
+			"name": "fx glass",
+			"position": [
+				2.715,
+				0.93,
+				-1.005
+			],
+			"rotation": [
+				0.0,
+				-69.682,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "metal"
+				}
+			},
+			"name": "fx metal",
+			"position": [
+				2.715,
+				0.545,
+				-1.005
+			],
+			"rotation": [
+				0.0,
+				-69.682,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 1",
+			"position": [
+				2.781,
+				1.315,
+				-0.806
+			],
+			"rotation": [
+				0.0,
+				-73.837,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "CLASSIC\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nRim glow\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nHologram\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nGlass\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nMetal",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "toon_outline"
+				}
+			},
+			"name": "fx toon_outline",
+			"position": [
+				2.886,
+				1.7,
+				-0.237
+			],
+			"rotation": [
+				0.0,
+				-85.314,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "dissolve"
+				}
+			},
+			"name": "fx dissolve",
+			"position": [
+				2.886,
+				1.315,
+				-0.237
+			],
+			"rotation": [
+				0.0,
+				-85.314,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "pulse"
+				}
+			},
+			"name": "fx pulse",
+			"position": [
+				2.886,
+				0.93,
+				-0.237
+			],
+			"rotation": [
+				0.0,
+				-85.314,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "flicker"
+				}
+			},
+			"name": "fx flicker",
+			"position": [
+				2.886,
+				0.545,
+				-0.237
+			],
+			"rotation": [
+				0.0,
+				-85.314,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 2",
+			"position": [
+				2.895,
+				1.122,
+				-0.027
+			],
+			"rotation": [
+				0.0,
+				-89.47,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Toon outline\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nDissolve\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPulse\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nFlicker",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "plasma"
+				}
+			},
+			"name": "fx plasma",
+			"position": [
+				2.771,
+				1.7,
+				0.841
+			],
+			"rotation": [
+				0.0,
+				-106.883,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "aurora"
+				}
+			},
+			"name": "fx aurora",
+			"position": [
+				2.771,
+				1.315,
+				0.841
+			],
+			"rotation": [
+				0.0,
+				-106.883,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "nebula"
+				}
+			},
+			"name": "fx nebula",
+			"position": [
+				2.771,
+				0.93,
+				0.841
+			],
+			"rotation": [
+				0.0,
+				-106.883,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "force_field"
+				}
+			},
+			"name": "fx force_field",
+			"position": [
+				2.771,
+				0.545,
+				0.841
+			],
+			"rotation": [
+				0.0,
+				-106.883,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 3",
+			"position": [
+				2.702,
+				1.315,
+				1.039
+			],
+			"rotation": [
+				0.0,
+				-111.039,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "ENERGY\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPlasma\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nAurora\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nNebula\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nForce field",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "circuit"
+				}
+			},
+			"name": "fx circuit",
+			"position": [
+				2.436,
+				1.7,
+				1.565
+			],
+			"rotation": [
+				0.0,
+				-122.714,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "neon"
+				}
+			},
+			"name": "fx neon",
+			"position": [
+				2.436,
+				1.315,
+				1.565
+			],
+			"rotation": [
+				0.0,
+				-122.714,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 4",
+			"position": [
+				2.316,
+				1.508,
+				1.737
+			],
+			"rotation": [
+				0.0,
+				-126.869,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Circuit\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nNeon",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "caustics"
+				}
+			},
+			"name": "fx caustics",
+			"position": [
+				1.786,
+				1.7,
+				2.279
+			],
+			"rotation": [
+				0.0,
+				-141.908,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "water"
+				}
+			},
+			"name": "fx water",
+			"position": [
+				1.786,
+				1.315,
+				2.279
+			],
+			"rotation": [
+				0.0,
+				-141.908,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "lava"
+				}
+			},
+			"name": "fx lava",
+			"position": [
+				1.786,
+				0.93,
+				2.279
+			],
+			"rotation": [
+				0.0,
+				-141.908,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "embers"
+				}
+			},
+			"name": "fx embers",
+			"position": [
+				1.786,
+				0.545,
+				2.279
+			],
+			"rotation": [
+				0.0,
+				-141.908,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 5",
+			"position": [
+				1.616,
+				1.315,
+				2.402
+			],
+			"rotation": [
+				0.0,
+				-146.064,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "NATURE\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nCaustics\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWater\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nLava\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nEmbers",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "smoke"
+				}
+			},
+			"name": "fx smoke",
+			"position": [
+				1.134,
+				1.7,
+				2.664
+			],
+			"rotation": [
+				0.0,
+				-156.947,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "clouds"
+				}
+			},
+			"name": "fx clouds",
+			"position": [
+				1.134,
+				1.315,
+				2.664
+			],
+			"rotation": [
+				0.0,
+				-156.947,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "starfield"
+				}
+			},
+			"name": "fx starfield",
+			"position": [
+				1.134,
+				0.93,
+				2.664
+			],
+			"rotation": [
+				0.0,
+				-156.947,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "wind_sway",
+					"sway": 0.15
+				}
+			},
+			"name": "fx wind_sway",
+			"position": [
+				1.134,
+				0.545,
+				2.664
+			],
+			"rotation": [
+				0.0,
+				-156.947,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 6",
+			"position": [
+				0.938,
+				1.122,
+				2.739
+			],
+			"rotation": [
+				0.0,
+				-161.102,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Smoke\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nClouds\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nStarfield\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWind sway",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "iridescent"
+				}
+			},
+			"name": "fx iridescent",
+			"position": [
+				0.105,
+				1.7,
+				2.894
+			],
+			"rotation": [
+				0.0,
+				-177.922,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "pearl"
+				}
+			},
+			"name": "fx pearl",
+			"position": [
+				0.105,
+				1.315,
+				2.894
+			],
+			"rotation": [
+				0.0,
+				-177.922,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "velvet"
+				}
+			},
+			"name": "fx velvet",
+			"position": [
+				0.105,
+				0.93,
+				2.894
+			],
+			"rotation": [
+				0.0,
+				-177.922,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "brushed_metal"
+				}
+			},
+			"name": "fx brushed_metal",
+			"position": [
+				0.105,
+				0.545,
+				2.894
+			],
+			"rotation": [
+				0.0,
+				-177.922,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 7",
+			"position": [
+				-0.105,
+				1.315,
+				2.894
+			],
+			"rotation": [
+				0.0,
+				177.922,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "MATERIALS\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nIridescent\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPearl\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nVelvet\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nBrushed metal",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "carbon_fibre"
+				}
+			},
+			"name": "fx carbon_fibre",
+			"position": [
+				-0.775,
+				1.7,
+				2.79
+			],
+			"rotation": [
+				0.0,
+				164.466,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "marble"
+				}
+			},
+			"name": "fx marble",
+			"position": [
+				-0.775,
+				1.315,
+				2.79
+			],
+			"rotation": [
+				0.0,
+				164.466,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "crystal"
+				}
+			},
+			"name": "fx crystal",
+			"position": [
+				-0.775,
+				0.93,
+				2.79
+			],
+			"rotation": [
+				0.0,
+				164.466,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "liquid_chrome"
+				}
+			},
+			"name": "fx liquid_chrome",
+			"position": [
+				-0.775,
+				0.545,
+				2.79
+			],
+			"rotation": [
+				0.0,
+				164.466,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 8",
+			"position": [
+				-0.976,
+				1.122,
+				2.726
+			],
+			"rotation": [
+				0.0,
+				160.311,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Carbon fibre\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nMarble\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nCrystal\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nLiquid chrome",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "frosted_glass"
+				}
+			},
+			"name": "fx frosted_glass",
+			"position": [
+				-1.575,
+				1.7,
+				2.43
+			],
+			"rotation": [
+				0.0,
+				147.053,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 9",
+			"position": [
+				-1.747,
+				1.7,
+				2.309
+			],
+			"rotation": [
+				0.0,
+				142.898,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Frosted glass",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "hatching",
+					"pitch": 0.1
+				}
+			},
+			"name": "fx hatching",
+			"position": [
+				-2.369,
+				1.7,
+				1.664
+			],
+			"rotation": [
+				0.0,
+				125.088,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "halftone",
+					"pitch": 0.12
+				}
+			},
+			"name": "fx halftone",
+			"position": [
+				-2.369,
+				1.315,
+				1.664
+			],
+			"rotation": [
+				0.0,
+				125.088,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "pixel"
+				}
+			},
+			"name": "fx pixel",
+			"position": [
+				-2.369,
+				0.93,
+				1.664
+			],
+			"rotation": [
+				0.0,
+				125.088,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "wireframe",
+					"pitch": 0.25
+				}
+			},
+			"name": "fx wireframe",
+			"position": [
+				-2.369,
+				0.545,
+				1.664
+			],
+			"rotation": [
+				0.0,
+				125.088,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 10",
+			"position": [
+				-2.484,
+				1.315,
+				1.488
+			],
+			"rotation": [
+				0.0,
+				120.933,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "STYLISED\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPencil hatching\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nHalftone\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nRetro pixels\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWireframe",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"cell": 0.3,
+					"name": "stained_glass"
+				}
+			},
+			"name": "fx stained_glass",
+			"position": [
+				-2.765,
+				1.7,
+				0.86
+			],
+			"rotation": [
+				0.0,
+				107.279,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "duotone"
+				}
+			},
+			"name": "fx duotone",
+			"position": [
+				-2.765,
+				1.315,
+				0.86
+			],
+			"rotation": [
+				0.0,
+				107.279,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 11",
+			"position": [
+				-2.82,
+				1.508,
+				0.657
+			],
+			"rotation": [
+				0.0,
+				103.124,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Stained glass\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nDuotone",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"amount": 0.6,
+					"name": "wipe"
+				}
+			},
+			"name": "fx wipe",
+			"position": [
+				-2.886,
+				1.7,
+				-0.237
+			],
+			"rotation": [
+				0.0,
+				85.314,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"amount": 0.6,
+					"band": 0.05,
+					"name": "scan_in"
+				}
+			},
+			"name": "fx scan_in",
+			"position": [
+				-2.886,
+				1.315,
+				-0.237
+			],
+			"rotation": [
+				0.0,
+				85.314,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "selection_outline"
+				}
+			},
+			"name": "fx selection_outline",
+			"position": [
+				-2.886,
+				0.93,
+				-0.237
+			],
+			"rotation": [
+				0.0,
+				85.314,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 12",
+			"position": [
+				-2.861,
+				1.508,
+				-0.445
+			],
+			"rotation": [
+				0.0,
+				81.159,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "TRANSITIONS\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWipe\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nScan in\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nSelection outline",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "react_sound"
+				}
+			},
+			"name": "fx react_sound",
+			"position": [
+				-2.556,
+				1.7,
+				-1.361
+			],
+			"rotation": [
+				0.0,
+				61.965,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "react_screen"
+				}
+			},
+			"name": "fx react_screen",
+			"position": [
+				-2.556,
+				1.315,
+				-1.361
+			],
+			"rotation": [
+				0.0,
+				61.965,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#8a6e4b",
+				"effect": {
+					"name": "react_caustics"
+				}
+			},
+			"name": "fx react_caustics",
+			"position": [
+				-2.556,
+				0.93,
+				-1.361
+			],
+			"rotation": [
+				0.0,
+				61.965,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 13",
+			"position": [
+				-2.45,
+				1.508,
+				-1.543
+			],
+			"rotation": [
+				0.0,
+				57.809,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "REACTIVE\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nSound glow\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nScreen sheen\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nCaustics with sound",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		}
+	],
+	"recolour": [],
+	"schema": 2
+}

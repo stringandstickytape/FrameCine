@@ -1,0 +1,39 @@
+{
+	"base": "void",
+	"light": {
+		"ambient": 0.3,
+		"contact_shadows": false
+	},
+	"name": "Sunset sky",
+	"parts": [
+		{
+			"name": "About",
+			"position": [
+				1.915,
+				1.3,
+				-1.607
+			],
+			"rotation": [
+				0,
+				-50.0,
+				0
+			],
+			"size": [
+				0.06
+			],
+			"text": "Sunset sky\nthe sun on the horizon with a warm glow round it, the sky deepening overhead, thin streaks of cloud lit from below; golden hour, romantic, warm",
+			"text_options": {
+				"color": "#e6e6e6",
+				"max_width": 1.2
+			},
+			"type": "text"
+		}
+	],
+	"recolour": [],
+	"schema": 2,
+	"sky": {
+		"effect": {
+			"name": "sky_sunset"
+		}
+	}
+}

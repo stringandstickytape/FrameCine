@@ -1,0 +1,304 @@
+{
+	"budget": {
+		"cost": 100.0,
+		"draws": 150,
+		"lights": 3,
+		"texts": 16,
+		"triangles": 250000
+	},
+	"made_by": "tools/showrooms.gd",
+	"showrooms": [
+		{
+			"budget": {
+				"cost": 82.8,
+				"draws": 60,
+				"lights": 0,
+				"parts": 58,
+				"texts": 14,
+				"triangles": 182784,
+				"widgets": 0
+			},
+			"description": "Every effect of the effect library on a sphere, by group",
+			"file": "effects.room.json",
+			"id": "effects",
+			"name": "Effects gallery",
+			"shows": {
+				"effects": [
+					"rim_glow",
+					"hologram",
+					"glass",
+					"metal",
+					"toon_outline",
+					"dissolve",
+					"pulse",
+					"flicker",
+					"plasma",
+					"aurora",
+					"nebula",
+					"force_field",
+					"circuit",
+					"neon",
+					"caustics",
+					"water",
+					"lava",
+					"embers",
+					"smoke",
+					"clouds",
+					"starfield",
+					"wind_sway",
+					"iridescent",
+					"pearl",
+					"velvet",
+					"brushed_metal",
+					"carbon_fibre",
+					"marble",
+					"crystal",
+					"liquid_chrome",
+					"frosted_glass",
+					"hatching",
+					"halftone",
+					"pixel",
+					"wireframe",
+					"stained_glass",
+					"duotone",
+					"wipe",
+					"scan_in",
+					"selection_outline",
+					"react_sound",
+					"react_screen",
+					"react_caustics"
+				],
+				"parts": 58
+			}
+		},
+		{
+			"budget": {
+				"cost": 72.0,
+				"draws": 98,
+				"lights": 0,
+				"parts": 98,
+				"texts": 13,
+				"triangles": 179250,
+				"widgets": 0
+			},
+			"description": "Every library material on a flat panel and a sphere, by kind",
+			"file": "materials.room.json",
+			"id": "materials",
+			"name": "Material wall",
+			"shows": {
+				"materials": [
+					"brown_wood_floor",
+					"rustic_planks",
+					"wood_panelling",
+					"grey_oak_floor",
+					"herringbone_parquet",
+					"oak_planks",
+					"oak_veneer",
+					"pale_laminate",
+					"red_hardwood",
+					"walnut_veneer",
+					"wood_slats",
+					"black_marble",
+					"checker_marble_tiles",
+					"concrete_panels",
+					"smooth_concrete",
+					"terrazzo",
+					"white_marble",
+					"acoustic_foam",
+					"felt",
+					"painted_brick",
+					"painted_wall",
+					"red_brick",
+					"rough_plaster",
+					"smooth_plaster",
+					"brushed_steel",
+					"dark_metal",
+					"perforated_metal",
+					"brass",
+					"black_leather",
+					"brown_leather",
+					"oxblood_leather",
+					"tufted_leather",
+					"corduroy",
+					"cream_carpet",
+					"melange_fabric",
+					"herringbone_upholstery",
+					"linen",
+					"plush_carpet",
+					"velvet",
+					"wicker",
+					"woven_carpet",
+					"woven_upholstery"
+				],
+				"parts": 98
+			}
+		},
+		{
+			"budget": {
+				"cost": 41.7,
+				"draws": 56,
+				"lights": 0,
+				"parts": 40,
+				"texts": 11,
+				"triangles": 34958,
+				"widgets": 8
+			},
+			"description": "The parts a room document places: shapes, text, surfaces, widgets, motion, objects",
+			"file": "objects.room.json",
+			"id": "objects",
+			"name": "Objects",
+			"shows": {
+				"objects": [
+					"picture_frame",
+					"wall_shelf",
+					"pot_plant",
+					"wall_clock"
+				],
+				"parts": 40,
+				"types": [
+					"box",
+					"sphere",
+					"cylinder",
+					"plane",
+					"text",
+					"model"
+				],
+				"widgets": [
+					"clock",
+					"film_progress",
+					"now_playing",
+					"end_time",
+					"battery",
+					"screen_glow"
+				]
+			}
+		},
+		{
+			"budget": {
+				"cost": 41.3,
+				"draws": 32,
+				"lights": 3,
+				"parts": 12,
+				"texts": 3,
+				"triangles": 7450,
+				"widgets": 0
+			},
+			"description": "Real lighting: the key light with shadows, sky fill, the film's light, a point and a spot light",
+			"file": "lights.room.json",
+			"id": "lights",
+			"name": "Lights",
+			"shows": {
+				"objects": [
+					"pot_plant"
+				],
+				"parts": 12
+			}
+		},
+		{
+			"budget": {
+				"cost": 2.0,
+				"draws": 2,
+				"lights": 0,
+				"parts": 1,
+				"texts": 1,
+				"triangles": 4438,
+				"widgets": 0
+			},
+			"description": "Aurora sky as the whole sky",
+			"file": "sky_aurora.room.json",
+			"id": "sky_aurora",
+			"name": "Aurora sky",
+			"shows": {
+				"effects": [
+					"sky_aurora"
+				],
+				"parts": 1
+			}
+		},
+		{
+			"budget": {
+				"cost": 2.0,
+				"draws": 2,
+				"lights": 0,
+				"parts": 1,
+				"texts": 1,
+				"triangles": 4454,
+				"widgets": 0
+			},
+			"description": "Starfield sky as the whole sky",
+			"file": "sky_starfield.room.json",
+			"id": "sky_starfield",
+			"name": "Starfield sky",
+			"shows": {
+				"effects": [
+					"sky_starfield"
+				],
+				"parts": 1
+			}
+		},
+		{
+			"budget": {
+				"cost": 2.0,
+				"draws": 2,
+				"lights": 0,
+				"parts": 1,
+				"texts": 1,
+				"triangles": 4476,
+				"widgets": 0
+			},
+			"description": "Nebula sky as the whole sky",
+			"file": "sky_nebula.room.json",
+			"id": "sky_nebula",
+			"name": "Nebula sky",
+			"shows": {
+				"effects": [
+					"sky_nebula"
+				],
+				"parts": 1
+			}
+		},
+		{
+			"budget": {
+				"cost": 2.0,
+				"draws": 2,
+				"lights": 0,
+				"parts": 1,
+				"texts": 1,
+				"triangles": 4478,
+				"widgets": 0
+			},
+			"description": "Sunset sky as the whole sky",
+			"file": "sky_sunset.room.json",
+			"id": "sky_sunset",
+			"name": "Sunset sky",
+			"shows": {
+				"effects": [
+					"sky_sunset"
+				],
+				"parts": 1
+			}
+		},
+		{
+			"budget": {
+				"cost": 2.0,
+				"draws": 2,
+				"lights": 0,
+				"parts": 1,
+				"texts": 1,
+				"triangles": 4502,
+				"widgets": 0
+			},
+			"description": "Cloud layers sky as the whole sky",
+			"file": "sky_clouds.room.json",
+			"id": "sky_clouds",
+			"name": "Cloud layers sky",
+			"shows": {
+				"effects": [
+					"sky_clouds"
+				],
+				"parts": 1
+			}
+		}
+	],
+	"version": 1
+}

@@ -97,6 +97,7 @@ const Snapshots := preload("res://scripts/dev/snapshots.gd")
 const Features := preload("res://scripts/play/features.gd")
 const Recipes := preload("res://scripts/dev/recipes.gd")
 const EnvLibrary := preload("res://scripts/env/env_library.gd")
+const Showrooms := preload("res://scripts/env/showrooms.gd")
 const ContainerMode := preload("res://scripts/play/container_mode.gd")
 const Sidecar := preload("res://scripts/play/sidecar.gd")
 const HwVideo := preload("res://scripts/play/hw_video.gd")
@@ -763,9 +764,11 @@ func auto_mode() -> void:
 # --- Screen, environment, audio, overlay ---------------------------------------------------------------------------
 
 ## The built-in environments, then the rooms from scripts/env/env_library.gd (more built-in rooms, photo rooms, glTF
-## rooms), then the scene recipes saved under user://recipes (scripts/dev/recipes.gd, docs/recipes.md).
+## rooms), then the scene recipes saved under user://recipes (scripts/dev/recipes.gd, docs/recipes.md), then the
+## showrooms that ship with the app (scripts/env/showrooms.gd, docs/showrooms.md; always last: the Room tab groups
+## them).
 func all_environments() -> Array:
-	return ENVIRONMENTS + EnvLibrary.environments() + Recipes.environments()
+	return ENVIRONMENTS + EnvLibrary.environments() + Recipes.environments() + Showrooms.environments()
 
 
 func get_environment_list() -> Array:

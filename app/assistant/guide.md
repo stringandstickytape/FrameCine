@@ -511,6 +511,13 @@ that layers keeps the colour or library material under it. In a document these a
 change takes an entry out; one that reaches no part is kept, with a `no_such_part` warning (the `recolour`
 command refuses it instead).
 
+**Showrooms.** The app ships rooms that show the libraries, each sample labelled: `showroom:effects` (every effect
+on a sphere), `showroom:materials` (every library material on a panel and a sphere), `showroom:objects` (the shapes,
+surfaces, widgets, motions and built-in objects), `showroom:lights` (real lighting) and one per sky
+(`showroom:sky_aurora`, ...). When the viewer wants to see the choices before picking, `set_environment` one of
+them (they are in `room_settings`' environments and the Room tab's Showrooms group), then go back to their room. They
+are read-only: a change to one is kept as the viewer's own room, under the document's `name`.
+
 Widgets (the app draws them on the part; you only name them):
 
 <<WIDGETS>>

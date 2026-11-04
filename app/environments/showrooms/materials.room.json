@@ -1,0 +1,2079 @@
+{
+	"base": "void",
+	"light": {
+		"ambient": 0.7,
+		"contact_shadows": false,
+		"screen_glow": 0.3
+	},
+	"name": "Material wall",
+	"parts": [
+		{
+			"material": {
+				"color": "#1b1d22"
+			},
+			"name": "Floor",
+			"position": [
+				0,
+				0,
+				0
+			],
+			"size": [
+				9.93439500597032,
+				9.93439500597032
+			],
+			"type": "plane"
+		},
+		{
+			"name": "About",
+			"position": [
+				2.748,
+				1.315,
+				-2.577
+			],
+			"rotation": [
+				0.0,
+				-46.844,
+				0.0
+			],
+			"size": [
+				0.045
+			],
+			"text": "Material wall\n42 materials of the material library, each on a flat panel and a sphere, at its own scale (tiling).",
+			"text_options": {
+				"color": "#e6e6e6",
+				"max_width": 0.9
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"library_material": "brown_wood_floor"
+			},
+			"name": "mat brown_wood_floor panel",
+			"position": [
+				3.354,
+				1.7,
+				-1.723
+			],
+			"rotation": [
+				0.0,
+				-65.323,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "brown_wood_floor"
+			},
+			"name": "mat brown_wood_floor sphere",
+			"position": [
+				3.494,
+				1.7,
+				-1.418
+			],
+			"rotation": [
+				0.0,
+				-65.323,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "rustic_planks"
+			},
+			"name": "mat rustic_planks panel",
+			"position": [
+				3.354,
+				1.315,
+				-1.723
+			],
+			"rotation": [
+				0.0,
+				-65.323,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "rustic_planks"
+			},
+			"name": "mat rustic_planks sphere",
+			"position": [
+				3.494,
+				1.315,
+				-1.418
+			],
+			"rotation": [
+				0.0,
+				-65.323,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "wood_panelling"
+			},
+			"name": "mat wood_panelling panel",
+			"position": [
+				3.354,
+				0.93,
+				-1.723
+			],
+			"rotation": [
+				0.0,
+				-65.323,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "wood_panelling"
+			},
+			"name": "mat wood_panelling sphere",
+			"position": [
+				3.494,
+				0.93,
+				-1.418
+			],
+			"rotation": [
+				0.0,
+				-65.323,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "grey_oak_floor"
+			},
+			"name": "mat grey_oak_floor panel",
+			"position": [
+				3.354,
+				0.545,
+				-1.723
+			],
+			"rotation": [
+				0.0,
+				-65.323,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "grey_oak_floor"
+			},
+			"name": "mat grey_oak_floor sphere",
+			"position": [
+				3.494,
+				0.545,
+				-1.418
+			],
+			"rotation": [
+				0.0,
+				-65.323,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 1",
+			"position": [
+				3.563,
+				1.315,
+				-1.225
+			],
+			"rotation": [
+				0.0,
+				-71.027,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "WOOD\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nBrown wood floor\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nDark rustic planks\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nDark wood panelling\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nGrey oak floor",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"library_material": "herringbone_parquet"
+			},
+			"name": "mat herringbone_parquet panel",
+			"position": [
+				3.744,
+				1.7,
+				-0.447
+			],
+			"rotation": [
+				0.0,
+				-85.703,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "herringbone_parquet"
+			},
+			"name": "mat herringbone_parquet sphere",
+			"position": [
+				3.769,
+				1.7,
+				-0.113
+			],
+			"rotation": [
+				0.0,
+				-85.703,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "oak_planks"
+			},
+			"name": "mat oak_planks panel",
+			"position": [
+				3.744,
+				1.315,
+				-0.447
+			],
+			"rotation": [
+				0.0,
+				-85.703,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "oak_planks"
+			},
+			"name": "mat oak_planks sphere",
+			"position": [
+				3.769,
+				1.315,
+				-0.113
+			],
+			"rotation": [
+				0.0,
+				-85.703,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "oak_veneer"
+			},
+			"name": "mat oak_veneer panel",
+			"position": [
+				3.744,
+				0.93,
+				-0.447
+			],
+			"rotation": [
+				0.0,
+				-85.703,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "oak_veneer"
+			},
+			"name": "mat oak_veneer sphere",
+			"position": [
+				3.769,
+				0.93,
+				-0.113
+			],
+			"rotation": [
+				0.0,
+				-85.703,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "pale_laminate"
+			},
+			"name": "mat pale_laminate panel",
+			"position": [
+				3.744,
+				0.545,
+				-0.447
+			],
+			"rotation": [
+				0.0,
+				-85.703,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "pale_laminate"
+			},
+			"name": "mat pale_laminate sphere",
+			"position": [
+				3.769,
+				0.545,
+				-0.113
+			],
+			"rotation": [
+				0.0,
+				-85.703,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 2",
+			"position": [
+				3.766,
+				1.122,
+				0.092
+			],
+			"rotation": [
+				0.0,
+				-91.407,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Herringbone parquet\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nOak floor planks\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nOak veneer\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPale laminate floor",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"library_material": "red_hardwood"
+			},
+			"name": "mat red_hardwood panel",
+			"position": [
+				3.663,
+				1.7,
+				0.895
+			],
+			"rotation": [
+				0.0,
+				-106.236,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "red_hardwood"
+			},
+			"name": "mat red_hardwood sphere",
+			"position": [
+				3.569,
+				1.7,
+				1.216
+			],
+			"rotation": [
+				0.0,
+				-106.236,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "walnut_veneer"
+			},
+			"name": "mat walnut_veneer panel",
+			"position": [
+				3.663,
+				1.315,
+				0.895
+			],
+			"rotation": [
+				0.0,
+				-106.236,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "walnut_veneer"
+			},
+			"name": "mat walnut_veneer sphere",
+			"position": [
+				3.569,
+				1.315,
+				1.216
+			],
+			"rotation": [
+				0.0,
+				-106.236,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "wood_slats"
+			},
+			"name": "mat wood_slats panel",
+			"position": [
+				3.663,
+				0.93,
+				0.895
+			],
+			"rotation": [
+				0.0,
+				-106.236,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "wood_slats"
+			},
+			"name": "mat wood_slats sphere",
+			"position": [
+				3.569,
+				0.93,
+				1.216
+			],
+			"rotation": [
+				0.0,
+				-106.236,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 3",
+			"position": [
+				3.494,
+				1.315,
+				1.408
+			],
+			"rotation": [
+				0.0,
+				-111.939,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Red hardwood\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWalnut veneer\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWood slat panelling",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"library_material": "black_marble"
+			},
+			"name": "mat black_marble panel",
+			"position": [
+				2.987,
+				1.7,
+				2.301
+			],
+			"rotation": [
+				0.0,
+				-130.114,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "black_marble"
+			},
+			"name": "mat black_marble sphere",
+			"position": [
+				2.771,
+				1.7,
+				2.557
+			],
+			"rotation": [
+				0.0,
+				-130.114,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "checker_marble_tiles"
+			},
+			"name": "mat checker_marble_tiles panel",
+			"position": [
+				2.987,
+				1.315,
+				2.301
+			],
+			"rotation": [
+				0.0,
+				-130.114,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "checker_marble_tiles"
+			},
+			"name": "mat checker_marble_tiles sphere",
+			"position": [
+				2.771,
+				1.315,
+				2.557
+			],
+			"rotation": [
+				0.0,
+				-130.114,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "concrete_panels"
+			},
+			"name": "mat concrete_panels panel",
+			"position": [
+				2.987,
+				0.93,
+				2.301
+			],
+			"rotation": [
+				0.0,
+				-130.114,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "concrete_panels"
+			},
+			"name": "mat concrete_panels sphere",
+			"position": [
+				2.771,
+				0.93,
+				2.557
+			],
+			"rotation": [
+				0.0,
+				-130.114,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "smooth_concrete"
+			},
+			"name": "mat smooth_concrete panel",
+			"position": [
+				2.987,
+				0.545,
+				2.301
+			],
+			"rotation": [
+				0.0,
+				-130.114,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "smooth_concrete"
+			},
+			"name": "mat smooth_concrete sphere",
+			"position": [
+				2.771,
+				0.545,
+				2.557
+			],
+			"rotation": [
+				0.0,
+				-130.114,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 4",
+			"position": [
+				2.626,
+				1.315,
+				2.702
+			],
+			"rotation": [
+				0.0,
+				-135.817,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "STONE AND CONCRETE\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nBlack marble\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nCheckered marble tiles\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nConcrete panels\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nSmooth concrete",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"library_material": "terrazzo"
+			},
+			"name": "mat terrazzo panel",
+			"position": [
+				1.922,
+				1.7,
+				3.244
+			],
+			"rotation": [
+				0.0,
+				-151.863,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "terrazzo"
+			},
+			"name": "mat terrazzo sphere",
+			"position": [
+				1.627,
+				1.7,
+				3.402
+			],
+			"rotation": [
+				0.0,
+				-151.863,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "white_marble"
+			},
+			"name": "mat white_marble panel",
+			"position": [
+				1.922,
+				1.315,
+				3.244
+			],
+			"rotation": [
+				0.0,
+				-151.863,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "white_marble"
+			},
+			"name": "mat white_marble sphere",
+			"position": [
+				1.627,
+				1.315,
+				3.402
+			],
+			"rotation": [
+				0.0,
+				-151.863,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 5",
+			"position": [
+				1.438,
+				1.508,
+				3.482
+			],
+			"rotation": [
+				0.0,
+				-157.567,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Terrazzo\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWhite marble",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"library_material": "acoustic_foam"
+			},
+			"name": "mat acoustic_foam panel",
+			"position": [
+				0.573,
+				1.7,
+				3.727
+			],
+			"rotation": [
+				0.0,
+				-173.764,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "acoustic_foam"
+			},
+			"name": "mat acoustic_foam sphere",
+			"position": [
+				0.24,
+				1.7,
+				3.763
+			],
+			"rotation": [
+				0.0,
+				-173.764,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "felt"
+			},
+			"name": "mat felt panel",
+			"position": [
+				0.573,
+				1.315,
+				3.727
+			],
+			"rotation": [
+				0.0,
+				-173.764,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "felt"
+			},
+			"name": "mat felt sphere",
+			"position": [
+				0.24,
+				1.315,
+				3.763
+			],
+			"rotation": [
+				0.0,
+				-173.764,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "painted_brick"
+			},
+			"name": "mat painted_brick panel",
+			"position": [
+				0.573,
+				0.93,
+				3.727
+			],
+			"rotation": [
+				0.0,
+				-173.764,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "painted_brick"
+			},
+			"name": "mat painted_brick sphere",
+			"position": [
+				0.24,
+				0.93,
+				3.763
+			],
+			"rotation": [
+				0.0,
+				-173.764,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "painted_wall"
+			},
+			"name": "mat painted_wall panel",
+			"position": [
+				0.573,
+				0.545,
+				3.727
+			],
+			"rotation": [
+				0.0,
+				-173.764,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "painted_wall"
+			},
+			"name": "mat painted_wall sphere",
+			"position": [
+				0.24,
+				0.545,
+				3.763
+			],
+			"rotation": [
+				0.0,
+				-173.764,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 6",
+			"position": [
+				0.035,
+				1.315,
+				3.767
+			],
+			"rotation": [
+				0.0,
+				-179.468,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "WALLS\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nAcoustic foam\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nFelt\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPainted brick\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPainted wall",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"library_material": "red_brick"
+			},
+			"name": "mat red_brick panel",
+			"position": [
+				-0.633,
+				1.7,
+				3.717
+			],
+			"rotation": [
+				0.0,
+				167.833,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "red_brick"
+			},
+			"name": "mat red_brick sphere",
+			"position": [
+				-0.96,
+				1.7,
+				3.647
+			],
+			"rotation": [
+				0.0,
+				167.833,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "rough_plaster"
+			},
+			"name": "mat rough_plaster panel",
+			"position": [
+				-0.633,
+				1.315,
+				3.717
+			],
+			"rotation": [
+				0.0,
+				167.833,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "rough_plaster"
+			},
+			"name": "mat rough_plaster sphere",
+			"position": [
+				-0.96,
+				1.315,
+				3.647
+			],
+			"rotation": [
+				0.0,
+				167.833,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "smooth_plaster"
+			},
+			"name": "mat smooth_plaster panel",
+			"position": [
+				-0.633,
+				0.93,
+				3.717
+			],
+			"rotation": [
+				0.0,
+				167.833,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "smooth_plaster"
+			},
+			"name": "mat smooth_plaster sphere",
+			"position": [
+				-0.96,
+				0.93,
+				3.647
+			],
+			"rotation": [
+				0.0,
+				167.833,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 7",
+			"position": [
+				-1.156,
+				1.315,
+				3.585
+			],
+			"rotation": [
+				0.0,
+				162.129,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Red brick\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nRough white plaster\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nSmooth plaster",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"library_material": "brushed_steel"
+			},
+			"name": "mat brushed_steel panel",
+			"position": [
+				-2.092,
+				1.7,
+				3.138
+			],
+			"rotation": [
+				0.0,
+				143.802,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "brushed_steel"
+			},
+			"name": "mat brushed_steel sphere",
+			"position": [
+				-2.362,
+				1.7,
+				2.94
+			],
+			"rotation": [
+				0.0,
+				143.802,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "dark_metal"
+			},
+			"name": "mat dark_metal panel",
+			"position": [
+				-2.092,
+				1.315,
+				3.138
+			],
+			"rotation": [
+				0.0,
+				143.802,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "dark_metal"
+			},
+			"name": "mat dark_metal sphere",
+			"position": [
+				-2.362,
+				1.315,
+				2.94
+			],
+			"rotation": [
+				0.0,
+				143.802,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "perforated_metal"
+			},
+			"name": "mat perforated_metal panel",
+			"position": [
+				-2.092,
+				0.93,
+				3.138
+			],
+			"rotation": [
+				0.0,
+				143.802,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "perforated_metal"
+			},
+			"name": "mat perforated_metal sphere",
+			"position": [
+				-2.362,
+				0.93,
+				2.94
+			],
+			"rotation": [
+				0.0,
+				143.802,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "brass"
+			},
+			"name": "mat brass panel",
+			"position": [
+				-2.092,
+				0.545,
+				3.138
+			],
+			"rotation": [
+				0.0,
+				143.802,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "brass"
+			},
+			"name": "mat brass sphere",
+			"position": [
+				-2.362,
+				0.545,
+				2.94
+			],
+			"rotation": [
+				0.0,
+				143.802,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 8",
+			"position": [
+				-2.516,
+				1.315,
+				2.804
+			],
+			"rotation": [
+				0.0,
+				138.099,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "METAL\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nBrushed steel\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nDark metal\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPerforated metal\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPolished brass",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"library_material": "black_leather"
+			},
+			"name": "mat black_leather panel",
+			"position": [
+				-3.15,
+				1.7,
+				2.073
+			],
+			"rotation": [
+				0.0,
+				120.836,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "black_leather"
+			},
+			"name": "mat black_leather sphere",
+			"position": [
+				-3.322,
+				1.7,
+				1.785
+			],
+			"rotation": [
+				0.0,
+				120.836,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "brown_leather"
+			},
+			"name": "mat brown_leather panel",
+			"position": [
+				-3.15,
+				1.315,
+				2.073
+			],
+			"rotation": [
+				0.0,
+				120.836,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "brown_leather"
+			},
+			"name": "mat brown_leather sphere",
+			"position": [
+				-3.322,
+				1.315,
+				1.785
+			],
+			"rotation": [
+				0.0,
+				120.836,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "oxblood_leather"
+			},
+			"name": "mat oxblood_leather panel",
+			"position": [
+				-3.15,
+				0.93,
+				2.073
+			],
+			"rotation": [
+				0.0,
+				120.836,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "oxblood_leather"
+			},
+			"name": "mat oxblood_leather sphere",
+			"position": [
+				-3.322,
+				0.93,
+				1.785
+			],
+			"rotation": [
+				0.0,
+				120.836,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "tufted_leather"
+			},
+			"name": "mat tufted_leather panel",
+			"position": [
+				-3.15,
+				0.545,
+				2.073
+			],
+			"rotation": [
+				0.0,
+				120.836,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "tufted_leather"
+			},
+			"name": "mat tufted_leather sphere",
+			"position": [
+				-3.322,
+				0.545,
+				1.785
+			],
+			"rotation": [
+				0.0,
+				120.836,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 9",
+			"position": [
+				-3.411,
+				1.315,
+				1.6
+			],
+			"rotation": [
+				0.0,
+				115.133,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "LEATHER\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nBlack leather\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nBrown leather\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nOxblood leather\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nTufted leather",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"library_material": "corduroy"
+			},
+			"name": "mat corduroy panel",
+			"position": [
+				-3.707,
+				1.7,
+				0.689
+			],
+			"rotation": [
+				0.0,
+				98.023,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "corduroy"
+			},
+			"name": "mat corduroy sphere",
+			"position": [
+				-3.754,
+				1.7,
+				0.357
+			],
+			"rotation": [
+				0.0,
+				98.023,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "cream_carpet"
+			},
+			"name": "mat cream_carpet panel",
+			"position": [
+				-3.707,
+				1.315,
+				0.689
+			],
+			"rotation": [
+				0.0,
+				98.023,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "cream_carpet"
+			},
+			"name": "mat cream_carpet sphere",
+			"position": [
+				-3.754,
+				1.315,
+				0.357
+			],
+			"rotation": [
+				0.0,
+				98.023,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "melange_fabric"
+			},
+			"name": "mat melange_fabric panel",
+			"position": [
+				-3.707,
+				0.93,
+				0.689
+			],
+			"rotation": [
+				0.0,
+				98.023,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "melange_fabric"
+			},
+			"name": "mat melange_fabric sphere",
+			"position": [
+				-3.754,
+				0.93,
+				0.357
+			],
+			"rotation": [
+				0.0,
+				98.023,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "herringbone_upholstery"
+			},
+			"name": "mat herringbone_upholstery panel",
+			"position": [
+				-3.707,
+				0.545,
+				0.689
+			],
+			"rotation": [
+				0.0,
+				98.023,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "herringbone_upholstery"
+			},
+			"name": "mat herringbone_upholstery sphere",
+			"position": [
+				-3.754,
+				0.545,
+				0.357
+			],
+			"rotation": [
+				0.0,
+				98.023,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 10",
+			"position": [
+				-3.764,
+				1.315,
+				0.152
+			],
+			"rotation": [
+				0.0,
+				92.319,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "FABRIC AND CARPET\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nCorduroy\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nCream carpet\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nGrey melange fabric\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nHerringbone upholstery",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"library_material": "linen"
+			},
+			"name": "mat linen panel",
+			"position": [
+				-3.703,
+				1.7,
+				-0.714
+			],
+			"rotation": [
+				0.0,
+				76.578,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "linen"
+			},
+			"name": "mat linen sphere",
+			"position": [
+				-3.625,
+				1.7,
+				-1.04
+			],
+			"rotation": [
+				0.0,
+				76.578,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "plush_carpet"
+			},
+			"name": "mat plush_carpet panel",
+			"position": [
+				-3.703,
+				1.315,
+				-0.714
+			],
+			"rotation": [
+				0.0,
+				76.578,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "plush_carpet"
+			},
+			"name": "mat plush_carpet sphere",
+			"position": [
+				-3.625,
+				1.315,
+				-1.04
+			],
+			"rotation": [
+				0.0,
+				76.578,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "velvet"
+			},
+			"name": "mat velvet panel",
+			"position": [
+				-3.703,
+				0.93,
+				-0.714
+			],
+			"rotation": [
+				0.0,
+				76.578,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "velvet"
+			},
+			"name": "mat velvet sphere",
+			"position": [
+				-3.625,
+				0.93,
+				-1.04
+			],
+			"rotation": [
+				0.0,
+				76.578,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "wicker"
+			},
+			"name": "mat wicker panel",
+			"position": [
+				-3.703,
+				0.545,
+				-0.714
+			],
+			"rotation": [
+				0.0,
+				76.578,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "wicker"
+			},
+			"name": "mat wicker sphere",
+			"position": [
+				-3.625,
+				0.545,
+				-1.04
+			],
+			"rotation": [
+				0.0,
+				76.578,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 11",
+			"position": [
+				-3.559,
+				1.122,
+				-1.234
+			],
+			"rotation": [
+				0.0,
+				70.875,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Linen\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPlush carpet\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nVelvet\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWicker",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"library_material": "woven_carpet"
+			},
+			"name": "mat woven_carpet panel",
+			"position": [
+				-3.302,
+				1.7,
+				-1.82
+			],
+			"rotation": [
+				0.0,
+				58.631,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "woven_carpet"
+			},
+			"name": "mat woven_carpet sphere",
+			"position": [
+				-3.128,
+				1.7,
+				-2.106
+			],
+			"rotation": [
+				0.0,
+				58.631,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"library_material": "woven_upholstery"
+			},
+			"name": "mat woven_upholstery panel",
+			"position": [
+				-3.302,
+				1.315,
+				-1.82
+			],
+			"rotation": [
+				0.0,
+				58.631,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.02
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"library_material": "woven_upholstery"
+			},
+			"name": "mat woven_upholstery sphere",
+			"position": [
+				-3.128,
+				1.315,
+				-2.106
+			],
+			"rotation": [
+				0.0,
+				58.631,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 12",
+			"position": [
+				-3.006,
+				1.508,
+				-2.271
+			],
+			"rotation": [
+				0.0,
+				52.928,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Woven carpet\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWoven upholstery",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		}
+	],
+	"recolour": [],
+	"schema": 2
+}

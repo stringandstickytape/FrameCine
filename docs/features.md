@@ -85,6 +85,7 @@ sections of `user://settings.cfg`; `<environment id>` and `<id>` sections hold o
 | [Android apps](#android-apps) | | none | on demand, from Files |
 | [Effect library](#effect-library) | | none | data and shaders; a room names an effect (`docs/effects.md`) |
 | [Controller look](#controller-look) | | `[controllers] look`, `look_options` | on; black as the controllers come by default |
+| [Showrooms](#showrooms) | | none | in the Room tab's Showrooms group (`docs/showrooms.md`) |
 | [Every format: old and other codecs in software](#every-format-old-and-other-codecs-in-software) | none | none | on (engine branch `frame/codecs`) |
 
 ## #36 Wall-clock end time
@@ -2278,3 +2279,25 @@ Untested: on the headset (each effect's cost there, and how the slow motions rea
 - **Tested:** `test_controller_look` (612 checks headless, 647 with a renderer: every preset builds and draws on each
   model, options and bounds, the print's contrast on every preset and on any colour, the shell only, the setting's
   round trip, the command). Not yet seen on the headset.
+
+## Showrooms
+
+Rooms that ship with the app to show what the room system can do: the Effects gallery (every effect on a sphere, by
+group), the Material wall (every library material on a panel and a sphere), Objects (shapes, text, surfaces and
+pictures, every widget, motion, the built-in objects), Lights (the key light with shadows, sky fill, the film's
+light, a point and a spot light) and one room per sky. Each sample has its name beside it. They are plain room
+documents, made from the libraries by `app/tools/showrooms.gd` (run it again when a library grows), read-only under
+`app/environments/showrooms/`, and listed in the Room tab under **Showrooms** (ids `showroom:<id>`, so
+`set_environment` and `--env` take them too). Each keeps a budget for a mobile GPU (100 cost units, 150 draw calls,
+250 000 triangles, 16 text parts); a room that would go over is split. Particles are left out for now.
+
+- **Measuring:** the dev link's `perf_rooms` shows each showroom in turn at each foveation level and returns the GPU
+  time of each, against the void (`app/scripts/assistant/room_perf.gd`); the steps for the headset are in
+  `docs/showrooms.md`.
+- **Also:** a room's sky sphere is now 180 m, inside the cameras' 200 m far plane (it was 400 m, so a room's sky
+  only showed in snapshots).
+- **Tested:** `tests/test_showrooms.gd` (every document valid and within the limits, every effect, sky, material,
+  built-in object, part type, widget and motion shown, the labels level with their samples, the files as the tool
+  makes them, each built in the main scene, the Room tab's group, `perf_rooms`). Rendered in WSL with lavapipe.
+
+Untested: on the headset (the GPU cost of each, how the labels read in the lenses).

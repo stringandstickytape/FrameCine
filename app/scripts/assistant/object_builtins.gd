@@ -1,7 +1,8 @@
 extends RefCounted
 
 ## The object library's built-in objects (object_library.gd, docs/assistant.md "Objects"): a few simple ones made here
-## from the engine's primitive meshes, so the repository holds no model files and nothing anyone else made. Each is
+## from the engine's primitive meshes, so nothing anyone else made (the showrooms ship .glb copies written from these,
+## by tools/showrooms.gd). Each is
 ## built as nodes (one MeshInstance3D per part, named), written as a .glb by the library and read back like any
 ## imported object. The front faces +Z; a wall object's back is at z = 0, a floor object's bottom at y = 0.
 ##

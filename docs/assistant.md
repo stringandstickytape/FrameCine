@@ -601,6 +601,10 @@ second, for 60 s.
   cost, ms_per_cost, dropped, film_playing}`. Arrangements: `grid` and `line` 6 m ahead, `ring` round the seat
   (`radius` 10), `scatter` (`radius` 12), `stack` (all in one place: the overdraw case); `spacing`, `center`. The
   room document is not touched or saved.
+- Whole rooms, from the dev link: `perf_rooms {rooms, foveation, baseline, settle, seconds}` shows each room in turn
+  (default: every showroom, after the void as the baseline) at each foveation level (default off, low, high), waits
+  `settle` s, measures `seconds` s and returns a row per room and level with `delta_gpu_ms` against the baseline;
+  then the viewer's room and foveation again. The showrooms and the steps on the headset: `docs/showrooms.md`.
 
 ### Every change is kept
 

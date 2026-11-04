@@ -1,0 +1,944 @@
+{
+	"base": "void",
+	"light": {
+		"ambient": 0.7,
+		"contact_shadows": false,
+		"screen_glow": 0.3
+	},
+	"name": "Objects",
+	"parts": [
+		{
+			"material": {
+				"color": "#1b1d22"
+			},
+			"name": "Floor",
+			"position": [
+				0,
+				0,
+				0
+			],
+			"size": [
+				7.2,
+				7.2
+			],
+			"type": "plane"
+		},
+		{
+			"name": "About",
+			"position": [
+				1.858,
+				1.315,
+				-1.519
+			],
+			"rotation": [
+				0.0,
+				-50.743,
+				0.0
+			],
+			"size": [
+				0.045
+			],
+			"text": "Objects\nWhat a room document places: shapes and text, surfaces and pictures, widgets, motion and the object library's built-in objects. Lights: the Lights showroom. Particles are not shown here.",
+			"text_options": {
+				"color": "#e6e6e6",
+				"max_width": 0.9
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#6f8fb0"
+			},
+			"name": "Box",
+			"position": [
+				2.327,
+				1.7,
+				-0.588
+			],
+			"rotation": [
+				20.0,
+				-45.81,
+				0.0
+			],
+			"size": [
+				0.24,
+				0.24,
+				0.24
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"color": "#b07a5a"
+			},
+			"name": "Sphere",
+			"position": [
+				2.327,
+				1.315,
+				-0.588
+			],
+			"rotation": [
+				0.0,
+				-75.81,
+				0.0
+			],
+			"size": [
+				0.3
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#7aa070"
+			},
+			"name": "Cylinder",
+			"position": [
+				2.327,
+				0.93,
+				-0.588
+			],
+			"rotation": [
+				15.0,
+				-75.81,
+				0.0
+			],
+			"size": [
+				0.22,
+				0.3
+			],
+			"type": "cylinder"
+		},
+		{
+			"material": {
+				"color": "#a0a0a8"
+			},
+			"name": "Plane",
+			"position": [
+				2.327,
+				0.545,
+				-0.588
+			],
+			"rotation": [
+				60.0,
+				-75.81,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3
+			],
+			"type": "plane"
+		},
+		{
+			"name": "Labels 1",
+			"position": [
+				2.369,
+				1.315,
+				-0.383
+			],
+			"rotation": [
+				0.0,
+				-80.823,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "SHAPES\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nBox\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nSphere\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nCylinder\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPlane",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"name": "Text",
+			"position": [
+				2.393,
+				1.7,
+				0.185
+			],
+			"rotation": [
+				0.0,
+				-94.431,
+				0.0
+			],
+			"size": [
+				0.1
+			],
+			"text": "Words",
+			"text_options": {
+				"background": "#2a3442",
+				"weight": "bold"
+			},
+			"type": "text"
+		},
+		{
+			"name": "Labels 2",
+			"position": [
+				2.364,
+				1.7,
+				0.414
+			],
+			"rotation": [
+				0.0,
+				-99.922,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Text",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#c06a3a"
+			},
+			"name": "Colour",
+			"position": [
+				2.141,
+				1.7,
+				1.085
+			],
+			"rotation": [
+				15.0,
+				-91.872,
+				0.0
+			],
+			"size": [
+				0.26,
+				0.26,
+				0.26
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"color": "#402010",
+				"emission": "#ff9040",
+				"emission_strength": 1.5
+			},
+			"name": "Glow emission",
+			"position": [
+				2.141,
+				1.315,
+				1.085
+			],
+			"rotation": [
+				0.0,
+				-116.872,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": [
+					0.55,
+					0.8,
+					1.0,
+					0.45
+				]
+			},
+			"name": "See-through",
+			"position": [
+				2.141,
+				0.93,
+				1.085
+			],
+			"rotation": [
+				0.0,
+				-116.872,
+				0.0
+			],
+			"size": [
+				0.28
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"texture_file": "picture.png",
+				"uv": "atlas"
+			},
+			"name": "Picture atlas",
+			"position": [
+				2.141,
+				0.545,
+				1.085
+			],
+			"rotation": [
+				15.0,
+				-91.872,
+				0.0
+			],
+			"size": [
+				0.26,
+				0.26,
+				0.26
+			],
+			"type": "box"
+		},
+		{
+			"name": "Labels 3",
+			"position": [
+				2.038,
+				1.315,
+				1.268
+			],
+			"rotation": [
+				0.0,
+				-121.885,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "SURFACES\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nColour\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nGlow (emission)\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nSee-through\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPicture, atlas",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"texture_file": "picture.png",
+				"uv": "each_face"
+			},
+			"name": "Picture each face",
+			"position": [
+				1.58,
+				1.7,
+				1.807
+			],
+			"rotation": [
+				15.0,
+				-113.835,
+				0.0
+			],
+			"size": [
+				0.26,
+				0.26,
+				0.26
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"color": "#505860",
+				"texture_file": "picture.png",
+				"uv": "front_only"
+			},
+			"name": "Picture front only",
+			"position": [
+				1.58,
+				1.315,
+				1.807
+			],
+			"rotation": [
+				15.0,
+				-113.835,
+				0.0
+			],
+			"size": [
+				0.26,
+				0.26,
+				0.26
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"alpha": "cutout",
+				"texture_file": "cutout.png",
+				"uv": "front_only"
+			},
+			"name": "Cut-out picture",
+			"position": [
+				1.58,
+				0.93,
+				1.807
+			],
+			"rotation": [
+				0.0,
+				-138.835,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.3,
+				0.01
+			],
+			"type": "box"
+		},
+		{
+			"name": "Labels 4",
+			"position": [
+				1.416,
+				1.315,
+				1.938
+			],
+			"rotation": [
+				0.0,
+				-143.849,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Picture, each face\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPicture, front only\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nCut-out picture",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#e8e4dc"
+			},
+			"name": "Clock",
+			"position": [
+				0.491,
+				1.7,
+				2.349
+			],
+			"rotation": [
+				90.0,
+				-168.199,
+				0.0
+			],
+			"size": [
+				0.28,
+				0.03
+			],
+			"type": "cylinder",
+			"widget": "clock",
+			"widget_options": {
+				"background": "#e8e4dc",
+				"color": "#202020",
+				"style": "analog"
+			}
+		},
+		{
+			"material": {
+				"color": "#1c1c1c"
+			},
+			"name": "Film progress bar",
+			"position": [
+				0.491,
+				1.315,
+				2.349
+			],
+			"rotation": [
+				0.0,
+				-168.199,
+				0.0
+			],
+			"size": [
+				0.34,
+				0.1,
+				0.03
+			],
+			"type": "box",
+			"widget": "film_progress",
+			"widget_options": {
+				"style": "bar"
+			}
+		},
+		{
+			"material": {
+				"color": "#1c1c1c"
+			},
+			"name": "Film progress ring",
+			"position": [
+				0.491,
+				0.93,
+				2.349
+			],
+			"rotation": [
+				0.0,
+				-168.199,
+				0.0
+			],
+			"size": [
+				0.24,
+				0.24,
+				0.03
+			],
+			"type": "box",
+			"widget": "film_progress",
+			"widget_options": {
+				"style": "ring"
+			}
+		},
+		{
+			"material": {
+				"color": "#1c1c1c"
+			},
+			"name": "Now playing",
+			"position": [
+				0.491,
+				0.545,
+				2.349
+			],
+			"rotation": [
+				0.0,
+				-168.199,
+				0.0
+			],
+			"size": [
+				0.34,
+				0.12,
+				0.03
+			],
+			"type": "box",
+			"widget": "now_playing"
+		},
+		{
+			"name": "Labels 5",
+			"position": [
+				0.264,
+				1.315,
+				2.385
+			],
+			"rotation": [
+				0.0,
+				-173.69,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "WIDGETS\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nClock\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nFilm progress, bar\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nFilm progress, ring\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nNow playing",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#1c1c1c"
+			},
+			"name": "End time",
+			"position": [
+				-0.502,
+				1.7,
+				2.347
+			],
+			"rotation": [
+				0.0,
+				167.927,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.12,
+				0.03
+			],
+			"type": "box",
+			"widget": "end_time"
+		},
+		{
+			"material": {
+				"color": "#1c1c1c"
+			},
+			"name": "Battery",
+			"position": [
+				-0.502,
+				1.315,
+				2.347
+			],
+			"rotation": [
+				0.0,
+				167.927,
+				0.0
+			],
+			"size": [
+				0.3,
+				0.14,
+				0.03
+			],
+			"type": "box",
+			"widget": "battery"
+		},
+		{
+			"material": {
+				"color": "#ffffff"
+			},
+			"name": "Screen glow",
+			"position": [
+				-0.502,
+				0.93,
+				2.347
+			],
+			"rotation": [
+				0.0,
+				167.927,
+				0.0
+			],
+			"size": [
+				0.26
+			],
+			"type": "sphere",
+			"widget": "screen_glow",
+			"widget_options": {
+				"style": "shimmer"
+			}
+		},
+		{
+			"name": "Labels 6",
+			"position": [
+				-0.705,
+				1.315,
+				2.294
+			],
+			"rotation": [
+				0.0,
+				162.914,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "End time\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nBattery\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nScreen glow",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#d0a040"
+			},
+			"motion": {
+				"axis": [
+					0,
+					1,
+					0
+				],
+				"speed": 40,
+				"type": "spin"
+			},
+			"name": "Spin",
+			"position": [
+				-1.481,
+				1.7,
+				1.889
+			],
+			"rotation": [
+				20.0,
+				141.906,
+				20.0
+			],
+			"size": [
+				0.2,
+				0.2,
+				0.2
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"color": "#60a0d0"
+			},
+			"motion": {
+				"height": 0.1,
+				"period": 3,
+				"type": "bob"
+			},
+			"name": "Bob",
+			"position": [
+				-1.481,
+				1.315,
+				1.889
+			],
+			"rotation": [
+				0.0,
+				141.906,
+				0.0
+			],
+			"size": [
+				0.2
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#a070c0"
+			},
+			"motion": {
+				"angle": 20,
+				"axis": [
+					0,
+					0,
+					1
+				],
+				"period": 4,
+				"type": "sway"
+			},
+			"name": "Sway",
+			"position": [
+				-1.481,
+				0.93,
+				1.889
+			],
+			"rotation": [
+				0.0,
+				141.906,
+				0.0
+			],
+			"size": [
+				0.06,
+				0.3,
+				0.06
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"color": "#808080"
+			},
+			"name": "Orbit",
+			"position": [
+				-1.481,
+				0.545,
+				1.889
+			],
+			"rotation": [
+				0.0,
+				141.906,
+				0.0
+			],
+			"size": [
+				0.08
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#e0e0e0"
+			},
+			"motion": {
+				"axis": [
+					0.617,
+					0.0,
+					-0.787
+				],
+				"center": [
+					-1.481,
+					0.545,
+					1.889
+				],
+				"period": 6,
+				"radius": 0.12,
+				"type": "orbit"
+			},
+			"name": "Orbit 2",
+			"position": [
+				-1.575,
+				0.545,
+				1.815
+			],
+			"rotation": [
+				0.0,
+				141.906,
+				0.0
+			],
+			"size": [
+				0.08
+			],
+			"type": "sphere"
+		},
+		{
+			"name": "Labels 7",
+			"position": [
+				-1.64,
+				1.315,
+				1.752
+			],
+			"rotation": [
+				0.0,
+				136.892,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "MOTION\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nSpin\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nBob\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nSway\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nOrbit",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"material": {
+				"color": "#c05050"
+			},
+			"motion": {
+				"angle": 30,
+				"axis": [
+					0,
+					0,
+					1
+				],
+				"hinge": [
+					-0.13,
+					0,
+					0
+				],
+				"period": 2,
+				"type": "flap"
+			},
+			"name": "Flap",
+			"position": [
+				-2.067,
+				1.7,
+				1.226
+			],
+			"rotation": [
+				0.0,
+				123.762,
+				0.0
+			],
+			"size": [
+				0.26,
+				0.02,
+				0.12
+			],
+			"type": "box"
+		},
+		{
+			"name": "Labels 8",
+			"position": [
+				-2.104,
+				1.7,
+				1.154
+			],
+			"rotation": [
+				0.0,
+				118.749,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "Flap",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"model_file": "picture_frame.glb",
+			"name": "Picture frame",
+			"object": "picture_frame",
+			"position": [
+				-2.38,
+				1.7,
+				0.395
+			],
+			"rotation": [
+				0.0,
+				99.411,
+				0.0
+			],
+			"scale": 0.85,
+			"type": "model"
+		},
+		{
+			"model_file": "wall_shelf.glb",
+			"name": "Wall shelf",
+			"object": "wall_shelf",
+			"position": [
+				-2.436,
+				1.365,
+				0.404
+			],
+			"rotation": [
+				0.0,
+				99.411,
+				0.0
+			],
+			"scale": 0.625,
+			"type": "model"
+		},
+		{
+			"model_file": "pot_plant.glb",
+			"name": "Pot plant",
+			"object": "pot_plant",
+			"position": [
+				-2.363,
+				0.76,
+				0.392
+			],
+			"rotation": [
+				0.0,
+				99.411,
+				0.0
+			],
+			"scale": 0.462,
+			"type": "model"
+		},
+		{
+			"model_file": "wall_clock.glb",
+			"name": "Wall clock",
+			"object": "wall_clock",
+			"position": [
+				-2.389,
+				0.545,
+				0.396
+			],
+			"rotation": [
+				0.0,
+				99.411,
+				0.0
+			],
+			"scale": 1.0,
+			"type": "model",
+			"widget": "clock",
+			"widget_options": {
+				"background": "#00000000",
+				"color": "#202020",
+				"style": "analog"
+			}
+		},
+		{
+			"name": "Labels 9",
+			"position": [
+				-2.399,
+				1.315,
+				0.084
+			],
+			"rotation": [
+				0.0,
+				92.011,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "LIBRARY OBJECTS\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPicture frame\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWall shelf\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPot plant\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWall clock",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		}
+	],
+	"recolour": [],
+	"schema": 2
+}

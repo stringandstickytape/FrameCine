@@ -1,0 +1,273 @@
+{
+	"base": "void",
+	"light": {
+		"ambient": 0.2,
+		"contact_shadows": true,
+		"key": {
+			"azimuth": 60,
+			"elevation": 40,
+			"energy": 0.8,
+			"shadows": true
+		},
+		"screen": {
+			"energy": 0.6
+		},
+		"screen_glow": 0.4,
+		"sky": {
+			"energy": 0.35
+		}
+	},
+	"lights": [
+		{
+			"color": "#ffb060",
+			"energy": 1.5,
+			"flicker": {
+				"rate": 1.2,
+				"swing": 0.25
+			},
+			"name": "Point",
+			"position": [
+				-2.2,
+				1.4,
+				-0.2
+			],
+			"range": 3.0,
+			"type": "point"
+		},
+		{
+			"angle": 35,
+			"color": "#a8c4ff",
+			"direction": [
+				0,
+				-1,
+				0
+			],
+			"energy": 3.0,
+			"name": "Spot",
+			"position": [
+				2.2,
+				2.2,
+				0.0
+			],
+			"range": 4.0,
+			"type": "spot"
+		}
+	],
+	"name": "Lights",
+	"parts": [
+		{
+			"material": {
+				"color": "#6d6862"
+			},
+			"name": "Floor",
+			"position": [
+				0,
+				0,
+				0
+			],
+			"size": [
+				9,
+				9
+			],
+			"type": "plane"
+		},
+		{
+			"material": {
+				"color": "#d8d0c4"
+			},
+			"name": "Ball",
+			"position": [
+				-2.3,
+				0.25,
+				-0.6
+			],
+			"size": [
+				0.5
+			],
+			"type": "sphere"
+		},
+		{
+			"material": {
+				"color": "#5a7890"
+			},
+			"name": "Drum",
+			"position": [
+				-2.2,
+				0.3,
+				0.3
+			],
+			"size": [
+				0.4,
+				0.6
+			],
+			"type": "cylinder"
+		},
+		{
+			"material": {
+				"color": "#b08a5a"
+			},
+			"name": "Crate",
+			"position": [
+				2.3,
+				0.25,
+				-0.5
+			],
+			"rotation": [
+				0,
+				25,
+				0
+			],
+			"size": [
+				0.5,
+				0.5,
+				0.5
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"color": "#c8c8c8"
+			},
+			"name": "Pillar",
+			"position": [
+				2.0,
+				0.7,
+				0.6
+			],
+			"size": [
+				0.25,
+				1.4,
+				0.25
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"color": "#a09080"
+			},
+			"name": "Arch left",
+			"position": [
+				-0.6,
+				0.8,
+				2.4
+			],
+			"size": [
+				0.2,
+				1.6,
+				0.2
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"color": "#a09080"
+			},
+			"name": "Arch right",
+			"position": [
+				0.6,
+				0.8,
+				2.4
+			],
+			"size": [
+				0.2,
+				1.6,
+				0.2
+			],
+			"type": "box"
+		},
+		{
+			"material": {
+				"color": "#a09080"
+			},
+			"name": "Arch top",
+			"position": [
+				0,
+				1.7,
+				2.4
+			],
+			"size": [
+				1.4,
+				0.2,
+				0.2
+			],
+			"type": "box"
+		},
+		{
+			"model_file": "pot_plant.glb",
+			"name": "Plant",
+			"object": "pot_plant",
+			"position": [
+				2.6,
+				0.0,
+				0.4
+			],
+			"type": "model"
+		},
+		{
+			"name": "About",
+			"position": [
+				1.7,
+				1.6,
+				-1.7
+			],
+			"rotation": [
+				0,
+				-45.0,
+				0
+			],
+			"size": [
+				0.06
+			],
+			"text": "Lights\nThe key light (the sun) with its shadows, the sky's fill light and the film's light on the room; a flickering point light on the left, a spot light on the right.",
+			"text_options": {
+				"color": "#e6e6e6",
+				"max_width": 1.2
+			},
+			"type": "text"
+		},
+		{
+			"name": "Point light label",
+			"position": [
+				-2.0,
+				1.2,
+				-0.15
+			],
+			"rotation": [
+				0,
+				85.7,
+				0
+			],
+			"size": [
+				0.06
+			],
+			"text": "Point light, flickering",
+			"text_options": {
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
+			"name": "Spot light label",
+			"position": [
+				2.0,
+				1.45,
+				0.05
+			],
+			"rotation": [
+				0,
+				-91.4,
+				0
+			],
+			"size": [
+				0.06
+			],
+			"text": "Spot light",
+			"text_options": {
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		}
+	],
+	"recolour": [],
+	"schema": 2
+}

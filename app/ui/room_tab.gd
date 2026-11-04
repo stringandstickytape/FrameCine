@@ -1,15 +1,16 @@
 extends ScrollContainer
 
-## The Room tab (docs/ui-design.md): environment (with photo rooms and glTF rooms, #18 / #53, and "use this picture
-## as the room"), seat (#19), floor reflection (#62), the room's effects (bias light #29, reacting to the film #81,
-## the projector beam #92, time of day #84), room light (and whether it dims while the film plays), screen
-## placement reset, recentre, the showing (curtains #37, up next #34, intermission #39), the sleep timer (#17), and the
-## watch party (#51, scripts/party/watch_party.gd): host, join, leave, who is in it, and "the host plays a file that
-## isn't open here". Each control is also a command (scripts/dev/room_tab_commands.gd), which calls the same code and
-## then sync().
+## The Room tab (docs/ui-design.md): environment (with photo rooms and glTF rooms, #18 / #53, "use this picture as
+## the room", and the showrooms in a group of their own, docs/showrooms.md), seat (#19), floor reflection (#62), the
+## room's effects (bias light #29, reacting to the film #81, the projector beam #92, time of day #84), room light (and
+## whether it dims while the film plays), screen placement reset, recentre, the showing (curtains #37, up next #34,
+## intermission #39), the sleep timer (#17), and the watch party (#51, scripts/party/watch_party.gd): host, join,
+## leave, who is in it, and "the host plays a file that isn't open here". Each control is also a command
+## (scripts/dev/room_tab_commands.gd), which calls the same code and then sync().
 
 const W := preload("res://ui/pane_widgets.gd")
 const EnvLibrary := preload("res://scripts/env/env_library.gd")
+const Showrooms := preload("res://scripts/env/showrooms.gd")
 const SearchForm := preload("res://ui/search_form.gd")
 const WatchParty := preload("res://scripts/party/watch_party.gd")
 
@@ -23,6 +24,11 @@ var box: VBoxContainer
 ## One row per environment, rebuilt when the list changes (photo rooms and glTF rooms come and go).
 var _envs: VBoxContainer
 var _env_ids: Array[String] = []
+## The showrooms (scripts/env/showrooms.gd), the list's last rows: their own group under the rooms, one row each.
+var _showroom_box: VBoxContainer
+var _showrooms: VBoxContainer
+## Every environment row, the rooms' then the showrooms', in _env_ids' order.
+var _env_rows: Array[Button] = []
 var _use_picture: Button
 var _seat_box: VBoxContainer
 var _seat_label: Label
@@ -88,6 +94,12 @@ func bind(p_app: Node) -> void:
 	box.add_child(_envs)
 	_use_picture = W.button("Use this picture as the room", _use_picture_as_room)
 	box.add_child(W.hbox([_use_picture]))
+	_showroom_box = W.vbox()
+	box.add_child(_showroom_box)
+	_showroom_box.add_child(W.section("Showrooms"))
+	_showrooms = VBoxContainer.new()
+	_showrooms.add_theme_constant_override("separation", 0)
+	_showroom_box.add_child(_showrooms)
 
 	# Seats (#19): rooms that have them.
 	_seat_box = W.vbox()
@@ -261,6 +273,7 @@ func tick() -> void:
 
 
 ## The environment rows: rebuilt when the list changed (a photo room or a glTF room added), else only the mark moves.
+## The showrooms go in their own group (Showrooms), one mark for both.
 func _sync_envs() -> void:
 	if _form_open():
 		return
@@ -270,9 +283,11 @@ func _sync_envs() -> void:
 		ids.append(str(e[0]))
 	if ids != _env_ids:
 		_env_ids = ids
-		for c in _envs.get_children():
-			_envs.remove_child(c)
-			c.queue_free()
+		_env_rows.clear()
+		for holder: VBoxContainer in [_envs, _showrooms]:
+			for c in holder.get_children():
+				holder.remove_child(c)
+				c.queue_free()
 		var group := ButtonGroup.new()
 		for e: Array in list:
 			var id := str(e[0])
@@ -280,9 +295,11 @@ func _sync_envs() -> void:
 			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 			b.toggle_mode = true
 			b.button_group = group
-			_envs.add_child(b)
-	for i in _envs.get_child_count():
-		(_envs.get_child(i) as Button).set_pressed_no_signal(_env_ids[i] == str(app.env_id))
+			(_showrooms if Showrooms.is_showroom(id) else _envs).add_child(b)
+			_env_rows.append(b)
+		_showroom_box.visible = _showrooms.get_child_count() > 0
+	for i in _env_rows.size():
+		_env_rows[i].set_pressed_no_signal(_env_ids[i] == str(app.env_id))
 	_use_picture.visible = bool(app.features.slideshow.is_picture()) and not str(app.current_path).begins_with("smb://")
 
 
