@@ -5,7 +5,8 @@ extends SceneTree
 ## the front panel where the head is, keeping it there while the head moves, and hiding it with the panel; the two
 ## panes; the style document (its defaults valid, partial changes from outside, bad values refused with their paths,
 ## only the changes kept, reset); the now playing pane (title, played / total, the bar and its hit area, a long
-## title cut; the text and bar centred as one); the laser's ray, a touch, skipping and dragging the bar; the fades.
+## title cut; the text and bar centred as one); the laser's ray, a touch, skipping and dragging the bar; the
+## categories down the main pane's side; the fades.
 ## Run: godot --headless --xr-mode off --path app --script res://tests/test_tablet.gd
 
 const Tablet := preload("res://ui/tablet.gd")
@@ -74,6 +75,8 @@ func _run() -> void:
 	_check("now playing on top, short", np.position.y > mp.end.y and np.size.y < mp.size.y * 0.5)
 	_check("a gap of %.0f mm between them" % ((np.position.y - mp.end.y) * 1000.0),
 			is_equal_approx(np.position.y - mp.end.y, Tablet.GAP))
+	_check("the top edge where it was (%.3f), the main pane 25 %% deeper (%.4f)" % [np.end.y, mp.size.y],
+			is_equal_approx(np.end.y, 0.13) and is_equal_approx(mp.size.y, 0.19 * 1.25))
 	_check("together they fill the tablet", is_equal_approx(np.end.y - mp.position.y, Tablet.SIZE.y)
 			and is_equal_approx(np.size.x, Tablet.SIZE.x) and is_equal_approx(mp.size.x, Tablet.SIZE.x))
 	_check("the pane nodes sit there", tablet.now_playing.position.is_equal_approx(Vector3(0, np.get_center().y, 0))
@@ -166,6 +169,42 @@ func _run() -> void:
 	hit = tablet.ray_hit(eye, (main_mid - eye).normalized())
 	_check("a ray at the main pane: that pane, off the bar", hit.get("pane") == "main" and float(hit["fraction"]) < 0.0)
 	_check("a ray past the tablet: nothing", tablet.ray_hit(eye, Vector3.FORWARD).is_empty())
+
+	# Categories: down the main pane's left side, Source first, one selected; the laser lights one up, the trigger
+	# or a touch selects it.
+	_check("the categories are the front panel's tabs, Files called Source", Tablet.CATEGORIES[0] == "Source"
+			and Tablet.CATEGORIES.size() == 7 and tablet.category == 0 and tablet.content_title.text == "Source")
+	var c0 := tablet.category_rect(0)
+	var c6 := tablet.category_rect(6)
+	_check("down the left side, inside the pane, one under another", c0.position.x < -mp.size.x * 0.4
+			and c0.position.x > -mp.size.x * 0.5 and c6.end.y < c0.position.y and c6.position.y > -mp.size.y * 0.5
+			and c0.end.y < mp.size.y * 0.5)
+	_check("each has its name", tablet._cat_labels[2].text == "Sound")
+	var sound_at := tablet.main_pane.to_global(Vector3(tablet.category_rect(2).get_center().x,
+			tablet.category_rect(2).get_center().y, 0))
+	hit = tablet.ray_hit(eye, (sound_at - eye).normalized())
+	_check("a ray at Sound: category 2", hit.get("pane") == "main" and int(hit["category"]) == 2)
+	_check("a ray at the main pane's middle: no category", int(tablet.ray_hit(eye, (main_mid - eye).normalized())["category"]) == -1)
+	_check("a tip over Sound: category 2", int(tablet.poke_probe(sound_at + tablet.global_transform.basis.z * 0.003)["category"]) == 2)
+	var fill_of := func(i: int) -> Color:
+		return (tablet._cat_fills[i].material_override as ShaderMaterial).get_shader_parameter("fill_color")
+	tablet.set_hover(2)
+	_check("the laser on one lights it", fill_of.call(2).is_equal_approx(Color.html(st["categories"]["hover_fill"])))
+	var changed := []
+	tablet.category_changed.connect(func(i: int) -> void: changed.append(i))
+	tablet.select_category(2)
+	_check("selecting: it shows selected, the heading follows, and it says so", tablet.category == 2
+			and fill_of.call(2).is_equal_approx(Color.html(st["categories"]["selected_fill"]))
+			and fill_of.call(0).is_equal_approx(Color.html(st["categories"]["fill"]))
+			and tablet.content_title.text == "Sound" and changed == [2])
+	tablet.select_category(2)
+	tablet.select_category(99)
+	_check("again, or out of range: nothing", changed == [2])
+	tablet.set_style({"categories": {"selected_fill": "#ff000080"}}, false)
+	_check("styled from outside", fill_of.call(2).is_equal_approx(Color.html("#ff000080")))
+	tablet.reset_style()
+	tablet.set_hover(-1)
+	tablet.select_category(0)
 	var face: Vector3 = tablet.global_transform.basis.z
 	var probe: Dictionary = tablet.poke_probe(bar_mid + face * 0.003)
 	_check("a tip 3 mm over the bar: its depth and place", absf(float(probe["depth"]) - 0.003) < 0.0005

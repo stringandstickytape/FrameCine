@@ -97,6 +97,8 @@ var _poke_down := false
 var _tablet_hit := {}
 var _scrub_hand: XRHand
 var _scrub_by := ""
+## Hands touching a category (one touch selects once; pulled back out, they can touch again).
+var _category_touch := {}
 var _grip_held := -1.0
 var _refresh_timer := 0.0
 ## A network file was picked: close once it is open.
@@ -581,6 +583,7 @@ func _update_pointer() -> void:
 			tablet.scrub(tablet.along_bar(at))
 			_tablet_hit = {"point": at, "distance": (at as Vector3).distance_to(pointer_hand.get_ray_origin()),
 					"pane": "now_playing", "fraction": tablet.along_bar(at)}
+	tablet.set_hover(int(_tablet_hit.get("category", -1)))
 	if not _tablet_hit.is_empty():
 		card_hit = _tablet_hit
 		_card_pointed = false
@@ -649,12 +652,22 @@ func _update_tablet_poke() -> void:
 			tablet.scrub(tablet.along_bar(tip))
 		return
 	if _scrub_by != "" or not app.use_xr or not tablet.is_shown():
+		_category_touch.clear()
 		return
 	for hand: XRHand in [pointer_hand, other_hand]:
 		if hand == null or not hand.get_is_active():
 			continue
 		var probe := tablet.poke_probe(hand.get_ray_origin())
 		var depth: float = probe["depth"]
+		if _category_touch.has(hand):
+			if depth > POKE_RELEASE or depth < -0.08:
+				_category_touch.erase(hand)
+			continue
+		if int(probe["category"]) >= 0 and depth < POKE_PRESS and depth > -0.05:
+			_category_touch[hand] = true
+			tablet.select_category(probe["category"])
+			hand.pulse()
+			continue
 		if float(probe["fraction"]) >= 0.0 and depth < POKE_PRESS and depth > -0.05 \
 				and tablet.begin_scrub(probe["fraction"]):
 			_scrub_hand = hand
@@ -901,7 +914,10 @@ func on_trigger(hand: XRHand, pressed: bool) -> bool:
 		hand.pulse()
 		return true
 	if not _tablet_hit.is_empty():
-		if pressed and _scrub_by == "" and float(_tablet_hit.get("fraction", -1.0)) >= 0.0 \
+		if pressed and int(_tablet_hit.get("category", -1)) >= 0:
+			tablet.select_category(_tablet_hit["category"])
+			hand.pulse()
+		elif pressed and _scrub_by == "" and float(_tablet_hit.get("fraction", -1.0)) >= 0.0 \
 				and tablet.begin_scrub(_tablet_hit["fraction"]):
 			_scrub_hand = hand
 			_scrub_by = "trigger"

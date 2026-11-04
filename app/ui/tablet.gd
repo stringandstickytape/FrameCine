@@ -10,7 +10,10 @@ extends Node3D
 ##   now playing   short, on top: the title on the left, "played / total" on the right (as the front panel shows
 ##                 them), and the time bar along the bottom. Nothing else. bar_fraction(point) gives the place in the
 ##                 film for a point on or near the bar, for touching it or the laser and trigger (to come).
-##   main          below it, for everything else: the backdrop only for now.
+##   main          below it, for everything else, 25 % deeper than at first (the user: the top stays, the bottom
+##                 comes down). Down its left side the categories, one at a time: CATEGORIES (as the front panel's
+##                 tabs, Files called Source), selected by the laser and trigger or a touch; the selected one's name
+##                 heads the rest of the pane, which is empty for now.
 ##
 ## Its look is one JSON document, all of it themable from outside (the assistant, in time). The defaults are
 ## ui/themes/tablet.json; set_style() merges a partial document over them, checked against SCHEMA (nothing changes
@@ -22,6 +25,9 @@ extends Node3D
 ##   now_playing   padding (metres, at the sides); spacing (metres between the text and the bar: the two are
 ##                 centred together, top to bottom); title and time: color, size (the font's size, metres), font (one
 ##                 of the theme's: FONTS); bar: track, played (colours), height, corner_radius (metres)
+##   categories    padding, width, item_height, spacing, corner_radius, text_inset (metres); text: color, size, font;
+##                 fill, hover_fill, selected_fill (colours); selected_color (the selected one's text)
+##   content       title: color, size, font (the selected category's name over the rest of the main pane)
 ##
 ## Placement, from the head's position and its heading (yaw only, so looking down when pressing doesn't sink it):
 ## FORWARD metres ahead and DOWN metres below the eyes, the centre about 44° below the horizon, about half a metre
@@ -32,7 +38,10 @@ extends Node3D
 ##   style() -> Dictionary, set_style(changes, save := true) -> Array (errors), reset_style()
 ##   now_playing, main_pane    the two panes (MeshInstance3D); title_label, time_label (Label3D)
 ##   bar_rect() -> Rect2 (now playing pane's space), bar_fraction(global_point) -> float (-1: not on the bar)
-##   ray_hit(origin, direction) -> {point, distance, pane, fraction} or {}; poke_probe(point) -> {depth, fraction}
+##   category, select_category(i), category_rect(i) -> Rect2 (main pane's space), category_at(point) -> int (-1),
+##   set_hover(i), signal category_changed(i)
+##   ray_hit(origin, direction) -> {point, distance, pane, fraction, category} or {};
+##   poke_probe(point) -> {depth, fraction, category}
 ##   plane_point(origin, direction) -> Variant (the ray on the tablet's plane, or null); along_bar(point) -> 0..1
 ##   seek_to(fraction) -> bool; begin_scrub(fraction) -> bool, scrub(fraction), end_scrub(), scrubbing
 ## Input (ui_layer.gd): the pointer controller's laser shows on either pane. The time bar is dragged: the trigger held
@@ -43,11 +52,17 @@ extends Node3D
 ##   static pane_rects() -> {name: Rect2} in metres, static validate(doc, partial) -> Array (errors)
 ##   static pose(head) -> Transform3D
 
-## Metres: the whole tablet's size (landscape), and where its centre sits from the eyes.
-const SIZE := Vector2(0.48, 0.26)
-## Metres: the now playing pane's height, and the gap between it and the main pane below.
+signal category_changed(index: int)
+
+## Metres: the now playing pane's height, the gap below it, and the main pane's height (0.19 at first, then 25 %
+## deeper, downwards).
 const NOW_PLAYING_HEIGHT := 0.06
 const GAP := 0.01
+const MAIN_HEIGHT := 0.2375
+## Metres: the whole tablet's size (landscape), and its top edge above the point it is placed at (pose()).
+const SIZE := Vector2(0.48, NOW_PLAYING_HEIGHT + GAP + MAIN_HEIGHT)
+const TOP_EDGE := 0.13
+const CATEGORIES: Array[String] = ["Source", "Picture", "Sound", "Subtitles", "Room", "Objects", "System"]
 const FORWARD := 0.35
 const DOWN := 0.34
 ## Degrees the face tilts back from vertical: 45 would face a point 45° below the horizon.
@@ -68,6 +83,13 @@ const SCHEMA := {
 		"time": {"color": "color", "size": [0.004, 0.03], "font": "font"},
 		"bar": {"track": "color", "played": "color", "height": [0.001, 0.02], "corner_radius": [0.0, 0.01]},
 	},
+	"categories": {
+		"padding": [0.0, 0.03], "width": [0.04, 0.2], "item_height": [0.012, 0.05], "spacing": [0.0, 0.02],
+		"corner_radius": [0.0, 0.025], "text_inset": [0.0, 0.03],
+		"text": {"color": "color", "size": [0.004, 0.03], "font": "font"},
+		"fill": "color", "hover_fill": "color", "selected_fill": "color", "selected_color": "color",
+	},
+	"content": {"title": {"color": "color", "size": [0.004, 0.04], "font": "font"}},
 }
 ## Label3D: the font's pixels per em (pixel_size makes it the style's size in metres).
 const FONT_PX := 96
@@ -89,6 +111,14 @@ var now_playing: MeshInstance3D
 var main_pane: MeshInstance3D
 var title_label: Label3D
 var time_label: Label3D
+## The selected category (CATEGORIES), the one under the laser (-1 none), their backgrounds and names, and the
+## content's heading.
+var category := 0
+var _hover := -1
+var _cat_fills: Array[MeshInstance3D] = []
+var _cat_labels: Array[Label3D] = []
+var content_title: Label3D
+var _labels: Array[Label3D] = []
 var _bar_track: MeshInstance3D
 var _bar_played: MeshInstance3D
 var _mats: Array[ShaderMaterial] = []
@@ -113,8 +143,16 @@ func _ready() -> void:
 	var rects := pane_rects()
 	now_playing = _pane("NowPlaying", rects["now_playing"])
 	main_pane = _pane("Main", rects["main"])
-	title_label = _label("Title", HORIZONTAL_ALIGNMENT_LEFT)
-	time_label = _label("Time", HORIZONTAL_ALIGNMENT_RIGHT)
+	title_label = _label("Title", HORIZONTAL_ALIGNMENT_LEFT, now_playing)
+	time_label = _label("Time", HORIZONTAL_ALIGNMENT_RIGHT, now_playing)
+	for i in CATEGORIES.size():
+		var fill := _rounded("Category%d" % i, Vector2(0.1, 0.03), "category", 1)
+		main_pane.add_child(fill)
+		_cat_fills.append(fill)
+		var l := _label("CategoryName%d" % i, HORIZONTAL_ALIGNMENT_LEFT, main_pane)
+		l.text = CATEGORIES[i]
+		_cat_labels.append(l)
+	content_title = _label("ContentTitle", HORIZONTAL_ALIGNMENT_LEFT, main_pane)
 	_bar_track = _bar("BarTrack", "track", 1)
 	_bar_played = _bar("BarPlayed", "played", 2)
 	visible = false
@@ -196,7 +234,7 @@ func _set_opacity(v: float) -> void:
 	_opacity = v
 	for m in _mats:
 		m.set_shader_parameter("opacity", v)
-	for l: Label3D in [title_label, time_label]:
+	for l in _labels:
 		l.modulate.a = v * float(l.get_meta("alpha", 1.0))
 
 
@@ -272,7 +310,8 @@ func ray_hit(origin: Vector3, direction: Vector3) -> Dictionary:
 		if r.has_point(Vector2(p.x, p.y)) or on_bar:
 			var world := global_transform * p
 			return {"point": world, "distance": world.distance_to(origin), "pane": key,
-					"fraction": bar_fraction(world) if key == "now_playing" else -1.0}
+					"fraction": bar_fraction(world) if key == "now_playing" else -1.0,
+					"category": category_at(world) if key == "main" else -1}
 	return {}
 
 
@@ -280,7 +319,56 @@ func ray_hit(origin: Vector3, direction: Vector3) -> Dictionary:
 ## (-1 off the bar).
 func poke_probe(point: Vector3) -> Dictionary:
 	var p := global_transform.affine_inverse() * point
-	return {"depth": p.z, "fraction": bar_fraction(global_transform * Vector3(p.x, p.y, 0.0)) if _shown else -1.0}
+	var on := global_transform * Vector3(p.x, p.y, 0.0)
+	return {"depth": p.z, "fraction": bar_fraction(on) if _shown else -1.0,
+			"category": category_at(on) if _shown else -1}
+
+
+# --- Categories ---------------------------------------------------------------------------------------------------
+
+func select_category(i: int) -> void:
+	if i < 0 or i >= CATEGORIES.size() or i == category:
+		return
+	category = i
+	_refresh_categories()
+	category_changed.emit(i)
+
+
+## The category under the laser (-1: none): its background lights up.
+func set_hover(i: int) -> void:
+	if i != _hover:
+		_hover = i
+		_refresh_categories()
+
+
+## Category i's rectangle in the main pane's space (metres from its centre).
+func category_rect(i: int) -> Rect2:
+	var s := style()
+	var r: Rect2 = pane_rects()["main"]
+	var pad := float(_get(s, "categories/padding"))
+	var h := float(_get(s, "categories/item_height"))
+	var step := h + float(_get(s, "categories/spacing"))
+	return Rect2(-r.size.x * 0.5 + pad, r.size.y * 0.5 - pad - h - step * i, float(_get(s, "categories/width")), h)
+
+
+## The category at a point (global) on the main pane, or -1.
+func category_at(point: Vector3) -> int:
+	var p := main_pane.to_local(point)
+	for i in CATEGORIES.size():
+		if category_rect(i).has_point(Vector2(p.x, p.y)):
+			return i
+	return -1
+
+
+func _refresh_categories() -> void:
+	var s := style()
+	for i in _cat_fills.size():
+		var key := "categories/selected_fill" if i == category else ("categories/hover_fill" if i == _hover
+				else "categories/fill")
+		(_cat_fills[i].material_override as ShaderMaterial).set_shader_parameter("fill_color", Color.html(_get(s, key)))
+		var c := Color.html(_get(s, "categories/selected_color" if i == category else "categories/text/color"))
+		_tint(_cat_labels[i], c)
+	content_title.text = CATEGORIES[category]
 
 
 ## Skips the film to a fraction of its length. False when it can't (nothing playing, a live stream).
@@ -447,6 +535,9 @@ func _apply_style() -> void:
 			m.set_shader_parameter("border_color", Color.html(_get(s, "pane/border")))
 			m.set_shader_parameter("corner_radius", float(_get(s, "pane/corner_radius")))
 			m.set_shader_parameter("border_width", float(_get(s, "pane/border_width")))
+		elif role == "category":
+			m.set_shader_parameter("corner_radius", float(_get(s, "categories/corner_radius")))
+			m.set_shader_parameter("border_width", 0.0)
 		else:
 			m.set_shader_parameter("fill_color", Color.html(_get(s, "now_playing/bar/" + role)))
 			m.set_shader_parameter("corner_radius", float(_get(s, "now_playing/bar/corner_radius")))
@@ -456,20 +547,19 @@ func _apply_style() -> void:
 	# The middle of the text row: the capitals' middle goes there.
 	var text_mid := _block_height(s) * 0.5 - _text_height(s) * 0.5
 	for row: Array in [[title_label, "title", -r.size.x * 0.5 + pad], [time_label, "time", r.size.x * 0.5 - pad]]:
-		var l: Label3D = row[0]
 		var key: String = row[1]
-		var size := float(_get(s, "now_playing/%s/size" % key))
-		l.font = PaneStyle.font(StringName(str(_get(s, "now_playing/%s/font" % key))))
-		l.pixel_size = size / FONT_PX
-		var c := Color.html(_get(s, "now_playing/%s/color" % key))
-		l.set_meta("alpha", c.a)
-		l.modulate = c
-		l.modulate.a = c.a * _opacity
-		# Label3D centres its line box (ascent over descent): moved so the capitals' middle is on text_mid.
-		var box_mid := 0.0
-		if l.font != null:
-			box_mid = (l.font.get_ascent(FONT_PX) - l.font.get_descent(FONT_PX)) * 0.5 * l.pixel_size
-		l.position = Vector3(float(row[2]), text_mid - (box_mid - size * CAP_MIDDLE), LIFT)
+		_text(row[0], s, "now_playing/" + key, Vector2(float(row[2]), text_mid))
+	for i in _cat_fills.size():
+		var cr := category_rect(i)
+		(_cat_fills[i].mesh as QuadMesh).size = cr.size
+		(_cat_fills[i].material_override as ShaderMaterial).set_shader_parameter("size", cr.size)
+		_cat_fills[i].position = Vector3(cr.get_center().x, cr.get_center().y, LIFT)
+		_text(_cat_labels[i], s, "categories/text",
+				Vector2(cr.position.x + float(_get(s, "categories/text_inset")), cr.get_center().y))
+	var first := category_rect(0)
+	_text(content_title, s, "content/title", Vector2(first.end.x + float(_get(s, "categories/padding")) * 1.5,
+			first.get_center().y))
+	_refresh_categories()
 	var bar := bar_rect()
 	(_bar_track.mesh as QuadMesh).size = bar.size
 	(_bar_track.material_override as ShaderMaterial).set_shader_parameter("size", bar.size)
@@ -478,6 +568,27 @@ func _apply_style() -> void:
 	_title_fit = -1.0
 	if app != null:
 		_update_now_playing()
+
+
+## A label's font, size and colour from the style at key (key/font, key/size, key/color), its capitals' middle at
+## at.y and its start (or end, aligned right) at at.x, just in front of its pane.
+func _text(l: Label3D, s: Dictionary, key: String, at: Vector2) -> void:
+	var size := float(_get(s, key + "/size"))
+	l.font = PaneStyle.font(StringName(str(_get(s, key + "/font"))))
+	l.pixel_size = size / FONT_PX
+	_tint(l, Color.html(_get(s, key + "/color")))
+	# Label3D centres its line box (ascent over descent): moved so the capitals' middle is on at.y.
+	var box_mid := 0.0
+	if l.font != null:
+		box_mid = (l.font.get_ascent(FONT_PX) - l.font.get_descent(FONT_PX)) * 0.5 * l.pixel_size
+	l.position = Vector3(at.x, at.y - (box_mid - size * CAP_MIDDLE), LIFT * 2.0)
+
+
+## A label's colour, its own opacity kept apart from the fade's.
+func _tint(l: Label3D, c: Color) -> void:
+	l.set_meta("alpha", c.a)
+	l.modulate = c
+	l.modulate.a = c.a * _opacity
 
 
 ## a/b/c of a nested dictionary (null when it isn't there).
@@ -520,12 +631,12 @@ static func _load_defaults() -> Dictionary:
 
 # --- Building -----------------------------------------------------------------------------------------------------
 
-## Each pane's rectangle on the tablet, in metres from its centre (+y towards the top edge, away from the eyes).
+## Each pane's rectangle on the tablet, in metres from the point it is placed at (+y towards the top edge, away
+## from the eyes): the top edge at TOP_EDGE, the main pane below the now playing one.
 static func pane_rects() -> Dictionary:
-	var top := SIZE.y * 0.5
-	var main_h := SIZE.y - NOW_PLAYING_HEIGHT - GAP
-	return {"now_playing": Rect2(-SIZE.x * 0.5, top - NOW_PLAYING_HEIGHT, SIZE.x, NOW_PLAYING_HEIGHT),
-			"main": Rect2(-SIZE.x * 0.5, -top, SIZE.x, main_h)}
+	var np_bottom := TOP_EDGE - NOW_PLAYING_HEIGHT
+	return {"now_playing": Rect2(-SIZE.x * 0.5, np_bottom, SIZE.x, NOW_PLAYING_HEIGHT),
+			"main": Rect2(-SIZE.x * 0.5, np_bottom - GAP - MAIN_HEIGHT, SIZE.x, MAIN_HEIGHT)}
 
 
 func _pane(p_name: String, r: Rect2) -> MeshInstance3D:
@@ -558,7 +669,7 @@ func _rounded(p_name: String, size: Vector2, role: String, priority: int) -> Mes
 	return mi
 
 
-func _label(p_name: String, align: HorizontalAlignment) -> Label3D:
+func _label(p_name: String, align: HorizontalAlignment, parent: Node3D) -> Label3D:
 	var l := Label3D.new()
 	l.name = p_name
 	l.font_size = FONT_PX
@@ -567,7 +678,8 @@ func _label(p_name: String, align: HorizontalAlignment) -> Label3D:
 	l.outline_size = 0
 	l.render_priority = 3
 	l.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	now_playing.add_child(l)
+	parent.add_child(l)
+	_labels.append(l)
 	return l
 
 
