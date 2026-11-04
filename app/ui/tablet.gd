@@ -11,9 +11,15 @@ extends Node3D
 ##                 them), and the time bar along the bottom. Nothing else. bar_fraction(point) gives the place in the
 ##                 film for a point on or near the bar, for touching it or the laser and trigger (to come).
 ##   main          below it, for everything else, 25 % deeper than at first (the user: the top stays, the bottom
-##                 comes down). Down its left side the categories, one at a time: CATEGORIES (as the front panel's
-##                 tabs, Files called Source), selected by the laser and trigger or a touch; the selected one's name
-##                 heads the rest of the pane, which is empty for now.
+##                 comes down). Three columns of lists (ui/tablet_list.gd; lists, not buttons, the user: they take
+##                 less room), a hairline between them:
+##                   categories   CATEGORIES (as the front panel's tabs, Files called Source), one selected
+##                   options      the selected category's parts: for Source the places (source_options(): the
+##                                library and the lists first, folders, test patterns last), else OPTIONS
+##                   content      the rest of the width, under a heading: for Source the files tab's rows (the same
+##                                browser as the front panel: a folder opens, a file plays), else empty for now
+##                 A list that doesn't fit scrolls: grabbed (the trigger held, or a tip pushed through it), dragged,
+##                 and let go (the trigger released, the tip pulled back out), and a grab that hardly moves is a tap.
 ##
 ## Its look is one JSON document, all of it themable from outside (the assistant, in time). The defaults are
 ## ui/themes/tablet.json; set_style() merges a partial document over them, checked against SCHEMA (nothing changes
@@ -25,9 +31,12 @@ extends Node3D
 ##   now_playing   padding (metres, at the sides); spacing (metres between the text and the bar: the two are
 ##                 centred together, top to bottom); title and time: color, size (the font's size, metres), font (one
 ##                 of the theme's: FONTS); bar: track, played (colours), height, corner_radius (metres)
-##   categories    padding, width, item_height, spacing, corner_radius, text_inset (metres); text: color, size, font;
-##                 fill, hover_fill, selected_fill (colours); selected_color (the selected one's text)
-##   content       title: color, size, font (the selected category's name over the rest of the main pane)
+##   main          padding, gap (metres between the columns, the divider in its middle), categories_width,
+##                 options_width, heading_height (metres); divider (colour)
+##   list          row_height, corner_radius, text_inset, marker_width, thumb_width (metres); text: color, size,
+##                 font; fill, hover_fill, selected_fill, selected_color (the selected row's text), marker (a slim
+##                 mark at the selected row's left), thumb (where a list that scrolls is): colours
+##   content       title: color, size, font (the heading over the content list)
 ##
 ## Placement, from the head's position and its heading (yaw only, so looking down when pressing doesn't sink it):
 ## FORWARD metres ahead and DOWN metres below the eyes, the centre about 44° below the horizon, about half a metre
@@ -38,17 +47,20 @@ extends Node3D
 ##   style() -> Dictionary, set_style(changes, save := true) -> Array (errors), reset_style()
 ##   now_playing, main_pane    the two panes (MeshInstance3D); title_label, time_label (Label3D)
 ##   bar_rect() -> Rect2 (now playing pane's space), bar_fraction(global_point) -> float (-1: not on the bar)
-##   category, select_category(i), category_rect(i) -> Rect2 (main pane's space), category_at(point) -> int (-1),
-##   set_hover(i), signal category_changed(i)
-##   ray_hit(origin, direction) -> {point, distance, pane, fraction, category} or {};
-##   poke_probe(point) -> {depth, fraction, category}
+##   categories_list, options_list, content_list (TabletList), content_title (Label3D); list_rects() (main pane's
+##   space); category, select_category(i), option, select_option(i), options_for(category) -> [{label, path}],
+##   signal category_changed(i); hover(point) (null: none) lights the row under the laser
+##   ray_hit(origin, direction) -> {point, distance, pane, fraction, list} or {};
+##   poke_probe(point) -> {depth, point (on the plane), fraction, list}
+##   grab(point) -> bool, grab_move(point), release() -> bool, is_grabbing(): the bar or a list, by the trigger or a
+##   touch (ui_layer.gd)
 ##   plane_point(origin, direction) -> Variant (the ray on the tablet's plane, or null); along_bar(point) -> 0..1
 ##   seek_to(fraction) -> bool; begin_scrub(fraction) -> bool, scrub(fraction), end_scrub(), scrubbing
 ## Input (ui_layer.gd): the pointer controller's laser shows on either pane. The time bar is dragged: the trigger held
 ## on it, or a controller's tip pushed through it, then moved along it, and let go (the trigger released, the tip
 ## pulled back out) where the film should be. While dragging, the bar and the time follow at once, the film skips
-## there at most every SCRUB_SEEK seconds, and exactly where it is let go. Anywhere else on the tablet the trigger is
-## taken (nothing happens), so it doesn't pause the film by accident.
+## there at most every SCRUB_SEEK seconds, and exactly where it is let go. The lists are grabbed the same way.
+## Anywhere else on the tablet the trigger is taken (nothing happens), so it doesn't pause the film by accident.
 ##   static pane_rects() -> {name: Rect2} in metres, static validate(doc, partial) -> Array (errors)
 ##   static pose(head) -> Transform3D
 
@@ -63,6 +75,16 @@ const MAIN_HEIGHT := 0.2375
 const SIZE := Vector2(0.48, NOW_PLAYING_HEIGHT + GAP + MAIN_HEIGHT)
 const TOP_EDGE := 0.13
 const CATEGORIES: Array[String] = ["Source", "Picture", "Sound", "Subtitles", "Room", "Objects", "System"]
+## Each category's parts (the front panel's sections, most used first); Source's are the places (source_options()).
+const OPTIONS := {
+	"Picture": ["Screen", "Picture", "Mode", "3D", "HDR", "Horizon", "Corner film", "Frame", "Slideshow"],
+	"Sound": ["Audio track", "Level and timing", "Spatial sound", "Night mode", "Speed", "Play on a PC"],
+	"Subtitles": ["Track", "Second track", "Look and timing", "Subtitle files", "Script"],
+	"Room": ["Environment", "Showrooms", "Seat", "Placement", "Effects", "The showing", "Sleep timer", "Watch party"],
+	"Objects": ["Library", "In this room"],
+	"System": ["Views", "Panel", "Controllers", "Accessibility", "Rendering", "Hardware video", "Phone remote",
+			"Share files", "Assistant", "Test and setup", "Dev tools", "About"],
+}
 const FORWARD := 0.35
 const DOWN := 0.34
 ## Degrees the face tilts back from vertical: 45 would face a point 45° below the horizon.
@@ -70,6 +92,8 @@ const TILT := 35.0
 const PaneStyle := preload("res://ui/pane_style.gd")
 const W := preload("res://ui/pane_widgets.gd")
 const SHADER := preload("res://shaders/tablet.gdshader")
+const TabletList := preload("res://ui/tablet_list.gd")
+const FilesTab := preload("res://ui/files_tab.gd")
 const STYLE_PATH := "res://ui/themes/tablet.json"
 const FONTS := ["light", "regular", "medium", "semibold", "label"]
 ## The style's shape: a leaf is "color", "font" or [min, max] (a number).
@@ -83,11 +107,16 @@ const SCHEMA := {
 		"time": {"color": "color", "size": [0.004, 0.03], "font": "font"},
 		"bar": {"track": "color", "played": "color", "height": [0.001, 0.02], "corner_radius": [0.0, 0.01]},
 	},
-	"categories": {
-		"padding": [0.0, 0.03], "width": [0.04, 0.2], "item_height": [0.012, 0.05], "spacing": [0.0, 0.02],
-		"corner_radius": [0.0, 0.025], "text_inset": [0.0, 0.03],
+	"main": {
+		"padding": [0.0, 0.03], "gap": [0.0, 0.03], "categories_width": [0.04, 0.2], "options_width": [0.04, 0.2],
+		"heading_height": [0.0, 0.05], "divider": "color",
+	},
+	"list": {
+		"row_height": [0.012, 0.05], "corner_radius": [0.0, 0.025], "text_inset": [0.0, 0.03],
+		"marker_width": [0.0, 0.006], "thumb_width": [0.0005, 0.008],
 		"text": {"color": "color", "size": [0.004, 0.03], "font": "font"},
-		"fill": "color", "hover_fill": "color", "selected_fill": "color", "selected_color": "color",
+		"fill": "color", "hover_fill": "color", "selected_fill": "color", "selected_color": "color", "marker": "color",
+		"thumb": "color",
 	},
 	"content": {"title": {"color": "color", "size": [0.004, 0.04], "font": "font"}},
 }
@@ -111,13 +140,18 @@ var now_playing: MeshInstance3D
 var main_pane: MeshInstance3D
 var title_label: Label3D
 var time_label: Label3D
-## The selected category (CATEGORIES), the one under the laser (-1 none), their backgrounds and names, and the
-## content's heading.
+## The selected category (CATEGORIES) and its selected option (the place, for Source); each category's last.
 var category := 0
-var _hover := -1
-var _cat_fills: Array[MeshInstance3D] = []
-var _cat_labels: Array[Label3D] = []
+var option := 0
+var _options := {}
+var categories_list: TabletList
+var options_list: TabletList
+var content_list: TabletList
 var content_title: Label3D
+var _dividers: Array[MeshInstance3D] = []
+## The list being grabbed (null: none), and the files tab's folder the content list shows.
+var _grab_list: TabletList
+var _content_folder := ""
 var _labels: Array[Label3D] = []
 var _bar_track: MeshInstance3D
 var _bar_played: MeshInstance3D
@@ -143,16 +177,17 @@ func _ready() -> void:
 	var rects := pane_rects()
 	now_playing = _pane("NowPlaying", rects["now_playing"])
 	main_pane = _pane("Main", rects["main"])
-	title_label = _label("Title", HORIZONTAL_ALIGNMENT_LEFT, now_playing)
-	time_label = _label("Time", HORIZONTAL_ALIGNMENT_RIGHT, now_playing)
-	for i in CATEGORIES.size():
-		var fill := _rounded("Category%d" % i, Vector2(0.1, 0.03), "category", 1)
-		main_pane.add_child(fill)
-		_cat_fills.append(fill)
-		var l := _label("CategoryName%d" % i, HORIZONTAL_ALIGNMENT_LEFT, main_pane)
-		l.text = CATEGORIES[i]
-		_cat_labels.append(l)
-	content_title = _label("ContentTitle", HORIZONTAL_ALIGNMENT_LEFT, main_pane)
+	title_label = make_label("Title", HORIZONTAL_ALIGNMENT_LEFT, now_playing)
+	time_label = make_label("Time", HORIZONTAL_ALIGNMENT_RIGHT, now_playing)
+	categories_list = _list("Categories")
+	options_list = _list("Options")
+	content_list = _list("Content")
+	for i in 2:
+		_dividers.append(make_quad("Divider%d" % i, "divider", main_pane, 1))
+	content_title = make_label("ContentTitle", HORIZONTAL_ALIGNMENT_LEFT, main_pane)
+	categories_list.picked.connect(select_category)
+	options_list.picked.connect(select_option)
+	content_list.picked.connect(_on_content_picked)
 	_bar_track = _bar("BarTrack", "track", 1)
 	_bar_played = _bar("BarPlayed", "played", 2)
 	visible = false
@@ -161,7 +196,17 @@ func _ready() -> void:
 		var saved: Variant = app.settings.get_value("pane", "tablet_style", {})
 		if saved is Dictionary and validate(saved, true).is_empty():
 			_overrides = (saved as Dictionary).duplicate(true)
+		var files := _files()
+		if files != null:
+			files.listing_changed.connect(func() -> void:
+				if category == 0:
+					option = _source_option(options_for(0))
+					options_list.select(option)
+					_fill_content())
 	_apply_style()
+	categories_list.set_items(CATEGORIES)
+	categories_list.select(category)
+	_fill_options()
 	_set_opacity(0.0)
 
 
@@ -206,7 +251,7 @@ func show_at(head: Transform3D) -> void:
 func hide_tablet() -> void:
 	if not _shown:
 		return
-	end_scrub()
+	release()
 	_shown = false
 	_fade_to(0.0, float(_get(style(), "fade/out")))
 
@@ -235,7 +280,7 @@ func _set_opacity(v: float) -> void:
 	for m in _mats:
 		m.set_shader_parameter("opacity", v)
 	for l in _labels:
-		l.modulate.a = v * float(l.get_meta("alpha", 1.0))
+		l.modulate.a = _alpha(l)
 
 
 # --- Now playing --------------------------------------------------------------------------------------------------
@@ -268,11 +313,16 @@ func _fit_title() -> void:
 	var room := maxf(r.size.x - 2.0 * pad - _text_width(time_label, time_label.text) - TEXT_GAP, 0.0)
 	_title_fit = room
 	var text := _title_full
-	if _text_width(title_label, text) > room:
-		while text.length() > 1 and _text_width(title_label, text + "…") > room:
-			text = text.left(-1)
-		text = text.strip_edges() + "…"
-	title_label.text = text
+	title_label.text = _cut(title_label, text, room)
+
+
+## Text cut with an ellipsis to fit a width (metres) in a label's font and size.
+func _cut(l: Label3D, text: String, room: float) -> String:
+	if _text_width(l, text) <= room:
+		return text
+	while text.length() > 1 and _text_width(l, text + "…") > room:
+		text = text.left(-1)
+	return text.strip_edges() + "…"
 
 
 func _text_width(l: Label3D, text: String) -> float:
@@ -311,64 +361,232 @@ func ray_hit(origin: Vector3, direction: Vector3) -> Dictionary:
 			var world := global_transform * p
 			return {"point": world, "distance": world.distance_to(origin), "pane": key,
 					"fraction": bar_fraction(world) if key == "now_playing" else -1.0,
-					"category": category_at(world) if key == "main" else -1}
+					"list": _list_name(list_at(world)) if key == "main" else ""}
 	return {}
 
 
-## For touching: how far the point is in front of the tablet (negative behind it), and the bar fraction under it
-## (-1 off the bar).
+## For touching: how far the point is in front of the tablet (negative behind it), the point on the tablet's plane
+## under it, and the bar fraction (-1 off the bar) and list ("" none) there.
 func poke_probe(point: Vector3) -> Dictionary:
 	var p := global_transform.affine_inverse() * point
 	var on := global_transform * Vector3(p.x, p.y, 0.0)
-	return {"depth": p.z, "fraction": bar_fraction(on) if _shown else -1.0,
-			"category": category_at(on) if _shown else -1}
+	return {"depth": p.z, "point": on, "fraction": bar_fraction(on) if _shown else -1.0,
+			"list": _list_name(list_at(on)) if _shown else ""}
 
 
-# --- Categories ---------------------------------------------------------------------------------------------------
+# --- Grabbing -----------------------------------------------------------------------------------------------------
+
+## A grab at a point (global, on the plane): the time bar starts a drag of the time, a list a drag of its rows.
+## False when there is nothing there to grab (or the film can't skip).
+func grab(point: Vector3) -> bool:
+	if not _shown or is_grabbing():
+		return false
+	var f := bar_fraction(point)
+	if f >= 0.0:
+		return begin_scrub(f)
+	var l := list_at(point)
+	if l != null and l.grab(_main_point(point)):
+		_grab_list = l
+		return true
+	return false
+
+
+func grab_move(point: Vector3) -> void:
+	if scrubbing:
+		scrub(along_bar(point))
+	elif _grab_list != null:
+		_grab_list.drag(_main_point(point))
+
+
+## Lets go of a grab. True when it picked a row (a tap) or ended a drag of the time.
+func release() -> bool:
+	if scrubbing:
+		end_scrub()
+		return true
+	if _grab_list != null:
+		var l := _grab_list
+		_grab_list = null
+		return l.release()
+	return false
+
+
+func is_grabbing() -> bool:
+	return scrubbing or _grab_list != null
+
+
+## The laser on the tablet (global, null: off it): the row under it lights up.
+func hover(point: Variant) -> void:
+	for l: TabletList in [categories_list, options_list, content_list]:
+		l.set_hover(_main_point(point) if point is Vector3 and _shown else null)
+
+
+# --- The lists ----------------------------------------------------------------------------------------------------
+
+## The list at a point (global) on the main pane, or null.
+func list_at(point: Vector3) -> TabletList:
+	var p := _main_point(point)
+	for l: TabletList in [categories_list, options_list, content_list]:
+		if l.rect.has_point(p):
+			return l
+	return null
+
+
+## The lists' rectangles in the main pane's space: the categories, the options, and the content under its heading;
+## and "heading" (the content's).
+func list_rects(s: Dictionary = style()) -> Dictionary:
+	var r: Rect2 = pane_rects()["main"]
+	var pad := float(_get(s, "main/padding"))
+	var gap := float(_get(s, "main/gap"))
+	var top := r.size.y * 0.5 - pad
+	var h := r.size.y - pad * 2.0
+	var x := -r.size.x * 0.5 + pad
+	var cw := float(_get(s, "main/categories_width"))
+	var ow := float(_get(s, "main/options_width"))
+	var cats := Rect2(x, top - h, cw, h)
+	var opts := Rect2(cats.end.x + gap, top - h, ow, h)
+	var content_x := opts.end.x + gap
+	var heading := float(_get(s, "main/heading_height"))
+	var content_w := r.size.x * 0.5 - pad - content_x
+	return {"categories": cats, "options": opts, "heading": Rect2(content_x, top - heading, content_w, heading),
+			"content": Rect2(content_x, top - h, content_w, h - heading)}
+
 
 func select_category(i: int) -> void:
-	if i < 0 or i >= CATEGORIES.size() or i == category:
+	if i < 0 or i >= CATEGORIES.size():
 		return
+	var changed := i != category
 	category = i
-	_refresh_categories()
-	category_changed.emit(i)
+	categories_list.select(i)
+	if changed:
+		_fill_options()
+		category_changed.emit(i)
 
 
-## The category under the laser (-1: none): its background lights up.
-func set_hover(i: int) -> void:
-	if i != _hover:
-		_hover = i
-		_refresh_categories()
+## An option of the selected category: for Source, its place opens in the files tab (and the content lists it).
+func select_option(i: int) -> void:
+	var opts := options_for(category)
+	if i < 0 or i >= opts.size():
+		return
+	option = i
+	_options[category] = i
+	options_list.select(i)
+	var files := _files()
+	if category == 0 and files != null:
+		files.open_folder(str(opts[i]["path"]))
+	_fill_content()
 
 
-## Category i's rectangle in the main pane's space (metres from its centre).
-func category_rect(i: int) -> Rect2:
-	var s := style()
-	var r: Rect2 = pane_rects()["main"]
-	var pad := float(_get(s, "categories/padding"))
-	var h := float(_get(s, "categories/item_height"))
-	var step := h + float(_get(s, "categories/spacing"))
-	return Rect2(-r.size.x * 0.5 + pad, r.size.y * 0.5 - pad - h - step * i, float(_get(s, "categories/width")), h)
+## A category's options, [{label, path}] (path only for Source's places).
+func options_for(i: int) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if i == 0:
+		return source_options(FilesTab.get_places())
+	for label: String in OPTIONS.get(CATEGORIES[i], []):
+		out.append({"label": label, "path": ""})
+	return out
 
 
-## The category at a point (global) on the main pane, or -1.
-func category_at(point: Vector3) -> int:
+## The places in the order the tablet offers them: the library and the lists first, then the network, then folders
+## on the headset, the agents, and the test patterns last.
+static func source_options(places: Array[Dictionary]) -> Array[Dictionary]:
+	var first: Array[String] = [FilesTab.LibraryIndex.root(), FilesTab.FAVOURITES_FOLDER, FilesTab.QUEUE_FOLDER,
+			FilesTab.SEARCH_FOLDER, FilesTab.NETWORK_FOLDER, FilesTab.MEDIA_SERVERS_FOLDER, FilesTab.ANDROID_FOLDER,
+			FilesTab.BROWSER_FOLDER]
+	var top: Array[Dictionary] = []
+	var folders: Array[Dictionary] = []
+	var agents: Array[Dictionary] = []
+	var last: Array[Dictionary] = []
+	for p: Dictionary in places:
+		var path := str(p["path"])
+		if path in first:
+			top.append(p)
+		elif path.begins_with(FilesTab.AGENT_PREFIX):
+			agents.append(p)
+		elif path == FilesTab.PATTERNS_FOLDER:
+			last.append(p)
+		else:
+			folders.append(p)
+	top.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return first.find(str(a["path"])) < first.find(str(b["path"])))
+	return top + folders + agents + last
+
+
+func _fill_options() -> void:
+	var opts := options_for(category)
+	var labels: Array[String] = []
+	for o: Dictionary in opts:
+		labels.append(str(o["label"]))
+	options_list.set_items(labels)
+	option = int(_options.get(category, 0))
+	var files := _files()
+	if category == 0 and files != null:
+		option = _source_option(opts)
+	options_list.select(option)
+	_fill_content()
+
+
+## The place the files tab is in, the nearest that holds it (Videos, not Home; the front panel may have moved it;
+## -1: none of them).
+func _source_option(opts: Array[Dictionary]) -> int:
+	var files := _files()
+	if files == null:
+		return -1
+	var best := -1
+	for k in opts.size():
+		var p := str(opts[k]["path"])
+		if p != "" and (files.current == p or files.current.begins_with(p.trim_suffix("/") + "/")) \
+				and (best < 0 or p.length() > str(opts[best]["path"]).length()):
+			best = k
+	return best
+
+
+## The content list: the files tab's rows for Source (a folder's, the library's, the queue's ...), else nothing yet.
+func _fill_content() -> void:
+	var texts: Array[String] = []
+	var heading := ""
+	var opts := options_for(category)
+	if option >= 0 and option < opts.size():
+		heading = str(opts[option]["label"])
+	var files := _files()
+	var marked := -1
+	if category == 0 and files != null:
+		var rows: Array[Dictionary] = files.rows()
+		for k in rows.size():
+			texts.append(str(rows[k].get("text", "")))
+			if str(rows[k].get("kind", "")) == "file" and str(rows[k].get("path", "")) == files.active_path:
+				marked = k
+		if files.path_text() != "":
+			heading = files.path_text()
+		var same: bool = files.current == _content_folder
+		_content_folder = files.current
+		content_list.set_items(texts, same)
+	else:
+		_content_folder = ""
+		content_list.set_items(texts)
+	content_list.select(marked)
+	content_title.text = _cut(content_title, heading, list_rects()["heading"].size.x)
+
+
+func _on_content_picked(i: int) -> void:
+	var files := _files()
+	if category == 0 and files != null:
+		files.press_row(i)
+
+
+func _files() -> Node:
+	if app == null or app.get("ui") == null or app.ui.get("ui") == null:
+		return null
+	return app.ui.ui.files
+
+
+func _list_name(l: TabletList) -> String:
+	return "" if l == null else str(l.name).to_snake_case()
+
+
+## A global point in the main pane's space (the lists' space).
+func _main_point(point: Vector3) -> Vector2:
 	var p := main_pane.to_local(point)
-	for i in CATEGORIES.size():
-		if category_rect(i).has_point(Vector2(p.x, p.y)):
-			return i
-	return -1
-
-
-func _refresh_categories() -> void:
-	var s := style()
-	for i in _cat_fills.size():
-		var key := "categories/selected_fill" if i == category else ("categories/hover_fill" if i == _hover
-				else "categories/fill")
-		(_cat_fills[i].material_override as ShaderMaterial).set_shader_parameter("fill_color", Color.html(_get(s, key)))
-		var c := Color.html(_get(s, "categories/selected_color" if i == category else "categories/text/color"))
-		_tint(_cat_labels[i], c)
-	content_title.text = CATEGORIES[category]
+	return Vector2(p.x, p.y)
 
 
 ## Skips the film to a fraction of its length. False when it can't (nothing playing, a live stream).
@@ -528,6 +746,9 @@ func _apply_style() -> void:
 	if now_playing == null:
 		return
 	var s := style()
+	var rects := list_rects(s)
+	for l: TabletList in [categories_list, options_list, content_list]:
+		l.layout(rects[_list_name(l)], s["list"])
 	for m in _mats:
 		var role := str(m.get_meta("role", "pane"))
 		if role == "pane":
@@ -535,9 +756,16 @@ func _apply_style() -> void:
 			m.set_shader_parameter("border_color", Color.html(_get(s, "pane/border")))
 			m.set_shader_parameter("corner_radius", float(_get(s, "pane/corner_radius")))
 			m.set_shader_parameter("border_width", float(_get(s, "pane/border_width")))
-		elif role == "category":
-			m.set_shader_parameter("corner_radius", float(_get(s, "categories/corner_radius")))
+		elif role.begins_with("list_") or role == "divider":
+			var radius := {"list_row": float(_get(s, "list/corner_radius")),
+					"list_marker": float(_get(s, "list/marker_width")) * 0.5,
+					"list_thumb": float(_get(s, "list/thumb_width")) * 0.5, "divider": 0.0}
+			m.set_shader_parameter("corner_radius", radius[role])
 			m.set_shader_parameter("border_width", 0.0)
+			if role == "list_marker" or role == "list_thumb":
+				m.set_shader_parameter("fill_color", Color.html(_get(s, "list/" + role.trim_prefix("list_"))))
+			elif role == "divider":
+				m.set_shader_parameter("fill_color", Color.html(_get(s, "main/divider")))
 		else:
 			m.set_shader_parameter("fill_color", Color.html(_get(s, "now_playing/bar/" + role)))
 			m.set_shader_parameter("corner_radius", float(_get(s, "now_playing/bar/corner_radius")))
@@ -548,18 +776,19 @@ func _apply_style() -> void:
 	var text_mid := _block_height(s) * 0.5 - _text_height(s) * 0.5
 	for row: Array in [[title_label, "title", -r.size.x * 0.5 + pad], [time_label, "time", r.size.x * 0.5 - pad]]:
 		var key: String = row[1]
-		_text(row[0], s, "now_playing/" + key, Vector2(float(row[2]), text_mid))
-	for i in _cat_fills.size():
-		var cr := category_rect(i)
-		(_cat_fills[i].mesh as QuadMesh).size = cr.size
-		(_cat_fills[i].material_override as ShaderMaterial).set_shader_parameter("size", cr.size)
-		_cat_fills[i].position = Vector3(cr.get_center().x, cr.get_center().y, LIFT)
-		_text(_cat_labels[i], s, "categories/text",
-				Vector2(cr.position.x + float(_get(s, "categories/text_inset")), cr.get_center().y))
-	var first := category_rect(0)
-	_text(content_title, s, "content/title", Vector2(first.end.x + float(_get(s, "categories/padding")) * 1.5,
-			first.get_center().y))
-	_refresh_categories()
+		place_text(row[0], _get(s, "now_playing/" + key), Vector2(float(row[2]), text_mid))
+	# The dividers: hairlines down the middle of the gaps between the columns.
+	var gap := float(_get(s, "main/gap"))
+	for k in _dividers.size():
+		var col: Rect2 = rects["categories" if k == 0 else "options"]
+		var d := _dividers[k]
+		var size := Vector2(0.0008, col.size.y)
+		(d.mesh as QuadMesh).size = size
+		(d.material_override as ShaderMaterial).set_shader_parameter("size", size)
+		d.position = Vector3(col.end.x + gap * 0.5, col.get_center().y, LIFT)
+	var heading: Rect2 = rects["heading"]
+	place_text(content_title, _get(s, "content/title"), Vector2(heading.position.x + float(_get(s, "list/text_inset")),
+			heading.get_center().y))
 	var bar := bar_rect()
 	(_bar_track.mesh as QuadMesh).size = bar.size
 	(_bar_track.material_override as ShaderMaterial).set_shader_parameter("size", bar.size)
@@ -570,25 +799,38 @@ func _apply_style() -> void:
 		_update_now_playing()
 
 
-## A label's font, size and colour from the style at key (key/font, key/size, key/color), its capitals' middle at
-## at.y and its start (or end, aligned right) at at.x, just in front of its pane.
-func _text(l: Label3D, s: Dictionary, key: String, at: Vector2) -> void:
-	var size := float(_get(s, key + "/size"))
-	l.font = PaneStyle.font(StringName(str(_get(s, key + "/font"))))
-	l.pixel_size = size / FONT_PX
-	_tint(l, Color.html(_get(s, key + "/color")))
+## A label's font, size and colour from a text style ({color, size, font}), its capitals' middle at at.y and its
+## start (or end, aligned right) at at.x, just in front of its pane.
+func place_text(l: Label3D, text_style: Dictionary, at: Vector2) -> void:
+	_font(l, text_style)
+	tint(l, Color.html(text_style["color"]))
 	# Label3D centres its line box (ascent over descent): moved so the capitals' middle is on at.y.
 	var box_mid := 0.0
 	if l.font != null:
 		box_mid = (l.font.get_ascent(FONT_PX) - l.font.get_descent(FONT_PX)) * 0.5 * l.pixel_size
-	l.position = Vector3(at.x, at.y - (box_mid - size * CAP_MIDDLE), LIFT * 2.0)
+	l.position = Vector3(at.x, at.y - (box_mid - float(text_style["size"]) * CAP_MIDDLE), LIFT * 2.0)
 
 
-## A label's colour, its own opacity kept apart from the fade's.
-func _tint(l: Label3D, c: Color) -> void:
+## Text cut with an ellipsis to a width (metres) in a text style's font and size.
+func fit_text(l: Label3D, text: String, room: float, text_style: Dictionary) -> String:
+	_font(l, text_style)
+	return _cut(l, text, room)
+
+
+func _font(l: Label3D, text_style: Dictionary) -> void:
+	l.font = PaneStyle.font(StringName(str(text_style["font"])))
+	l.pixel_size = float(text_style["size"]) / FONT_PX
+
+
+## A label's colour, its own opacity kept apart from the fade's (and a list's clip, meta "clip").
+func tint(l: Label3D, c: Color) -> void:
 	l.set_meta("alpha", c.a)
 	l.modulate = c
-	l.modulate.a = c.a * _opacity
+	l.modulate.a = _alpha(l)
+
+
+func _alpha(l: Label3D) -> float:
+	return _opacity * float(l.get_meta("alpha", 1.0)) * float(l.get_meta("clip", 1.0))
 
 
 ## a/b/c of a nested dictionary (null when it isn't there).
@@ -639,6 +881,24 @@ static func pane_rects() -> Dictionary:
 			"main": Rect2(-SIZE.x * 0.5, np_bottom - GAP - MAIN_HEIGHT, SIZE.x, MAIN_HEIGHT)}
 
 
+func _list(p_name: String) -> TabletList:
+	var l := TabletList.new()
+	l.name = p_name
+	l.tablet = self
+	l.cap_middle = CAP_MIDDLE
+	main_pane.add_child(l)
+	return l
+
+
+## A rounded quad (shaders/tablet.gdshader) on a parent, a little in front of it by its priority; the style sets it
+## by its role (_apply_style()).
+func make_quad(p_name: String, role: String, parent: Node3D, priority: int) -> MeshInstance3D:
+	var mi := _rounded(p_name, Vector2(0.01, 0.01), role, priority)
+	mi.position.z = LIFT * priority
+	parent.add_child(mi)
+	return mi
+
+
 func _pane(p_name: String, r: Rect2) -> MeshInstance3D:
 	var mi := _rounded(p_name, r.size, "pane", 0)
 	mi.position = Vector3(r.get_center().x, r.get_center().y, 0.0)
@@ -662,6 +922,7 @@ func _rounded(p_name: String, size: Vector2, role: String, priority: int) -> Mes
 	m.shader = SHADER
 	m.render_priority = priority
 	m.set_shader_parameter("size", size)
+	m.set_shader_parameter("opacity", _opacity)
 	m.set_meta("role", role)
 	mi.material_override = m
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -669,7 +930,7 @@ func _rounded(p_name: String, size: Vector2, role: String, priority: int) -> Mes
 	return mi
 
 
-func _label(p_name: String, align: HorizontalAlignment, parent: Node3D) -> Label3D:
+func make_label(p_name: String, align: HorizontalAlignment, parent: Node3D) -> Label3D:
 	var l := Label3D.new()
 	l.name = p_name
 	l.font_size = FONT_PX

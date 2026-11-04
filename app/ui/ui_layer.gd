@@ -97,8 +97,6 @@ var _poke_down := false
 var _tablet_hit := {}
 var _scrub_hand: XRHand
 var _scrub_by := ""
-## Hands touching a category (one touch selects once; pulled back out, they can touch again).
-var _category_touch := {}
 var _grip_held := -1.0
 var _refresh_timer := 0.0
 ## A network file was picked: close once it is open.
@@ -576,14 +574,14 @@ func _update_pointer() -> void:
 	_tablet_hit = {}
 	if not _pointed and not _card_pointed and pointer_hand.get_is_active():
 		_tablet_hit = tablet.ray_hit(pointer_hand.get_ray_origin(), pointer_hand.get_ray_direction())
-	# Dragging the bar with the trigger held: it follows the laser along the bar, wherever it is beside it.
-	if _scrub_by == "trigger" and _scrub_hand == pointer_hand:
+	# A grab with the trigger held (the bar, a list): it follows the laser on the tablet's plane, on or off it.
+	if _scrub_by == "trigger" and _scrub_hand == pointer_hand and tablet.is_grabbing():
 		var at: Variant = tablet.plane_point(pointer_hand.get_ray_origin(), pointer_hand.get_ray_direction())
 		if at != null:
-			tablet.scrub(tablet.along_bar(at))
+			tablet.grab_move(at)
 			_tablet_hit = {"point": at, "distance": (at as Vector3).distance_to(pointer_hand.get_ray_origin()),
-					"pane": "now_playing", "fraction": tablet.along_bar(at)}
-	tablet.set_hover(int(_tablet_hit.get("category", -1)))
+					"pane": "grab", "fraction": -1.0, "list": ""}
+	tablet.hover(_tablet_hit.get("point"))
 	if not _tablet_hit.is_empty():
 		card_hit = _tablet_hit
 		_card_pointed = false
@@ -625,8 +623,8 @@ func _check_hover(hand: XRHand) -> void:
 
 
 ## Poking the panel with the pointer controller's tip clicks, as people will try it (with [pane] distance set short).
-## The tablet's time bar is dragged by touch too: either controller's tip pushed through it, moved along it, and
-## pulled back out where the film should be.
+## The tablet's time bar and lists are grabbed by touch too: either controller's tip pushed through it, moved, and
+## pulled back out (where the film should be; a list scrolls with it, or a tap picks a row).
 func _update_poke() -> void:
 	_update_tablet_poke()
 	_update_panel_poke()
@@ -636,40 +634,29 @@ func _update_tablet_poke() -> void:
 	if _scrub_by == "touch":
 		var h := _scrub_hand
 		if h == null or not app.use_xr or not h.get_is_active() or not tablet.is_shown():
-			tablet.end_scrub()
+			tablet.release()
 			_scrub_hand = null
 			_scrub_by = ""
 			return
-		var tip := h.get_ray_origin()
-		var depth: float = tablet.poke_probe(tip)["depth"]
+		var probe := tablet.poke_probe(h.get_ray_origin())
+		var depth: float = probe["depth"]
 		if depth > POKE_RELEASE or depth < -0.08:
 			# Pulled back out (or right through): let go there.
-			tablet.end_scrub()
+			if tablet.release():
+				h.pulse()
 			_scrub_hand = null
 			_scrub_by = ""
-			h.pulse()
 		else:
-			tablet.scrub(tablet.along_bar(tip))
+			tablet.grab_move(probe["point"])
 		return
 	if _scrub_by != "" or not app.use_xr or not tablet.is_shown():
-		_category_touch.clear()
 		return
 	for hand: XRHand in [pointer_hand, other_hand]:
 		if hand == null or not hand.get_is_active():
 			continue
 		var probe := tablet.poke_probe(hand.get_ray_origin())
 		var depth: float = probe["depth"]
-		if _category_touch.has(hand):
-			if depth > POKE_RELEASE or depth < -0.08:
-				_category_touch.erase(hand)
-			continue
-		if int(probe["category"]) >= 0 and depth < POKE_PRESS and depth > -0.05:
-			_category_touch[hand] = true
-			tablet.select_category(probe["category"])
-			hand.pulse()
-			continue
-		if float(probe["fraction"]) >= 0.0 and depth < POKE_PRESS and depth > -0.05 \
-				and tablet.begin_scrub(probe["fraction"]):
+		if depth < POKE_PRESS and depth > -0.05 and tablet.grab(probe["point"]):
 			_scrub_hand = hand
 			_scrub_by = "touch"
 			hand.pulse()
@@ -908,17 +895,13 @@ func on_trigger(hand: XRHand, pressed: bool) -> bool:
 			hand.pulse()
 		return true
 	if _scrub_by == "trigger" and not pressed and hand == _scrub_hand:
-		tablet.end_scrub()
+		if tablet.release():
+			hand.pulse()
 		_scrub_hand = null
 		_scrub_by = ""
-		hand.pulse()
 		return true
 	if not _tablet_hit.is_empty():
-		if pressed and int(_tablet_hit.get("category", -1)) >= 0:
-			tablet.select_category(_tablet_hit["category"])
-			hand.pulse()
-		elif pressed and _scrub_by == "" and float(_tablet_hit.get("fraction", -1.0)) >= 0.0 \
-				and tablet.begin_scrub(_tablet_hit["fraction"]):
+		if pressed and _scrub_by == "" and tablet.grab(_tablet_hit["point"]):
 			_scrub_hand = hand
 			_scrub_by = "trigger"
 			hand.pulse()

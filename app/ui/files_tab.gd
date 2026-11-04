@@ -986,6 +986,20 @@ func row_texts() -> Array[String]:
 	return out
 
 
+## The rows on show ({kind, path, text, ...}) and pressing one: the tablet (ui/tablet.gd) lists them too.
+func rows() -> Array[Dictionary]:
+	return _rows
+
+
+func press_row(index: int) -> void:
+	_on_row_pressed(index)
+
+
+## Where the list is ("Library / Films", a folder's path; "... (loading...)" while it loads).
+func path_text() -> String:
+	return _path_label.text
+
+
 func list_scroll() -> ScrollContainer:
 	return _list_scroll
 

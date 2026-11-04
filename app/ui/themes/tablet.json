@@ -8,11 +8,15 @@
 		"time": {"color": "#ffffffcc", "size": 0.011, "font": "regular"},
 		"bar": {"track": "#ffffff38", "played": "#b0e0e6ff", "height": 0.004, "corner_radius": 0.002}
 	},
-	"categories": {
-		"padding": 0.012, "width": 0.1, "item_height": 0.026, "spacing": 0.0035, "corner_radius": 0.008,
-		"text_inset": 0.01,
-		"text": {"color": "#ffffffb3", "size": 0.011, "font": "medium"},
-		"fill": "#ffffff00", "hover_fill": "#ffffff1f", "selected_fill": "#b0e0e659", "selected_color": "#ffffffff"
+	"main": {
+		"padding": 0.012, "gap": 0.01, "categories_width": 0.085, "options_width": 0.11, "heading_height": 0.026,
+		"divider": "#b0e0e640"
+	},
+	"list": {
+		"row_height": 0.021, "corner_radius": 0.005, "text_inset": 0.008, "marker_width": 0.0016, "thumb_width": 0.0016,
+		"text": {"color": "#ffffffb3", "size": 0.0095, "font": "regular"},
+		"fill": "#ffffff00", "hover_fill": "#ffffff14", "selected_fill": "#b0e0e62e", "selected_color": "#ffffffff",
+		"marker": "#b0e0e6ff", "thumb": "#ffffff59"
 	},
 	"content": {"title": {"color": "#ffffffff", "size": 0.014, "font": "semibold"}}
 }

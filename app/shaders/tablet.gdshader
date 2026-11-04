@@ -10,6 +10,8 @@ uniform float border_width = 0.006; // Metres.
 uniform vec4 fill_color : source_color = vec4(0.69, 0.878, 0.902, 0.5);
 uniform vec4 border_color : source_color = vec4(0.69, 0.878, 0.902, 0.75);
 uniform float opacity = 1.0; // The tablet's fade.
+// Metres from the quad's centre (x0, y0, x1, y1, +y up): nothing is drawn outside it (a list's row part way out).
+uniform vec4 clip = vec4(-1000.0, -1000.0, 1000.0, 1000.0);
 
 // Signed distance to a rounded rectangle centred at 0 with half-size h and corner radius r (negative inside).
 float rounded_rect(vec2 p, vec2 h, float r) {
@@ -26,5 +28,7 @@ void fragment() {
 	float fill = border_width > 0.0 ? 1.0 - smoothstep(-aa, aa, d + border_width) : inside;
 	vec4 c = mix(border_color, fill_color, fill);
 	ALBEDO = c.rgb;
-	ALPHA = c.a * inside * opacity;
+	vec2 q = vec2(p.x, -p.y);
+	float kept = step(clip.x, q.x) * step(q.x, clip.z) * step(clip.y, q.y) * step(q.y, clip.w);
+	ALPHA = c.a * inside * opacity * kept;
 }
