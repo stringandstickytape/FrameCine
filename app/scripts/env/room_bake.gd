@@ -55,6 +55,9 @@ const ERRORS := ["ok", "no scene root", "foreign data", "no lightmapper in this 
 ## light, drawn as emission. They are not light sources: the bake sets them to nothing while it runs (else every
 ## surface would glow into the lightmap), and they are not part of the stamp (the film light changes as it plays).
 const LIVE_PARAMETERS := {"sky_top": Vector3.ZERO, "sky_bottom": Vector3.ZERO, "screen_light": 0.0}
+## Shader parameters a room flips around a bake (environments/cinema.gd set_baking(): bake_pass), so they are set
+## while the stamp is made and clear when it is checked: not part of the stamp either.
+const STATE_PARAMETERS: Array[String] = ["bake_pass"]
 
 ## Meta on a prepared MeshInstance3D: the stamp of its mesh before the second UVs were added.
 const META_SOURCE := &"room_bake_source"
@@ -422,7 +425,7 @@ static func _resource_stamp(r: Object, depth := 0) -> String:
 		if sm.shader != null:
 			for u: Dictionary in sm.shader.get_shader_uniform_list():
 				var n := str(u["name"])
-				if LIVE_PARAMETERS.has(n):
+				if LIVE_PARAMETERS.has(n) or n in STATE_PARAMETERS:
 					continue
 				var v: Variant = sm.get_shader_parameter(n)
 				out.append("%s=%s" % [n, _resource_stamp(v, depth + 1) if v is Object else var_to_str(v)])

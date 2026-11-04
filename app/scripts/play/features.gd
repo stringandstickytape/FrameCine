@@ -67,8 +67,11 @@ extends Node
 ##   crossfade  scripts/play/crossfade.gd: music and videos overlap into the next item (#94), off by default
 ##   hwvideo    scripts/play/hw_video.gd: which way 10-bit video plays (P010, Q10C or software; read-only), hw_vp9
 ##   film_layer scripts/play/film_layer.gd: the flat film as an OpenXR layer (#70), on by default
+##   lightmaps  scripts/env/room_lightmaps.gd: a room built for it bakes its own lightmap on the headset the first
+##              time it is shown, and keeps it; on by default
 
 const EndTime := preload("res://scripts/play/end_time.gd")
+const RoomLightmaps := preload("res://scripts/env/room_lightmaps.gd")
 const BatteryForecast := preload("res://scripts/comfort/battery_forecast.gd")
 const StereoDepth := preload("res://scripts/play/stereo_depth.gd")
 const Resume := preload("res://scripts/play/resume.gd")
@@ -191,6 +194,7 @@ var thumbs: SeekThumbnails
 var crossfade: Crossfade
 var hwvideo: HwVideo
 var film_layer: FilmLayer
+var lightmaps: RoomLightmaps
 
 
 func _ready() -> void:
@@ -256,6 +260,7 @@ func _ready() -> void:
 	crossfade = _add(Crossfade.new(), "Crossfade")
 	hwvideo = _add(HwVideo.new(), "HwVideo")
 	film_layer = _add(FilmLayer.new(), "FilmLayer")
+	lightmaps = _add(RoomLightmaps.new(), "RoomLightmaps")
 
 
 func _add(node: Node, node_name: String) -> Node:
