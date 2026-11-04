@@ -132,7 +132,43 @@ static func section(text: String) -> Label:
 	var l := caps(text)
 	l.custom_minimum_size = Vector2(0, 26)
 	l.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+	l.set_meta("section", text)
 	return l
+
+
+## Groups a tab's box by its sections (section()): each heading and what follows it, up to the next, go into a box
+## of their own (meta "section": the name), so one section can show at a time (the tablet, ui/pane_ui.gd). A box
+## that starts with a heading is a section of its own; its own visibility stays the tab's. Looks the same with every
+## group shown.
+static func group_sections(box: VBoxContainer) -> Array[VBoxContainer]:
+	var groups: Array[VBoxContainer] = []
+	var group: VBoxContainer = null
+	var children := box.get_children()
+	for c in children:
+		box.remove_child(c)
+	for c in children:
+		var title := section_title(c)
+		if title != "" or group == null:
+			group = vbox()
+			group.add_theme_constant_override("separation", box.get_theme_constant("separation"))
+			group.set_meta("section", title if title != "" else "General")
+			groups.append(group)
+			box.add_child(group)
+		group.add_child(c)
+	return groups
+
+
+## The section a node starts (its heading, or a box's first child's, a few levels down), or "".
+static func section_title(n: Node) -> String:
+	for depth in 4:
+		if n == null:
+			return ""
+		if n.has_meta("section"):
+			return str(n.get_meta("section"))
+		if not (n is Container) or n.get_child_count() == 0:
+			return ""
+		n = n.get_child(0)
+	return ""
 
 
 static func hbox(children: Array = []) -> HBoxContainer:

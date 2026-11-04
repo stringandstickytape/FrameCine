@@ -10,6 +10,13 @@ extends PanelContainer
 ##
 ## Everything looks the way the theme says (ui/pane_style.gd); this file sets no colour and no font. The tabs talk to
 ## the app directly; the transport and seek bar emit signals that ui_layer.gd turns into app calls.
+##
+## The tablet layout (set_tablet_layout(); ui/tablet.gd, the user 2026-11-04: the old menu moved onto the tablet and
+## reshaped, a wider pane with lists down its side): the header, seek bar and transport go (the tablet's now playing
+## pane shows the title, time and bar); down the left the tabs as a list (Files called Source), then the tab's parts
+## (Source: the places, FilesTab.places_in_order(), and the files tab's own places column goes; any other tab: its
+## sections, W.group_sections(), one shown at a time); the tab in the rest of the width; the footer under them all.
+## No backdrop of its own: the tablet's pane shows through. Lists are dragged to scroll (ui/pane.gd).
 
 const PaneStyle := preload("res://ui/pane_style.gd")
 const W := preload("res://ui/pane_widgets.gd")
@@ -31,6 +38,10 @@ signal skip_requested(delta_seconds: float)
 
 enum Tab { FILES, PICTURE, SOUND, SUBTITLES, ROOM, OBJECTS, SYSTEM }
 const TAB_NAMES: Array[String] = ["Files", "Picture", "Sound", "Subtitles", "Room", "Objects", "System"]
+## The tablet layout's names for the tabs, and its two lists' widths (pixels).
+const TABLET_TAB_NAMES: Array[String] = ["Source", "Picture", "Sound", "Subtitles", "Room", "Objects", "System"]
+const TABLET_TABS_WIDTH := 190
+const TABLET_PARTS_WIDTH := 250
 
 var app: Node
 var files: FilesTab
@@ -82,6 +93,16 @@ var _status := ""
 var header_extra := ""
 ## Push-to-talk is recording: "Listening" in the header and the footer.
 var listening := false
+## The tablet layout: on or not; its row (the two lists and the body), the tab list's buttons, the parts list; each
+## tab's sections (W.group_sections(), made the first time) and the one shown.
+var tablet_layout := false
+var _tabs_box: VBoxContainer
+var _tablet_row: HBoxContainer
+var tablet_tab_buttons: Array[Button] = []
+var _parts_box: VBoxContainer
+var _parts_scroll: ScrollContainer
+var _sections := {}
+var _section := {}
 
 
 func _ready() -> void:
@@ -180,11 +201,11 @@ func _build_open() -> void:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bar.add_child(b)
 		tab_buttons.append(b)
-	var tabs_box := VBoxContainer.new()
-	tabs_box.add_theme_constant_override("separation", 0)
-	tabs_box.add_child(bar)
-	tabs_box.add_child(HSeparator.new())
-	_open.add_child(tabs_box)
+	_tabs_box = VBoxContainer.new()
+	_tabs_box.add_theme_constant_override("separation", 0)
+	_tabs_box.add_child(bar)
+	_tabs_box.add_child(HSeparator.new())
+	_open.add_child(_tabs_box)
 
 	_body = PanelContainer.new()
 	_body.theme_type_variation = &"BodyPanel"
@@ -244,6 +265,7 @@ func bind(p_app: Node) -> void:
 		t.bind(app)
 	files.form_shown.connect(set_form_mode)
 	files.listing_changed.connect(_update_footer)
+	files.folder_changed.connect(func(_p: String) -> void: _mark_parts())
 	system.open_place.connect(func(p: String) -> void:
 		show_tab(Tab.FILES)
 		files.open_folder(p))
@@ -290,8 +312,8 @@ func thumb_shown() -> bool:
 ## A form with the keyboard is open: the seek bar and transport make room for it.
 func set_form_mode(on: bool) -> void:
 	_form_mode = on
-	seek.visible = not on and _seekable
-	_transport.visible = not on
+	seek.visible = not on and _seekable and not tablet_layout
+	_transport.visible = not on and not tablet_layout
 
 
 ## Trick play from a held 4x / 8x button: start on press, plain playback on release.
@@ -310,12 +332,166 @@ func show_tab(index: int) -> void:
 	for i in tabs.size():
 		tabs[i].visible = i == current_tab
 		tab_buttons[i].set_pressed_no_signal(i == current_tab)
+	for i in tablet_tab_buttons.size():
+		tablet_tab_buttons[i].set_pressed_no_signal(i == current_tab)
+	if tablet_layout:
+		_fill_parts()
 	_update_footer()
 
 
 ## The control that takes the stick focus first when the panel opens.
 func default_focus() -> Control:
-	return _play_button
+	return tablet_tab_buttons[current_tab] if tablet_layout else _play_button
+
+
+# --- The tablet layout ----------------------------------------------------------------------------------------------
+
+func set_tablet_layout(on: bool) -> void:
+	if on == tablet_layout or _body == null:
+		return
+	tablet_layout = on
+	if on and _tablet_row == null:
+		_build_tablet_row()
+	for c: Control in [_now.get_parent(), _title.get_parent(), _tabs_box]:
+		c.visible = not on
+	set_form_mode(_form_mode)
+	seek.visible = _seekable and not _form_mode and not on
+	_tablet_row.visible = on
+	var home: Container = _tablet_row if on else _open
+	_body.get_parent().remove_child(_body)
+	home.add_child(_body)
+	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	if not on:
+		_open.move_child(_body, _tablet_row.get_index())
+	if files != null:
+		files.set_places_column(not on)
+	if on:
+		# No backdrop: the tablet's pane shows through (its own margins kept).
+		add_theme_stylebox_override("panel", _clear(get_theme_stylebox("panel")))
+		_body.add_theme_stylebox_override("panel", _clear(_body.get_theme_stylebox("panel")))
+		_fill_parts()
+	else:
+		remove_theme_stylebox_override("panel")
+		_body.remove_theme_stylebox_override("panel")
+		for i: int in _sections:
+			for g: Control in _sections[i]:
+				g.visible = true
+
+
+func _build_tablet_row() -> void:
+	_tablet_row = W.hbox()
+	_tablet_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_open.add_child(_tablet_row)
+	_open.move_child(_tablet_row, _body.get_index())
+	var group := ButtonGroup.new()
+	var tab_list := VBoxContainer.new()
+	tab_list.add_theme_constant_override("separation", 0)
+	tab_list.custom_minimum_size.x = TABLET_TABS_WIDTH
+	for i in TABLET_TAB_NAMES.size():
+		var b := _list_button(TABLET_TAB_NAMES[i], func() -> void: show_tab(i))
+		b.button_group = group
+		tab_list.add_child(b)
+		tablet_tab_buttons.append(b)
+	_tablet_row.add_child(tab_list)
+	_tablet_row.add_child(VSeparator.new())
+	_parts_scroll = ScrollContainer.new()
+	_parts_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_parts_scroll.custom_minimum_size.x = TABLET_PARTS_WIDTH
+	_parts_box = VBoxContainer.new()
+	_parts_box.add_theme_constant_override("separation", 0)
+	_parts_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_parts_scroll.add_child(_parts_box)
+	_tablet_row.add_child(_parts_scroll)
+	_tablet_row.add_child(VSeparator.new())
+
+
+## A row of a list (the files tab's places look): left aligned, cut with an ellipsis, a toggle.
+func _list_button(text: String, action: Callable) -> Button:
+	var b := W.button(text, action, &"PlaceButton")
+	b.custom_minimum_size.y = PaneStyle.constant(&"row_height")
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.clip_text = true
+	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	b.toggle_mode = true
+	return b
+
+
+## The parts list for the tab on show: Source's places, or the tab's sections.
+func _fill_parts() -> void:
+	for c in _parts_box.get_children():
+		_parts_box.remove_child(c)
+		c.queue_free()
+	if current_tab == Tab.FILES:
+		for place: Dictionary in FilesTab.places_in_order():
+			var path := str(place["path"])
+			var b := _list_button(str(place["label"]), func() -> void: files.open_folder(path))
+			b.set_meta("path", path)
+			_parts_box.add_child(b)
+	else:
+		var groups := sections(current_tab)
+		for k in groups.size():
+			var b := _list_button(str(groups[k].get_meta("section")), func() -> void: show_section(k))
+			_parts_box.add_child(b)
+		show_section(int(_section.get(current_tab, 0)))
+	_mark_parts()
+
+
+## A tab's sections (made the first time: W.group_sections() on its box); none for the files tab.
+func sections(tab: int) -> Array[VBoxContainer]:
+	if not _sections.has(tab):
+		var box: Variant = tabs[tab].get("box")
+		var groups: Array[VBoxContainer] = []
+		if tab != Tab.FILES and box is VBoxContainer:
+			groups = W.group_sections(box)
+		_sections[tab] = groups
+	return _sections[tab]
+
+
+## Shows one section of the tab on show (the others hide), from its top.
+func show_section(k: int) -> void:
+	var groups := sections(current_tab)
+	if groups.is_empty():
+		return
+	k = clampi(k, 0, groups.size() - 1)
+	_section[current_tab] = k
+	for j in groups.size():
+		groups[j].visible = j == k
+	(tabs[current_tab] as ScrollContainer).scroll_vertical = 0
+	_mark_parts()
+
+
+## Marks the part on show (the place, or the section), and hides the sections with nothing to show (the tab hides
+## the parts that don't apply, such as 3D for a flat film); the one on show moves to the first left.
+func _mark_parts() -> void:
+	if not tablet_layout or _parts_box == null:
+		return
+	var buttons := _parts_box.get_children().filter(func(c: Node) -> bool: return not c.is_queued_for_deletion())
+	if current_tab == Tab.FILES:
+		for b: Button in buttons:
+			b.set_pressed_no_signal(files.is_current_place(str(b.get_meta("path"))))
+		return
+	var groups := sections(current_tab)
+	var shown := int(_section.get(current_tab, 0))
+	for k in mini(buttons.size(), groups.size()):
+		var any := groups[k].get_children().any(func(c: Node) -> bool: return c is CanvasItem and c.visible)
+		(buttons[k] as Button).visible = any
+		(buttons[k] as Button).set_pressed_no_signal(k == shown)
+	if shown < groups.size() and not (buttons[shown] as Button).visible:
+		for k in buttons.size():
+			if (buttons[k] as Button).visible:
+				show_section(k)
+				return
+
+
+## A copy of a backdrop with nothing drawn (its margins kept).
+static func _clear(sb: StyleBox) -> StyleBox:
+	if not (sb is StyleBoxFlat):
+		return StyleBoxEmpty.new()
+	var c := sb.duplicate() as StyleBoxFlat
+	c.bg_color.a = 0.0
+	c.border_color.a = 0.0
+	c.shadow_size = 0
+	return c
 
 
 func set_title(text: String) -> void:
@@ -420,7 +596,7 @@ func set_playback(position_s: float, duration: float, playing: bool, can_seek: b
 	seek.set_state(position_s, duration, can_seek and duration > 0.0)
 	# A live stream (or HTTP without ranges) can't seek: no seek bar or skips, and LIVE by the time.
 	_seekable = can_seek
-	seek.visible = can_seek and not _form_mode
+	seek.visible = can_seek and not _form_mode and not tablet_layout
 	for b in _skip_buttons:
 		b.visible = can_seek
 	var f: Node = app.features if app != null and app.get("features") != null else null
@@ -454,6 +630,7 @@ func tick() -> void:
 	var chapter: String = f.chapters.title_text() if int(f.chapters.current) >= 0 else ""
 	_now.text = "Now playing" + (("  ·  chapter " + chapter) if chapter != "" else "")
 	_update_footer()
+	_mark_parts()
 	if current_tab == Tab.ROOM:
 		room.tick()
 	elif current_tab == Tab.SOUND:

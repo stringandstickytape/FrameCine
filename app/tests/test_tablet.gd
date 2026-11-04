@@ -6,7 +6,8 @@ extends SceneTree
 ## panes; the style document (its defaults valid, partial changes from outside, bad values refused with their paths,
 ## only the changes kept, reset); the now playing pane (title, played / total, the bar and its hit area, a long
 ## title cut; the text and bar centred as one); the laser's ray, a touch, skipping and dragging the bar; the
-## lists (categories, options, content: picking, dragging, flicking, the clip, Source's rows); the fades.
+## old menu on the main pane in its tablet layout (lists down the left, one section at a time), dragging its lists;
+## the fades.
 ## Run: godot --headless --xr-mode off --path app --script res://tests/test_tablet.gd
 
 const Tablet := preload("res://ui/tablet.gd")
@@ -56,6 +57,8 @@ func _run() -> void:
 	await _frames(1)
 	_check("menu: shown in front of the head", tablet.is_shown() and tablet.global_transform.is_equal_approx(p))
 	_check("menu: the front panel opens too", layer.is_open())
+	# The first seconds after launch place it again as the head settles (ui_layer.gd _replace_left): past them.
+	layer._replace_left = 0.0
 	main.camera.global_transform = turned
 	await _frames(2)
 	_check("the head turns: it stays where it was", tablet.global_transform.is_equal_approx(p))
@@ -170,107 +173,93 @@ func _run() -> void:
 	_check("a ray at the main pane: that pane, off the bar", hit.get("pane") == "main" and float(hit["fraction"]) < 0.0)
 	_check("a ray past the tablet: nothing", tablet.ray_hit(eye, Vector3.FORWARD).is_empty())
 
-	# The lists: categories, options, content, side by side in the main pane; the laser lights a row, the trigger or
-	# a touch grabs a list: a tap picks a row, a drag scrolls one that doesn't fit, and it carries on a little.
-	var lr := tablet.list_rects()
-	var half := mp.size * 0.5
-	_check("three columns left to right inside the main pane", lr["categories"].end.x < lr["options"].position.x
-			and lr["options"].end.x < lr["content"].position.x and lr["content"].end.x <= half.x + 0.0001
-			and lr["categories"].position.x >= -half.x and lr["categories"].end.y <= half.y
-			and lr["content"].end.y <= lr["heading"].position.y + 0.0001)
-	var cats := tablet.categories_list
-	_check("the categories are the front panel's tabs, Files called Source, as a list",
-			cats.items == Tablet.CATEGORIES and cats.items[0] == "Source" and tablet.category == 0 and cats.selected == 0
-			and not cats.can_scroll())
-	var opts: Array[String] = tablet.options_list.items
-	_check("Source's options: the library first, the test patterns last (%s)" % [opts],
-			opts.size() > 3 and opts[0] == "Library" and opts[-1] == "Test patterns" and opts.has("Network"))
-	var to_global := func(l: Variant, i: int) -> Vector3:
-		var lrect: Rect2 = l.rect
-		var y: float = lrect.end.y - l._row_height() * (i + 0.5) + l.scroll
-		return tablet.main_pane.to_global(Vector3(lrect.position.x + lrect.size.x * 0.3, y, 0))
-	var sound_at: Vector3 = to_global.call(cats, 2)
-	hit = tablet.ray_hit(eye, (sound_at - eye).normalized())
-	_check("a ray at Sound: the categories list", hit.get("pane") == "main" and hit.get("list") == "categories")
-	_check("a tip over Sound: the categories list, the point on the plane",
-			tablet.poke_probe(sound_at + tablet.global_transform.basis.z * 0.003)["list"] == "categories"
-			and (tablet.poke_probe(sound_at + tablet.global_transform.basis.z * 0.003)["point"] as Vector3).distance_to(sound_at) < 0.0005)
-	var fill_of := func(l: Variant, k: int) -> Color:
-		return (l._fills[k].material_override as ShaderMaterial).get_shader_parameter("fill_color")
-	tablet.hover(sound_at)
-	_check("the laser on a row lights it", cats.hover == 2
-			and fill_of.call(cats, 2).is_equal_approx(Color.html(st["list"]["hover_fill"])))
-	tablet.hover(null)
-	var changed := []
-	tablet.category_changed.connect(func(i: int) -> void: changed.append(i))
-	_check("a grab on a list that fits picks at once", tablet.grab(sound_at) and tablet.category == 2)
-	_check("let go: a tap", tablet.release() and not tablet.is_grabbing())
-	_check("picked: selected, its options, and it says so", cats.selected == 2 and changed == [2]
-			and fill_of.call(cats, 2).is_equal_approx(Color.html(st["list"]["selected_fill"]))
-			and tablet.options_list.items[0] == "Audio track" and tablet.content_list.items.is_empty()
-			and tablet.content_title.text == "Audio track")
-	tablet.select_category(5)
-	_check("Objects: its two parts", tablet.options_list.items == ["Library", "In this room"])
-	tablet.select_category(6)
-	var sys := tablet.options_list
-	_check("System's parts don't all fit: the list scrolls (%.3f m)" % sys.max_scroll(), sys.can_scroll())
-	var y0: Vector3 = to_global.call(sys, 3)
-	var up := tablet.main_pane.global_transform.basis.y.normalized()
-	_check("a grab on a list that scrolls doesn't pick yet", tablet.grab(y0) and sys.selected == 0)
-	tablet.grab_move(y0 + up * 0.02)
-	_check("dragging up moves the rows up with it (%.3f)" % sys.scroll, absf(sys.scroll - minf(0.02, sys.max_scroll())) < 0.0005)
-	tablet.grab_move(y0 + up * 0.5)
-	_check("not past the end", is_equal_approx(sys.scroll, sys.max_scroll()))
-	_check("let go after a drag: no pick", not tablet.release() and sys.selected == 0)
-	var rows_in := 0
-	for k in sys._fills.size():
-		if sys._fills[k].visible:
-			rows_in += 1
-	_check("scrolled: the last row is on show (%d rows drawn)" % rows_in, sys.row_at(Vector2(sys.rect.get_center().x,
-			sys.rect.position.y + 0.001)) == sys.items.size() - 1)
-	sys.set_scroll(0.0)
-	var about: Vector3 = to_global.call(sys, 1)
-	tablet.grab(about)
-	tablet.grab_move(about + up * 0.003)
-	_check("a grab that hardly moves is a tap on its row", tablet.release() and sys.selected == 1
-			and tablet.content_title.text == sys.items[1])
-	# A flick: let go while moving, and it carries on, slowing.
-	tablet.grab(about)
-	for k in 6:
-		await _frames(1)
-		tablet.grab_move(about + up * 0.004 * (k + 1))
-	var at_release := sys.scroll
-	tablet.release()
-	await _frames(10)
-	_check("a flick carries on after letting go (%.4f to %.4f)" % [at_release, sys.scroll], sys.scroll > at_release)
-	sys.set_scroll(0.0105)
-	var cut_label: Label3D = sys._labels[0]
-	_check("a row part way out at the top: its fill cut there, its text faded",
-			(sys._fills[0].material_override as ShaderMaterial).get_shader_parameter("clip").w < sys._row_height() * 0.5
-			and float(cut_label.get_meta("clip", 1.0)) < 1.0)
-	sys.set_scroll(0.0)
-	tablet.set_style({"list": {"selected_fill": "#ff000080"}}, false)
-	_check("styled from outside", fill_of.call(sys, 1).is_equal_approx(Color.html("#ff000080")))
-	tablet.reset_style()
-	# Source: the content is the files tab's list, and a tap on a row presses it there.
-	tablet.select_category(0)
-	var files: Node = main.ui.ui.files
-	var patterns := tablet.options_list.items.find("Test patterns")
-	tablet.select_option(patterns)
-	await _frames(3)
-	_check("Test patterns: the files tab there, its rows in the content (%d)" % tablet.content_list.items.size(),
-			files.current == "stub://" and tablet.content_list.items == files.row_texts()
-			and tablet.content_list.items.size() > 3)
-	_check("the place follows the files tab", tablet.options_list.selected == patterns)
-	var content := tablet.content_list
-	if content.can_scroll():
-		var row_at: Vector3 = to_global.call(content, 2)
-		tablet.grab(row_at)
-		tablet.grab_move(row_at + up * 0.03)
-		tablet.release()
-		_check("the content scrolls by a drag too (%.3f)" % content.scroll, content.scroll > 0.02)
-		content.set_scroll(0.0)
-	tablet.select_category(0)
+	# The menu on the tablet: the old panel on the main pane in its tablet layout (the tabs and their parts as lists
+	# down the left, the tab beside them); its lists are dragged.
+	var keep := tablet.global_transform
+	layer.show_panel()
+	await _frames(2)
+	var panel: Node3D = layer.panel
+	var pui: Node = layer.ui
+	var pr := tablet.panel_rect()
+	_check("on: the panel is the tablet's menu, its size and resolution, no halo (%s m, %s px)"
+			% [panel.size_m, panel.resolution], panel.size_m.is_equal_approx(pr.size)
+			and panel.resolution == tablet.panel_pixels() and not panel.halo_shown and pui.tablet_layout
+			and pr.size.x > mp.size.x - 0.02 and pr.size.y > mp.size.y - 0.02)
+	_check("on the main pane, a little in front", panel.global_transform.is_equal_approx(tablet.panel_transform())
+			and (panel.global_transform.origin - tablet.main_pane.global_position).length() < 0.005)
+	_check("the header, seek bar, transport and tab bar give way", not pui._title.is_visible_in_tree()
+			and not pui.seek.is_visible_in_tree() and not pui._transport.is_visible_in_tree()
+			and not pui._tabs_box.is_visible_in_tree())
+	_check("the tabs as a list down the left, Source first", pui.tablet_tab_buttons.size() == 7
+			and pui.tablet_tab_buttons[0].text == "Source" and pui.tablet_tab_buttons[0].is_visible_in_tree()
+			and pui.tablet_tab_buttons[0].get_global_rect().position.x < 60.0)
+	var part_names := func() -> Array:
+		return pui._parts_box.get_children().filter(func(c: Node) -> bool: return not c.is_queued_for_deletion()) \
+				.map(func(b: Button) -> String: return b.text)
+	pui.tablet_tab_buttons[0].pressed.emit()
+	var names: Array = part_names.call()
+	_check("Source's parts: the places, Library first, Test patterns last (%s)" % [names],
+			names[0] == "Library" and names[-1] == "Test patterns" and names.has("Network"))
+	_check("the files tab's own places column gives way", not pui.files._places_scroll.visible)
+	var patterns_button: Button = pui._parts_box.get_child(names.size() - 1)
+	patterns_button.pressed.emit()
+	await _frames(2)
+	_check("a place opens there and is marked", pui.files.current == "stub://" and patterns_button.button_pressed)
+	_check("opening a place keeps the files tab's places column away", not pui.files._places_scroll.visible)
+	_check("the tab takes the rest of the width (%.0f of %d px)" % [pui._body.size.x, panel.resolution.x],
+			pui._body.size.x > panel.resolution.x - pui.TABLET_TABS_WIDTH - pui.TABLET_PARTS_WIDTH - 120)
+	pui.tablet_tab_buttons[1].pressed.emit()
+	var groups: Array = pui.sections(1)
+	names = part_names.call()
+	_check("Picture's parts: its sections (%s)" % [names], pui.current_tab == 1 and names.has("Screen")
+			and names.size() == groups.size())
+	var screen := names.find("Screen")
+	(pui._parts_box.get_child(screen) as Button).pressed.emit()
+	_check("one section shows at a time", groups[screen].visible
+			and groups.filter(func(g: Control) -> bool: return g.visible).size() == 1)
+	tablet.set_enabled(false, false)
+	_check("off: the front panel again, every section", not pui.tablet_layout and panel.halo_shown
+			and pui._tabs_box.visible and pui.files._places_scroll.visible
+			and groups.all(func(g: Control) -> bool: return g.visible))
+	tablet.set_enabled(true, false)
+	await _frames(1)
+	_check("on again: the tablet layout", pui.tablet_layout and pui._tablet_row.visible)
+
+	# Dragging a list: a press moved up or down scrolls it instead of clicking; a press that hardly moves clicks.
+	pui.tablet_tab_buttons[0].pressed.emit()
+	await _frames(1)
+	pui._parts_box.custom_minimum_size.y = 3000
+	await _frames(2)
+	var sc: ScrollContainer = pui._parts_scroll
+	var at: Vector2 = sc.get_global_rect().get_center()
+	var clicks := [0]
+	for b: Node in pui._parts_box.get_children():
+		(b as Button).pressed.connect(func() -> void: clicks[0] += 1)
+	var slop: float = panel.DRAG_SLOP / panel.size_m.x * panel.resolution.x
+	panel.pointer_button(at, true)
+	_check("a press on it finds the list", panel.scroll_under(panel.hovered_control()) == sc)
+	panel.pointer_move(at + Vector2(0, -slop * 0.5))
+	_check("within %.0f px: not a drag yet" % slop, not panel.dragging and sc.scroll_vertical == 0)
+	panel.pointer_move(at + Vector2(0, -40))
+	panel.pointer_move(at + Vector2(0, -80))
+	_check("moved up 80 px: the list moves with it (%d)" % sc.scroll_vertical, panel.dragging
+			and sc.scroll_vertical == 80)
+	panel.pointer_button(at + Vector2(0, -80), false)
+	_check("let go: no click", clicks[0] == 0 and not panel.dragging and not panel.is_pressed())
+	await _frames(8)
+	_check("it carries on a little (%d)" % sc.scroll_vertical, sc.scroll_vertical > 80)
+	await _frames(60)
+	sc.scroll_vertical = 0
+	await _frames(1)
+	panel.pointer_button(at, true)
+	panel.pointer_move(at + Vector2(0, 3))
+	panel.pointer_button(at + Vector2(0, 3), false)
+	_check("a press that hardly moves is a click (%d clicks, scroll %d)" % [clicks[0], sc.scroll_vertical], clicks[0] == 1 and sc.scroll_vertical == 0)
+	pui._parts_box.custom_minimum_size.y = 0
+	layer.hide_panel()
+	tablet.show_at(head)
+	tablet.global_transform = keep
+	await _frames(1)
 	var face: Vector3 = tablet.global_transform.basis.z
 	var probe: Dictionary = tablet.poke_probe(bar_mid + face * 0.003)
 	_check("a tip 3 mm over the bar: its depth and place", absf(float(probe["depth"]) - 0.003) < 0.0005

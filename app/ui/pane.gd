@@ -5,6 +5,12 @@ extends Node3D
 ## pointer controller's laser, a poke with its tip, the mouse ray on a desktop) become mouse events pushed into the
 ## viewport, so ordinary Controls work; the stick focus becomes ui_* actions. The viewport renders only while
 ## the panel can be seen. Opacity fades in place over the token fade_ms.
+##
+## Lists are dragged (the user, 2026-11-04: push through, drag, pull back out): a press that moves more than DRAG_SLOP
+## metres up or down, inside a ScrollContainer that has more than it shows (and not on a slider), lets go of the
+## press away from everything (so the button under it doesn't fire) and moves the list with the pointer; let go while
+## moving and it carries on, slowing (DRAG_FRICTION per second). A press that hardly moves is an ordinary click.
+## configure() gives the pane another size and resolution (the tablet's, ui/tablet.gd), and halo_shown its halo.
 
 const PaneStyle := preload("res://ui/pane_style.gd")
 const PaneUI := preload("res://ui/pane_ui.gd")
@@ -43,6 +49,16 @@ void fragment() {
 }
 """
 
+## Metres a press may move and still be a click; how fast a let-go list slows (per second); the speed it stops at
+## (pixels per second).
+const DRAG_SLOP := 0.006
+const DRAG_FRICTION := 5.0
+const DRAG_STOP := 20.0
+## Seconds the speed takes as the least time between two moves, and the fastest a list carries on (pixels per
+## second).
+const DRAG_MIN_STEP := 1.0 / 120.0
+const DRAG_MAX_SPEED := 3000.0
+
 ## Physical size (metres) and viewport size (pixels), from the theme tokens and [pane] scale.
 var size_m := Vector2(0.24, 0.195)
 var resolution := Vector2i(740, 600)
@@ -56,6 +72,18 @@ var _halo: MeshInstance3D
 var _halo_mat: ShaderMaterial
 var _last_pixel := Vector2(-1, -1)
 var _pressed := false
+var halo_shown := true
+## A list being dragged: the ScrollContainer under the press (null: none), where the press was and the list's scroll
+## then, and its speed (scroll pixels per second) for carrying on after.
+var dragging := false
+var _drag_scroll: ScrollContainer
+var _press_pixel := Vector2.ZERO
+var _press_scroll := 0.0
+var _drag_speed := 0.0
+var _drag_last_y := 0.0
+var _drag_last_t := 0.0
+var _coast: ScrollContainer
+var _coast_scroll := 0.0
 
 
 func _init(scale := 1.0) -> void:
@@ -69,6 +97,18 @@ func set_size_scale(scale: float) -> void:
 	if _mesh != null:
 		(_mesh.mesh as QuadMesh).size = size_m
 		apply_style()
+
+
+## Another size (metres) and resolution (pixels): the tablet's (ui/tablet.gd), or the theme's again.
+func configure(p_size_m: Vector2, p_resolution: Vector2i) -> void:
+	size_m = p_size_m
+	resolution = p_resolution
+	if _mesh == null:
+		return
+	viewport.size = resolution
+	ui.size = Vector2(resolution)
+	(_mesh.mesh as QuadMesh).size = size_m
+	apply_style()
 
 
 func _ready() -> void:
@@ -127,6 +167,7 @@ func apply_style() -> void:
 	_halo_mat.set_shader_parameter("inner", size_m * 0.5)
 	_halo_mat.set_shader_parameter("radius", PaneStyle.constant(&"radius_pane") * px_to_m)
 	_halo_mat.set_shader_parameter("spread", spread)
+	_halo.visible = halo_shown
 	if ui != null:
 		ui.apply_style()
 
@@ -137,6 +178,7 @@ func fade_to(a: float) -> void:
 
 
 func _process(delta: float) -> void:
+	_coast_step(delta)
 	if is_equal_approx(opacity, _target_opacity):
 		return
 	var step := delta / maxf(PaneStyle.constant(&"fade_ms") / 1000.0, 0.001)
@@ -194,6 +236,14 @@ func pixel_to_world(pixel: Vector2) -> Vector3:
 
 
 func pointer_move(pixel: Vector2) -> void:
+	if _pressed and _drag_scroll != null and not dragging:
+		var moved := pixel - _press_pixel
+		if absf(moved.y) > DRAG_SLOP / size_m.x * resolution.x and absf(moved.y) > absf(moved.x):
+			_begin_drag(pixel)
+	if dragging:
+		_drag_to(pixel)
+		_last_pixel = pixel
+		return
 	var ev := InputEventMouseMotion.new()
 	ev.position = pixel
 	ev.global_position = pixel
@@ -206,6 +256,18 @@ func pointer_move(pixel: Vector2) -> void:
 func pointer_button(pixel: Vector2, pressed: bool) -> void:
 	if pixel != _last_pixel:
 		pointer_move(pixel)
+	if not pressed and dragging:
+		# The press was let go when the drag began: the list carries on from here.
+		_end_drag()
+		return
+	if pressed:
+		_coast = null
+		_press_pixel = pixel
+		_drag_scroll = scroll_under(hovered_control())
+		if _drag_scroll != null:
+			_press_scroll = _drag_scroll.scroll_vertical
+	else:
+		_drag_scroll = null
 	var ev := InputEventMouseButton.new()
 	ev.button_index = MOUSE_BUTTON_LEFT
 	ev.pressed = pressed
@@ -233,8 +295,10 @@ func is_pressed() -> bool:
 	return _pressed
 
 
-## The pointer left the pane: release a held button there and clear hover.
+## The pointer left the pane: release a held button there and clear hover (a drag ends where it is).
 func pointer_exit() -> void:
+	if dragging:
+		_end_drag()
 	if _pressed and _last_pixel.x >= 0.0:
 		pointer_button(_last_pixel, false)
 	if _last_pixel.x >= 0.0:
@@ -249,6 +313,81 @@ func push_action(action: StringName) -> void:
 		ev.action = action
 		ev.pressed = pressed
 		viewport.push_input(ev, true)
+
+
+# --- Dragging a list -----------------------------------------------------------------------------------------------
+
+## The ScrollContainer a press on `c` would drag: the nearest one round it with more than it shows; null for none, or
+## for a slider (it is dragged sideways itself).
+static func scroll_under(c: Control) -> ScrollContainer:
+	var n: Node = c
+	while n != null and n is Control:
+		if n is Slider:
+			return null
+		if n is ScrollContainer and (n as ScrollContainer).vertical_scroll_mode != ScrollContainer.SCROLL_MODE_DISABLED:
+			var bar := (n as ScrollContainer).get_v_scroll_bar()
+			if bar.max_value - bar.page > 0.5:
+				return n
+		n = n.get_parent()
+	return null
+
+
+func _begin_drag(pixel: Vector2) -> void:
+	dragging = true
+	_drag_speed = 0.0
+	_drag_last_y = pixel.y
+	_drag_last_t = Time.get_ticks_usec() / 1000000.0
+	# Let go of the press away from everything: the button under it doesn't fire.
+	var away := Vector2(-1000, -1000)
+	var move := InputEventMouseMotion.new()
+	move.position = away
+	move.global_position = away
+	move.button_mask = MOUSE_BUTTON_MASK_LEFT
+	viewport.push_input(move, true)
+	var up := InputEventMouseButton.new()
+	up.button_index = MOUSE_BUTTON_LEFT
+	up.pressed = false
+	up.position = away
+	up.global_position = away
+	viewport.push_input(up, true)
+
+
+func _drag_to(pixel: Vector2) -> void:
+	if not is_instance_valid(_drag_scroll):
+		return
+	_drag_scroll.scroll_vertical = roundi(_press_scroll - (pixel.y - _press_pixel.y))
+	var now := Time.get_ticks_usec() / 1000000.0
+	# Moves can come close together (two in a frame): not less than DRAG_MIN_STEP apart, and no faster than
+	# DRAG_MAX_SPEED, or a let-go list would fly to its end.
+	var dt := maxf(now - _drag_last_t, DRAG_MIN_STEP)
+	var speed := clampf(-(pixel.y - _drag_last_y) / dt, -DRAG_MAX_SPEED, DRAG_MAX_SPEED)
+	_drag_speed = lerpf(_drag_speed, speed, 0.5)
+	_drag_last_y = pixel.y
+	_drag_last_t = now
+
+
+func _end_drag() -> void:
+	dragging = false
+	_pressed = false
+	_coast = _drag_scroll if is_instance_valid(_drag_scroll) else null
+	_drag_scroll = null
+	if _coast != null:
+		_coast_scroll = _coast.scroll_vertical
+
+
+## A let-go list carries on, slowing, until it stops, reaches an end, or something else scrolls it.
+func _coast_step(delta: float) -> void:
+	if _coast == null:
+		return
+	if not is_instance_valid(_coast) or absf(_drag_speed) < DRAG_STOP 			or _coast.scroll_vertical != roundi(_coast_scroll):
+		_coast = null
+		return
+	_coast_scroll += _drag_speed * delta
+	_drag_speed *= exp(-DRAG_FRICTION * delta)
+	var before := _coast.scroll_vertical
+	_coast.scroll_vertical = roundi(_coast_scroll)
+	if _coast.scroll_vertical == before and absf(_drag_speed * delta) >= 1.0:
+		_coast = null
 
 
 ## The control under the pointer, or null.

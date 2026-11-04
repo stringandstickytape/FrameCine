@@ -68,6 +68,9 @@ var active_path := ""
 var active_title := ""
 var _places_scroll: ScrollContainer
 var _places_box: VBoxContainer
+var _places_rule: VSeparator
+## The places column is wanted (set_places_column(): the tablet lists the places beside the tabs instead).
+var _places_shown := true
 var _path_label: Label
 var _add_button: Button
 var _edit_button: Button
@@ -78,6 +81,8 @@ var _url_form: UrlForm
 ## Per list row: {"kind": "dir"|"file"|"up"|"host"|"add"|"url"|"page"|"window"|"stop"|"none", "path": String,
 ## "index": int, "button": Button or null}
 var _rows: Array[Dictionary] = []
+## _system_dir()'s answers.
+static var _system_dirs := {}
 var _request := 0
 var _tasks: Array[int] = []
 var _busy := false
@@ -117,7 +122,8 @@ func _ready() -> void:
 	_places_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_places_box.add_theme_constant_override("separation", 0)
 	_places_scroll.add_child(_places_box)
-	add_child(VSeparator.new())
+	_places_rule = VSeparator.new()
+	add_child(_places_rule)
 
 	var right := VBoxContainer.new()
 	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -258,11 +264,45 @@ func _build_places() -> void:
 func _mark_place() -> void:
 	for b in _places_box.get_children():
 		if b is Button and b.has_meta("path"):
-			var p: String = b.get_meta("path")
-			# Inside the Library only its own place lights up, not the Videos folder it sits in.
-			(b as Button).set_pressed_no_signal(p == current or (p != "" and not p.ends_with("://")
-					and current.begins_with(p.trim_suffix("/") + "/")
-					and (p == LibraryIndex.root() or not LibraryIndex.is_inside(current))))
+			(b as Button).set_pressed_no_signal(is_current_place(b.get_meta("path")))
+
+
+## The place's list is on show, or a folder inside it (inside the Library only its own place, not the Videos folder
+## it sits in).
+func is_current_place(p: String) -> bool:
+	return p == current or (p != "" and not p.ends_with("://") and current.begins_with(p.trim_suffix("/") + "/")
+			and (p == LibraryIndex.root() or not LibraryIndex.is_inside(current)))
+
+
+## The places column on the left: the tablet (ui/pane_ui.gd) lists the places beside the tabs instead.
+func set_places_column(on: bool) -> void:
+	_places_shown = on
+	_places_scroll.visible = on and not is_form_open()
+	_places_rule.visible = _places_scroll.visible
+
+
+## The places in the tablet's order: the library and the lists first, then the network, the folders on the headset,
+## the agents, and the test patterns last.
+static func places_in_order() -> Array[Dictionary]:
+	var first: Array[String] = [LibraryIndex.root(), FAVOURITES_FOLDER, QUEUE_FOLDER, SEARCH_FOLDER, NETWORK_FOLDER,
+			MEDIA_SERVERS_FOLDER, ANDROID_FOLDER, BROWSER_FOLDER]
+	var top: Array[Dictionary] = []
+	var folders: Array[Dictionary] = []
+	var agents: Array[Dictionary] = []
+	var last: Array[Dictionary] = []
+	for p: Dictionary in get_places():
+		var path := str(p["path"])
+		if path in first:
+			top.append(p)
+		elif path.begins_with(AGENT_PREFIX):
+			agents.append(p)
+		elif path == PATTERNS_FOLDER:
+			last.append(p)
+		else:
+			folders.append(p)
+	top.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return first.find(str(a["path"])) < first.find(str(b["path"])))
+	return top + folders + agents + last
 
 
 ## [{label, path}] in display order; only places that exist.
@@ -287,8 +327,8 @@ static func get_places() -> Array[Dictionary]:
 		home = OS.get_environment("USERPROFILE").replace("\\", "/")
 	add.call("Home", home)
 	add.call("Device home", "/home/steamos")
-	add.call("Videos", OS.get_system_dir(OS.SYSTEM_DIR_MOVIES))
-	add.call("Downloads", OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS))
+	add.call("Videos", _system_dir(OS.SYSTEM_DIR_MOVIES))
+	add.call("Downloads", _system_dir(OS.SYSTEM_DIR_DOWNLOADS))
 	# What an assistant fetched (scripts/assistant/assistant_fetch.gd), once there is anything.
 	add.call(AssistantFetch.FOLDER_NAME, AssistantFetch.folder())
 	# Folders the viewer added (an assistant's add_place, confirmed): scripts/net/saved_places.gd.
@@ -309,6 +349,14 @@ static func get_places() -> Array[Dictionary]:
 			var drive := DirAccess.get_drive_name(i)
 			add.call(drive, drive + "/")
 	return out
+
+
+## OS.get_system_dir(), asked once: on Linux each call runs xdg-user-dir (about 45 ms on the headset), and the
+## places are listed on every change of place.
+static func _system_dir(which: OS.SystemDir) -> String:
+	if not _system_dirs.has(which):
+		_system_dirs[which] = OS.get_system_dir(which)
+	return _system_dirs[which]
 
 
 static func _subdirs(p: String) -> Array[String]:
@@ -915,7 +963,7 @@ func _show_url_form(url: String, saved_page: bool) -> void:
 func _set_list_visible(on: bool) -> void:
 	for c in get_children():
 		if c is Control and c != _form and c != _url_form and c != _search_form:
-			(c as Control).visible = on
+			(c as Control).visible = on and (_places_shown or not (c == _places_scroll or c == _places_rule))
 
 
 func _hide_form(refresh := true) -> void:
@@ -984,20 +1032,6 @@ func row_texts() -> Array[String]:
 	for row in _rows:
 		out.append(str(row["text"]))
 	return out
-
-
-## The rows on show ({kind, path, text, ...}) and pressing one: the tablet (ui/tablet.gd) lists them too.
-func rows() -> Array[Dictionary]:
-	return _rows
-
-
-func press_row(index: int) -> void:
-	_on_row_pressed(index)
-
-
-## Where the list is ("Library / Films", a folder's path; "... (loading...)" while it loads).
-func path_text() -> String:
-	return _path_label.text
 
 
 func list_scroll() -> ScrollContainer:

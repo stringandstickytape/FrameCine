@@ -148,6 +148,8 @@ func setup(p_app: Node3D) -> void:
 	tablet.app = app
 	add_child(tablet)
 	apply_layout()
+	tablet.layout_changed.connect(apply_tablet_mode)
+	apply_tablet_mode()
 	ui.system.layout_changed.connect(apply_layout)
 	ui.system.reset_layout_requested.connect(reset_layout)
 	ui.system.reload_theme_requested.connect(reload_theme)
@@ -270,7 +272,8 @@ func dominant_hand() -> XRHand:
 func apply_layout() -> void:
 	var access: Node = app.features.access
 	var scale := float(layout_value("scale")) * float(access.get_value("ui_scale"))
-	panel.set_size_scale(scale)
+	if tablet == null or not tablet.enabled:
+		panel.set_size_scale(scale)
 	distance = clampf(float(layout_value("distance")), PanePose.MIN_DISTANCE, PanePose.MAX_DISTANCE)
 	menu.hold = clampf(float(layout_value("recentre_hold")), 0.2, 3.0)
 	world_locked = bool(layout_value("world_locked"))
@@ -438,15 +441,30 @@ func is_open() -> bool:
 	return _open
 
 
+## The tablet on or off (ui/tablet.gd): on, the panel is the menu on its main pane (its size and resolution, the
+## tablet layout, no halo); off, the front panel again.
+func apply_tablet_mode() -> void:
+	var on := tablet.enabled
+	panel.halo_shown = not on
+	if on:
+		panel.configure(tablet.panel_rect().size, tablet.panel_pixels())
+	else:
+		var scale := float(layout_value("scale")) * float(app.features.access.get_value("ui_scale"))
+		panel.configure(PaneStyle.pane_metres(scale), PaneStyle.pane_pixels())
+	ui.set_tablet_layout(on)
+	if _open:
+		recentre()
+
+
 ## Opens the panel in front of the head (the menu button; at launch; at the end of a file). Already open: brings it
 ## back in front (a recentre). hand: the new pointer (null: keep the current one).
 func show_panel(hand: XRHand = null) -> void:
 	set_pointer_hand(hand)
 	var was_open := _open
 	_open = true
-	recentre()
 	if tablet.enabled:
 		tablet.show_at(_head())
+	recentre()
 	if app.get("_frames") != null and int(app.get("_frames")) < 10:
 		_replace_left = LAUNCH_REPLACE_SECONDS
 	panel.fade_to(1.0)
@@ -484,7 +502,12 @@ func toggle_panel(hand: XRHand = null) -> void:
 
 ## Puts the panel in front of the head again: [pane] distance along the line of sight, at eye height, facing the head.
 func recentre() -> void:
-	panel.global_transform = PanePose.front(_head(), distance)
+	if tablet != null and tablet.enabled:
+		# The menu is on the tablet: the tablet goes in its place for the head, the panel onto it.
+		tablet.place(_head())
+		panel.global_transform = tablet.panel_transform()
+	else:
+		panel.global_transform = PanePose.front(_head(), distance)
 	follow.catching = false
 
 
@@ -523,7 +546,7 @@ func _process(delta: float) -> void:
 		_replace_left -= delta
 		if _open:
 			recentre()
-	elif _open and not world_locked:
+	elif _open and not world_locked and not tablet.enabled:
 		panel.global_transform = follow.step(panel.global_transform, head, PanePose.front(head, distance), delta,
 				panel.is_pressed())
 	_take_over_pointer()
@@ -580,8 +603,7 @@ func _update_pointer() -> void:
 		if at != null:
 			tablet.grab_move(at)
 			_tablet_hit = {"point": at, "distance": (at as Vector3).distance_to(pointer_hand.get_ray_origin()),
-					"pane": "grab", "fraction": -1.0, "list": ""}
-	tablet.hover(_tablet_hit.get("point"))
+					"pane": "grab", "fraction": -1.0}
 	if not _tablet_hit.is_empty():
 		card_hit = _tablet_hit
 		_card_pointed = false
@@ -623,8 +645,8 @@ func _check_hover(hand: XRHand) -> void:
 
 
 ## Poking the panel with the pointer controller's tip clicks, as people will try it (with [pane] distance set short).
-## The tablet's time bar and lists are grabbed by touch too: either controller's tip pushed through it, moved, and
-## pulled back out (where the film should be; a list scrolls with it, or a tap picks a row).
+## The tablet's time bar is grabbed by touch too: either controller's tip pushed through it, moved along it, and
+## pulled back out where the film should be. A tip held in the panel and moved drags a list.
 func _update_poke() -> void:
 	_update_tablet_poke()
 	_update_panel_poke()
@@ -675,12 +697,15 @@ func _update_panel_poke() -> void:
 		_poke_down = true
 		panel.pointer_button(probe["pixel"], true)
 		pointer_hand.pulse()
-	elif _poke_down and (depth > POKE_RELEASE or depth < -0.08 or not probe["inside"]):
+	elif _poke_down and (depth > POKE_RELEASE or depth < -0.08 or not (probe["inside"] or panel.dragging)):
 		_poke_down = false
-		if probe["inside"]:
+		if probe["inside"] or panel.dragging:
 			panel.pointer_button(probe["pixel"], false)
 		else:
 			panel.pointer_exit()
+	elif _poke_down:
+		# Held in: the tip moving drags a list (ui/pane.gd).
+		panel.pointer_move(probe["pixel"])
 
 
 func _update_grip_hold(delta: float) -> void:

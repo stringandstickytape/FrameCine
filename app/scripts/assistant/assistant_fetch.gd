@@ -40,6 +40,7 @@ const TYPES := {"video/mp4": "mp4", "video/x-matroska": "mkv", "video/webm": "we
 
 ## Tests: another folder, the loopback allowed (a server in the test), a pretend amount of free space.
 static var folder_override := ""
+static var _folder := ""
 static var allow_loopback := false
 static var free_space_override := -1
 
@@ -69,10 +70,13 @@ static func ensure(tree: SceneTree) -> Node:
 static func folder() -> String:
 	if folder_override != "":
 		return folder_override
-	var videos := OS.get_system_dir(OS.SYSTEM_DIR_MOVIES)
-	if videos == "":
-		videos = OS.get_environment("HOME").path_join("Videos")
-	return videos.path_join(FOLDER_NAME)
+	# Asked once: on Linux OS.get_system_dir() runs xdg-user-dir (about 45 ms on the headset).
+	if _folder == "":
+		var videos := OS.get_system_dir(OS.SYSTEM_DIR_MOVIES)
+		if videos == "":
+			videos = OS.get_environment("HOME").path_join("Videos")
+		_folder = videos.path_join(FOLDER_NAME)
+	return _folder
 
 
 # --- Checks ----------------------------------------------------------------------------------------------------------
