@@ -14,6 +14,8 @@
 // LIT defined (room_material_lit.gdshader, room_material_lit_triplanar.gdshader): the same maps in an assistant's room
 // with real lighting, as room_lit.gdshader lights it: the engine's lights and shadows on the maps' colour, roughness,
 // metalness and normals, plus the hemisphere fill, the film's light and the contact darkening added as emission.
+// HOUSE defined too (room_material_house.gdshader): a built-in room lit that way on the stock rooms' room light,
+// ready for a baked lightmap (the cinema; see the HOUSE uniforms).
 // Included by room_material.gdshader and room_material_triplanar.gdshader (TRIPLANAR defined) and their lit forms,
 // after their shader_type and render_mode.
 
@@ -55,6 +57,25 @@ uniform float screen_light = 0.0;
 uniform float contact_height = 0.5;
 uniform float contact_strength = 0.35;
 uniform float floor_y = 0.0;
+#endif
+#ifdef HOUSE
+// HOUSE (with LIT, room_material_house.gdshader): a built-in room lit for real and ready for a baked lightmap (the
+// cinema, environments/cinema.gd), on the stock rooms' room light. The house lights' level is env_light over
+// house_reference (the room's own ambient level), squared: 1 as designed, 12 % while the film plays (room light
+// 0.35), up to 4 with the user's room light. It scales the engine's light on the surface (a baked lightmap's, a
+// light's) and the fill (sky_top, sky_bottom). The screen's light is the stock rooms' spill (screen_glow, the bias light's tint, `spill`), not
+// screen_light. Until a lightmap is baked, lamps stand in for the room's lights: up to HOUSE_LAMPS soft point lights
+// without shadows, added as emission (lamp_position: xyz in the world, w the range; lamp_colour: rgb times energy, w
+// > 0 makes it shine only up and down, w the cosine of the cones' half angle: a wall sconce's scallops).
+// instance_tint: the MultiMesh instance's colour multiplies the base colour (seats). bake_pass: what the lightmapper
+// renders of the surface (the colour at level 1; no fill, film or lamps, which would bake in as light).
+#define HOUSE_LAMPS 8
+uniform float house_reference = 0.05;
+uniform int lamp_count = 0;
+uniform vec4 lamp_position[HOUSE_LAMPS];
+uniform vec4 lamp_colour[HOUSE_LAMPS];
+uniform bool bake_pass = false;
+uniform bool instance_tint = false;
 #endif
 
 // env_light, screen_center, screen_glow and the bias light's tint (ideas #29).
@@ -174,17 +195,56 @@ void fragment() {
 		fold = 1.0 - pleat_depth * 0.35 * (1.0 - sin(phase));
 	}
 	vec3 base = tint * t.albedo;
+	float level = 1.0;
+#ifdef HOUSE
+	if (instance_tint) {
+		base *= COLOR.rgb;
+	}
+	// The house lights give the square of the room light: dimmed to 0.35 while the film plays, 12 %.
+	level = bake_pass ? 1.0 : clamp(env_light / max(house_reference, 0.0001), 0.0, 2.0);
+	level *= level;
+#endif
 	float metallic = t.orm.b;
 	float ao = mix(1.0, t.orm.r, ao_strength) * fold;
 	float occlusion = mix(1.0 - contact_strength, 1.0, smoothstep(0.0, contact_height, world_pos.y - floor_y));
 	// Metals: no environment to reflect, so a dimmer copy of their colour stands in for it (as unlit).
-	ALBEDO = base * mix(1.0, 0.45, metallic);
+	vec3 diffuse = base * mix(1.0, 0.45, metallic);
+	// HOUSE: the house lights' level scales what the engine lights (a baked lightmap included).
+	ALBEDO = diffuse * level;
 	METALLIC = metallic * 0.5;
 	ROUGHNESS = clamp(t.orm.g * roughness_scale, 0.05, 1.0);
 	SPECULAR = clamp(specular * 0.5, 0.0, 1.0);
 	NORMAL = normalize((VIEW_MATRIX * vec4(n, 0.0)).xyz);
-	vec3 fill = mix(sky_bottom, sky_top, n.y * 0.5 + 0.5);
+	vec3 fill = mix(sky_bottom, sky_top, n.y * 0.5 + 0.5) * level;
 	vec3 film = vec3(0.0);
+#ifdef HOUSE
+	{
+		// The stock rooms' spill, facing as the lit form's film light.
+		vec3 to = screen_center - world_pos;
+		float d = length(to);
+		float facing = clamp(dot(n, to / max(d, 0.001)) * 0.75 + 0.25, 0.0, 1.0);
+		film = spill * screen_glow * spill_tint(world_pos) * facing / (1.0 + 0.05 * d * d);
+	}
+	// The lamps standing in for the room's lights until a lightmap is baked.
+	for (int i = 0; i < min(lamp_count, HOUSE_LAMPS); i++) {
+		vec3 to = lamp_position[i].xyz - world_pos;
+		float d2 = dot(to, to);
+		float range = lamp_position[i].w;
+		float window = clamp(1.0 - d2 / (range * range), 0.0, 1.0);
+		if (window <= 0.0) {
+			continue;
+		}
+		vec3 l = to * inversesqrt(max(d2, 0.0001));
+		float lambert = max(dot(n, l), 0.0);
+		float cone = 1.0;
+		if (lamp_colour[i].w > 0.0) {
+			// Up and down only, soft-edged; light grazing the wall it hangs on still shows (the scallops).
+			cone = smoothstep(lamp_colour[i].w, mix(lamp_colour[i].w, 1.0, 0.6), abs(l.y));
+			lambert = sqrt(lambert);
+		}
+		fill += lamp_colour[i].rgb * level * (lambert * cone * window * window / (1.0 + d2));
+	}
+#else
 	if (screen_light > 0.0) {
 		vec3 to = screen_center - world_pos;
 		float d = length(to);
@@ -194,11 +254,17 @@ void fragment() {
 		vec3 c = spill_srgb_to_linear(textureLod(screen_thumb, vec2(u, 0.5), 0.0).rgb);
 		film = min(c / SPILL_REFERENCE, vec3(SPILL_MAX)) * screen_light * facing / (1.0 + 0.08 * d * d);
 	}
-	vec3 own = ALBEDO * (fill + film) * occlusion * ao;
+#endif
+	vec3 own = diffuse * (fill + film) * occlusion * ao;
 	if (sheen > 0.0) {
 		float rim = 1.0 - max(dot(n, normalize(CAMERA_POSITION_WORLD - world_pos)), 0.0);
 		own += base * (fill + film) * sheen * rim * rim * rim * 2.0;
 	}
+#ifdef HOUSE
+	if (bake_pass) {
+		own = vec3(0.0);
+	}
+#endif
 	EMISSION = own + emission;
 	AO = occlusion * ao;
 	AO_LIGHT_AFFECT = 0.6;

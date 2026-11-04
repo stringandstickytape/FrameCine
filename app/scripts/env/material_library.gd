@@ -20,7 +20,9 @@ extends RefCounted
 ## triplanar (true: three blended projections, for meshes with neither flat faces nor UVs; three times the fetches),
 ## roughness_scale, normal_strength, specular, sheen, pleats (folds per metre, curtains), pleat_depth, spill and
 ## floor_darkening (as env_unlit.gdshader), emission (Color, added on top), lit ({sky_top, sky_bottom, screen}: an
-## assistant's room with real lighting, room_material_lit.gdshader; assistant_room.gd lighting_of()). Materials with
+## assistant's room with real lighting, room_material_lit.gdshader; assistant_room.gd lighting_of()), house
+## ({sky_top, sky_bottom}: a built-in room lit for real and ready for a lightmap, room_material_house.gdshader; the
+## cinema sets its other uniforms). Materials with
 ## the same id and options are one shared ShaderMaterial: duplicate() it before changing it for one surface only.
 ##   MaterialLibrary.lit_variant(material, lighting)  a library material as its lit form (shared too)
 ##   MaterialLibrary.id_of(material), shown_colour(material)   which library material a surface shows, and its colour
@@ -30,6 +32,7 @@ const SHADER := preload("res://shaders/room_material.gdshader")
 const SHADER_TRIPLANAR := preload("res://shaders/room_material_triplanar.gdshader")
 const SHADER_LIT := preload("res://shaders/room_material_lit.gdshader")
 const SHADER_LIT_TRIPLANAR := preload("res://shaders/room_material_lit_triplanar.gdshader")
+const SHADER_HOUSE := preload("res://shaders/room_material_house.gdshader")
 const MAPS: Array[String] = ["albedo", "normal", "orm"]
 ## .mtex: "MTEX", version, block size (x | y << 16), width, height, mip levels, flags, data size; then the data.
 const MTEX_MAGIC := "MTEX"
@@ -117,6 +120,9 @@ static func get_material(id: String, options := {}) -> ShaderMaterial:
 	if options.get("lit") is Dictionary:
 		m.shader = SHADER_LIT_TRIPLANAR if options.get("triplanar", false) else SHADER_LIT
 		_light(m, options["lit"])
+	if options.get("house") is Dictionary:
+		m.shader = SHADER_HOUSE
+		_light(m, options["house"])
 	if options.has("emission"):
 		m.set_shader_parameter("emission", _colour(options["emission"]))
 	m.set_shader_parameter("albedo_map", tex["albedo"])
@@ -173,7 +179,7 @@ static func _light(m: ShaderMaterial, lighting: Dictionary) -> void:
 ## True when `m` is a library material (either shader, lit or not).
 static func is_library(m: Material) -> bool:
 	return m is ShaderMaterial and (m as ShaderMaterial).shader in [SHADER, SHADER_TRIPLANAR, SHADER_LIT,
-			SHADER_LIT_TRIPLANAR]
+			SHADER_LIT_TRIPLANAR, SHADER_HOUSE]
 
 
 ## The library material's id a surface's material shows, "" when it is not one.

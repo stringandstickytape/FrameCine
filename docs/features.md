@@ -873,6 +873,25 @@ environments' screen-anchor convention (`environments/vr_environment.gd`, `app/d
   - Planetarium: a dark dome full of stars over a skyline silhouette, with a cove light and reclined seats. The
     projector is behind you, and the screen is high on the dome.
   - Dome: a geodesic frame of struts (an icosahedron subdivided once) on a plain at dusk, with a warm horizon.
+- **The cinema, rebuilt (2026-11-04):** the flagship room, lit for real and ready for a lightmap bake
+  (`environments/cinema.gd`; the house form of the library materials, `docs/materials.md`).
+  - A stadium hall 19.2 x 20.7 m, 12 m from the pit to the ceiling: 11 carpeted tiers that curve gently toward the
+    screen, side aisles with two steps a row and a light on every step's nose, a pit and a stage with a lit edge,
+    pleated curtains and a valance, fabric wall panels with wooden rails, sconces between them, acoustic clouds
+    with ceiling cans, brass handrails, four exits with doors and lit signs, and the projection booth's windows in
+    the rear wall.
+  - 297 modelled seats in one MultiMesh (velvet cushion and curved, tilted back, arm rests and standards shared with
+    the neighbour, a pedestal; 564 vertices; a slightly different velvet per seat). The viewer's row and seat stay
+    where they were; every seat back in front stays under the sight line to the default screen. The seat you sit in
+    is folded away, also after a seat change.
+  - Light: no live lights. A warm fill, the screen's spill and lamps standing in for the sconces, all in the
+    surface shader, follow the room light (dim while the film plays). The room's real lights (sconces, house lights,
+    step lights, exit signs: 26) are there, hidden, for a lightmap bake; with a lightmap the stand-ins step back. The
+    beam from the booth to the screen, with 300 motes of dust, shows while the film plays.
+  - Budget: 20 draw calls (one per mesh surface), 172 000 vertices (the seats 167 000).
+  - Tested: `tests/test_cinema.gd` (50 checks, lavapipe); renders of the seat, the aisle, the stage and the hall from
+    above, playing and with the lights up.
+  - Untested: the headset (the cost of the seats and of the lamps in the shader at 90 Hz), and a real bake.
 - **Photo rooms (#18):** every picture in `user://skyboxes` is in the list as "<name> (photo)"
   (`scripts/env/skybox_room.gd`, `shaders/sky_photo.gdshader`).
   - The photo surrounds the viewer, centred ahead, with its horizon at eye level. It decodes on a worker thread

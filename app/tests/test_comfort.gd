@@ -125,12 +125,13 @@ func _run() -> void:
 	var side := -1
 	for i in seats.size():
 		var s: Vector3 = seats[i]
-		if is_zero_approx(s.z) and s.x > 5.0:
+		# Row 0 (its floor at 0; the rows curve, so its ends are nearer the screen), well to the right.
+		if is_zero_approx(s.y) and s.x > 5.0:
 			side = i
 	f.seat.choose_seat(side)
 	_check("a side seat turns the screen toward the middle (yaw %.0f deg)" % rad_to_deg(main.screen_yaw), main.screen_yaw < -0.2)
 	var pointed: Vector3 = main.env.global_transform * Vector3(seats[back])
-	_check("pointing at a seat picks it", f.seat.choose_seat_at(pointed + Vector3(0.3, 0.5, 0.0)) and f.seat.seat == back)
+	_check("pointing at a seat picks it", f.seat.choose_seat_at(pointed + Vector3(0.15, 0.5, 0.0)) and f.seat.seat == back)
 	_check("pointing at nothing near a seat: no change", not f.seat.choose_seat_at(Vector3(0, 30, 0)))
 	f.seat.choose_seat(-1)
 	_check("own spot again", main.env.position == Vector3.ZERO and absf(main.screen_distance - d0) < 0.01

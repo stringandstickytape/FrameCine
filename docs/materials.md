@@ -19,7 +19,8 @@ app/materials/<id>.json              one catalogue entry per material
 app/materials/textures/<id>_<map>.mtex   albedo, normal, orm: ASTC 8 x 8, every mip level
 app/materials/CREDITS.md             the source of every material
 app/scripts/env/material_library.gd  the loader and the API
-app/shaders/room_material.gdshader(inc), room_material_triplanar.gdshader, room_material_lit(_triplanar).gdshader
+app/shaders/room_material.gdshader(inc), room_material_triplanar.gdshader, room_material_lit(_triplanar).gdshader,
+                                     room_material_house.gdshader (the cinema: lit, ready for a lightmap)
 tools/materials/                     build_materials.py, mtex_pack.cpp, make-packer.sh
 app/tools/material_sheet.gd, material_bench.gd   a contact sheet, the cost benchmark
 ```
@@ -108,7 +109,7 @@ headset: `perf` before and after a room change (`docs/assistant.md`, "Performanc
 
 | Room | Surfaces |
 |---|---|
-| Cinema | walls and ceiling `felt`, tiers `plush_carpet`, seats `velvet`, stage `red_hardwood`; new: pleated `velvet` curtains either side of the front wall (one more draw call) |
+| Cinema | lit for real (the house form, below): walls and wall panels `felt`, ceiling and its clouds `acoustic_foam`, tiers, aisle steps and walkways `woven_carpet`, seats `velvet` (a tint per seat) with `black_leather` arms and standards, stage `red_hardwood`, pleated `velvet` curtains and valance, panel rails and doors `walnut_veneer`, door frames and push bars `brushed_steel`, sconce plates and handrails `brass` |
 | Home theatre | walls `smooth_plaster`, floor `herringbone_parquet`, rug `woven_carpet`, cabinet and table `walnut_veneer`, panels and speaker cloth `felt`, sofa `herringbone_upholstery` |
 | Dim room | walls and ceiling `smooth_plaster` (the grid floor stays) |
 | Planetarium | seats `velvet`, floor `plush_carpet` |
@@ -143,6 +144,27 @@ light and contact darkening are added as emission, times ambient occlusion; shee
 `lit_variant(material, lighting)` turns an unlit library material into its lit form with every setting copied (a
 built-in room's surfaces when that room is lit), one per material and lighting, shared. Not yet measured on the
 headset: it adds the engine's per-light work to the three fetches.
+
+### The house form
+
+`room_material_house.gdshader` is the lit form with `HOUSE` defined too, for a built-in room lit for real and ready
+for a baked lightmap: the cinema (`app/environments/cinema.gd`). `get_material(id, {"house": {sky_top,
+sky_bottom}})` makes one; the room sets the rest on its own copy:
+
+- **The house lights' level** is the room light (`env_light` over `house_reference`, the room's ambient level),
+  squared: 1 as designed, 12 % while the film plays (room light 0.35). It scales what the engine lights (`ALBEDO`:
+  a baked lightmap, a light) and the fill, so the house lights go down with a lightmap too.
+- **The screen's light** is the unlit rooms' spill (`screen_glow`, the bias light's colour, `spill`), facing as the
+  lit form's film light; not `screen_light`.
+- **Lamps** stand in for the room's lights until a lightmap is baked: up to 8 soft point lights without shadows
+  (`lamp_count`, `lamp_position` xyz and range in the world, `lamp_colour` rgb times energy, w > 0 for a light that
+  shines only up and down: a wall sconce's scallops), added as emission. No light pass.
+- **`instance_tint`** multiplies the base colour by the MultiMesh instance's colour (the cinema's seats).
+- **`bake_pass`** is what the lightmapper renders of the surface: its colour at level 1, no fill, spill or lamps
+  (they would bake in as light).
+
+A `vec3` uniform set with a `Color` comes back as a zero `Vector3` from `ShaderMaterial.duplicate()`: the cinema sets
+the fill again as `Vector3`s on its copies.
 
 ## Using it
 
