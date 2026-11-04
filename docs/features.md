@@ -891,7 +891,17 @@ environments' screen-anchor convention (`environments/vr_environment.gd`, `app/d
   - Budget: 20 draw calls (one per mesh surface), 172 000 vertices (the seats 167 000).
   - Tested: `tests/test_cinema.gd` (50 checks, lavapipe); renders of the seat, the aisle, the stage and the hall from
     above, playing and with the lights up.
-  - Untested: the headset (the cost of the seats and of the lamps in the shader at 90 Hz), and a real bake.
+  - On the headset (2026-11-04, SteamOS 0.5.7): shown with a 4K film playing, judged "looks great". The house
+    lights keep a floor of 4 % of the designed level, so the room never goes fully out while the film plays
+    (the "dimmed to" setting can be 0).
+- **Rooms light themselves (2026-11-04):** a room built for a lightmap (the cinema: `static_meshes()`,
+  `bake_lights()`, `set_baking()`) is baked on the headset the first time it is shown, behind a notice, and the
+  bake is kept under `user://lightmaps/<room>/` with a stamp of what went in; a changed room bakes again, else
+  every later start loads it (`scripts/env/room_lightmaps.gd` over `scripts/env/room_bake.gd`; the engine fork's
+  `LightmapGI.bake()`, `docs/BUILD.md` PLAYER_BAKE). No PC step. The cinema takes 3.0 s on the Frame, during which
+  no frames are drawn. `[env] lightmaps` turns it off. Seats are a MultiMesh and keep the shader's light.
+  - Tested: `tests/test_room_lightmaps.gd` (headless: which rooms, the setting; lavapipe: the first showing bakes,
+    the second loads, `bake_now()`), `tests/test_bake.gd`.
 - **Photo rooms (#18):** every picture in `user://skyboxes` is in the list as "<name> (photo)"
   (`scripts/env/skybox_room.gd`, `shaders/sky_photo.gdshader`).
   - The photo surrounds the viewer, centred ahead, with its horizon at eye level. It decodes on a worker thread
