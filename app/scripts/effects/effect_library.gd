@@ -245,18 +245,21 @@ static func to_color(v: Variant) -> Color:
 
 
 ## The effect's shader: its group shader with its define (and FX_TEST_CLOCK for the tests' clock, FX_BASE_TRIPLANAR
-## for a library material mapped by the part's own space), compiled once and kept.
-static func shader(id: String, test_clock := false, triplanar := false) -> Shader:
+## for a library material mapped by the part's own space, FX_PRINT for our controller model's printed legends over it,
+## scripts/xr/controller_look.gd), compiled once and kept.
+static func shader(id: String, test_clock := false, triplanar := false, with_print := false) -> Shader:
 	var e := entry(id)
 	if e.is_empty():
 		return null
-	var key := "%s|%s|%s" % [id, test_clock, triplanar]
+	var key := "%s|%s|%s|%s" % [id, test_clock, triplanar, with_print]
 	if not _shaders.has(key):
 		var defines := "#define %s" % e["define"]
 		if test_clock:
 			defines += "\n#define FX_TEST_CLOCK"
 		if triplanar:
 			defines += "\n#define FX_BASE_TRIPLANAR"
+		if with_print:
+			defines += "\n#define FX_PRINT"
 		var s := Shader.new()
 		s.code = (load(str(e["shader"])) as Shader).code.replace("shader_type spatial;", "shader_type spatial;\n"
 				+ defines)
@@ -267,12 +270,13 @@ static func shader(id: String, test_clock := false, triplanar := false) -> Shade
 ## Puts an effect on a material: its shader, its options (defaults for those not given) on their uniforms, the noise
 ## textures, a seed (0..1, from the part's name, so copies are out of step) and, for a two-pass effect, its second
 ## pass. The material's own colour, picture, emission and self_lit are the caller's (the room builder sets them as for
-## any surface). flags: test_clock, triplanar (shader()).
+## any surface). flags: test_clock, triplanar, print (shader()).
 static func apply(mat: ShaderMaterial, id: String, options: Dictionary, seed_value: float, flags := {}) -> void:
 	var e := entry(id)
 	if e.is_empty():
 		return
-	mat.shader = shader(id, bool(flags.get("test_clock", false)), bool(flags.get("triplanar", false)))
+	mat.shader = shader(id, bool(flags.get("test_clock", false)), bool(flags.get("triplanar", false)),
+			bool(flags.get("print", false)))
 	var second: ShaderMaterial = null
 	if e.has("second_pass"):
 		second = ShaderMaterial.new()

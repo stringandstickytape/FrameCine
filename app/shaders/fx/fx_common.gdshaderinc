@@ -192,3 +192,17 @@ vec3 fx_film_colour(vec3 p) {
 vec3 fx_dither(vec2 frag) {
 	return vec3((fx_hash(vec3(frag, 61.0)) - 0.5) / 255.0);
 }
+
+// The last step of an effect's colour. Compiled with FX_PRINT (an effect on our controller model's shell,
+// scripts/xr/controller_look.gd), the legends printed in the model's texture go over it in their ink; otherwise
+// nothing. The energy, nature and materials shaders call it.
+#if defined(FX_PRINT)
+#include "res://shaders/controller_print.gdshaderinc"
+vec3 fx_print(vec3 col, vec2 uv) {
+	return controller_print(col, uv);
+}
+#else
+vec3 fx_print(vec3 col, vec2 uv) {
+	return col;
+}
+#endif

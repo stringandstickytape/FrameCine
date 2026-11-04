@@ -93,6 +93,12 @@ An entry (`effect_info` shows one, without the shader's wiring):
 emission and `self_lit` are set as for any surface, so an effect that layers draws over them. `validate(id, options)`
 returns every problem with its path, in the room schema's words.
 
+A few effects also dress the controllers (`scripts/xr/controller_look.gd`, `docs/features.md` "Controller look"). On
+our own controller model they are compiled with `FX_PRINT` (`apply(..., {"print": true})`): the energy, nature and
+materials shaders end in `fx_print()`, which draws the legends printed in that model's texture over the effect
+(`shaders/controller_print.gdshaderinc`); without the define it does nothing. A new group shader that should dress the
+controllers ends the same way.
+
 ## Performance
 
 The headset renders about 1728 x 1728 a eye at 90 Hz on a mobile GPU, without MSAA, with the film playing. So:

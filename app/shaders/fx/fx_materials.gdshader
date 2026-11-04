@@ -314,7 +314,7 @@ void fragment() {
 			+ emission;
 	a = clamp(mix(0.3, 0.7, frost) + 0.3 * rim + 0.05 * grain, 0.0, 1.0) * s.a;
 #endif
-	ALBEDO = col + fx_dither(FRAGCOORD.xy);
+	ALBEDO = fx_print(col + fx_dither(FRAGCOORD.xy), UV);
 #if defined(FX_CRYSTAL) || defined(FX_FROSTED_GLASS)
 	ALPHA = a;
 #endif

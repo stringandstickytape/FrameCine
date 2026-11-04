@@ -3,8 +3,9 @@ extends ScrollContainer
 ## The System tab (docs/ui-design.md): the info overlay and the stats view; the panel's layout (size, distance,
 ## recentre hold, follow the head, left-handed, reset) so the numbers can be tuned in the headset; accessibility (#74);
 ## test patterns, calibration cards and the bandwidth meter (#48); the benchmark (#82); hardware 10-bit video (which way
-## it plays, read-only, ui/hw_video_row.gd); foveation (D22) and the film layer (#70, a prototype); haptics; the phone remote with
-## its address and QR code (#13); the assistant (ui/assistant_row.gd); the dev tools when dev mode is on (theme, remote changes and their undo); about.
+## it plays, read-only, ui/hw_video_row.gd); foveation (D22) and the film layer (#70, a prototype); the controllers' look
+## and haptics; the phone remote with its address and QR code (#13); the assistant (ui/assistant_row.gd); the dev tools
+## when dev mode is on (theme, remote changes and their undo); about.
 ##
 ## Hooks used: scripts/dev/stats.gd (made here while the stats view is on, freed when it goes off or the tab hides),
 ## DevHost.instance().permissions (scripts/dev/permission_ring.gd), scripts/remote/remote.gd,
@@ -21,6 +22,8 @@ const Benchmark := preload("res://scripts/dev/benchmark.gd")
 const Tour := preload("res://scripts/dev/tour.gd")
 const HwVideoRow := preload("res://ui/hw_video_row.gd")
 const AssistantRow := preload("res://ui/assistant_row.gd")
+const ControllerLook := preload("res://scripts/xr/controller_look.gd")
+const ObjectSection := preload("res://ui/object_section.gd")
 
 ## Open a place of the Files tab (test patterns, network hosts).
 signal open_place(path: String)
@@ -37,6 +40,8 @@ const REMOTE_WORDS := ["Ask", "Allow", "Deny"]
 const FOVEATION_WORDS := ["Off", "Low", "Medium", "High"]
 const FOVEATION_HELP := "Saves GPU time at the edges of your view. High can look blocky."
 const FOVEATION_UNAVAILABLE := "Foveation isn't available: this build starts without it."
+const LOOK_COLUMNS := 3
+const LOOK_HELP := "Both controllers. The labels change ink, or get a dark outline, to stay readable."
 
 var app: Node
 var box: VBoxContainer
@@ -44,6 +49,10 @@ var _overlay: Button
 var _stats_toggle: Button
 var _stats_label: Label
 var _stats: Node
+## The controllers' look: the presets, the colour palette and the speed slider for a look that takes them.
+var _look_grid: GridContainer
+var _look_colours: GridContainer
+var _look_speed: HBoxContainer
 var _haptics: Button
 var _strength: HBoxContainer
 var _jog: Button
@@ -209,6 +218,7 @@ func bind(p_app: Node) -> void:
 	box.add_child(_film_layer_help)
 
 	box.add_child(W.section("Controllers"))
+	_build_look()
 	var haptics: Node = app.features.haptics
 	_haptics = W.toggle("Haptic ticks", func(on: bool) -> void: haptics.set_enabled(on))
 	box.add_child(W.hbox([_haptics]))
@@ -346,6 +356,7 @@ func sync() -> void:
 	_monocular_eye.visible = bool(access.get_value("monocular"))
 	W.set_on(_subs_always, bool(access.get_value("subtitles_always")))
 	_sync_foveation()
+	_sync_look()
 	_sync_benchmark()
 	_sync_remote()
 	_sync_dev()
@@ -398,6 +409,81 @@ func _sync_foveation() -> void:
 
 
 ## The remote and the file share are one server (remote_server.gd); each switch shows its own part of it.
+## The controllers' look (scripts/xr/controller_look.gd): every preset as a button with its swatch or the effect's
+## preview, three to a row; under them, for a look that takes them, a palette for its colour and a slider for its
+## speed. The controllers in your hands are the preview: a choice shows on them at once.
+func _build_look() -> void:
+	box.add_child(W.label("Look"))
+	_look_grid = GridContainer.new()
+	_look_grid.columns = LOOK_COLUMNS
+	_look_grid.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
+	_look_grid.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	for id in ControllerLook.ids():
+		var e := ControllerLook.entry(id)
+		var b := W.button(str(e["name"]), func() -> void:
+			app.set_controller_look(id, {})
+			_sync_look(), &"RowButton")
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.toggle_mode = true
+		b.icon = _look_icon(id)
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.tooltip_text = str(e["description"])
+		b.set_meta("look", id)
+		_look_grid.add_child(b)
+	box.add_child(_look_grid)
+	_look_colours = GridContainer.new()
+	_look_colours.columns = ObjectSection.PALETTE.size() / 2
+	_look_colours.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
+	_look_colours.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	for hex: String in ObjectSection.PALETTE:
+		var b := W.button("", func() -> void: _set_look_option("color", hex))
+		b.custom_minimum_size = Vector2(PaneStyle.constant(&"button_height"), PaneStyle.constant(&"button_height"))
+		b.tooltip_text = hex
+		var dot := ColorRect.new()
+		dot.color = Color.html(hex)
+		dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		dot.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 6)
+		b.add_child(dot)
+		_look_colours.add_child(b)
+	box.add_child(_look_colours)
+	_look_speed = W.slider_row("Speed", 0.0, 1.0, 0.05, func(v: float) -> String: return "%d %%" % roundi(v * 100.0),
+			func(v: float) -> void: _set_look_option("speed", v))
+	box.add_child(_look_speed)
+	box.add_child(W.help(LOOK_HELP))
+
+
+## One option of the look on show, over the others it has.
+func _set_look_option(key: String, value: Variant) -> void:
+	var options: Dictionary = (app.controller_look_options as Dictionary).duplicate()
+	options[key] = value
+	app.set_controller_look(app.controller_look, options)
+	_sync_look()
+
+
+func _sync_look() -> void:
+	if _look_grid == null:
+		return
+	var id := str(app.controller_look)
+	for b: Button in _look_grid.get_children():
+		b.set_pressed_no_signal(str(b.get_meta("look")) == id)
+	var specs := ControllerLook.option_specs(id)
+	_look_colours.visible = specs.has("color")
+	_look_speed.visible = specs.has("speed")
+	if specs.has("speed"):
+		W.set_slider(_look_speed, float(ControllerLook.options_of(id, app.controller_look_options).get("speed",
+				specs["speed"]["default"])))
+
+
+## A look's picker icon: the effect's preview, or a square of the plastic's or the metal's colour.
+static func _look_icon(id: String) -> Texture2D:
+	var e := ControllerLook.entry(id)
+	if e.has("effect"):
+		return ObjectSection.effect_icon(str(e["effect"]))
+	return ObjectSection.swatch_icon("#" + ControllerLook.body_colour(id).to_html(false))
+
+
 func _sync_remote() -> void:
 	var server := _live_server()
 	W.set_on(_remote_toggle, bool(server.remote_enabled) if server != null

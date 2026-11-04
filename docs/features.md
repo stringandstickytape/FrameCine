@@ -84,6 +84,7 @@ sections of `user://settings.cfg`; `<environment id>` and `<id>` sections hold o
 | [The Library](#the-library) | | none | on; a place in Files, made on first use |
 | [Android apps](#android-apps) | | none | on demand, from Files |
 | [Effect library](#effect-library) | | none | data and shaders; a room names an effect (`docs/effects.md`) |
+| [Controller look](#controller-look) | | `[controllers] look`, `look_options` | on; black as the controllers come by default |
 | [Every format: old and other codecs in software](#every-format-old-and-other-codecs-in-software) | none | none | on (engine branch `frame/codecs`) |
 
 ## #36 Wall-clock end time
@@ -2241,3 +2242,39 @@ Each has a description written for an assistant to choose by, bounded options, a
 performance and photosensitivity rules and how to add an effect: `docs/effects.md`.
 
 Untested: on the headset (each effect's cost there, and how the slow motions read in the lenses).
+
+## Controller look
+
+- **What:** how both controllers look, from presets: the black plastic they come in (the default); plastics (white,
+  graphite, red, blue, and any colour); metals from the material library (brushed steel, dark metal, brass: the
+  library's picture three ways in the part's own space, a made-up studio reflected); and effects from the effect
+  library that suit a held object: plasma (two colourways), embers, circuit, neon, starfield, liquid chrome, iridescent
+  and carbon fibre, sized for a hand-held shell, their options (colour, speed, ...) within the library's bounds and
+  its photosensitivity ceiling. Chosen as opaque, one-pass effects drawn in the part's own space that read as a
+  material at 10 cm; left out: the see-through ones (overdraw, and a see-through controller), the transitions (they
+  cut the part away), the room-sized ones (aurora, water, lava, clouds, nebula, marble: their sizes don't go small
+  enough), the stylised and reactive ones and the first eight (their shader has no print hook). One setting for both
+  hands. Code: `scripts/xr/controller_look.gd` (the presets, the print style), `controller_visual.gd` (`set_look`).
+- **Where:** the look goes on the shell (the body and the battery door) of the runtime's model, our own model and the
+  hand-built body; buttons, stick, trigger and grip stay black with their moulded art white. Black puts each model's
+  own material back.
+- **Legible print:** on a plastic or a metal the ink is white or near-black, whichever stands out more from the
+  darkest and brightest the shell gets under the controllers' fake light; below 4.5 : 1 against either, the letters
+  also get a backing in the other colour. On an effect they always get it: white ink, a near-black outline (18 : 1).
+  The print on the runtime's model draws the outline from its distance field (`controller_label.gdshader`
+  `backing_width`, the same four samples); our model's legends, which are in its texture, take the ink over the look
+  and a halo from a coarser mip of the texture (`controller_print.gdshaderinc`, in the model shader and, with
+  `FX_PRINT`, in the effect shaders). A print on a part that keeps its black stays white.
+- **Cost:** the look replaces the shell's material: no draw call or pass is added, nothing runs per frame in GDScript
+  (effects animate by the shader's clock). Plastic: the default shader. Metal: three texture reads more. Effects:
+  their measured tier over a plain surface (plasma 1.24, liquid chrome 2.04, circuit 2.26, embers 2.6, iridescent
+  1.72, starfield 0.9, neon 0.5; carbon fibre 3.5, medium), on the few per cent of the view the controllers cover.
+  The first choice of an effect compiles its shader once (a short hitch).
+- **Controls:** System tab, Controllers, Look: a button per preset with its swatch or the effect's preview (the
+  controllers in your hands are the preview), and for a look that takes them a colour palette and Speed.
+- **Assistant:** `controller_looks` (read: the presets, their options and bounds, their cost) and `controller_look
+  {look, options}` (settings), which validates the look and every option against its bounds and can be undone;
+  `system_settings` names the look on show.
+- **Tested:** `test_controller_look` (612 checks headless, 647 with a renderer: every preset builds and draws on each
+  model, options and bounds, the print's contrast on every preset and on any colour, the shell only, the setting's
+  round trip, the command). Not yet seen on the headset.

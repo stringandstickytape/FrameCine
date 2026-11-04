@@ -7,6 +7,11 @@ render_mode unshaded, blend_mix, cull_back, depth_draw_never, shadows_disabled, 
 
 uniform sampler2D atlas : filter_linear_mipmap_anisotropic, repeat_disable;
 uniform vec3 ink : source_color = vec3(1.0);
+// A backing behind the letters for a busy or mid-toned look (scripts/xr/controller_look.gd): an outline of this colour
+// round each stroke, backing_width of the field past its edge (0: none; at most 0.4, the glyph quad's margin). The same
+// four samples draw it.
+uniform vec3 backing : source_color = vec3(0.0);
+uniform float backing_width = 0.0;
 // Atlas pixels the field spans (label_font.gd FIELD_RANGE).
 uniform float field_range = 10.0;
 // Moved towards the eye, metres: at a grazing angle the sticker's small height over the surface is almost no depth.
@@ -46,11 +51,12 @@ void fragment() {
 	float pixel = max(slope, footprint / field_range * 0.5);
 	float edge = 0.5 - stem_gain * footprint / field_range * smoothstep(1.0, 3.0, footprint);
 	// Rotated grid of four samples in the pixel, each softened over its own share of it.
-	float cover = 0.0;
-	cover += clamp((field(UV + dx * -0.125 + dy * -0.375) - edge) / pixel * 2.0 + 0.5, 0.0, 1.0);
-	cover += clamp((field(UV + dx * 0.375 + dy * -0.125) - edge) / pixel * 2.0 + 0.5, 0.0, 1.0);
-	cover += clamp((field(UV + dx * 0.125 + dy * 0.375) - edge) / pixel * 2.0 + 0.5, 0.0, 1.0);
-	cover += clamp((field(UV + dx * -0.375 + dy * 0.125) - edge) / pixel * 2.0 + 0.5, 0.0, 1.0);
-	ALBEDO = ink;
-	ALPHA = cover * 0.25;
+	vec4 f = vec4(field(UV + dx * -0.125 + dy * -0.375), field(UV + dx * 0.375 + dy * -0.125),
+			field(UV + dx * 0.125 + dy * 0.375), field(UV + dx * -0.375 + dy * 0.125));
+	float cover = dot(clamp((f - edge) / pixel * 2.0 + 0.5, 0.0, 1.0), vec4(0.25));
+	// The backing: the same samples against an edge moved out; the letters over it.
+	float behind = dot(clamp((f - edge + clamp(backing_width, 0.0, 0.4)) / pixel * 2.0 + 0.5, 0.0, 1.0), vec4(0.25));
+	behind = max(behind, cover);
+	ALBEDO = mix(backing, ink, cover / max(behind, 1e-4));
+	ALPHA = behind;
 }

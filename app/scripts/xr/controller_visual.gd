@@ -56,6 +56,11 @@ const LAYOUT_PATH := "res://xr/controller_labels_layout.tres"
 ## Our own controller models (tools/controller_model/: derived from Valve's controller CAD, CC BY-NC-SA 4.0, see
 ## models/controllers/LICENSE-controller.md), with the legends printed into their texture.
 const OUR_MODELS := "res://models/controllers"
+const ControllerLook := preload("res://scripts/xr/controller_look.gd")
+const EffectLibrary := preload("res://scripts/effects/effect_library.gd")
+## The parts the controllers' look goes on (controller_look.gd): the shell, by its node's name or an ancestor's. The
+## rest keep their own colours.
+const SHELL_PARTS: Array[String] = ["body", "battery_door"]
 
 ## Right controller, aim space (metres): where each input sits. Mirrored in x for the left controller. Measured from
 ## Valve's controller drawing (README, "Controller labels"), scaled to a face 65 mm wide.
@@ -178,6 +183,14 @@ static var _layout_res: LabelLayout
 static var _layout_loaded := false
 var _face_normal := Vector3.ZERO
 var _body_centre := Vector3.ZERO
+## The look on show (set_look()) and its shell materials by target ("ours", "runtime", "fallback"), made when first
+## needed; none for the default.
+var _look_id := ControllerLook.DEFAULT
+var _look_options := {}
+var _look_materials := {}
+var _fallback_material: Material
+## The print on a shell that has a look: its ink and backing (both hands show the same look).
+static var _look_print_material: ShaderMaterial
 
 
 func configure(p_side: String) -> void:
@@ -192,6 +205,7 @@ func configure(p_side: String) -> void:
 	mat.set_shader_parameter("use_vertex_color", true)
 	mat.set_shader_parameter("lift", 0.0)
 	mat.set_shader_parameter("fake_light", 0.0)
+	_fallback_material = mat
 	_body.material_override = mat
 	_body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_body)
@@ -272,9 +286,16 @@ func use_our_model() -> bool:
 			if img.load_png_from_buffer(FileAccess.get_file_as_bytes(png)) == OK:
 				img.generate_mipmaps()
 				_ours_textures[st] = ImageTexture.create_from_image(img)
+	# Mipmapped as the other states are: a look's backing behind the legends reads a coarser level of it.
+	var normal := _ours_textures.get("normal") as Texture2D
+	if normal != null and normal.get_image() != null and not normal.get_image().has_mipmaps():
+		var img := normal.get_image()
+		img.generate_mipmaps()
+		_ours_textures["normal"] = ImageTexture.create_from_image(img)
 	_apply_print_state()
 	_setup_animation()
 	_body.visible = false
+	_apply_look()
 	# The face for the snapshot cameras: square to the aim pose's up, centred on the face controls.
 	_face_normal = Vector3.UP
 	_face_centre = centre / maxf(count, 1)
@@ -302,8 +323,15 @@ func set_print_state(state: String) -> void:
 
 func _apply_print_state() -> void:
 	if _ours_material != null:
-		_ours_material.set_shader_parameter("albedo_texture",
-				_ours_textures.get(_print_state, _ours_textures.get("normal")))
+		_ours_material.set_shader_parameter("albedo_texture", _print_texture())
+	var look := _look_materials.get("ours") as ShaderMaterial
+	if look != null:
+		look.set_shader_parameter("print_texture", _print_texture())
+
+
+## Our model's texture for the print state on show.
+func _print_texture() -> Texture2D:
+	return _ours_textures.get(_print_state, _ours_textures.get("normal"))
 
 
 ## A runtime render model for this hand appeared (or its scene was reloaded): hide the fallback body, make the model
@@ -340,6 +368,8 @@ func attach_render_model(model: Node3D, tries := 5) -> void:
 		_label_root.transform = Transform3D()
 	_make_unlit(model)
 	_mark_agent_button()
+	_look_materials.erase("runtime")
+	_apply_look()
 	_body.visible = false
 	if _ours != null and _ours.visible:
 		_ours.visible = false
@@ -451,7 +481,8 @@ func _make_unlit(model: Node3D) -> void:
 			continue
 		if mi.mesh == null:
 			continue
-		if mi.material_override != null:
+		# A look on the shell stays (_apply_look() sets it again); its own surfaces are made unlit under it.
+		if mi.material_override != null and not mi.material_override.has_meta(&"controller_look"):
 			mi.material_override = _unlit(mi.material_override, converted, str(mi.name) in INK_PARTS)
 		else:
 			for i in mi.mesh.get_surface_count():
@@ -776,7 +807,7 @@ func _rebuild_print() -> void:
 			mesh.name = "Print"
 			mesh.set_meta(&"controller_print", true)
 			mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			mesh.material_override = _label_material()
+			mesh.material_override = _print_material_for(part)
 			mesh.visible = _shown
 			part.add_child(mesh)
 			_print[part] = mesh
@@ -790,6 +821,97 @@ static func _label_material() -> ShaderMaterial:
 		_print_material.set_shader_parameter("atlas", LabelFont.texture())
 		_print_material.set_shader_parameter("field_range", float(LabelFont.FIELD_RANGE))
 	return _print_material
+
+
+## The print on a part: on a shell with a look, in the look's ink with its backing; elsewhere white, as always.
+func _print_material_for(part: Node) -> ShaderMaterial:
+	if _look_id == ControllerLook.DEFAULT or not _is_shell(part):
+		return _label_material()
+	if _look_print_material == null:
+		_look_print_material = _label_material().duplicate() as ShaderMaterial
+	var style := ControllerLook.print_style(_look_id, _look_options)
+	_look_print_material.set_shader_parameter("ink", style["ink"])
+	_look_print_material.set_shader_parameter("backing", style["backing"])
+	_look_print_material.set_shader_parameter("backing_width",
+			ControllerLook.BACKING_WIDTH if bool(style["backing_on"]) else 0.0)
+	return _look_print_material
+
+
+# --- Look --------------------------------------------------------------------------------------------------------
+
+## The controllers' look (controller_look.gd; main.gd sets the same on both hands): its shell materials go on our
+## model's, the runtime model's and the hand-built body's shell, and the print on them takes the look's ink. The
+## default puts the models' own materials back. Nothing runs per frame for it.
+func set_look(id: String, options := {}) -> void:
+	if not ControllerLook.has(id):
+		id = ControllerLook.DEFAULT
+	_look_id = id
+	_look_options = options.duplicate(true)
+	_look_materials.clear()
+	_apply_look()
+	for part: Variant in _print:
+		if is_instance_valid(part) and is_instance_valid(_print[part]):
+			(_print[part] as MeshInstance3D).material_override = _print_material_for(part)
+
+
+func look() -> Dictionary:
+	return {"id": _look_id, "options": _look_options.duplicate(true)}
+
+
+func _apply_look() -> void:
+	if _ours != null:
+		for mi in _shell_meshes(_ours):
+			var m := _look_material("ours", mi)
+			mi.material_override = m if m != null else _ours_material
+	if _model_root != null and is_instance_valid(_model_root):
+		for mi in _shell_meshes(_model_root):
+			# The model's own override (or none), kept to go back to; an Array, as a null meta would be no meta.
+			if not mi.has_meta(&"look_restore"):
+				mi.set_meta(&"look_restore", [mi.material_override])
+			var m := _look_material("runtime", mi)
+			mi.material_override = m if m != null else (mi.get_meta(&"look_restore") as Array)[0]
+	if _body != null:
+		var m := _look_material("fallback", _body)
+		_body.material_override = m if m != null else _fallback_material
+
+
+## A target's shell material for the look on show, made once (null: the default).
+func _look_material(target: String, mi: MeshInstance3D) -> ShaderMaterial:
+	if _look_id == ControllerLook.DEFAULT:
+		return null
+	if not _look_materials.has(target):
+		_look_materials[target] = ControllerLook.material(_look_id, _look_options, target,
+				_print_texture() if target == "ours" else null, _metres_per_unit(mi), EffectLibrary.seed_of(side))
+	return _look_materials[target]
+
+
+## The shell's meshes under a model: those whose node, or a node above it in the model, is named as a shell part.
+func _shell_meshes(top: Node) -> Array[MeshInstance3D]:
+	var out: Array[MeshInstance3D] = []
+	for mi: MeshInstance3D in top.find_children("*", "MeshInstance3D", true, false):
+		if not _is_ours(mi) and mi.mesh != null and _is_shell(mi):
+			out.append(mi)
+	return out
+
+
+## Whether a part is the shell: the hand-built body, or a node of a model named as a shell part (or under one).
+func _is_shell(part: Node) -> bool:
+	if part == _body:
+		return true
+	var n: Node = part
+	while n != null and n != _model_root and n != _ours and n != self:
+		if str(n.name).to_lower() in SHELL_PARTS:
+			return true
+		n = n.get_parent()
+	return false
+
+
+## Metres per unit of a mesh's own space (1 unless a model scales its parts), so a look's sizes stay in metres.
+func _metres_per_unit(mi: Node3D) -> float:
+	if mi == null or not mi.is_inside_tree() or not is_inside_tree():
+		return 1.0
+	var s := mi.global_basis.get_scale().x / maxf(global_basis.get_scale().x, 1e-6)
+	return s if absf(s - 1.0) > 0.01 else 1.0
 
 
 ## The triangles the print lies on: the runtime model's parts (hidden ones are not there to print on), or the hand-built

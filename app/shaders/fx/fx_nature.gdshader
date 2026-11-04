@@ -316,7 +316,7 @@ void fragment() {
 	// The surface as it is, a pale sheen rising and falling with the gusts where the part bends most.
 	col += fx_color * s.light * clamp(sway_sheen, 0.0, 0.4) * sway_gust.y * fx_swing(sway_gust.x, FX_MAX_SWING);
 #endif
-	ALBEDO = col + fx_dither(FRAGCOORD.xy);
+	ALBEDO = fx_print(col + fx_dither(FRAGCOORD.xy), UV);
 #if defined(FX_SMOKE)
 	ALPHA = a;
 #endif

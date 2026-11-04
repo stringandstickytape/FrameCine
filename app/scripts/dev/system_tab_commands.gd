@@ -1,9 +1,9 @@
 extends RefCounted
 
 ## The System tab's viewer settings as commands (ui/system_tab.gd; docs/dev/assistant-coverage/room-system.md): the
-## panel's layout, accessibility, foveation, the controllers (haptic ticks, jog wheel, seek bar pictures, zoom lens) and the
-## calibration cards. Each handler calls what the tab's control calls, then syncs the tab. Registered by
-## command_host.gd; "assistant" in a spec is the consumer level that reaches it.
+## panel's layout, accessibility, foveation, the controllers (their look, haptic ticks, jog wheel, seek bar pictures,
+## zoom lens) and the calibration cards. Each handler calls what the tab's control calls, then syncs the tab.
+## Registered by command_host.gd; "assistant" in a spec is the consumer level that reaches it.
 ##
 ## Never here: the assistant's own switches and its pairing (ui/assistant_row.gd), the phone remote and file sharing
 ## (they open a server with its own pairing), and the dev tools. The hardware video row is read-only: its status is
@@ -11,6 +11,7 @@ extends RefCounted
 
 const DevCommands := preload("res://scripts/dev/dev_commands.gd")
 const TestLab := preload("res://scripts/dev/test_lab.gd")
+const ControllerLook := preload("res://scripts/xr/controller_look.gd")
 
 ## [pane] layout keys the tab's Panel section sets; world_locked is "Follow my head" turned round.
 const LAYOUT_KEYS := ["scale", "distance", "recentre_hold", "world_locked"]
@@ -31,7 +32,8 @@ func register_all() -> void:
 	R.register("system_settings", _cmd_system_settings, {
 		"description": "The System tab's viewer settings: the panel's layout, accessibility, foveation, the controllers "
 				+ "and the app's version.",
-		"returns": "{panel, accessibility, foveation, haptics, jog_wheel, seek_bar_pictures, zoom_lens, version}",
+		"returns": "{panel, accessibility, foveation, haptics, jog_wheel, controller_look, seek_bar_pictures, "
+				+ "zoom_lens, version}",
 		"assistant": "read"})
 	R.register("panel_layout", _cmd_panel_layout, {
 		"description": "The menu panel's size and distance, how long the menu button is held to recentre it, and "
@@ -71,6 +73,27 @@ func register_all() -> void:
 				"description": "Foveation off while the menu panel or the agent pane shows, so their text stays sharp "
 				+ "(true, the default) or not (false)."}],
 		"level": "change", "returns": "{level, sharp_panel, available}", "assistant": "settings"})
+	R.register("controller_looks", _cmd_controller_looks, {
+		"description": "The looks both controllers can take (controller_look sets one): the black they come in, "
+				+ "plastics, metals from the material library and effects from the effect library (plasma, embers, "
+				+ "circuit, neon, starfield, liquid chrome...), each with its options and their bounds and its cost. "
+				+ "The look goes on the shell; the printed labels change ink or get an outline to stay readable.",
+		"returns": "{looks: [{id, name, kind, description, effect | material, options: {name: {type, min, max, "
+				+ "default, description}}, cost: {tier, cost_ratio, passes, animates}}], current}",
+		"assistant": "read"})
+	R.register("controller_look", _cmd_controller_look, {
+		"description": "How both controllers look: one of controller_looks, with its options. Applies at once and is "
+				+ "kept. The labels stay readable whatever the look.",
+		"params": [{"name": "look", "type": "string", "required": true, "enum": ControllerLook.ids(),
+				"description": "black (as they come), white, graphite, red, blue, colour (any colour: options.color), "
+				+ "steel, dark_metal, brass, or an effect: plasma, cold_plasma, embers, circuit, neon, starfield, "
+				+ "liquid_chrome, iridescent, carbon_fibre."},
+				{"name": "options", "type": "object", "default": {},
+				"description": "Options over the look's own, within their bounds (controller_looks lists them): a "
+				+ "plastic's {\"color\": \"#rrggbb\"}; an effect's, e.g. {\"color\": \"#40c0ff\", \"speed\": 0.2}. "
+				+ "A metal takes none. Left out: the look as it comes."}],
+		"level": "change", "returns": "{look, name, kind, options, effect | material, print: {ink, backing}, cost}",
+		"assistant": "settings"})
 	R.register("haptics", _cmd_haptics, {
 		"description": "The controllers' haptic ticks (on the panel's controls and while seeking).",
 		"params": [{"name": "on", "type": "bool", "description": "Turns the ticks on (true) or off (false)."},
@@ -118,6 +141,7 @@ static func system_settings(m: Node) -> Dictionary:
 		"foveation": _foveation(m),
 		"haptics": {"on": bool(f.haptics.enabled), "strength": snappedf(float(f.haptics.strength), 0.01)},
 		"jog_wheel": {"on": bool(f.jog.enabled), "seconds_per_turn": float(f.jog.seconds_per_turn)},
+		"controller_look": _look(m),
 		"seek_bar_pictures": bool(f.thumbs.enabled),
 		"zoom_lens": {"on": bool(f.zoom_lens.enabled), "magnification": float(f.zoom_lens.magnification)},
 		"version": str(ProjectSettings.get_setting("application/config/version", "")),
@@ -140,6 +164,10 @@ static func _access(m: Node) -> Dictionary:
 	return {"larger_panel": snappedf(float(a.get_value("ui_scale")), 0.01), "left_handed": bool(a.get_value("left_handed")),
 			"one_eye_3d": bool(a.get_value("monocular")), "eye": EYES[clampi(int(a.get_value("monocular_eye")), 0, 1)],
 			"subtitles_always": bool(a.get_value("subtitles_always"))}
+
+
+static func _look(m: Node) -> Dictionary:
+	return ControllerLook.describe(str(m.controller_look), m.controller_look_options)
 
 
 ## available false: the app started without a foveated swapchain; the level can't be changed then.
@@ -283,6 +311,30 @@ func _cmd_foveation(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 
 
 # --- The controllers -----------------------------------------------------------------------------------------------
+
+func _cmd_controller_looks(_args: Dictionary, _ctx: DevCommands.Call) -> Variant:
+	return {"looks": ControllerLook.listing(), "current": _look(_main())}
+
+
+func _cmd_controller_look(args: Dictionary, ctx: DevCommands.Call) -> Variant:
+	var m := _main()
+	var options: Variant = args.get("options", {})
+	if options == null:
+		options = {}
+	var errors := ControllerLook.validate(str(args["look"]), options)
+	if not errors.is_empty():
+		return ctx.fail("controller_look: " + "; ".join(errors.map(func(e: Dictionary) -> String:
+				return "%s: %s" % [e["path"], e["error"]])))
+	var was := [str(m.controller_look), (m.controller_look_options as Dictionary).duplicate(true)]
+	# What a look button and its colour and speed do in the tab.
+	m.set_controller_look(str(args["look"]), options)
+	_sync_tab()
+	ctx.summary = "controller look %s" % m.controller_look
+	ctx.undo = func() -> void:
+		_main().set_controller_look(was[0], was[1])
+		_sync_tab()
+	return _look(m)
+
 
 func _cmd_haptics(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 	if _none(args, ctx, ["on", "strength"]):

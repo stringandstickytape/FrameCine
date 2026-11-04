@@ -540,6 +540,20 @@ of the room's own parts), `behind_stock_part` (one of them is between the seat a
 lists the sides with nothing there, set to 200 m; or `{known: false}` in the passthrough room), `stock_parts` with
 each part's `aabb` (`{min, max}` in the room frame), and for each of `bases` its `interior` once it has been on show.
 
+## The controllers' look
+
+With "Let the assistant change settings" on, `controller_look {look, options?}` sets how both controllers look; it is
+kept, as if the viewer chose it in System, Controllers, Look. `controller_looks` (read) lists the looks with their
+options, bounds and cost: `black` (as they come, the default), plastics (`white`, `graphite`, `red`, `blue`, and
+`colour` with `options.color`), metals from the material library (`steel`, `dark_metal`, `brass`) and effects from
+the effect library that suit a held object (`plasma`, `cold_plasma`, `embers`, `circuit`, `neon`, `starfield`,
+`liquid_chrome`, `iridescent`, `carbon_fibre`). An effect's options are the effect library's (`effect_info`), within
+the same bounds and the same photosensitivity ceiling: `controller_look {"look": "plasma", "options": {"color":
+"#40c0ff", "speed": 0.2}}`. Options you leave out keep the look's own; an option out of bounds or one the look does
+not take is refused with its path (`$.options.speed: 0..1`). The look goes on the shell; buttons, stick and trigger
+stay black. The printed labels stay readable on every look: they take a dark or white ink, or a dark outline on a
+busy or mid-toned shell, by themselves. `system_settings` names the look on show (`controller_look`).
+
 ## Bringing a video from the browser (fetch)
 
 The headset pulls; you never push into it. When the viewer found a video in the headset's Browser source:

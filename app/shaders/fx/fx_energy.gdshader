@@ -274,7 +274,7 @@ void fragment() {
 	float hum = fx_swing(fx_wander(FX_TIME, 1.5, fx_seed), min(fx_depth, 0.2));
 	col = c * fx_strength * hum;
 #endif
-	ALBEDO = col;
+	ALBEDO = fx_print(col, UV);
 #if defined(FX_FORCE_FIELD)
 	ALPHA = 1.0;
 #endif

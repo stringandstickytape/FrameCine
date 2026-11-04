@@ -10,6 +10,16 @@ uniform sampler2D albedo_texture : source_color, filter_linear_mipmap, repeat_en
 uniform bool use_texture = false;
 uniform bool use_vertex_color = false;
 uniform vec3 emission : source_color = vec3(0.0);
+// The controllers' look (scripts/xr/controller_look.gd) on the shell: a finish colour in place of the moulded plastic,
+// with a library material's picture over it if one is given (three projections in the part's own space, pattern_scale
+// metres a repeat: the shell's UVs are an atlas), and for metal a made-up surroundings reflected (reflection 0..1: a
+// dim floor, a bright band at the horizon, a sky above, as the effect library's fx_studio). Off: the model's own colours.
+uniform bool use_finish = false;
+uniform vec3 finish : source_color = vec3(0.02);
+uniform bool use_pattern = false;
+uniform sampler2D pattern : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform float pattern_scale = 0.08;
+uniform float reflection = 0.0;
 // Dark plastic would stay near-black: lift every colour a little so the body reads against a black void.
 uniform float lift = 0.07;
 // 1: fake key light and rim; 0: colours as they are (the hand-built controller has its shading baked in).
@@ -37,6 +47,16 @@ uniform vec3 mark_cap : source_color = vec3(0.07);
 const vec3 MARK_FROM = vec3(0.12, 0.45, 1.0);
 const vec3 MARK_VIA = vec3(0.52, 0.25, 1.0);
 const vec3 MARK_TO = vec3(1.0, 0.30, 0.68);
+
+#include "res://shaders/controller_print.gdshaderinc"
+
+varying vec3 local_pos;
+varying vec3 local_normal;
+
+void vertex() {
+	local_pos = VERTEX;
+	local_normal = NORMAL;
+}
 
 // A four-point star of radius r, more than zero inside: a square with a circle out of each corner.
 float sparkle(vec2 p, float r) {
@@ -66,6 +86,15 @@ void fragment() {
 	if (use_vertex_color) {
 		c *= COLOR;
 	}
+	if (use_finish) {
+		c.rgb = finish;
+		if (use_pattern) {
+			vec3 w = pow(abs(local_normal), vec3(4.0));
+			w /= max(w.x + w.y + w.z, 1e-4);
+			vec3 q = local_pos / max(pattern_scale, 0.005);
+			c.rgb *= texture(pattern, q.zy).rgb * w.x + texture(pattern, q.xz).rgb * w.y + texture(pattern, q.xy).rgb * w.z;
+		}
+	}
 	vec3 light_dir = normalize(vec3(-0.35, 0.8, 0.5));
 	float key = max(dot(NORMAL, light_dir), 0.0);
 	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
@@ -74,5 +103,14 @@ void fragment() {
 	if (use_ink) {
 		lit = mix(lit, ink_colour, clamp((dot(c.rgb, vec3(0.2126, 0.7152, 0.0722)) - INK_FROM) / (INK_TO - INK_FROM), 0.0, 1.0));
 	}
+	if (reflection > 0.0) {
+		// The metal tints what it reflects; the key light's highlight stays for the shape.
+		float up = (INV_VIEW_MATRIX * vec4(reflect(-VIEW, NORMAL), 0.0)).y;
+		vec3 around = mix(vec3(0.05), vec3(0.16), smoothstep(-1.0, -0.05, up));
+		around = mix(around, mix(vec3(0.42), vec3(0.95), smoothstep(0.05, 0.95, up)), smoothstep(-0.06, 0.05, up));
+		around += vec3(0.5) * exp(-pow((up - 0.02) / 0.1, 2.0));
+		lit = mix(lit, base * around * 1.3 + vec3(sheen) * key * key * key, clamp(reflection, 0.0, 1.0));
+	}
+	lit = controller_print(lit, UV);
 	ALBEDO = mix(lit, mark_rgb, mark);
 }

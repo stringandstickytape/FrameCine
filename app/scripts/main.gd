@@ -79,6 +79,7 @@ const VideoScreen := preload("res://scripts/video_screen.gd")
 const VideoSource := preload("res://scripts/video/video_source.gd")
 const VideoSourceFactory := preload("res://scripts/video/video_source_factory.gd")
 const XRHand := preload("res://scripts/xr/xr_hand.gd")
+const ControllerLook := preload("res://scripts/xr/controller_look.gd")
 const InfoOverlay := preload("res://scripts/info_overlay.gd")
 const NetworkHosts := preload("res://scripts/net/network_hosts.gd")
 const WebPages := preload("res://scripts/net/web_pages.gd")
@@ -218,6 +219,9 @@ var foveation := "low"
 var foveation_sharp_panel := true
 ## What foveation is set on: the OpenXR interface in XR (_setup_view), else null. Tests put a stand-in here.
 var foveation_xr: Object
+## [controllers] look and look_options: how both controllers look (scripts/xr/controller_look.gd).
+var controller_look := ControllerLook.DEFAULT
+var controller_look_options := {}
 
 ## Screen / sphere drag: {"ray": Callable -> [origin, dir], "hand": XRHand or null, "distance", "yaw", "start_dir",
 ## "start_msec"}
@@ -331,6 +335,7 @@ func _ready() -> void:
 		hand.visual.use_our_model()
 		if use_xr and str(_args.get("controller-model", "runtime")) != "ours":
 			hand.setup_render_model()
+	load_controller_look()
 	update_controller_labels()
 	if _args.has("snapshot-dir"):
 		snapshots = Snapshots.new()
@@ -963,6 +968,38 @@ func set_foveation_sharp_panel(on: bool) -> void:
 	settings.set_value("view", "foveation_sharp_panel", on)
 	_update_foveation()
 	audio_settings_changed.emit()
+
+
+## [controllers] look and look_options (the System tab's Controllers section, the controller_look command). A look or
+## options that no longer check out (a preset since renamed, a bound since narrowed) read as the default.
+func load_controller_look() -> void:
+	var id := str(settings.get_value("controllers", "look", ControllerLook.DEFAULT))
+	var options: Variant = settings.get_value("controllers", "look_options", {})
+	if not ControllerLook.validate(id, options).is_empty():
+		id = ControllerLook.DEFAULT
+		options = {}
+	controller_look = id
+	controller_look_options = (options as Dictionary).duplicate(true)
+	_apply_controller_look()
+
+
+## Both controllers take a look (controller_look.gd LOOKS) with these options over the preset's; kept in the settings.
+## Returns "" or what is wrong ("$.options.speed: 0..1"), and changes nothing then.
+func set_controller_look(id: String, options := {}) -> String:
+	var errors := ControllerLook.validate(id, options)
+	if not errors.is_empty():
+		return "; ".join(errors.map(func(e: Dictionary) -> String: return "%s: %s" % [e["path"], e["error"]]))
+	controller_look = id
+	controller_look_options = options.duplicate(true)
+	settings.set_value("controllers", "look", null if id == ControllerLook.DEFAULT else id)
+	settings.set_value("controllers", "look_options", null if options.is_empty() else controller_look_options)
+	_apply_controller_look()
+	return ""
+
+
+func _apply_controller_look() -> void:
+	for hand in hands:
+		hand.visual.set_look(controller_look, controller_look_options)
 
 
 ## The swapchain is foveated only if xr/openxr/foveation_level was above 0 at start; after that the level can change,
