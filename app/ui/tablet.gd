@@ -19,8 +19,9 @@ extends Node3D
 ##   pane          fill, border: colours ("#rrggbb" or "#rrggbbaa", the last pair the opacity); corner_radius,
 ##                 border_width: metres. Each pane is a rounded rectangle (shaders/tablet.gdshader), nothing drawn
 ##                 outside its border. Frosted glass will be another kind of fill here.
-##   now_playing   padding (metres); title and time: color, size (the font's size, metres), font (one of the theme's:
-##                 FONTS); bar: track, played (colours), height, corner_radius (metres)
+##   now_playing   padding (metres, at the sides); spacing (metres between the text and the bar: the two are
+##                 centred together, top to bottom); title and time: color, size (the font's size, metres), font (one
+##                 of the theme's: FONTS); bar: track, played (colours), height, corner_radius (metres)
 ##
 ## Placement, from the head's position and its heading (yaw only, so looking down when pressing doesn't sink it):
 ## FORWARD metres ahead and DOWN metres below the eyes, the centre about 44° below the horizon, about half a metre
@@ -32,9 +33,12 @@ extends Node3D
 ##   now_playing, main_pane    the two panes (MeshInstance3D); title_label, time_label (Label3D)
 ##   bar_rect() -> Rect2 (now playing pane's space), bar_fraction(global_point) -> float (-1: not on the bar)
 ##   ray_hit(origin, direction) -> {point, distance, pane, fraction} or {}; poke_probe(point) -> {depth, fraction}
-##   seek_to(fraction) -> bool
-## Input (ui_layer.gd): the pointer controller's laser shows on either pane, and the trigger on the time bar skips
-## there; touching the bar with either controller's tip skips there too. Anywhere else on the tablet the trigger is
+##   plane_point(origin, direction) -> Variant (the ray on the tablet's plane, or null); along_bar(point) -> 0..1
+##   seek_to(fraction) -> bool; begin_scrub(fraction) -> bool, scrub(fraction), end_scrub(), scrubbing
+## Input (ui_layer.gd): the pointer controller's laser shows on either pane. The time bar is dragged: the trigger held
+## on it, or a controller's tip pushed through it, then moved along it, and let go (the trigger released, the tip
+## pulled back out) where the film should be. While dragging, the bar and the time follow at once, the film skips
+## there at most every SCRUB_SEEK seconds, and exactly where it is let go. Anywhere else on the tablet the trigger is
 ## taken (nothing happens), so it doesn't pause the film by accident.
 ##   static pane_rects() -> {name: Rect2} in metres, static validate(doc, partial) -> Array (errors)
 ##   static pose(head) -> Transform3D
@@ -59,6 +63,7 @@ const SCHEMA := {
 	"pane": {"fill": "color", "border": "color", "corner_radius": [0.0, 0.13], "border_width": [0.0, 0.03]},
 	"now_playing": {
 		"padding": [0.0, 0.025],
+		"spacing": [0.0, 0.03],
 		"title": {"color": "color", "size": [0.004, 0.03], "font": "font"},
 		"time": {"color": "color", "size": [0.004, 0.03], "font": "font"},
 		"bar": {"track": "color", "played": "color", "height": [0.001, 0.02], "corner_radius": [0.0, 0.01]},
@@ -72,6 +77,11 @@ const LIFT := 0.0008
 const BAR_HIT := Vector2(0.006, 0.012)
 ## Metres between the title and the time.
 const TEXT_GAP := 0.02
+## Seconds between skips while the bar is dragged.
+const SCRUB_SEEK := 0.25
+## The visual middle of capitals and figures above the baseline, as a share of the font's size (Label3D centres the
+## line box, ascent over descent, which puts the letters off the middle).
+const CAP_MIDDLE := 0.36
 
 var app: Node3D
 var enabled := false
@@ -91,6 +101,11 @@ var _tween: Tween
 var _title_full := ""
 var _title_fit := -1.0
 var _fraction := -1.0
+## Dragging the bar: where it is (0..1), where the film last skipped to, and when.
+var scrubbing := false
+var _scrub := 0.0
+var _scrub_sought := -1.0
+var _scrub_at := 0.0
 
 
 func _ready() -> void:
@@ -113,6 +128,12 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	if scrubbing and app != null and not is_equal_approx(_scrub, _scrub_sought):
+		var now := Time.get_ticks_msec() / 1000.0
+		if now - _scrub_at >= SCRUB_SEEK:
+			_scrub_at = now
+			_scrub_sought = _scrub
+			_seek(_scrub)
 	if visible and app != null:
 		_update_now_playing()
 
@@ -147,6 +168,7 @@ func show_at(head: Transform3D) -> void:
 func hide_tablet() -> void:
 	if not _shown:
 		return
+	end_scrub()
 	_shown = false
 	_fade_to(0.0, float(_get(style(), "fade/out")))
 
@@ -187,8 +209,8 @@ func _update_now_playing() -> void:
 	if title != _title_full:
 		_title_full = title
 		_title_fit = -1.0
-	var pos: float = player.get_position() if has else 0.0
 	var dur: float = player.get_duration() if has else 0.0
+	var pos: float = (_scrub * dur if scrubbing else player.get_position()) if has else 0.0
 	var t := ""
 	if has:
 		t = "%s / %s" % [W.clock(pos), W.clock(dur)] if dur > 0.0 else (W.clock(pos) if pos > 0.0 else "")
@@ -263,22 +285,84 @@ func poke_probe(point: Vector3) -> Dictionary:
 
 ## Skips the film to a fraction of its length. False when it can't (nothing playing, a live stream).
 func seek_to(fraction: float) -> bool:
-	if app == null or not app.player.has_source() or not app.player.can_seek():
+	if not can_seek():
 		return false
-	var dur: float = app.player.get_duration()
-	if dur <= 0.0:
-		return false
-	app.player.seek(clampf(fraction, 0.0, 1.0) * dur)
+	_seek(fraction)
 	_update_now_playing()
 	return true
 
 
+func can_seek() -> bool:
+	return app != null and app.player.has_source() and app.player.can_seek() and app.player.get_duration() > 0.0
+
+
+func _seek(fraction: float) -> void:
+	app.player.seek(clampf(fraction, 0.0, 1.0) * float(app.player.get_duration()))
+
+
+## Where a ray meets the tablet's plane (global), or null when it points away from it.
+func plane_point(origin: Vector3, direction: Vector3) -> Variant:
+	var inv := global_transform.affine_inverse()
+	var o := inv * origin
+	var d := inv.basis * direction
+	if absf(d.z) < 1e-6 or (o.z > 0.0) == (d.z > 0.0):
+		return null
+	return global_transform * (o + d * (-o.z / d.z))
+
+
+## How far along the bar a point (global) is, 0 to 1, wherever it is beside the bar: for dragging.
+func along_bar(point: Vector3) -> float:
+	var bar := bar_rect()
+	return clampf((now_playing.to_local(point).x - bar.position.x) / bar.size.x, 0.0, 1.0)
+
+
+## Dragging the bar: begin_scrub() where it was pressed, scrub() as it moves, end_scrub() where it is let go (the film
+## goes there). begin_scrub() is false when the film can't skip.
+func begin_scrub(fraction: float) -> bool:
+	if not can_seek():
+		return false
+	scrubbing = true
+	_scrub_sought = -1.0
+	_scrub_at = 0.0
+	scrub(fraction)
+	return true
+
+
+func scrub(fraction: float) -> void:
+	if not scrubbing:
+		return
+	_scrub = clampf(fraction, 0.0, 1.0)
+	if app != null:
+		_update_now_playing()
+
+
+func end_scrub() -> void:
+	if not scrubbing:
+		return
+	scrubbing = false
+	if can_seek() and not is_equal_approx(_scrub, _scrub_sought):
+		_seek(_scrub)
+	if app != null:
+		_update_now_playing()
+
+
 ## The time bar's rectangle in the now playing pane's space (metres from its centre).
 func bar_rect() -> Rect2:
+	var s := style()
 	var r: Rect2 = pane_rects()["now_playing"]
-	var pad := float(_get(style(), "now_playing/padding"))
-	var h := float(_get(style(), "now_playing/bar/height"))
-	return Rect2(-r.size.x * 0.5 + pad, -r.size.y * 0.5 + pad, r.size.x - 2.0 * pad, h)
+	var pad := float(_get(s, "now_playing/padding"))
+	var h := float(_get(s, "now_playing/bar/height"))
+	return Rect2(-r.size.x * 0.5 + pad, -_block_height(s) * 0.5, r.size.x - 2.0 * pad, h)
+
+
+## The text row's height (its capitals), metres.
+static func _text_height(s: Dictionary) -> float:
+	return maxf(float(_get(s, "now_playing/title/size")), float(_get(s, "now_playing/time/size"))) * CAP_MIDDLE * 2.0
+
+
+## The text row and the bar together, top to bottom: they are centred in the pane as one.
+static func _block_height(s: Dictionary) -> float:
+	return _text_height(s) + float(_get(s, "now_playing/spacing")) + float(_get(s, "now_playing/bar/height"))
 
 
 ## Where in the film a point (global) on or near the time bar is, 0 to 1; -1 when it isn't on the bar (BAR_HIT round
@@ -369,7 +453,8 @@ func _apply_style() -> void:
 			m.set_shader_parameter("border_width", 0.0)
 	var r: Rect2 = pane_rects()["now_playing"]
 	var pad := float(_get(s, "now_playing/padding"))
-	var top := r.size.y * 0.5 - pad
+	# The middle of the text row: the capitals' middle goes there.
+	var text_mid := _block_height(s) * 0.5 - _text_height(s) * 0.5
 	for row: Array in [[title_label, "title", -r.size.x * 0.5 + pad], [time_label, "time", r.size.x * 0.5 - pad]]:
 		var l: Label3D = row[0]
 		var key: String = row[1]
@@ -380,7 +465,11 @@ func _apply_style() -> void:
 		l.set_meta("alpha", c.a)
 		l.modulate = c
 		l.modulate.a = c.a * _opacity
-		l.position = Vector3(float(row[2]), top - size * 0.5, LIFT)
+		# Label3D centres its line box (ascent over descent): moved so the capitals' middle is on text_mid.
+		var box_mid := 0.0
+		if l.font != null:
+			box_mid = (l.font.get_ascent(FONT_PX) - l.font.get_descent(FONT_PX)) * 0.5 * l.pixel_size
+		l.position = Vector3(float(row[2]), text_mid - (box_mid - size * CAP_MIDDLE), LIFT)
 	var bar := bar_rect()
 	(_bar_track.mesh as QuadMesh).size = bar.size
 	(_bar_track.material_override as ShaderMaterial).set_shader_parameter("size", bar.size)

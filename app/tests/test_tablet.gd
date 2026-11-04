@@ -5,7 +5,7 @@ extends SceneTree
 ## the front panel where the head is, keeping it there while the head moves, and hiding it with the panel; the two
 ## panes; the style document (its defaults valid, partial changes from outside, bad values refused with their paths,
 ## only the changes kept, reset); the now playing pane (title, played / total, the bar and its hit area, a long
-## title cut); the laser's ray, a touch and skipping; the fades.
+## title cut; the text and bar centred as one); the laser's ray, a touch, skipping and dragging the bar; the fades.
 ## Run: godot --headless --xr-mode off --path app --script res://tests/test_tablet.gd
 
 const Tablet := preload("res://ui/tablet.gd")
@@ -130,7 +130,17 @@ func _run() -> void:
 			or tablet.time_label.text.ends_with(" / " + W.clock(dur)))
 	var bar: Rect2 = tablet.bar_rect()
 	var np_rect: Rect2 = Tablet.pane_rects()["now_playing"]
-	_check("the bar runs along the bottom inside the padding", bar.position.y < 0.0 and bar.size.x > np_rect.size.x * 0.8)
+	_check("the bar runs along the lower half inside the padding", bar.position.y < 0.0 and bar.size.x > np_rect.size.x * 0.8)
+	var stl := tablet.style()
+	var block: float = Tablet._block_height(stl)
+	var text_h: float = Tablet._text_height(stl)
+	var title_size := float(stl["now_playing"]["title"]["size"])
+	var ff: Font = tablet.title_label.font
+	var box_mid := (ff.get_ascent(Tablet.FONT_PX) - ff.get_descent(Tablet.FONT_PX)) * 0.5 * tablet.title_label.pixel_size
+	var caps_mid := tablet.title_label.position.y + box_mid - title_size * Tablet.CAP_MIDDLE
+	_check("text and bar centred together: the block's top and bottom the same distance from the middle (%.4f, %.4f)"
+			% [caps_mid + text_h * 0.5, bar.position.y], absf((caps_mid + text_h * 0.5) + bar.position.y) < 0.0005
+			and is_equal_approx(bar.position.y, -block * 0.5))
 	_check("the title above the bar, on the left; the time on the right", tablet.title_label.position.y > bar.end.y
 			and tablet.title_label.position.x < 0.0 and tablet.time_label.position.x > 0.0)
 	var on_bar := tablet.now_playing.to_global(Vector3(bar.position.x + bar.size.x * 0.25, bar.get_center().y, 0))
@@ -165,6 +175,30 @@ func _run() -> void:
 		await _frames(3)
 		_check("the film is half way (%.1f of %.1f)" % [main.player.get_position(), dur],
 				absf(main.player.get_position() - dur * 0.5) < maxf(2.0, dur * 0.02))
+		# Dragging: the bar and time follow at once, the film every SCRUB_SEEK, exactly where it is let go.
+		var tol := maxf(2.0, dur * 0.02)
+		var laser_at: Variant = tablet.plane_point(eye, (bar_mid - eye).normalized())
+		_check("a ray meets the plane at the bar", laser_at != null and (laser_at as Vector3).distance_to(bar_mid) < 0.001
+				and absf(tablet.along_bar(laser_at) - 0.75) < 0.01)
+		var beside := tablet.now_playing.to_global(Vector3(bar.position.x + bar.size.x * 0.4, bar.position.y + 0.05, 0))
+		_check("along the bar counts beside it too (dragging)", absf(tablet.along_bar(beside) - 0.4) < 0.01)
+		_check("dragging starts", tablet.begin_scrub(0.2) and tablet.scrubbing)
+		tablet.scrub(0.6)
+		_check("the time follows the drag at once (%s)" % tablet.time_label.text,
+				tablet.time_label.text.begins_with(W.clock(dur * 0.6)))
+		await create_timer(Tablet.SCRUB_SEEK + 0.15).timeout
+		_check("the film follows within SCRUB_SEEK (%.1f)" % main.player.get_position(),
+				absf(main.player.get_position() - dur * 0.6) < tol)
+		tablet.scrub(0.8)
+		tablet.end_scrub()
+		await _frames(3)
+		_check("let go: exactly there (%.1f)" % main.player.get_position(), not tablet.scrubbing
+				and absf(main.player.get_position() - dur * 0.8) < tol)
+		tablet.begin_scrub(0.1)
+		tablet.hide_tablet()
+		_check("hiding ends a drag", not tablet.scrubbing)
+		tablet.show_at(head)
+		await _frames(1)
 
 	# Fades.
 	_check("showing fades in", tablet.visible)

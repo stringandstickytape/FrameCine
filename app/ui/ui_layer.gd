@@ -92,9 +92,11 @@ var _scroll_acc := {}
 var _focus_dir := Vector2i.ZERO
 var _focus_wait := 0.0
 var _poke_down := false
-## The tablet (ui/tablet.gd): what the pointer's ray hits on it ({} for nothing), and which hands are touching its bar.
+## The tablet (ui/tablet.gd): what the pointer's ray hits on it ({} for nothing); the hand dragging its bar, and how
+## ("trigger" or "touch").
 var _tablet_hit := {}
-var _tablet_poked := {}
+var _scrub_hand: XRHand
+var _scrub_by := ""
 var _grip_held := -1.0
 var _refresh_timer := 0.0
 ## A network file was picked: close once it is open.
@@ -572,6 +574,13 @@ func _update_pointer() -> void:
 	_tablet_hit = {}
 	if not _pointed and not _card_pointed and pointer_hand.get_is_active():
 		_tablet_hit = tablet.ray_hit(pointer_hand.get_ray_origin(), pointer_hand.get_ray_direction())
+	# Dragging the bar with the trigger held: it follows the laser along the bar, wherever it is beside it.
+	if _scrub_by == "trigger" and _scrub_hand == pointer_hand:
+		var at: Variant = tablet.plane_point(pointer_hand.get_ray_origin(), pointer_hand.get_ray_direction())
+		if at != null:
+			tablet.scrub(tablet.along_bar(at))
+			_tablet_hit = {"point": at, "distance": (at as Vector3).distance_to(pointer_hand.get_ray_origin()),
+					"pane": "now_playing", "fraction": tablet.along_bar(at)}
 	if not _tablet_hit.is_empty():
 		card_hit = _tablet_hit
 		_card_pointed = false
@@ -613,27 +622,45 @@ func _check_hover(hand: XRHand) -> void:
 
 
 ## Poking the panel with the pointer controller's tip clicks, as people will try it (with [pane] distance set short).
-## Touching the tablet's time bar with either controller's tip skips there.
+## The tablet's time bar is dragged by touch too: either controller's tip pushed through it, moved along it, and
+## pulled back out where the film should be.
 func _update_poke() -> void:
 	_update_tablet_poke()
 	_update_panel_poke()
 
 
 func _update_tablet_poke() -> void:
+	if _scrub_by == "touch":
+		var h := _scrub_hand
+		if h == null or not app.use_xr or not h.get_is_active() or not tablet.is_shown():
+			tablet.end_scrub()
+			_scrub_hand = null
+			_scrub_by = ""
+			return
+		var tip := h.get_ray_origin()
+		var depth: float = tablet.poke_probe(tip)["depth"]
+		if depth > POKE_RELEASE or depth < -0.08:
+			# Pulled back out (or right through): let go there.
+			tablet.end_scrub()
+			_scrub_hand = null
+			_scrub_by = ""
+			h.pulse()
+		else:
+			tablet.scrub(tablet.along_bar(tip))
+		return
+	if _scrub_by != "" or not app.use_xr or not tablet.is_shown():
+		return
 	for hand: XRHand in [pointer_hand, other_hand]:
-		if hand == null:
-			continue
-		if not app.use_xr or not hand.get_is_active() or not tablet.is_shown():
-			_tablet_poked.erase(hand)
+		if hand == null or not hand.get_is_active():
 			continue
 		var probe := tablet.poke_probe(hand.get_ray_origin())
 		var depth: float = probe["depth"]
-		if not _tablet_poked.has(hand) and float(probe["fraction"]) >= 0.0 and depth < POKE_PRESS and depth > -0.05:
-			_tablet_poked[hand] = true
-			if tablet.seek_to(probe["fraction"]):
-				hand.pulse()
-		elif _tablet_poked.has(hand) and (depth > POKE_RELEASE or depth < -0.08 or float(probe["fraction"]) < 0.0):
-			_tablet_poked.erase(hand)
+		if float(probe["fraction"]) >= 0.0 and depth < POKE_PRESS and depth > -0.05 \
+				and tablet.begin_scrub(probe["fraction"]):
+			_scrub_hand = hand
+			_scrub_by = "touch"
+			hand.pulse()
+			return
 
 
 func _update_panel_poke() -> void:
@@ -867,8 +894,17 @@ func on_trigger(hand: XRHand, pressed: bool) -> bool:
 			pick_seat(_seat_aim)
 			hand.pulse()
 		return true
+	if _scrub_by == "trigger" and not pressed and hand == _scrub_hand:
+		tablet.end_scrub()
+		_scrub_hand = null
+		_scrub_by = ""
+		hand.pulse()
+		return true
 	if not _tablet_hit.is_empty():
-		if pressed and float(_tablet_hit.get("fraction", -1.0)) >= 0.0 and tablet.seek_to(_tablet_hit["fraction"]):
+		if pressed and _scrub_by == "" and float(_tablet_hit.get("fraction", -1.0)) >= 0.0 \
+				and tablet.begin_scrub(_tablet_hit["fraction"]):
+			_scrub_hand = hand
+			_scrub_by = "trigger"
 			hand.pulse()
 		return true
 	if _card_pointed:
