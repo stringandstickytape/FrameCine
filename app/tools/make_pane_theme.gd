@@ -13,12 +13,27 @@ extends SceneTree
 ## This tool is the only place the default token values are written down. A new theme is a new .tres: edit a copy in
 ## the editor, or change TOKENS here and write it under another name. The doc's numbers are the defaults; all of them
 ## are to be tuned in the headset.
+##
+## build(options) also makes a theme at run time for the tablet (ui/tablet.gd, ui/pane_style.gd tablet_theme()):
+##   colours   {token: Color}: over the defaults ("text", "muted", "accent", "surface" and the derived ones)
+##   flat      true: no borders on buttons at rest, on hover or in focus (a fill says it all); the tablet's look
+##   generate  true: (re)write the FontFile resources from the .ttf files (the tool; never at run time)
 
-## The font file as shipped (SIL OFL 1.1, ui/fonts/LICENSE.Inter.txt), and the FontFile resource made from it. The app
-## runs from its source folder without the editor's import step, so the theme refers to a saved FontFile (.res), not
-## to the .woff2 itself.
-const FONT_SOURCE := "res://ui/fonts/Inter_Regular.woff2"
-const FONT_RESOURCE := "res://ui/fonts/inter_regular.res"
+## The font, Fira Sans Condensed in four weights (SIL OFL 1.1, ui/fonts/LICENSE.FiraSansCondensed.txt), and the
+## FontFile resources made from them. The app runs from its source folder without the editor's import step, so the
+## theme refers to saved FontFiles (.res), not to the .ttf files themselves.
+const FONT_SOURCES := {
+	"light": "res://ui/fonts/FiraSansCondensed-Light.ttf",
+	"regular": "res://ui/fonts/FiraSansCondensed-Regular.ttf",
+	"medium": "res://ui/fonts/FiraSansCondensed-Medium.ttf",
+	"semibold": "res://ui/fonts/FiraSansCondensed-SemiBold.ttf",
+}
+const FONT_RESOURCES := {
+	"light": "res://ui/fonts/fira_sans_condensed_light.res",
+	"regular": "res://ui/fonts/fira_sans_condensed_regular.res",
+	"medium": "res://ui/fonts/fira_sans_condensed_medium.res",
+	"semibold": "res://ui/fonts/fira_sans_condensed_semibold.res",
+}
 const OUT_DEFAULT := "res://ui/themes/default.tres"
 
 ## The doc's tokens. Colours are [hex, alpha]. "accent*" alphas are fractions of the accent colour.
@@ -89,36 +104,48 @@ func _init() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):
 			out = arg.trim_prefix("--out=")
-	var theme := build()
+	var theme := build({"generate": true})
 	var err := ResourceSaver.save(theme, out)
 	print("Pane theme: %s (%s)" % [out, "ok" if err == OK else error_string(err)])
 	quit(0 if err == OK else 1)
 
 
-static func colours() -> Dictionary:
+## The colour tokens: the defaults, with `over` ({token: Color}) on top; a base colour given changes what derives
+## from it, and a derived one given stands as it is.
+static func colours(over: Dictionary = {}) -> Dictionary:
 	var c := {}
 	for k: String in BASE:
-		c[k] = Color(BASE[k][0], BASE[k][1])
+		c[k] = over[k] if over.has(k) else Color(BASE[k][0], BASE[k][1])
 	for k: String in FIXED:
-		c[k] = Color(FIXED[k][0], FIXED[k][1])
+		c[k] = over[k] if over.has(k) else Color(FIXED[k][0], FIXED[k][1])
 	for k: String in DERIVED:
 		var base: Color = c[DERIVED[k][0]]
-		c[k] = Color(base, DERIVED[k][1])
+		c[k] = over[k] if over.has(k) else Color(base, DERIVED[k][1])
 	return c
 
 
-static func build() -> Theme:
-	var c := colours()
+## The colour tokens for a tablet palette ({plate, edge, ink, ink2, accent} as Colors; ui/tablet.gd palette()):
+## bright text, the muted at ink2, the accent, the plate as the surface, and the fills as the ink over the plate
+## rather than tints of the accent. "bar_track" is the now playing bar's track.
+static func palette_colours(pal: Dictionary) -> Dictionary:
+	var ink: Color = pal["ink"]
+	return {"text": ink, "muted": pal["ink2"], "accent": pal["accent"], "surface": pal["plate"], "edge": pal["edge"],
+			"hairline": Color(ink, 0.09), "hover_fill": Color(ink, 0.12), "focus_fill": Color(ink, 0.08),
+			"pressed_fill": Color(ink, 0.10), "selection": Color(pal["accent"], 0.35), "field": Color(ink, 0.06),
+			"scroll_grabber": Color(ink, 0.3), "seek_track": Color(ink, 0.2), "halo": Color(pal["accent"], 0.0),
+			"bar_track": Color(ink, 0.14)}
+
+
+static func build(options: Dictionary = {}) -> Theme:
+	var c := colours(options.get("colours", {}))
+	var flat := bool(options.get("flat", false))
+	var generate := bool(options.get("generate", false))
 	var t := Theme.new()
-	var base_font := font_resource()
 	var tnum := {TextServerManager.get_primary_interface().name_to_tag("tnum"): 1}
-	var fonts := {
-		"regular": _variation(base_font, tnum, 0.0, 0),
-		"medium": _variation(base_font, tnum, 0.35, 0),
-		"semibold": _variation(base_font, tnum, 0.7, 0),
-		"light": _variation(base_font, tnum, -0.35, 0),
-		"label": _variation(base_font, tnum, 0.35, int(CONSTANTS["label_tracking"])),
-	}
+	var fonts := {}
+	for w: String in FONT_SOURCES:
+		fonts[w] = _variation(font_resource(w, generate), tnum, 0)
+	fonts["label"] = _variation(font_resource("medium", generate), tnum, int(CONSTANTS["label_tracking"]))
 	t.default_font = fonts["regular"]
 	t.default_font_size = SIZES["body"]
 
@@ -176,8 +203,9 @@ static func build() -> Theme:
 	t.set_constant("separation", "VSeparator", 1)
 
 	# Buttons. Normal: a hairline outline. Hover: 14 % accent fill with a 1 px accent inset ring. Focus: a 2 px accent
-	# bar at the left edge and a 10 % accent fill. Toggled on (pressed): accent text on the focus fill.
-	_button_styles(t, "Button", c, row_radius, true)
+	# bar at the left edge and a 10 % accent fill. Toggled on (pressed): accent text on the focus fill. Flat: fills
+	# only, no outline or ring in any state.
+	_button_styles(t, "Button", c, row_radius, not flat, flat)
 	for state in ["font_color", "font_hover_color", "font_focus_color", "font_hover_pressed_color"]:
 		t.set_color(state, "Button", c["text"])
 	t.set_color("font_pressed_color", "Button", c["accent"])
@@ -188,10 +216,10 @@ static func build() -> Theme:
 
 	# List rows and places: no outline at rest.
 	_variation_of(t, "RowButton", "Button")
-	_button_styles(t, "RowButton", c, row_radius, false)
+	_button_styles(t, "RowButton", c, row_radius, false, flat)
 	t.set_font("font", "RowButton", fonts["regular"])
 	_variation_of(t, "PlaceButton", "Button")
-	_button_styles(t, "PlaceButton", c, row_radius, false)
+	_button_styles(t, "PlaceButton", c, row_radius, false, flat)
 	t.set_font("font", "PlaceButton", fonts["regular"])
 	t.set_color("font_color", "PlaceButton", c["muted"])
 
@@ -215,12 +243,12 @@ static func build() -> Theme:
 	t.set_stylebox("hover", "TabButton", tab_hover)
 	t.set_stylebox("pressed", "TabButton", tab_on)
 	t.set_stylebox("hover_pressed", "TabButton", tab_on)
-	t.set_stylebox("focus", "TabButton", _focus_box(c, row_radius))
+	t.set_stylebox("focus", "TabButton", _focus_box(c, row_radius, false, flat))
 	t.set_stylebox("disabled", "TabButton", tab_rest)
 
 	# Transport: 44 px words; play/pause ringed, 52 px.
 	_variation_of(t, "TransportButton", "Button")
-	_button_styles(t, "TransportButton", c, row_radius, false)
+	_button_styles(t, "TransportButton", c, row_radius, false, flat)
 	_variation_of(t, "PlayButton", "Button")
 	var play_size: int = CONSTANTS["play_size"]
 	var ring := _box(Color(c["accent"], 0.0), play_size / 2, 2, c["accent"])
@@ -239,7 +267,7 @@ static func build() -> Theme:
 
 	# Keys of the on-pane keyboard: as buttons, a little tighter.
 	_variation_of(t, "KeyButton", "Button")
-	var key := _box(c["field"], 4, 1, c["hairline"])
+	var key := _box(c["field"], 4, 0 if flat else 1, c["hairline"])
 	_margins(key, 2, 2)
 	t.set_stylebox("normal", "KeyButton", key)
 
@@ -296,35 +324,36 @@ static func build() -> Theme:
 
 	# Docked: the focused control also gets a 1 px accent outline (ui/pane_style.gd swaps this in).
 	for k in ["Button", "RowButton", "PlaceButton", "TransportButton", "TabButton", "KeyButton"]:
-		t.set_stylebox("focus_docked_" + k, "Tokens", _focus_box(c, row_radius, true))
+		t.set_stylebox("focus_docked_" + k, "Tokens", _focus_box(c, row_radius, not flat, flat))
 	t.set_stylebox("focus_docked_PlayButton", "Tokens", _box(c["focus_fill"], play_size / 2, 1, c["accent"]))
 	return t
 
 
-## Makes FONT_RESOURCE from FONT_SOURCE when it is missing or older, and returns it loaded from its path (so the
-## theme refers to it instead of embedding it).
-static func font_resource() -> FontFile:
-	var src := ProjectSettings.globalize_path(FONT_SOURCE)
-	var dst := ProjectSettings.globalize_path(FONT_RESOURCE)
-	if not FileAccess.file_exists(dst) or FileAccess.get_modified_time(dst) < FileAccess.get_modified_time(src):
+## A weight's FontFile, loaded from its path (so the theme refers to it instead of embedding it); generate: made
+## again from the .ttf when it is missing or older (the tool).
+static func font_resource(weight: String, generate := false) -> FontFile:
+	var src: String = FONT_SOURCES[weight]
+	var res: String = FONT_RESOURCES[weight]
+	var dst := ProjectSettings.globalize_path(res)
+	if generate and (not FileAccess.file_exists(dst)
+			or FileAccess.get_modified_time(dst) < FileAccess.get_modified_time(ProjectSettings.globalize_path(src))):
 		var f := FontFile.new()
-		var err := f.load_dynamic_font(FONT_SOURCE)
+		var err := f.load_dynamic_font(src)
 		if err != OK:
-			push_error("Pane theme: can't read %s (%s)" % [FONT_SOURCE, error_string(err)])
+			push_error("Pane theme: can't read %s (%s)" % [src, error_string(err)])
 			return null
 		f.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
 		f.hinting = TextServer.HINTING_LIGHT
 		f.subpixel_positioning = TextServer.SUBPIXEL_POSITIONING_AUTO
 		f.generate_mipmaps = true
-		ResourceSaver.save(f, FONT_RESOURCE)
-	return load(FONT_RESOURCE) as FontFile
+		ResourceSaver.save(f, res)
+	return load(res) as FontFile
 
 
-static func _variation(base: FontFile, features: Dictionary, embolden: float, tracking: int) -> FontVariation:
+static func _variation(base: FontFile, features: Dictionary, tracking: int) -> FontVariation:
 	var f := FontVariation.new()
 	f.base_font = base
 	f.opentype_features = features
-	f.variation_embolden = embolden
 	f.spacing_glyph = tracking
 	return f
 
@@ -347,7 +376,10 @@ static func _margins(s: StyleBox, h: float, v: float) -> void:
 
 
 ## The focus look: a 2 px accent bar at the left edge plus a 10 % accent fill; docked adds a 1 px accent outline.
-static func _focus_box(c: Dictionary, radius: int, docked := false) -> StyleBoxFlat:
+## Flat: the hover fill alone.
+static func _focus_box(c: Dictionary, radius: int, docked := false, flat := false) -> StyleBoxFlat:
+	if flat:
+		return _box(c["hover_fill"], radius)
 	var s := _box(c["focus_fill"], radius, 1 if docked else 0, c["accent"])
 	s.border_width_left = 2
 	s.border_color = c["accent"]
@@ -355,11 +387,12 @@ static func _focus_box(c: Dictionary, radius: int, docked := false) -> StyleBoxF
 	return s
 
 
-static func _button_styles(t: Theme, type: String, c: Dictionary, radius: int, outlined: bool) -> void:
+static func _button_styles(t: Theme, type: String, c: Dictionary, radius: int, outlined: bool, flat := false) -> void:
+	var ring := 0 if flat else 1
 	var normal := _box(Color(c["accent"], 0.0), radius, 1 if outlined else 0, c["hairline"])
-	var hover := _box(c["hover_fill"], radius, 1, c["accent"])
-	var pressed := _box(c["focus_fill"], radius, 1 if outlined else 0, c["hairline"])
-	var hover_pressed := _box(c["hover_fill"], radius, 1, c["accent"])
+	var hover := _box(c["hover_fill"], radius, ring, c["accent"])
+	var pressed := _box(c["pressed_fill"] if flat else c["focus_fill"], radius, 1 if outlined else 0, c["hairline"])
+	var hover_pressed := _box(c["hover_fill"], radius, ring, c["accent"])
 	var disabled := normal.duplicate() as StyleBoxFlat
 	for s in [normal, hover, pressed, hover_pressed, disabled]:
 		_margins(s, 12, 6)
@@ -368,7 +401,7 @@ static func _button_styles(t: Theme, type: String, c: Dictionary, radius: int, o
 	t.set_stylebox("pressed", type, pressed)
 	t.set_stylebox("hover_pressed", type, hover_pressed)
 	t.set_stylebox("disabled", type, disabled)
-	t.set_stylebox("focus", type, _focus_box(c, radius))
+	t.set_stylebox("focus", type, _focus_box(c, radius, false, flat))
 
 
 static func _variation_of(t: Theme, type: String, base: String) -> void:

@@ -10,9 +10,13 @@ extends RefCounted
 
 const DEFAULT_PATH := "res://ui/themes/default.tres"
 const TOKENS := &"Tokens"
+const MakeTheme := preload("res://tools/make_pane_theme.gd")
 
 static var path := DEFAULT_PATH
 static var _theme: Theme
+## The theme the custom-drawn parts read their tokens from while it is set (the tablet's, ui_layer.gd
+## apply_tablet_mode()); null: the pane's own.
+static var _active: Theme
 ## Emitted (through the holder's signal) when reload() swapped the theme.
 static var _holder: Holder
 
@@ -38,9 +42,35 @@ static func theme() -> Theme:
 	return _theme
 
 
-## A copy of the theme with every font size times `s` (the tablet's bigger text, ui/pane_ui.gd set_text_scale()).
-static func scaled_theme(s: float) -> Theme:
-	var t := theme().duplicate() as Theme
+## The tablet's theme (ui/tablet.gd menu_colours(): the palette's text, muted, accent and surface over the defaults),
+## flat: no borders on buttons in any state. Made once per set of colours.
+static var _tablet_themes := {}
+
+
+static func tablet_theme(colours: Dictionary) -> Theme:
+	var key := str(colours)
+	if not _tablet_themes.has(key):
+		_tablet_themes[key] = MakeTheme.build({"colours": colours, "flat": true})
+	return _tablet_themes[key]
+
+
+## Makes a theme the one the tokens are read from (color(), constant(), ...; null: the pane's own again), and tells
+## the custom-drawn parts.
+static func set_active(t: Theme) -> void:
+	if t == _active:
+		return
+	_active = t
+	holder().changed.emit()
+
+
+static func active() -> Theme:
+	return _active if _active != null else theme()
+
+
+## A copy of a theme (the pane's, or the tablet's) with every font size times `s` (the tablet's bigger text,
+## ui/pane_ui.gd set_text_scale()).
+static func scaled_theme(s: float, base: Theme = null) -> Theme:
+	var t := (base if base != null else theme()).duplicate() as Theme
 	if t.default_font_size > 0:
 		t.default_font_size = roundi(t.default_font_size * s)
 	for type in t.get_font_size_type_list():
@@ -70,23 +100,23 @@ static func reload() -> void:
 
 
 static func color(token: StringName) -> Color:
-	return theme().get_color(token, TOKENS)
+	return active().get_color(token, TOKENS)
 
 
 static func constant(token: StringName) -> int:
-	return theme().get_constant(token, TOKENS)
+	return active().get_constant(token, TOKENS)
 
 
 static func font(token: StringName) -> Font:
-	return theme().get_font(token, TOKENS)
+	return active().get_font(token, TOKENS)
 
 
 static func font_size(token: StringName) -> int:
-	return theme().get_font_size(token, TOKENS)
+	return active().get_font_size(token, TOKENS)
 
 
 static func stylebox(token: StringName) -> StyleBox:
-	return theme().get_stylebox(token, TOKENS)
+	return active().get_stylebox(token, TOKENS)
 
 
 ## Pane size in pixels and metres. scale: [pane] scale in the settings (1 = the doc's 24 x 19.5 cm).

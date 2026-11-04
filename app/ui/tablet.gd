@@ -20,12 +20,18 @@ extends Node3D
 ## ui/themes/tablet.json; set_style() merges a partial document over them, checked against SCHEMA (nothing changes
 ## if any of it is wrong), and keeps the changes in [pane] tablet_style; null puts a value back to the default.
 ##   fade          in, out: seconds
-##   pane          fill, border: colours ("#rrggbb" or "#rrggbbaa", the last pair the opacity); corner_radius,
-##                 border_width: metres. Each pane is a rounded rectangle (shaders/tablet.gdshader), nothing drawn
-##                 outside its border. Frosted glass will be another kind of fill here.
+##   palette       the name of the palette in use (one of palettes); palettes: {name: {name (shown), plate, edge,
+##                 ink, ink2, accent, accent_ink}} (colours: "#rrggbb" or "#rrggbbaa", the last pair the opacity).
+##                 The palette colours the panes (plate, edge), the now playing text and bar (ink, ink2, accent) and
+##                 the menu (menu_colours(): the theme's text, muted, accent and fills, PaneStyle.tablet_theme()).
+##                 The user, 2026-11-04: plum and gold first, the other dark ones a choice in System.
+##   pane          corner_radius, border_width: metres; fill, border: colours, when given they beat the palette's
+##                 plate and edge. Each pane is a rounded rectangle (shaders/tablet.gdshader), nothing drawn outside
+##                 its border. Frosted glass will be another kind of fill here.
 ##   now_playing   padding (metres, at the sides); spacing (metres between the text and the bar: the two are
-##                 centred together, top to bottom); title and time: color, size (the font's size, metres), font (one
-##                 of the theme's: FONTS); bar: track, played (colours), height, corner_radius (metres)
+##                 centred together, top to bottom); title and time: size (the font's size, metres), font (one of
+##                 the theme's: FONTS), color (when given, else the palette's ink and ink2); bar: height,
+##                 corner_radius (metres), track, played (colours, when given, else from the palette)
 ##   panel         inset (metres between the main pane's edge and the menu on it), px_per_m (the menu's layout pixels
 ##                 per metre: its theme is in pixels, so this sets how big it all is; the front panel's is 3080 at
 ##                 scale 1, the tablet's 2053, half as big again, the user 2026-11-04), render_scale (drawn pixels per
@@ -74,11 +80,15 @@ const TILT := 35.0
 const PaneStyle := preload("res://ui/pane_style.gd")
 const W := preload("res://ui/pane_widgets.gd")
 const SHADER := preload("res://shaders/tablet.gdshader")
+const MakeTheme := preload("res://tools/make_pane_theme.gd")
 const STYLE_PATH := "res://ui/themes/tablet.json"
 const FONTS := ["light", "regular", "medium", "semibold", "label"]
 ## The style's shape: a leaf is "color", "font" or [min, max] (a number).
 const SCHEMA := {
 	"fade": {"in": [0.0, 2.0], "out": [0.0, 2.0]},
+	"palette": "string",
+	"palettes": {"*": {"name": "string", "plate": "color", "edge": "color", "ink": "color", "ink2": "color",
+			"accent": "color", "accent_ink": "color"}},
 	"pane": {"fill": "color", "border": "color", "corner_radius": [0.0, 0.13], "border_width": [0.0, 0.03]},
 	"now_playing": {
 		"padding": [0.0, 0.025],
@@ -503,16 +513,19 @@ static func validate(doc: Variant, partial := false, schema: Dictionary = SCHEMA
 	for k: Variant in doc:
 		var key := str(k)
 		var at := key if path == "" else path + "/" + key
-		if not schema.has(key):
+		if not schema.has(key) and not schema.has("*"):
 			errors.append({"path": at, "error": "one of " + ", ".join(schema.keys())})
 			continue
 		var v: Variant = doc[k]
-		var want: Variant = schema[key]
+		var want: Variant = schema[key] if schema.has(key) else schema["*"]
 		if v == null:
 			if not partial:
 				errors.append({"path": at, "error": "a value"})
 		elif want is Dictionary:
 			errors.append_array(validate(v, partial, want, at))
+		elif want is String and want == "string":
+			if not (v is String) or (v as String).strip_edges() == "":
+				errors.append({"path": at, "error": "a name"})
 		elif want is String and want == "color":
 			if not (v is String and Color.html_is_valid(v)):
 				errors.append({"path": at, "error": "a colour: \"#rrggbb\" or \"#rrggbbaa\""})
@@ -525,28 +538,79 @@ static func validate(doc: Variant, partial := false, schema: Dictionary = SCHEMA
 	return errors
 
 
+## The palette in use ({name, plate, edge, ink, ink2, accent, accent_ink} as Colors): style()'s "palette" among its
+## "palettes", or the first of them.
+func palette() -> Dictionary:
+	var s := style()
+	var all: Variant = _get(s, "palettes")
+	if not (all is Dictionary) or (all as Dictionary).is_empty():
+		# Changed away from outside: the shipped ones.
+		all = _get(_defaults, "palettes")
+	var want := str(_get(s, "palette"))
+	var doc: Dictionary = all[want] if all.has(want) else all[all.keys()[0]]
+	var out := {}
+	for k: String in doc:
+		out[k] = Color.html(doc[k]) if k != "name" else doc[k]
+	return out
+
+
+## The palettes on offer, in the document's order: [{id, name}].
+func palette_names() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var all: Variant = _get(style(), "palettes")
+	if all is Dictionary:
+		for id: String in all:
+			out.append({"id": id, "name": str((all[id] as Dictionary).get("name", id))})
+	return out
+
+
+func palette_id() -> String:
+	var all: Variant = _get(style(), "palettes")
+	var want := str(_get(style(), "palette"))
+	if all is Dictionary and (all as Dictionary).has(want):
+		return want
+	return str((all as Dictionary).keys()[0]) if all is Dictionary and not (all as Dictionary).is_empty() else ""
+
+
+## The menu's colour tokens for the palette (tools/make_pane_theme.gd palette_colours()).
+func menu_colours() -> Dictionary:
+	return MakeTheme.palette_colours(palette())
+
+
+## A colour from the style at path when it is given, else the palette's.
+func _colour(s: Dictionary, path: String, fallback: Color) -> Color:
+	var v: Variant = _get(s, path)
+	return Color.html(v) if v is String and Color.html_is_valid(v) else fallback
+
+
 func _apply_style() -> void:
 	if now_playing == null:
 		return
 	var s := style()
+	var pal := palette()
+	var menu := menu_colours()
 	for m in _mats:
 		var role := str(m.get_meta("role", "pane"))
 		if role == "pane":
-			m.set_shader_parameter("fill_color", Color.html(_get(s, "pane/fill")))
-			m.set_shader_parameter("border_color", Color.html(_get(s, "pane/border")))
+			m.set_shader_parameter("fill_color", _colour(s, "pane/fill", pal["plate"]))
+			m.set_shader_parameter("border_color", _colour(s, "pane/border", pal["edge"]))
 			m.set_shader_parameter("corner_radius", float(_get(s, "pane/corner_radius")))
 			m.set_shader_parameter("border_width", float(_get(s, "pane/border_width")))
 		else:
-			m.set_shader_parameter("fill_color", Color.html(_get(s, "now_playing/bar/" + role)))
+			var fallback: Color = pal["accent"] if role == "played" else menu["bar_track"]
+			m.set_shader_parameter("fill_color", _colour(s, "now_playing/bar/" + role, fallback))
 			m.set_shader_parameter("corner_radius", float(_get(s, "now_playing/bar/corner_radius")))
 			m.set_shader_parameter("border_width", 0.0)
 	var r: Rect2 = pane_rects()["now_playing"]
 	var pad := float(_get(s, "now_playing/padding"))
 	# The middle of the text row: the capitals' middle goes there.
 	var text_mid := _block_height(s) * 0.5 - _text_height(s) * 0.5
-	for row: Array in [[title_label, "title", -r.size.x * 0.5 + pad], [time_label, "time", r.size.x * 0.5 - pad]]:
+	for row: Array in [[title_label, "title", -r.size.x * 0.5 + pad, pal["ink"]],
+			[time_label, "time", r.size.x * 0.5 - pad, pal["ink2"]]]:
 		var key: String = row[1]
-		place_text(row[0], _get(s, "now_playing/" + key), Vector2(float(row[2]), text_mid))
+		var text_style: Dictionary = (_get(s, "now_playing/" + key) as Dictionary).duplicate()
+		text_style["color"] = _colour(s, "now_playing/%s/color" % key, row[3]).to_html()
+		place_text(row[0], text_style, Vector2(float(row[2]), text_mid))
 	var bar := bar_rect()
 	(_bar_track.mesh as QuadMesh).size = bar.size
 	(_bar_track.material_override as ShaderMaterial).set_shader_parameter("size", bar.size)

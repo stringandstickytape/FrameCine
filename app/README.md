@@ -232,8 +232,8 @@ bar, transport, tabs, footer) and one script per tab.
 - **Theme:** `ui/themes/default.tres`, written by `tools/make_pane_theme.gd`, holds every colour, size and font, with
   the custom parts' tokens under the theme type "Tokens" (`ui/pane_style.gd` reads them). No pane script writes a
   colour or a font; `tests/test_pane.gd` checks. Another theme is another `.tres`: `[pane] theme = "res://..."`.
-  `[pane] scale` scales the panel's physical size (1 = 24 cm wide, default 1.6). The font is Inter (SIL OFL 1.1,
-  `ui/fonts/LICENSE.Inter.txt`) with tabular numerals.
+  `[pane] scale` scales the panel's physical size (1 = 24 cm wide, default 1.6). The font is Fira Sans Condensed (SIL OFL 1.1,
+  `ui/fonts/LICENSE.FiraSansCondensed.txt`) in four weights, with tabular numerals.
 - **Alpha:** the panel quad maps alpha as 1 - (1 - a)^2.2, so the doc's 94 % surface and the fades look as they
   would composited in sRGB. Blended in linear light as given, a bright film showed through at about a quarter of its
   brightness.
@@ -596,7 +596,7 @@ ui/                      the panel: ui_layer.gd (open / closed, pointer, menu, w
                          transport, tabs, footer), files_tab.gd, picture_tab.gd, sound_tab.gd,
                          subtitles_tab.gd, room_tab.gd, system_tab.gd, seek_bar.gd, mode_diagram.gd,
                          pane_widgets.gd, pane_style.gd, host_form.gd, url_form.gd, onscreen_keyboard.gd;
-                         themes/default.tres (the one Theme), fonts/ (Inter, OFL)
+                         themes/default.tres (the one Theme), fonts/ (Fira Sans Condensed, OFL)
 tools/make_pane_theme.gd writes ui/themes/default.tres
 xr/                      XR action map
 tools/make_action_map.gd regenerates the action map

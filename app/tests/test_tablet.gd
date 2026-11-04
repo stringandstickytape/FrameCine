@@ -93,19 +93,38 @@ func _run() -> void:
 	_check("the default document is valid", defaults is Dictionary and Tablet.validate(defaults).is_empty())
 	var st := tablet.style()
 	_check("in use: the defaults", st == defaults)
-	var fill := Color.html(st["pane"]["fill"])
-	var powder := Color.html("#b0e0e6")
-	_check("pane fill: powder blue at 10 %%: %s" % fill, fill.is_equal_approx(Color(powder, fill.a))
-			and absf(fill.a - 0.1) < 0.01)
-	_check("pane border: 3 mm at 75 %", is_equal_approx(float(st["pane"]["border_width"]), 0.003)
-			and absf(Color.html(st["pane"]["border"]).a - 0.75) < 0.01)
+	# The palette: plum and gold first; the panes take its plate and edge, the menu its colours.
+	var pal: Dictionary = tablet.palette()
+	_check("plum and gold by default (%s)" % tablet.palette_id(), tablet.palette_id() == "plum_gold"
+			and pal["name"] == "Plum & gold" and tablet.palette_names().size() >= 6
+			and tablet.palette_names()[0]["id"] == "plum_gold")
+	var fill: Color = pal["plate"]
+	_check("the plate: a dark plum, mostly opaque (%s)" % fill, fill.r > fill.g and fill.b > fill.g and fill.a > 0.6)
+	_check("pane border: a hairline at 10 %", is_equal_approx(float(st["pane"]["border_width"]), 0.0009)
+			and absf((pal["edge"] as Color).a - 0.1) < 0.01)
 	var mat: ShaderMaterial = tablet.main_pane.material_override
 	_check("both panes' shaders have it", (mat.get_shader_parameter("fill_color") as Color).is_equal_approx(fill)
 			and (top_mat.get_shader_parameter("fill_color") as Color).is_equal_approx(fill)
 			and is_equal_approx(float(mat.get_shader_parameter("corner_radius")), 0.024))
+	_check("the menu's colours from the palette", tablet.menu_colours()["accent"] == pal["accent"]
+			and tablet.menu_colours()["text"] == pal["ink"])
+	_check("the time bar: the accent, the track the ink at 14 %",
+			(tablet._bar_played.material_override as ShaderMaterial).get_shader_parameter("fill_color") == pal["accent"]
+			and absf(((tablet._bar_track.material_override as ShaderMaterial).get_shader_parameter("fill_color") as Color).a - 0.14) < 0.01)
+	_check("another palette: the plate and accent follow", tablet.set_style({"palette": "ink_sky"}, false).is_empty()
+			and tablet.palette_id() == "ink_sky"
+			and (mat.get_shader_parameter("fill_color") as Color).is_equal_approx(tablet.palette()["plate"])
+			and tablet.menu_colours()["accent"] == tablet.palette()["accent"])
+	_check("an unknown palette name falls back to the first", tablet.set_style({"palette": "neon"}, false).is_empty()
+			and tablet.palette_id() == "plum_gold")
+	_check("a palette can be added from outside", tablet.set_style({"palettes": {"test": {"name": "Test", "plate": "#000000cc",
+			"edge": "#ffffff1a", "ink": "#ffffff", "ink2": "#ffffff99", "accent": "#ff0000", "accent_ink": "#000000"}},
+			"palette": "test"}, false).is_empty() and tablet.palette()["accent"] == Color.RED
+			and tablet.palette_names().size() >= 7)
+	tablet.reset_style()
 	var errors: Array = tablet.set_style({"pane": {"fill": "#ff000080"}, "now_playing": {"title": {"size": 0.02}}})
 	_check("a partial change: no errors, the rest stays (%s)" % [errors], errors.is_empty()
-			and tablet.style()["pane"]["fill"] == "#ff000080" and tablet.style()["pane"]["border"] == st["pane"]["border"]
+			and tablet.style()["pane"]["fill"] == "#ff000080" and tablet.style()["pane"]["border_width"] == st["pane"]["border_width"]
 			and is_equal_approx(float(tablet.style()["now_playing"]["title"]["size"]), 0.02))
 	_check("it takes effect", (mat.get_shader_parameter("fill_color") as Color).is_equal_approx(Color.html("#ff000080"))
 			and is_equal_approx(tablet.title_label.pixel_size, 0.02 / Tablet.FONT_PX))
@@ -118,7 +137,8 @@ func _run() -> void:
 			and errors.any(func(e: Dictionary) -> bool: return e["path"] == "now_playing/time/font")
 			and tablet.style()["pane"]["fill"] == "#ff000080")
 	tablet.set_style({"pane": {"fill": null}})
-	_check("null: back to the default for that value", tablet.style()["pane"]["fill"] == st["pane"]["fill"]
+	_check("null: back to the default for that value", not tablet.style()["pane"].has("fill")
+			and (mat.get_shader_parameter("fill_color") as Color).is_equal_approx(fill)
 			and is_equal_approx(float(tablet.style()["now_playing"]["title"]["size"]), 0.02))
 	tablet.reset_style()
 	_check("reset: the defaults again, nothing kept", tablet.style() == st
@@ -317,7 +337,7 @@ func _run() -> void:
 	_check("showing fades in", tablet.visible)
 	await create_timer(float(st["fade"]["in"]) + 0.15).timeout
 	_check("faded in", is_equal_approx(float(top_mat.get_shader_parameter("opacity")), 1.0)
-			and absf(tablet.title_label.modulate.a - Color.html(st["now_playing"]["title"]["color"]).a) < 0.01)
+			and absf(tablet.title_label.modulate.a - (pal["ink"] as Color).a) < 0.01)
 	tablet.hide_tablet()
 	_check("hiding: not shown at once, still visible while it fades", not tablet.is_shown() and tablet.visible)
 	await create_timer(float(st["fade"]["out"]) + 0.15).timeout

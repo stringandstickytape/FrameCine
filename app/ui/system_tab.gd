@@ -61,6 +61,9 @@ var _jog_turn: HBoxContainer
 var _zoom_lens: Button
 var _magnification: HBoxContainer
 var _left_handed: Button
+var _tablet_toggle: Button
+var _palette_box: HBoxContainer
+var _palette_buttons := {}
 var _foveation: HBoxContainer
 var _foveation_help: Label
 var _foveation_sharp: Button
@@ -144,6 +147,13 @@ func bind(p_app: Node) -> void:
 	box.add_child(W.hbox([_follow_head, _left_handed, W.button("Reset layout", func() -> void:
 		reset_layout_requested.emit()
 		sync())]))
+	# The tablet (ui/tablet.gd): on or off, and its colours (the palettes of its style document).
+	_tablet_toggle = W.toggle("Tablet menu", func(on: bool) -> void:
+		var t: Node = _tablet()
+		if t != null:
+			t.set_enabled(on))
+	_palette_box = W.hbox([_tablet_toggle])
+	box.add_child(_palette_box)
 
 	box.add_child(W.section("Accessibility"))
 	_ui_scale = W.slider_row("Larger panel", 1.0, 2.0, 0.05, func(v: float) -> String: return "%.2fx" % v,
@@ -326,7 +336,33 @@ func bind(p_app: Node) -> void:
 	sync()
 
 
+func _tablet() -> Node:
+	var layer: Node = app.get("ui") if app != null else null
+	return layer.get("tablet") if layer != null else null
+
+
+## The palette buttons, made once the tablet exists (after the panel: ui_layer.gd setup()); the one in use pressed.
+func _sync_tablet() -> void:
+	var t: Node = _tablet()
+	if t == null:
+		return
+	_tablet_toggle.set_pressed_no_signal(bool(t.enabled))
+	if _palette_buttons.is_empty():
+		for p: Dictionary in t.palette_names():
+			var id := str(p["id"])
+			var b := W.button(str(p["name"]), func() -> void:
+				t.set_style({"palette": id})
+				_sync_tablet())
+			b.toggle_mode = true
+			_palette_buttons[id] = b
+			_palette_box.add_child(b)
+	var current := str(t.palette_id())
+	for id: String in _palette_buttons:
+		(_palette_buttons[id] as Button).set_pressed_no_signal(id == current)
+
+
 func sync() -> void:
+	_sync_tablet()
 	W.set_on(_overlay, app.overlay_on)
 	W.set_on(_stats_toggle, _stats != null)
 	var haptics: Node = app.features.haptics

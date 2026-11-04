@@ -451,6 +451,9 @@ func apply_tablet_mode() -> void:
 	else:
 		var scale := float(layout_value("scale")) * float(app.features.access.get_value("ui_scale"))
 		panel.configure(PaneStyle.pane_metres(scale), PaneStyle.pane_pixels())
+	var menu_theme: Theme = PaneStyle.tablet_theme(tablet.menu_colours()) if on else null
+	ui.set_tablet_theme(menu_theme)
+	PaneStyle.set_active(menu_theme)
 	ui.set_text_scale(tablet.panel_text_scale() if on else 1.0)
 	ui.set_tablet_layout(on)
 	if _open:

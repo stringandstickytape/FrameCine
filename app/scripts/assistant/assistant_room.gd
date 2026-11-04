@@ -734,7 +734,7 @@ static func _text(node: Node3D, p: Dictionary) -> AABB:
 	return AABB(Vector3(-size.x * 0.5, -size.y * 0.5, -0.003), Vector3(size.x, size.y, 0.003))
 
 
-const TEXT_FONT := "res://ui/fonts/inter_regular.res"
+const TEXT_FONT := "res://ui/fonts/fira_sans_condensed_regular.res"
 ## Glyphs are drawn this many pixels high; MSDF keeps them sharp at any distance.
 const TEXT_FONT_PX := 64
 static var _fonts := {}

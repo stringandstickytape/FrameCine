@@ -1,12 +1,89 @@
 {
-	"fade": {"in": 0.25, "out": 0.2},
-	"pane": {"fill": "#b0e0e61a", "border": "#b0e0e6bf", "corner_radius": 0.024, "border_width": 0.003},
-	"now_playing": {
-		"padding": 0.012,
-		"spacing": 0.008,
-		"title": {"color": "#ffffffff", "size": 0.013, "font": "medium"},
-		"time": {"color": "#ffffffcc", "size": 0.011, "font": "regular"},
-		"bar": {"track": "#ffffff38", "played": "#b0e0e6ff", "height": 0.004, "corner_radius": 0.002}
+	"fade": {
+		"in": 0.25,
+		"out": 0.2
 	},
-	"panel": {"inset": 0.006, "px_per_m": 2053, "render_scale": 1.5, "text_scale": 1.5}
+	"palette": "plum_gold",
+	"palettes": {
+		"plum_gold": {
+			"name": "Plum & gold",
+			"plate": "#180c1cb8",
+			"edge": "#ffffff1a",
+			"ink": "#f4ecf5",
+			"ink2": "#f4ecf599",
+			"accent": "#e8c35a",
+			"accent_ink": "#2a1f05"
+		},
+		"graphite_amber": {
+			"name": "Graphite & amber",
+			"plate": "#0e1014ad",
+			"edge": "#ffffff1a",
+			"ink": "#f2efe9",
+			"ink2": "#f2efe999",
+			"accent": "#f2b25a",
+			"accent_ink": "#1d1405"
+		},
+		"midnight_coral": {
+			"name": "Midnight & coral",
+			"plate": "#0a101eb8",
+			"edge": "#ffffff1a",
+			"ink": "#eef1f8",
+			"ink2": "#eef1f899",
+			"accent": "#ff7a6b",
+			"accent_ink": "#2a0d09"
+		},
+		"slate_mint": {
+			"name": "Slate & mint",
+			"plate": "#10161aad",
+			"edge": "#ffffff1a",
+			"ink": "#edf3f2",
+			"ink2": "#edf3f299",
+			"accent": "#6fe3c1",
+			"accent_ink": "#05211a"
+		},
+		"ink_sky": {
+			"name": "Ink & sky",
+			"plate": "#080a10c2",
+			"edge": "#ffffff1a",
+			"ink": "#eef2fa",
+			"ink2": "#eef2fa99",
+			"accent": "#5aa8ff",
+			"accent_ink": "#06182e"
+		},
+		"espresso_peach": {
+			"name": "Espresso & peach",
+			"plate": "#1c120eb8",
+			"edge": "#ffffff1a",
+			"ink": "#f6ece4",
+			"ink2": "#f6ece499",
+			"accent": "#ffb38a",
+			"accent_ink": "#2c1206"
+		}
+	},
+	"pane": {
+		"corner_radius": 0.024,
+		"border_width": 0.0009
+	},
+	"now_playing": {
+		"padding": 0.014,
+		"spacing": 0.008,
+		"title": {
+			"size": 0.0135,
+			"font": "semibold"
+		},
+		"time": {
+			"size": 0.0115,
+			"font": "regular"
+		},
+		"bar": {
+			"height": 0.004,
+			"corner_radius": 0.002
+		}
+	},
+	"panel": {
+		"inset": 0.006,
+		"px_per_m": 2053,
+		"render_scale": 1.5,
+		"text_scale": 1.5
+	}
 }
