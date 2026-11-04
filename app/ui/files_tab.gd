@@ -76,6 +76,14 @@ var _add_button: Button
 var _edit_button: Button
 var _list_scroll: ScrollContainer
 var _list: VBoxContainer
+## The view (VIEWS): "details" (rows with their extras; the Library with pictures and plots), "list" (dense rows) or
+## "grid" (tiles; the Library's posters and thumbnails). ui/pane_ui.gd keeps it in the settings.
+var view := "details"
+const VIEWS: Array[String] = ["details", "list", "grid"]
+## The grid view's tile, pane pixels (the names wrap to two lines).
+const TILE := Vector2(180, 96)
+## The flow of tiles being filled (the grid view), or null: a row that is not a tile ends it.
+var _tiles: HFlowContainer
 var _form: HostForm
 var _url_form: UrlForm
 ## Per list row: {"kind": "dir"|"file"|"up"|"host"|"add"|"url"|"page"|"window"|"stop"|"none", "path": String,
@@ -279,6 +287,15 @@ func set_places_column(on: bool) -> void:
 	_places_shown = on
 	_places_scroll.visible = on and not is_form_open()
 	_places_rule.visible = _places_scroll.visible
+
+
+## The view (VIEWS): the listing is drawn again in it.
+func set_view(v: String) -> void:
+	if v == view or not v in VIEWS:
+		return
+	view = v
+	if not is_form_open():
+		_refresh()
 
 
 ## The places column's width (pixels): scaled with the text on the tablet (ui/pane_ui.gd).
@@ -550,6 +567,7 @@ func _clear(title: String) -> void:
 		_list.remove_child(c)
 		c.queue_free()
 	_rows.clear()
+	_tiles = null
 	_library_shown = false
 	_path_label.text = title
 	_busy = false
@@ -635,6 +653,7 @@ func set_library_title(text: String) -> void:
 
 ## A row of the Library's own making: a poster or an episode. `parent` is the grid it sits in.
 func add_library_row(b: Button, row: Dictionary, parent: Control = null) -> void:
+	_tiles = null
 	row["library"] = true
 	b.set_meta("text", row["text"])
 	b.set_pressed_no_signal(row["kind"] == "file" and row["path"] == active_path)
@@ -780,6 +799,7 @@ func _add_row(text: String, row: Dictionary) -> void:
 	row["text"] = text
 	var h := PaneStyle.constant(&"row_height")
 	if row["kind"] == "none":
+		_tiles = null
 		var l := W.ellipsis(W.label(text, &"MutedLabel"))
 		l.custom_minimum_size = Vector2(0, h)
 		_list.add_child(l)
@@ -788,26 +808,58 @@ func _add_row(text: String, row: Dictionary) -> void:
 		return
 	var b := Button.new()
 	b.theme_type_variation = &"RowButton"
-	b.custom_minimum_size = Vector2(0, h)
 	b.toggle_mode = true
 	b.set_pressed_no_signal(row["kind"] == "file" and row["path"] == active_path)
 	b.set_meta("text", text)
-	var content := W.hbox()
-	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	content.offset_left = 12
-	content.offset_right = -12
-	b.add_child(content)
-	var name_label := W.ellipsis(W.label(text, &"AccentLabel" if b.button_pressed else &""))
-	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	content.add_child(name_label)
+	var extras: Array[Control] = []
 	if row["kind"] == "file":
-		for extra in _row_extras(row):
-			(extra as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
+		extras = _row_extras(row)
+	if view == "grid" and row["kind"] in ["file", "dir"]:
+		# A tile: the name over two lines, the extras along the bottom.
+		b.custom_minimum_size = TILE
+		var content := VBoxContainer.new()
+		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		content.offset_left = 10
+		content.offset_right = -10
+		content.offset_top = 6
+		content.offset_bottom = -6
+		b.add_child(content)
+		var name_label := W.ellipsis(W.label(text, &"AccentLabel" if b.button_pressed else &""))
+		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		name_label.max_lines_visible = 2
+		name_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+		name_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.add_child(name_label)
+		var foot := W.hbox()
+		foot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		for extra in extras:
+			extra.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			foot.add_child(extra)
+		content.add_child(foot)
+		if _tiles == null:
+			_tiles = W.flow()
+			_list.add_child(_tiles)
+		_tiles.add_child(b)
+	else:
+		_tiles = null
+		b.custom_minimum_size = Vector2(0, h * 0.75 if view == "list" else h)
+		var content := W.hbox()
+		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		content.offset_left = 12
+		content.offset_right = -12
+		b.add_child(content)
+		var name_label := W.ellipsis(W.label(text, &"AccentLabel" if b.button_pressed else &""))
+		name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.add_child(name_label)
+		for extra in extras:
+			extra.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			content.add_child(extra)
+		_list.add_child(b)
 	var index := _rows.size()
 	b.pressed.connect(func() -> void: _on_row_pressed(index))
-	_list.add_child(b)
 	row["button"] = b
 	_rows.append(row)
 

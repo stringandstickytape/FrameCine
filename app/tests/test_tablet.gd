@@ -251,7 +251,20 @@ func _run() -> void:
 	pui._view_buttons[2].pressed.emit()
 	_check("picking the grid: remembered", pui.view == "grid" and main.settings.get_value("browser", "view", "") == "grid"
 			and pui._view_buttons[2].button_pressed and not pui._view_buttons[0].button_pressed)
+	await _frames(2)
+	var tiles: Array = pui.files._rows.filter(func(r: Dictionary) -> bool:
+		return r["button"] != null and r["button"].get_parent() is HFlowContainer)
+	_check("the grid view: the test patterns as tiles (%d of %d)" % [tiles.size(), pui.files._rows.size()],
+			tiles.size() > 2 and tiles.size() == pui.files._rows.size() and pui.files.view == "grid")
+	pui._view_buttons[1].pressed.emit()
+	await _frames(2)
+	var list_row: Button = pui.files._rows[0]["button"]
+	_check("the list view: shorter rows, no tiles", pui.files.view == "list" and list_row.get_parent() == pui.files._list
+			and list_row.custom_minimum_size.y < 40.0)
 	pui._view_buttons[0].pressed.emit()
+	await _frames(2)
+	_check("details again: full rows", pui.files.view == "details"
+			and (pui.files._rows[0]["button"] as Button).custom_minimum_size.y >= 40.0)
 	pui.tablet_tab_buttons[1].pressed.emit()
 	await _frames(2)
 	var cards: Array = pui.cards(1)

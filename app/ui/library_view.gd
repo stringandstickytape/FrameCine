@@ -10,11 +10,12 @@ const LibraryImages := preload("res://scripts/library/library_images.gd")
 const W := preload("res://ui/pane_widgets.gd")
 const PaneStyle := preload("res://ui/pane_style.gd")
 
-const COLUMNS := 4
 ## Pixels on the pane, which are the pictures' cached sizes too.
 const POSTER := Vector2i(130, 195)
 const SMALL_POSTER := Vector2i(110, 165)
 const THUMB := Vector2i(120, 68)
+## The grid view's episode tile: the thumbnail drawn larger (the cached picture is THUMB).
+const TILE_THUMB := Vector2i(180, 101)
 const HERO := Vector2i(550, 190)
 const EPISODE_ROW := 92
 const SEASON_ROW := 48
@@ -89,41 +90,61 @@ func _plain(data: Dictionary) -> void:
 		tab.add_library_folder(str(f["name"]), str(f["path"]))
 
 
+## The episodes (or a shelf's loose files): rows, or tiles in the grid view.
 func _files(files: Array) -> void:
+	var flow: Control = null
+	if tab.view == "grid" and not files.is_empty():
+		flow = W.flow()
+		tab.add_library_control(flow)
 	for e: Dictionary in files:
-		_episode_row(e)
+		_episode_row(e, flow)
 
 
+## The cards of a shelf: posters that flow to the width (details), smaller ones without a caption (grid), or rows
+## of titles (list).
 func _grid(cards: Array) -> void:
 	if cards.is_empty():
 		return
-	var grid := GridContainer.new()
-	grid.columns = COLUMNS
-	grid.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
-	grid.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	if tab.view == "list":
+		for c: Dictionary in cards:
+			var b := _row(SEASON_ROW)
+			var line := W.hbox()
+			_fill(b, line)
+			line.add_child(_mouseless(W.ellipsis(W.label(str(c["title"])))))
+			var mark := _mouseless(W.label("", &"MutedLabel"))
+			line.add_child(mark)
+			_marks.append({"keys": c["keys"], "label": mark, "bar": null, "year": int(c["year"]), "show": c["kind"] == "show"})
+			tab.add_library_row(b, {"kind": "dir", "path": str(c["path"]), "text": str(c["title"])})
+		return
+	var grid := W.flow()
 	tab.add_library_control(grid)
 	for c: Dictionary in cards:
 		_card(grid, c)
 
 
-## A poster, its title and a line under it. A show says how much was watched, a film whether it was.
+## A poster, its title and a line under it (the grid view: the poster alone, smaller). A show says how much was
+## watched, a film whether it was.
 func _card(grid: Control, c: Dictionary) -> void:
+	var captioned: bool = tab.view != "grid"
+	var size: Vector2i = POSTER if captioned else SMALL_POSTER
 	var b := Button.new()
 	b.theme_type_variation = &"RowButton"
-	b.custom_minimum_size = Vector2(POSTER.x, POSTER.y + CARD_TEXT)
-	var art := _picture(str(c["poster"]), POSTER, Rect2(Vector2.ZERO, POSTER), str(c["title"]))
+	b.custom_minimum_size = Vector2(size.x, size.y + (CARD_TEXT if captioned else 0))
+	var art := _picture(str(c["poster"]), size, Rect2(Vector2.ZERO, size), str(c["title"]))
 	b.add_child(art)
 	var title := W.ellipsis(W.label(str(c["title"])))
-	title.set_position(Vector2(4, POSTER.y + 2))
-	title.size = Vector2(POSTER.x - 8, 20)
-	title.custom_minimum_size = Vector2(POSTER.x - 8, 0)
+	title.set_position(Vector2(4, size.y + 2))
+	title.size = Vector2(size.x - 8, 20)
+	title.custom_minimum_size = Vector2(size.x - 8, 0)
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	title.visible = captioned
 	b.add_child(title)
 	var line := W.label(str(c["year"]) if int(c["year"]) > 0 else "", &"MutedLabel")
-	line.set_position(Vector2(4, POSTER.y + 22))
+	line.set_position(Vector2(4, size.y + 22))
 	line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	line.visible = captioned
 	b.add_child(line)
-	var bar := _bar(b, Rect2(0, POSTER.y - 3, POSTER.x, 3))
+	var bar := _bar(b, Rect2(0, size.y - 3, size.x, 3))
 	_marks.append({"keys": c["keys"], "label": line, "bar": bar, "year": int(c["year"]), "show": c["kind"] == "show"})
 	tab.add_library_row(b, {"kind": "dir", "path": str(c["path"]), "text": str(c["title"])}, grid)
 
@@ -167,7 +188,8 @@ func _draw_show(data: Dictionary) -> void:
 		facts.append("%d season%s" % [seasons.size(), "" if seasons.size() == 1 else "s"])
 	for g: String in (c["genre"] as Array).slice(0, 2):
 		facts.append(g)
-	_hero(str(c["title"]), "  ".join(facts).to_upper(), str(c["plot"]), str(c["poster"]), str(c["fanart"]))
+	if tab.view != "list":
+		_hero(str(c["title"]), "  ".join(facts).to_upper(), str(c["plot"]), str(c["poster"]), str(c["fanart"]))
 	for s: Dictionary in seasons:
 		var b := _row(SEASON_ROW)
 		var line := W.hbox()
@@ -182,8 +204,7 @@ func _draw_show(data: Dictionary) -> void:
 
 func _draw_season(data: Dictionary) -> void:
 	tab.set_library_title("%s, %s" % [data["show"], data["title"]])
-	for e: Dictionary in data["episodes"]:
-		_episode_row(e)
+	_files(data["episodes"])
 
 
 func _draw_film(f: Dictionary) -> void:
@@ -194,7 +215,8 @@ func _draw_film(f: Dictionary) -> void:
 		facts.append("%d min" % int(f["runtime"]))
 	for g: String in (f["genre"] as Array).slice(0, 2):
 		facts.append(g)
-	_hero(str(f["title"]), "  ".join(facts).to_upper(), str(f["plot"]), str(f["poster"]), str(f["fanart"]))
+	if tab.view != "list":
+		_hero(str(f["title"]), "  ".join(facts).to_upper(), str(f["plot"]), str(f["poster"]), str(f["fanart"]))
 	var b := _row(SEASON_ROW)
 	var line := W.hbox()
 	_fill(b, line)
@@ -205,8 +227,44 @@ func _draw_film(f: Dictionary) -> void:
 	tab.add_library_row(b, {"kind": "file", "path": str(f["video"]), "text": "Play"})
 
 
-## Thumbnail, S01E01, title and on the right how far it was watched; the short plot under them.
-func _episode_row(e: Dictionary) -> void:
+## Thumbnail, S01E01, title and on the right how far it was watched; the short plot under them. The list view: the
+## number, the title and the mark on one short row. The grid view: a tile in `flow`, the thumbnail over the title.
+func _episode_row(e: Dictionary, flow: Control = null) -> void:
+	var title := str(e["title"]) if str(e["title"]) != "" else str(e["path"]).get_file()
+	if tab.view == "list":
+		var short := _row(SEASON_ROW)
+		var line := W.hbox()
+		_fill(short, line)
+		if str(e["label"]) != "":
+			line.add_child(_mouseless(W.label(str(e["label"]), &"ChipLabel")))
+		var short_title := _mouseless(W.ellipsis(W.label(title)))
+		line.add_child(short_title)
+		var short_mark := _mouseless(W.label("", &"MutedLabel"))
+		line.add_child(short_mark)
+		_marks.append({"keys": [e["key"]], "label": short_mark, "bar": null, "show": false, "year": 0, "runtime": e["runtime"]})
+		tab.add_library_row(short, {"kind": "file", "path": str(e["path"]), "text": title, "title_label": short_title})
+		return
+	if tab.view == "grid" and flow != null:
+		var tile := _row(TILE_THUMB.y + CARD_TEXT)
+		tile.size_flags_horizontal = Control.SIZE_FILL
+		tile.custom_minimum_size.x = TILE_THUMB.x
+		tile.add_child(_picture(str(e["thumb"]), THUMB, Rect2(Vector2.ZERO, TILE_THUMB), ""))
+		var tile_bar := _bar(tile, Rect2(0, TILE_THUMB.y - 3, TILE_THUMB.x, 3))
+		var head := W.hbox()
+		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		head.set_position(Vector2(4, TILE_THUMB.y + 2))
+		head.size = Vector2(TILE_THUMB.x - 8, 20)
+		tile.add_child(head)
+		if str(e["label"]) != "":
+			head.add_child(_mouseless(W.label(str(e["label"]), &"ChipLabel")))
+		var tile_title := _mouseless(W.ellipsis(W.label(title)))
+		head.add_child(tile_title)
+		var tile_mark := _mouseless(W.label("", &"MutedLabel"))
+		tile_mark.set_position(Vector2(4, TILE_THUMB.y + 22))
+		tile.add_child(tile_mark)
+		_marks.append({"keys": [e["key"]], "label": tile_mark, "bar": tile_bar, "show": false, "year": 0, "runtime": e["runtime"]})
+		tab.add_library_row(tile, {"kind": "file", "path": str(e["path"]), "text": title, "title_label": tile_title}, flow)
+		return
 	var b := _row(EPISODE_ROW)
 	var pad := Vector2(PaneStyle.constant(&"gap"), (EPISODE_ROW - THUMB.y) / 2)
 	b.add_child(_picture(str(e["thumb"]), THUMB, Rect2(pad, THUMB), ""))
@@ -224,7 +282,6 @@ func _episode_row(e: Dictionary) -> void:
 	box.add_child(head)
 	if str(e["label"]) != "":
 		head.add_child(_mouseless(W.label(str(e["label"]), &"ChipLabel")))
-	var title := str(e["title"]) if str(e["title"]) != "" else str(e["path"]).get_file()
 	var title_label := _mouseless(W.ellipsis(W.label(title)))
 	head.add_child(title_label)
 	var mark := _mouseless(W.label("", &"MutedLabel"))

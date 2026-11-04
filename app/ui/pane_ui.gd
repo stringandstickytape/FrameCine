@@ -461,6 +461,8 @@ func _build_tablet_row() -> void:
 		view = str(app.settings.get_value("browser", "view", "details"))
 		if not view in VIEWS:
 			view = "details"
+		if files != null:
+			files.set_view(view)
 	_refresh_rail()
 
 
@@ -483,6 +485,8 @@ func set_view(v: String) -> void:
 	view = v
 	if app != null:
 		app.settings.set_value("browser", "view", v if v != "details" else null)
+	if files != null:
+		files.set_view(v)
 	_refresh_rail()
 
 
