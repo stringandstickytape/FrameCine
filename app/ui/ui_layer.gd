@@ -447,7 +447,7 @@ func apply_tablet_mode() -> void:
 	var on := tablet.enabled
 	panel.halo_shown = not on
 	if on:
-		panel.configure(tablet.panel_rect().size, tablet.panel_pixels())
+		panel.configure(tablet.panel_rect().size, tablet.panel_pixels(), tablet.panel_render_scale())
 	else:
 		var scale := float(layout_value("scale")) * float(app.features.access.get_value("ui_scale"))
 		panel.configure(PaneStyle.pane_metres(scale), PaneStyle.pane_pixels())

@@ -184,6 +184,8 @@ func _run() -> void:
 	_check("on: the panel is the tablet's menu, its size and resolution, no halo (%s m, %s px)"
 			% [panel.size_m, panel.resolution], panel.size_m.is_equal_approx(pr.size)
 			and panel.resolution == tablet.panel_pixels() and not panel.halo_shown and pui.tablet_layout
+			and panel.viewport.size == Vector2i((Vector2(panel.resolution) * tablet.panel_render_scale()).round())
+			and panel.viewport.size_2d_override == panel.resolution
 			and pr.size.x > mp.size.x - 0.02 and pr.size.y > mp.size.y - 0.02)
 	_check("on the main pane, a little in front", panel.global_transform.is_equal_approx(tablet.panel_transform())
 			and (panel.global_transform.origin - tablet.main_pane.global_position).length() < 0.005)
@@ -219,6 +221,7 @@ func _run() -> void:
 			and groups.filter(func(g: Control) -> bool: return g.visible).size() == 1)
 	tablet.set_enabled(false, false)
 	_check("off: the front panel again, every section", not pui.tablet_layout and panel.halo_shown
+			and panel.viewport.size_2d_override == Vector2i.ZERO and panel.viewport.size == panel.resolution
 			and pui._tabs_box.visible and pui.files._places_scroll.visible
 			and groups.all(func(g: Control) -> bool: return g.visible))
 	tablet.set_enabled(true, false)
@@ -251,9 +254,11 @@ func _run() -> void:
 	await _frames(60)
 	sc.scroll_vertical = 0
 	await _frames(1)
-	panel.pointer_button(at, true)
-	panel.pointer_move(at + Vector2(0, 3))
-	panel.pointer_button(at + Vector2(0, 3), false)
+	# In the middle of a row, so the small move stays on it.
+	var tap: Vector2 = (pui._parts_box.get_child(2) as Control).get_global_rect().get_center()
+	panel.pointer_button(tap, true)
+	panel.pointer_move(tap + Vector2(0, 3))
+	panel.pointer_button(tap + Vector2(0, 3), false)
 	_check("a press that hardly moves is a click (%d clicks, scroll %d)" % [clicks[0], sc.scroll_vertical], clicks[0] == 1 and sc.scroll_vertical == 0)
 	pui._parts_box.custom_minimum_size.y = 0
 	layer.hide_panel()

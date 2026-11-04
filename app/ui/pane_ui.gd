@@ -40,8 +40,8 @@ enum Tab { FILES, PICTURE, SOUND, SUBTITLES, ROOM, OBJECTS, SYSTEM }
 const TAB_NAMES: Array[String] = ["Files", "Picture", "Sound", "Subtitles", "Room", "Objects", "System"]
 ## The tablet layout's names for the tabs, and its two lists' widths (pixels).
 const TABLET_TAB_NAMES: Array[String] = ["Source", "Picture", "Sound", "Subtitles", "Room", "Objects", "System"]
-const TABLET_TABS_WIDTH := 190
-const TABLET_PARTS_WIDTH := 250
+const TABLET_TABS_WIDTH := 150
+const TABLET_PARTS_WIDTH := 200
 
 var app: Node
 var files: FilesTab

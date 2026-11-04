@@ -11,6 +11,9 @@ extends Node3D
 ## press away from everything (so the button under it doesn't fire) and moves the list with the pointer; let go while
 ## moving and it carries on, slowing (DRAG_FRICTION per second). A press that hardly moves is an ordinary click.
 ## configure() gives the pane another size and resolution (the tablet's, ui/tablet.gd), and halo_shown its halo.
+## render_scale draws it at more pixels than it is laid out in (the viewport's size_2d_override, stretched): the
+## tablet makes everything bigger with fewer layout pixels per metre and keeps it sharp this way. Pointer pixels are
+## layout pixels.
 
 const PaneStyle := preload("res://ui/pane_style.gd")
 const PaneUI := preload("res://ui/pane_ui.gd")
@@ -73,6 +76,8 @@ var _halo_mat: ShaderMaterial
 var _last_pixel := Vector2(-1, -1)
 var _pressed := false
 var halo_shown := true
+## Drawn pixels per layout pixel (configure()).
+var render_scale := 1.0
 ## A list being dragged: the ScrollContainer under the press (null: none), where the press was and the list's scroll
 ## then, and its speed (scroll pixels per second) for carrying on after.
 var dragging := false
@@ -99,13 +104,18 @@ func set_size_scale(scale: float) -> void:
 		apply_style()
 
 
-## Another size (metres) and resolution (pixels): the tablet's (ui/tablet.gd), or the theme's again.
-func configure(p_size_m: Vector2, p_resolution: Vector2i) -> void:
+## Another size (metres), resolution (layout pixels) and render scale: the tablet's (ui/tablet.gd), or the theme's
+## again.
+func configure(p_size_m: Vector2, p_resolution: Vector2i, p_render_scale := 1.0) -> void:
 	size_m = p_size_m
 	resolution = p_resolution
+	render_scale = maxf(p_render_scale, 0.25)
 	if _mesh == null:
 		return
-	viewport.size = resolution
+	var stretched := not is_equal_approx(render_scale, 1.0)
+	viewport.size = Vector2i((Vector2(resolution) * render_scale).round())
+	viewport.size_2d_override = resolution if stretched else Vector2i.ZERO
+	viewport.size_2d_override_stretch = stretched
 	ui.size = Vector2(resolution)
 	(_mesh.mesh as QuadMesh).size = size_m
 	apply_style()

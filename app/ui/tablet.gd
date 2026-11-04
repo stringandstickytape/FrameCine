@@ -26,8 +26,10 @@ extends Node3D
 ##   now_playing   padding (metres, at the sides); spacing (metres between the text and the bar: the two are
 ##                 centred together, top to bottom); title and time: color, size (the font's size, metres), font (one
 ##                 of the theme's: FONTS); bar: track, played (colours), height, corner_radius (metres)
-##   panel         inset (metres between the main pane's edge and the menu on it), px_per_m (the menu's pixels per
-##                 metre: its theme is in pixels, so this sets how big it all is; the front panel's is 3080 at scale 1)
+##   panel         inset (metres between the main pane's edge and the menu on it), px_per_m (the menu's layout pixels
+##                 per metre: its theme is in pixels, so this sets how big it all is; the front panel's is 3080 at
+##                 scale 1, the tablet's 2053, half as big again, the user 2026-11-04), render_scale (drawn pixels per
+##                 layout pixel: keeps the bigger text sharp)
 ##
 ## Placement, from the head's position and its heading (yaw only, so looking down when pressing doesn't sink it):
 ## FORWARD metres ahead and DOWN metres below the eyes, the centre about 44° below the horizon, about half a metre
@@ -84,7 +86,7 @@ const SCHEMA := {
 		"time": {"color": "color", "size": [0.004, 0.03], "font": "font"},
 		"bar": {"track": "color", "played": "color", "height": [0.001, 0.02], "corner_radius": [0.0, 0.01]},
 	},
-	"panel": {"inset": [0.0, 0.03], "px_per_m": [1500, 8000]},
+	"panel": {"inset": [0.0, 0.03], "px_per_m": [1000, 8000], "render_scale": [1.0, 3.0]},
 }
 ## Label3D: the font's pixels per em (pixel_size makes it the style's size in metres).
 const FONT_PX := 96
@@ -348,6 +350,10 @@ func panel_pixels() -> Vector2i:
 	var px := float(_get(style(), "panel/px_per_m"))
 	var size := panel_rect().size
 	return Vector2i(roundi(size.x * px), roundi(size.y * px))
+
+
+func panel_render_scale() -> float:
+	return float(_get(style(), "panel/render_scale"))
 
 
 ## Where the menu goes: on the main pane, a little in front of it.
