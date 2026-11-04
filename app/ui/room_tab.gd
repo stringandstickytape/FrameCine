@@ -37,29 +37,29 @@ var _point_seat: Button
 var _seat_moved: Button
 var _reflection_box: VBoxContainer
 var _reflection: Button
-var _reflection_strength: HBoxContainer
+var _reflection_strength: VBoxContainer
 var _bias: Button
-var _bias_strength: HBoxContainer
+var _bias_strength: VBoxContainer
 var _react: Button
-var _react_strength: HBoxContainer
+var _react_strength: VBoxContainer
 var _react_note: Label
 var _beam: Button
 var _time_box: VBoxContainer
-var _time_mode: HBoxContainer
-var _latitude: HBoxContainer
+var _time_mode: HFlowContainer
+var _latitude: VBoxContainer
 var _curtains: Button
 var _curtains_note: Label
 var _up_next: Button
-var _up_next_seconds: HBoxContainer
+var _up_next_seconds: VBoxContainer
 var _intermission: Button
-var _intermission_minutes: HBoxContainer
+var _intermission_minutes: VBoxContainer
 var _intermission_note: Label
-var _crossfade_music: HBoxContainer
-var _crossfade_video: HBoxContainer
-var _light: HBoxContainer
+var _crossfade_music: VBoxContainer
+var _crossfade_video: VBoxContainer
+var _light: VBoxContainer
 var _follow: Button
-var _play_level: HBoxContainer
-var _sleep: HBoxContainer
+var _play_level: VBoxContainer
+var _sleep: HFlowContainer
 var _sleep_status: Label
 var _party: Node
 var _party_status: Label
@@ -108,7 +108,7 @@ func bind(p_app: Node) -> void:
 	var seat: Node = app.features.seat
 	_seat_label = W.label("", &"MutedLabel")
 	_seat_box.add_child(_seat_label)
-	_seat_box.add_child(W.hbox([W.button("Previous seat", func() -> void: seat.next_seat(-1)),
+	_seat_box.add_child(W.flow([W.button("Previous seat", func() -> void: seat.next_seat(-1)),
 			W.button("Next seat", func() -> void: seat.next_seat(1)),
 			W.button("Room's own spot", func() -> void: seat.go_to_seat(-1))]))
 	# In the headset: the laser picks one (the layer's seat picking).
@@ -181,7 +181,7 @@ func bind(p_app: Node) -> void:
 	box.add_child(W.section("Placement"))
 	# "Reset room" replaces "Recentre", which recentred the view and turned the screen to the gaze in the same frame,
 	# before the recentre had moved the camera: the screen swung away from the room, into a wall (headset, 2026-10-31).
-	box.add_child(W.hbox([W.button("Reset room", func() -> void: app.reset_room()),
+	box.add_child(W.flow([W.button("Reset room", func() -> void: app.reset_room()),
 			W.button("Reset screen", func() -> void: app.reset_screen())]))
 	box.add_child(W.help("Reset room: back to the room's own seat, facing the screen, view recentred."))
 

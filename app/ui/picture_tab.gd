@@ -31,9 +31,9 @@ var _projection_buttons: Array[ModeDiagram] = []
 var _auto_label: Label
 var _half: Button
 var _swap: Button
-var _two_d: HBoxContainer
-var _fov_row: HBoxContainer
-var _depth_row: HBoxContainer
+var _two_d: HFlowContainer
+var _fov_row: VBoxContainer
+var _depth_row: VBoxContainer
 var _depth_file: Button
 var _edge: Button
 var _stereo_box: VBoxContainer
@@ -45,15 +45,15 @@ var _folder_label: Label
 var _clear_folder: Button
 var _use_folder: Button
 var _lens_box: VBoxContainer
-var _lens: HBoxContainer
+var _lens: HFlowContainer
 ## Dual fisheye 360: the lens profile, its field of view and the seam nudge.
 var _dual_box: VBoxContainer
-var _dual_profile: HBoxContainer
-var _presets: HBoxContainer
+var _dual_profile: HFlowContainer
+var _presets: HFlowContainer
 var _preset_ids: Array = []
 var _follow: Button
 var _lying: Button
-var _deinterlace: HBoxContainer
+var _deinterlace: HFlowContainer
 var _hdr_box: VBoxContainer
 var _hdr_label: Label
 var _tone_map: Button
@@ -61,11 +61,11 @@ var _auto_crop: Button
 ## Picture in picture (#87): shown while a film plays in the corner (Files, "In corner").
 var _pip_box: VBoxContainer
 var _pip_label: Label
-var _pip_corner: HBoxContainer
+var _pip_corner: HFlowContainer
 var _crop_grow: Button
 var _slideshow: Button
-var _slide_seconds: HBoxContainer
-var _crossfade: HBoxContainer
+var _slide_seconds: VBoxContainer
+var _crossfade: VBoxContainer
 
 
 func _init() -> void:
@@ -124,8 +124,9 @@ func sync() -> void:
 
 func _build() -> void:
 	box.add_child(W.section("Mode"))
-	# Two rows: the layouts, then the projections (eight diagrams in one row are wider than the panel).
-	var diagrams := W.hbox()
+	# Two rows: the layouts, then the projections (eight diagrams in one row are wider than the panel); each wraps
+	# where it is narrower still (a card on the tablet).
+	var diagrams := W.flow()
 	box.add_child(diagrams)
 	var layout_group := ButtonGroup.new()
 	for i in LAYOUT_KINDS.size():
@@ -135,7 +136,7 @@ func _build() -> void:
 		b.pressed.connect(func() -> void: _edit(func(m: VideoMode) -> void: m.layout = l as VideoMode.Layout))
 		diagrams.add_child(b)
 		_layout_buttons.append(b)
-	var projections := W.hbox()
+	var projections := W.flow()
 	box.add_child(projections)
 	var projection_group := ButtonGroup.new()
 	for i in PROJECTION_KINDS.size():
@@ -157,7 +158,7 @@ func _build() -> void:
 		if not rule.is_empty():
 			folder_modes.clear_rule(rule["folder"]))
 	_use_folder = W.button("Use for this folder", func() -> void: folder_modes.use_current_for_folder())
-	box.add_child(W.hbox([_use_folder, _clear_folder]))
+	box.add_child(W.flow([_use_folder, _clear_folder]))
 	_folder_label = W.ellipsis(W.label("", &"MutedLabel"))
 	box.add_child(_folder_label)
 	_fov_row = W.slider_row("Fisheye field", 120.0, 240.0, 5.0, func(v: float) -> String: return "%d°" % roundi(v),
@@ -184,7 +185,7 @@ func _build() -> void:
 			func(v: float) -> String: return "%+.1f°" % v, func(v: float) -> void: dual.set_value("seam", v))
 	_dual_box.add_child(_rows["dual_fov"])
 	_dual_box.add_child(_rows["dual_seam"])
-	_dual_box.add_child(W.hbox([W.button("Reset lens", func() -> void: dual.reset())]))
+	_dual_box.add_child(W.flow([W.button("Reset lens", func() -> void: dual.reset())]))
 
 	_stereo_box = W.vbox()
 	box.add_child(_stereo_box)
@@ -242,7 +243,7 @@ func _build() -> void:
 	box.add_child(W.hbox([_follow, _lying]))
 	_flat_box.add_child(_rows["curve"])
 	_flat_box.add_child(_rows["zoom"])
-	_flat_box.add_child(W.hbox([W.button("Reset zoom", func() -> void: zoom.reset())]))
+	_flat_box.add_child(W.flow([W.button("Reset zoom", func() -> void: zoom.reset())]))
 	# Letterbox bars (#42): turning it on reopens the file at its place; the footer says what it found.
 	var auto_crop: Node = app.features.auto_crop
 	_auto_crop = W.toggle("Auto crop bars", func(on: bool) -> void: auto_crop.set_enabled(on))
@@ -261,7 +262,7 @@ func _build() -> void:
 	_rows["roll"] = W.slider_row("Roll", -horizon.MAX, horizon.MAX, 0.5, degrees, set_trim)
 	_horizon_box.add_child(_rows["pitch"])
 	_horizon_box.add_child(_rows["roll"])
-	_horizon_box.add_child(W.hbox([W.button("Level", func() -> void: horizon.reset())]))
+	_horizon_box.add_child(W.flow([W.button("Level", func() -> void: horizon.reset())]))
 
 	box.add_child(W.section("Picture"))
 	var picture: Node = app.features.picture
@@ -282,7 +283,7 @@ func _build() -> void:
 			func(v: float) -> void: projector.set_weave(v))
 	box.add_child(_rows["grain"])
 	box.add_child(_rows["weave"])
-	box.add_child(W.hbox([W.button("Reset picture", func() -> void: picture.reset())]))
+	box.add_child(W.flow([W.button("Reset picture", func() -> void: picture.reset())]))
 
 	# HDR (#85): only for HDR files. Tone map off clips the highlights instead, for comparison.
 	_hdr_box = W.vbox()
@@ -321,11 +322,11 @@ func _build() -> void:
 
 	box.add_child(W.section("Frame"))
 	var step_loop: Node = app.features.step_loop
-	box.add_child(W.hbox([W.button("Frame back", func() -> void: step_loop.step(-1)),
+	box.add_child(W.flow([W.button("Frame back", func() -> void: step_loop.step(-1)),
 			W.button("Frame forward", func() -> void: step_loop.step(1)),
 			W.button("Mark A / B", func() -> void: step_loop.mark()),
 			W.button("Clear loop", func() -> void: step_loop.clear())]))
-	box.add_child(W.hbox([W.button("Screenshot", _screenshot)]))
+	box.add_child(W.flow([W.button("Screenshot", _screenshot)]))
 
 	_pip_box = W.vbox()
 	box.add_child(_pip_box)
@@ -333,7 +334,7 @@ func _build() -> void:
 	var pip: Node = app.features.pip
 	_pip_label = W.ellipsis(W.label("", &"MutedLabel"))
 	_pip_box.add_child(_pip_label)
-	_pip_box.add_child(W.hbox([W.button("Swap", func() -> void: pip.swap()),
+	_pip_box.add_child(W.flow([W.button("Swap", func() -> void: pip.swap()),
 			W.button("Close corner", func() -> void: pip.close())]))
 	_rows["pip_size"] = W.slider_row("Corner size", 0.15, 0.5, 0.05,
 			func(v: float) -> String: return "%d %%" % roundi(v * 100.0), func(v: float) -> void: pip.set_size(v))

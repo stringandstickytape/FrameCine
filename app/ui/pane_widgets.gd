@@ -55,9 +55,9 @@ static func set_on(b: Button, on: bool) -> void:
 
 ## A row of mutually exclusive buttons. on_chosen(index) runs for the user's picks. Returns the HBoxContainer; its
 ## buttons are its children in order.
-static func choices(names: Array, on_chosen: Callable) -> HBoxContainer:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", PaneStyle.constant(&"gap"))
+static func choices(names: Array, on_chosen: Callable) -> HFlowContainer:
+	# A row that wraps where it is narrow (a card on the tablet).
+	var row := flow()
 	var group := ButtonGroup.new()
 	for i in names.size():
 		var b := button(str(names[i]), Callable())
@@ -79,25 +79,28 @@ static func set_choice(row: Container, index: int) -> void:
 
 ## A slider row: name, slider, value. fmt(value) -> String gives the value text; on_change(value) runs for the user's
 ## changes only. The slider is the row's meta "slider".
-static func slider_row(text: String, min_v: float, max_v: float, step: float, fmt: Callable, on_change: Callable) -> HBoxContainer:
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", PaneStyle.constant(&"gap") * 2)
-	row.custom_minimum_size = Vector2(0, PaneStyle.constant(&"button_height"))
-	var name_label := label(text)
-	name_label.custom_minimum_size = Vector2(170, 0)
-	row.add_child(name_label)
+static func slider_row(text: String, min_v: float, max_v: float, step: float, fmt: Callable, on_change: Callable) -> VBoxContainer:
+	# The name and the value on one line, the slider under them the full width: fits a half-width card on the
+	# tablet, and gives a finger the whole width.
+	var row := VBoxContainer.new()
+	row.add_theme_constant_override("separation", 0)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", PaneStyle.constant(&"gap"))
+	var name_label := ellipsis(label(text))
+	head.add_child(name_label)
+	row.add_child(head)
 	var s := HSlider.new()
 	s.min_value = min_v
 	s.max_value = max_v
 	s.step = step
 	s.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	s.size_flags_vertical = Control.SIZE_FILL
-	s.custom_minimum_size = Vector2(0, PaneStyle.constant(&"button_height"))
-	row.add_child(s)
+	s.custom_minimum_size = Vector2(0, PaneStyle.constant(&"button_height") - 8)
 	var value_label := label("", &"TimeLabel")
 	value_label.custom_minimum_size = Vector2(84, 0)
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	row.add_child(value_label)
+	head.add_child(value_label)
+	row.add_child(s)
 	s.value_changed.connect(func(v: float) -> void:
 		value_label.text = fmt.call(v)
 		if not s.has_meta("quiet"):
@@ -144,6 +147,11 @@ static func group_sections(box: VBoxContainer) -> Array[VBoxContainer]:
 	var groups: Array[VBoxContainer] = []
 	var group: VBoxContainer = null
 	var children := box.get_children()
+	# Grouped already: as they are.
+	if not children.is_empty() and children.all(func(c: Node) -> bool: return c is VBoxContainer and c.has_meta("section")):
+		for c in children:
+			groups.append(c)
+		return groups
 	for c in children:
 		box.remove_child(c)
 	for c in children:
@@ -158,6 +166,106 @@ static func group_sections(box: VBoxContainer) -> Array[VBoxContainer]:
 	return groups
 
 
+## Lays a tab's box out as cards (the tablet, ui/pane_ui.gd): its sections (group_sections()) each in a CardPanel,
+## packed two to a row where both fit half the width, else one to a row (refresh_cards()); off: the groups back in
+## the box, one under another. The cards and their rows live in a box kept on the tab's box as meta "cards".
+static func card_layout(box: VBoxContainer, on: bool) -> void:
+	var holder: VBoxContainer = box.get_meta("cards", null)
+	if on and holder == null:
+		var groups := group_sections(box)
+		holder = VBoxContainer.new()
+		holder.name = "Cards"
+		holder.add_theme_constant_override("separation", PaneStyle.constant(&"gap"))
+		holder.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var all: Array = []
+		for g in groups:
+			box.remove_child(g)
+			var card := PanelContainer.new()
+			card.theme_type_variation = &"CardPanel"
+			card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			card.add_child(g)
+			all.append(card)
+		holder.set_meta("all", all)
+		holder.set_meta("packed", "")
+		box.add_child(holder)
+		box.set_meta("cards", holder)
+	elif not on and holder != null:
+		for card: Control in holder.get_meta("all", []):
+			var g: Node = card.get_child(0)
+			card.remove_child(g)
+			box.add_child(g)
+			if card.get_parent() != null:
+				card.get_parent().remove_child(card)
+			card.free()
+		box.remove_child(holder)
+		holder.queue_free()
+		box.remove_meta("cards")
+
+
+## The cards of a box laid out by card_layout() (PanelContainers, in order), or none.
+static func cards(box: VBoxContainer) -> Array:
+	var holder: VBoxContainer = box.get_meta("cards", null)
+	return holder.get_meta("all", []) if holder != null else []
+
+
+## Packs the cards for a width (pixels): a card whose section has nothing to show (a tab hides what doesn't apply,
+## such as 3D for a flat film) is left out; a card too wide for half the width takes a row of its own; a run of
+## cards that fit go into two columns, each to the shorter column, so a tall list and a short card don't stretch
+## each other. Packed again only when that changes.
+static func refresh_cards(box: VBoxContainer, width: float) -> void:
+	var holder: VBoxContainer = box.get_meta("cards", null)
+	if holder == null:
+		return
+	var gap := PaneStyle.constant(&"gap")
+	var half := (width - gap) * 0.5
+	var shown: Array = []
+	var key := ""
+	for card: Control in holder.get_meta("all", []):
+		var g: Node = card.get_child(0)
+		var any := false
+		for i in range(1, g.get_child_count()):
+			var c: Node = g.get_child(i)
+			if c is CanvasItem and (c as CanvasItem).visible:
+				any = true
+				break
+		if any:
+			shown.append(card)
+			key += "1" if card.get_combined_minimum_size().x <= half else "W"
+		else:
+			key += "0"
+	if key == str(holder.get_meta("packed", "")):
+		return
+	holder.set_meta("packed", key)
+	for card: Control in holder.get_meta("all", []):
+		if card.get_parent() != null:
+			card.get_parent().remove_child(card)
+	for row in holder.get_children():
+		holder.remove_child(row)
+		row.queue_free()
+	var columns: Array = []
+	var heights := [0.0, 0.0]
+	for card: Control in shown:
+		if card.get_combined_minimum_size().x > half:
+			columns = []
+			holder.add_child(card)
+			continue
+		if columns.is_empty():
+			var pair := HBoxContainer.new()
+			pair.add_theme_constant_override("separation", gap)
+			for k in 2:
+				var col := VBoxContainer.new()
+				col.add_theme_constant_override("separation", gap)
+				col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				col.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+				pair.add_child(col)
+				columns.append(col)
+			heights = [0.0, 0.0]
+			holder.add_child(pair)
+		var k := 0 if heights[0] <= heights[1] else 1
+		(columns[k] as Container).add_child(card)
+		heights[k] += card.get_combined_minimum_size().y + gap
+
+
 ## The section a node starts (its heading, or a box's first child's, a few levels down), or "".
 static func section_title(n: Node) -> String:
 	for depth in 4:
@@ -169,6 +277,27 @@ static func section_title(n: Node) -> String:
 			return ""
 		n = n.get_child(0)
 	return ""
+
+
+## A row that wraps onto more rows where it is narrow (a card on the tablet): the diagrams, a row of choices.
+static func flow(children: Array = []) -> HFlowContainer:
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
+	row.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	for c: Control in children:
+		row.add_child(c)
+	return row
+
+
+## A grid of equal columns (the mode diagrams: three to a row, so they fit a card).
+static func grid(columns: int, children: Array = []) -> GridContainer:
+	var g := GridContainer.new()
+	g.columns = columns
+	g.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
+	g.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	for c: Control in children:
+		g.add_child(c)
+	return g
 
 
 static func hbox(children: Array = []) -> HBoxContainer:

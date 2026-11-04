@@ -39,7 +39,7 @@ var _service: Node
 ## "Voice goes to": shown when there is more than one place for it (the dev link, the assistant link, the agents
 ## running on this headset); see ui_layer.voice_target().
 var _voice_box: HBoxContainer
-var _voice_choice: HBoxContainer
+var _voice_choice: HFlowContainer
 var _voice_targets: Array[String] = []
 
 

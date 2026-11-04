@@ -52,19 +52,19 @@ var _stats: Node
 ## The controllers' look: the presets, the colour palette and the speed slider for a look that takes them.
 var _look_grid: GridContainer
 var _look_colours: GridContainer
-var _look_speed: HBoxContainer
+var _look_speed: VBoxContainer
 var _haptics: Button
-var _strength: HBoxContainer
+var _strength: VBoxContainer
 var _jog: Button
 var _thumbs: Button
-var _jog_turn: HBoxContainer
+var _jog_turn: VBoxContainer
 var _zoom_lens: Button
-var _magnification: HBoxContainer
+var _magnification: VBoxContainer
 var _left_handed: Button
 var _tablet_toggle: Button
 var _palette_box: HBoxContainer
 var _palette_buttons := {}
-var _foveation: HBoxContainer
+var _foveation: HFlowContainer
 var _foveation_help: Label
 var _foveation_sharp: Button
 var _film_layer: Button
@@ -72,9 +72,9 @@ var _film_layer_help: Label
 ## [pane] world_locked off: the panel follows the head lazily.
 var _follow_head: Button
 var _layout_rows := {}
-var _ui_scale: HBoxContainer
+var _ui_scale: VBoxContainer
 var _monocular: Button
-var _monocular_eye: HBoxContainer
+var _monocular_eye: HFlowContainer
 var _subs_always: Button
 var _lab_path: LineEdit
 var _lab_result: Label
@@ -95,7 +95,7 @@ var _share_qr: TextureRect
 var assistant_row: AssistantRow
 var _dev_box: VBoxContainer
 var _dev_status: Label
-var _remote_mode: HBoxContainer
+var _remote_mode: HFlowContainer
 var _changes: VBoxContainer
 var _ring: Node
 ## The stats view refreshes at 2 Hz (stats.gd's collect() is meant for 1 to 4 Hz).
@@ -167,7 +167,7 @@ func bind(p_app: Node) -> void:
 	access.changed.connect(func(_k: String, _v: Variant) -> void: sync())
 
 	box.add_child(W.section("Test and setup"))
-	box.add_child(W.hbox([W.button("Test patterns", func() -> void: open_place.emit("stub://")),
+	box.add_child(W.flow([W.button("Test patterns", func() -> void: open_place.emit("stub://")),
 			W.button("Network hosts", func() -> void: open_place.emit("network://"))]))
 	var cards := W.hbox()
 	for card: Dictionary in TestLab.cards():
@@ -187,7 +187,7 @@ func bind(p_app: Node) -> void:
 	_lab_result = W.label("", &"MutedLabel")
 	_lab_result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_lab_result)
-	box.add_child(W.hbox([W.button("Run benchmark", _run_benchmark)]))
+	box.add_child(W.flow([W.button("Run benchmark", _run_benchmark)]))
 	_bench_label = W.label("", &"MutedLabel")
 	_bench_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_bench_label)
@@ -309,13 +309,13 @@ func bind(p_app: Node) -> void:
 	_dev_box.add_child(W.section("Dev tools"))
 	_dev_status = W.label("", &"MutedLabel")
 	_dev_box.add_child(_dev_status)
-	_dev_box.add_child(W.hbox([W.button("Reload theme", func() -> void: reload_theme_requested.emit())]))
+	_dev_box.add_child(W.flow([W.button("Reload theme", func() -> void: reload_theme_requested.emit())]))
 	_dev_box.add_child(W.label("Remote changes"))
 	_remote_mode = W.choices(REMOTE_WORDS, func(i: int) -> void:
 		app.settings.set_value("dev", "remote_changes", REMOTE_MODES[i])
 		_sync_dev())
 	_dev_box.add_child(_remote_mode)
-	_dev_box.add_child(W.hbox([W.button("Allow for an hour", func() -> void:
+	_dev_box.add_child(W.flow([W.button("Allow for an hour", func() -> void:
 				if _ring != null:
 					_ring.allow_for(3600.0)
 				_sync_dev()),

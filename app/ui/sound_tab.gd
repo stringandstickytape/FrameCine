@@ -14,20 +14,20 @@ const PCAudio := preload("res://scripts/dev/pc_audio.gd")
 var app: Node
 var box: VBoxContainer
 var _tracks: VBoxContainer
-var _volume: HBoxContainer
-var _offset: HBoxContainer
-var _speed: HBoxContainer
-var _live_delay: HBoxContainer
+var _volume: VBoxContainer
+var _offset: VBoxContainer
+var _speed: HFlowContainer
+var _live_delay: VBoxContainer
 var _night_box: VBoxContainer
 var _night: Button
-var _night_strength: HBoxContainer
-var _boost: HBoxContainer
+var _night_strength: VBoxContainer
+var _boost: VBoxContainer
 var _speakers: Button
 var _lfe: Button
 var _speakers_status: Label
 var _spatial_box: VBoxContainer
-var _reverb: HBoxContainer
-var _output: HBoxContainer
+var _reverb: VBoxContainer
+var _output: HFlowContainer
 var _hrtf_list: VBoxContainer
 var _hrtf_get: Button
 var _hrtf_offer := "" # A set not downloaded yet, its licence shown: _hrtf_get fetches it.
@@ -60,7 +60,7 @@ func bind(p_app: Node) -> void:
 	_offset = W.slider_row("A/V offset", -300.0, 300.0, 5.0, func(v: float) -> String: return "%+d ms" % roundi(v),
 			func(v: float) -> void: app.set_av_offset(v / 1000.0))
 	box.add_child(_offset)
-	box.add_child(W.hbox([W.button("Calibrate", func() -> void: app.open_path("lab://av_sync", false))]))
+	box.add_child(W.flow([W.button("Calibrate", func() -> void: app.open_path("lab://av_sync", false))]))
 	# Live streams (udp://, http live): how far behind live to play; a change reopens a live stream.
 	var live: Node = app.features.live
 	_live_delay = W.slider_row("Live delay", 0.1, 2.5, 0.1, func(v: float) -> String: return "%.1f s" % v,
@@ -120,7 +120,7 @@ func bind(p_app: Node) -> void:
 		_sync_speakers())
 	_spatial_box.add_child(W.hbox([_hrtf_get]))
 	if "spatial_tune" in app.features:
-		_spatial_box.add_child(W.hbox([W.button("Tune spatial sound", func() -> void:
+		_spatial_box.add_child(W.flow([W.button("Tune spatial sound", func() -> void:
 			app.features.spatial_tune.start())]))
 	_speakers_status = W.label("", &"MutedLabel")
 	_speakers_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

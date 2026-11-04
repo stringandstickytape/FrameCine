@@ -229,35 +229,51 @@ func _run() -> void:
 	_check("the tabs as a list down the left, Source first", pui.tablet_tab_buttons.size() == 7
 			and pui.tablet_tab_buttons[0].text == "Source" and pui.tablet_tab_buttons[0].is_visible_in_tree()
 			and pui.tablet_tab_buttons[0].get_global_rect().position.x < 60.0)
-	var part_names := func() -> Array:
-		return pui._parts_box.get_children().filter(func(c: Node) -> bool: return not c.is_queued_for_deletion()) \
+	var chip_names := func() -> Array:
+		return pui._chips.get_children().filter(func(c: Node) -> bool: return not c.is_queued_for_deletion()) \
 				.map(func(b: Button) -> String: return b.text)
 	pui.tablet_tab_buttons[0].pressed.emit()
-	var names: Array = part_names.call()
-	_check("Source's parts: the places, Library first, Test patterns last (%s)" % [names],
-			names[0] == "Library" and names[-1] == "Test patterns" and names.has("Network"))
+	var names: Array = chip_names.call()
+	_check("Source's places as chips, Library first, Test patterns last (%s)" % [names],
+			names[0] == "Library" and names[-1] == "Test patterns" and names.has("Network") and pui._source_head.visible)
 	_check("the files tab's own places column gives way", not pui.files._places_scroll.visible)
-	var patterns_button: Button = pui._parts_box.get_child(names.size() - 1)
-	patterns_button.pressed.emit()
+	var patterns_chip: Button = pui._chips.get_child(names.size() - 1)
+	patterns_chip.pressed.emit()
 	await _frames(2)
-	_check("a place opens there and is marked", pui.files.current == "stub://" and patterns_button.button_pressed)
+	_check("a place opens there and its chip is marked", pui.files.current == "stub://" and patterns_chip.button_pressed)
 	_check("opening a place keeps the files tab's places column away", not pui.files._places_scroll.visible)
 	_check("the tab takes the rest of the width (%.0f of %d px)" % [pui._body.size.x, panel.resolution.x],
-			pui._body.size.x > panel.resolution.x - pui.TABLET_TABS_WIDTH - pui.TABLET_PARTS_WIDTH - 120)
+			pui._body.size.x > panel.resolution.x - pui.TABLET_TABS_WIDTH - 120)
+	_check("the rail has icons", pui.tablet_tab_buttons.all(func(b: Button) -> bool: return b.icon != null)
+			and pui.tablet_tab_buttons[0].icon.get_width() == pui.RAIL_ICON_PX)
+	_check("a view selector: details, list, grid, details first", pui._view_buttons.size() == 3
+			and pui.view == "details" and pui._view_buttons[0].button_pressed and pui._view_buttons[2].icon != null)
+	pui._view_buttons[2].pressed.emit()
+	_check("picking the grid: remembered", pui.view == "grid" and main.settings.get_value("browser", "view", "") == "grid"
+			and pui._view_buttons[2].button_pressed and not pui._view_buttons[0].button_pressed)
+	pui._view_buttons[0].pressed.emit()
 	pui.tablet_tab_buttons[1].pressed.emit()
-	var groups: Array = pui.sections(1)
-	names = part_names.call()
-	_check("Picture's parts: its sections (%s)" % [names], pui.current_tab == 1 and names.has("Screen")
-			and names.size() == groups.size())
-	var screen := names.find("Screen")
-	(pui._parts_box.get_child(screen) as Button).pressed.emit()
-	_check("one section shows at a time", groups[screen].visible
-			and groups.filter(func(g: Control) -> bool: return g.visible).size() == 1)
+	await _frames(2)
+	var cards: Array = pui.cards(1)
+	var pic_box: VBoxContainer = pui.tabs[1].box
+	var holder: Node = pic_box.get_node("Cards")
+	var pairs: Array = holder.get_children().filter(func(r: Node) -> bool: return r is HBoxContainer)
+	var both := pairs.any(func(r: Node) -> bool:
+		return r.get_child_count() == 2 and r.get_child(0).get_child_count() > 0 and r.get_child(1).get_child_count() > 0)
+	var shape: Array = holder.get_children().map(func(r: Node) -> String:
+		return "%s:%s" % [r.get_class(), r.get_children().map(func(c: Node) -> int: return c.get_child_count())])
+	_check("Picture's sections as cards in two columns (%d cards, %d runs: %s)" % [cards.size(), pairs.size(), shape],
+			cards.size() >= 6 and both and cards[0] is PanelContainer
+			and cards[0].get_child(0).get_meta("section") == "Mode" and not pui._source_head.visible)
+	_check("a card whose section has nothing to show is left out (3D, for a flat film)", cards.any(
+			func(c: Control) -> bool: return c.get_child(0).get_meta("section") == "3D" and c.get_parent() == null))
+	_check("no card is wider than the tab (%.0f)" % pui.tabs[1].size.x, cards.all(func(c: Control) -> bool:
+			return c.get_parent() == null or c.get_combined_minimum_size().x <= pui.tabs[1].size.x))
 	tablet.set_enabled(false, false)
-	_check("off: the front panel again, every section", not pui.tablet_layout and panel.halo_shown
+	_check("off: the front panel again, the sections back in their box", not pui.tablet_layout and panel.halo_shown
 			and panel.viewport.size_2d_override == Vector2i.ZERO and panel.viewport.size == panel.resolution
 			and pui._tabs_box.visible and pui.files._places_scroll.visible
-			and groups.all(func(g: Control) -> bool: return g.visible))
+			and not pic_box.has_node("Cards") and pic_box.get_child(0).get_meta("section") == "Mode")
 	tablet.set_enabled(true, false)
 	await _frames(1)
 	_check("on again: the tablet layout", pui.tablet_layout and pui._tablet_row.visible)
@@ -265,13 +281,15 @@ func _run() -> void:
 	# Dragging a list: a press moved up or down scrolls it instead of clicking; a press that hardly moves clicks.
 	pui.tablet_tab_buttons[0].pressed.emit()
 	await _frames(1)
-	pui._parts_box.custom_minimum_size.y = 3000
+	var sc: ScrollContainer = pui.files.list_scroll()
+	var lst: Control = sc.get_child(0)
+	lst.custom_minimum_size.y = 3000
 	await _frames(2)
-	var sc: ScrollContainer = pui._parts_scroll
 	var at: Vector2 = sc.get_global_rect().get_center()
 	var clicks := [0]
-	for b: Node in pui._parts_box.get_children():
-		(b as Button).pressed.connect(func() -> void: clicks[0] += 1)
+	for b: Node in lst.get_children():
+		if b is Button:
+			(b as Button).pressed.connect(func() -> void: clicks[0] += 1)
 	var slop: float = panel.DRAG_SLOP / panel.size_m.x * panel.resolution.x
 	panel.pointer_button(at, true)
 	_check("a press on it finds the list", panel.scroll_under(panel.hovered_control()) == sc)
@@ -289,12 +307,18 @@ func _run() -> void:
 	sc.scroll_vertical = 0
 	await _frames(1)
 	# In the middle of a row, so the small move stays on it.
-	var tap: Vector2 = (pui._parts_box.get_child(2) as Control).get_global_rect().get_center()
+	var first_row: Control = null
+	for b: Node in lst.get_children():
+		if b is Button:
+			first_row = b
+			break
+	var tap: Vector2 = first_row.get_global_rect().get_center()
 	panel.pointer_button(tap, true)
 	panel.pointer_move(tap + Vector2(0, 3))
 	panel.pointer_button(tap + Vector2(0, 3), false)
-	_check("a press that hardly moves is a click (%d clicks, scroll %d)" % [clicks[0], sc.scroll_vertical], clicks[0] == 1 and sc.scroll_vertical == 0)
-	pui._parts_box.custom_minimum_size.y = 0
+	_check("a press that hardly moves is a click (%d clicks, scroll %d)" % [clicks[0], sc.scroll_vertical],
+			clicks[0] == 1 and sc.scroll_vertical == 0)
+	lst.custom_minimum_size.y = 0
 	layer.hide_panel()
 	tablet.show_at(head)
 	tablet.global_transform = keep

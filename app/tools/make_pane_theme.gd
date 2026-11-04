@@ -42,6 +42,8 @@ const BASE := {
 	"text": ["#E6EAEE", 1.0],
 	"muted": ["#8B95A1", 1.0],
 	"accent": ["#9CCBE8", 1.0],
+	# Text on the accent (a chip that is chosen).
+	"accent_ink": ["#0C0F13", 1.0],
 }
 ## Derived colours: [base token, alpha].
 const DERIVED := {
@@ -62,6 +64,8 @@ const DERIVED := {
 	"laser_dot": ["accent", 1.0],
 	"scroll_grabber": ["muted", 0.40],
 	"field": ["text", 0.06],
+	# The cards a tab's sections sit in on the tablet.
+	"card": ["text", 0.06],
 }
 ## Hairline rules: 9 % white. The QR code must stay black on white to scan.
 const FIXED := {
@@ -133,7 +137,7 @@ static func palette_colours(pal: Dictionary) -> Dictionary:
 			"hairline": Color(ink, 0.09), "hover_fill": Color(ink, 0.12), "focus_fill": Color(ink, 0.08),
 			"pressed_fill": Color(ink, 0.10), "selection": Color(pal["accent"], 0.35), "field": Color(ink, 0.06),
 			"scroll_grabber": Color(ink, 0.3), "seek_track": Color(ink, 0.2), "halo": Color(pal["accent"], 0.0),
-			"bar_track": Color(ink, 0.14)}
+			"bar_track": Color(ink, 0.14), "accent_ink": pal["accent_ink"], "card": Color(ink, 0.06)}
 
 
 static func build(options: Dictionary = {}) -> Theme:
@@ -222,6 +226,43 @@ static func build(options: Dictionary = {}) -> Theme:
 	_button_styles(t, "PlaceButton", c, row_radius, false, flat)
 	t.set_font("font", "PlaceButton", fonts["regular"])
 	t.set_color("font_color", "PlaceButton", c["muted"])
+
+	# The tablet (ui/pane_ui.gd): the tab rail (an icon and the name; the icons carry their own colour, so the
+	# theme's icon colours are white), the place chips (pills, the chosen one in the accent), the view selector
+	# (small, flat) and the cards the sections sit in.
+	_variation_of(t, "RailButton", "Button")
+	_button_styles(t, "RailButton", c, row_radius, false, true)
+	t.set_font("font", "RailButton", fonts["medium"])
+	t.set_color("font_color", "RailButton", c["muted"])
+	t.set_color("font_pressed_color", "RailButton", c["text"])
+	t.set_color("font_hover_pressed_color", "RailButton", c["text"])
+	t.set_constant("h_separation", "RailButton", 10)
+	_variation_of(t, "ViewButton", "Button")
+	_button_styles(t, "ViewButton", c, row_radius, false, true)
+	for type in ["RailButton", "ViewButton"]:
+		for k in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_hover_pressed_color",
+				"icon_focus_color", "icon_disabled_color"]:
+			t.set_color(k, type, Color.WHITE)
+	_variation_of(t, "ChipButton", "Button")
+	var pill: int = CONSTANTS["row_height"]
+	var chip_rest := _box(c["field"], pill)
+	var chip_hover := _box(c["hover_fill"], pill)
+	var chip_on := _box(c["accent"], pill)
+	for s in [chip_rest, chip_hover, chip_on]:
+		_margins(s, 14, 2)
+	t.set_stylebox("normal", "ChipButton", chip_rest)
+	t.set_stylebox("hover", "ChipButton", chip_hover)
+	t.set_stylebox("pressed", "ChipButton", chip_on)
+	t.set_stylebox("hover_pressed", "ChipButton", chip_on)
+	t.set_stylebox("disabled", "ChipButton", chip_rest)
+	t.set_stylebox("focus", "ChipButton", chip_hover)
+	t.set_font("font", "ChipButton", fonts["medium"])
+	t.set_color("font_pressed_color", "ChipButton", c["accent_ink"])
+	t.set_color("font_hover_pressed_color", "ChipButton", c["accent_ink"])
+	_variation_of(t, "CardPanel", "PanelContainer")
+	var card := _box(c["card"], 12)
+	_margins(card, 14, 10)
+	t.set_stylebox("panel", "CardPanel", card)
 
 	# Tabs: uppercase 11 px labels, letter-spaced; the active tab has an accent underline.
 	_variation_of(t, "TabButton", "Button")

@@ -15,13 +15,13 @@ const Director := preload("res://scripts/director/director.gd")
 var app: Node
 var box: VBoxContainer
 var _tracks: VBoxContainer
-var _size: HBoxContainer
-var _delay: HBoxContainer
+var _size: VBoxContainer
+var _delay: VBoxContainer
 var _second: VBoxContainer
-var _place: HBoxContainer
-var _offset: HBoxContainer
-var _depth: HBoxContainer
-var _background: HBoxContainer
+var _place: HFlowContainer
+var _offset: VBoxContainer
+var _depth: VBoxContainer
+var _background: VBoxContainer
 var _find_files: Button
 var _files_label: Label
 var _script_rows: VBoxContainer
@@ -50,7 +50,7 @@ func _init() -> void:
 func bind(p_app: Node) -> void:
 	app = p_app
 	var subs: Node = app.features.subtitles
-	box.add_child(W.hbox([W.button("Replay 10 s", func() -> void: app.features.catch_up.replay())]))
+	box.add_child(W.flow([W.button("Replay 10 s", func() -> void: app.features.catch_up.replay())]))
 	box.add_child(W.section("Track"))
 	_tracks = VBoxContainer.new()
 	_tracks.add_theme_constant_override("separation", 0)
@@ -80,7 +80,7 @@ func bind(p_app: Node) -> void:
 	_delay = W.slider_row("Delay", -5.0, 5.0, 0.1, func(v: float) -> String: return "%+.1f s" % v,
 			func(v: float) -> void: sub_delay.set_delay(v))
 	box.add_child(_delay)
-	box.add_child(W.hbox([W.button("Reset delay", func() -> void: sub_delay.reset())]))
+	box.add_child(W.flow([W.button("Reset delay", func() -> void: sub_delay.reset())]))
 	box.add_child(W.section("Subtitle files"))
 	var sub_files: Node = app.features.sub_files
 	_find_files = W.toggle("Find files next to the video", func(on: bool) -> void: sub_files.set_enabled(on))
@@ -93,7 +93,7 @@ func bind(p_app: Node) -> void:
 		sync())
 
 	box.add_child(W.section("Script"))
-	box.add_child(W.hbox([W.button("Find a line", _show_find), W.button("Lines around now", _around_now)]))
+	box.add_child(W.flow([W.button("Find a line", _show_find), W.button("Lines around now", _around_now)]))
 	_script_tracks = W.vbox()
 	_script_tracks.add_theme_constant_override("separation", 0)
 	box.add_child(_script_tracks)

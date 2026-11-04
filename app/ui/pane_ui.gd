@@ -12,11 +12,12 @@ extends PanelContainer
 ## the app directly; the transport and seek bar emit signals that ui_layer.gd turns into app calls.
 ##
 ## The tablet layout (set_tablet_layout(); ui/tablet.gd, the user 2026-11-04: the old menu moved onto the tablet and
-## reshaped, a wider pane with lists down its side): the header, seek bar and transport go (the tablet's now playing
-## pane shows the title, time and bar); down the left the tabs as a list (Files called Source), then the tab's parts
-## (Source: the places, FilesTab.places_in_order(), and the files tab's own places column goes; any other tab: its
-## sections, W.group_sections(), one shown at a time); the tab in the rest of the width; the footer under them all.
-## No backdrop of its own: the tablet's pane shows through. Lists are dragged to scroll (ui/pane.gd).
+## reshaped): the header, seek bar and transport go (the tablet's now playing pane shows the title, time and bar);
+## down the left a rail of the tabs, an icon (ui/icons.gd) and the name each, Files called Source; the tab in the
+## rest of the width. Source: the places as chips over the files tab (FilesTab.places_in_order(); the tab's own
+## places column goes), with a view selector at the right (details, list, grid: `view`, [browser] view; the views
+## themselves are to come). Any other tab: its sections as cards, two to a row (W.card_layout()). The footer under
+## it all. No backdrop of its own: the tablet's pane shows through. Lists are dragged to scroll (ui/pane.gd).
 
 const PaneStyle := preload("res://ui/pane_style.gd")
 const W := preload("res://ui/pane_widgets.gd")
@@ -38,10 +39,13 @@ signal skip_requested(delta_seconds: float)
 
 enum Tab { FILES, PICTURE, SOUND, SUBTITLES, ROOM, OBJECTS, SYSTEM }
 const TAB_NAMES: Array[String] = ["Files", "Picture", "Sound", "Subtitles", "Room", "Objects", "System"]
-## The tablet layout's names for the tabs, and its two lists' widths (pixels).
+## The tablet layout's names and icons for the tabs, the rail's width and its icons' size (pixels), and the views.
 const TABLET_TAB_NAMES: Array[String] = ["Source", "Picture", "Sound", "Subtitles", "Room", "Objects", "System"]
-const TABLET_TABS_WIDTH := 170
-const TABLET_PARTS_WIDTH := 240
+const TABLET_TAB_ICONS: Array[String] = ["source", "picture", "sound", "subtitles", "room", "objects", "system"]
+const TABLET_TABS_WIDTH := 190
+const RAIL_ICON_PX := 30
+const VIEWS: Array[String] = ["details", "list", "grid"]
+const Icons := preload("res://ui/icons.gd")
 
 var app: Node
 var files: FilesTab
@@ -93,9 +97,10 @@ var _status := ""
 var header_extra := ""
 ## Push-to-talk is recording: "Listening" in the header and the footer.
 var listening := false
-## The tablet layout: on or not; its row (the two lists and the body), the tab list's buttons, the parts list; each
-## tab's sections (W.group_sections(), made the first time) and the one shown.
+## The tablet layout: on or not; its row (the rail and the body), the rail's buttons, Source's chips and view
+## selector, and the view chosen.
 var tablet_layout := false
+var view := "details"
 ## Every font size times this (set_text_scale(): the tablet's, from its style; 1 on the front panel), and the
 ## tablet's own theme (set_tablet_theme(); null: the front panel's).
 var text_scale := 1.0
@@ -103,10 +108,9 @@ var _tablet_theme: Theme
 var _tabs_box: VBoxContainer
 var _tablet_row: HBoxContainer
 var tablet_tab_buttons: Array[Button] = []
-var _parts_box: VBoxContainer
-var _parts_scroll: ScrollContainer
-var _sections := {}
-var _section := {}
+var _source_head: HBoxContainer
+var _chips: HFlowContainer
+var _view_buttons: Array[Button] = []
 
 
 func _ready() -> void:
@@ -127,6 +131,8 @@ func apply_style() -> void:
 	if _content != null:
 		# The stick focus: a ring on the front panel; the tablet's theme is flat, its own focus look stays.
 		_content.theme = null if _tablet_theme != null else PaneStyle.docked_focus_theme()
+	if _tablet_row != null:
+		_refresh_rail()
 	queue_redraw()
 
 
@@ -271,7 +277,7 @@ func bind(p_app: Node) -> void:
 		t.bind(app)
 	files.form_shown.connect(set_form_mode)
 	files.listing_changed.connect(_update_footer)
-	files.folder_changed.connect(func(_p: String) -> void: _mark_parts())
+	files.folder_changed.connect(func(_p: String) -> void: _mark_chips())
 	system.open_place.connect(func(p: String) -> void:
 		show_tab(Tab.FILES)
 		files.open_folder(p))
@@ -341,7 +347,13 @@ func show_tab(index: int) -> void:
 	for i in tablet_tab_buttons.size():
 		tablet_tab_buttons[i].set_pressed_no_signal(i == current_tab)
 	if tablet_layout:
-		_fill_parts()
+		_refresh_rail()
+		_source_head.visible = current_tab == Tab.FILES
+		if current_tab == Tab.FILES:
+			_fill_chips()
+		else:
+			W.card_layout(tabs[current_tab].get("box"), true)
+			_pack_cards()
 	_update_footer()
 
 
@@ -384,7 +396,7 @@ func set_tablet_layout(on: bool) -> void:
 	set_form_mode(_form_mode)
 	seek.visible = _seekable and not _form_mode and not on
 	_tablet_row.visible = on
-	var home: Container = _tablet_row if on else _open
+	var home: Container = _tablet_row.get_node("Content") if on else _open
 	_body.get_parent().remove_child(_body)
 	home.add_child(_body)
 	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -396,13 +408,14 @@ func set_tablet_layout(on: bool) -> void:
 		# No backdrop: the tablet's pane shows through (its own margins kept).
 		add_theme_stylebox_override("panel", _clear(get_theme_stylebox("panel")))
 		_body.add_theme_stylebox_override("panel", _clear(_body.get_theme_stylebox("panel")))
-		_fill_parts()
+		show_tab(current_tab)
 	else:
 		remove_theme_stylebox_override("panel")
 		_body.remove_theme_stylebox_override("panel")
-		for i: int in _sections:
-			for g: Control in _sections[i]:
-				g.visible = true
+		for t in tabs:
+			var box: Variant = t.get("box")
+			if box is VBoxContainer:
+				W.card_layout(box, false)
 
 
 func _build_tablet_row() -> void:
@@ -411,103 +424,109 @@ func _build_tablet_row() -> void:
 	_open.add_child(_tablet_row)
 	_open.move_child(_tablet_row, _body.get_index())
 	var group := ButtonGroup.new()
-	var tab_list := VBoxContainer.new()
-	tab_list.add_theme_constant_override("separation", 0)
-	tab_list.custom_minimum_size.x = TABLET_TABS_WIDTH
+	var rail := VBoxContainer.new()
+	rail.name = "Rail"
+	rail.add_theme_constant_override("separation", 2)
+	rail.custom_minimum_size.x = TABLET_TABS_WIDTH
 	for i in TABLET_TAB_NAMES.size():
-		var b := _list_button(TABLET_TAB_NAMES[i], func() -> void: show_tab(i))
+		var b := W.button(TABLET_TAB_NAMES[i], func() -> void: show_tab(i), &"RailButton")
+		b.custom_minimum_size.y = PaneStyle.constant(&"button_height") + 4
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.toggle_mode = true
 		b.button_group = group
-		tab_list.add_child(b)
+		b.set_meta("icon", TABLET_TAB_ICONS[i])
+		rail.add_child(b)
 		tablet_tab_buttons.append(b)
-	_tablet_row.add_child(tab_list)
+	_tablet_row.add_child(rail)
 	_tablet_row.add_child(VSeparator.new())
-	_parts_scroll = ScrollContainer.new()
-	_parts_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	_parts_scroll.custom_minimum_size.x = TABLET_PARTS_WIDTH
-	_parts_box = VBoxContainer.new()
-	_parts_box.add_theme_constant_override("separation", 0)
-	_parts_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_parts_scroll.add_child(_parts_box)
-	_tablet_row.add_child(_parts_scroll)
-	_tablet_row.add_child(VSeparator.new())
+	var content := VBoxContainer.new()
+	content.name = "Content"
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", PaneStyle.constant(&"gap"))
+	_tablet_row.add_child(content)
+	# Source's head: the places as chips, the view selector at the right.
+	_source_head = W.hbox()
+	_chips = HFlowContainer.new()
+	_chips.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_chips.add_theme_constant_override("h_separation", 6)
+	_chips.add_theme_constant_override("v_separation", 4)
+	_source_head.add_child(_chips)
+	var views := HBoxContainer.new()
+	views.add_theme_constant_override("separation", 2)
+	views.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	var view_group := ButtonGroup.new()
+	for v in VIEWS:
+		var b := W.button("", func() -> void: set_view(v), &"ViewButton")
+		b.toggle_mode = true
+		b.button_group = view_group
+		b.set_meta("icon", "view-" + v)
+		b.tooltip_text = v.capitalize()
+		views.add_child(b)
+		_view_buttons.append(b)
+	_source_head.add_child(views)
+	content.add_child(_source_head)
+	if app != null:
+		view = str(app.settings.get_value("browser", "view", "details"))
+		if not view in VIEWS:
+			view = "details"
+	_refresh_rail()
 
 
-## A row of a list (the files tab's places look): left aligned, cut with an ellipsis, a toggle.
-func _list_button(text: String, action: Callable) -> Button:
-	var b := W.button(text, action, &"PlaceButton")
-	b.custom_minimum_size.y = PaneStyle.constant(&"row_height")
-	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	b.clip_text = true
-	b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	b.toggle_mode = true
-	return b
+## The rail's and the view selector's icons in the theme's colours (the chosen one bright or in the accent).
+func _refresh_rail() -> void:
+	for b in tablet_tab_buttons:
+		var colour := PaneStyle.color(&"accent" if b.button_pressed else &"muted")
+		b.icon = Icons.texture(str(b.get_meta("icon")), RAIL_ICON_PX, colour)
+	for b in _view_buttons:
+		var on := str(b.get_meta("icon")) == "view-" + view
+		b.set_pressed_no_signal(on)
+		b.icon = Icons.texture(str(b.get_meta("icon")), RAIL_ICON_PX - 6, PaneStyle.color(&"text" if on else &"muted"))
 
 
-## The parts list for the tab on show: Source's places, or the tab's sections.
-func _fill_parts() -> void:
-	for c in _parts_box.get_children():
-		_parts_box.remove_child(c)
+## The browser's view (VIEWS), remembered in [browser] view. The views themselves are to come: details is what
+## the files tab draws now.
+func set_view(v: String) -> void:
+	if not v in VIEWS:
+		return
+	view = v
+	if app != null:
+		app.settings.set_value("browser", "view", v if v != "details" else null)
+	_refresh_rail()
+
+
+## Source's places as chips, the one on show pressed.
+func _fill_chips() -> void:
+	for c in _chips.get_children():
+		_chips.remove_child(c)
 		c.queue_free()
-	if current_tab == Tab.FILES:
-		for place: Dictionary in FilesTab.places_in_order():
-			var path := str(place["path"])
-			var b := _list_button(str(place["label"]), func() -> void: files.open_folder(path))
-			b.set_meta("path", path)
-			_parts_box.add_child(b)
-	else:
-		var groups := sections(current_tab)
-		for k in groups.size():
-			var b := _list_button(str(groups[k].get_meta("section")), func() -> void: show_section(k))
-			_parts_box.add_child(b)
-		show_section(int(_section.get(current_tab, 0)))
-	_mark_parts()
+	for place: Dictionary in FilesTab.places_in_order():
+		var path := str(place["path"])
+		var b := W.button(str(place["label"]), func() -> void: files.open_folder(path), &"ChipButton")
+		b.custom_minimum_size.y = PaneStyle.constant(&"row_height")
+		b.toggle_mode = true
+		b.set_meta("path", path)
+		_chips.add_child(b)
+	_mark_chips()
 
 
-## A tab's sections (made the first time: W.group_sections() on its box); none for the files tab.
-func sections(tab: int) -> Array[VBoxContainer]:
-	if not _sections.has(tab):
-		var box: Variant = tabs[tab].get("box")
-		var groups: Array[VBoxContainer] = []
-		if tab != Tab.FILES and box is VBoxContainer:
-			groups = W.group_sections(box)
-		_sections[tab] = groups
-	return _sections[tab]
-
-
-## Shows one section of the tab on show (the others hide), from its top.
-func show_section(k: int) -> void:
-	var groups := sections(current_tab)
-	if groups.is_empty():
+func _mark_chips() -> void:
+	if not tablet_layout or _chips == null:
 		return
-	k = clampi(k, 0, groups.size() - 1)
-	_section[current_tab] = k
-	for j in groups.size():
-		groups[j].visible = j == k
-	(tabs[current_tab] as ScrollContainer).scroll_vertical = 0
-	_mark_parts()
-
-
-## Marks the part on show (the place, or the section), and hides the sections with nothing to show (the tab hides
-## the parts that don't apply, such as 3D for a flat film); the one on show moves to the first left.
-func _mark_parts() -> void:
-	if not tablet_layout or _parts_box == null:
-		return
-	var buttons := _parts_box.get_children().filter(func(c: Node) -> bool: return not c.is_queued_for_deletion())
-	if current_tab == Tab.FILES:
-		for b: Button in buttons:
+	for b: Button in _chips.get_children():
+		if not b.is_queued_for_deletion():
 			b.set_pressed_no_signal(files.is_current_place(str(b.get_meta("path"))))
-		return
-	var groups := sections(current_tab)
-	var shown := int(_section.get(current_tab, 0))
-	for k in mini(buttons.size(), groups.size()):
-		var any := groups[k].get_children().any(func(c: Node) -> bool: return c is CanvasItem and c.visible)
-		(buttons[k] as Button).visible = any
-		(buttons[k] as Button).set_pressed_no_signal(k == shown)
-	if shown < groups.size() and not (buttons[shown] as Button).visible:
-		for k in buttons.size():
-			if (buttons[k] as Button).visible:
-				show_section(k)
-				return
+
+
+## Packs the tab's cards for the body's width (W.refresh_cards()): the tab fills the body, and the body is always
+## laid out, where a tab just shown still has the size it last had.
+func _pack_cards() -> void:
+	W.refresh_cards(tabs[current_tab].get("box"), _body.size.x - 16.0)
+
+
+## A tab's cards on the tablet (PanelContainers, W.card_layout()); none for the files tab.
+func cards(tab: int) -> Array:
+	var box: Variant = tabs[tab].get("box")
+	return W.cards(box) if box is VBoxContainer else []
 
 
 ## A copy of a backdrop with nothing drawn (its margins kept).
@@ -657,7 +676,8 @@ func tick() -> void:
 	var chapter: String = f.chapters.title_text() if int(f.chapters.current) >= 0 else ""
 	_now.text = "Now playing" + (("  ·  chapter " + chapter) if chapter != "" else "")
 	_update_footer()
-	_mark_parts()
+	if tablet_layout and current_tab != Tab.FILES:
+		_pack_cards()
 	if current_tab == Tab.ROOM:
 		room.tick()
 	elif current_tab == Tab.SOUND:
