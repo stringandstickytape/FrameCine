@@ -1,0 +1,10 @@
+{
+	"fade": {"in": 0.25, "out": 0.2},
+	"pane": {"fill": "#b0e0e61a", "border": "#b0e0e6bf", "corner_radius": 0.024, "border_width": 0.003},
+	"now_playing": {
+		"padding": 0.012,
+		"title": {"color": "#ffffffff", "size": 0.013, "font": "medium"},
+		"time": {"color": "#ffffffcc", "size": 0.011, "font": "regular"},
+		"bar": {"track": "#ffffff38", "played": "#b0e0e6ff", "height": 0.004, "corner_radius": 0.002}
+	}
+}

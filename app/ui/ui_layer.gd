@@ -92,6 +92,9 @@ var _scroll_acc := {}
 var _focus_dir := Vector2i.ZERO
 var _focus_wait := 0.0
 var _poke_down := false
+## The tablet (ui/tablet.gd): what the pointer's ray hits on it ({} for nothing), and which hands are touching its bar.
+var _tablet_hit := {}
+var _tablet_poked := {}
 var _grip_held := -1.0
 var _refresh_timer := 0.0
 ## A network file was picked: close once it is open.
@@ -566,7 +569,13 @@ func _update_pointer() -> void:
 		card_hit = card.ray_hit(pointer_hand.get_ray_origin(), pointer_hand.get_ray_direction())
 	_card_pointed = not card_hit.is_empty()
 	_card_hit = card_hit
-	var laser_on := _pointed or _card_pointed
+	_tablet_hit = {}
+	if not _pointed and not _card_pointed and pointer_hand.get_is_active():
+		_tablet_hit = tablet.ray_hit(pointer_hand.get_ray_origin(), pointer_hand.get_ray_direction())
+	if not _tablet_hit.is_empty():
+		card_hit = _tablet_hit
+		_card_pointed = false
+	var laser_on := _pointed or _card_pointed or not _tablet_hit.is_empty()
 	if not (_seat_pick and not laser_on) and seat_ring_shown():
 		_seat_ring.visible = false
 	if is_placing_object() and not laser_on and pointer_hand.get_is_active():
@@ -580,7 +589,7 @@ func _update_pointer() -> void:
 		pointer_hand.set_laser(true, float(_seat_aim.get("distance", floor_distance(o, d))), aimed,
 				PaneStyle.color(&"laser"), PaneStyle.color(&"laser_dot"))
 		_show_seat_ring(_seat_aim)
-	elif not app.window_pointer_owns(pointer_hand) or _card_pointed:
+	elif not app.window_pointer_owns(pointer_hand) or _card_pointed or not _tablet_hit.is_empty():
 		pointer_hand.set_laser(laser_on, float((hit if _pointed else card_hit).get("distance", 3.0)), laser_on,
 				PaneStyle.color(&"laser"), PaneStyle.color(&"laser_dot"))
 	if other_hand != null and not app.window_pointer_owns(other_hand):
@@ -604,7 +613,30 @@ func _check_hover(hand: XRHand) -> void:
 
 
 ## Poking the panel with the pointer controller's tip clicks, as people will try it (with [pane] distance set short).
+## Touching the tablet's time bar with either controller's tip skips there.
 func _update_poke() -> void:
+	_update_tablet_poke()
+	_update_panel_poke()
+
+
+func _update_tablet_poke() -> void:
+	for hand: XRHand in [pointer_hand, other_hand]:
+		if hand == null:
+			continue
+		if not app.use_xr or not hand.get_is_active() or not tablet.is_shown():
+			_tablet_poked.erase(hand)
+			continue
+		var probe := tablet.poke_probe(hand.get_ray_origin())
+		var depth: float = probe["depth"]
+		if not _tablet_poked.has(hand) and float(probe["fraction"]) >= 0.0 and depth < POKE_PRESS and depth > -0.05:
+			_tablet_poked[hand] = true
+			if tablet.seek_to(probe["fraction"]):
+				hand.pulse()
+		elif _tablet_poked.has(hand) and (depth > POKE_RELEASE or depth < -0.08 or float(probe["fraction"]) < 0.0):
+			_tablet_poked.erase(hand)
+
+
+func _update_panel_poke() -> void:
 	if not app.use_xr or pointer_hand == null or not pointer_hand.get_is_active() or not _open:
 		if _poke_down:
 			_poke_down = false
@@ -833,6 +865,10 @@ func on_trigger(hand: XRHand, pressed: bool) -> bool:
 	if _seat_pick and not _pointed and not _card_pointed:
 		if pressed:
 			pick_seat(_seat_aim)
+			hand.pulse()
+		return true
+	if not _tablet_hit.is_empty():
+		if pressed and float(_tablet_hit.get("fraction", -1.0)) >= 0.0 and tablet.seek_to(_tablet_hit["fraction"]):
 			hand.pulse()
 		return true
 	if _card_pointed:

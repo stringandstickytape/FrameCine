@@ -2,11 +2,14 @@ extends SceneTree
 
 ## Tests for the tablet prototype (ui/tablet.gd) in the real main scene: where it goes for a head pose (ahead and
 ## below, tilted up towards the eyes, by the head's heading only), the setting, and the menu button showing it with
-## the front panel where the head is, keeping it there while the head moves, and hiding it with the panel; its style
-## (the theme's defaults, partial changes from outside, bad values refused, kept, reset); the two panes.
+## the front panel where the head is, keeping it there while the head moves, and hiding it with the panel; the two
+## panes; the style document (its defaults valid, partial changes from outside, bad values refused with their paths,
+## only the changes kept, reset); the now playing pane (title, played / total, the bar and its hit area, a long
+## title cut); the laser's ray, a touch and skipping; the fades.
 ## Run: godot --headless --xr-mode off --path app --script res://tests/test_tablet.gd
 
 const Tablet := preload("res://ui/tablet.gd")
+const W := preload("res://ui/pane_widgets.gd")
 
 var _failures := 0
 var _checks := 0
@@ -78,36 +81,100 @@ func _run() -> void:
 	var top_mat: ShaderMaterial = tablet.now_playing.material_override
 	_check("each pane's backdrop is its own size", (top_mat.get_shader_parameter("size") as Vector2).is_equal_approx(np.size))
 
-	# The style: the theme's defaults, changed from outside in part, checked, kept, and back to the theme's.
+	# The style: one JSON document, the defaults from ui/themes/tablet.json, changed from outside in part.
+	var defaults: Variant = JSON.parse_string(FileAccess.get_file_as_string(Tablet.STYLE_PATH))
+	_check("the default document is valid", defaults is Dictionary and Tablet.validate(defaults).is_empty())
 	var st := tablet.style()
-	var powder := Color(0.69, 0.878, 0.902)
-	var fill: Color = st["fill"]
-	_check("default fill: powder blue at 10 %%: %s" % fill, absf(fill.r - powder.r) < 0.01 and absf(fill.g - powder.g) < 0.01
-			and absf(fill.b - powder.b) < 0.01 and absf(fill.a - 0.1) < 0.01)
-	_check("default border: 75 %% opaque", absf((st["border"] as Color).a - 0.75) < 0.01)
-	_check("default corner and border in metres", is_equal_approx(float(st["corner_radius"]), 0.024)
-			and is_equal_approx(float(st["border_width"]), 0.003))
+	_check("in use: the defaults", st == defaults)
+	var fill := Color.html(st["pane"]["fill"])
+	var powder := Color.html("#b0e0e6")
+	_check("pane fill: powder blue at 10 %%: %s" % fill, fill.is_equal_approx(Color(powder, fill.a))
+			and absf(fill.a - 0.1) < 0.01)
+	_check("pane border: 3 mm at 75 %", is_equal_approx(float(st["pane"]["border_width"]), 0.003)
+			and absf(Color.html(st["pane"]["border"]).a - 0.75) < 0.01)
 	var mat: ShaderMaterial = tablet.main_pane.material_override
-	_check("both panes' shaders have them", (mat.get_shader_parameter("fill_color") as Color).is_equal_approx(st["fill"])
-			and (top_mat.get_shader_parameter("fill_color") as Color).is_equal_approx(st["fill"])
+	_check("both panes' shaders have it", (mat.get_shader_parameter("fill_color") as Color).is_equal_approx(fill)
+			and (top_mat.get_shader_parameter("fill_color") as Color).is_equal_approx(fill)
 			and is_equal_approx(float(mat.get_shader_parameter("corner_radius")), 0.024))
-	var errors: Array = tablet.set_style({"fill": "#ff000080", "corner_radius": 0.05})
-	_check("a partial change: no errors, the rest stays", errors.is_empty()
-			and (tablet.style()["fill"] as Color).is_equal_approx(Color("#ff000080"))
-			and is_equal_approx(float(tablet.style()["border_width"]), 0.003))
-	_check("the shader follows", (mat.get_shader_parameter("fill_color") as Color).is_equal_approx(Color("#ff000080"))
-			and is_equal_approx(float(mat.get_shader_parameter("corner_radius")), 0.05))
-	_check("kept in the settings as text", str((main.settings.get_value("pane", "tablet_style", {}) as Dictionary)
-			.get("fill", "")) == "#ff000080")
-	errors = tablet.set_style({"border": "not a colour", "border_width": 0.5, "shadow": 1})
-	_check("bad values: three errors, nothing changed (%s)" % [errors], errors.size() == 3
-			and (tablet.style()["fill"] as Color).is_equal_approx(Color("#ff000080")))
-	tablet.set_style({"fill": null})
-	_check("null: back to the theme's for that key", (tablet.style()["fill"] as Color).is_equal_approx(st["fill"])
-			and is_equal_approx(float(tablet.style()["corner_radius"]), 0.05))
+	var errors: Array = tablet.set_style({"pane": {"fill": "#ff000080"}, "now_playing": {"title": {"size": 0.02}}})
+	_check("a partial change: no errors, the rest stays (%s)" % [errors], errors.is_empty()
+			and tablet.style()["pane"]["fill"] == "#ff000080" and tablet.style()["pane"]["border"] == st["pane"]["border"]
+			and is_equal_approx(float(tablet.style()["now_playing"]["title"]["size"]), 0.02))
+	_check("it takes effect", (mat.get_shader_parameter("fill_color") as Color).is_equal_approx(Color.html("#ff000080"))
+			and is_equal_approx(tablet.title_label.pixel_size, 0.02 / Tablet.FONT_PX))
+	_check("only the changes are kept", main.settings.get_value("pane", "tablet_style", {}) == {
+			"pane": {"fill": "#ff000080"}, "now_playing": {"title": {"size": 0.02}}})
+	errors = tablet.set_style({"pane": {"border": "not a colour", "border_width": 0.5}, "shadow": 1,
+			"now_playing": {"time": {"font": "comic"}}})
+	_check("bad values: four errors with their paths, nothing changed (%s)" % [errors], errors.size() == 4
+			and errors.any(func(e: Dictionary) -> bool: return e["path"] == "pane/border_width")
+			and errors.any(func(e: Dictionary) -> bool: return e["path"] == "now_playing/time/font")
+			and tablet.style()["pane"]["fill"] == "#ff000080")
+	tablet.set_style({"pane": {"fill": null}})
+	_check("null: back to the default for that value", tablet.style()["pane"]["fill"] == st["pane"]["fill"]
+			and is_equal_approx(float(tablet.style()["now_playing"]["title"]["size"]), 0.02))
 	tablet.reset_style()
-	_check("reset: the theme's again, nothing kept", tablet.style() == st
+	_check("reset: the defaults again, nothing kept", tablet.style() == st
 			and not main.settings.has_value("pane", "tablet_style"))
+
+	# Now playing: the title, played / total, and the bar.
+	tablet.set_enabled(true, false)
+	main.open_path("stub://flat_mono")
+	await _frames(3)
+	tablet.show_at(head)
+	await _frames(2)
+	var dur: float = main.player.get_duration()
+	_check("the title is the display title (%s)" % tablet.title_label.text, tablet.title_label.text != ""
+			and main.display_title().begins_with(tablet.title_label.text.trim_suffix("…")))
+	_check("the time reads played / total (%s)" % tablet.time_label.text, dur <= 0.0
+			or tablet.time_label.text.ends_with(" / " + W.clock(dur)))
+	var bar: Rect2 = tablet.bar_rect()
+	var np_rect: Rect2 = Tablet.pane_rects()["now_playing"]
+	_check("the bar runs along the bottom inside the padding", bar.position.y < 0.0 and bar.size.x > np_rect.size.x * 0.8)
+	_check("the title above the bar, on the left; the time on the right", tablet.title_label.position.y > bar.end.y
+			and tablet.title_label.position.x < 0.0 and tablet.time_label.position.x > 0.0)
+	var on_bar := tablet.now_playing.to_global(Vector3(bar.position.x + bar.size.x * 0.25, bar.get_center().y, 0))
+	_check("a point a quarter along the bar: 0.25", is_equal_approx(tablet.bar_fraction(on_bar), 0.25))
+	var near := tablet.now_playing.to_global(Vector3(bar.end.x - 0.001, bar.get_center().y + Tablet.BAR_HIT.y * 0.9, 0))
+	_check("just above it still counts", tablet.bar_fraction(near) > 0.99)
+	var off := tablet.now_playing.to_global(Vector3(0, np_rect.size.y * 0.4, 0))
+	_check("the title row is not the bar", tablet.bar_fraction(off) < 0.0)
+	tablet.title_label.text = ""
+	tablet.set("_title_full", "A very long title " .repeat(8))
+	tablet.set("_title_fit", -1.0)
+	tablet.call("_fit_title")
+	_check("a long title is cut with an ellipsis to fit beside the time", tablet.title_label.text.ends_with("…")
+			and tablet.call("_text_width", tablet.title_label, tablet.title_label.text) < np_rect.size.x * 0.8)
+
+	# Input: the laser's ray, a touch, and skipping.
+	var eye := head.origin
+	var bar_mid := tablet.now_playing.to_global(Vector3(bar.position.x + bar.size.x * 0.75, bar.get_center().y, 0))
+	var hit: Dictionary = tablet.ray_hit(eye, (bar_mid - eye).normalized())
+	_check("a ray at the bar: the now playing pane, 0.75 along (%s)" % hit.get("fraction"), hit.get("pane") == "now_playing"
+			and absf(float(hit["fraction"]) - 0.75) < 0.01 and absf(float(hit["distance"]) - eye.distance_to(bar_mid)) < 0.001)
+	var main_mid := tablet.main_pane.global_position
+	hit = tablet.ray_hit(eye, (main_mid - eye).normalized())
+	_check("a ray at the main pane: that pane, off the bar", hit.get("pane") == "main" and float(hit["fraction"]) < 0.0)
+	_check("a ray past the tablet: nothing", tablet.ray_hit(eye, Vector3.FORWARD).is_empty())
+	var face: Vector3 = tablet.global_transform.basis.z
+	var probe: Dictionary = tablet.poke_probe(bar_mid + face * 0.003)
+	_check("a tip 3 mm over the bar: its depth and place", absf(float(probe["depth"]) - 0.003) < 0.0005
+			and absf(float(probe["fraction"]) - 0.75) < 0.01)
+	if main.player.can_seek() and dur > 0.0:
+		_check("skipping to 0.5", tablet.seek_to(0.5))
+		await _frames(3)
+		_check("the film is half way (%.1f of %.1f)" % [main.player.get_position(), dur],
+				absf(main.player.get_position() - dur * 0.5) < maxf(2.0, dur * 0.02))
+
+	# Fades.
+	_check("showing fades in", tablet.visible)
+	await create_timer(float(st["fade"]["in"]) + 0.15).timeout
+	_check("faded in", is_equal_approx(float(top_mat.get_shader_parameter("opacity")), 1.0)
+			and absf(tablet.title_label.modulate.a - Color.html(st["now_playing"]["title"]["color"]).a) < 0.01)
+	tablet.hide_tablet()
+	_check("hiding: not shown at once, still visible while it fades", not tablet.is_shown() and tablet.visible)
+	await create_timer(float(st["fade"]["out"]) + 0.15).timeout
+	_check("faded out: hidden", not tablet.visible and float(top_mat.get_shader_parameter("opacity")) < 0.01)
 	print("test_tablet: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	quit(_failures)
 
