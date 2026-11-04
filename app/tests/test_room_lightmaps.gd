@@ -39,6 +39,27 @@ func _run() -> void:
 	main.set_environment("cinema")
 	await _frames(2)
 	_check("the cinema is built for a lightmap", lm.room_bakeable())
+	# A saved screen placement outlives its room only while the room's own screen stays where it was.
+	var own: Dictionary = main.env.get_default_screen()
+	main.settings.set_value("screen_cinema", "distance", float(own["distance"]) - 4.0)
+	main.settings.set_value("screen_cinema", "room_default", "another layout")
+	main.set_environment("void")
+	await _frames(1)
+	main.set_environment("cinema")
+	await _frames(1)
+	_check("a placement saved for another layout of the room is dropped (%.1f)" % main.screen_distance,
+			is_equal_approx(main.screen_distance, float(own["distance"]))
+			and main.settings.get_value("screen_cinema", "room_default", null) == null)
+	main.screen_distance = float(own["distance"]) - 2.0
+	main._save_screen_settings()
+	main.set_environment("void")
+	await _frames(1)
+	main.set_environment("cinema")
+	await _frames(1)
+	_check("one saved for this layout stays (%.1f)" % main.screen_distance,
+			is_equal_approx(main.screen_distance, float(own["distance"]) - 2.0))
+	main.settings.set_value("screen_cinema", "distance", null)
+	main.settings.set_value("screen_cinema", "room_default", null)
 	if not RoomBake.can_bake():
 		_check("no lightmapper here: nothing baked, the room keeps its shader light", lm.last.is_empty()
 				and main.env.get_node_or_null("RoomLightmap") == null)

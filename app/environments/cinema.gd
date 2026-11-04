@@ -498,7 +498,9 @@ func _build_fixtures() -> void:
 
 
 func _build_seats() -> void:
-	var velvet := _library("velvet", Color(0.46, 0.055, 0.08), {"tiling": 0.22}, true)
+	# A red velvet a third of the way to grey: the full red read as too saturated under the house lights (the user, in
+	# the headset, 2026-11-04).
+	var velvet := _library("velvet", Color(0.376, 0.092, 0.11), {"tiling": 0.22}, true)
 	velvet.set_shader_parameter("instance_tint", true)
 	var shell := _library("black_leather", Color(0.08, 0.075, 0.078), {}, true)
 	var mesh := seat_mesh(velvet, shell)

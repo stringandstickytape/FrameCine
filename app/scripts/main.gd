@@ -803,6 +803,12 @@ func use_environment(node: VREnvironment, id: String, keep_screen := false, keep
 	if not keep_screen:
 		var d := env.get_default_screen()
 		var section := "screen_" + env_id
+		# A placement saved against another default (the room rebuilt, its screen moved) is stale: the cinema's
+		# screen hung four metres in front of the new stage (the user, 2026-11-04). It goes; the room's own stands.
+		var made_for := str(settings.get_value(section, "room_default", ""))
+		if made_for != "" and made_for != _screen_default_key(d):
+			for k in ["width", "distance", "height_offset", "yaw", "room_default"]:
+				settings.set_value(section, k, null)
 		screen_width = float(settings.get_value(section, "width", d["width"]))
 		screen_distance = float(settings.get_value(section, "distance", d["distance"]))
 		screen_height_offset = float(settings.get_value(section, "height_offset", d["height_offset"]))
@@ -886,6 +892,13 @@ func _save_screen_settings() -> void:
 	settings.set_value(section, "distance", snappedf(screen_distance, 0.01))
 	settings.set_value(section, "height_offset", snappedf(screen_height_offset, 0.01))
 	settings.set_value(section, "yaw", snappedf(screen_yaw, 0.001))
+	if env != null:
+		settings.set_value(section, "room_default", _screen_default_key(env.get_default_screen()))
+
+
+## The room's own screen placement as a short key: a saved placement remembers the one it was made against.
+static func _screen_default_key(d: Dictionary) -> String:
+	return "%.2f %.2f %.2f" % [float(d.get("width", 0.0)), float(d.get("distance", 0.0)), float(d.get("height_offset", 0.0))]
 
 
 ## Puts the flat screen at screen_yaw / screen_distance / eye height + offset, facing the viewer; the overlay with it.
