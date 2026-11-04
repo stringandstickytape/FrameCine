@@ -235,9 +235,9 @@ func _sync_speakers() -> void:
 	else:
 		_speakers_status.text = "The stereo mix plays for now (PC sound on, or no file open)."
 	var tuned: Dictionary = speakers.profile_settings().tuning
-	if on and tuned.has("after_deg"):
-		_speakers_status.text += " Tuned to your ears: off by %d degrees on average, %d before." % [
-				roundi(float(tuned.after_deg)), roundi(float(tuned.get("before_deg", 0.0)))]
+	if on and tuned.has("tuned_at"):
+		_speakers_status.text += " Tuned to your ears: head size %d %%." % roundi(float(tuned.get("itd_scale", 1.0))
+				* 100.0)
 	if _hrtf_note != "":
 		_speakers_status.text += " " + _hrtf_note
 

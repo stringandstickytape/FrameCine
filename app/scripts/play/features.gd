@@ -49,7 +49,7 @@ extends Node
 ##   folder_modes scripts/play/folder_modes.gd: a mode per folder for files without their own (#83)
 ##   deinterlace scripts/play/deinterlace.gd: GPU bob or edge deinterlace for interlaced video (#95)
 ##   speakers   scripts/play/spatial_audio.gd: spatial audio, every channel from its place in the room (#21, #47)
-##   spatial_tune scripts/play/spatial_tune.gd: "Tune spatial sound", the HRTF fitted to the ears by pointing (#21)
+##   spatial_tune scripts/play/spatial_tune.gd: "Tune spatial sound", the HRTF fitted to the ears by A / B picks (#21)
 ##   bias       scripts/env/bias_light.gd: the screen's light on the room takes the picture's colour (#29)
 ##   night      scripts/play/night_mode.gd: night mode (levelled loudness) and dialogue boost (#26)
 ##   react      scripts/env/film_react.gd: bass pulses in the controllers, room flashes on loud moments (#81)

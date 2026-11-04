@@ -206,7 +206,7 @@ func hrtf_sets() -> Array:
 
 ## The output profile's settings: {hrtf, eq: [{type, freq, gain_db, q}], tuning: {itd_scale, pinna_warp, concha_db}}.
 ## The EQ is the hook for a measured correction of the headset's speakers or of headphones; the tuning comes from
-## the "Tune spatial sound" step (scripts/play/spatial_tune.gd).
+## the "Tune spatial sound" step (scripts/play/spatial_tune.gd, A / B picks).
 func profile_settings(p := "") -> Dictionary:
 	var name := p if p != "" else profile()
 	var tuning: Variant = main.settings.get_value("spatial", "tuning_" + name, {})

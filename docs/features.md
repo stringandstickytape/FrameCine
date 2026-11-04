@@ -1323,27 +1323,41 @@ head turns. This works for every channel layout and for the sound field (ambison
   - Not offered: LISTEN (its terms are not clear).
   - `app/tools/hrtf_pack.gd` converts any SOFA file (AES69 SimpleFreeFieldHRIR). The steps: resample to 48 kHz,
     equalise to the diffuse field, take the delay out of each response, put it on the grid, and store it as 16-bit.
-- **Tuning ("Tune spatial sound", `scripts/play/spatial_tune.gd`):** a pointing test that fits the HRTF to the
-  viewer's ears, for the output profile in use.
-  - Short pink-noise bursts (150 to 250 ms, level jittered by up to 3 dB) come from 18 directions: the horizontal
-    ring, above and below at the front and back, and straight up. Each burst is rendered in the head's frame, so it
-    doesn't move if the head turns while it plays (head tracking frozen).
-  - The viewer points either controller's laser where they heard it and pulls the trigger. The menu button cancels,
-    and then nothing changes. The film pauses while it runs.
-  - Each answer is scored in the head's frame at the burst: the angle off, the azimuth and elevation off, and a front
-    / back mix-up (both off the side by more than 20 degrees, on opposite halves, the answer nearer the mirror image).
-  - The search, tournament style, 72 bursts (about 3 to 4 minutes):
-    1. Every HRTF set (bundled and fetched) gets 5 bursts, interleaved. The best two go on.
-    2. The two get 6 more each. The lower mean angle off over all their bursts wins.
-    3. The winner's ITD scale (head size, steps of 0.1), pinna warp (the notch frequencies, steps of 7 %) and concha
-       gain (steps of 3 dB), one at a time: a step down and a step up, 5 bursts each. A step is kept only if it is
-       2 degrees better than what stands.
+- **Tuning ("Tune spatial sound", `scripts/play/spatial_tune.gd`):** "which sounds better?" picks that fit the
+  spatial sound to the viewer's ears, for the output profile in use. It replaced a pointing test (point where each
+  short burst was heard, about 70 of them, no feedback): in the headset it was not possible to tell whether the
+  answers were right, and the user gave up halfway.
+  - The sound: pink noise in pulses, four a second (170 ms on, 12 ms fades, each pulse within 2 dB of -16 dB). It is
+    broadband with a rhythm, and each pulse's onset gives the ear a fresh cue. In 6 s it circles the head on the
+    horizon (front, right, behind, left, front; 4.4 s), then rises over the top to 30 degrees up behind.
+  - Head tracking is on. The path is fixed in the room, facing where the head faced when the pick began, so the viewer
+    may turn toward the sound. The film pauses while it runs.
+  - Each pick plays the sound through two candidates: A, then 0.6 s later B. The card beside the screen says which
+    one plays. It has four buttons for the laser and trigger: A, B, Can't tell (the champion stays) and Again (both
+    again). A or B counts only once both have been heard. The menu button cancels, and then nothing changes.
+  - The card says there is no right answer: pick whichever sounds more real, more outside your head, more in the
+    room. Its title gives the progress ("Head size: pick 7 of 9").
+  - The order (`Knockout`, pure):
+    1. The profile's HRTF set and tuning start as the champion, so tuning never leaves the viewer with something they
+       like less. Every other set (bundled and fetched) challenges it once, with no tuning, and the winner stays.
+    2. Head size (ITD scale, steps of 0.1, 0.7 to 1.3): a step one way, chosen at random. If it won, a step further
+       that way; if it lost, a step the other way. Two picks, fewer at the limits.
+    3. Ear shape (pinna warp, steps of 7 %, 0.85 to 1.18), in the same way, only if all the picks fit in 9 (about 2
+       minutes): with the six bundled sets, yes; with fetched sets too, no.
+    - Which of the two is A is random each pick, so the champion isn't always first. The concha gain is kept as it
+      is.
+  - The stream: an `AudioStreamGenerator` (0.25 s buffer) kept 50 ms ahead, fed each frame in blocks of 512 frames.
+    Each set and ear shape has its own `BinauralRenderer`, loaded on a worker thread while the pick before plays: a
+    new pinna warp rebuilds the set's grid, which takes as long as loading it. Before each block
+    the listener is set to the head's pose, turned back by the path. The source stays straight ahead, so it moves as
+    smoothly as a head turn does. The renderer has the profile's EQ, the speakers' gain and the light room of 180 /
+    360 (reverb only). Head tracking lags by the 50 ms lead plus the sound device's own latency. `status().skips`
+    counts underruns.
   - The result is saved for the profile: the set (`[spatial] hrtf_<profile>`) and `[spatial] tuning_<profile>`
-    (`itd_scale`, `pinna_warp`, `concha_db`, `before_deg`, `after_deg`, `flips_before`, `flips_after`, `trials`,
-    `tuned_at`).
-  - A card shows the result: the mean error and the front / back mix-ups, before (the profile's set as it was) and
-    after. The Sound tab's line repeats the mean error.
-  - Started from the Sound tab, or by the `spatial_tune` command (assistant level control).
+    (`itd_scale`, `pinna_warp`, `concha_db`, `picks`, `changed`, `tuned_at`). A card says what was chosen and what it
+    was before. The Sound tab's line gives the head size.
+  - Started from the Sound tab, or by the `spatial_tune` command (assistant level control): `action` is start (the
+    default), cancel, status, or a pick for the viewer (a, b, same, again).
 - **Sync and speed:** at a speed other than 1x the engine time-stretches the stereo mix only, so the stereo mix
   plays until the speed is 1x again. With the sound on a PC (#9) the renderer is taken off, and the PC's speakers get
   the plain mix. A seek clears the room's echoes.
@@ -1392,13 +1406,20 @@ head turns. This works for every channel layout and for the sound field (ambison
       first-order ambisonics, with and without the head-locked pair; each 7.1.4 tone from its side; the sound field
       and the head-locked tone on the left; the binaural mix's loudness against the stereo mix (0.4 dB); the audio
       clock unchanged.
-  - `tests/test_spatial_tune.gd` (18 checks):
-    - The scoring: angles, azimuth wrap-round, elevation, front / back mix-ups.
-    - The search against simulated listeners whose scatter and mix-ups depend on the set and the tuning, over 10
-      seeded runs: the best-fitting set wins 8 of 10, the error falls in 10 of 10, and the ITD scale reaches the
-      listener's in 7 of 10. A perfect listener changes nothing.
-    - The pink noise and its WAV.
-    - The step in the main scene with simulated trigger pulls: every burst played, and the result saved.
+  - `tests/test_spatial_tune.gd` (44 checks):
+    - The knockout: the profile's set is the first champion; every other set challenges once; the champion plays
+      as A in some picks and as B in others; 9 picks with six sets, no ear shape picks with ten. The next challenger
+      is always one of those foreseen (loaded while the pick before plays).
+    - Against listeners who prefer one set, head size and ear shape, over 20 seeded runs each: their set wins
+      every time; a step away, the head size and ear shape are found every time; two steps away, one step is taken
+      toward it. Can't tell throughout changes nothing. At the limit, no step goes past it, and the count of picks
+      shrinks to match.
+    - The path (front, right, behind, left, over the top to behind, no jumps), and the listener pose: whichever way
+      the head turns, the source is heard where it is in the room.
+    - The pulsed pink noise: its level, pulses four a second, silent between.
+    - The step in the main scene, with picks on the card's buttons: the menu cancels with nothing changed; A plays,
+      then B; a pick before both are heard is refused; Again plays them again; the sound is rendered; every pick runs;
+      the result is saved and shown; the `spatial_tune` command's status, picks, start and cancel.
   - `test_features`, `test_night`, `test_media_features`, `test_pane`, `test_assistant_coverage_playback` and
     `test_assistant` still pass. `test_media_features`' "events arrive" fails now and then on the base engine as on
     this one (1 run in 6 on the base engine, 2 runs in 8 here). It is a subtitle timing check, headless.
@@ -1415,8 +1436,10 @@ head turns. This works for every channel layout and for the sound field (ambison
   - Lip sync with the A/V calibration card (lab://av_sync), spatial sound on and off: the offsets should match.
   - The loudness against the stereo mix (`SpatialAudio.GAIN`), and which output `pactl` reports for the speakers and
     for earbuds (it decides the profile).
-  - Run Tune spatial sound once on the speakers and once on earbuds. Check that the laser answers are taken in the
-    right frame (an answer pointed at a front burst scores near 0), and note the before and after errors.
+  - Run Tune spatial sound once on the speakers and once on earbuds. Check that the sound starts in front and goes
+    round to the right, and that it stays put in the room when the head turns (no lag you can hear, no clicks). Check
+    that A and B are told apart on the card, and that the menu button stops it. Check `status().skips` (underruns)
+    after a run; if it is not 0, raise `LEAD_SECONDS`. Time a whole run (about 2 minutes).
   - Then set `DEFAULT_ON` to true.
 - **Untested:** the headset (all of the above); 44.1 kHz output (the HRTF is resampled to the mix rate, but checked
   only at 48 kHz); real films' Atmos beds; Opus ambisonics (no encoder here, so the test file is PCM in MP4); the

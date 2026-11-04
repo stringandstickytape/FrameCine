@@ -762,18 +762,37 @@ static func _register_sound(host: Node) -> void:
 		"params": [{"name": "id", "type": "string", "required": true,
 				"description": "the set's id, one of speakers.hrtf_sets whose bundled is false"}],
 		"returns": "{fetching}"})
-	DevCommands.register("spatial_tune", func(_args: Dictionary, ctx: DevCommands.Call) -> Variant:
+	DevCommands.register("spatial_tune", func(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 		var t: Node = host.main.features.spatial_tune
-		if not bool(host.main.features.speakers.available()):
-			return ctx.fail("this player has no spatial sound")
-		t.start()
-		ctx.summary = "tune spatial sound"
+		var action := str(args["action"])
+		match action:
+			"start":
+				if not bool(host.main.features.speakers.available()):
+					return ctx.fail("this player has no spatial sound")
+				t.start()
+				ctx.summary = "tune spatial sound"
+			"cancel":
+				t.cancel()
+				ctx.summary = "spatial sound tuning cancelled"
+			"a", "b", "same", "again":
+				var error: String = t.choose(action)
+				if error != "":
+					return ctx.fail(error)
+				ctx.summary = "spatial sound tuning: %s" % action
 		return t.status(), {
-		"description": "Starts Tune spatial sound in the headset: short hisses from all round; the viewer points the "
-				+ "controller where each came from and pulls the trigger (about 70, 3 to 4 minutes; the menu button "
-				+ "cancels). The best HRTF set and tuning are then kept for the output in use; sound shows the result "
-				+ "as speakers.tuning (errors before and after).",
-		"level": "control", "assistant": "control", "returns": "{running, stage, trial, trials}"})
+		"description": "Tune spatial sound in the headset: a sound circles the viewer and passes overhead, played "
+				+ "twice, as A and then B, through two versions of the spatial sound; the viewer picks A or B (or "
+				+ "can't tell) on a card with the laser, about 9 picks in about 2 minutes. The profile's current HRTF "
+				+ "set starts as the champion, every other set challenges it, then head size and ear shape steps. "
+				+ "The menu button cancels with nothing changed. The result is kept for the output in use (sound "
+				+ "shows it as speakers.tuning). action: start, cancel, status, or a pick for the viewer (a, b, same, "
+				+ "again: only when they ask).",
+		"params": [{"name": "action", "type": "string", "default": "start",
+				"enum": ["start", "cancel", "status", "a", "b", "same", "again"],
+				"description": "start (the default), cancel (nothing changes), status, or a pick: a, b, same (can't "
+						+ "tell), again (hear both again)"}],
+		"level": "control", "assistant": "control",
+		"returns": "{running, stage, pick, picks, playing, heard_both, ready, skips, lead_ms}"})
 
 
 static func _sound_state(m: Node) -> Dictionary:

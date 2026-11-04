@@ -251,7 +251,11 @@ It needs the `PLAYER_BINAURAL` engine or a later one. On older engines the tab s
   default. Try the others if sounds behind you seem to come from in front.
   - Sets marked "Fetch" are not part of the app. Choosing one shows its licence and a Download button. After the
     download the set is converted on the headset and listed like the others.
-- **Tune spatial sound:** a short test that fits the sound to your ears (`docs/features.md`, #21, "Tuning").
+- **Tune spatial sound:** fits the sound to your ears in about 2 minutes (`docs/features.md`, #21, "Tuning"). A
+  sound circles you and passes overhead, played twice: as A, then as B. Pick the one that sounds more real, more
+  outside your head, on the card beside the screen. There is no right answer. Can't tell keeps what you have, Again
+  plays both again, and the menu button stops with nothing changed. What you had at the start is the first to beat,
+  so tuning never leaves you with something you like less.
 - The line under the section says what plays from where: the channels, or the 360 sound field. At a speed other than
   1x the stereo mix plays.
 

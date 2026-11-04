@@ -71,7 +71,7 @@ const SOUND := {
 	"Auto": "The headset sees what the sound plays on: its own speakers or headphones.",
 	"Headset speakers": "Settings for the headset's own speakers.",
 	"Headphones": "Settings for earbuds or headphones.",
-	"Tune spatial sound": "Point to where you hear sounds; the sound then fits your ears.",
+	"Tune spatial sound": "Hear a sound two ways, pick the better; it then fits your ears.",
 	"Play sound on a PC": "The sound plays on a PC, in time with the picture.",
 }
 
