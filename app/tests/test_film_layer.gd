@@ -33,21 +33,22 @@ func _run() -> void:
 	main.set_environment("void")
 	main.open_path("stub://flat_mono")
 	await _frames(3)
-	_check("off by default: no layers, the screen's quad drawn", not film.enabled and film.layers.is_empty()
-			and flat.visible and film.kind == "")
+	_check("on by default; no XR session, so no layers and the screen's quad drawn", film.enabled
+			and film.layers.is_empty() and flat.visible and film.kind == "")
 
-	# The setting.
-	film.set_enabled(true)
-	_check("on: saved", main.settings.get_value("view", "film_layer", false) == true)
+	# The setting: only off is stored.
+	film.set_enabled(false)
+	_check("off: saved", main.settings.get_value("view", "film_layer", true) == false)
 	var fresh: Node = FilmLayer.new()
 	fresh.main = main
 	main.add_child(fresh)
-	_check("a new instance reads it", fresh.enabled)
+	_check("a new instance reads it", not fresh.enabled)
 	fresh.free()
-	film.set_enabled(false)
-	_check("off: the key goes", not main.settings.has_value("view", "film_layer"))
+	film.set_enabled(true)
+	_check("on: the key goes", not main.settings.has_value("view", "film_layer"))
+	film.set_enabled(false, false)
+	_check("for the run only: off, not saved", not film.enabled and not main.settings.has_value("view", "film_layer"))
 	film.set_enabled(true, false)
-	_check("for the run only: on, not saved", film.enabled and not main.settings.has_value("view", "film_layer"))
 
 	# No XR session: the mesh.
 	await _frames(3)

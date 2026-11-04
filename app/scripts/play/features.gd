@@ -66,7 +66,7 @@ extends Node
 ##   thumbs     scripts/play/seek_thumbnails.gd: pictures for the seek bar from a second session (#40), off by default
 ##   crossfade  scripts/play/crossfade.gd: music and videos overlap into the next item (#94), off by default
 ##   hwvideo    scripts/play/hw_video.gd: which way 10-bit video plays (P010, Q10C or software; read-only), hw_vp9
-##   film_layer scripts/play/film_layer.gd: the flat film as an OpenXR layer (#70, a prototype), off by default
+##   film_layer scripts/play/film_layer.gd: the flat film as an OpenXR layer (#70), on by default
 
 const EndTime := preload("res://scripts/play/end_time.gd")
 const BatteryForecast := preload("res://scripts/comfort/battery_forecast.gd")

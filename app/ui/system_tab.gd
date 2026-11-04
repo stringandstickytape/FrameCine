@@ -210,7 +210,7 @@ func bind(p_app: Node) -> void:
 	box.add_child(W.hbox([_foveation_sharp]))
 	# Film layer (#70, a prototype): the flat film drawn by the headset's compositor, for comparison.
 	var film_layer: Node = app.features.film_layer
-	_film_layer = W.toggle("Film drawn by the headset (test)", func(on: bool) -> void:
+	_film_layer = W.toggle("Film drawn by the headset", func(on: bool) -> void:
 		film_layer.set_enabled(on)
 		_film_layer_help.text = film_layer.status())
 	box.add_child(W.hbox([_film_layer]))

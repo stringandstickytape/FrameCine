@@ -1,10 +1,11 @@
 extends Node
 
-## Film layer (ideas #70, a prototype behind a setting, off by default): the flat film shown by an OpenXR composition
-## layer instead of the screen's mesh. In the scene the film is resampled twice: into the eye buffers (at lower
+## Film layer (ideas #70; on by default since 2026-11-04): the flat film shown by an OpenXR composition layer instead
+## of the screen's mesh. In the scene the film is resampled twice: into the eye buffers (at lower
 ## resolution away from the centre while foveation is on), then again by the runtime's lens distortion. As a layer
 ## the runtime samples the film's own pixels once, at display resolution: sharper text and fine detail, no foveation
-## on the film. docs/features.md, "Film layer", says what to compare.
+## on the film. On the Steam Frame, stars in a paused 4K frame stopped shimmering, and the app's GPU time with a 4K
+## film fell from 2.5 to 1.4 ms (docs/features.md, "Film layer").
 ##
 ## Each layer has a SubViewport the size of one eye's picture (at most MAX_EDGE pixels a side), drawn by
 ## video_layer.gdshader with the screen's uniforms copied over: the same picture code as the screen (colour matrix,
@@ -32,7 +33,7 @@ extends Node
 ##   status() -> String     one line for the pane
 ##   static available(), static eye_pixels(frame_px, flat_size, mode) -> Vector2i
 ##   signal changed         layers made or dropped
-## Settings: [view] film_layer (default off).
+## Settings: [view] film_layer (default on; only false is stored).
 
 signal changed
 
@@ -66,7 +67,7 @@ var _cylinder := -1
 func _ready() -> void:
 	# After the player's update and the features that set the screen's uniforms each frame.
 	process_priority = 100
-	enabled = bool(main.settings.get_value("view", "film_layer", false))
+	enabled = bool(main.settings.get_value("view", "film_layer", true))
 	for u: Dictionary in LAYER_SHADER.get_shader_uniform_list():
 		if str(u["name"]) != "force_eye":
 			_names.append(str(u["name"]))
@@ -80,7 +81,7 @@ static func available() -> bool:
 func set_enabled(on: bool, save := true) -> void:
 	enabled = on
 	if save:
-		main.settings.set_value("view", "film_layer", true if on else null)
+		main.settings.set_value("view", "film_layer", null if on else false)
 	_update()
 
 

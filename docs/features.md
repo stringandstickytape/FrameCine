@@ -65,7 +65,7 @@ sections of `user://settings.cfg`; `<environment id>` and `<id>` sections hold o
 | [Bias light from the picture](#29-bias-light-from-the-picture) | #29 | `[bias_light]` | off by default |
 | [Night mode and dialogue boost](#26-night-mode-and-dialogue-boost) | #26 | `[sound]` | off by default |
 | [Quad layers (a spike behind flags)](#70-quad-layers-a-spike-behind-flags) | #70 | none (flags `--pane-layer`, `--video-layer`) | spike behind flags |
-| [Film layer (a prototype behind a setting)](#70-film-layer-a-prototype-behind-a-setting) | #70 | `[view] film_layer` | off by default |
+| [Film layer](#70-film-layer) | #70 | `[view] film_layer` | on by default (flat films) |
 | [The environment reacts to the film](#81-the-environment-reacts-to-the-film) | #81 | `[react]` | off by default |
 | [Projector mode](#92-projector-mode) | #92 | `[projector]` | off by default |
 | [Time of day for the outdoor rooms](#84-time-of-day-for-the-outdoor-rooms) | #84 | `[time_of_day]` | on, "night" by default (the room as designed) |
@@ -1516,10 +1516,15 @@ the default. Details, limits, tests and the cost are in `docs/xr-spikes.md`, "Qu
 `app/scripts/xr_spikes/quad_layers.gd`.
 - **API:** `QuadLayers.attach(main, args, force)` (static), `pane_layer`. No settings: flags only.
 
-## #70 Film layer (a prototype behind a setting)
+## #70 Film layer
 
-The flat film as an OpenXR composition layer instead of a mesh in the room, so the lead can compare the two on the
-headset. Off by default. Code: `app/scripts/play/film_layer.gd`, `app/shaders/video_layer.gdshader`.
+The flat film as an OpenXR composition layer instead of a mesh in the room. On by default since 2026-11-04; the
+System tab can turn it off. Code: `app/scripts/play/film_layer.gd`, `app/shaders/video_layer.gdshader`.
+
+- **On the Steam Frame (2026-11-04):** the hole punch works, and the film shows through it at 3840 x 1608 for a 4K
+  scope film. Stars in a paused 4K frame alias badly on the mesh and stay still on the layer, whatever their size
+  against a pixel. With a 4K HEVC film playing at 72 fps, the app's GPU time was 1.4 ms with the layer and 2.5 ms
+  without, with no dropped frames either way; the runtime's own cost for the extra layer is not in that figure.
 
 - **Why:** in the room, the film is resampled twice: into the eye buffers, then again by the runtime's lens
   distortion. With foveation on (D22), the eye buffers have lower resolution away from the centre. As a layer, the
@@ -1569,9 +1574,9 @@ headset. Off by default. Code: `app/scripts/play/film_layer.gd`, `app/shaders/vi
   - The screen's edges while you turn your head fast.
 - **API:** `main.features.film_layer`: `enabled`, `set_enabled(on, save := true)`, `kind` ("quad", "cylinder" or
   ""), `layers`, `viewports`, `updates`, `status()`, `wanted_kind()`, static `available()`, static
-  `eye_pixels(frame_px, flat_size, mode)`, signal `changed`. The System tab, Rendering: "Film drawn by the headset
-  (test)", with a status line under it.
-- **Settings:** `[view] film_layer` (default off).
+  `eye_pixels(frame_px, flat_size, mode)`, signal `changed`. The System tab, Rendering: "Film drawn by the headset",
+  with a status line under it.
+- **Settings:** `[view] film_layer` (default on; only false is stored).
 - **Tested:** `tests/test_film_layer.gd`, 33 checks headless, 35 with a renderer (WSLg), forced on without an XR
   session:
   - the setting and its round trip;
@@ -1583,8 +1588,7 @@ headset. Off by default. Code: `app/scripts/play/film_layer.gd`, `app/shaders/vi
 
   With a renderer, the layer's colour bars match the screen shader's within 4 of 255 per channel (the check allows
   0.02), and the two eyes differ on a 3D pattern.
-- **Untested:** everything the runtime does. That covers whether the hole punch shows the layer, how much sharper
-  the picture is, the GPU cost, and cylinder layers (no runtime here has them).
+- **Untested:** cylinder layers (no runtime here has them), and side-by-side 3D on the headset.
 
 ## #81 The environment reacts to the film
 

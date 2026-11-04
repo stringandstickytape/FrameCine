@@ -104,7 +104,7 @@ lens-corrected view.
   - The pane cannot fade, so its fades show as a cut. The layer is on above 50 % opacity.
   - Pointing still works, because it uses the pane's maths, not its mesh.
 - **`--video-layer`:** turns on the film layer for this run, without saving it. The film layer is the setting
-  `[view] film_layer` and the System tab's "Film drawn by the headset (test)" (`app/scripts/play/film_layer.gd`;
+  `[view] film_layer` and the System tab's "Film drawn by the headset" (`app/scripts/play/film_layer.gd`;
   `docs/features.md`, "Film layer"). It replaced this flag's own two-quad code on 2026-11-04. The film layer draws
   only on new video frames, uses one layer for 2D films, and follows the screen as its child.
 - **Without XR** (a desktop) the flags print that they do nothing. The startup log says whether the runtime
