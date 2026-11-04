@@ -357,7 +357,8 @@ Would change if: a SteamOS update breaks Q10C through the sampler before its ker
 ## D22. Foveated rendering at Low, eye-tracked, without subsampled images (2026-11-03)
 
 The headset renders the eye images with eye-tracked foveation at level Low (`[xr]` in project.godot), and the main
-viewport uses VRS XR. The engine fork carries one line from upstream PR 124811 (branch `frame/foveation`): subpass
+viewport uses VRS XR while the level is above Off (`_update_foveation()` sets both: left in VRS XR with the level at
+0, the periphery was still shaded coarsely and a thin bright strip there strobed, 2026-11-04). The engine fork carries one line from upstream PR 124811 (branch `frame/foveation`): subpass
 dependencies by region. Without it the Frame's Mesa driver leaves tiled mode and ignores the density map, so foveation
 had no effect.
 

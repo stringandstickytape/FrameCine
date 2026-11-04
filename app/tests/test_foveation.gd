@@ -150,7 +150,7 @@ func _test_row() -> void:
 		_check("the main scene has its System tab", false)
 		return
 	tab.sync()
-	var row: HBoxContainer = tab._foveation
+	var row: Container = tab._foveation
 	var words: Array = []
 	for b: Button in row.get_children():
 		words.append(b.text)
