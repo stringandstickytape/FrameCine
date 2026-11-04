@@ -13,17 +13,24 @@ extends Node3D
 ## fill in the same style.
 ##   STYLE keys: fill, border (colours: "#rrggbbaa" or Color), corner_radius, border_width (metres)
 ##
+## Two panes, one above the other with a small gap (the user, 2026-11-04): a short one on top for the now playing
+## controls, and below it the main one for everything else. Each is the backdrop only for now.
+##
 ## Placement, from the head's position and its heading (yaw only, so looking down when pressing doesn't sink it):
 ## FORWARD metres ahead and DOWN metres below the eyes, the centre about 44° below the horizon, about half a metre
 ## away; its face tilted TILT degrees back from vertical (the user, 2026-11-04: a little more upright than 45°, a
 ## little smaller, 5 cm closer).
 ##
 ##   enabled, set_enabled(on, save := true), toggle(head), show_at(head), hide_tablet(), is_shown()
+##   now_playing, main_pane    the two panes (MeshInstance3D); static pane_rects() -> {name: Rect2} in metres
 ##   style() -> Dictionary, set_style(changes, save := true) -> Array (errors), reset_style()
 ##   static pose(head) -> Transform3D
 
-## Metres: the panel's size (landscape), and where its centre sits from the eyes.
+## Metres: the whole tablet's size (landscape), and where its centre sits from the eyes.
 const SIZE := Vector2(0.48, 0.26)
+## Metres: the now playing pane's height, and the gap between it and the main pane below.
+const NOW_PLAYING_HEIGHT := 0.06
+const GAP := 0.01
 const FORWARD := 0.35
 const DOWN := 0.34
 ## Degrees the face tilts back from vertical: 45 would face a point 45° below the horizon.
@@ -36,24 +43,17 @@ const BORDER_MAX := 0.03
 
 var app: Node3D
 var enabled := false
-var _quad: MeshInstance3D
-var _mat: ShaderMaterial
+var now_playing: MeshInstance3D
+var main_pane: MeshInstance3D
+var _mats: Array[ShaderMaterial] = []
 ## What set_style() changed from the theme's defaults.
 var _overrides := {}
 
 
 func _ready() -> void:
-	_quad = MeshInstance3D.new()
-	_quad.name = "Quad"
-	var mesh := QuadMesh.new()
-	mesh.size = SIZE
-	_quad.mesh = mesh
-	_mat = ShaderMaterial.new()
-	_mat.shader = SHADER
-	_mat.set_shader_parameter("size", SIZE)
-	_quad.material_override = _mat
-	_quad.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(_quad)
+	var rects := pane_rects()
+	now_playing = _pane("NowPlaying", rects["now_playing"])
+	main_pane = _pane("Main", rects["main"])
 	visible = false
 	if app != null:
 		enabled = bool(app.settings.get_value("pane", "tablet", false))
@@ -120,13 +120,37 @@ func reset_style() -> void:
 
 
 func _apply_style() -> void:
-	if _mat == null:
-		return
 	var s := style()
-	_mat.set_shader_parameter("fill_color", s["fill"])
-	_mat.set_shader_parameter("border_color", s["border"])
-	_mat.set_shader_parameter("corner_radius", s["corner_radius"])
-	_mat.set_shader_parameter("border_width", s["border_width"])
+	for m in _mats:
+		m.set_shader_parameter("fill_color", s["fill"])
+		m.set_shader_parameter("border_color", s["border"])
+		m.set_shader_parameter("corner_radius", s["corner_radius"])
+		m.set_shader_parameter("border_width", s["border_width"])
+
+
+## Each pane's rectangle on the tablet, in metres from its centre (+y towards the top edge, away from the eyes).
+static func pane_rects() -> Dictionary:
+	var top := SIZE.y * 0.5
+	var main_h := SIZE.y - NOW_PLAYING_HEIGHT - GAP
+	return {"now_playing": Rect2(-SIZE.x * 0.5, top - NOW_PLAYING_HEIGHT, SIZE.x, NOW_PLAYING_HEIGHT),
+			"main": Rect2(-SIZE.x * 0.5, -top, SIZE.x, main_h)}
+
+
+func _pane(p_name: String, r: Rect2) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.name = p_name
+	var mesh := QuadMesh.new()
+	mesh.size = r.size
+	mi.mesh = mesh
+	mi.position = Vector3(r.get_center().x, r.get_center().y, 0.0)
+	var m := ShaderMaterial.new()
+	m.shader = SHADER
+	m.set_shader_parameter("size", r.size)
+	mi.material_override = m
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(mi)
+	_mats.append(m)
+	return mi
 
 
 static func _to_color(v: Variant) -> Variant:

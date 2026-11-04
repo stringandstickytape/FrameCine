@@ -3,7 +3,7 @@ extends SceneTree
 ## Tests for the tablet prototype (ui/tablet.gd) in the real main scene: where it goes for a head pose (ahead and
 ## below, tilted up towards the eyes, by the head's heading only), the setting, and the menu button showing it with
 ## the front panel where the head is, keeping it there while the head moves, and hiding it with the panel; its style
-## (the theme's defaults, partial changes from outside, bad values refused, kept, reset).
+## (the theme's defaults, partial changes from outside, bad values refused, kept, reset); the two panes.
 ## Run: godot --headless --xr-mode off --path app --script res://tests/test_tablet.gd
 
 const Tablet := preload("res://ui/tablet.gd")
@@ -64,6 +64,20 @@ func _run() -> void:
 	layer.on_menu(null, false)
 	_check("off: the menu opens only the front panel", layer.is_open() and not tablet.is_shown())
 
+	# Two panes: a short now playing one on top, the main one below, a gap between, filling the tablet.
+	var r: Dictionary = Tablet.pane_rects()
+	var np: Rect2 = r["now_playing"]
+	var mp: Rect2 = r["main"]
+	_check("now playing on top, short", np.position.y > mp.end.y and np.size.y < mp.size.y * 0.5)
+	_check("a gap of %.0f mm between them" % ((np.position.y - mp.end.y) * 1000.0),
+			is_equal_approx(np.position.y - mp.end.y, Tablet.GAP))
+	_check("together they fill the tablet", is_equal_approx(np.end.y - mp.position.y, Tablet.SIZE.y)
+			and is_equal_approx(np.size.x, Tablet.SIZE.x) and is_equal_approx(mp.size.x, Tablet.SIZE.x))
+	_check("the pane nodes sit there", tablet.now_playing.position.is_equal_approx(Vector3(0, np.get_center().y, 0))
+			and tablet.main_pane.position.is_equal_approx(Vector3(0, mp.get_center().y, 0)))
+	var top_mat: ShaderMaterial = tablet.now_playing.material_override
+	_check("each pane's backdrop is its own size", (top_mat.get_shader_parameter("size") as Vector2).is_equal_approx(np.size))
+
 	# The style: the theme's defaults, changed from outside in part, checked, kept, and back to the theme's.
 	var st := tablet.style()
 	var powder := Color(0.69, 0.878, 0.902)
@@ -72,14 +86,15 @@ func _run() -> void:
 			and absf(fill.b - powder.b) < 0.01 and absf(fill.a - 0.1) < 0.01)
 	_check("default border: 75 %% opaque", absf((st["border"] as Color).a - 0.75) < 0.01)
 	_check("default corner and border in metres", is_equal_approx(float(st["corner_radius"]), 0.024)
-			and is_equal_approx(float(st["border_width"]), 0.006))
-	var mat: ShaderMaterial = (tablet.get_node("Quad") as MeshInstance3D).material_override
-	_check("the shader has them", (mat.get_shader_parameter("fill_color") as Color).is_equal_approx(st["fill"])
+			and is_equal_approx(float(st["border_width"]), 0.003))
+	var mat: ShaderMaterial = tablet.main_pane.material_override
+	_check("both panes' shaders have them", (mat.get_shader_parameter("fill_color") as Color).is_equal_approx(st["fill"])
+			and (top_mat.get_shader_parameter("fill_color") as Color).is_equal_approx(st["fill"])
 			and is_equal_approx(float(mat.get_shader_parameter("corner_radius")), 0.024))
 	var errors: Array = tablet.set_style({"fill": "#ff000080", "corner_radius": 0.05})
 	_check("a partial change: no errors, the rest stays", errors.is_empty()
 			and (tablet.style()["fill"] as Color).is_equal_approx(Color("#ff000080"))
-			and is_equal_approx(float(tablet.style()["border_width"]), 0.006))
+			and is_equal_approx(float(tablet.style()["border_width"]), 0.003))
 	_check("the shader follows", (mat.get_shader_parameter("fill_color") as Color).is_equal_approx(Color("#ff000080"))
 			and is_equal_approx(float(mat.get_shader_parameter("corner_radius")), 0.05))
 	_check("kept in the settings as text", str((main.settings.get_value("pane", "tablet_style", {}) as Dictionary)
