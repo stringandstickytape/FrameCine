@@ -601,7 +601,7 @@ static func _part(p: Dictionary, assets: Dictionary) -> Node3D:
 			local = _text(node, p)
 		"particles":
 			var area := Vector3(float(size[0]), float(size[1]), float(size[2]))
-			node.add_child(RoomParticles.build(p))
+			RoomParticles.add_when_safe(node, RoomParticles.build(p))
 			local = AABB(-area * 0.5, area)
 	node.set_meta("local_aabb", local)
 	fit_effect(mat, (p["material"] as Dictionary).get("effect") if p.get("material") is Dictionary else null, local)

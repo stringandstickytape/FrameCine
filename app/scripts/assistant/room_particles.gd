@@ -12,6 +12,7 @@ extends RefCounted
 ## renderer it costs a full depth copy every frame, which the film can't spare.
 ##
 ##   validate(v, path, errors)       build(p) -> GPUParticles3D       amount(p) -> particles it will hold
+##   add_when_safe(parent, particles)     hold(), allow(): see SAFE_AFTER
 
 const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
 
@@ -43,6 +44,36 @@ const LIFE_MIN := 0.3
 const LIFE_MAX := 30.0
 
 static var _sprites := {}
+## Seconds the headset must have shown the app before particles are added. Added while its first frames were shown
+## (the app starting in a room with particles), they crashed the GPU driver on the first visible frame (Steam Frame,
+## 2026-11-03); loaded later they are fine. main.gd calls hold() when it starts XR and allow() SAFE_AFTER seconds after
+## the session is first visible; until then add_when_safe() keeps them back. Without XR (tests, the desktop) nothing
+## is held.
+const SAFE_AFTER := 3.0
+static var _held := false
+static var _waiting: Array = [] # [weakref(parent), particles]
+
+
+static func hold() -> void:
+	_held = true
+
+
+static func allow() -> void:
+	_held = false
+	for w: Array in _waiting:
+		var parent: Node = (w[0] as WeakRef).get_ref()
+		if parent != null:
+			parent.add_child(w[1])
+		else:
+			(w[1] as Node).free()
+	_waiting.clear()
+
+
+static func add_when_safe(parent: Node, particles: Node) -> void:
+	if _held:
+		_waiting.append([weakref(parent), particles])
+	else:
+		parent.add_child(particles)
 
 
 static func validate(v: Variant, path: String, errors: Array) -> void:

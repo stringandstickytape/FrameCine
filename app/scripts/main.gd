@@ -71,6 +71,7 @@ signal audio_settings_changed
 signal playback_ended
 
 const VideoMode := preload("res://scripts/video_mode.gd")
+const RoomParticles := preload("res://scripts/assistant/room_particles.gd")
 const AppSettings := preload("res://scripts/app_settings.gd")
 const PlaybackController := preload("res://scripts/playback_controller.gd")
 const VideoScreen := preload("res://scripts/video_screen.gd")
@@ -236,6 +237,7 @@ var _overlay_suppressed := false
 var menu_shown := false
 ## The XR session is FOCUSED (input and full frame rate). True without XR.
 var session_focused := true
+var _particles_timed := false # RoomParticles.allow() is due (on_session_state()).
 ## Playback was paused because the session lost focus (resumes on focus); false once the user plays or pauses.
 var auto_paused := false
 var _auto_toggle := false
@@ -465,6 +467,7 @@ func _setup_view(want_xr: bool) -> void:
 		# Session states, like the engine's own --verbose "On state ..." lines. Controller profiles are bound only once the
 		# session is focused (headset worn); the hands time their "no profile" warning from then. Focus changes pause
 		# and resume playback (on_session_state()).
+		RoomParticles.hold()
 		for state: String in ["session_begun", "session_synchronized", "session_visible", "session_focussed",
 				"session_stopping", "session_loss_pending", "instance_exiting"]:
 			if xr.has_signal(state):
@@ -487,6 +490,9 @@ func _setup_view(want_xr: bool) -> void:
 ## quick dashboard flick doesn't stutter), but only if we paused it: a film the user paused stays paused.
 func on_session_state(state: String) -> void:
 	print("XR: %s (%.1f s)" % [state, Time.get_ticks_msec() / 1000.0])
+	if state in ["session_visible", "session_focussed"] and not _particles_timed:
+		_particles_timed = true
+		get_tree().create_timer(RoomParticles.SAFE_AFTER).timeout.connect(RoomParticles.allow)
 	var was_focused := session_focused
 	session_focused = state == "session_focussed"
 	if session_focused:
