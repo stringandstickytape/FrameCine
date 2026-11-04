@@ -229,19 +229,19 @@ func _run() -> void:
 	_check("the tabs as a list down the left, Source first", pui.tablet_tab_buttons.size() == 7
 			and pui.tablet_tab_buttons[0].text == "Source" and pui.tablet_tab_buttons[0].is_visible_in_tree()
 			and pui.tablet_tab_buttons[0].get_global_rect().position.x < 60.0)
-	var chip_names := func() -> Array:
-		return pui._chips.get_children().filter(func(c: Node) -> bool: return not c.is_queued_for_deletion()) \
-				.map(func(b: Button) -> String: return b.text)
 	pui.tablet_tab_buttons[0].pressed.emit()
-	var names: Array = chip_names.call()
-	_check("Source's places as chips, Library first, Test patterns last (%s)" % [names],
-			names[0] == "Library" and names[-1] == "Test patterns" and names.has("Network") and pui._source_head.visible)
-	_check("the files tab's own places column gives way", not pui.files._places_scroll.visible)
-	var patterns_chip: Button = pui._chips.get_child(names.size() - 1)
-	patterns_chip.pressed.emit()
+	var place_buttons: Array = pui.files._places_box.get_children().filter(func(c: Node) -> bool:
+		return c is Button and not c.is_queued_for_deletion())
+	var names: Array = place_buttons.map(func(b: Button) -> String: return b.text)
+	_check("Source's places as a list beside the rail, Library first, Test patterns last (%s)" % [names],
+			names[0] == "Library" and names[-1] == "Test patterns" and names.has("Network")
+			and pui.files._places_scroll.is_visible_in_tree())
+	var patterns_button: Button = place_buttons[-1]
+	patterns_button.pressed.emit()
 	await _frames(2)
-	_check("a place opens there and its chip is marked", pui.files.current == "stub://" and patterns_chip.button_pressed)
-	_check("opening a place keeps the files tab's places column away", not pui.files._places_scroll.visible)
+	_check("a place opens there and its row is marked", pui.files.current == "stub://" and patterns_button.button_pressed)
+	_check("the view selector sits in the browser's title row", pui._views.is_visible_in_tree()
+			and pui._views.get_parent() == pui.files._in_corner.get_parent())
 	_check("the tab takes the rest of the width (%.0f of %d px)" % [pui._body.size.x, panel.resolution.x],
 			pui._body.size.x > panel.resolution.x - pui.TABLET_TABS_WIDTH - 120)
 	_check("the rail has icons", pui.tablet_tab_buttons.all(func(b: Button) -> bool: return b.icon != null)
@@ -264,7 +264,7 @@ func _run() -> void:
 		return "%s:%s" % [r.get_class(), r.get_children().map(func(c: Node) -> int: return c.get_child_count())])
 	_check("Picture's sections as cards in two columns (%d cards, %d runs: %s)" % [cards.size(), pairs.size(), shape],
 			cards.size() >= 6 and both and cards[0] is PanelContainer
-			and cards[0].get_child(0).get_meta("section") == "Mode" and not pui._source_head.visible)
+			and cards[0].get_child(0).get_meta("section") == "Mode" and not pui._views.is_visible_in_tree())
 	_check("a card whose section has nothing to show is left out (3D, for a flat film)", cards.any(
 			func(c: Control) -> bool: return c.get_child(0).get_meta("section") == "3D" and c.get_parent() == null))
 	_check("no card is wider than the tab (%.0f)" % pui.tabs[1].size.x, cards.all(func(c: Control) -> bool:

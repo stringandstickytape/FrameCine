@@ -242,7 +242,7 @@ func _ready() -> void:
 func _build_places() -> void:
 	for c in _places_box.get_children():
 		c.queue_free()
-	for place in get_places():
+	for place in places_in_order():
 		var p: String = place["path"]
 		var b := W.button(place["label"], func() -> void:
 			open_folder(p)
@@ -274,15 +274,25 @@ func is_current_place(p: String) -> bool:
 			and (p == LibraryIndex.root() or not LibraryIndex.is_inside(current)))
 
 
-## The places column on the left: the tablet (ui/pane_ui.gd) lists the places beside the tabs instead.
+## The places column on the left, or not (a layout that lists the places elsewhere).
 func set_places_column(on: bool) -> void:
 	_places_shown = on
 	_places_scroll.visible = on and not is_form_open()
 	_places_rule.visible = _places_scroll.visible
 
 
-## The places in the tablet's order: the library and the lists first, then the network, the folders on the headset,
-## the agents, and the test patterns last.
+## The places column's width (pixels): scaled with the text on the tablet (ui/pane_ui.gd).
+func set_places_width(px: float) -> void:
+	_places_scroll.custom_minimum_size.x = px
+
+
+## Adds a control at the right end of the title row (the tablet's view selector, ui/pane_ui.gd).
+func add_to_bar(control: Control) -> void:
+	_in_corner.get_parent().add_child(control)
+
+
+## The places in order: the library and the lists first, then the network, the folders on the headset, the agents,
+## and the test patterns last.
 static func places_in_order() -> Array[Dictionary]:
 	var first: Array[String] = [LibraryIndex.root(), FAVOURITES_FOLDER, QUEUE_FOLDER, SEARCH_FOLDER, NETWORK_FOLDER,
 			MEDIA_SERVERS_FOLDER, ANDROID_FOLDER, BROWSER_FOLDER]

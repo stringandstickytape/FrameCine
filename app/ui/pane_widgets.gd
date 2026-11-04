@@ -170,7 +170,7 @@ static func group_sections(box: VBoxContainer) -> Array[VBoxContainer]:
 ## packed two to a row where both fit half the width, else one to a row (refresh_cards()); off: the groups back in
 ## the box, one under another. The cards and their rows live in a box kept on the tab's box as meta "cards".
 static func card_layout(box: VBoxContainer, on: bool) -> void:
-	var holder: VBoxContainer = box.get_meta("cards", null)
+	var holder: VBoxContainer = (box.get_meta("cards") if box.has_meta("cards") else null)
 	if on and holder == null:
 		var groups := group_sections(box)
 		holder = VBoxContainer.new()
@@ -204,7 +204,7 @@ static func card_layout(box: VBoxContainer, on: bool) -> void:
 
 ## The cards of a box laid out by card_layout() (PanelContainers, in order), or none.
 static func cards(box: VBoxContainer) -> Array:
-	var holder: VBoxContainer = box.get_meta("cards", null)
+	var holder: VBoxContainer = (box.get_meta("cards") if box.has_meta("cards") else null)
 	return holder.get_meta("all", []) if holder != null else []
 
 
@@ -213,7 +213,7 @@ static func cards(box: VBoxContainer) -> Array:
 ## cards that fit go into two columns, each to the shorter column, so a tall list and a short card don't stretch
 ## each other. Packed again only when that changes.
 static func refresh_cards(box: VBoxContainer, width: float) -> void:
-	var holder: VBoxContainer = box.get_meta("cards", null)
+	var holder: VBoxContainer = (box.get_meta("cards") if box.has_meta("cards") else null)
 	if holder == null:
 		return
 	var gap := PaneStyle.constant(&"gap")

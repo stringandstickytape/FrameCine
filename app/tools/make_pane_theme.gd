@@ -243,22 +243,6 @@ static func build(options: Dictionary = {}) -> Theme:
 		for k in ["icon_normal_color", "icon_hover_color", "icon_pressed_color", "icon_hover_pressed_color",
 				"icon_focus_color", "icon_disabled_color"]:
 			t.set_color(k, type, Color.WHITE)
-	_variation_of(t, "ChipButton", "Button")
-	var pill: int = CONSTANTS["row_height"]
-	var chip_rest := _box(c["field"], pill)
-	var chip_hover := _box(c["hover_fill"], pill)
-	var chip_on := _box(c["accent"], pill)
-	for s in [chip_rest, chip_hover, chip_on]:
-		_margins(s, 14, 2)
-	t.set_stylebox("normal", "ChipButton", chip_rest)
-	t.set_stylebox("hover", "ChipButton", chip_hover)
-	t.set_stylebox("pressed", "ChipButton", chip_on)
-	t.set_stylebox("hover_pressed", "ChipButton", chip_on)
-	t.set_stylebox("disabled", "ChipButton", chip_rest)
-	t.set_stylebox("focus", "ChipButton", chip_hover)
-	t.set_font("font", "ChipButton", fonts["medium"])
-	t.set_color("font_pressed_color", "ChipButton", c["accent_ink"])
-	t.set_color("font_hover_pressed_color", "ChipButton", c["accent_ink"])
 	_variation_of(t, "CardPanel", "PanelContainer")
 	var card := _box(c["card"], 12)
 	_margins(card, 14, 10)

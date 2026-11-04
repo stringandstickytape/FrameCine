@@ -108,8 +108,8 @@ var _tablet_theme: Theme
 var _tabs_box: VBoxContainer
 var _tablet_row: HBoxContainer
 var tablet_tab_buttons: Array[Button] = []
-var _source_head: HBoxContainer
-var _chips: HFlowContainer
+## The browser's view selector (VIEWS), in the files tab's title row on the tablet.
+var _views: HBoxContainer
 var _view_buttons: Array[Button] = []
 
 
@@ -133,6 +133,8 @@ func apply_style() -> void:
 		_content.theme = null if _tablet_theme != null else PaneStyle.docked_focus_theme()
 	if _tablet_row != null:
 		_refresh_rail()
+	if files != null:
+		files.set_places_width(PaneStyle.constant(&"places_width") * text_scale)
 	queue_redraw()
 
 
@@ -277,7 +279,6 @@ func bind(p_app: Node) -> void:
 		t.bind(app)
 	files.form_shown.connect(set_form_mode)
 	files.listing_changed.connect(_update_footer)
-	files.folder_changed.connect(func(_p: String) -> void: _mark_chips())
 	system.open_place.connect(func(p: String) -> void:
 		show_tab(Tab.FILES)
 		files.open_folder(p))
@@ -348,10 +349,7 @@ func show_tab(index: int) -> void:
 		tablet_tab_buttons[i].set_pressed_no_signal(i == current_tab)
 	if tablet_layout:
 		_refresh_rail()
-		_source_head.visible = current_tab == Tab.FILES
-		if current_tab == Tab.FILES:
-			_fill_chips()
-		else:
+		if current_tab != Tab.FILES:
 			W.card_layout(tabs[current_tab].get("box"), true)
 			_pack_cards()
 	_update_footer()
@@ -402,8 +400,8 @@ func set_tablet_layout(on: bool) -> void:
 	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if not on:
 		_open.move_child(_body, _tablet_row.get_index())
-	if files != null:
-		files.set_places_column(not on)
+	if _views != null:
+		_views.visible = on
 	if on:
 		# No backdrop: the tablet's pane shows through (its own margins kept).
 		add_theme_stylebox_override("panel", _clear(get_theme_stylebox("panel")))
@@ -444,16 +442,10 @@ func _build_tablet_row() -> void:
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_theme_constant_override("separation", PaneStyle.constant(&"gap"))
 	_tablet_row.add_child(content)
-	# Source's head: the places as chips, the view selector at the right.
-	_source_head = W.hbox()
-	_chips = HFlowContainer.new()
-	_chips.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_chips.add_theme_constant_override("h_separation", 6)
-	_chips.add_theme_constant_override("v_separation", 4)
-	_source_head.add_child(_chips)
-	var views := HBoxContainer.new()
-	views.add_theme_constant_override("separation", 2)
-	views.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	# The view selector, at the right of the files tab's title row.
+	_views = HBoxContainer.new()
+	_views.add_theme_constant_override("separation", 2)
+	_views.visible = false
 	var view_group := ButtonGroup.new()
 	for v in VIEWS:
 		var b := W.button("", func() -> void: set_view(v), &"ViewButton")
@@ -461,10 +453,10 @@ func _build_tablet_row() -> void:
 		b.button_group = view_group
 		b.set_meta("icon", "view-" + v)
 		b.tooltip_text = v.capitalize()
-		views.add_child(b)
+		_views.add_child(b)
 		_view_buttons.append(b)
-	_source_head.add_child(views)
-	content.add_child(_source_head)
+	if files != null:
+		files.add_to_bar(_views)
 	if app != null:
 		view = str(app.settings.get_value("browser", "view", "details"))
 		if not view in VIEWS:
@@ -492,29 +484,6 @@ func set_view(v: String) -> void:
 	if app != null:
 		app.settings.set_value("browser", "view", v if v != "details" else null)
 	_refresh_rail()
-
-
-## Source's places as chips, the one on show pressed.
-func _fill_chips() -> void:
-	for c in _chips.get_children():
-		_chips.remove_child(c)
-		c.queue_free()
-	for place: Dictionary in FilesTab.places_in_order():
-		var path := str(place["path"])
-		var b := W.button(str(place["label"]), func() -> void: files.open_folder(path), &"ChipButton")
-		b.custom_minimum_size.y = PaneStyle.constant(&"row_height")
-		b.toggle_mode = true
-		b.set_meta("path", path)
-		_chips.add_child(b)
-	_mark_chips()
-
-
-func _mark_chips() -> void:
-	if not tablet_layout or _chips == null:
-		return
-	for b: Button in _chips.get_children():
-		if not b.is_queued_for_deletion():
-			b.set_pressed_no_signal(files.is_current_place(str(b.get_meta("path"))))
 
 
 ## Packs the tab's cards for the body's width (W.refresh_cards()): the tab fills the body, and the body is always
