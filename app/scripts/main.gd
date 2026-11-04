@@ -463,9 +463,10 @@ func _setup_view(want_xr: bool) -> void:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 		get_viewport().use_xr = true
 		# Foveation ([xr] in project.godot; the level is [view] foveation): the runtime's density map shapes the eye
-		# images only with VRS XR, which _update_foveation() turns on with the level and off with it.
+		# images only with VRS XR. Set once: switching the viewport's VRS mode at run time left the eye images low
+		# resolution all over, then unfoveated whatever the level, with odd distortions (2026-11-04).
+		get_viewport().vrs_mode = Viewport.VRS_XR
 		foveation_xr = xr
-		_update_foveation()
 		xr_camera.current = true
 		camera = xr_camera
 		use_xr = true
@@ -1042,11 +1043,6 @@ func _update_foveation() -> void:
 			local_agents != null and local_agents.pane_shown())
 	if foveation_xr.foveation_level != want:
 		foveation_xr.foveation_level = want
-	# The viewport's variable-rate shading follows: left in XR mode with the level at 0, the periphery was still
-	# shaded coarsely, and thin bright things there strobed (the cinema's stage strip: the user, 2026-11-04).
-	var vrs := Viewport.VRS_XR if want > 0 else Viewport.VRS_DISABLED
-	if get_viewport().vrs_mode != vrs:
-		get_viewport().vrs_mode = vrs
 
 
 func _update_overlay_visibility() -> void:
