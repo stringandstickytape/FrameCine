@@ -26,6 +26,9 @@ extends Node3D
 ## hide_panel() closes it, toggle_panel(), recentre(), is_open(), reload_theme(). `docked` is kept as an alias of
 ## is_open() (the panel used to have a docked state; now that is the only one). `panel` is the quad (ui/pane.gd), `ui`
 ## its controls (ui/pane_ui.gd).
+##
+## The tablet (ui/tablet.gd, [pane] tablet, a prototype for a new UI): while it is on, it shows and hides with the
+## panel, placed from the head whenever the panel is.
 
 const Pane := preload("res://ui/pane.gd")
 const PaneUI := preload("res://ui/pane_ui.gd")
@@ -122,6 +125,8 @@ var _seat_ring: MeshInstance3D
 ## seat picking, it takes the laser, the trigger and the pointer controller's stick; B or menu cancels.
 var _placer: ObjectPlacer
 const ObjectPlacer := preload("res://ui/object_placer.gd")
+const Tablet := preload("res://ui/tablet.gd")
+var tablet: Tablet
 
 
 ## Called by the app once its nodes are ready.
@@ -133,6 +138,10 @@ func setup(p_app: Node3D) -> void:
 	add_child(panel)
 	ui = panel.ui
 	ui.bind(app)
+	tablet = Tablet.new()
+	tablet.name = "Tablet"
+	tablet.app = app
+	add_child(tablet)
 	apply_layout()
 	ui.system.layout_changed.connect(apply_layout)
 	ui.system.reset_layout_requested.connect(reset_layout)
@@ -431,6 +440,8 @@ func show_panel(hand: XRHand = null) -> void:
 	var was_open := _open
 	_open = true
 	recentre()
+	if tablet.enabled:
+		tablet.show_at(_head())
 	if app.get("_frames") != null and int(app.get("_frames")) < 10:
 		_replace_left = LAUNCH_REPLACE_SECONDS
 	panel.fade_to(1.0)
@@ -449,6 +460,7 @@ func hide_panel() -> void:
 		return
 	_open = false
 	panel.fade_to(0.0)
+	tablet.hide_tablet()
 	var focus := panel.focus_owner()
 	if focus != null:
 		focus.release_focus()

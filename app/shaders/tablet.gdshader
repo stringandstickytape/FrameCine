@@ -1,0 +1,28 @@
+shader_type spatial;
+// The tablet's backdrop (ui/tablet.gd): a rounded rectangle the size of the quad, its fill inside a border, nothing
+// outside the border. Both colours carry their own opacity. Edges are antialiased over one pixel.
+render_mode unshaded, cull_disabled, blend_mix, depth_draw_never, shadows_disabled;
+
+uniform vec2 size = vec2(0.48, 0.26); // Metres: the quad.
+uniform float corner_radius = 0.024; // Metres, the outer edge's.
+uniform float border_width = 0.006; // Metres.
+uniform vec4 fill_color : source_color = vec4(0.69, 0.878, 0.902, 0.5);
+uniform vec4 border_color : source_color = vec4(0.69, 0.878, 0.902, 0.75);
+
+// Signed distance to a rounded rectangle centred at 0 with half-size h and corner radius r (negative inside).
+float rounded_rect(vec2 p, vec2 h, float r) {
+	vec2 q = abs(p) - h + r;
+	return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+}
+
+void fragment() {
+	vec2 p = (UV - 0.5) * size;
+	float r = clamp(corner_radius, 0.0, 0.5 * min(size.x, size.y));
+	float d = rounded_rect(p, 0.5 * size, r);
+	float aa = max(fwidth(d), 1e-5);
+	float inside = 1.0 - smoothstep(-aa, aa, d);
+	float fill = border_width > 0.0 ? 1.0 - smoothstep(-aa, aa, d + border_width) : inside;
+	vec4 c = mix(border_color, fill_color, fill);
+	ALBEDO = c.rgb;
+	ALPHA = c.a * inside;
+}
