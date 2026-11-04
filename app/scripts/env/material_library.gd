@@ -93,6 +93,17 @@ static func textures(id: String) -> Dictionary:
 
 ## A shared ShaderMaterial for this id and options; null when the id is unknown (or its files are bad).
 static func get_material(id: String, options := {}) -> ShaderMaterial:
+	if options.get("lit") is Dictionary:
+		# The lighting's colours as opaque Colors in the key, whether given as Color (any alpha: the shader has no
+		# use for it), Vector3 (a uniform read back) or text.
+		var lit: Dictionary = (options["lit"] as Dictionary).duplicate()
+		for k in ["sky_top", "sky_bottom"]:
+			if lit.has(k):
+				var c := _colour(lit[k])
+				c.a = 1.0
+				lit[k] = c
+		options = options.duplicate()
+		options["lit"] = lit
 	var key := "%s %s" % [id, var_to_str(options)]
 	if _materials.has(key) and is_instance_valid(_materials[key]):
 		return _materials[key]
@@ -140,12 +151,22 @@ static func tint_for(id: String, colour: Color) -> Color:
 
 
 static func _colour(v: Variant) -> Color:
-	return v if v is Color else Color.from_string(str(v), Color.WHITE)
+	if v is Color:
+		return v
+	if v is Vector3:
+		return Color(v.x, v.y, v.z)
+	return Color.from_string(str(v), Color.WHITE)
+
+
+## A colour as the Vector3 a vec3 uniform wants: a Color in a vec3 uniform renders dimmer than its values and is
+## reset to zero when the material's properties are listed (duplicate(), saving).
+static func _vec3(c: Color) -> Vector3:
+	return Vector3(c.r, c.g, c.b)
 
 
 static func _light(m: ShaderMaterial, lighting: Dictionary) -> void:
-	m.set_shader_parameter("sky_top", _colour(lighting.get("sky_top", Color.BLACK)))
-	m.set_shader_parameter("sky_bottom", _colour(lighting.get("sky_bottom", Color.BLACK)))
+	m.set_shader_parameter("sky_top", _vec3(_colour(lighting.get("sky_top", Color.BLACK))))
+	m.set_shader_parameter("sky_bottom", _vec3(_colour(lighting.get("sky_bottom", Color.BLACK))))
 	m.set_shader_parameter("screen_light", float(lighting.get("screen", 0.0)))
 
 

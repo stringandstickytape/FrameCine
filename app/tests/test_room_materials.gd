@@ -320,7 +320,7 @@ func _test_lit() -> void:
 	_check("the room lit (%s)" % r.get("error", ""), r.get("ok") == true and RoomSchema.is_lit(main.env.get("doc")))
 	var a := _material_of("Crate A")
 	_check("a library part in its lit form", a != null and a.shader == MaterialLibrary.SHADER_LIT
-			and MaterialLibrary.id_of(a) == "oak_planks" and (a.get_shader_parameter("sky_top") as Color).r > 0.0)
+			and MaterialLibrary.id_of(a) == "oak_planks" and (a.get_shader_parameter("sky_top") as Vector3).x > 0.0)
 	_check("lit parts share it too", _material_of("Crate A") == MaterialLibrary.get_material("oak_planks",
 			{"lit": {"sky_top": a.get_shader_parameter("sky_top"), "sky_bottom": a.get_shader_parameter("sky_bottom"),
 			"screen": a.get_shader_parameter("screen_light")}}))

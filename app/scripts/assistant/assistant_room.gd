@@ -985,8 +985,11 @@ static func lighting_of(p_doc: Dictionary) -> Dictionary:
 
 
 static func _light_material(mat: ShaderMaterial) -> void:
-	mat.set_shader_parameter("sky_top", _lighting["sky_top"])
-	mat.set_shader_parameter("sky_bottom", _lighting["sky_bottom"])
+	# Vector3, not Color, for the vec3 uniforms (MaterialLibrary._vec3()).
+	var top: Color = _lighting["sky_top"]
+	var bottom: Color = _lighting["sky_bottom"]
+	mat.set_shader_parameter("sky_top", Vector3(top.r, top.g, top.b))
+	mat.set_shader_parameter("sky_bottom", Vector3(bottom.r, bottom.g, bottom.b))
 	mat.set_shader_parameter("screen_light", _lighting["screen"])
 
 

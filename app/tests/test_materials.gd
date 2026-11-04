@@ -206,8 +206,8 @@ func _lit_rooms() -> void:
 			and lit.shader == MaterialLibrary.SHADER_LIT and lit.get_shader_parameter("albedo_map")
 			== src.get_shader_parameter("albedo_map") and is_equal_approx(lit.get_shader_parameter("pleats"), 4.0)
 			and (lit.get_shader_parameter("tint") as Color).is_equal_approx(src.get_shader_parameter("tint")))
-	_check("it takes the room's fill and film light", (lit.get_shader_parameter("sky_top") as Color)
-			.is_equal_approx(Color(0.3, 0.3, 0.4)) and is_equal_approx(lit.get_shader_parameter("screen_light"), 0.5))
+	_check("it takes the room's fill and film light, as Vector3 for the vec3 uniform", (lit.get_shader_parameter("sky_top")
+			as Vector3).is_equal_approx(Vector3(0.3, 0.3, 0.4)) and is_equal_approx(lit.get_shader_parameter("screen_light"), 0.5))
 	_check("one lit form per material and lighting", MaterialLibrary.lit_variant(src, lighting) == lit
 			and MaterialLibrary.lit_variant(src, {"lit": true, "screen": 1.0}) != lit)
 	_check("only unlit library materials have one", MaterialLibrary.lit_variant(lit, lighting) == null
