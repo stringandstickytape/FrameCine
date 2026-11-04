@@ -278,6 +278,14 @@ func _run() -> void:
 	_check("Picture's sections as cards in two columns (%d cards, %d runs: %s)" % [cards.size(), pairs.size(), shape],
 			cards.size() >= 6 and both and cards[0] is PanelContainer
 			and cards[0].get_child(0).get_meta("section") == "Mode" and not pui._views.is_visible_in_tree())
+	pui.tablet_tab_buttons[5].pressed.emit()
+	await _frames(2)
+	var object_cards: Array = pui.cards(5)
+	_check("the Objects tab's one card (its heading inside the section node) is on show (%d)" % object_cards.size(),
+			object_cards.size() == 1 and (object_cards[0] as Control).get_parent() != null
+			and (object_cards[0] as Control).is_visible_in_tree())
+	pui.tablet_tab_buttons[1].pressed.emit()
+	await _frames(2)
 	_check("a card whose section has nothing to show is left out (3D, for a flat film)", cards.any(
 			func(c: Control) -> bool: return c.get_child(0).get_meta("section") == "3D" and c.get_parent() == null))
 	_check("no card is wider than the tab (%.0f)" % pui.tabs[1].size.x, cards.all(func(c: Control) -> bool:

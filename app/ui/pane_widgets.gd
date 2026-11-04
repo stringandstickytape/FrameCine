@@ -224,8 +224,11 @@ static func refresh_cards(box: VBoxContainer, width: float) -> void:
 	var key := ""
 	for card: Control in holder.get_meta("all", []):
 		var g: Node = card.get_child(0)
+		# Something past the heading is on show. A group whose heading sits inside its one child (the Objects tab's
+		# section node) has no heading of its own at the front: every child counts then.
+		var first := 1 if g.get_child_count() > 0 and g.get_child(0).has_meta("section") else 0
 		var any := false
-		for i in range(1, g.get_child_count()):
+		for i in range(first, g.get_child_count()):
 			var c: Node = g.get_child(i)
 			if c is CanvasItem and (c as CanvasItem).visible:
 				any = true
