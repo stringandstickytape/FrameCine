@@ -5,6 +5,7 @@ extends Node
 ## transcribes it if it can, and maps the sentence to commands (tools/voice.py). The headset only talks; it does not
 ## listen for anything (the link is the one the headset opened).
 ##
+## The microphone is the headset's own unless [voice] microphone is "default" (_choose_input()).
 ## Made by dev_tools.gd when the link is on. Hold F8 on a keyboard; on the controllers, the pane or the core calls
 ## begin() / end() from a binding (app-shell):
 ##   var ptt := preload("res://scripts/dev/push_to_talk.gd").instance()   # null without the link
@@ -20,6 +21,8 @@ const DevCommands := preload("res://scripts/dev/dev_commands.gd")
 
 const NODE_NAME := "PushToTalk"
 const BUS := "PushToTalk"
+## What the headset's own microphone is called in the system's list.
+const HEADSET_MIC := "HiFi__Mic"
 const KEY := KEY_F8
 const OUT_RATE := 16000
 const MIN_SECONDS := 0.3
@@ -62,6 +65,28 @@ func _ready() -> void:
 				+ "push-to-talk button does.",
 		"params": [{"name": "seconds", "type": "float", "default": 3.0}],
 		"level": "control", "returns": "{seconds, bytes}"})
+
+
+## The headset's own microphone (its name has HEADSET_MIC), or "" when the system lists none.
+static func headset_mic() -> String:
+	for d in AudioServer.get_input_device_list():
+		if str(d).contains(HEADSET_MIC):
+			return str(d)
+	return ""
+
+
+## Which microphone records: the headset's own by default, even with Bluetooth earbuds in. Their hands-free mic is
+## narrowband (nothing above 4 kHz; the user's clips, 2026-11-04) and, open, it drops the earbuds' sound to call
+## quality. [voice] microphone "default" takes whatever the system picks instead.
+func _choose_input() -> void:
+	var scene: Node = get_tree().current_scene
+	var settings: Object = scene.get("settings") if scene != null else null
+	var pref := str(settings.get_value("voice", "microphone", "headset")) if settings != null else "headset"
+	var want := headset_mic() if pref == "headset" else ""
+	if want == "":
+		want = "Default"
+	if AudioServer.input_device != want:
+		AudioServer.input_device = want
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -122,6 +147,7 @@ func begin() -> bool:
 		push_warning("Push-to-talk: audio/driver/enable_input is off in project.godot; no microphone.")
 		return false
 	_ensure_bus()
+	_choose_input()
 	if _player == null:
 		_player = AudioStreamPlayer.new()
 		_player.stream = AudioStreamMicrophone.new()
