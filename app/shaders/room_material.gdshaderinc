@@ -71,6 +71,9 @@ uniform float floor_y = 0.0;
 // renders of the surface (the colour at level 1; no fill, film or lamps, which would bake in as light).
 #define HOUSE_LAMPS 8
 uniform float house_reference = 0.05;
+// The least the house lights give (a share of the designed level): a cinema with the film on still shows its steps,
+// aisles and walls, however far the room light is turned down (the user's "dimmed to" can be 0).
+uniform float house_floor = 0.04;
 uniform int lamp_count = 0;
 uniform vec4 lamp_position[HOUSE_LAMPS];
 uniform vec4 lamp_colour[HOUSE_LAMPS];
@@ -203,6 +206,7 @@ void fragment() {
 	// The house lights give the square of the room light: dimmed to 0.35 while the film plays, 12 %.
 	level = bake_pass ? 1.0 : clamp(env_light / max(house_reference, 0.0001), 0.0, 2.0);
 	level *= level;
+	level = bake_pass ? 1.0 : max(level, house_floor);
 #endif
 	float metallic = t.orm.b;
 	float ao = mix(1.0, t.orm.r, ao_strength) * fold;

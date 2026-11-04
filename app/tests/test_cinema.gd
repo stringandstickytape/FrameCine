@@ -31,6 +31,9 @@ func _init() -> void:
 
 
 func _run() -> void:
+	# The room as built, before any lightmap: rooms light themselves on first showing (scripts/env/room_lightmaps.gd),
+	# which would drop the stand-in lamps and most of the fill this test looks at.
+	main.features.lightmaps.set_enabled(false)
 	await _frames(5)
 	main.set_environment("cinema")
 	main.open_path("stub://flat_mono")
