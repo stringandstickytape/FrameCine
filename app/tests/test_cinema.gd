@@ -189,8 +189,7 @@ func _run() -> void:
 			reaches = true
 	_check("the beam reaches the screen's corner from the booth window", reaches
 			and beam.global_position.z > 5.0 and beam.global_position.y > 3.0)
-	var dust := env.get_node_or_null("Beam/Dust") as GPUParticles3D
-	_check("dust in the beam while playing", dust != null and dust.emitting and dust.amount <= 400)
+	_check("no dust in the beam (it spoilt the picture: the user, 2026-11-04)", env.get_node_or_null("Beam/Dust") == null)
 	main.player.pause()
 	await _frames(3)
 	_check("paused: no beam", not beam.visible)

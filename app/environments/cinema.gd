@@ -18,7 +18,6 @@ extends "res://environments/vr_environment.gd"
 ##                HouseLamps (sconce shades, ceiling cans: dim with the house lights), StepLights (the aisle steps'
 ##                noses and the stage edge: always on), ExitSigns, BoothWindow (the lens and the booth behind it)
 ##   Beam         the projector's beam (Cone) from the booth window to the screen (room_beam.gdshader, additive),
-##                with dust motes (Dust, GPU particles, added once the headset is safely showing: RoomParticles)
 ##   BakeLights   the room's real lights for a lightmap bake: sconces (a spot up and one down each), house lights
 ##                over the seats, step lights, the exit signs. Hidden: they never light the room live (LightmapGI
 ##                bakes hidden lights; bake_mode static)
@@ -41,7 +40,6 @@ extends "res://environments/vr_environment.gd"
 
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const RoomMesh := preload("res://scripts/env/room_mesh.gd")
-const RoomParticles := preload("res://scripts/assistant/room_particles.gd")
 const ENV_SHADER := preload("res://shaders/env_unlit.gdshader")
 const LAMP_SHADER := preload("res://shaders/room_lamp.gdshader")
 const BEAM_SHADER := preload("res://shaders/room_beam.gdshader")
@@ -89,7 +87,6 @@ const LAMP_COLOUR := Color(1.0, 0.68, 0.42)
 const LAMP_ENERGY := 2.6
 const LAMP_RANGE := 6.0
 const LAMP_CONE_DEG := 42.0
-const DUST := 300
 const SEAT_SEED := 1907
 
 var _border: MeshInstance3D
@@ -110,7 +107,6 @@ var _lightmap_seen := false
 var _main: Node
 var _beam_root: Node3D
 var _beam: MeshInstance3D
-var _dust: GPUParticles3D
 var _screen_world := Transform3D()
 var _screen_size := Vector2.ZERO
 var _beam_key := ""
@@ -632,47 +628,6 @@ func _build_beam() -> void:
 	_beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_beam.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	_beam_root.add_child(_beam)
-	_dust = GPUParticles3D.new()
-	_dust.name = "Dust"
-	_dust.amount = DUST
-	_dust.lifetime = 10.0
-	_dust.preprocess = 10.0
-	_dust.local_coords = true
-	var pm := ParticleProcessMaterial.new()
-	pm.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_POINTS
-	pm.gravity = Vector3(0.0, -0.002, 0.0)
-	pm.direction = Vector3.UP
-	pm.spread = 180.0
-	pm.initial_velocity_min = 0.004
-	pm.initial_velocity_max = 0.025
-	pm.turbulence_enabled = false
-	pm.scale_min = 0.5
-	pm.scale_max = 1.3
-	var curve := Curve.new()
-	curve.add_point(Vector2(0.0, 0.0))
-	curve.add_point(Vector2(0.25, 1.0))
-	curve.add_point(Vector2(0.75, 1.0))
-	curve.add_point(Vector2(1.0, 0.0))
-	var ct := CurveTexture.new()
-	ct.curve = curve
-	pm.alpha_curve = ct
-	_dust.process_material = pm
-	var dot := QuadMesh.new()
-	dot.size = Vector2(0.005, 0.005)
-	var dm := StandardMaterial3D.new()
-	dm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	dm.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	dm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	dm.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	dm.vertex_color_use_as_albedo = true
-	dm.albedo_color = Color(1.0, 0.94, 0.82, 0.18)
-	dot.material = dm
-	_dust.draw_pass_1 = dot
-	_dust.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_dust.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-	_dust.emitting = false
-	# Particles added while the headset shows its first frames crash its GPU driver: added once that is safe.
-	RoomParticles.add_when_safe(_beam_root, _dust)
 
 
 # --- Materials and nodes ---------------------------------------------------------------------------------------------
@@ -901,8 +856,7 @@ func _fit_to_screen() -> void:
 	_shape_beam(local)
 
 
-## The beam: four sides from the lens to the screen's edges (UV.y along it, 0 at the lens; UV2.x across a side), and
-## the dust's places inside it.
+## The beam: four sides from the lens to the screen's edges (UV.y along it, 0 at the lens; UV2.x across a side).
 func _shape_beam(screen: Transform3D) -> void:
 	var corners: Array[Vector3] = []
 	for c: Vector2 in [Vector2(-0.5, 0.5), Vector2(0.5, 0.5), Vector2(0.5, -0.5), Vector2(-0.5, -0.5)]:
@@ -921,23 +875,6 @@ func _shape_beam(screen: Transform3D) -> void:
 			st.set_uv2(Vector2(v[2], 0.0))
 			st.add_vertex(v[0])
 	_beam.mesh = st.commit()
-	var rng := RandomNumberGenerator.new()
-	rng.seed = SEAT_SEED
-	var img := Image.create_empty(DUST, 1, false, Image.FORMAT_RGBF)
-	for i in DUST:
-		var t := rng.randf_range(0.12, 0.85)
-		var u := rng.randf()
-		var v := rng.randf()
-		var edge := corners[0].lerp(corners[1], u).lerp(corners[3].lerp(corners[2], u), v)
-		var pt := edge * t
-		img.set_pixel(i, 0, Color(pt.x, pt.y, pt.z))
-	var pm := _dust.process_material as ParticleProcessMaterial
-	pm.emission_point_texture = ImageTexture.create_from_image(img)
-	pm.emission_point_count = DUST
-	_dust.visibility_aabb = AABB().expand(corners[0]).expand(corners[1]).expand(corners[2]).expand(corners[3]) \
-			.grow(0.5)
-	if _dust.is_inside_tree():
-		_dust.restart()
 
 
 ## The seat the viewer sits in (the room moved so it is at the origin) is folded away; the others are all there.
@@ -974,8 +911,6 @@ func _process(_delta: float) -> void:
 		if projector != null and projector.beam_applies():
 			on = false
 	_beam_root.visible = on
-	if _dust.emitting != on:
-		_dust.emitting = on
 
 
 ## The app's main node (scenes/main.tscn), the room's ancestor; null when the room stands alone (tests, tools).

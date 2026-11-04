@@ -887,7 +887,8 @@ environments' screen-anchor convention (`environments/vr_environment.gd`, `app/d
   - Light: no live lights. A warm fill, the screen's spill and lamps standing in for the sconces, all in the
     surface shader, follow the room light (dim while the film plays). The room's real lights (sconces, house lights,
     step lights, exit signs: 26) are there, hidden, for a lightmap bake; with a lightmap the stand-ins step back. The
-    beam from the booth to the screen, with 300 motes of dust, shows while the film plays.
+    beam from the booth to the screen shows while the film plays (the dust motes it had went: they spoilt the
+    picture).
   - Budget: 20 draw calls (one per mesh surface), 172 000 vertices (the seats 167 000).
   - Tested: `tests/test_cinema.gd` (50 checks, lavapipe); renders of the seat, the aisle, the stage and the hall from
     above, playing and with the lights up.
