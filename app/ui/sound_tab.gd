@@ -286,7 +286,7 @@ func _build_pc_audio() -> void:
 			PCAudio.start(app, pc_host())
 		_sync_pc_audio.call_deferred())
 	_pc_address = W.button("", _ask_address)
-	box.add_child(W.hbox([_pc_toggle, _pc_address]))
+	box.add_child(W.flow([_pc_toggle, _pc_address]))
 	_pc_status = W.label("", &"MutedLabel")
 	_pc_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_pc_status)

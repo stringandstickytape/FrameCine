@@ -40,7 +40,8 @@ const REMOTE_WORDS := ["Ask", "Allow", "Deny"]
 const FOVEATION_WORDS := ["Off", "Low", "Medium", "High"]
 const FOVEATION_HELP := "Saves GPU time at the edges of your view. High can look blocky."
 const FOVEATION_UNAVAILABLE := "Foveation isn't available: this build starts without it."
-const LOOK_COLUMNS := 3
+## A controller look's button: wide enough for the icon and a name, three to a row on the front panel.
+const LOOK_WIDTH := 150
 const LOOK_HELP := "Both controllers. The labels change ink, or get a dark outline, to stay readable."
 
 var app: Node
@@ -50,8 +51,8 @@ var _stats_toggle: Button
 var _stats_label: Label
 var _stats: Node
 ## The controllers' look: the presets, the colour palette and the speed slider for a look that takes them.
-var _look_grid: GridContainer
-var _look_colours: GridContainer
+var _look_grid: HFlowContainer
+var _look_colours: HFlowContainer
 var _look_speed: VBoxContainer
 var _haptics: Button
 var _strength: VBoxContainer
@@ -62,7 +63,7 @@ var _zoom_lens: Button
 var _magnification: VBoxContainer
 var _left_handed: Button
 var _tablet_toggle: Button
-var _palette_box: HBoxContainer
+var _palette_box: HFlowContainer
 var _palette_buttons := {}
 var _foveation: HFlowContainer
 var _foveation_help: Label
@@ -144,7 +145,7 @@ func bind(p_app: Node) -> void:
 	var access: Node = app.features.access
 	_follow_head = W.toggle("Follow my head", func(on: bool) -> void: set_layout.call("world_locked", not on))
 	_left_handed = W.toggle("Left-handed", func(on: bool) -> void: access.set_value("left_handed", on))
-	box.add_child(W.hbox([_follow_head, _left_handed, W.button("Reset layout", func() -> void:
+	box.add_child(W.flow([_follow_head, _left_handed, W.button("Reset layout", func() -> void:
 		reset_layout_requested.emit()
 		sync())]))
 	# The tablet (ui/tablet.gd): on or off, and its colours (the palettes of its style document).
@@ -152,7 +153,7 @@ func bind(p_app: Node) -> void:
 		var t: Node = _tablet()
 		if t != null:
 			t.set_enabled(on))
-	_palette_box = W.hbox([_tablet_toggle])
+	_palette_box = W.flow([_tablet_toggle])
 	box.add_child(_palette_box)
 
 	box.add_child(W.section("Accessibility"))
@@ -250,9 +251,10 @@ func bind(p_app: Node) -> void:
 	box.add_child(W.hbox([_thumbs]))
 	# Zoom lens (#38): in 180 / 360, hold the grip and pull the trigger for a magnifier.
 	var zoom_lens: Node = app.features.zoom_lens
-	_zoom_lens = W.toggle("Zoom lens (grip and trigger in 180 / 360)", func(on: bool) -> void:
+	_zoom_lens = W.toggle("Zoom lens", func(on: bool) -> void:
 		zoom_lens.set_enabled(on)
 		_magnification.visible = on)
+	_zoom_lens.tooltip_text = "In 180 and 360: hold the grip and pull the trigger for a magnifier"
 	box.add_child(W.hbox([_zoom_lens]))
 	_magnification = W.slider_row("Magnification", 1.5, 8.0, 0.5, func(v: float) -> String: return "%.1fx" % v,
 			func(v: float) -> void: zoom_lens.set_magnification(v))
@@ -267,7 +269,7 @@ func bind(p_app: Node) -> void:
 			if _live_server() == null:
 				_remote_server = null
 		_sync_remote())
-	box.add_child(W.hbox([_remote_toggle, W.button("Unpair phones", func() -> void:
+	box.add_child(W.flow([_remote_toggle, W.button("Unpair phones", func() -> void:
 		var server := Remote.instance()
 		if server != null:
 			server.new_key()
@@ -330,8 +332,8 @@ func bind(p_app: Node) -> void:
 	box.add_child(W.section("About"))
 	var version := str(ProjectSettings.get_setting("application/config/version", ""))
 	box.add_child(W.label("VR Video Player%s" % ((" " + version) if version != "" else "")))
-	box.add_child(W.label("Engine %s, %s" % [Engine.get_version_info().get("string", ""),
-			str(ProjectSettings.get_setting("rendering/renderer/rendering_method", ""))], &"MutedLabel"))
+	box.add_child(W.ellipsis(W.label("Engine %s, %s" % [Engine.get_version_info().get("string", ""),
+			str(ProjectSettings.get_setting("rendering/renderer/rendering_method", ""))], &"MutedLabel")))
 	app.audio_settings_changed.connect(sync)
 	sync()
 
@@ -450,10 +452,7 @@ func _sync_foveation() -> void:
 ## speed. The controllers in your hands are the preview: a choice shows on them at once.
 func _build_look() -> void:
 	box.add_child(W.label("Look"))
-	_look_grid = GridContainer.new()
-	_look_grid.columns = LOOK_COLUMNS
-	_look_grid.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
-	_look_grid.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	_look_grid = W.flow()
 	for id in ControllerLook.ids():
 		var e := ControllerLook.entry(id)
 		var b := W.button(str(e["name"]), func() -> void:
@@ -467,12 +466,10 @@ func _build_look() -> void:
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.tooltip_text = str(e["description"])
 		b.set_meta("look", id)
+		b.custom_minimum_size.x = LOOK_WIDTH
 		_look_grid.add_child(b)
 	box.add_child(_look_grid)
-	_look_colours = GridContainer.new()
-	_look_colours.columns = ObjectSection.PALETTE.size() / 2
-	_look_colours.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
-	_look_colours.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	_look_colours = W.flow()
 	for hex: String in ObjectSection.PALETTE:
 		var b := W.button("", func() -> void: _set_look_option("color", hex))
 		b.custom_minimum_size = Vector2(PaneStyle.constant(&"button_height"), PaneStyle.constant(&"button_height"))

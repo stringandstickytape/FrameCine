@@ -302,7 +302,9 @@ func _sync_second() -> void:
 		c.queue_free()
 	var options: Array = subs.secondary_tracks()
 	if options.is_empty():
-		_second.add_child(W.label("A second track needs a subtitle file next to the video", &"MutedLabel"))
+		var note := W.label("A second track needs a subtitle file next to the video", &"MutedLabel")
+		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_second.add_child(note)
 		return
 	var group := ButtonGroup.new()
 	var off := _row_in(_second, "Off", func() -> void: subs.select_secondary(-1), group)

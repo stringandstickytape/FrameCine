@@ -22,11 +22,11 @@ const SLEEP_WORDS := ["Off", "15 min", "30 min", "60 min", "90 min", "End of fil
 var app: Node
 var box: VBoxContainer
 ## One row per environment, rebuilt when the list changes (photo rooms and glTF rooms come and go).
-var _envs: VBoxContainer
+var _envs: HFlowContainer
 var _env_ids: Array[String] = []
 ## The showrooms (scripts/env/showrooms.gd), the list's last rows: their own group under the rooms, one row each.
 var _showroom_box: VBoxContainer
-var _showrooms: VBoxContainer
+var _showrooms: HFlowContainer
 ## Every environment row, the rooms' then the showrooms', in _env_ids' order.
 var _env_rows: Array[Button] = []
 var _use_picture: Button
@@ -89,15 +89,14 @@ func _init() -> void:
 func bind(p_app: Node) -> void:
 	app = p_app
 	box.add_child(W.section("Environment"))
-	_envs = VBoxContainer.new()
-	_envs.add_theme_constant_override("separation", 0)
+	_envs = W.flow()
 	box.add_child(_envs)
 	_use_picture = W.button("Use this picture as the room", _use_picture_as_room)
 	box.add_child(W.hbox([_use_picture]))
 	_showroom_box = W.vbox()
 	box.add_child(_showroom_box)
 	_showroom_box.add_child(W.section("Showrooms"))
-	_showrooms = VBoxContainer.new()
+	_showrooms = W.flow()
 	_showrooms.add_theme_constant_override("separation", 0)
 	_showroom_box.add_child(_showrooms)
 
@@ -143,7 +142,7 @@ func bind(p_app: Node) -> void:
 	_beam = W.toggle("Projector beam", func(on: bool) -> void:
 		projector.set_beam(on)
 		_sync_room_parts())
-	box.add_child(W.hbox([_bias, _react, _beam]))
+	box.add_child(W.flow([_bias, _react, _beam]))
 	_bias_strength = W.slider_row("Bias light", 0.0, 1.0, 0.05,
 			func(v: float) -> String: return "%d %%" % roundi(v * 100.0), func(v: float) -> void: bias.set_strength(v))
 	box.add_child(_bias_strength)
@@ -192,7 +191,7 @@ func bind(p_app: Node) -> void:
 	_up_next = W.toggle("Up next countdown", func(on: bool) -> void: up_next.set_enabled(on))
 	var intermission: Node = app.features.intermission
 	_intermission = W.toggle("Intermission", func(on: bool) -> void: intermission.set_enabled(on))
-	box.add_child(W.hbox([_curtains, _up_next, _intermission]))
+	box.add_child(W.flow([_curtains, _up_next, _intermission]))
 	_curtains_note = W.label("", &"MutedLabel")
 	_curtains_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_curtains_note)
@@ -284,15 +283,14 @@ func _sync_envs() -> void:
 	if ids != _env_ids:
 		_env_ids = ids
 		_env_rows.clear()
-		for holder: VBoxContainer in [_envs, _showrooms]:
+		for holder: HFlowContainer in [_envs, _showrooms]:
 			for c in holder.get_children():
 				holder.remove_child(c)
 				c.queue_free()
 		var group := ButtonGroup.new()
 		for e: Array in list:
 			var id := str(e[0])
-			var b := W.button(str(e[1]), func() -> void: app.set_environment(id), &"RowButton")
-			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			var b := W.button(str(e[1]), func() -> void: app.set_environment(id))
 			b.toggle_mode = true
 			b.button_group = group
 			(_showrooms if Showrooms.is_showroom(id) else _envs).add_child(b)

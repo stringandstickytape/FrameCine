@@ -122,10 +122,12 @@ static func slider_of(row: Control) -> HSlider:
 	return row.get_meta("slider")
 
 
-## A help line under a control (ui/help_texts.gd): one muted line (an ellipsis if it is too long; no wrapping, so the
-## layout settles in one pass), not clickable. Its meta "help" marks it.
+## A help line under a control (ui/help_texts.gd): muted, up to two lines (an ellipsis if it is longer still: a
+## half-width card holds few words to a line), not clickable. Its meta "help" marks it.
 static func help(text: String) -> Label:
 	var l := ellipsis(label(text, &"MutedLabel"))
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.max_lines_visible = 2
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	l.set_meta("help", true)
 	return l
