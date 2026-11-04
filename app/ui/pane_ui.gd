@@ -40,8 +40,8 @@ enum Tab { FILES, PICTURE, SOUND, SUBTITLES, ROOM, OBJECTS, SYSTEM }
 const TAB_NAMES: Array[String] = ["Files", "Picture", "Sound", "Subtitles", "Room", "Objects", "System"]
 ## The tablet layout's names for the tabs, and its two lists' widths (pixels).
 const TABLET_TAB_NAMES: Array[String] = ["Source", "Picture", "Sound", "Subtitles", "Room", "Objects", "System"]
-const TABLET_TABS_WIDTH := 150
-const TABLET_PARTS_WIDTH := 200
+const TABLET_TABS_WIDTH := 170
+const TABLET_PARTS_WIDTH := 240
 
 var app: Node
 var files: FilesTab
@@ -96,6 +96,8 @@ var listening := false
 ## The tablet layout: on or not; its row (the two lists and the body), the tab list's buttons, the parts list; each
 ## tab's sections (W.group_sections(), made the first time) and the one shown.
 var tablet_layout := false
+## Every font size times this (set_text_scale(): the tablet's, from its style; 1 on the front panel).
+var text_scale := 1.0
 var _tabs_box: VBoxContainer
 var _tablet_row: HBoxContainer
 var tablet_tab_buttons: Array[Button] = []
@@ -118,7 +120,9 @@ func _ready() -> void:
 
 ## The theme, and the focus boxes with their 1 px accent outline (the stick focus works whenever the panel is open).
 func apply_style() -> void:
-	theme = PaneStyle.theme()
+	theme = PaneStyle.theme() if is_equal_approx(text_scale, 1.0) else PaneStyle.scaled_theme(text_scale)
+	if _tablet_row != null:
+		_tablet_row.theme = _flat_list_theme(theme)
 	if _content != null:
 		_content.theme = PaneStyle.docked_focus_theme()
 	queue_redraw()
@@ -339,12 +343,25 @@ func show_tab(index: int) -> void:
 	_update_footer()
 
 
-## The control that takes the stick focus first when the panel opens.
+## The control that takes the stick focus first when the panel opens: none on the tablet (it is pointed at or
+## touched; a focused row would look selected beside the selected one), until the stick moves.
 func default_focus() -> Control:
+	return null if tablet_layout else _play_button
+
+
+## Where the stick starts when nothing has the focus: the tab's row on the tablet.
+func stick_focus() -> Control:
 	return tablet_tab_buttons[current_tab] if tablet_layout else _play_button
 
 
 # --- The tablet layout ----------------------------------------------------------------------------------------------
+
+func set_text_scale(s: float) -> void:
+	if is_equal_approx(s, text_scale):
+		return
+	text_scale = s
+	apply_style()
+
 
 func set_tablet_layout(on: bool) -> void:
 	if on == tablet_layout or _body == null:
@@ -381,6 +398,7 @@ func set_tablet_layout(on: bool) -> void:
 func _build_tablet_row() -> void:
 	_tablet_row = W.hbox()
 	_tablet_row.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_tablet_row.theme = _flat_list_theme(theme)
 	_open.add_child(_tablet_row)
 	_open.move_child(_tablet_row, _body.get_index())
 	var group := ButtonGroup.new()
@@ -481,6 +499,26 @@ func _mark_parts() -> void:
 			if (buttons[k] as Button).visible:
 				show_section(k)
 				return
+
+
+## The two lists' rows without borders (the user, 2026-11-04: borders look horrible in a list): the theme's
+## PlaceButton looks with every border taken off, and the stick focus shown as the hover fill instead of a ring.
+## Only PlaceButton, so the tab beside them (in the same row) keeps its own looks.
+static func _flat_list_theme(base: Theme) -> Theme:
+	var t := Theme.new()
+	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+		t.set_stylebox(state, "PlaceButton", _borderless(base.get_stylebox(state, "PlaceButton")))
+	t.set_stylebox("focus", "PlaceButton", _borderless(base.get_stylebox("hover", "PlaceButton")))
+	return t
+
+
+static func _borderless(sb: StyleBox) -> StyleBox:
+	if not (sb is StyleBoxFlat):
+		return sb
+	var c := sb.duplicate() as StyleBoxFlat
+	c.set_border_width_all(0)
+	c.shadow_size = 0
+	return c
 
 
 ## A copy of a backdrop with nothing drawn (its margins kept).

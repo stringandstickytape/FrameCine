@@ -451,6 +451,7 @@ func apply_tablet_mode() -> void:
 	else:
 		var scale := float(layout_value("scale")) * float(app.features.access.get_value("ui_scale"))
 		panel.configure(PaneStyle.pane_metres(scale), PaneStyle.pane_pixels())
+	ui.set_text_scale(tablet.panel_text_scale() if on else 1.0)
 	ui.set_tablet_layout(on)
 	if _open:
 		recentre()
@@ -1004,7 +1005,7 @@ func _focus_step(stick: Vector2, delta: float) -> void:
 			return
 		_focus_wait = FOCUS_REPEAT
 	if panel.focus_owner() == null:
-		var first := ui.default_focus()
+		var first := ui.stick_focus()
 		if first != null:
 			first.grab_focus()
 		return

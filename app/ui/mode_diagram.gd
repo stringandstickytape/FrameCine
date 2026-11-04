@@ -25,10 +25,9 @@ func _init(p_kind := "mono", p_word := "") -> void:
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(76, PaneStyle.constant(&"button_height") + DIAGRAM_HEIGHT)
 	word.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	word.offset_top = -30.0
 	word.offset_bottom = -6.0
+	_fit_word()
 	toggled.connect(func(_on: bool) -> void: _restyle())
 	_restyle()
 
@@ -43,8 +42,18 @@ func set_chosen(on: bool) -> void:
 	_restyle()
 
 
-func _get_minimum_size() -> Vector2:
-	return custom_minimum_size
+## 76 px by the button height and the diagram, or wide and tall enough for its word in the theme's size (the
+## tablet's text is bigger, ui/pane_ui.gd). A Button sizes itself in the engine: custom_minimum_size is the way in.
+func _fit_word() -> void:
+	var w := word.get_combined_minimum_size()
+	word.offset_top = -(maxf(w.y, 24.0) + 6.0)
+	custom_minimum_size = Vector2(maxf(76.0, w.x + 16.0),
+			maxf(PaneStyle.constant(&"button_height") + DIAGRAM_HEIGHT, DIAGRAM_HEIGHT + 12.0 + w.y + 6.0))
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_THEME_CHANGED and word != null and is_node_ready():
+		_fit_word()
 
 
 func _draw() -> void:

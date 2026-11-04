@@ -38,6 +38,17 @@ static func theme() -> Theme:
 	return _theme
 
 
+## A copy of the theme with every font size times `s` (the tablet's bigger text, ui/pane_ui.gd set_text_scale()).
+static func scaled_theme(s: float) -> Theme:
+	var t := theme().duplicate() as Theme
+	if t.default_font_size > 0:
+		t.default_font_size = roundi(t.default_font_size * s)
+	for type in t.get_font_size_type_list():
+		for n in t.get_font_size_list(type):
+			t.set_font_size(n, type, roundi(t.get_font_size(n, type) * s))
+	return t
+
+
 ## Uses another theme file (settings) and tells the pane.
 static func use(p_path: String) -> void:
 	if p_path == "" or p_path == path and _theme != null:

@@ -29,7 +29,8 @@ extends Node3D
 ##   panel         inset (metres between the main pane's edge and the menu on it), px_per_m (the menu's layout pixels
 ##                 per metre: its theme is in pixels, so this sets how big it all is; the front panel's is 3080 at
 ##                 scale 1, the tablet's 2053, half as big again, the user 2026-11-04), render_scale (drawn pixels per
-##                 layout pixel: keeps the bigger text sharp)
+##                 layout pixel: keeps the bigger text sharp), text_scale (its font sizes times this: the text
+##                 half as big again once more, the user 2026-11-04, without making the rows and lists bigger)
 ##
 ## Placement, from the head's position and its heading (yaw only, so looking down when pressing doesn't sink it):
 ## FORWARD metres ahead and DOWN metres below the eyes, the centre about 44° below the horizon, about half a metre
@@ -86,7 +87,7 @@ const SCHEMA := {
 		"time": {"color": "color", "size": [0.004, 0.03], "font": "font"},
 		"bar": {"track": "color", "played": "color", "height": [0.001, 0.02], "corner_radius": [0.0, 0.01]},
 	},
-	"panel": {"inset": [0.0, 0.03], "px_per_m": [1000, 8000], "render_scale": [1.0, 3.0]},
+	"panel": {"inset": [0.0, 0.03], "px_per_m": [1000, 8000], "render_scale": [1.0, 3.0], "text_scale": [0.5, 3.0]},
 }
 ## Label3D: the font's pixels per em (pixel_size makes it the style's size in metres).
 const FONT_PX := 96
@@ -354,6 +355,10 @@ func panel_pixels() -> Vector2i:
 
 func panel_render_scale() -> float:
 	return float(_get(style(), "panel/render_scale"))
+
+
+func panel_text_scale() -> float:
+	return float(_get(style(), "panel/text_scale"))
 
 
 ## Where the menu goes: on the main pane, a little in front of it.

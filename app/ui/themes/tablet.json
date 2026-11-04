@@ -8,5 +8,5 @@
 		"time": {"color": "#ffffffcc", "size": 0.011, "font": "regular"},
 		"bar": {"track": "#ffffff38", "played": "#b0e0e6ff", "height": 0.004, "corner_radius": 0.002}
 	},
-	"panel": {"inset": 0.006, "px_per_m": 2053, "render_scale": 1.5}
+	"panel": {"inset": 0.006, "px_per_m": 2053, "render_scale": 1.5, "text_scale": 1.5}
 }

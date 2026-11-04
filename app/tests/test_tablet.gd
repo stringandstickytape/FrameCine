@@ -12,6 +12,7 @@ extends SceneTree
 
 const Tablet := preload("res://ui/tablet.gd")
 const W := preload("res://ui/pane_widgets.gd")
+const PaneStyle := preload("res://ui/pane_style.gd")
 
 var _failures := 0
 var _checks := 0
@@ -187,6 +188,19 @@ func _run() -> void:
 			and panel.viewport.size == Vector2i((Vector2(panel.resolution) * tablet.panel_render_scale()).round())
 			and panel.viewport.size_2d_override == panel.resolution
 			and pr.size.x > mp.size.x - 0.02 and pr.size.y > mp.size.y - 0.02)
+	var body_size: int = PaneStyle.theme().get_font_size(&"font_size", &"Label")
+	_check("the text times the tablet's text_scale (%d px, the front panel's %d)"
+			% [pui.tabs[0].get_theme_font_size(&"font_size", &"Label"), body_size],
+			pui.text_scale == tablet.panel_text_scale()
+			and pui.tabs[0].get_theme_font_size(&"font_size", &"Label") == roundi(body_size * tablet.panel_text_scale()))
+	var row_b: Button = pui.tablet_tab_buttons[0]
+	var borders := 0
+	for state: String in ["normal", "hover", "pressed", "hover_pressed", "focus"]:
+		var sb := row_b.get_theme_stylebox(state)
+		if sb is StyleBoxFlat:
+			var f := sb as StyleBoxFlat
+			borders += f.border_width_left + f.border_width_top + f.border_width_right + f.border_width_bottom
+	_check("the list rows have no borders, the focus no ring (%d px)" % borders, borders == 0)
 	_check("on the main pane, a little in front", panel.global_transform.is_equal_approx(tablet.panel_transform())
 			and (panel.global_transform.origin - tablet.main_pane.global_position).length() < 0.005)
 	_check("the header, seek bar, transport and tab bar give way", not pui._title.is_visible_in_tree()
