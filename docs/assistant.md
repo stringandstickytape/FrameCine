@@ -209,14 +209,17 @@ With "Let the assistant change the room" on, the assistant can rebuild the room 
 recolour it. It sends data, never code. Nothing it sends is run, evaluated or loaded as a script on the headset. An
 assistant can run any code on its own machine and send only the result (a model, a picture, a document).
 
-### The room document (schema 2)
+### The room document (schema 3)
 
-Schema 2 is schema 1 with objects (a model part's `object`), part addressing (`"Shelf/Board"` in `recolour`) and
-library materials (`library_material`); a schema 1 document is still read, and one that uses those is refused with
-"needs schema 2". Kept rooms are written as schema 2.
+Rooms are made of objects (`docs/decisions.md` D24). A part is either a **placement** of an object from the object
+library (below, "Objects") or a **shape** as an assistant describes it (`type`, `size`, an inline `model`, a
+`texture`): both may be sent, and a change keeps every shape as a placement (below, "Kept rooms"). Schema 3 is
+schema 2 with placements; schema 2 is schema 1 with objects (a model part's `object`), part addressing
+(`"Shelf/Board"` in `recolour`) and library materials (`library_material`). Schemas 1 and 2 are still read; a document
+that uses what its schema lacks is refused with "needs schema 2" or "needs schema 3". Kept rooms are written as schema 3.
 
 ```json
-{"schema": 2,
+{"schema": 3,
  "name": "Lounge at dusk",
  "base": "dim_room",
  "light": {"ambient": 0.2, "screen_glow": 0.6},
@@ -224,14 +227,15 @@ library materials (`library_material`); a schema 1 document is still read, and o
  "parts": [{"name": "Clock", "type": "cylinder", "size": [0.4, 0.04],
             "position": [1.6, 1.8, -3], "rotation": [90, 0, 0],
             "material": {"color": "#202020"},
-            "widget": "clock", "widget_options": {"style": "analog"}}],
+            "widget": "clock", "widget_options": {"style": "analog"}},
+           {"name": "Shelf", "object": "wall_shelf", "position": [-1.5, 1.2, -3]}],
  "recolour": [{"match": "Wall*", "material": {"color": "#3a5a7a"}}],
  "remove": ["Lamp"]}
 ```
 
 | Key | What |
 |---|---|
-| `schema` | 2 (1 is still read) |
+| `schema` | 3 (1 and 2 are still read) |
 | `name` | what the viewer keeps the room as (letters, digits, space, - and _; up to 40) |
 | `base` | `new_room` only: a room id from `room_state`'s `bases` (void, dim room, cinema, the built-in rooms, photo and glTF rooms, recipes) |
 | `base_model` | `new_room` only, instead of `base`: a whole room as a `.glb`, base64 (`app/docs/rooms.md` convention) |
@@ -247,12 +251,45 @@ library materials (`library_material`); a schema 1 document is still read, and o
 | `light` | `ambient`, `screen_glow` (the flat look); `key`, `sky`, `screen`, `contact_shadows` (real lighting, below) |
 | `lights` | at most 4 point or spot lights: `position` or `attach`, color, energy, range, flicker; no shadows |
 
-A part: `name`, `type` (`box` size [w, h, d]; `sphere` [diameter]; `cylinder` [diameter, height], round faces up
+A shape: `name`, `type` (`box` size [w, h, d]; `sphere` [diameter]; `cylinder` [diameter, height], round faces up
 and down; `plane` [w, d], facing up; `model` with `"model": base64 .glb`, and `"object": "<library id>"` when it was
 placed from the object library), `position` [x, y, z] in metres (the room
 frame, below), `rotation` [x, y, z] in degrees, `scale` (a number or [x, y, z]), `material` (`color`, `texture`
 base64 PNG/JPEG, `self_lit`, `emission`, `emission_strength` 0..10, `roughness` accepted but the rooms are unlit),
 `widget` and `widget_options`.
+
+A placement: `name`, `object` (a library id: `object_library` lists them), `position`, `rotation`, `scale`,
+`material` (an override, without a picture: `color`, `self_lit`, `emission`, `emission_strength`, `alpha`,
+`library_material` and its options, `effect`), `widget`, `widget_options`, `motion`; the object `text` takes `text`
+and `text_options`, `particles` takes `particles`. The built-in primitives are 1 m (`box` a 1 m cube, `sphere` 1 m
+across, `cylinder` 1 m across and 1 m tall, `plane` 1 x 1 m facing up): their placement's `scale` is their size in
+metres (box [w, h, d], sphere s, cylinder [d, h, d], plane [w, 1, d]). `text` at scale 1 is a line 0.1 m high, so its
+scale is the line height over 0.1; `particles` is an area 1 m a side. Any other object is a model from the library.
+`RoomSchema.build_form()` turns a placement into the shape the room is built from.
+
+**Kept rooms: placements only** (`scripts/assistant/room_keep.gd`). When a change is applied (`room_editor.apply`,
+new and patch), each shape becomes a placement before the room is built:
+
+| Sent | Kept as |
+|---|---|
+| a `box`, `sphere`, `cylinder` or `plane` without a picture | a placement of that built-in, its size (times its scale) as the scale, its material as the placement's |
+| a `text`, a `particles` area | a placement of the generator, its words or area kept on it |
+| a `model` (base64 `.glb`) | a user object named after the part (`ObjectLibrary.import_glb`); the same bytes are the same object (the md5 its manifest keeps), not a copy; a model naming a library `object` the library has: that object |
+| a shape or model with a `texture` (a poster, a photo, a sign), or a placement sent with one (`recolour` with `texture`) | a **picture object**: a user object, the shape's mesh at its size (a box with its `uv` layout) with the picture as its unlit material, written as a `.glb` (`RoomModel.with_picture`: the picture's own bytes in the file's buffer), named after the part, tags `["picture"]`, `mount` `wall` for a plane (its face turned to +Z, the placement turned back) or a box under 5 cm deep, else `free`; the placement keeps the rest of the material (`self_lit`, emission, alpha, an effect) |
+
+The reply's `kept_objects` lists them (`{part, id, name, new}`) and its summary names the new ones ("kept Poster in
+the object library"): each can be placed in any room by its id. A change that is refused after its parts were kept
+(the cost cap, a seat outside the walls) takes the objects it made out of the library again. User objects go under
+`user://objects/<id>/`, never under `res://`: nothing a viewer or an assistant gave ships with the app. A picture
+object shows its picture as a part's picture does (`assistant_room.gd _model_surfaces`: self-lit and white in a flat
+room, a cut-out where it is transparent, `color` on the placement tints it, a library material replaces it), and costs
+what the shape did (one mesh: `COSTS.part`). A wall or ceiling object gets no contact shadow.
+
+**Migration.** A kept room of schema 1 or 2 (`user://recipes`) is converted when it is loaded
+(`assistant_room.gd load_saved`): its `model_file` and `texture_file` parts go into the library the same way, and the
+room is saved back as schema 3 once. One that can't be converted (a model that doesn't read) is built as it was, with
+the reason in the log, and left as it was. The showrooms (`res://environments/showrooms`) stay schema-2 documents
+shipped read-only (`tools/showrooms.gd`); only a viewer's kept room fills the viewer's library.
 
 **Materials.** What a surface shows is `color x texture x light + emission x emission_strength`
 (`shaders/env_unlit_tex.gdshader`, `assistant_room.gd material()`). `light` is the room's light, as on its own walls
@@ -279,7 +316,9 @@ face's piece stretched to the whole picture).
 **Text.** `"type": "text"`: `text` (at most 1000 characters), `size` [line height in metres, default 0.1],
 `text_options` (`color`, `background`, `weight` regular or bold, `align`, `max_width` in metres to wrap). A Label3D
 in the panel's font (Inter) as a multichannel signed distance field, so it stays sharp at any distance; bold is a
-FontVariation; the background is a quad behind it. At most 16 text parts. `add_text` is the shortcut.
+FontVariation; the background is a quad behind it. At most 16 text parts. `add_text` is the shortcut. A text is kept
+as a placement of the library's `text` object (its line height over 0.1 as the scale), and `object_place {id:
+"text", text}` puts one in the room.
 
 **Bounds and warnings** (`room_bounds.gd`). `room_state` gives the base room's `interior` (a box in the room frame,
 measured with six rays from the seated eyes to the farthest surface each way, sides with nothing `open`; unknown in
@@ -416,14 +455,19 @@ model was made.
 
 "However objects were created, the app must be able to identify their parts and do whatever with them." The object
 library (`scripts/assistant/object_library.gd`) keeps things to put in a room: each a `.glb` and a small manifest.
+Rooms are made of objects (above, "Kept rooms"): every part of a kept room is a placement of one, and the library is
+the one source of a room's models and pictures.
 
 | Where | What |
 |---|---|
 | Built in (`object_builtins.gd`) | Made in the app from primitive meshes, so the repository holds no model files and nothing anyone else made: Picture frame (Frame, Mount, Picture: a quad that takes a picture whole), Wall shelf (Board, Brackets), Pot plant (Pot, Soil, Leaves), Wall clock (Rim, Face, with the `clock` widget drawing the hands). Written as a `.glb` once a session and read back like any import. |
-| The viewer's (`user://objects/<id>/`) | `object.glb`, `manifest.json`, `thumb.png`. Never under `res://`: an imported object may hold anything the viewer gave, logos too, so it stays in the user's data. A deleted one waits in `user://objects/.deleted/` until its undo is dropped. |
+| Built-in primitives | `box`, `sphere`, `cylinder`, `plane`: 1 m, centred, one grey part named after the shape (`Box`, ...: `"<placed>/Box"` in a recolour). A placement's scale is their size. The room builds them at that size from the same primitive meshes (a box with a picture's `uv` layout is a picture object instead), so a widget's face is not stretched. |
+| Built-in generators | `text` and `particles`: a manifest (`generator`), no `.glb`; their node is made per placement from its `text` and `text_options` (`assistant_room.gd _text()`) or its `particles`. The Objects tab doesn't list them (they need those options). |
+| The viewer's (`user://objects/<id>/`) | `object.glb`, `manifest.json`, `thumb.png`. Never under `res://`: an imported object may hold anything the viewer gave, logos too, so it stays in the user's data. A deleted one waits in `user://objects/.deleted/` until its undo is dropped. Imported, or kept from a room's part (a model, a picture object). |
 
 A manifest: `{id, name, tags, source (builtin or user), mount (wall, floor, table, ceiling or free), size [w, h, d],
-bounds {min, max}, triangles, parts: [{name, color, texture, triangles}], widget?, widget_options?}`. The catalogue is
+bounds {min, max}, triangles, parts: [{name, color, texture, triangles}], widget?, widget_options?, md5 (a user
+object's .glb, so the same bytes are kept once), picture? (a picture object), primitive? or generator?}`. The catalogue is
 the built-ins and the folder as it is on disk, so it survives restarts. Thumbnails are drawn in the app without the GPU
 (`object_thumb.gd`: the triangles from the front, a little from above and the right, in the parts' colours, shaded,
 on a clear background), on a worker thread: they never wait for a frame or stall the headset.
@@ -449,8 +493,10 @@ solid in the app (`svg_extrude.gd`, GDScript, no outside tools):
   `<use>` and pictures are left out. Each with a warning in the reply. An outline that crosses itself can't be filled
   and is left out (said too).
 
-**Placing.** `object_place {id}` adds a `model` part with `"object": "<id>"` and the model as base64 (kept as a file
-beside the kept room; two copies of one object are one file, and in the headset one mesh). Where: `at` `wall` (the
+**Placing.** `object_place {id}` adds a placement, `{"name", "object": "<id>", "position", "rotation", "scale"}`: the
+room keeps only the id, and its model comes from the library when the room is built (read once a session; two copies
+of one object are one mesh in the headset). `object_place {id: "text", text, text_options}` places words (`scale` 1:
+a line 0.1 m high); particles are sent as a part with `room_apply`. Where: `at` `wall` (the
 wall the viewer looks at: the head's level direction against the room's interior box, `RoomBounds.interior`), `floor`
 (1.3 m ahead of the head, on the floor), `ceiling`, `front` (1.5 m ahead at eye height); or `position` and `rotation`.
 A wall object's back goes on the wall, its front out (`turn` spins it about the wall's normal); a floor or table
@@ -519,11 +565,15 @@ id, "" for none) with `color` its mean colour (the swatch times the tint). A lib
 | `object_import {name, data, format, tags, mount, width, depth, bevel, part_names}` | room | a `.glb` or an SVG into the library; `path` instead of `data` is the dev link's only |
 | `object_place {id, name, at, position, rotation, turn, scale}` | room | into the room |
 | `object_move {name, at, position, rotation, turn, scale}` | room | what is left out stays |
-| `object_delete {id}` | room | an imported object out of the library (destructive; built-ins can't go; placed copies stay) |
+| `object_delete {id}` | room | a user object out of the library (destructive; built-ins can't go); refused while a kept room places it, the reply naming the rooms (`rooms`): remove it from them first. The Objects tab's Delete says the same |
 | `recolour {match, color, emission, emission_strength, texture, material, tint, tiling, triplanar, reset}` | room | a part as `"<placed>/<part>"`; `material` a library material's id (`materials` lists them) |
 | `remove {name}` | room | a placed object out of the room |
 
-`room_state` has `objects`: each placed object with its parts. The MCP adapter takes `data_path` for `data`.
+`room_state` has `objects`: every placement (in a kept room every part) with its `object` id, the object's name
+(`object_name`), where it is and its parts (none for a text or a particles area); `placements` names the built-in
+primitives and generators. A whole placement's `recolour` sets the placement's `material` (on a picture object the
+picture stays: `color` tints it); `"<placed>/<part>"` reaches a part of any placement, a primitive's one part
+included. The MCP adapter takes `data_path` for `data`.
 
 **Performance.** Placed copies of one object share its meshes (the room editor reads a model once per session by its
 data, and each copy is a duplicate of that); parts painted alike share one material. A model's parts are capped
@@ -566,7 +616,9 @@ Per room, for what the assistant added: 512 parts (64 until 2026-11-01; parts me
 8 MB per picture, 4096 x 4096 pixels per texture, 32 textures, 8 widgets, 4 lights, 128 parts per model, 256 recolour
 entries, everything within 200 m. A
 refusal names the limit and its value ("model_triangles: 160000, at most 150000"), so the assistant can retry with
-less.
+less. Every part is a placement, so `parts` is also the cap on the objects placed in a room (no other count); the
+models and pictures a room keeps in the library are checked against `model_triangles`, `model_parts` and
+`texture_size` as any import is, and count towards `triangles` and `textures` where they are placed.
 
 ### Performance
 
@@ -610,9 +662,10 @@ second, for 60 s.
 
 Everything the assistant adds goes into one node, `AssistantLayer`, under the room. The screen, the panel, the player
 and the XR rig are never in it, and `remove` takes only the assistant's own parts. A change shows at once and is
-kept: saved as a recipe, `user://recipes/<name>.room.json` (the document's `name`, else "Assistant room"), with its
-models and pictures in `<name>.files/`. It is in the Room tab's list with the other rooms and comes back after a
-restart. The reply says `"state": "kept"` with the room's `name` and `warnings`; the `room` event says the same.
+kept: saved as a recipe, `user://recipes/<name>.room.json` (the document's `name`, else "Assistant room"): its parts
+placements of library objects (its models and pictures in the object library, above), the pictures of its
+`recolour` entries, its sky's and its `base_model` in `<name>.files/`. It is in the Room tab's list with the other
+rooms and comes back after a restart. The reply says `"state": "kept"` with the room's `name` and `warnings`; the `room` event says the same.
 There is no Keep or Undo (the user's choice, 2026-10-31: "just assume keep; the AI can always change it back"): to go
 back, the assistant sends the reverse change. **Reset room** in an assistant's room goes back to the stock room it
 was built on. One change loads at a time; another sent meanwhile gets "another room change is still loading".
@@ -924,6 +977,7 @@ python3 tools/assistant/test_assistant.py    # end to end: the headless app on 1
 python tools/assistant/test_mcp_server.py    # the MCP adapter on stdio against a stand-in (fake_service.py)
 godot --headless --xr-mode off --path app --script res://tests/test_assistant_room.gd   # rooms: permission, schema, models, kept at once, frame, pictures, restart, snapshot
 godot --headless --xr-mode off --path app --script res://tests/test_object_library.gd   # objects: catalogue, SVG import, part addressing, kept part colours, the commands, the Objects tab
+godot --headless --xr-mode off --path app --script res://tests/test_room_objects.gd     # rooms are made of objects: every part type kept as a placement, picture objects, the same bytes once, text as an object, delete refused, schema 2 rooms converted
 godot --headless --xr-mode off --path app --script res://tests/test_room_materials.gd   # library materials on parts, objects and base surfaces; kept, lit, the material picker
 godot --headless --xr-mode off --path app --script res://tests/test_assistant_fetch.gd  # fetch: download, progress, refusals, disk, cancel; the browser page from DevTools
 godot --headless --xr-mode off --path app --script res://tests/test_assistant_places.gd # add_place / remove_place: the card, where each kind is kept, refusals

@@ -8,8 +8,8 @@
   "description": "A room, or a change to the room on show (docs/assistant.md, Rooms). Data only.",
   "properties": {
    "schema": {
-    "enum": [1, 2],
-    "description": "2 (1 is still read: 2 without objects, part addressing and library materials)"
+    "enum": [1, 2, 3],
+    "description": "3 (1 and 2 are still read: 2 without placements, 1 also without objects, part addressing and library materials)"
    },
    "name": {
     "type": "string",
@@ -241,9 +241,10 @@
  "Part": {
   "type": "object",
   "required": [
-   "name",
-   "type"
+   "name"
   ],
+  "anyOf": [{"required": ["type"]}, {"required": ["object"]}],
+  "description": "a shape (type, size, model, a picture in material.texture), or a placement of a library object (object, no type; schema 3). A kept room keeps every part as a placement: a model or a picture sent becomes a library object",
   "additionalProperties": false,
   "properties": {
    "name": {
@@ -338,7 +339,7 @@
    "object": {
     "type": "string",
     "pattern": "^[a-z0-9_-]{1,64}$",
-    "description": "type model, schema 2: the object library id it was placed from (object_place sets it)"
+    "description": "an object library id (object_library lists them). Without type (schema 3): a placement, the built-in box, sphere, cylinder and plane 1 m with the scale their size, text a 0.1 m line at scale 1; with type model (schema 2): the id it was placed from"
    },
    "position": {
     "type": "array",
@@ -357,11 +358,12 @@
     "maxItems": 3
    },
    "scale": {
+    "description": "at most 100; a primitive placement's (its size in metres) at most 200",
     "oneOf": [
      {
       "type": "number",
       "exclusiveMinimum": 0,
-      "maximum": 100
+      "maximum": 200
      },
      {
       "type": "array",

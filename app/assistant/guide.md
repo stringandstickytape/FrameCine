@@ -237,7 +237,7 @@ curl -s -k --pinnedpubkey "<<PIN>>" -H "Authorization: Bearer TOKEN" <<URL>>/car
 ## Rooms
 
 With the viewer's "Let the assistant change the room" on, you can rebuild the room around the screen, add to it or
-recolour it. You send data, never code: a **room document** (JSON, `"schema": 2`; 1 is still read), or the shortcut commands
+recolour it. You send data, never code: a **room document** (JSON, `"schema": 3`; 1 and 2 are still read), or the shortcut commands
 (`add_shape`, `add_model`, `recolour`, `set_lighting`, `remove`), which make one. Each change shows in the headset at
 once and is kept (saved as a room in the viewer's Room tab, under the document's `name`); the reply says
 `"state": "kept"`. There is no undo: to go back, send the change that reverses it (the viewer's Reset room returns
@@ -261,7 +261,7 @@ For motion, particles and effects, look at a clip: `GET /snapshot_clip.png?secon
 the frames side by side (8 a second, read left to right, then down).
 
 ```
-{"schema": 2,
+{"schema": 3,
  "name": "Lounge at dusk",                         the name the viewer keeps it under
  "base": "dim_room",                               new_room only: a room id from room_state's bases
  "base_model": "<base64 .glb>",                    new_room only, instead of base: a whole room as glTF
@@ -289,6 +289,17 @@ down: rotate [90, 0, 0] to face the viewer), `plane` ([w, d], facing up), `model
 `text` (words; below).
 Metres, in the room frame above. Models: binary glTF with everything embedded; no behaviour extensions;
 animations, cameras and lights are removed.
+
+**Rooms are made of objects.** Send parts as above; the room keeps each one as a *placement* of an object from the
+object library (`room_state`'s `objects` and the kept room list them as `{"name", "object": "<id>", "position",
+"rotation", "scale", "material"}`). A plain shape becomes the built-in `box`, `sphere`, `cylinder` or `plane` (1 m;
+the placement's `scale` is its size in metres), a text the built-in `text`. **A model you send, and a shape with a
+picture on it (a poster, a photo, a sign), is kept in the object library as an object of its own**, named after the
+part: the reply's `kept_objects` gives its id (the same file sent again is the same object, not a copy). You can then
+place it in any room with `object_place {id}`, or send a placement yourself in a schema-3 document: `{"name": "Poster",
+"object": "<id>", "position": [...], "rotation": [...]}`. A placement's `material` changes how it shows without
+changing the object (`color` tints a picture, `emission`, `effect`, `library_material`); a picture on a placement
+(`recolour` with `texture`) makes a new picture object.
 
 Materials: `color`, `texture` (base64 PNG/JPEG), `self_lit`, `emission`, `emission_strength`. What a surface shows is
 
@@ -488,10 +499,11 @@ data}` adds a `.glb` as it is, or an SVG drawing made solid (`width` and `depth`
 group a part, named by its `id`, else `part_1`, `part_2`, ...; `part_names` renames them in order and joins those
 given one name; gradients become one flat colour; strokes, text and pictures are left out, with warnings).
 `object_place {id}` puts one in the room: `at` `wall` (the wall the viewer looks at), `floor` (in front of them),
-`ceiling`, `front` (at eye height), or `position` and `rotation`; `scale`; `turn` (degrees). It is a `model` part
-with `"object": "<id>"`, so `room_state`'s `objects` lists it with its parts. `object_move {name}` moves it
-(`at`, `position`, `rotation`, `scale`), `remove {name}` takes it out, `object_delete {id}` deletes an imported
-object from the library (placed copies stay).
+`ceiling`, `front` (at eye height), or `position` and `rotation`; `scale`; `turn` (degrees). It is a placement,
+`"object": "<id>"` (the room keeps only the id), so `room_state`'s `objects` lists it with its parts. `object_place
+{id: "text", text: "Now showing", text_options}` places words (scale 1: a line 0.1 m high). `object_move {name}` moves
+it (`at`, `position`, `rotation`, `scale`), `remove {name}` takes it out, `object_delete {id}` deletes an imported or
+kept object from the library: refused while a kept room places it (the reply names the rooms; remove it there first).
 
 **Part addressing.** A part inside a placed object is `"<placed name>/<part name>"`, a pattern on each side
 (`"Shelf*/Board"`). `recolour {match: "Wall shelf/Board", color: "#c0392b"}` changes that part only and keeps the
