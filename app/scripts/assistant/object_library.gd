@@ -11,11 +11,16 @@ extends RefCounted
 ##
 ## A manifest: {id, name, tags, source, mount (wall, floor, table, ceiling or free), size [w, h, d] metres,
 ## bounds {min, max} (the model's own frame), triangles, parts: [{name, color, texture, triangles}], widget?,
-## widget_options?}.
+## widget_options?, md5 (a user object: its .glb's, so the same bytes are kept once), picture? (a picture object kept
+## from a room's part: its picture shows as the part's did), primitive? or generator? (built-ins)}.
+##
+## Rooms are made of objects (docs/decisions.md): a kept room's parts are placements of these, so the library is the
+## one source of a room's models and pictures. An object a kept room places can't be deleted (rooms_using()).
 ##
 ##   list(tag, source) -> [manifest]       get_object(id) -> manifest or {}       glb(id) -> PackedByteArray
-##   import_glb(bytes, name, tags, mount) -> {ok, manifest, warnings} or {ok: false, error, limit?}
+##   import_glb(bytes, name, tags, mount, extra) -> {ok, manifest, warnings} or {ok: false, error, limit?}
 ##   import_svg(text, name, options) -> the same                       delete(id), restore(id), purge(id)
+##   find_by_md5(md5) -> id or ""          rooms_using(id) -> [kept room names]
 ##   thumbnail(id) -> Image or null          aim(), pose(): where a placed object goes (object_commands.gd)
 
 const RoomModel := preload("res://scripts/assistant/room_model.gd")
@@ -25,6 +30,9 @@ const ObjectThumb := preload("res://scripts/assistant/object_thumb.gd")
 const SvgExtrude := preload("res://scripts/assistant/svg_extrude.gd")
 
 const USER_DIR := "user://objects"
+## The kept rooms (assistant_room.gd RECIPE_DIR, scripts/dev/recipes.gd ROOM_SUFFIX): what places an object.
+const RECIPE_DIR := "user://recipes"
+const ROOM_SUFFIX := ".room.json"
 const TRASH_DIR := "user://objects/.deleted"
 const MANIFEST := "manifest.json"
 const GLB := "object.glb"
@@ -42,6 +50,8 @@ const EDITOR_NODE := "ObjectRoomEditor"
 static var _builtin := {}
 ## Thumbnails made or read this session: id -> Image.
 static var _thumbs := {}
+## User objects' manifests read this session: id -> manifest.
+static var _manifests := {}
 ## The Room tab reads the catalogue on a worker thread while a command may read it here: one at a time.
 static var _lock := Mutex.new()
 
@@ -131,6 +141,12 @@ static func _user_ids() -> Array:
 
 
 static func _read_manifest(id: String) -> Dictionary:
+	# Read once (a room asks for its objects' manifests at each change); the library's own changes drop it.
+	_lock.lock()
+	var known: Variant = _manifests.get(id)
+	_lock.unlock()
+	if known is Dictionary:
+		return (known as Dictionary).duplicate(true)
 	var path := USER_DIR.path_join(id).path_join(MANIFEST)
 	if not FileAccess.file_exists(path):
 		return {}
@@ -140,7 +156,16 @@ static func _read_manifest(id: String) -> Dictionary:
 	var m: Dictionary = j.data
 	m["id"] = id
 	m["source"] = "user"
+	_lock.lock()
+	_manifests[id] = m.duplicate(true)
+	_lock.unlock()
 	return m
+
+
+static func _forget_manifest(id: String) -> void:
+	_lock.lock()
+	_manifests.erase(id)
+	_lock.unlock()
 
 
 ## A built-in: its nodes written as a .glb and read back as any import is (the same parts and checks).
@@ -158,6 +183,13 @@ static func _build_builtin(id: String) -> Dictionary:
 	for e: Dictionary in ObjectBuiltins.ENTRIES:
 		if e["id"] == id:
 			entry = e
+	if entry.has("generator"):
+		# Made per placement (a text's words, a particles area): a manifest, no .glb.
+		_builtin[id] = {"glb": PackedByteArray(), "manifest": {"id": id, "name": entry["name"],
+				"tags": (entry.get("tags", []) as Array).duplicate(), "mount": entry["mount"], "size": [1.0, 1.0, 1.0],
+				"bounds": {"min": [-0.5, -0.5, -0.5], "max": [0.5, 0.5, 0.5]}, "triangles": 0, "parts": [],
+				"source": "builtin", "generator": entry["generator"], "credit": "made for this app"}}
+		return _builtin[id]
 	var node := ObjectBuiltins.build(id)
 	if node == null:
 		return {}
@@ -171,6 +203,8 @@ static func _build_builtin(id: String) -> Dictionary:
 	(r["node"] as Node).free()
 	m["source"] = "builtin"
 	m["credit"] = "made for this app from simple shapes"
+	if entry.get("primitive", false):
+		m["primitive"] = true
 	if entry.has("widget"):
 		m["widget"] = entry["widget"]
 		m["widget_options"] = (entry.get("widget_options", {}) as Dictionary).duplicate(true)
@@ -199,8 +233,9 @@ static func manifest_of(r: Dictionary, id: String, name: String, tags: Array, mo
 # --- Import and delete ----------------------------------------------------------------------------------------------
 
 ## A .glb as a user object: checked as a room's models are (no scripts, no outside files, the limits), its parts
-## named, a thumbnail made, written under user://objects/<id>/. Safe on a worker thread.
-static func import_glb(bytes: PackedByteArray, name: String, tags: Array = [], mount := "") -> Dictionary:
+## named, a thumbnail made, written under user://objects/<id>/ with the md5 of its bytes. extra: more manifest fields
+## (picture). Safe on a worker thread.
+static func import_glb(bytes: PackedByteArray, name: String, tags: Array = [], mount := "", extra := {}) -> Dictionary:
 	var lim := RoomSchema.LIMITS
 	if bytes.size() > int(lim["model_bytes"]):
 		return {"ok": false, "error": "model_bytes: %d, at most %d" % [bytes.size(), lim["model_bytes"]],
@@ -238,6 +273,9 @@ static func import_glb(bytes: PackedByteArray, name: String, tags: Array = [], m
 		mount = "wall" if box.size.z < 0.25 * minf(box.size.x, box.size.y) else "floor"
 	var id := new_id(clean)
 	var m := manifest_of(r, id, clean, clean_tags(tags), mount)
+	m["md5"] = md5_of(bytes)
+	for k: String in extra:
+		m[k] = extra[k]
 	var thumb := ObjectThumb.render(r["node"], THUMB_SIZE)
 	(r["node"] as Node).free()
 	var dir := USER_DIR.path_join(id)
@@ -254,6 +292,7 @@ static func import_glb(bytes: PackedByteArray, name: String, tags: Array = [], m
 	f.store_string(JSON.stringify(saved, " "))
 	f.close()
 	_thumbs[id] = thumb
+	_forget_manifest(id)
 	m["source"] = "user"
 	return {"ok": true, "manifest": m, "warnings": r.get("removed", [])}
 
@@ -273,17 +312,61 @@ static func import_svg(text: String, name: String, tags: Array = [], mount := "w
 	return out
 
 
-## Deletes a user object (built-ins can't go): moved aside, so restore() can bring it back until purge().
+## The md5 of a file's bytes (hex), as a user object's manifest keeps it.
+static func md5_of(bytes: PackedByteArray) -> String:
+	var h := HashingContext.new()
+	h.start(HashingContext.HASH_MD5)
+	h.update(bytes)
+	return h.finish().hex_encode()
+
+
+## The user object whose .glb has these bytes (its manifest's md5), or "".
+static func find_by_md5(md5: String) -> String:
+	for id: String in _user_ids():
+		if str(_read_manifest(id).get("md5", "")) == md5:
+			return id
+	return ""
+
+
+## The kept rooms (user://recipes/<name>.room.json) whose parts place object `id`: their names.
+static func rooms_using(id: String) -> Array:
+	var out: Array = []
+	var dir: String = RECIPE_DIR
+	if not DirAccess.dir_exists_absolute(dir):
+		return out
+	for f in DirAccess.get_files_at(dir):
+		if not f.ends_with(ROOM_SUFFIX):
+			continue
+		var text := FileAccess.get_file_as_string(dir.path_join(f))
+		if not text.contains("\"%s\"" % id):
+			continue
+		var j := JSON.new()
+		if j.parse(text) != OK or not (j.data is Dictionary) or not (j.data.get("parts") is Array):
+			continue
+		for p: Variant in j.data["parts"]:
+			if p is Dictionary and str(p.get("object", "")) == id:
+				out.append(str(j.data.get("name", f.trim_suffix(ROOM_SUFFIX))))
+				break
+	return out
+
+
+## Deletes a user object (built-ins can't go, nor one a kept room places): moved aside, so restore() can bring it back
+## until purge().
 static func delete(id: String) -> Dictionary:
 	if is_builtin(id):
 		return {"ok": false, "error": "%s is built in: it can't be deleted" % id}
 	if not RoomSchema.id_ok(id) or not DirAccess.dir_exists_absolute(USER_DIR.path_join(id)):
 		return {"ok": false, "error": "no user object %s (object_library lists them)" % id}
+	var using := rooms_using(id)
+	if not using.is_empty():
+		return {"ok": false, "refused": true, "rooms": using, "error": "%s is placed in kept room%s %s: take it out "
+				% [id, "" if using.size() == 1 else "s", ", ".join(using)] + "of them first (remove)"}
 	DirAccess.make_dir_recursive_absolute(TRASH_DIR)
 	purge(id)
 	if DirAccess.rename_absolute(USER_DIR.path_join(id), TRASH_DIR.path_join(id)) != OK:
 		return {"ok": false, "error": "can't delete %s" % id}
 	_thumbs.erase(id)
+	_forget_manifest(id)
 	return {"ok": true}
 
 
@@ -291,6 +374,7 @@ static func delete(id: String) -> Dictionary:
 static func restore(id: String) -> bool:
 	if not DirAccess.dir_exists_absolute(TRASH_DIR.path_join(id)) or DirAccess.dir_exists_absolute(USER_DIR.path_join(id)):
 		return false
+	_forget_manifest(id)
 	return DirAccess.rename_absolute(TRASH_DIR.path_join(id), USER_DIR.path_join(id)) == OK
 
 
