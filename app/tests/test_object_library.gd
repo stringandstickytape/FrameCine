@@ -479,7 +479,11 @@ func _test_objects_tab() -> void:
 		if not section._ids.is_empty() and not section._loading:
 			break
 	_check("the Objects tab: a tile for each (%d)" % section._ids.size(), section._ids.size()
-			== ObjectLibrary.list().size() and section._grid.get_child_count() == section._ids.size())
+			== ObjectLibrary.list().size() and section._grid.get_child_count() + section._yours_grid.get_child_count()
+			== section._ids.size())
+	var built_in: int = ObjectLibrary.list("", "builtin").size()
+	_check("built in and yours apart (%d + %d)" % [section._grid.get_child_count(), section._yours_grid.get_child_count()],
+			section._grid.get_child_count() == built_in and section._yours_grid.visible == (section._yours_grid.get_child_count() > 0))
 	var tile: Button = section._tiles.get("pot_plant")
 	_check("a tile has its thumbnail and name", tile != null and tile.find_children("*", "TextureRect", true,
 			false).size() == 1)

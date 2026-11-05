@@ -39,7 +39,11 @@ const EFFECT_SWATCH := 32
 
 ## scripts/main.gd
 var app: Node
+## The built-in objects' tiles, then the viewer's own (imported, or kept from a room) under their own heading, so it is
+## plain which came with the app and which are this install's (the user, 2026-11-05).
 var _grid: GridContainer
+var _yours_label: Label
+var _yours_grid: GridContainer
 var _tiles := {}
 var _ids: Array = []
 var _selected := ""
@@ -66,11 +70,13 @@ func bind(p_app: Node) -> void:
 	app = p_app
 	add_theme_constant_override("separation", PaneStyle.constant(&"gap"))
 	add_child(W.section("Objects"))
-	_grid = GridContainer.new()
-	_grid.columns = COLUMNS
-	_grid.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
-	_grid.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	add_child(W.label("Built in", &"MutedLabel"))
+	_grid = _tile_grid()
 	add_child(_grid)
+	_yours_label = W.label("Yours", &"MutedLabel")
+	add_child(_yours_label)
+	_yours_grid = _tile_grid()
+	add_child(_yours_grid)
 	_chosen = W.ellipsis(W.label("", &"MutedLabel"))
 	_place = W.button("Place", _start_place)
 	_delete = W.button("Delete", _ask_delete)
@@ -118,12 +124,15 @@ func _sync_library() -> void:
 	if ids != _ids:
 		_ids = ids
 		_tiles.clear()
-		for c in _grid.get_children():
-			_grid.remove_child(c)
-			c.queue_free()
+		for g in [_grid, _yours_grid]:
+			for c in g.get_children():
+				g.remove_child(c)
+				c.queue_free()
 		var group := ButtonGroup.new()
 		for m: Dictionary in list:
 			_tile(m, group)
+		_yours_label.visible = _yours_grid.get_child_count() > 0
+		_yours_grid.visible = _yours_label.visible
 	if not (_selected in _ids):
 		_selected = ""
 	for id: String in _tiles:
@@ -159,8 +168,16 @@ func _tile(m: Dictionary, group: ButtonGroup) -> void:
 		_selected = id
 		_sync_chosen()
 		_show_place())
-	_grid.add_child(b)
+	(_grid if str(m.get("source", "user")) == "builtin" else _yours_grid).add_child(b)
 	_tiles[id] = b
+
+
+func _tile_grid() -> GridContainer:
+	var g := GridContainer.new()
+	g.columns = COLUMNS
+	g.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
+	g.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	return g
 
 
 func _sync_chosen() -> void:
@@ -170,7 +187,7 @@ func _sync_chosen() -> void:
 	else:
 		var n := (m.get("parts", []) as Array).size()
 		_chosen.text = "%s  ·  %s  ·  %d part%s%s" % [m["name"], m["mount"], n, "" if n == 1 else "s",
-				"  ·  imported" if m["source"] == "user" else ""]
+				"  ·  yours" if m["source"] == "user" else "  ·  built in"]
 	_place.disabled = m.is_empty()
 	_delete.visible = not m.is_empty() and m["source"] == "user"
 
