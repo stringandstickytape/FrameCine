@@ -253,7 +253,11 @@ func _test_room_tab() -> void:
 			func(r: Dictionary) -> String: return str(r["name"])))
 	_check("no showroom among the rooms' own rows", (tab._envs.get_children() as Array).all(func(b: Button) -> bool:
 			return not str(b.text) in rooms.map(func(r: Dictionary) -> String: return str(r["name"]))))
-	_check("the rooms' rows come first", tab._envs.get_child_count() + rows.size() == tab._env_ids.size())
+	_check("the rooms' rows come first", tab._envs.get_child_count() + tab._yours.get_child_count() + rows.size()
+			== tab._env_ids.size())
+	_check("the viewer's own rooms apart (%d)" % tab._yours.get_child_count(), (tab._yours.get_children() as Array).size()
+			== tab._env_ids.filter(func(id: String) -> bool: return tab.is_yours(id)).size()
+			and tab._yours_box.visible == (tab._yours.get_child_count() > 0))
 	var before: String = main.env_id
 	(rows[0] as Button).pressed.emit()
 	await _frames(2)

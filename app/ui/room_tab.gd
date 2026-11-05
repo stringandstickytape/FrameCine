@@ -10,6 +10,7 @@ extends ScrollContainer
 
 const W := preload("res://ui/pane_widgets.gd")
 const EnvLibrary := preload("res://scripts/env/env_library.gd")
+const Recipes := preload("res://scripts/dev/recipes.gd")
 const Showrooms := preload("res://scripts/env/showrooms.gd")
 const SearchForm := preload("res://ui/search_form.gd")
 const WatchParty := preload("res://scripts/party/watch_party.gd")
@@ -22,7 +23,11 @@ const SLEEP_WORDS := ["Off", "15 min", "30 min", "60 min", "90 min", "End of fil
 var app: Node
 var box: VBoxContainer
 ## One row per environment, rebuilt when the list changes (photo rooms and glTF rooms come and go).
+## The rooms that ship with the app, then the viewer's own (kept rooms, glTF rooms, photo rooms: user data, never
+## shipped) under their own heading, as the Objects tab does (the user, 2026-11-05).
 var _envs: HFlowContainer
+var _yours_box: VBoxContainer
+var _yours: HFlowContainer
 var _env_ids: Array[String] = []
 ## The showrooms (scripts/env/showrooms.gd), the list's last rows: their own group under the rooms, one row each.
 var _showroom_box: VBoxContainer
@@ -89,8 +94,14 @@ func _init() -> void:
 func bind(p_app: Node) -> void:
 	app = p_app
 	box.add_child(W.section("Environment"))
+	box.add_child(W.label("Built in", &"MutedLabel"))
 	_envs = W.flow()
 	box.add_child(_envs)
+	_yours_box = W.vbox()
+	box.add_child(_yours_box)
+	_yours_box.add_child(W.label("Yours", &"MutedLabel"))
+	_yours = W.flow()
+	_yours_box.add_child(_yours)
 	_use_picture = W.button("Use this picture as the room", _use_picture_as_room)
 	box.add_child(W.hbox([_use_picture]))
 	_showroom_box = W.vbox()
@@ -272,7 +283,7 @@ func tick() -> void:
 
 
 ## The environment rows: rebuilt when the list changed (a photo room or a glTF room added), else only the mark moves.
-## The showrooms go in their own group (Showrooms), one mark for both.
+## The viewer's own rooms go under Yours, the showrooms in their own group (Showrooms); one mark for all.
 func _sync_envs() -> void:
 	if _form_open():
 		return
@@ -283,7 +294,7 @@ func _sync_envs() -> void:
 	if ids != _env_ids:
 		_env_ids = ids
 		_env_rows.clear()
-		for holder: HFlowContainer in [_envs, _showrooms]:
+		for holder: HFlowContainer in [_envs, _yours, _showrooms]:
 			for c in holder.get_children():
 				holder.remove_child(c)
 				c.queue_free()
@@ -293,12 +304,19 @@ func _sync_envs() -> void:
 			var b := W.button(str(e[1]), func() -> void: app.set_environment(id))
 			b.toggle_mode = true
 			b.button_group = group
-			(_showrooms if Showrooms.is_showroom(id) else _envs).add_child(b)
+			var holder := _showrooms if Showrooms.is_showroom(id) else (_yours if is_yours(id) else _envs)
+			holder.add_child(b)
 			_env_rows.append(b)
+		_yours_box.visible = _yours.get_child_count() > 0
 		_showroom_box.visible = _showrooms.get_child_count() > 0
 	for i in _env_rows.size():
 		_env_rows[i].set_pressed_no_signal(_env_ids[i] == str(app.env_id))
 	_use_picture.visible = bool(app.features.slideshow.is_picture()) and not str(app.current_path).begins_with("smb://")
+
+
+## A room of the viewer's own: a kept room, a glTF room or a photo room (user data), not one that ships.
+static func is_yours(id: String) -> bool:
+	return id.begins_with(Recipes.PREFIX) or id.begins_with(EnvLibrary.SKY_PREFIX) or id.begins_with(EnvLibrary.ROOM_PREFIX)
 
 
 ## The name or PIN form has the tab: the other rows stay hidden until it closes (sync() then shows them right).
