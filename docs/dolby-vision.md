@@ -19,7 +19,7 @@ Y'CbCr is purple and green. The profile comes from the container's DOVI configur
 ## What the profile 5 path does now
 
 `scripts/play/hdr_tone_map.gd describe()`: profile 5 means PQ, BT.2020, limited range, `dovi = 1`. The status line
-says "Dolby Vision profile 5 (IPT, as PQ)".
+says "DV profile 5 (IPT, as PQ)".
 
 `shaders/video_common.gdshaderinc`, with `dovi == 1`:
 

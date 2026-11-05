@@ -131,7 +131,7 @@ func text() -> String:
 		return ""
 	var kind := "HDR10 (PQ)" if int(current["transfer"]) == TRANSFER_PQ else "HLG"
 	if int(current.get("dovi", 0)) == 1:
-		kind = "Dolby Vision profile 5 (IPT, as PQ)"
+		kind = "DV profile 5 (IPT, as PQ)"
 	return "%s, peak %d nits (%s)%s%s" % [kind,
 			roundi(float(current["peak_nits"])), current["peak_from"], ", BT.2390" if uses_engine_curve() else "",
 			"" if enabled else ", tone mapping off"]
