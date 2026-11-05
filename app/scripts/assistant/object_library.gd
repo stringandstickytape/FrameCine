@@ -52,7 +52,9 @@ static var _builtin := {}
 static var _thumbs := {}
 ## User objects' manifests read this session: id -> manifest.
 static var _manifests := {}
-## The Room tab reads the catalogue on a worker thread while a command may read it here: one at a time.
+## The Room tab reads the catalogue on a worker thread while a command may read it here: one at a time. Held only to
+## read and store the caches, never while a model is built or drawn: that reads meshes back from the renderer, which
+## from a worker waits for the main thread, and the main thread may be waiting here (the Objects tab hung the app so).
 static var _lock := Mutex.new()
 
 
@@ -105,14 +107,23 @@ static func glb(id: String) -> PackedByteArray:
 ## Its thumbnail (made once, kept for a user object beside it), or null.
 static func thumbnail(id: String) -> Image:
 	_lock.lock()
-	var img := _thumbnail(id)
+	var known: Variant = _thumbs.get(id)
 	_lock.unlock()
+	if known is Image:
+		return known
+	var img := _thumbnail(id)
+	if img != null:
+		_lock.lock()
+		if _thumbs.get(id) is Image:
+			img = _thumbs[id]
+		else:
+			_thumbs[id] = img
+		_lock.unlock()
 	return img
 
 
+## Read or drawn, without the lock.
 static func _thumbnail(id: String) -> Image:
-	if _thumbs.has(id):
-		return _thumbs[id]
 	var img: Image = null
 	if not is_builtin(id):
 		var path := USER_DIR.path_join(id).path_join(THUMB)
@@ -127,7 +138,6 @@ static func _thumbnail(id: String) -> Image:
 			return null
 		img = ObjectThumb.render(r["node"], THUMB_SIZE)
 		(r["node"] as Node).free()
-	_thumbs[id] = img
 	return img
 
 
@@ -169,27 +179,36 @@ static func _forget_manifest(id: String) -> void:
 
 
 ## A built-in: its nodes written as a .glb and read back as any import is (the same parts and checks).
+## Built without the lock (two threads may both build one the first time: the first kept).
 static func _make_builtin(id: String) -> Dictionary:
 	_lock.lock()
+	var known: Variant = _builtin.get(id)
+	_lock.unlock()
+	if known is Dictionary:
+		return known
 	var out := _build_builtin(id)
+	if out.is_empty():
+		return out
+	_lock.lock()
+	if _builtin.get(id) is Dictionary:
+		out = _builtin[id]
+	else:
+		_builtin[id] = out
 	_lock.unlock()
 	return out
 
 
 static func _build_builtin(id: String) -> Dictionary:
-	if _builtin.has(id):
-		return _builtin[id]
 	var entry: Dictionary = {}
 	for e: Dictionary in ObjectBuiltins.ENTRIES:
 		if e["id"] == id:
 			entry = e
 	if entry.has("generator"):
 		# Made per placement (a text's words, a particles area): a manifest, no .glb.
-		_builtin[id] = {"glb": PackedByteArray(), "manifest": {"id": id, "name": entry["name"],
+		return {"glb": PackedByteArray(), "manifest": {"id": id, "name": entry["name"],
 				"tags": (entry.get("tags", []) as Array).duplicate(), "mount": entry["mount"], "size": [1.0, 1.0, 1.0],
 				"bounds": {"min": [-0.5, -0.5, -0.5], "max": [0.5, 0.5, 0.5]}, "triangles": 0, "parts": [],
 				"source": "builtin", "generator": entry["generator"], "credit": "made for this app"}}
-		return _builtin[id]
 	var node := ObjectBuiltins.build(id)
 	if node == null:
 		return {}
@@ -208,8 +227,7 @@ static func _build_builtin(id: String) -> Dictionary:
 	if entry.has("widget"):
 		m["widget"] = entry["widget"]
 		m["widget_options"] = (entry.get("widget_options", {}) as Dictionary).duplicate(true)
-	_builtin[id] = {"glb": bytes, "manifest": m}
-	return _builtin[id]
+	return {"glb": bytes, "manifest": m}
 
 
 ## Nodes (not in a tree) as a binary glTF.
@@ -291,7 +309,9 @@ static func import_glb(bytes: PackedByteArray, name: String, tags: Array = [], m
 	f = FileAccess.open(dir.path_join(MANIFEST), FileAccess.WRITE)
 	f.store_string(JSON.stringify(saved, " "))
 	f.close()
+	_lock.lock()
 	_thumbs[id] = thumb
+	_lock.unlock()
 	_forget_manifest(id)
 	m["source"] = "user"
 	return {"ok": true, "manifest": m, "warnings": r.get("removed", [])}
@@ -365,7 +385,9 @@ static func delete(id: String) -> Dictionary:
 	purge(id)
 	if DirAccess.rename_absolute(USER_DIR.path_join(id), TRASH_DIR.path_join(id)) != OK:
 		return {"ok": false, "error": "can't delete %s" % id}
+	_lock.lock()
 	_thumbs.erase(id)
+	_lock.unlock()
 	_forget_manifest(id)
 	return {"ok": true}
 
