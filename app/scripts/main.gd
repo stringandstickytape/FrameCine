@@ -459,8 +459,8 @@ func _env_from_arg(text: String) -> String:
 func _setup_view(want_xr: bool) -> void:
 	var xr := XRServer.find_interface("OpenXR")
 	if want_xr and xr != null and xr.is_initialized():
-		# The XR runtime paces frames.
-		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+		# The XR runtime paces frames; the window's vsync is left as it is. Asking for it off warned at every start on
+		# the Frame ("not available", so it stayed on) and changed nothing: the eye images go to the runtime, not the window.
 		get_viewport().use_xr = true
 		# Foveation ([xr] in project.godot; the level is [view] foveation): the runtime's density map shapes the eye
 		# images only with VRS XR. Set once: switching the viewport's VRS mode at run time left the eye images low

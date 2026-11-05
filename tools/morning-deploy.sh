@@ -107,8 +107,10 @@ APP_FILES=$(cd app && find . \( -path ./.godot -o -path ./docs \) -prune -o -typ
 if [ "$DRY" = 1 ]; then
   echo "  $(printf '%s\n' "$APP_FILES" | wc -l) files (tools/push-app.sh)"
 elif [ "$HOST" = local ]; then
-  mkdir -p "$HOME/spike03/app"
+  mkdir -p "$HOME/spike03/app/.godot"
   (cd app && printf '%s\n' "$APP_FILES" | tar -cf - -T -) | tar -xf - -C "$HOME/spike03/app"
+  [ -f "$HOME/spike03/app/.godot/global_script_class_cache.cfg" ] \
+    || printf 'list=Array[Dictionary]([])\n' > "$HOME/spike03/app/.godot/global_script_class_cache.cfg"
 else
   FRAME_APP_DIR=spike03/app bash tools/push-app.sh > /dev/null
 fi

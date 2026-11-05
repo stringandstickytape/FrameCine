@@ -21,6 +21,11 @@ driver/enable_input=true
 window/size/viewport_width=1280
 window/size/viewport_height=720
 
+[physics]
+
+; Pointers raycast for themselves; the viewport's own picking only warns that it can't work in stereo.
+common/enable_object_picking=false
+
 [rendering]
 
 renderer/rendering_method="mobile"

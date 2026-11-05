@@ -52,6 +52,13 @@ push_all() {
   else
     list_files | send_tar
   fi
+  [ "$DRY" = 1 ] || script_class_cache
+}
+
+# A template run from a project folder reads .godot/global_script_class_cache.cfg and prints "Could not load global
+# script cache" without it; the app has no class_name scripts, so an empty list is the truth.
+script_class_cache() {
+  ssh "$HOST" "mkdir -p '$DEST/.godot' && { [ -f '$DEST/.godot/global_script_class_cache.cfg' ] || printf 'list=Array[Dictionary]([])\n' > '$DEST/.godot/global_script_class_cache.cfg'; }"
 }
 
 # Changes made while the first copy runs are caught by the first watch round.

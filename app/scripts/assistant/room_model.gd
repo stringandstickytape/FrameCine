@@ -340,8 +340,16 @@ static func _turn_surface(arrays: Array) -> int:
 
 static func decode_image(bytes: PackedByteArray) -> Dictionary:
 	var img := Image.new()
-	if img.load_png_from_buffer(bytes) != OK and img.load_jpg_from_buffer(bytes) != OK \
-			and img.load_webp_from_buffer(bytes) != OK:
+	# The first bytes say which it is: a wrong guess prints an engine warning ("Not a PNG file") for every JPEG.
+	var err := ERR_FILE_UNRECOGNIZED
+	if bytes.size() >= 12:
+		if bytes[0] == 0x89 and bytes[1] == 0x50:
+			err = img.load_png_from_buffer(bytes)
+		elif bytes[0] == 0xFF and bytes[1] == 0xD8:
+			err = img.load_jpg_from_buffer(bytes)
+		elif bytes.slice(8, 12).get_string_from_ascii() == "WEBP":
+			err = img.load_webp_from_buffer(bytes)
+	if err != OK or img.is_empty():
 		return {"error": "not a PNG, JPEG or WebP picture"}
 	var cap: int = RoomSchema.LIMITS["texture_size"]
 	if img.get_width() > cap or img.get_height() > cap:
