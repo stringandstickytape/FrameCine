@@ -693,11 +693,12 @@ func on_talk(held: bool) -> void:
 
 
 ## Y on the right controller. The pointer hand only: the pane sits there, and the left has no Y for it to be the left's. Not
-## while the menu or a calibration has the controller. An agent running: its pane on or off, and it keeps working either
-## way. None: starts one, or a card asks to install it.
+## while a calibration has the controller. With the menu open it still works (the user, 2026-11-05): the pane shows or
+## hides, and the menu keeps the stick and trigger until it closes (has_input()). An agent running: its pane on or off,
+## and it keeps working either way. None: starts one, or a card asks to install it.
 func on_agent_button(hand: Node) -> void:
 	var gaze := _gaze()
-	if hand != _pointer_hand() or main.menu_shown or (gaze != null and gaze.calibrating):
+	if hand != _pointer_hand() or (gaze != null and gaze.calibrating):
 		return
 	if active != "" and (is_running(active) or _starting.has(active)):
 		toggle_pane()

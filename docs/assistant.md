@@ -745,7 +745,8 @@ It is 26 cm wide (`PANE_WIDTH_M`), and the window is 66 columns by 34 lines (`CO
 - **Talk** shows it, and it stays until you hide it. A quick tap of talk while it shows hides it.
 - **Y** on the right controller, the button with the sparkle, shows or hides it, while the right hand is the pointer hand.
   With no agent running it starts the last one used, or the first one installed, or asks to install one. It does nothing
-  while the menu or a calibration has the controller, and hiding leaves the agent working.
+  while a calibration has the controller; with the menu open the pane still toggles, and the menu keeps the stick and
+  trigger until it closes. Hiding leaves the agent working.
 - It comes and goes in 0.2 s: its opacity eases and it grows a little out of its controller end. A press in the middle
   turns it back from where it is, and the gaze's hit test follows the size it is at.
 - The capture is a second `X11WindowSource` beside the screen's. It updates only while the pane shows, so a hidden pane

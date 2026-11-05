@@ -546,7 +546,8 @@ func _pane_fade_checks() -> void:
 	_check("and ends with it", fake.captured == 0)
 
 
-## Y: on the pointer hand only, not under the menu or a calibration; shows and hides the pane with the agent left working;
+## Y: on the pointer hand only, not under a calibration, with the menu open too; shows and hides the pane with the agent
+## left working;
 ## with none running, starts the last one used, or the first installed, or asks.
 func _y_checks(hand: Node) -> void:
 	var voice := str(main.settings.get_value("assistant", "voice_to", ""))
@@ -563,7 +564,10 @@ func _y_checks(hand: Node) -> void:
 	main.ui.set_pointer_hand(main.right_hand)
 	main.set_menu_shown(true)
 	agents.on_agent_button(hand)
-	_check("the menu has it: Y does nothing", not agents.pane_shown())
+	_check("the menu open: Y still shows the pane", agents.pane_shown())
+	_check("but the menu keeps the stick and trigger", not agents.has_input(hand))
+	agents.on_agent_button(hand)
+	_check("and Y hides it again", not agents.pane_shown())
 	main.set_menu_shown(false)
 	var gaze: Object = agents.gaze_override
 	agents.gaze_override = fake_gaze
