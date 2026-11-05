@@ -9,10 +9,15 @@ extends RefCounted
 ## `fab`, so the same download isn't added twice). The material is made here, not read from the .fbx (which names
 ## the 4K maps of the full asset, not the ones in the zip): the colour map with the ambient occlusion multiplied in
 ## (rooms draw objects unlit, gltf_room.gd, so the crevices keep their shade), the normal map, and roughness (or
-## gloss turned round); an opacity map becomes the colour's alpha, cut out. Maps over MAX_TEXTURE are made smaller.
+## gloss turned round); an opacity map becomes the colour's alpha, cut out (two-sided). Maps over MAX_TEXTURE are made
+## smaller. A plant's "AO" isn't occlusion (a fifth of the ham's on average: it made them five times darker), so it
+## is left out when there is an opacity map or the map's mean is under AO_MIN_MEAN. A dark scan (old wood: a mean of
+## 0.12 against the ham's 0.43) is lifted towards COLOUR_MIN_MEAN, at most COLOUR_MAX_GAIN times: unlit, nothing else
+## brings it up (the user, 2026-11-05: "rather too dark").
 ##
 ##   is_fab_zip(path) -> bool             read_zip(path) -> {id, name, tags, mount, model, model_name, maps} or {error}
-##   import_zip(path) -> import_glb's result (+ "already" when that asset is in the library)
+##   import_zip(path, again) -> import_glb's result (+ "already" when that asset is in the library; again: made again
+##                                       under the same id, so the rooms that place it show the new one)
 ##   downloads() -> [{path, id, name}]   the Fab zips in the Downloads folder not yet in the library
 
 const ObjectLibrary := preload("res://scripts/assistant/object_library.gd")
@@ -21,6 +26,9 @@ const ObjectLibrary := preload("res://scripts/assistant/object_library.gd")
 const MAX_TEXTURE := 2048
 ## A zip bigger than this isn't read (a Raw download is hundreds of MB, far over the object limits anyway).
 const MAX_ZIP_BYTES := 200 * 1024 * 1024
+const AO_MIN_MEAN := 0.5
+const COLOUR_MIN_MEAN := 0.25
+const COLOUR_MAX_GAIN := 2.0
 ## Map names in the files, by the slot they fill (Fab writes <name>_<id>_<res>_<Map>.jpg).
 const MAP_NAMES := {
 	"albedo": ["basecolor", "albedo", "diffuse"],
@@ -78,7 +86,7 @@ static func read_zip(path: String) -> Dictionary:
 		var ga := a.get_extension().to_lower() == "glb"
 		var gb := b.get_extension().to_lower() == "glb"
 		return ga and not gb if ga != gb else a < b)
-	var out := {"id": str(info["id"]), "name": str(info.get("name", info["id"])), "tags": _tags(info),
+	var out := {"id": str(info["id"]), "name": _name_of(info), "tags": _tags(info),
 			"mount": "table" if _meta(info, "small3dasset") == "true" else "floor",
 			"model_name": models[0].get_file(), "model": z.read_file(models[0]), "maps": {}}
 	for slot: String in maps:
@@ -90,13 +98,16 @@ static func read_zip(path: String) -> Dictionary:
 
 
 ## Adds the asset in a Fab zip to the library. Safe on a worker thread.
-static func import_zip(path: String) -> Dictionary:
+static func import_zip(path: String, again := false) -> Dictionary:
 	var a := read_zip(path)
 	if a.has("error"):
 		return {"ok": false, "error": a["error"]}
+	var extra := {"fab": a["id"]}
 	for m: Dictionary in ObjectLibrary.list("", "user"):
 		if str(m.get("fab", "")) == a["id"]:
-			return {"ok": true, "already": true, "manifest": m, "warnings": []}
+			if not again:
+				return {"ok": true, "already": true, "manifest": m, "warnings": []}
+			extra["replace"] = str(m["id"])
 	var node := _load_model(a["model"], a["model_name"])
 	if node == null:
 		return {"ok": false, "error": "%s doesn't read" % a["model_name"]}
@@ -105,7 +116,7 @@ static func import_zip(path: String) -> Dictionary:
 	node.free()
 	if bytes.is_empty():
 		return {"ok": false, "error": "the model could not be written as a .glb"}
-	return ObjectLibrary.import_glb(bytes, a["name"], a["tags"], a["mount"], {"fab": a["id"]})
+	return ObjectLibrary.import_glb(bytes, a["name"], a["tags"], a["mount"], extra)
 
 
 ## The Fab zips in the Downloads folder whose asset isn't in the library yet.
@@ -137,6 +148,15 @@ static func _slot_of(file: String) -> String:
 		if last in MAP_NAMES[slot]:
 			return slot
 	return ""
+
+
+## The asset's name; some .json files have none, only semanticTags.name ("Historic Mansion Furniture Chair ...").
+static func _name_of(info: Dictionary) -> String:
+	var semantic: Variant = (info["semanticTags"] as Dictionary).get("name") if info.get("semanticTags") is Dictionary 			else null
+	for v: Variant in [info.get("name"), semantic]:
+		if v is String and (v as String).strip_edges() != "":
+			return (v as String).strip_edges()
+	return str(info.get("id", ""))
 
 
 static func _meta(info: Dictionary, key: String) -> String:
@@ -175,7 +195,8 @@ static func _zip_id(path: String) -> String:
 
 
 static func _zip_name(path: String) -> String:
-	return str(_zip_json(path).get("name", path.get_file().get_basename()))
+	var j := _zip_json(path)
+	return _name_of(j) if j.has("id") else path.get_file().get_basename()
 
 
 static func _image(bytes: PackedByteArray, file: String) -> Image:
@@ -249,8 +270,9 @@ static func material(maps: Dictionary) -> StandardMaterial3D:
 	var albedo: Image = maps.get("albedo")
 	if albedo != null:
 		albedo = albedo.duplicate()
-		if maps.get("ao") != null:
+		if maps.get("ao") != null and maps.get("opacity") == null and _mean(maps["ao"]) >= AO_MIN_MEAN:
 			_multiply(albedo, maps["ao"])
+		_lift(albedo, maps.get("opacity"))
 		if maps.get("opacity") != null:
 			_alpha(albedo, maps["opacity"])
 			m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
@@ -300,6 +322,49 @@ static func _invert(img: Image) -> void:
 	var d := img.get_data()
 	for i in d.size():
 		d[i] = 255 - d[i]
+	img.set_data(img.get_width(), img.get_height(), false, img.get_format(), d)
+
+
+## A map's mean (its first channel), 0..1, from a small copy; with a mask, only where the mask is over half.
+static func _mean(img: Image, mask: Image = null) -> float:
+	var s := img.duplicate() as Image
+	s.resize(64, 64, Image.INTERPOLATE_BILINEAR)
+	var v := _channel(s)
+	var m := PackedByteArray()
+	if mask != null:
+		var k := mask.duplicate() as Image
+		k.resize(64, 64, Image.INTERPOLATE_BILINEAR)
+		m = _channel(k)
+	var total := 0
+	var n := 0
+	for i in v.size():
+		if not m.is_empty() and m[i] < 128:
+			continue
+		total += v[i]
+		n += 1
+	return total / 255.0 / maxi(1, n)
+
+
+## A dark colour map brightened towards COLOUR_MIN_MEAN (its mean where the opacity map keeps it), at most
+## COLOUR_MAX_GAIN times; the colours keep their balance (each channel times the same gain, clipped).
+static func _lift(img: Image, opacity: Image) -> void:
+	var mean := _mean(img, opacity)
+	if mean <= 0.0 or mean >= COLOUR_MIN_MEAN:
+		return
+	var gain := minf(COLOUR_MIN_MEAN / mean, COLOUR_MAX_GAIN)
+	var rgba := img.get_format() == Image.FORMAT_RGBA8
+	if not rgba:
+		img.convert(Image.FORMAT_RGB8)
+	var d := img.get_data()
+	var step := 4 if rgba else 3
+	var lut := PackedByteArray()
+	lut.resize(256)
+	for i in 256:
+		lut[i] = mini(255, roundi(i * gain))
+	for o in range(0, d.size(), step):
+		d[o] = lut[d[o]]
+		d[o + 1] = lut[d[o + 1]]
+		d[o + 2] = lut[d[o + 2]]
 	img.set_data(img.get_width(), img.get_height(), false, img.get_format(), d)
 
 

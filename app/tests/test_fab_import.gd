@@ -41,10 +41,12 @@ func _init() -> void:
 
 	var m := FabImport.material(maps)
 	var c := m.albedo_texture.get_image().get_pixel(10, 4)
-	_check("material: occlusion multiplied in (%s)" % c, absf(c.r8 - 200 * 128 / 255) <= 2 and absf(c.g8 - 50 * 128 / 255) <= 2)
+	_check("material: occlusion multiplied in (%s)" % c, absf(c.r8 - 230 * 128 / 255) <= 2 and absf(c.g8 - 200 * 128 / 255) <= 2)
 	_check("material: gloss turned to roughness (%.2f)" % m.roughness_texture.get_image().get_pixel(1, 1).r,
 			m.roughness_texture.get_image().get_pixel(1, 1).r < 0.3)
 	_check("material: the normal map", m.normal_enabled and m.normal_texture != null)
+
+	_rules()
 
 	var r := FabImport.import_zip(zip)
 	_check("import: ok (%s)" % r.get("error", ""), r.get("ok") == true and not r.has("already"))
@@ -61,6 +63,11 @@ func _init() -> void:
 	_check("import again: kept once", again.get("ok") == true and again.get("already") == true
 			and again["manifest"]["id"] == man.get("id"))
 	_check("downloads(): a list", FabImport.downloads() is Array)
+	var redo := FabImport.import_zip(zip, true)
+	_check("import again (again): the same id, made again (%s)" % redo.get("error", ""), redo.get("ok") == true
+			and not redo.has("already") and redo["manifest"]["id"] == man.get("id") and redo["manifest"]["fab"] == ID)
+	_check("import again (again): one object for the asset", ObjectLibrary.list("", "user").filter(
+			func(o: Dictionary) -> bool: return o.get("fab") == ID).size() == 1)
 
 	var real := OS.get_environment("FAB_ZIP")
 	if real != "":
@@ -80,6 +87,31 @@ func _init() -> void:
 	quit(1 if _failures > 0 else 0)
 
 
+## The material's rules on made-up maps: a plant's AO, a dark scan, the name from semanticTags.
+func _rules() -> void:
+	var grey := func(v: float, size := 16) -> Image:
+		var img := Image.create_empty(size, size, false, Image.FORMAT_RGB8)
+		img.fill(Color(v, v, v))
+		return img
+	var plant := FabImport.material({"albedo": grey.call(0.6), "ao": grey.call(0.2), "opacity": grey.call(1.0)})
+	_check("a plant's AO is left out (opacity map)", plant.albedo_texture.get_image().get_pixel(1, 1).r > 0.55)
+	_check("a plant is cut out, two-sided", plant.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+			and plant.cull_mode == BaseMaterial3D.CULL_DISABLED)
+	var dim_ao := FabImport.material({"albedo": grey.call(0.6), "ao": grey.call(0.3)})
+	_check("an AO map mostly dark is left out", dim_ao.albedo_texture.get_image().get_pixel(1, 1).r > 0.55)
+	var dark := FabImport.material({"albedo": grey.call(0.1)})
+	var v := dark.albedo_texture.get_image().get_pixel(1, 1).r
+	_check("a dark scan lifted, at most %.0f times (%.3f)" % [FabImport.COLOUR_MAX_GAIN, v], v > 0.15 and v < 0.21)
+	var mid := FabImport.material({"albedo": grey.call(0.5)})
+	_check("a scan bright enough left as it is", absf(mid.albedo_texture.get_image().get_pixel(1, 1).r - 0.5) < 0.01)
+	_check("the name from semanticTags when the .json has none", FabImport._name_of(
+			{"id": "abc", "semanticTags": {"name": "Old Chair 07"}}) == "Old Chair 07")
+	_check("else the id", FabImport._name_of({"id": "abc"}) == "abc")
+	var cut := load("res://scripts/env/gltf_room.gd").convert_material(plant) as ShaderMaterial
+	_check("in a room a cut-out is the room shader, cut out and two-sided (dimmed with the room)", cut != null
+			and cut.shader.code.contains("#define ALPHA_CUT") and cut.shader.code.contains("cull_disabled"))
+
+
 ## A zip as Fab lays one out: the asset's .json at the top, a model, its maps named <name>_<id>_<res>_<Map>.
 func _make_zip(path: String, with_json: bool) -> String:
 	var box := MeshInstance3D.new()
@@ -97,7 +129,7 @@ func _make_zip(path: String, with_json: bool) -> String:
 		_put(z, "%s.json" % ID, JSON.stringify({"id": ID, "name": "Test Fab Crate", "tags": ["Crate", "wood", "crate"],
 				"meta": [{"key": "small3dasset", "name": "Small3dAsset", "value": "true"}]}).to_utf8_buffer())
 	_put(z, "Test_Fab_Crate_%s_Low.glb" % ID, glb)
-	_put(z, "Test_Fab_Crate_%s_Low_1K_BaseColor.png" % ID, _png(Color(200 / 255.0, 50 / 255.0, 50 / 255.0), Vector2i(2100, 16)))
+	_put(z, "Test_Fab_Crate_%s_Low_1K_BaseColor.png" % ID, _png(Color(230 / 255.0, 200 / 255.0, 180 / 255.0), Vector2i(2100, 16)))
 	_put(z, "Test_Fab_Crate_%s_Low_1K_AO.png" % ID, _png(Color(128 / 255.0, 128 / 255.0, 128 / 255.0), Vector2i(64, 64)))
 	_put(z, "Test_Fab_Crate_%s_Low_1K_Normal.png" % ID, _png(Color(0.5, 0.5, 1.0), Vector2i(64, 64)))
 	_put(z, "Test_Fab_Crate_%s_Low_1K_Gloss.png" % ID, _png(Color(0.9, 0.9, 0.9), Vector2i(64, 64)))

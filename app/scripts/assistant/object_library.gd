@@ -289,11 +289,14 @@ static func import_glb(bytes: PackedByteArray, name: String, tags: Array = [], m
 	if mount == "":
 		# Thin and upright: it hangs on a wall; else it stands.
 		mount = "wall" if box.size.z < 0.25 * minf(box.size.x, box.size.y) else "floor"
-	var id := new_id(clean)
+	# extra.replace: that user object's model and manifest written again under its id (a Fab import made again), so
+	# the rooms that place it show the new one.
+	var id := str(extra["replace"]) if extra.has("replace") and RoomSchema.id_ok(str(extra["replace"])) 			and not is_builtin(str(extra["replace"])) else new_id(clean)
 	var m := manifest_of(r, id, clean, clean_tags(tags), mount)
 	m["md5"] = md5_of(bytes)
 	for k: String in extra:
-		m[k] = extra[k]
+		if k != "replace":
+			m[k] = extra[k]
 	var thumb := ObjectThumb.render(r["node"], THUMB_SIZE)
 	(r["node"] as Node).free()
 	var dir := USER_DIR.path_join(id)

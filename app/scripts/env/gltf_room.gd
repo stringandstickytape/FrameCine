@@ -6,7 +6,8 @@ extends "res://environments/vr_environment.gd"
 ## {"name", "ambient_level", "screen_glow", "screen_width", "reflection_floor_y"}.
 ##
 ## Every material becomes unlit (env_unlit_tex.gdshader: base colour and texture lit by the room's level and the
-## screen's spill, emission added), since the app has no lights; transparent materials become unshaded standard ones.
+## screen's spill, emission added), since the app has no lights; cut-out ones (alpha scissor: a scanned plant's leaves)
+## the same shader with ALPHA_CUT, two-sided when the material was; other transparent materials unshaded standard ones.
 ## Lights, cameras and animations in the file are ignored.
 ##
 ##   load_room(path) -> this script's node, or null (with last_error)   (static; blocking: reads and builds the file)
@@ -14,6 +15,8 @@ extends "res://environments/vr_environment.gd"
 const UNLIT_TEX := preload("res://shaders/env_unlit_tex.gdshader")
 
 static var last_error := ""
+## The unlit shader with ALPHA_CUT defined, one-sided and two-sided (a scanned plant's leaves).
+static var _cut_shaders := {}
 
 var reflection_floor_y := NAN
 
@@ -111,6 +114,15 @@ static func convert_material(src: Material) -> Material:
 		m.shader = UNLIT_TEX
 		m.set_shader_parameter("albedo", Color(0.5, 0.5, 0.5))
 		return m
+	if base.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR:
+		var c := ShaderMaterial.new()
+		c.shader = cut_shader(base.cull_mode == BaseMaterial3D.CULL_DISABLED)
+		c.set_shader_parameter("albedo", base.albedo_color)
+		c.set_shader_parameter("alpha", base.albedo_color.a)
+		if base.albedo_texture != null:
+			c.set_shader_parameter("albedo_texture", base.albedo_texture)
+			c.set_shader_parameter("use_texture", true)
+		return c
 	if base.transparency != BaseMaterial3D.TRANSPARENCY_DISABLED:
 		var t := base.duplicate() as BaseMaterial3D
 		t.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -125,3 +137,17 @@ static func convert_material(src: Material) -> Material:
 		var e := base.emission * base.emission_energy_multiplier
 		m.set_shader_parameter("emission", e)
 	return m
+
+
+## UNLIT_TEX with ALPHA_CUT (as assistant_room.gd unlit_shader("cutout"), so its lit variant is found the same way),
+## cull_disabled when two_sided.
+static func cut_shader(two_sided: bool) -> Shader:
+	if not _cut_shaders.has(two_sided):
+		var s := Shader.new()
+		var code := UNLIT_TEX.code.replace("shader_type spatial;", "shader_type spatial;
+#define ALPHA_CUT")
+		if two_sided:
+			code = code.replace("render_mode unshaded, cull_back,", "render_mode unshaded, cull_disabled,")
+		s.code = code
+		_cut_shaders[two_sided] = s
+	return _cut_shaders[two_sided]
