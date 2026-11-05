@@ -2,7 +2,9 @@ extends Node3D
 
 ## The info overlay: a small world-space text panel (main.gd puts it under the flat screen, or low in front in
 ## 180/360) with file, mode, time / duration, decode fps, dropped frames, battery. A SubViewport refreshed 4 times a
-## second while shown, on a quad drawn on top of everything.
+## second while shown, on a quad drawn through the room (no depth test: a seat back or the stage can't hide it) but
+## under the panes and the other transparent things in front of it (default render priority; it was 100 and showed
+## through the agent's pane, the user, 2026-11-05).
 ## Its top band says LEFT EYE / RIGHT EYE through eye_overlay.gdshader: each eye sees only its own word (VIEW_INDEX),
 ## so a glance with one eye closed shows which view reaches which eye.
 
@@ -45,7 +47,7 @@ func _ready() -> void:
 
 	_material = ShaderMaterial.new()
 	_material.shader = OVERLAY_SHADER
-	_material.render_priority = 100
+	_material.render_priority = 0
 	_material.set_shader_parameter("overlay", _viewport.get_texture())
 	_material.set_shader_parameter("band", BAND)
 	var quad := QuadMesh.new()
