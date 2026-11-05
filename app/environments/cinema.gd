@@ -16,7 +16,7 @@ extends "res://environments/vr_environment.gd"
 ##                slight tint per seat), arm rests, standards and a pedestal
 ##   (lamp glows) the light sources' own glow (room_lamp.gdshader: emission only, so a bake takes them as emitters):
 ##                HouseLamps (sconce shades, ceiling cans: dim with the house lights), StepLights (the aisle steps'
-##                noses and the stage edge: always on), ExitSigns, BoothWindow (the lens and the booth behind it)
+##                noses: always on), StageLight (a broad dim band along the stage edge), ExitSigns, BoothWindow (the lens and the booth behind it)
 ##   Beam         the projector's beam (Cone) from the booth window to the screen (room_beam.gdshader, additive),
 ##   BakeLights   the room's real lights for a lightmap bake: sconces (a spot up and one down each), house lights
 ##                over the seats, step lights, the exit signs. Hidden: they never light the room live (LightmapGI
@@ -460,7 +460,7 @@ func _build_fixtures() -> void:
 			corners.append(c + Vector3(cos(a), 0.0, sin(a)) * 0.12)
 		house.face(corners, Vector3.DOWN)
 	_add_lamps("HouseLamps", house)
-	# Step lights: a strip on the nose of every aisle step, and along the stage's edge.
+	# Step lights: a strip on the nose of every aisle step.
 	var steps := RoomMesh.new()
 	steps.surface(_lamp_material(Color(1.0, 0.62, 0.3), 1.1, 0.0))
 	for row in range(-ROWS_BACK, ROWS_FRONT + 1):
@@ -473,10 +473,15 @@ func _build_fixtures() -> void:
 				var z := nose.x - 0.004
 				steps.face([Vector3(x0, nose.y - 0.035, z), Vector3(x1, nose.y - 0.035, z), Vector3(x1, nose.y - 0.01, z),
 						Vector3(x0, nose.y - 0.01, z)], Vector3.FORWARD)
-	var sz := ROOM_MIN.z + STAGE_DEPTH + 0.004
-	steps.face([Vector3(ROOM_MIN.x, STAGE_TOP - 0.05, sz), Vector3(ROOM_MAX.x, STAGE_TOP - 0.05, sz),
-			Vector3(ROOM_MAX.x, STAGE_TOP - 0.02, sz), Vector3(ROOM_MIN.x, STAGE_TOP - 0.02, sz)], Vector3.BACK)
 	_add_lamps("StepLights", steps)
+	# The stage's apron light: a broad, dim band, not a thin bright line. A 3 cm strip at 14 m strobed in the
+	# periphery with foveation on (the user, 2026-11-04).
+	var sz := ROOM_MIN.z + STAGE_DEPTH + 0.004
+	var apron := RoomMesh.new()
+	apron.surface(_lamp_material(Color(1.0, 0.62, 0.3), 0.4, 0.0))
+	apron.face([Vector3(ROOM_MIN.x, STAGE_TOP - 0.12, sz), Vector3(ROOM_MAX.x, STAGE_TOP - 0.12, sz),
+			Vector3(ROOM_MAX.x, STAGE_TOP - 0.02, sz), Vector3(ROOM_MIN.x, STAGE_TOP - 0.02, sz)], Vector3.BACK)
+	_add_lamps("StageLight", apron)
 	# Exit signs over the doors, and the booth's windows: pictures.
 	var signs: Array = []
 	for d in _doors():
