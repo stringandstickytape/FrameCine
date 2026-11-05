@@ -1,8 +1,8 @@
 #!/bin/bash
 # Probes the HEVC / HDR files in a folder for their Dolby Vision profile and colour description (ffmpeg -i, the
 # player's tool build). Film names stay on the command line, never in the repository.
-#   bash tools/dovi/probe.sh /mnt/g/movies [name-part]
-DIR=${1:-/mnt/g/movies}
+#   bash tools/dovi/probe.sh <folder> [name-part]
+DIR=${1:?folder}
 PART=${2:-}
 P="$HOME/src/ffmpeg-tool/bin/ffmpeg"
 [ -x "$P" ] || { echo "no ffmpeg at $P"; exit 1; }
