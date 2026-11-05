@@ -107,6 +107,7 @@ func _run() -> void:
 	await _context_checks()
 	await _small_checks()
 	_locale_checks()
+	_detached_checks()
 	agents.set_active("")
 	agents.hide_pane()
 	AgentTerminal.home_override = ""
@@ -824,6 +825,28 @@ func _context_checks() -> void:
 			and str(card.get("_text").text).contains("Claude Code wants to open claude.ai/oauth"))
 	card.dismiss("no")
 	await _frames(2)
+
+
+## The terminal starts outside the app's process tree where the user's service manager is there (Steam's launch wrapper
+## would wait for it); elsewhere as it is.
+func _detached_checks() -> void:
+	var kept := OS.get_environment("XDG_RUNTIME_DIR")
+	var args: Array[String] = ["-class", "frame-claude", "-e", "/bin/sh", "run.sh"]
+	OS.unset_environment("XDG_RUNTIME_DIR")
+	var plain: Array = AgentTerminal.detached("/usr/bin/xterm", args, "claude")
+	_check("no runtime dir: the terminal as it is", plain[0] == "/usr/bin/xterm" and plain[1] == args)
+	if FileAccess.file_exists("/usr/bin/systemd-run"):
+		OS.set_environment("XDG_RUNTIME_DIR", "/tmp")
+		var d: Array = AgentTerminal.detached("/usr/bin/xterm", args, "claude")
+		var da: Array = d[1]
+		_check("a runtime dir and systemd-run: a transient user unit, the terminal after --", d[0] == "/usr/bin/systemd-run"
+				and da[0] == "--user" and "--collect" in da and str(da[3]).begins_with("--unit=frame-claude-")
+				and da.slice(da.find("--") + 1) == ["/usr/bin/xterm"] + args
+				and "--setenv=XDG_RUNTIME_DIR=/tmp" in da)
+	if kept == "":
+		OS.unset_environment("XDG_RUNTIME_DIR")
+	else:
+		OS.set_environment("XDG_RUNTIME_DIR", kept)
 
 
 ## The terminal needs a UTF-8 locale: LC_ALL wins over LANG, and the Frame's Steam sets it to C.

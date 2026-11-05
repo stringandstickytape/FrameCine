@@ -517,11 +517,40 @@ static func start(id: String, install := false, plain := false, fresh := false) 
 	# control codes, and the agent's tools would make a mess of file names. A UTF-8 locale, whatever was set.
 	if not _utf8_locale():
 		OS.set_environment("LC_ALL", "C.UTF-8")
-	var pid := OS.create_process(t, PackedStringArray(args))
+	var cmd := [t, args]
+	if terminal_override.is_empty():
+		cmd = detached(t, args, id)
+	var pid := OS.create_process(str(cmd[0]), PackedStringArray(cmd[1]))
 	if pid < 0:
-		return "could not start %s" % t
-	print("Agents: started %s for %s (pid %d)" % [t.get_file(), id, pid])
+		return "could not start %s" % str(cmd[0]).get_file()
+	print("Agents: started %s for %s (pid %d%s)" % [t.get_file(), id, pid,
+			", outside the app's process tree" if cmd[0] != t else ""])
 	return ""
+
+
+## The environment the terminal is started with, outside the app's process tree: what a window and the agent need.
+const DETACHED_ENV: Array[String] = ["DISPLAY", "XAUTHORITY", "WAYLAND_DISPLAY", "XDG_RUNTIME_DIR", "PATH", "LANG",
+		"LC_ALL", "LC_CTYPE"]
+
+
+## The terminal's command, started outside the app's process tree when that is possible: as a transient unit of the
+## user's service manager (systemd-run --user), so the terminal is not a child of the app. Steam's launch wrapper waits
+## for every descendant of the app: a terminal left running kept it alive after the app had quit, and Steam refused
+## the next launch as already running (2026-11-05). Returns [command, arguments]: systemd-run's, else the terminal's own.
+static func detached(terminal_path: String, args: Array[String], id: String) -> Array:
+	var run := "/usr/bin/systemd-run"
+	if OS.get_name() != "Linux" or not FileAccess.file_exists(run) or OS.get_environment("XDG_RUNTIME_DIR") == "":
+		return [terminal_path, args]
+	var a: Dictionary = AGENTS[id]
+	var out: Array[String] = ["--user", "--quiet", "--collect", "--unit=%s-%d" % [a["class"], Time.get_ticks_msec()],
+			"--description=%s for the VR video player" % a["name"]]
+	for v in DETACHED_ENV:
+		if OS.get_environment(v) != "":
+			out.append("--setenv=%s=%s" % [v, OS.get_environment(v)])
+	out.append("--")
+	out.append(terminal_path)
+	out.append_array(args)
+	return [run, out]
 
 
 ## Whether the locale that counts (LC_ALL, else LC_CTYPE, else LANG) names a UTF-8 character set.

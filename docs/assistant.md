@@ -875,6 +875,13 @@ told to accept the capture's synthetic keys (`allowSendEvents`), which any X cli
 a single-user device. `allowTitleOps` is off, so the agent's words stay out of the window title. The konsole and
 lxterminal lines are untested.
 
+**Outside the app's process tree.** Where the user's service manager is there (`/usr/bin/systemd-run` and an
+`XDG_RUNTIME_DIR`, as on the Frame), the terminal is started as a transient user unit (`systemd-run --user --collect`,
+the display and locale variables passed along; `agent_terminal.gd detached()`), so it is not a child of the app.
+Steam's launch wrapper waits for every descendant of the app: a terminal left running kept it alive after the app had
+quit, and Steam refused the next launch as already running (2026-11-05). Elsewhere the terminal is the app's child, as
+before. Stopping is unchanged (by the window class).
+
 Tested with a real xterm under a virtual display, with a script standing in for the agent (not on the headset): keys,
 Unicode text and Shift + Page Up reach the terminal through its toplevel window; two captures work together, and
 letting go of one leaves the other working; the terminal survives another source opening, and a new player process
