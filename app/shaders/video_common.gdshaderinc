@@ -77,6 +77,9 @@ uniform int yuv_matrix = 0;
 uniform int transfer = 0;
 // BT.2020 primaries: converted to BT.709 in linear light (out-of-gamut colours clip).
 uniform bool primaries_bt2020 = false;
+// 1: Dolby Vision profile 5 (no HDR10 base): the planes hold I, P and T of Dolby's IPT-PQ-c2 signal, not Y'CbCr. The
+// app sets transfer 1 and primaries_bt2020 with it; yuv_matrix is not used then.
+uniform int dovi = 0;
 // HDR to the display (ideas #85): linear light with 1.0 = reference white (203 nits, BT.2408), times tm_exposure;
 // colours whose brightest channel is above tm_knee are compressed so that the content's peak (tm_peak, in reference
 // whites) lands on display white. Hue is kept (the three channels scale together). Off: highlights clip.
@@ -109,6 +112,20 @@ vec3 srgb_to_linear(vec3 c) {
 vec3 linear_to_srgb(vec3 c) {
 	return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), c));
 }
+
+// Dolby Vision profile 5 (IPT-PQ-c2): I'P'T' (P and T centred on 0) to PQ-encoded LMS, the RPU's ycc_to_rgb_matrix
+// (the same in every profile 5 file seen), and linear LMS to linear BT.2020 RGB. The second was fitted against the
+// HDR10 base of the same master (a profile 8 encode of the same film: five frames, 5445 block means, median error
+// 0.8 %, 90th percentile 2.8 %); the published IPT and BT.2100 LMS matrices, with or without the RPU's 2 %
+// crosstalk, were 5 % out. Column-major.
+const mat3 DOVI_IPT_TO_LMS = mat3(
+		vec3(1.0, 1.0, 1.0),
+		vec3(0.09753418, -0.11389160, 0.03259277),
+		vec3(0.20520020, 0.13317871, -0.67687988));
+const mat3 DOVI_LMS_TO_RGB = mat3(
+		vec3(3.14443, -0.79663, -0.06416),
+		vec3(-2.23166, 1.90617, -0.02069),
+		vec3(0.09499, -0.10497, 1.10503));
 
 // PQ signal -> absolute luminance in nits.
 vec3 pq_to_nits(vec3 e) {
@@ -302,7 +319,12 @@ vec3 video_pixel(vec2 mesh_uv, int view_index) {
 			// To linear light (1.0 = reference white), BT.709 primaries, tone mapped, and back to the gamma-encoded
 			// values the rest of the shader works on.
 			vec3 lin;
-			if (transfer == 1) {
+			if (dovi == 1) {
+				// The RPU's reshaping curves are not read: the files seen carry the limited-to-full range expansion
+				// only, which the range step above has done.
+				vec3 lms = pq_to_nits(DOVI_IPT_TO_LMS * vec3(y, cbcr));
+				lin = DOVI_LMS_TO_RGB * lms / REF_WHITE_NITS;
+			} else if (transfer == 1) {
 				lin = pq_to_nits(rgb) / REF_WHITE_NITS;
 			} else if (transfer == 2) {
 				lin = hlg_to_nits(rgb) / REF_WHITE_NITS;

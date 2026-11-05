@@ -54,7 +54,12 @@ func _describe_checks() -> void:
 	_check("hdr_transfer hlg", Hdr.describe({"hdr_transfer": "hlg"})["transfer"] == Hdr.TRANSFER_HLG)
 	_check("stub / window info: SDR BT.709", Hdr.describe({"codec": "stub", "width": 1920, "height": 1080, "bit_depth": 8})
 			== {"matrix": 0, "transfer": 0, "primaries_bt2020": false, "full_range": false, "peak_nits": 1000.0,
-			"peak_from": "default"})
+			"peak_from": "default", "dovi": 0})
+	var dv5 := Hdr.describe({"dolby_vision_profile": 5, "height": 2076, "color_range": "pc"})
+	_check("Dolby Vision profile 5: IPT (dovi 1), PQ, BT.2020, limited", dv5["dovi"] == 1
+			and dv5["transfer"] == Hdr.TRANSFER_PQ and dv5["primaries_bt2020"] and dv5["matrix"] == Hdr.MATRIX_2020
+			and not dv5["full_range"])
+	_check("profile 8 keeps its HDR10 base", Hdr.describe({"dolby_vision_profile": 8, "color_transfer": "smpte2084"})["dovi"] == 0)
 
 
 ## Draws one pixel of Y'CbCr (8-bit codes, limited range) through the video shader with `params`; returns the
@@ -128,6 +133,20 @@ func _shader_checks() -> void:
 	_check("HLG reference white near PQ's (%.3f vs %.3f)" % [hlg.r, on.r], absf(hlg.r - on.r) < 0.05)
 	# Grey stays grey through the BT.2020 -> BT.709 primaries.
 	_check("grey stays neutral", absf(on.r - on.g) < 0.01 and absf(on.g - on.b) < 0.01)
+	# Dolby Vision profile 5: reference white and a red as I'P'T' codes come out as the same light does through PQ
+	# Y'CbCr (8-bit codes on both sides, so a little slack).
+	var dv_params := {"dovi": 1, "transfer": 1, "primaries_bt2020": true, "yuv_matrix": 2}
+	var w := _ipt_codes(Vector3(1.0, 1.0, 1.0))
+	var dvw := await _draw(w[0], w[1], w[2], dv_params)
+	_check("DV5 reference white matches PQ's (%.3f %.3f %.3f vs %.3f)" % [dvw.r, dvw.g, dvw.b, on.r],
+			absf(dvw.r - on.r) < 0.03 and absf(dvw.g - on.r) < 0.03 and absf(dvw.b - on.r) < 0.03)
+	var red := Vector3(0.5, 0.1, 0.1)
+	var ri := _ipt_codes(red)
+	var rp := _pq_codes(red)
+	var dvr := await _draw(ri[0], ri[1], ri[2], dv_params)
+	var pqr := await _draw(rp[0], rp[1], rp[2], {"transfer": 1, "primaries_bt2020": true, "yuv_matrix": 2})
+	_check("DV5 red matches PQ's (%.3f %.3f %.3f vs %.3f %.3f %.3f)" % [dvr.r, dvr.g, dvr.b, pqr.r, pqr.g, pqr.b],
+			absf(dvr.r - pqr.r) < 0.04 and absf(dvr.g - pqr.g) < 0.04 and absf(dvr.b - pqr.b) < 0.04 and dvr.r > dvr.g + 0.2)
 
 
 ## The node in the real main scene: the engine curve chosen for an HDR file when the engine has it, its parameters on
@@ -181,6 +200,31 @@ func _engine_curve_checks() -> void:
 		_near("BT.2390 grey, code %d: shader vs engine" % code, got.r, _srgb(want.r), 0.012)
 	var top := await _draw(181, 128, 128, params)
 	_check("the 1000 nit source peak reaches display white (%.3f)" % top.r, top.r > 0.98)
+
+
+## PQ signal for a luminance in nits.
+func _nits_to_pq(nits: float) -> float:
+	var y := pow(maxf(nits, 0.0) / 10000.0, 0.1593017578125)
+	return pow((0.8359375 + 18.8515625 * y) / (1.0 + 18.6875 * y), 78.84375)
+
+
+## Linear BT.2020 RGB (1.0 = reference white) as the 8-bit limited-range Y'CbCr codes of a PQ BT.2020 file.
+func _pq_codes(lin: Vector3) -> Array[int]:
+	var e := Vector3(_nits_to_pq(lin.x * 203.0), _nits_to_pq(lin.y * 203.0), _nits_to_pq(lin.z * 203.0))
+	var yy := 0.2627 * e.x + 0.6780 * e.y + 0.0593 * e.z
+	return [roundi(16.0 + 219.0 * yy), roundi(128.0 + 224.0 * (e.z - yy) / 1.8814), roundi(128.0 + 224.0 * (e.x - yy) / 1.4746)]
+
+
+## The same light as the 8-bit limited-range I'P'T' codes of a Dolby Vision profile 5 base layer: linear BT.2020 RGB to
+## LMS, PQ, then the RPU's matrix the other way (the shader's constants inverted).
+func _ipt_codes(lin: Vector3) -> Array[int]:
+	var rgb := lin * 203.0
+	var to_lms: Array[Vector3] = [Vector3(0.452503, 0.529895, 0.011438), Vector3(0.190754, 0.748533, 0.054708), Vector3(0.029845, 0.044782, 0.906641)]
+	var lms := Vector3(to_lms[0].dot(rgb), to_lms[1].dot(rgb), to_lms[2].dot(rgb))
+	var pq := Vector3(_nits_to_pq(lms.x), _nits_to_pq(lms.y), _nits_to_pq(lms.z))
+	var to_ipt: Array[Vector3] = [Vector3(0.400128, 0.399890, 0.199981), Vector3(4.455344, -4.851464, 0.396120), Vector3(0.805668, 0.357180, -1.162847)]
+	var ipt := Vector3(to_ipt[0].dot(pq), to_ipt[1].dot(pq), to_ipt[2].dot(pq))
+	return [roundi(16.0 + 219.0 * ipt.x), roundi(128.0 + 224.0 * ipt.y), roundi(128.0 + 224.0 * ipt.z)]
 
 
 func _pq_nits(e: float) -> float:

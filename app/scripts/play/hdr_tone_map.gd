@@ -70,6 +70,12 @@ static func describe(info: Dictionary) -> Dictionary:
 		transfer = TRANSFER_HLG
 	elif str(info.get("hdr_transfer", "")).to_lower() == "pq" or bool(info.get("hdr", false)):
 		transfer = TRANSFER_PQ
+	# Dolby Vision profile 5 has no HDR10 base: the planes are Dolby's IPT-PQ-c2 signal (PQ, BT.2020), whatever the file
+	# declares (usually nothing, so it showed as BT.709 SDR with a purple and green cast). The shader converts them
+	# (uniform dovi); its range step stands in for the RPU's reshaping, so the range is limited.
+	var dovi := 1 if int(info.get("dolby_vision_profile", -1)) == 5 else 0
+	if dovi == 1:
+		transfer = TRANSFER_PQ
 	var prim := str(info.get("color_primaries", "")).to_lower()
 	var known_prim := prim != "" and prim != "unknown" and prim != "unspecified"
 	var bt2020 := prim == "bt2020" or (not known_prim and transfer != TRANSFER_SDR)
@@ -85,6 +91,9 @@ static func describe(info: Dictionary) -> Dictionary:
 			matrix = MATRIX_2020
 		elif h > 0 and h <= 576:
 			matrix = MATRIX_601
+	if dovi == 1:
+		bt2020 = true
+		matrix = MATRIX_2020
 	var cll := float(info.get("max_cll", 0.0))
 	var mastering := float(info.get("mastering_max_luminance", 0.0))
 	var mdl: Variant = info.get("mastering_display_luminance")
@@ -99,7 +108,8 @@ static func describe(info: Dictionary) -> Dictionary:
 		peak = mastering
 		from = "mastering display"
 	return {"matrix": matrix, "transfer": transfer, "primaries_bt2020": bt2020,
-			"full_range": bool(info.get("full_range", false)) or str(info.get("color_range", "")) == "pc",
+			"full_range": dovi == 0 and (bool(info.get("full_range", false)) or str(info.get("color_range", "")) == "pc"),
+			"dovi": dovi,
 			"peak_nits": clampf(peak, REF_WHITE_NITS, 10000.0), "peak_from": from}
 
 
@@ -119,7 +129,10 @@ func is_hdr() -> bool:
 func text() -> String:
 	if not is_hdr():
 		return ""
-	return "%s, peak %d nits (%s)%s%s" % ["HDR10 (PQ)" if int(current["transfer"]) == TRANSFER_PQ else "HLG",
+	var kind := "HDR10 (PQ)" if int(current["transfer"]) == TRANSFER_PQ else "HLG"
+	if int(current.get("dovi", 0)) == 1:
+		kind = "Dolby Vision profile 5 (IPT, as PQ)"
+	return "%s, peak %d nits (%s)%s%s" % [kind,
 			roundi(float(current["peak_nits"])), current["peak_from"], ", BT.2390" if uses_engine_curve() else "",
 			"" if enabled else ", tone mapping off"]
 
@@ -194,6 +207,7 @@ func _apply() -> void:
 	m.set_shader_parameter("full_range", bool(current["full_range"]))
 	m.set_shader_parameter("transfer", int(current["transfer"]))
 	m.set_shader_parameter("primaries_bt2020", bool(current["primaries_bt2020"]))
+	m.set_shader_parameter("dovi", int(current.get("dovi", 0)))
 	m.set_shader_parameter("tm_enabled", enabled)
 	m.set_shader_parameter("tm_peak", float(current["peak_nits"]) / REF_WHITE_NITS)
 	m.set_shader_parameter("tm_exposure", REF_WHITE_NITS / display_white_nits())

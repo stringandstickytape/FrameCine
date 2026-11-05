@@ -762,6 +762,14 @@ colour description from `get_video_info()` and tone maps HDR to the display.
 - **Content peak:** the file's MaxCLL (`max_cll`), capped by its mastering display's peak
   (`mastering_display_luminance`, the engine's key, or `mastering_max_luminance`). Without either, 1000 nits. With
   the engine curve, the engine picks the peak the same way.
+- **Dolby Vision profile 5** (no HDR10 base: the planes are Dolby's IPT-PQ-c2 signal, and such a file usually declares
+  no colour at all, so it showed as BT.709 SDR with a purple and green cast): `describe()` sees the profile and the
+  shader (`dovi`) turns I'P'T' into PQ-encoded LMS with the RPU's matrix, decodes PQ, goes to linear BT.2020 with a
+  matrix fitted against the HDR10 base of the same master (a profile 8 encode of the same film, aligned to the frame:
+  median error 0.8 % over 5445 block means, where the published IPT and BT.2100 LMS matrices were 5 % out) and tone
+  maps as HDR10. The RPU's reshaping curves are not read: the files seen carry the limited-to-full range expansion
+  only, which the range step does. Profiles 7 and 8 keep their HDR10 base, as before.
+  The status line says "Dolby Vision profile 5 (IPT, as PQ)".
 - **Per environment:** exposure (stops), knee and target brightness (100 to 400 nits), like the picture controls.
 - **Cost:** SDR BT.709 files take the same path as before, except for one uniform branch. HDR adds a few `pow` and
   `exp` per pixel.
@@ -794,7 +802,9 @@ colour description from `get_video_info()` and tone maps HDR to the display.
     the headset's resolution.
   - An HLG file (none on hand).
   - The hardware P010 path (10-bit planes in the shader; the desktop's software path gives 8-bit planes).
-  - Dolby Vision's own layer: the film's HDR10 base is used, and its RPU is ignored.
+  - Dolby Vision's own layer: profiles 7 and 8 show their HDR10 base, the RPU ignored. A profile 5 file whose RPU
+    carries real reshaping curves (not only the range expansion) would need the RPU read per frame on the hardware
+    path; the one on hand doesn't.
 
 ## #22 Still pictures, photo spheres and a slideshow
 
