@@ -32,6 +32,7 @@ const FADE_SCALE := 0.92
 ## Where it floats without XR: this far ahead and this far down.
 const DESK_DISTANCE := 0.55
 const DESK_DROP := 0.04
+const Pane := preload("res://ui/pane.gd")
 
 const SHADER := """
 shader_type spatial;
@@ -73,7 +74,7 @@ func _ready() -> void:
 	var shader := Shader.new()
 	shader.code = SHADER
 	_mat.shader = shader
-	_mat.render_priority = 2
+	_mat.render_priority = Pane.PRIORITY
 	_mesh = MeshInstance3D.new()
 	_mesh.name = "AgentQuad"
 	_mesh.mesh = QuadMesh.new()

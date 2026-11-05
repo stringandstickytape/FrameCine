@@ -54,6 +54,9 @@ void fragment() {
 
 ## Metres a press may move and still be a click; how fast a let-go list slows (per second); the speed it stops at
 ## (pixels per second).
+## Render priority of a pane's quad: over the things drawn at the screen without a depth test (the info overlay, the
+## screen card, subtitles, toasts: up to 11), under the seat choice's veil. The halo is one below.
+const PRIORITY := 12
 const DRAG_SLOP := 0.006
 const DRAG_FRICTION := 5.0
 const DRAG_STOP := 20.0
@@ -140,7 +143,9 @@ func _ready() -> void:
 	pane_shader.code = PANE_SHADER
 	_mat.shader = pane_shader
 	_mat.set_shader_parameter("tex", viewport.get_texture())
-	_mat.render_priority = 2
+	# Above the things drawn at the screen without a depth test (the info overlay, the screen card, subtitles, toasts:
+	# priorities up to 11), which showed through the pane (the user, 2026-11-05). The pane is held close; it wins.
+	_mat.render_priority = PRIORITY
 	var quad := QuadMesh.new()
 	quad.size = size_m
 	_mesh = MeshInstance3D.new()
@@ -154,7 +159,7 @@ func _ready() -> void:
 	var shader := Shader.new()
 	shader.code = HALO_SHADER
 	_halo_mat.shader = shader
-	_halo_mat.render_priority = 1
+	_halo_mat.render_priority = PRIORITY - 1
 	_halo = MeshInstance3D.new()
 	_halo.name = "Halo"
 	_halo.material_override = _halo_mat
