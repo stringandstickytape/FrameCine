@@ -266,7 +266,9 @@ The same settings are in the dev link and for an assistant: `set_sound` with `sp
 
 The **Objects** tab (after Room) is the object library (`docs/assistant.md`, "Objects"): things to put in the room,
 built in (a picture frame, a wall shelf, a pot plant, a wall clock) and imported (by an assistant, or with
-`object_import` from the dev link: a `.glb`, or an SVG drawing made solid). One controller does it all.
+`object_import` from the dev link: a `.glb`, or an SVG drawing made solid). The built-in ones come first under
+**Built in**; the ones that are this install's own (imported, or kept from a room) under **Yours**, which only shows
+when there are some. One controller does it all.
 
 1. Pick a thumbnail. The line under the thumbnails says its name, how it sits (wall, floor, ...) and how many parts it
    has.
