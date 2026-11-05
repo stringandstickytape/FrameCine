@@ -581,6 +581,24 @@ data, and each copy is a duplicate of that); parts painted alike share one mater
 material (`part_recolour`, 0.05), the room's recolour entries are capped (`recolours`, 256), and triangles count as
 for any model. The measured guard (`RoomPerf`) applies after each change as before.
 
+### Objects from Fab
+
+A scanned asset downloaded from the Fab store (`scripts/assistant/fab_import.gd`): the viewer downloads it themselves,
+on the headset (the in-app browser or the desktop one; the site gives the zip without signing in), under their own
+Fab licence. That licence lets them use it, not hand it on (no standalone redistribution, free or not), so no Fab
+asset is ever in this repository or the release, and an import is a user object like any other (`user://objects`).
+
+- The Objects tab lists the Fab zips in the Downloads folder whose asset isn't in the library yet, under **In
+  Downloads, from Fab**: **Add <name>** imports one (on a worker thread).
+- The zip: the asset's `.json` at its top (`id`, `name`, `tags`, `meta` with `small3dasset`), an `.fbx` or `.glb`, the
+  maps as `<name>_<id>_<res>_<Map>.jpg`. The model is read with the engine's FBX loader (the `fbx` module, in the
+  player build); the material is made from the maps, not the `.fbx`'s (which names the full asset's 4K files): the
+  colour with the ambient occlusion multiplied in (rooms draw objects unlit, so the crevices keep their shade), the
+  normal map and roughness (or gloss turned round) kept in the `.glb` for lit rooms, an opacity map as the colour's
+  alpha, cut out. Maps over 2048 px are made smaller; the `.glb`'s maps are JPEG.
+- Small3dAsset puts it on a table, else the floor. The manifest keeps the asset's id as `fab`, so a download is added
+  once. Use the Low or Medium download: the object limits (150,000 triangles) refuse the full scan.
+
 ### Lighting
 
 A room is flat (unlit shaders, `env_unlit*.gdshader`) unless its document has `light.key`, `light.sky`,

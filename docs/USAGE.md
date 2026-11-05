@@ -270,6 +270,10 @@ built in (a picture frame, a wall shelf, a pot plant, a wall clock) and imported
 **Built in**; the ones that are this install's own (imported, or kept from a room) under **Yours**, which only shows
 when there are some. One controller does it all.
 
+A scanned object downloaded from the Fab store (the Low or Medium quality zip, into Downloads on the headset) shows
+under **In Downloads, from Fab**: **Add <name>** makes it one of yours. It stays on the headset: the Fab licence lets
+you use it, not share it.
+
 1. Pick a thumbnail. The line under the thumbnails says its name, how it sits (wall, floor, ...) and how many parts it
    has.
 2. **Place**. The panel goes. The object shows where the laser meets a wall (back to the wall) or the floor (standing,

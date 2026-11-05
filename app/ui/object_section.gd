@@ -17,6 +17,7 @@ const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
 const WorkerTask := preload("res://scripts/dev/worker_task.gd")
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const EffectLibrary := preload("res://scripts/effects/effect_library.gd")
+const FabImport := preload("res://scripts/assistant/fab_import.gd")
 
 const COLUMNS := 4
 ## Pixels on the pane: the thumbnail, and the name under it.
@@ -64,6 +65,11 @@ static var _swatches := {}
 static var _effect_swatches := {}
 var _loading := false
 var _empty: Label
+## Fab downloads in the Downloads folder not in the library yet (fab_import.gd): a button each to add it.
+var _fab_box: VBoxContainer
+var _fab_buttons: VBoxContainer
+var _fab_paths: Array = []
+var _adding := false
 
 
 func bind(p_app: Node) -> void:
@@ -77,6 +83,12 @@ func bind(p_app: Node) -> void:
 	add_child(_yours_label)
 	_yours_grid = _tile_grid()
 	add_child(_yours_grid)
+	_fab_box = W.vbox()
+	_fab_box.add_child(W.label("In Downloads, from Fab", &"MutedLabel"))
+	_fab_buttons = W.vbox()
+	_fab_box.add_child(_fab_buttons)
+	_fab_box.visible = false
+	add_child(_fab_box)
 	_chosen = W.ellipsis(W.label("", &"MutedLabel"))
 	_place = W.button("Place", _start_place)
 	_delete = W.button("Delete", _ask_delete)
@@ -116,11 +128,12 @@ func _sync_library() -> void:
 		var list := ObjectLibrary.list().filter(func(m: Dictionary) -> bool: return not m.has("generator"))
 		for m: Dictionary in list:
 			ObjectLibrary.thumbnail(str(m["id"]))
-		return list)
+		return {"list": list, "fab": FabImport.downloads()})
 	_loading = false
 	if not r["done"] or not is_instance_valid(self):
 		return
-	var list: Array = r["result"]
+	var list: Array = r["result"]["list"]
+	_sync_fab(r["result"]["fab"])
 	var ids: Array = list.map(func(m: Dictionary) -> String: return str(m["id"]))
 	if ids != _ids:
 		_ids = ids
@@ -171,6 +184,43 @@ func _tile(m: Dictionary, group: ButtonGroup) -> void:
 		_show_place())
 	(_grid if str(m.get("source", "user")) == "builtin" else _yours_grid).add_child(b)
 	_tiles[id] = b
+
+
+## A button for each Fab zip in Downloads; pressing it adds the asset as one of the viewer's objects.
+func _sync_fab(found: Array) -> void:
+	var paths: Array = found.map(func(f: Dictionary) -> String: return str(f["path"]))
+	if paths == _fab_paths:
+		return
+	_fab_paths = paths
+	for c in _fab_buttons.get_children():
+		_fab_buttons.remove_child(c)
+		c.queue_free()
+	for f: Dictionary in found:
+		var path := str(f["path"])
+		var b := W.button("Add %s" % f["name"], func() -> void: _add_fab(path), &"RowButton")
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		_fab_buttons.add_child(b)
+	_fab_box.visible = not found.is_empty()
+
+
+func _add_fab(path: String) -> void:
+	if _adding:
+		return
+	_adding = true
+	app.ui.notify("Adding %s…" % path.get_file())
+	var r: Dictionary = await WorkerTask.run(get_tree(), func() -> Variant: return FabImport.import_zip(path), 120.0)
+	_adding = false
+	if not is_instance_valid(self):
+		return
+	var out: Dictionary = r["result"] if r["done"] and r["result"] is Dictionary else {"ok": false,
+			"error": "Adding it took too long."}
+	if out.get("ok") == true:
+		_selected = str(out["manifest"]["id"])
+		app.ui.notify("%s is in your objects." % out["manifest"]["name"])
+	else:
+		app.ui.notify(str(out.get("error", "That didn't work.")))
+	_fab_paths = []
+	sync_objects()
 
 
 func _tile_grid() -> GridContainer:
