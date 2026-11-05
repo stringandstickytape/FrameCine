@@ -290,6 +290,8 @@ static func _objects_room() -> Dictionary:
 	var files := {picture: _png(false), cutout: _png(true)}
 	var ids: Array = []
 	for e: Dictionary in ObjectBuiltins.ENTRIES:
+		if e.get("primitive", false) or e.has("generator"):
+			continue  # the shapes and the text: shown above as the shapes a document sends
 		var id := str(e["id"])
 		var m := ObjectLibrary.get_object(id)
 		var bytes := ObjectLibrary.glb(id)
@@ -412,8 +414,14 @@ static func _with(d: Dictionary, more: Dictionary) -> Dictionary:
 	return out
 
 
+## A showroom is a document in schema 2, its parts as an assistant sends them (shapes, the app's own pictures and the
+## built-ins' .glb beside it): shipped read-only under res://, it is never converted into the viewer's object library
+## (rooms are made of objects only once kept: assistant_room.gd load_saved, room_keep.gd).
+const SHOWROOM_SCHEMA := 2
+
+
 static func _room(name: String, description: String, light: Dictionary, parts: Array, shows: Dictionary) -> Dictionary:
-	var doc := {"schema": RoomSchema.VERSION, "name": name, "base": "void", "light": light.duplicate(true),
+	var doc := {"schema": SHOWROOM_SCHEMA, "name": name, "base": "void", "light": light.duplicate(true),
 			"parts": parts, "recolour": []}
 	var c := shows.duplicate(true)
 	c["parts"] = parts.size()

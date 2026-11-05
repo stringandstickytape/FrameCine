@@ -96,7 +96,8 @@ static func register_commands(_host: Node = null) -> void:
 	R.register("object_place", func(a: Dictionary, ctx: DevCommands.Call) -> Variant:
 		return _give(ctx, await place(_tree(), ctx.caller, str(a["id"]), a)), {
 		"description": "Puts a library object in the room: at a position, on the wall the viewer looks at, on the "
-				+ "floor in front of them, on the ceiling, or in front at eye height. It shows at once and is kept.",
+				+ "floor in front of them, on the ceiling, or in front at eye height. It shows at once and is kept; "
+				+ "the room keeps only the object's id (its model and pictures stay in the library).",
 		"params": [{"name": "id", "type": "string", "required": true, "description": "The object's id "
 				+ "(object_library)."},
 				{"name": "name", "type": "string", "default": "", "description": "Its name in the room (its parts are "
@@ -110,7 +111,12 @@ static func register_commands(_host: Node = null) -> void:
 				+ "position."},
 				{"name": "turn", "type": "float", "default": 0.0, "description": "Degrees round the wall's normal or "
 				+ "round up, with at."},
-				{"name": "scale", "type": "float", "default": 1.0, "description": "Its size, 1 as made (0.05 to 20)."}],
+				{"name": "scale", "type": "float", "default": 1.0, "description": "Its size, 1 as made (0.05 to 20): a "
+				+ "primitive (box, sphere, cylinder, plane) is 1 m, a text a line 0.1 m high."},
+				{"name": "text", "type": "string", "default": "", "description": "The text object only: the words to "
+				+ "show (\\n starts a line)."},
+				{"name": "text_options", "type": "object", "default": {}, "description": "The text object only: "
+				+ "color, background, weight, align, max_width."}],
 		"level": "change", "assistant": "room", "title": "Place an object",
 		"returns": "{state: kept, placed, name, warnings, perf, ...}"})
 	R.register("object_move", func(a: Dictionary, ctx: DevCommands.Call) -> Variant:
@@ -133,18 +139,22 @@ static func register_commands(_host: Node = null) -> void:
 		var m := ObjectLibrary.get_object(id)
 		var r := ObjectLibrary.delete(id)
 		if not r["ok"]:
+			if r.has("rooms"):
+				# A kept room places it: rooms are made of objects, so it stays until they no longer do.
+				ctx.reply["refused"] = true
+				ctx.reply["rooms"] = r["rooms"]
 			return ctx.fail(str(r["error"]))
 		ctx.summary = "deleted %s from the library" % m.get("name", id)
 		ctx.undo = func() -> void: ObjectLibrary.restore(id)
 		ctx.cleanup = func() -> void: ObjectLibrary.purge(id)
 		_sync_tab()
-		return {"deleted": id, "name": m.get("name", id), "note": "copies placed in rooms stay (remove takes them out)"}, {
-		"description": "Deletes an imported object from the library (built-in ones stay). Copies already placed in "
-				+ "rooms stay; remove takes one out of the room.",
+		return {"deleted": id, "name": m.get("name", id)}, {
+		"description": "Deletes an imported object from the library (built-in ones stay). Refused while a kept room "
+				+ "places it (the reply names the rooms): remove it from them first.",
 		"params": [{"name": "id", "type": "string", "required": true, "description": "The user object's id "
 				+ "(object_library source user)."}],
 		"level": "change", "assistant": "room", "destructive": true, "title": "Delete an imported object",
-		"returns": "{deleted, name}"})
+		"returns": "{deleted, name}; refused: {error, rooms}"})
 
 
 ## A shared operation's reply ({ok, result | error, summary, undo, ...}) handed to the registry.
@@ -220,8 +230,12 @@ static func place(tree: SceneTree, caller: Object, id: String, opts: Dictionary)
 	var m := ObjectLibrary.get_object(id)
 	if m.is_empty():
 		return {"ok": false, "error": "no object %s (object_library lists them)" % id}
-	var bytes := ObjectLibrary.glb(id)
-	if bytes.is_empty():
+	var generator := str(m.get("generator", ""))
+	if generator == "text" and str(opts.get("text", "")).strip_edges() == "":
+		return {"ok": false, "error": "text: give text, the words to show (and text_options)"}
+	if generator == "particles":
+		return {"ok": false, "error": "particles: send a particles part with room_apply (its preset, rate and area)"}
+	if generator == "" and ObjectLibrary.glb(id).is_empty():
 		return {"ok": false, "error": "%s has no model file" % id}
 	var main := tree.current_scene
 	var editor := ObjectLibrary.editor_for(tree, caller)
@@ -235,11 +249,16 @@ static func place(tree: SceneTree, caller: Object, id: String, opts: Dictionary)
 	var spot := spot_for(main, ObjectLibrary.bounds_of(m), str(m.get("mount", "free")), opts)
 	if spot.has("error"):
 		return {"ok": false, "error": spot["error"]}
-	var part := {"name": name, "type": "model", "object": id, "model": Marshalls.raw_to_base64(bytes),
-			"position": spot["position"], "rotation": spot["rotation"], "scale": spot["scale"]}
+	# A placement: the object's id only; its model and pictures come from the library when the room is built.
+	var part := {"name": name, "object": id, "position": spot["position"], "rotation": spot["rotation"],
+			"scale": spot["scale"]}
 	if m.has("widget"):
 		part["widget"] = m["widget"]
 		part["widget_options"] = m.get("widget_options", {})
+	if generator == "text":
+		part["text"] = str(opts["text"])
+		if opts.get("text_options") is Dictionary and not (opts["text_options"] as Dictionary).is_empty():
+			part["text_options"] = opts["text_options"]
 	var patch := {"schema": RoomSchema.VERSION, "parts": [part]}
 	if not _assistant_room(main):
 		patch["name"] = room_name(main)
@@ -287,7 +306,11 @@ static func move(tree: SceneTree, caller: Object, name: String, opts: Dictionary
 	if scale > 0.0:
 		if scale < 0.05 or scale > 20.0:
 			return {"ok": false, "error": "scale: 0.05 to 20"}
-		part["scale"] = scale
+		if s is Array:
+			# A primitive's scale is its size ([w, h, d]): a number resizes it, keeping its shape.
+			part["scale"] = (s as Array).map(func(x: Variant) -> float: return snappedf(float(x) * scale, 0.0001))
+		else:
+			part["scale"] = scale
 	var undo := undo_for(editor, main)
 	var r: Dictionary = await editor.apply("patch", {"schema": RoomSchema.VERSION, "parts": [part]}, "move %s" % name)
 	if r.get("ok") == true:

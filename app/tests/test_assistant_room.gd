@@ -18,6 +18,7 @@ const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
 const AssistantRoom := preload("res://scripts/assistant/assistant_room.gd")
 const RoomSnapshot := preload("res://scripts/assistant/room_snapshot.gd")
 const RoomPerf := preload("res://scripts/assistant/room_perf.gd")
+const ObjectLibrary := preload("res://scripts/assistant/object_library.gd")
 const ROOM_NAME := "Test assistant room"
 const BOUNDS_NAME := "Test assistant bounds"
 
@@ -27,6 +28,8 @@ var main: Node3D
 var commands: AssistantCommands
 var editor: RoomEditor
 var allow_room := false
+## The user objects there before the test: what it kept in the library is deleted at the end.
+var _objects_before: Array = []
 
 
 func _init() -> void:
@@ -39,6 +42,7 @@ func _init() -> void:
 
 func _run() -> void:
 	await _frames(5)
+	_objects_before = ObjectLibrary.list("", "user").map(func(m: Dictionary) -> String: return m["id"])
 	_cleanup()
 	editor = RoomEditor.new()
 	root.add_child(editor)
@@ -194,8 +198,15 @@ func _run() -> void:
 	var kept_id: String = main.env_id
 	_check("kept as a recipe (%s)" % kept_id, kept_id == "recipe:" + ROOM_NAME
 			and FileAccess.file_exists(AssistantRoom.json_path(ROOM_NAME)))
-	_check("its model is a file beside it, nothing stale (%s)" % [DirAccess.get_files_at(AssistantRoom.files_dir(
-			ROOM_NAME))], DirAccess.get_files_at(AssistantRoom.files_dir(ROOM_NAME)).size() == 1)
+	# Rooms are made of objects: the model is a user object in the library, the room keeps its id.
+	var ball := {}
+	for p: Dictionary in (main.env.get("doc") as Dictionary)["parts"]:
+		if p["name"] == "Ball":
+			ball = p
+	_check("its model is a library object, no file beside it (%s, %s)" % [DirAccess.get_files_at(
+			AssistantRoom.files_dir(ROOM_NAME)), ball], DirAccess.get_files_at(AssistantRoom.files_dir(ROOM_NAME))
+			.is_empty() and not ball.has("model") and not ball.has("type")
+			and ObjectLibrary.get_object(str(ball.get("object", ""))).get("source") == "user")
 	_check("the light applied", is_equal_approx(float(main.env.ambient_level), 0.3))
 
 	# --- remove can't touch the screen, the panel or the stock room. ---
@@ -429,12 +440,14 @@ func _text_and_uv_checks() -> void:
 	_check("max_width wraps (%s)" % note_box, note != null and note.autowrap_mode != TextServer.AUTOWRAP_OFF
 			and is_equal_approx(note_box.size.x, 1.0) and note_box.size.y > 0.15
 			and note.horizontal_alignment == HORIZONTAL_ALIGNMENT_LEFT)
-	var canvas := layer.get_node_or_null("Canvas/Mesh") as MeshInstance3D
+	# A box with a picture is kept as a picture object (room_keep.gd): the box_mesh() surfaces in its .glb.
+	var canvas := _mesh_of("Canvas")
 	var cm: Mesh = canvas.mesh if canvas != null else null
 	_check("front_only: two surfaces, the picture on the front", cm != null and cm.get_surface_count() == 2
-			and (cm.surface_get_material(0) as ShaderMaterial).get_shader_parameter("use_texture") == true
-			and (cm.surface_get_material(1) as ShaderMaterial).get_shader_parameter("use_texture") != true
-			and (cm.surface_get_material(1) as ShaderMaterial).get_shader_parameter("albedo") == Color("#402010"))
+			and (canvas.get_active_material(0) as ShaderMaterial).get_shader_parameter("use_texture") == true
+			and (canvas.get_active_material(1) as ShaderMaterial).get_shader_parameter("use_texture") != true
+			and (canvas.get_active_material(1) as ShaderMaterial).get_shader_parameter("albedo")
+					.is_equal_approx(Color("#402010")))
 	var front_ok := cm != null
 	if cm != null:
 		var fa := cm.surface_get_arrays(0)
@@ -449,7 +462,7 @@ func _text_and_uv_checks() -> void:
 			hi = hi.max(fuv[i])
 		front_ok = front_ok and fi.size() == 6 and lo.is_equal_approx(Vector2.ZERO) and hi.is_equal_approx(Vector2.ONE)
 	_check("the front face shows the whole picture", front_ok)
-	var cube := layer.get_node_or_null("Cube/Mesh") as MeshInstance3D
+	var cube := _mesh_of("Cube")
 	var each_ok := cube != null and cube.mesh.get_surface_count() == 1
 	if each_ok:
 		var ca := cube.mesh.surface_get_arrays(0)
@@ -462,7 +475,8 @@ func _text_and_uv_checks() -> void:
 				if Vector3i(cn[i].round()) == face:
 					lo = lo.min(cuv[i])
 					hi = hi.max(cuv[i])
-			each_ok = each_ok and lo.is_equal_approx(Vector2.ZERO) and hi.is_equal_approx(Vector2.ONE)
+			# Read back from the picture object's .glb: the engine keeps UVs in 16 bits (within 1/65536).
+			each_ok = each_ok and lo.distance_to(Vector2.ZERO) < 0.001 and hi.distance_to(Vector2.ONE) < 0.001
 	_check("each_face: the whole picture on every face", each_ok)
 	r = await commands.run("room_apply", {"room": {"schema": 1, "parts": [
 			{"name": "a", "type": "sphere", "size": [1], "material": {"uv": "front_only"}},
@@ -1416,8 +1430,21 @@ func _png_b64(c: Color) -> String:
 
 
 func _material_of(part: String) -> ShaderMaterial:
-	var mi := main.env.get_node_or_null("%s/%s/Mesh" % [AssistantRoom.LAYER, part]) as MeshInstance3D
-	return mi.material_override as ShaderMaterial if mi != null else null
+	var mi := _mesh_of(part)
+	if mi == null:
+		return null
+	return (mi.material_override if mi.material_override != null else mi.get_active_material(0)) as ShaderMaterial
+
+
+## A part's mesh: a shape's Mesh, or the first mesh of a placed object's model (a picture object: room_keep.gd).
+func _mesh_of(part: String) -> MeshInstance3D:
+	var node: Node = main.env.get_node_or_null("%s/%s" % [AssistantRoom.LAYER, part])
+	if node == null:
+		return null
+	if node.has_node("Mesh"):
+		return node.get_node("Mesh") as MeshInstance3D
+	var found := node.find_children("*", "MeshInstance3D", true, false)
+	return found[0] as MeshInstance3D if not found.is_empty() else null
 
 
 func _sphere(radial: int, rings: int) -> Node3D:
@@ -1471,6 +1498,11 @@ func _cleanup() -> void:
 				DirAccess.remove_absolute(dir.path_join(f))
 			DirAccess.remove_absolute(dir)
 		DirAccess.remove_absolute(AssistantRoom.json_path(name))
+	# The models and pictures these rooms kept in the object library (room_keep.gd), once the rooms are gone.
+	for m: Dictionary in ObjectLibrary.list("", "user"):
+		if not (m["id"] in _objects_before):
+			ObjectLibrary.delete(m["id"])
+			ObjectLibrary.purge(m["id"])
 
 
 ## Real time passing (with a renderer, so particles and motion settle before a picture); headless: no wait.

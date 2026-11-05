@@ -106,7 +106,8 @@ func _sync_library() -> void:
 		return
 	_loading = true
 	var r: Dictionary = await WorkerTask.run(get_tree(), func() -> Variant:
-		var list := ObjectLibrary.list()
+		# Text and particles are made from their options (an assistant's): not placed from here.
+		var list := ObjectLibrary.list().filter(func(m: Dictionary) -> bool: return not m.has("generator"))
 		for m: Dictionary in list:
 			ObjectLibrary.thumbnail(str(m["id"]))
 		return list)
@@ -196,10 +197,18 @@ func _ask_delete() -> void:
 	var m := ObjectLibrary.get_object(id)
 	if m.is_empty():
 		return
-	app.ui.ui.show_choice("Delete %s from the library? Copies in rooms stay." % m["name"], "Delete", func() -> void:
-		ObjectLibrary.delete(id)
-		ObjectLibrary.purge(id)
-		_selected = ""
+	# A kept room that places it keeps it in the library (rooms are made of objects): said instead of asked.
+	var using := ObjectLibrary.rooms_using(id)
+	if not using.is_empty():
+		app.ui.notify("%s is in %s: remove it there first." % [m["name"], ", ".join(using)])
+		return
+	app.ui.ui.show_choice("Delete %s from the library?" % m["name"], "Delete", func() -> void:
+		var r := ObjectLibrary.delete(id)
+		if r.get("ok") == true:
+			ObjectLibrary.purge(id)
+			_selected = ""
+		else:
+			app.ui.notify(str(r.get("error", "")))
 		sync_objects()
 		app.ui.ui.hide_toast(), "Keep", func() -> void: app.ui.ui.hide_toast(), 15.0)
 

@@ -19,6 +19,8 @@ const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
 const AssistantRoom := preload("res://scripts/assistant/assistant_room.gd")
 const RoomEditor := preload("res://scripts/assistant/room_editor.gd")
 const ObjectThumb := preload("res://scripts/assistant/object_thumb.gd")
+const ObjectBuiltins := preload("res://scripts/assistant/object_builtins.gd")
+const RoomKeep := preload("res://scripts/assistant/room_keep.gd")
 
 const ROOM := "Dim room with objects"
 const TEST_NAME := "Test object chair"
@@ -73,7 +75,7 @@ func _test_schema() -> void:
 			"#ff0000"}}]}, "patch")
 	_check("schema 1 with a part-level match: needs schema 2 (%s)" % [v1_new["errors"]], not v1_new["ok"]
 			and str(v1_new["errors"]).contains("schema"))
-	_check("schema 3 refused", not RoomSchema.validate({"schema": 3}, "patch")["ok"])
+	_check("schema 4 refused", not RoomSchema.validate({"schema": 4}, "patch")["ok"])
 	var v2 := RoomSchema.validate({"schema": 2, "recolour": [{"match": "Shelf/Board", "material": {"color": "#ff0000",
 			"library_material": "oak"}}, {"match": "Lamp/Shade", "material": null}]}, "patch")
 	_check("schema 2: a part-level match, a library material, null to take one out (%s)" % [v2["errors"]], v2["ok"])
@@ -297,7 +299,9 @@ func _test_commands() -> void:
 			func(p: Dictionary) -> bool: return p["name"] == "material") and DevCommands.get_spec("recolour")["params"].any(
 			func(p: Dictionary) -> bool: return p["name"] == "reset"))
 	var r := await DevCommands.execute("object_library", {"source": "builtin"}, false)
-	_check("object_library lists the built-ins (%s)" % r.get("error", ""), r["ok"] and int(r["result"]["count"]) == 4)
+	_check("object_library lists the built-ins, the primitives and generators too (%s)" % r.get("error", ""), r["ok"]
+			and int(r["result"]["count"]) == ObjectBuiltins.ENTRIES.size() and (r["result"]["objects"] as Array).any(
+			func(o: Dictionary) -> bool: return o["id"] == "box"))
 	r = await DevCommands.execute("object_info", {"id": "wall_clock"}, false)
 	_check("object_info: parts and the widget", r["ok"] and r["result"]["widget"] == "clock"
 			and (r["result"]["parts"] as Array).size() == 2)
@@ -412,10 +416,13 @@ func _test_parts() -> void:
 	_check("object_move at floor: its bottom on the floor (%s)" % r.get("error", ""), r["ok"] and node != null
 			and absf((node.transform * (node.get_meta("local_aabb") as AABB)).position.y - ObjectLibrary.GAP) < 0.01)
 
-	# The kept room: one model file for the two shelves; removed with its part colours.
+	# The kept room: no model files (the library is the one source), the shelves placements of its id; removed with
+	# its part colours.
 	var files := DirAccess.get_files_at(AssistantRoom.files_dir(ROOM))
-	_check("two shelves are one model file (%s)" % [files], Array(files).filter(func(f: String) -> bool:
-			return f.ends_with(".glb")).size() == 1)
+	var kept_text := FileAccess.get_file_as_string(AssistantRoom.json_path(ROOM))
+	_check("the two shelves are placements of the library's shelf, no model files (%s)" % [files],
+			Array(files).filter(func(f: String) -> bool: return f.ends_with(".glb")).is_empty()
+			and kept_text.count("\"object\": \"wall_shelf\"") == 2 and not kept_text.contains("model"))
 	a = await commands.run("remove", {"name": "Wall shelf 2"})
 	_check("remove takes a placed object out", a.get("ok") == true
 			and main.env.get_node_or_null("AssistantLayer/Wall shelf 2") == null)
@@ -425,8 +432,8 @@ func _test_kept() -> void:
 	# The kept file has the part-level entry; building it again shows the part's colour.
 	var path := AssistantRoom.json_path(ROOM)
 	var text := FileAccess.get_file_as_string(path)
-	_check("the kept room has the part's recolour (schema 2)", text.contains("Wall shelf/Brackets")
-			and text.contains("\"schema\": 2") and text.contains("\"object\": \"wall_shelf\""))
+	_check("the kept room has the part's recolour (schema 3)", text.contains("Wall shelf/Brackets")
+			and text.contains("\"schema\": 3") and text.contains("\"object\": \"wall_shelf\""))
 	var room := AssistantRoom.load_saved(path)
 	_check("built again from the kept file", room != null)
 	if room != null:
@@ -478,8 +485,10 @@ func _test_objects_tab() -> void:
 		await process_frame
 		if not section._ids.is_empty() and not section._loading:
 			break
-	_check("the Objects tab: a tile for each (%d)" % section._ids.size(), section._ids.size()
-			== ObjectLibrary.list().size() and section._grid.get_child_count() == section._ids.size())
+	var placeable := ObjectLibrary.list().filter(func(m: Dictionary) -> bool: return not m.has("generator"))
+	_check("the Objects tab: a tile for each but text and particles (%d)" % section._ids.size(), section._ids.size()
+			== placeable.size() and section._grid.get_child_count() == section._ids.size()
+			and section._tiles.has("box") and not section._tiles.has("text"))
 	var tile: Button = section._tiles.get("pot_plant")
 	_check("a tile has its thumbnail and name", tile != null and tile.find_children("*", "TextureRect", true,
 			false).size() == 1)

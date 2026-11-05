@@ -124,6 +124,8 @@ func _test_coverage() -> void:
 		var on: Array = materials.get(id, [])
 		_check("material %s on a panel and a sphere %s" % [id, on], "box" in on and "sphere" in on)
 	for e: Dictionary in ObjectBuiltins.ENTRIES:
+		if e.get("primitive", false) or e.has("generator"):
+			continue  # the shapes and the text (rooms are made of objects): shown as the part types below
 		_check("built-in object %s shown" % e["id"], objects.has(e["id"]))
 	for t: String in RoomSchema.PART_TYPES:
 		if t == "particles":
