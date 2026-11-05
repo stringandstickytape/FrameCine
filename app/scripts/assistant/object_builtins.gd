@@ -6,9 +6,24 @@ extends RefCounted
 ## built as nodes (one MeshInstance3D per part, named), written as a .glb by the library and read back like any
 ## imported object. The front faces +Z; a wall object's back is at z = 0, a floor object's bottom at y = 0.
 ##
-##   ENTRIES: [{id, name, tags, mount, widget?, widget_options?}]      build(id) -> Node3D (not in a tree) or null
+## Rooms are made of objects (docs/decisions.md): the primitives every shape of a room is a placement of (a 1 m box,
+## sphere, cylinder and plane, centred; a placement's scale is their size, room_schema.gd build_form()) and the
+## generators, whose node is made per placement from its options (a text's words, a particles area: no .glb).
+##
+##   ENTRIES: [{id, name, tags, mount, primitive?, generator?, widget?, widget_options?}]
+##   build(id) -> Node3D (not in a tree) or null (a generator)
 
 const ENTRIES := [
+	# The shapes a room document sends (type box, sphere, cylinder, plane) are placements of these: one part each, named
+	# after the shape, grey as an uncoloured part shows.
+	{"id": "box", "name": "Box", "tags": ["shape"], "mount": "free", "primitive": true},
+	{"id": "sphere", "name": "Sphere", "tags": ["shape"], "mount": "free", "primitive": true},
+	{"id": "cylinder", "name": "Cylinder", "tags": ["shape"], "mount": "free", "primitive": true},
+	{"id": "plane", "name": "Plane", "tags": ["shape"], "mount": "free", "primitive": true},
+	# Made per placement: a text's words (text, text_options; a line 0.1 m high at scale 1), a particles area
+	# (particles; 1 m a side at scale 1).
+	{"id": "text", "name": "Text", "tags": ["text"], "mount": "free", "generator": "text"},
+	{"id": "particles", "name": "Particles", "tags": ["effect"], "mount": "free", "generator": "particles"},
 	{"id": "picture_frame", "name": "Picture frame", "tags": ["wall", "picture"], "mount": "wall"},
 	{"id": "wall_shelf", "name": "Wall shelf", "tags": ["wall", "furniture"], "mount": "wall"},
 	{"id": "pot_plant", "name": "Pot plant", "tags": ["floor", "plant"], "mount": "floor"},
@@ -20,6 +35,8 @@ const ENTRIES := [
 
 static func build(id: String) -> Node3D:
 	match id:
+		"box", "sphere", "cylinder", "plane":
+			return _primitive(id)
 		"picture_frame":
 			return _picture_frame()
 		"wall_shelf":
@@ -28,6 +45,57 @@ static func build(id: String) -> Node3D:
 			return _pot_plant()
 		"wall_clock":
 			return _clock()
+	return null
+
+
+## Whether an id is one of the primitives or the generators.
+static func is_primitive(id: String) -> bool:
+	return ENTRIES.any(func(e: Dictionary) -> bool: return e["id"] == id and e.get("primitive", false))
+
+
+static func generator_of(id: String) -> String:
+	for e: Dictionary in ENTRIES:
+		if e["id"] == id:
+			return str(e.get("generator", ""))
+	return ""
+
+
+## A primitive's one part: "Box", "Sphere", "Cylinder", "Plane" (as "<placed>/Box" in a recolour).
+static func part_name(kind: String) -> String:
+	return kind.capitalize()
+
+
+## A primitive at 1 m, centred, its one part grey.
+static func _primitive(id: String) -> Node3D:
+	# The root named apart from the part: the .glb's node names are made unique ("Box", "Box2").
+	var root := _root(part_name(id) + "Object")
+	_part(root, part_name(id), "#b0b0b0", [[shape_mesh(id, Vector3.ONE), Transform3D()]])
+	return root
+
+
+## A shape's mesh as a room builds it (assistant_room.gd _part): box size [w, h, d]; sphere size.x across; cylinder
+## size.x across and size.y tall, round faces up and down; plane size.x by size.z, facing up.
+static func shape_mesh(kind: String, size: Vector3) -> PrimitiveMesh:
+	match kind:
+		"box":
+			var b := BoxMesh.new()
+			b.size = size
+			return b
+		"sphere":
+			var sp := SphereMesh.new()
+			sp.radius = size.x * 0.5
+			sp.height = size.x
+			return sp
+		"cylinder":
+			var cy := CylinderMesh.new()
+			cy.top_radius = size.x * 0.5
+			cy.bottom_radius = cy.top_radius
+			cy.height = size.y
+			return cy
+		"plane":
+			var pl := PlaneMesh.new()
+			pl.size = Vector2(size.x, size.z)
+			return pl
 	return null
 
 

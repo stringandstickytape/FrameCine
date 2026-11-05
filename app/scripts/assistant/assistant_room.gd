@@ -3,8 +3,11 @@ extends "res://environments/vr_environment.gd"
 ## A room an assistant made (docs/assistant.md, "Rooms"): a base room (a stock room, or a whole glTF room) and, in the
 ## child "AssistantLayer", the parts from the room document (room_schema.gd); the base's own parts may be recoloured.
 ## Everything the assistant adds is under AssistantLayer: never in the player, the panel, the screen or the XR rig.
-## Kept rooms are saved as recipes (user://recipes/<name>.room.json, with their models and pictures in
-## <name>.files/) and listed with the other rooms (scripts/dev/recipes.gd).
+## Kept rooms are saved as recipes (user://recipes/<name>.room.json, with the pictures of their recolours, sky and base
+## in <name>.files/) and listed with the other rooms (scripts/dev/recipes.gd). Rooms are made of objects
+## (docs/decisions.md): a kept room's parts are placements of objects from the object library, whose models and
+## pictures come from the library when the room is built; a kept room of schema 1 or 2 is converted once when it is
+## loaded (room_keep.gd) and saved back as schema 3.
 ##
 ##   build(doc, base, assets, base_id) -> this node          doc already validated; assets from room_editor.gd
 ##   load_saved(path) -> this node                           a kept room, read back (blocking, at a room change)
@@ -12,6 +15,7 @@ extends "res://environments/vr_environment.gd"
 
 const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
 const RoomModel := preload("res://scripts/assistant/room_model.gd")
+const RoomKeep := preload("res://scripts/assistant/room_keep.gd")
 const RoomWidget := preload("res://scripts/assistant/room_widget.gd")
 const RoomMotion := preload("res://scripts/assistant/room_motion.gd")
 const RoomParticles := preload("res://scripts/assistant/room_particles.gd")
@@ -135,9 +139,15 @@ func on_screen_changed(screen_transform: Transform3D, size: Vector2) -> void:
 		_base.on_screen_changed(screen_transform, size)
 
 
-## The room's own parts (the base's meshes) and the assistant's, for room_state: each one's colour, and its library
-## material's id when it shows one.
+## The room's own parts (the base's meshes) and the assistant's, for room_state: each stock surface's colour, and its
+## library material's id when it shows one; the placements (placed_objects()) with their object's id and name.
 func describe_parts() -> Dictionary:
+	var out := _describe_stock()
+	out["placed"] = placed_objects(self)
+	return out
+
+
+func _describe_stock() -> Dictionary:
 	var stock: Array = []
 	if _base != null:
 		for n in _base.find_children("*", "GeometryInstance3D", true, false):
@@ -246,7 +256,8 @@ static func build(p_doc: Dictionary, base: Node3D, assets: Dictionary, p_base_id
 	motion.name = "Motion"
 	_shared_materials.clear()
 	for p: Dictionary in p_doc.get("parts", []):
-		var node := _part(p, assets)
+		# A placement is built as the part its object makes (its model from the library, a primitive at its size).
+		var node := _part(RoomSchema.build_form(p), assets)
 		layer.add_child(node)
 		if p.has("motion"):
 			motion.add(node, p)
@@ -366,7 +377,7 @@ static func _add_contact_shadows(layer: Node3D, p_doc: Dictionary) -> void:
 	var quad := PlaneMesh.new()
 	quad.size = Vector2(2.0, 2.0)
 	for p: Dictionary in p_doc.get("parts", []):
-		if not (str(p.get("type", "")) in ["box", "sphere", "cylinder", "model"]) or str(p.get("widget", "")) != "":
+		if not (RoomSchema.kind_of(p) in ["box", "sphere", "cylinder", "model"]) or str(p.get("widget", "")) != "":
 			continue
 		var node := layer.get_node_or_null(str(p["name"])) as Node3D
 		if node == null or not node.has_meta("local_aabb"):
@@ -415,11 +426,16 @@ static func _recolour_parts(layer: Node3D, p_doc: Dictionary, assets: Dictionary
 				while node != null and node.get_parent() != layer:
 					node = node.get_parent()
 				var placed := str(node.name) if node != null else ""
-				var base: Dictionary = (whole[placed] as Dictionary).duplicate(true) if whole.has(placed) \
-						else {"color": _colour_of(mi) if _colour_of(mi) != "" else "#b0b0b0"}
-				# The whole model's picture, read under its part's key.
-				looks[mi] = {"m": base, "image": "part:" + placed if base.has("texture") or base.has("texture_file")
-						else ""}
+				if mi.has_meta("look"):
+					# What _part() made it show: its own colour and picture under the placement's material.
+					var own: Dictionary = mi.get_meta("look")
+					looks[mi] = {"m": (own["m"] as Dictionary).duplicate(true), "image": own["image"]}
+				else:
+					var base: Dictionary = (whole[placed] as Dictionary).duplicate(true) if whole.has(placed) \
+							else {"color": _colour_of(mi) if _colour_of(mi) != "" else "#b0b0b0"}
+					# The whole model's picture, read under its part's key.
+					looks[mi] = {"m": base, "image": "part:" + placed if base.has("texture")
+							or base.has("texture_file") else ""}
 			var look: Dictionary = looks[mi]
 			var before: Dictionary = (look["m"] as Dictionary).duplicate(true)
 			if m.has("texture") or m.has("texture_file"):
@@ -452,30 +468,44 @@ static func part_targets(layer: Node, match: String) -> Array:
 	if s.is_empty() or layer == null:
 		return out
 	for n in layer.get_children():
-		if not (n is Node3D) or not n.has_node("Model") or not str(n.name).match(s[0]):
+		if not (n is Node3D) or not str(n.name).match(s[0]):
 			continue
-		var parts := RoomModel.parts_of(n.get_node("Model"))
+		var parts := parts_of_placed(n)
 		for pn: String in parts:
 			if pn.match(s[1]):
 				out.append(parts[pn])
 	return out
 
 
-## The models placed from the object library (parts with "object"), for room_state and the Room tab:
-## [{name, object, parts: [{name, color, material: the library material's id or "", effect: the effect's id or "",
-## recolour: the entry that sets it last, or null}]}].
+## A placed part's parts by name: a model's meshes (RoomModel.parts_of), or a primitive's one mesh ("Box", "Sphere",
+## ...: the built-in object's part, RoomModel.PART_META on its Mesh). {} for a text or a particles area.
+static func parts_of_placed(n: Node) -> Dictionary:
+	if n == null:
+		return {}
+	if n.has_node("Model"):
+		return RoomModel.parts_of(n.get_node("Model"))
+	var mesh := n.get_node_or_null("Mesh") as MeshInstance3D
+	if mesh != null and mesh.has_meta(RoomModel.PART_META):
+		return {str(mesh.get_meta(RoomModel.PART_META)): mesh}
+	return {}
+
+
+## The placements (parts with "object": in a kept room every part), for room_state and the Room tab:
+## [{name, object, object_name, position, rotation, scale, parts: [{name, color, material: the library material's id
+## or "", effect: the effect's id or "", recolour: the entry that sets it last, or null}]}].
 static func placed_objects(env: Node) -> Array:
 	var out: Array = []
 	if env == null or env.get_script() != load("res://scripts/assistant/assistant_room.gd"):
 		return out
 	var d: Dictionary = env.get("doc")
 	var layer: Node = env.get_node_or_null(LAYER)
+	var library := load("res://scripts/assistant/object_library.gd") as GDScript
 	for p: Dictionary in d.get("parts", []):
 		if not p.has("object"):
 			continue
 		var node: Node = layer.get_node_or_null(str(p["name"])) if layer != null else null
 		var parts: Array = []
-		var by_name := RoomModel.parts_of(node.get_node_or_null("Model") if node != null else null)
+		var by_name := parts_of_placed(node)
 		for pn: String in by_name:
 			var set_by: Variant = null
 			for r: Dictionary in d.get("recolour", []):
@@ -484,8 +514,10 @@ static func placed_objects(env: Node) -> Array:
 					set_by = r["match"]
 			parts.append({"name": pn, "color": _colour_of(by_name[pn]), "material": material_id_of(by_name[pn]),
 					"effect": effect_id_of(by_name[pn]), "recolour": set_by})
-		out.append({"name": p["name"], "object": p["object"], "position": p.get("position", [0, 0, 0]),
-				"rotation": p.get("rotation", [0, 0, 0]), "scale": p.get("scale", 1.0), "parts": parts})
+		var m: Dictionary = library.call("get_object", str(p["object"]))
+		out.append({"name": p["name"], "object": p["object"], "object_name": m.get("name", ""),
+				"position": p.get("position", [0, 0, 0]), "rotation": p.get("rotation", [0, 0, 0]),
+				"scale": p.get("scale", 1.0), "parts": parts})
 	return out
 
 
@@ -594,9 +626,11 @@ static func _part(p: Dictionary, assets: Dictionary) -> Node3D:
 				var model: Node3D = (m["node"] as Node).duplicate()
 				model.name = "Model"
 				node.add_child(model)
-				if p.get("material", {}) is Dictionary and not (p.get("material", {}) as Dictionary).is_empty():
+				if widget == "screen_glow":
 					for mi: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
 						mi.material_override = mat
+				else:
+					_model_surfaces(model, p, m.get("pictures", {}), assets)
 				var box := _aabb(model)
 				face = Vector2(maxf(box.size.x, 0.05), maxf(box.size.y, 0.05))
 				face_xf = Transform3D(Basis(), Vector3(box.get_center().x, box.get_center().y, box.end.z + 0.002))
@@ -613,6 +647,8 @@ static func _part(p: Dictionary, assets: Dictionary) -> Node3D:
 		var mi := MeshInstance3D.new()
 		mi.name = "Mesh"
 		mi.mesh = mesh
+		# The built-in primitive's one part ("<placed>/Box" in a recolour).
+		mi.set_meta(RoomModel.PART_META, type.capitalize())
 		if not per_surface:
 			mi.material_override = mat
 		# Solid parts cast the key light's shadow; see-through ones and glows do not.
@@ -634,6 +670,69 @@ static func _part(p: Dictionary, assets: Dictionary) -> Node3D:
 		w.transform = face_xf
 		node.add_child(w)
 	return node
+
+
+## A model's surfaces as the room shows them. A picture object's picture (an unlit material with a picture, read from
+## the file: RoomModel.load_glb's "pictures") becomes the room's picture material (material(): self-lit in a flat room,
+## white, a cut-out where it is transparent), as a part's picture does. With a placement material, each surface shows
+## its own colour (and picture) with the placement's material on top (RoomSchema.merge_material(): an emission keeps
+## the colour, a colour tints the picture, a library material replaces it). Other surfaces keep the file's own
+## materials. Each part keeps its look (meta "look") for part-level recolours (_recolour_parts()).
+static func _model_surfaces(model: Node3D, p: Dictionary, pictures: Dictionary, assets: Dictionary) -> void:
+	var whole: Dictionary = p.get("material", {}) if p.get("material") is Dictionary else {}
+	var name := str(p["name"])
+	var fx: Variant = whole.get("effect")
+	var local := _aabb(model) if fx is Dictionary else AABB()
+	if not assets.has("images"):
+		assets["images"] = {}
+	if not assets.has("alpha"):
+		assets["alpha"] = {}
+	for mi: MeshInstance3D in model.find_children("*", "MeshInstance3D", true, false):
+		if mi.mesh == null:
+			continue
+		for s in mi.mesh.get_surface_count():
+			var cur := mi.get_surface_override_material(s)
+			var pic := str(cur.get_meta(RoomModel.PICTURE_META, "")) if cur != null else ""
+			if whole.is_empty() and not pictures.has(pic):
+				continue
+			var own := {"color": _material_colour(cur)}
+			var key := ""
+			if pictures.has(pic):
+				# By the object: two copies of a poster share its material and texture.
+				key = "picture:%s/%s" % [p.get("object", name), pic]
+				own["texture"] = true
+				assets["images"][key] = pictures[pic]["image"]
+				assets["alpha"][key] = pictures[pic]["alpha"]
+			var look := RoomSchema.merge_material(own, whole) if not whole.is_empty() else own
+			if whole.has("texture") or whole.has("texture_file"):
+				# A picture sent on the whole model (a kept room of schema 2), read under its part's key.
+				key = "part:" + name
+			elif not look.has("texture"):
+				key = ""
+			var plain := look.duplicate()
+			plain.erase("texture")
+			plain.erase("texture_file")
+			var share := JSON.stringify(plain, "", true) + key
+			if not _shared_materials.has(share):
+				var made := material(look, assets, key)
+				fit_effect(made, fx, local)
+				_shared_materials[share] = made
+			mi.set_surface_override_material(s, _shared_materials[share])
+			if s == 0:
+				mi.set_meta("look", {"m": look, "image": key})
+
+
+## A surface material's colour as "#rrggbb" (or "#rrggbbaa" when see-through): what it shows before a placement's
+## material goes on top.
+static func _material_colour(m: Material) -> String:
+	var c := Color("#b0b0b0")
+	if m != null and m.has_meta("shown_colour"):
+		c = m.get_meta("shown_colour")
+	elif m is ShaderMaterial and (m as ShaderMaterial).get_shader_parameter("albedo") is Color:
+		c = (m as ShaderMaterial).get_shader_parameter("albedo")
+	elif m is BaseMaterial3D:
+		c = (m as BaseMaterial3D).albedo_color
+	return "#" + c.to_html(c.a < 0.999)
 
 
 ## BoxMesh's piece of the picture per face (its 3 x 2 layout, measured from the engine: tests/test_assistant_room.gd):
@@ -1278,6 +1377,22 @@ static func load_saved(path: String) -> Node3D:
 		if m.has("texture_file"):
 			m["texture"] = read.call(m["texture_file"])
 			m.erase("texture_file")
+	if int(d.get("schema", 1)) < RoomSchema.VERSION and path.begins_with(RECIPE_DIR + "/"):
+		# A kept room of schema 1 or 2 (a viewer's, never a showroom under res://): its models and pictures into the
+		# object library, its parts placements (room_keep.gd), saved back as schema 3 once. One that can't be converted
+		# is built as it is.
+		var k := RoomKeep.keep(d)
+		if k.has("error"):
+			push_warning("Assistant room %s: kept as schema %d, not converted: %s" % [path, d.get("schema", 1),
+					k["error"]])
+		else:
+			d = k["doc"]
+			var err := save(d, path.get_file().trim_suffix(".room.json"))
+			if err != "":
+				push_warning("Assistant room %s: converted, not saved: %s" % [path, err])
+			elif not (k["kept"] as Array).is_empty():
+				print("Assistant room %s: converted to schema %d; %s" % [path.get_file(), RoomSchema.VERSION,
+						RoomKeep.summary(k["kept"])])
 	var editor := load("res://scripts/assistant/room_editor.gd") as GDScript
 	var assets: Dictionary = editor.call("load_assets_now", d)
 	if assets.has("error"):

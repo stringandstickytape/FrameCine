@@ -2,7 +2,23 @@ extends RefCounted
 
 ## The room document (docs/assistant.md, "Rooms"): the data an assistant sends to build or change the room. Data only:
 ## nothing in it is run, evaluated or loaded as a script; models are glTF binaries read with the engine's GLTFDocument
-## and checked (assistant_room.gd). Schema 2 (schema 1 is still read: it is schema 2 without objects and part
+## and checked (assistant_room.gd). Schema 3: rooms are made of objects (docs/decisions.md, "Rooms are made of
+## objects"). A kept room's every part is a placement of an object from the object library (object_library.gd):
+##
+##   placement: {"name": "Poster", "object": "<library id>", "position": [x, y, z], "rotation": [x, y, z],
+##               "scale": s or [x, y, z], "material": material without a picture (an override: color, self_lit,
+##               emission, emission_strength, alpha, library_material and its options, effect), "widget",
+##               "widget_options", "motion"; object "text": "text", "text_options"; object "particles": "particles"}
+##
+## The built-in primitives (object_builtins.gd) are a 1 m box, a 1 m sphere, a cylinder 1 m across and 1 m tall and a
+## 1 x 1 m plane facing up: a placement's scale is their size (box [w, h, d], sphere s, cylinder [d, h, d], plane
+## [w, 1, d]). "text" is a line 0.1 m high at scale 1, "particles" an area of 1 m a side at scale 1. Any other object is
+## a model (a .glb in the library). build_form() turns a placement into the part the room is built from.
+##
+## A part may still be sent as a shape (the schema-2 way below: type, size, model, texture): room_editor.gd keeps it as
+## a placement when the change is applied (room_keep.gd): an inline model and a part with a picture become user objects
+## in the library, a plain shape a placement of a built-in primitive. Schemas 1 and 2 are still read; a kept room of
+## either is converted once when it is loaded. A part as sent in schema 2 (schema 1 is schema 2 without objects and part
 ## addressing):
 ##
 ##   {"schema": 2,
@@ -44,12 +60,24 @@ extends RefCounted
 ##
 ## validate(doc, mode) checks a whole document and returns every problem with its JSON path, so an assistant can fix
 ## them all at once. Modes: "new" (a whole room), "patch" (changes to the room on show), "saved" (a kept room read
-## back from disk, where models and pictures are files next to it: model_file, texture_file, image_file,
-## base_model_file).
+## back from disk, where pictures are files next to it: texture_file in a recolour entry, image_file, base_model_file;
+## a kept room of schema 1 or 2 also model_file and a part's texture_file). A kept room of schema 3 has placements only,
+## without pictures.
 
-const VERSION := 2
-## The versions read: 1 is 2 without objects ("object"), part addressing ("Shelf/Board") and library materials.
-const VERSIONS: Array[int] = [1, 2]
+const VERSION := 3
+## The versions read: 1 is 2 without objects ("object"), part addressing ("Shelf/Board") and library materials; 2 is 3
+## without placements (a part without type).
+const VERSIONS: Array[int] = [1, 2, 3]
+## The built-in primitive objects (object_builtins.gd): a placement's scale is their size.
+const PRIMITIVES: Array[String] = ["box", "sphere", "cylinder", "plane"]
+## The built-in objects made per placement from its options (object_builtins.gd GENERATORS): their node is generated
+## (a text's words, a particles area), not read from a .glb.
+const GENERATORS: Array[String] = ["text", "particles"]
+## A placement's keys (a kept room's parts).
+const PLACEMENT_KEYS: Array[String] = ["name", "object", "position", "rotation", "scale", "material", "widget",
+		"widget_options", "motion", "text", "text_options", "particles"]
+## A text object at scale 1: one line this high (metres).
+const TEXT_OBJECT_LINE := 0.1
 ## An object library id (object_library.gd) or a library material's: lower-case letters, digits, - and _.
 const ID_MAX := 64
 ## A library material's own options in a material object (only with library_material), and its tiling's range.
@@ -281,10 +309,14 @@ static func validate(doc: Variant, mode: String) -> Dictionary:
 			errors.append(_e("$.%s" % k, "unknown key (known: %s)" % ", ".join(known)))
 	var version := int(_num(d.get("schema", 0))) if is_finite(_num(d.get("schema", 0))) else 0
 	if not (version in VERSIONS):
-		errors.append(_e("$.schema", "must be %d (%d is still read)" % [VERSION, VERSIONS[0]]))
-	elif version < 2:
-		for p: String in _schema2_paths(d):
-			errors.append(_e(p, "needs \"schema\": 2 (objects, \"name/part\" matches and library materials)"))
+		errors.append(_e("$.schema", "must be %d (%s are still read)" % [VERSION, ", ".join(VERSIONS.slice(0, -1))]))
+	else:
+		if version < 2:
+			for p: String in _schema2_paths(d):
+				errors.append(_e(p, "needs \"schema\": 2 (objects, \"name/part\" matches and library materials)"))
+		if version < 3:
+			for p: String in _schema3_paths(d):
+				errors.append(_e(p, "needs \"schema\": 3 (a part placed as an object: object without type)"))
 	if d.has("name") and not _name_ok(d["name"]):
 		errors.append(_e("$.name", "letters, digits, space, - and _, at most %d" % NAME_MAX))
 	if mode == "patch" and (d.has("base") or d.has("base_model")):
@@ -324,7 +356,14 @@ static func validate(doc: Variant, mode: String) -> Dictionary:
 			if parts.size() > LIMITS["parts"]:
 				errors.append(_e("$.parts", "parts: at most %d" % LIMITS["parts"]))
 			for i in parts.size():
-				_part(parts[i], "$.parts[%d]" % i, mode, names, errors)
+				if parts[i] is Dictionary and not (parts[i] as Dictionary).has("type") \
+						and (parts[i] as Dictionary).has("object"):
+					_placement(parts[i], "$.parts[%d]" % i, mode, names, errors)
+				elif mode == "saved" and version >= 3:
+					errors.append(_e("$.parts[%d]" % i, "a kept room of schema 3 has placements only: {name, object, "
+							+ "...}, no type"))
+				else:
+					_part(parts[i], "$.parts[%d]" % i, mode, names, errors)
 	if d.has("recolour"):
 		if not (d["recolour"] is Array):
 			errors.append(_e("$.recolour", "a list of {match, material}"))
@@ -399,6 +438,17 @@ static func _schema2_paths(d: Dictionary) -> Array:
 				out.append("$.recolour[%d].match" % i)
 			if rs[i].get("material") is Dictionary and (rs[i]["material"] as Dictionary).has("library_material"):
 				out.append("$.recolour[%d].material.library_material" % i)
+	return out
+
+
+## Where a document uses what schema 2 lacks: a part placed as an object (object without type).
+static func _schema3_paths(d: Dictionary) -> Array:
+	var out: Array = []
+	var parts: Array = d.get("parts", []) if d.get("parts") is Array else []
+	for i in parts.size():
+		if parts[i] is Dictionary and (parts[i] as Dictionary).has("object") \
+				and not (parts[i] as Dictionary).has("type"):
+			out.append("$.parts[%d].object" % i)
 	return out
 
 
@@ -673,6 +723,7 @@ static func lighting_cost(doc: Dictionary) -> float:
 ## A solid part that may stand on the floor (a contact shadow under it): a box, sphere, cylinder or model, not
 ## see-through, no widget, its bottom (as far as the document says) within 0.3 m of the floor.
 static func stands_on_floor(p: Dictionary) -> bool:
+	p = build_form(p)
 	if not (str(p.get("type", "")) in ["box", "sphere", "cylinder", "model"]) or str(p.get("widget", "")) != "":
 		return false
 	var m: Dictionary = p.get("material", {}) if p.get("material") is Dictionary else {}
@@ -680,6 +731,11 @@ static func stands_on_floor(p: Dictionary) -> bool:
 			and str(m.get("alpha", "")) != "opaque"):
 		return false
 	if str(p["type"]) == "model":
+		# A placement of a wall or ceiling object (a poster kept from a plane) hangs; anything else may stand.
+		if p.has("object"):
+			var obj: Dictionary = (load("res://scripts/assistant/object_library.gd") as GDScript).call("get_object",
+					str(p["object"]))
+			return not (str(obj.get("mount", "")) in ["wall", "ceiling"])
 		return true
 	var size: Array = p.get("size", [1.0]) if p.get("size") is Array else [1.0]
 	var h := _num(size[1]) if str(p["type"]) in ["box", "cylinder"] and size.size() > 1 else _num(size[0])
@@ -929,6 +985,139 @@ static func _part(v: Variant, path: String, mode: String, names: Dictionary, err
 		errors.append(_e(path + ".widget_options", "only with a widget"))
 
 
+## A placement (schema 3): an object from the library put in the room. What it is made of comes from the library
+## (room_editor.gd refuses an id the library doesn't have); its material is an override. The checks a shape's part has
+## that still apply (a text's words, a particles area, the widget, motion, position) are made on its build form.
+static func _placement(p: Dictionary, path: String, mode: String, names: Dictionary, errors: Array) -> void:
+	for k: Variant in p:
+		if not (str(k) in PLACEMENT_KEYS):
+			errors.append(_e("%s.%s" % [path, k], "unknown key (a placement: %s; a shape is sent with type)"
+					% ", ".join(PLACEMENT_KEYS)))
+	if not id_ok(p.get("object")):
+		errors.append(_e(path + ".object", "an object library id (object_library lists them): lower-case letters, "
+				+ "digits, - and _"))
+		return
+	var kind := kind_of(p)
+	var max_scale := float(LIMITS["extent_m"]) if kind in PRIMITIVES else 100.0
+	if kind == "particles":
+		max_scale = 30.0
+	if p.has("scale"):
+		var s: Variant = p["scale"]
+		var ok: bool = (s is float or s is int) and float(s) > 0.0 and float(s) <= max_scale
+		if not ok and _vec(s, 3):
+			ok = (s as Array).all(func(x: Variant) -> bool: return float(x) > 0.0 and float(x) <= max_scale)
+		if not ok:
+			errors.append(_e(path + ".scale", "a number or [x, y, z], each above 0 and at most %s%s" % [max_scale,
+					" (a primitive's scale is its size in metres)" if kind in PRIMITIVES else ""]))
+	var m: Variant = p.get("material")
+	if m is Dictionary:
+		# A picture sent on a placement (recolour with texture) becomes a picture object when the change is applied;
+		# a kept room's placements have none.
+		var refused: Array = ["texture_file"]
+		if mode == "saved":
+			refused.append_array(["texture", "uv"])
+		for k: String in refused:
+			if (m as Dictionary).has(k):
+				errors.append(_e("%s.material.%s" % [path, k], "a placement's material has no picture of its own: "
+						+ "the object carries it (a part sent with material.texture becomes a picture object)"))
+	# The rest is checked as the part it is built as (its size from its scale).
+	var f := build_form(p)
+	f.erase("object")
+	if kind == "text":
+		f.erase("size")
+	var sub: Array = []
+	_part(f, path, "new" if mode == "saved" else mode, names, sub)
+	for e: Dictionary in sub:
+		# Its size comes from its scale (checked above); a model's data from the library.
+		if str(e["path"]).ends_with(".size") or str(e["path"]).ends_with(".model") or str(e["path"]).ends_with(".type"):
+			continue
+		errors.append(e)
+
+
+## What a part is built as: its type ("box", "text", "model", ...), from its object when it is a placement.
+static func kind_of(p: Dictionary) -> String:
+	if p.has("type"):
+		return str(p["type"])
+	var id := str(p.get("object", ""))
+	return id if id in PRIMITIVES or id in GENERATORS else "model"
+
+
+## A part as the room is built from it (assistant_room.gd _part): a shape's part as it is; a placement with the type
+## its object makes, a primitive's scale as its size (a node scale only for what the size can't say: an ellipsoid, an
+## oval cylinder), a text's scale as its line height, a particles area's as its size. Keeps "object".
+static func build_form(p: Dictionary) -> Dictionary:
+	if p.has("type") or not p.has("object"):
+		return p
+	var f := p.duplicate()
+	var kind := kind_of(p)
+	f["type"] = kind
+	var s: Variant = p.get("scale", 1.0)
+	var v := Vector3.ONE * float(s) if (s is float or s is int) else (Vector3(float(s[0]), float(s[1]), float(s[2]))
+			if _vec(s, 3) else Vector3.ONE)
+	match kind:
+		"box":
+			f["size"] = [v.x, v.y, v.z]
+			f.erase("scale")
+		"sphere":
+			f["size"] = [v.x]
+			_rest_scale(f, Vector3(1.0, v.y / v.x, v.z / v.x))
+		"cylinder":
+			f["size"] = [v.x, v.y]
+			_rest_scale(f, Vector3(1.0, 1.0, v.z / v.x))
+		"plane":
+			f["size"] = [v.x, v.z]
+			f.erase("scale")
+		"text":
+			if s is float or s is int:
+				f["size"] = [TEXT_OBJECT_LINE * float(s)]
+				f.erase("scale")
+			else:
+				f["size"] = [TEXT_OBJECT_LINE]
+		"particles":
+			f["size"] = [v.x, v.y, v.z]
+			f.erase("scale")
+	return f
+
+
+static func _rest_scale(f: Dictionary, k: Vector3) -> void:
+	if k.is_equal_approx(Vector3.ONE):
+		f.erase("scale")
+	else:
+		f["scale"] = [k.x, k.y, k.z]
+
+
+## A shape's part (type box, sphere, cylinder, plane, text or particles) as a placement's object and scale, the reverse
+## of build_form(): {object, scale} (a number when it is the same on every axis). {} for a model.
+static func placement_scale(p: Dictionary) -> Dictionary:
+	var kind := str(p.get("type", ""))
+	var s: Variant = p.get("scale", 1.0)
+	var k := Vector3.ONE * float(s) if (s is float or s is int) else (Vector3(float(s[0]), float(s[1]), float(s[2]))
+			if _vec(s, 3) else Vector3.ONE)
+	var size: Array = p.get("size", []) if p.get("size") is Array else []
+	var v := Vector3.ONE
+	match kind:
+		"box", "particles":
+			v = Vector3(float(size[0]), float(size[1]), float(size[2])) if size.size() == 3 else Vector3.ONE
+		"sphere":
+			v = Vector3.ONE * (float(size[0]) if size.size() >= 1 else 1.0)
+		"cylinder":
+			var d := float(size[0]) if size.size() >= 1 else 1.0
+			v = Vector3(d, float(size[1]) if size.size() >= 2 else 1.0, d)
+		"plane":
+			v = Vector3(float(size[0]) if size.size() >= 1 else 1.0, 1.0, float(size[1]) if size.size() >= 2 else 1.0)
+		"text":
+			v = Vector3.ONE * (float(size[0]) if size.size() >= 1 else TEXT_LINE_DEFAULT) / TEXT_OBJECT_LINE
+		_:
+			return {}
+	v *= k
+	if kind == "plane":
+		v.y = k.y
+	var out: Variant = [snappedf(v.x, 0.0001), snappedf(v.y, 0.0001), snappedf(v.z, 0.0001)]
+	if is_equal_approx(v.x, v.y) and is_equal_approx(v.x, v.z):
+		out = snappedf(v.x, 0.0001)
+	return {"object": kind, "scale": out}
+
+
 static func _widget_options(w: String, v: Variant, path: String, errors: Array) -> void:
 	_options(WIDGETS[w]["options"], w, v, path, errors)
 
@@ -1000,13 +1189,16 @@ static func with_defaults(spec: Dictionary, given: Variant) -> Dictionary:
 	return out
 
 
-## What a part costs (COSTS); model_triangles and model_parts: the model's, once read.
-static func part_cost(p: Dictionary, model_triangles := 0, model_parts := 1) -> float:
+## What a part costs (COSTS); model_triangles and model_parts: the model's, once read. picture: the model is a picture
+## object kept from a shape (room_keep.gd): one mesh, priced as the shape it was.
+static func part_cost(p: Dictionary, model_triangles := 0, model_parts := 1, picture := false) -> float:
+	p = build_form(p)
 	var c: float = COSTS["part"]
 	match str(p.get("type", "")):
 		"model":
-			c = COSTS["model"] + COSTS["model_per_10k_triangles"] * model_triangles / 10000.0 \
-					+ COSTS["model_part"] * maxi(model_parts - 1, 0)
+			if not picture:
+				c = COSTS["model"] + COSTS["model_per_10k_triangles"] * model_triangles / 10000.0 \
+						+ COSTS["model_part"] * maxi(model_parts - 1, 0)
 		"text":
 			c = COSTS["text"]
 		"particles":

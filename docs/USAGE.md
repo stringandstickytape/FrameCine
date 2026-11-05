@@ -193,8 +193,8 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 Other files in the same folder: `resume.cfg` (one section per file: path, title, position, duration, updated,
 finished), `xr_override.cfg` (only after `--hands`, `docs/xr-spikes.md`), `assistant_clients.cfg` (the paired
 assistants), `assistant_tls.key` and `assistant_tls.crt` (the assistant service's certificate), `tours/`, `rooms/`, `skyboxes/`, `recipes/` (also the rooms an assistant made and you kept:
-`<name>.room.json` and `<name>.files/`), `objects/` (the object library's imported objects: `<id>/object.glb`,
-`manifest.json`, `thumb.png`), `screenshots/`.
+`<name>.room.json` and `<name>.files/`), `objects/` (the object library's imported objects, and the models and
+pictures kept rooms place: `<id>/object.glb`, `manifest.json`, `thumb.png`), `screenshots/`.
 
 ## Controls
 
@@ -295,7 +295,9 @@ when there are some. One controller does it all.
   effect. A change that would take the room past its cost limit is refused with a note. **Reset** gives the part its
   own colours back. Each change has Undo in the footer.
 
-**Delete** (imported objects only) asks first in the footer; copies already in rooms stay.
+**Delete** (imported objects, and the models and pictures an assistant's rooms kept) asks first in the footer. While a
+kept room has the object in it, Delete says which rooms instead: rooms are made of the library's objects, so remove it
+there first.
 
 ## The Library
 

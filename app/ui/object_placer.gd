@@ -59,10 +59,14 @@ func start_place(id: String) -> bool:
 
 func start_move(name: String) -> bool:
 	var node := app.env.get_node_or_null("AssistantLayer/" + name) as Node3D if app.env != null else null
-	if node == null or not node.has_node("Model"):
+	# A model's nodes, or a built-in primitive's one mesh (rooms are made of objects: a box is placed like a shelf).
+	var shape: Node3D = node.get_node_or_null("Model") as Node3D if node != null else null
+	if shape == null and node != null:
+		shape = node.get_node_or_null("Mesh") as Node3D
+	if shape == null:
 		return false
 	var s := node.scale.x
-	var copy := node.get_node("Model").duplicate() as Node3D
+	var copy := shape.duplicate() as Node3D
 	_begin(copy, node.get_meta("local_aabb", ObjectLibrary.bounds_of({})), s)
 	moving = name
 	_hidden = node

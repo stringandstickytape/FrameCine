@@ -6,7 +6,8 @@ extends RefCounted
 ## loading runs on a worker thread (room_editor.gd), so the frame never waits for it.
 ##
 ##   precheck(bytes) -> "" or why it is refused                  (the GLB container, its JSON, extensions, URIs)
-##   load_glb(bytes) -> {node, triangles, textures, removed, turned, parts} or {error}   (worker-safe: not in a tree)
+##   load_glb(bytes) -> {node, triangles, textures, removed, turned, parts, pictures} or {error}   (worker-safe)
+##   with_picture(glb, material, picture) -> the .glb with the picture as that material's, unlit (a picture object)
 ##   turn_inside_out_shapes(mesh) -> [the fixed ArrayMesh or null, how many shapes were turned]
 ##   decode_image(bytes) -> {image} or {error}
 ##   parts_of(node) -> {part name: MeshInstance3D}                 a read model's parts (meta PART_META)
@@ -32,6 +33,8 @@ const ALLOWED_EXTENSIONS: Array[String] = [
 const SCRIPT_KEYS: Array[String] = ["script", "gdscript", "code", "eval", "javascript", "shader"]
 ## The meta on a model's MeshInstance3D that holds its part name.
 const PART_META := "object_part"
+## The meta on a surface's material that names its picture (load_glb's "pictures"): an unlit material with a picture.
+const PICTURE_META := "picture"
 const PART_NAME_MAX := 40
 
 
@@ -115,6 +118,10 @@ static func load_glb(bytes: PackedByteArray) -> Dictionary:
 	var triangles := 0
 	var textures := {}
 	var parts: Array = []
+	# Unlit materials with a picture (a picture object's, with_picture()): their pictures read from the file, so the
+	# room shows them as it shows a part's picture (assistant_room.gd material()).
+	var picture_bytes := _picture_bytes(_json_of(bytes), bytes)
+	var pictures := {}
 	for mi: MeshInstance3D in scene.find_children("*", "MeshInstance3D", true, false):
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		if mi.mesh == null:
@@ -131,13 +138,136 @@ static func load_glb(bytes: PackedByteArray) -> Dictionary:
 				part["texture"] = true
 			if s == 0:
 				part["color"] = "#" + (src.albedo_color.to_html(false) if src != null else "808080")
-			mi.set_surface_override_material(s, GltfRoom.convert_material(mi.get_active_material(s)))
+			var converted := GltfRoom.convert_material(mi.get_active_material(s))
+			var pic := String(src.resource_name) if src != null else ""
+			if picture_bytes.has(pic) and src.shading_mode == BaseMaterial3D.SHADING_MODE_UNSHADED:
+				if not pictures.has(pic):
+					var d := decode_image(picture_bytes[pic])
+					if d.has("error"):
+						scene.free()
+						return {"error": "the picture of %s: %s" % [pic, d["error"]]}
+					pictures[pic] = d
+				converted.set_meta(PICTURE_META, pic)
+				converted.set_meta("shown_colour", src.albedo_color)
+			mi.set_surface_override_material(s, converted)
 		parts.append(part)
 	var biggest := 0
 	for t: Texture2D in textures.values():
 		biggest = maxi(biggest, maxi(t.get_width(), t.get_height()))
 	return {"node": scene, "triangles": triangles, "textures": textures.size(), "texture_size": biggest,
-			"removed": removed, "turned": turned, "parts": parts}
+			"removed": removed, "turned": turned, "parts": parts, "pictures": pictures}
+
+
+## The pictures of a .glb's unlit materials (KHR_materials_unlit with a base colour texture in the file's own buffer):
+## {material name: the picture's bytes}.
+static func _picture_bytes(g: Dictionary, bytes: PackedByteArray) -> Dictionary:
+	var out := {}
+	var bin := _bin_of(bytes)
+	var views: Array = g.get("bufferViews", []) if g.get("bufferViews") is Array else []
+	var images: Array = g.get("images", []) if g.get("images") is Array else []
+	var textures: Array = g.get("textures", []) if g.get("textures") is Array else []
+	var mats: Array = g.get("materials", []) if g.get("materials") is Array else []
+	for m: Variant in mats:
+		if not (m is Dictionary) or not (m.get("extensions") is Dictionary) \
+				or not (m["extensions"] as Dictionary).has("KHR_materials_unlit"):
+			continue
+		var pbr: Variant = m.get("pbrMetallicRoughness")
+		var t := int(pbr.get("baseColorTexture", {}).get("index", -1)) if pbr is Dictionary \
+				and pbr.get("baseColorTexture") is Dictionary else -1
+		if t < 0 or t >= textures.size() or not (textures[t] is Dictionary):
+			continue
+		var i := int(textures[t].get("source", -1))
+		if i < 0 or i >= images.size() or not (images[i] is Dictionary) or not images[i].has("bufferView"):
+			continue
+		var v := int(images[i]["bufferView"])
+		if v < 0 or v >= views.size() or not (views[v] is Dictionary):
+			continue
+		var at := int(views[v].get("byteOffset", 0))
+		var n := int(views[v].get("byteLength", 0))
+		if at >= 0 and n > 0 and at + n <= bin.size():
+			out[str(m.get("name", ""))] = bin.slice(at, at + n)
+	return out
+
+
+## A .glb's binary chunk, or empty.
+static func _bin_of(bytes: PackedByteArray) -> PackedByteArray:
+	if bytes.size() < 20:
+		return PackedByteArray()
+	var at := 20 + int(bytes.decode_u32(12))
+	if bytes.size() < at + 8 or bytes.decode_u32(at + 4) != 0x004E4942:  # "BIN\0"
+		return PackedByteArray()
+	return bytes.slice(at + 8, at + 8 + int(bytes.decode_u32(at)))
+
+
+## A .glb with `picture` (PNG or JPEG bytes, kept as they are; WebP is written as PNG) as material `material`'s base
+## colour, the material made unlit (KHR_materials_unlit): a picture object (room_keep.gd). The picture is put in the
+## file's own buffer, so nothing reads it back from the GPU. Empty when the .glb has no such material.
+static func with_picture(glb: PackedByteArray, material: String, picture: PackedByteArray) -> PackedByteArray:
+	var g := _json_of(glb)
+	var mats: Array = g.get("materials", []) if g.get("materials") is Array else []
+	var mi := -1
+	for i in mats.size():
+		if mats[i] is Dictionary and str(mats[i].get("name", "")) == material:
+			mi = i
+	if mi < 0:
+		return PackedByteArray()
+	var mime := "image/png"
+	if picture.size() > 2 and picture[0] == 0xFF and picture[1] == 0xD8:
+		mime = "image/jpeg"
+	elif not (picture.size() > 2 and picture[0] == 0x89 and picture[1] == 0x50):
+		var d := decode_image(picture)
+		if d.has("error"):
+			return PackedByteArray()
+		picture = (d["image"] as Image).save_png_to_buffer()
+	var bin := _bin_of(glb)
+	while bin.size() % 4 != 0:
+		bin.append(0)
+	var views: Array = g.get("bufferViews", [])
+	views.append({"buffer": 0, "byteOffset": bin.size(), "byteLength": picture.size()})
+	bin.append_array(picture)
+	while bin.size() % 4 != 0:
+		bin.append(0)
+	g["bufferViews"] = views
+	var buffers: Array = g.get("buffers", [])
+	if buffers.is_empty():
+		buffers.append({})
+	buffers[0] = {"byteLength": bin.size()}
+	g["buffers"] = buffers
+	var images: Array = g.get("images", [])
+	images.append({"bufferView": views.size() - 1, "mimeType": mime})
+	g["images"] = images
+	var textures: Array = g.get("textures", [])
+	textures.append({"source": images.size() - 1})
+	g["textures"] = textures
+	var m: Dictionary = mats[mi]
+	var pbr: Dictionary = m.get("pbrMetallicRoughness", {}) if m.get("pbrMetallicRoughness") is Dictionary else {}
+	pbr["baseColorTexture"] = {"index": textures.size() - 1}
+	m["pbrMetallicRoughness"] = pbr
+	var ext: Dictionary = m.get("extensions", {}) if m.get("extensions") is Dictionary else {}
+	ext["KHR_materials_unlit"] = {}
+	m["extensions"] = ext
+	var used: Array = g.get("extensionsUsed", [])
+	if not ("KHR_materials_unlit" in used):
+		used.append("KHR_materials_unlit")
+	g["extensionsUsed"] = used
+	var text := JSON.stringify(g).to_utf8_buffer()
+	while text.size() % 4 != 0:
+		text.append(32)
+	var out := PackedByteArray()
+	out.resize(20)
+	out.encode_u32(0, 0x46546C67)
+	out.encode_u32(4, 2)
+	out.encode_u32(8, 28 + text.size() + bin.size())
+	out.encode_u32(12, text.size())
+	out.encode_u32(16, 0x4E4F534A)
+	out.append_array(text)
+	var head := PackedByteArray()
+	head.resize(8)
+	head.encode_u32(0, bin.size())
+	head.encode_u32(4, 0x004E4942)
+	out.append_array(head)
+	out.append_array(bin)
+	return out
 
 
 ## The .glb's JSON chunk (precheck() has read it already), or {}.

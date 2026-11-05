@@ -1,8 +1,9 @@
 extends Node
 
 ## The assistant's room changes on the headset (docs/assistant.md, "Rooms"). A change is a room document
-## (room_schema.gd): validated with the JSON path of every problem, its models and pictures read on a worker thread
-## (room_model.gd), checked against the room's limits, built as a new room (assistant_room.gd) and shown at once.
+## (room_schema.gd): validated with the JSON path of every problem, its parts kept as placements of library objects
+## (room_keep.gd: a new model or picture becomes a user object), their models read from the object library on a worker
+## thread (room_model.gd), checked against the room's limits, built as a new room (assistant_room.gd) and shown at once.
 ## Every change is kept: saved as a recipe (user://recipes/<name>.room.json, listed in the Room tab) so it survives a
 ## restart. There is no Keep or Undo: the assistant can always change it back, and Reset room returns the stock room
 ## the room was built on. One change loads at a time.
@@ -23,6 +24,8 @@ const RoomBounds := preload("res://scripts/assistant/room_bounds.gd")
 const RoomParticles := preload("res://scripts/assistant/room_particles.gd")
 const RoomPerf := preload("res://scripts/assistant/room_perf.gd")
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
+const ObjectLibrary := preload("res://scripts/assistant/object_library.gd")
+const RoomKeep := preload("res://scripts/assistant/room_keep.gd")
 ## Stock parts listed in room_state (a glTF room can have hundreds); stock_parts_total says how many there are.
 const STOCK_LISTED := 100
 const LOAD_TIMEOUT := 60.0
@@ -136,6 +139,10 @@ func state() -> Dictionary:
 		"photosensitivity": {"max_hz": RoomSchema.MAX_HZ, "max_swing": RoomSchema.MAX_SWING, "rule": "no brightness "
 				+ "change faster than max_hz, no swing larger than max_swing of the surface's own brightness"},
 		"part_types": RoomSchema.PART_TYPES,
+		# Rooms are made of objects: every part above is a placement; a shape sent with type is kept as one of these.
+		"placements": {"primitives": RoomSchema.PRIMITIVES, "generators": RoomSchema.GENERATORS,
+				"note": "every part is a placement {name, object, position, rotation, scale, material}: a primitive's "
+				+ "scale is its size in metres; a model or a picture sent in a part becomes a library object"},
 		"schema": RoomSchema.VERSION,
 	}
 
@@ -272,13 +279,19 @@ func _used(doc: Dictionary, assets := {}) -> Dictionary:
 	for p: Dictionary in doc.get("parts", []):
 		if p.has("widget"):
 			widgets += 1
-		if str(p.get("type", "")) == "text":
+		var kind := RoomSchema.kind_of(p)
+		if kind == "text":
 			texts += 1
-		if str(p.get("type", "")) == "particles":
+		if kind == "particles":
 			emitters += 1
-			particles += RoomParticles.amount(p)
+			particles += RoomParticles.amount(RoomSchema.build_form(p))
 		var model: Dictionary = assets.get("models", {}).get(str(p["name"]), {})
-		cost += RoomSchema.part_cost(p, int(model.get("triangles", 0)), (model.get("parts", [0]) as Array).size())
+		# A picture object (a poster kept from a plane) costs what the shape it was did: one mesh.
+		var picture: bool = not p.has("type") and kind == "model" \
+				and (model.get("parts", [0]) as Array).size() <= 1 \
+				and bool(ObjectLibrary.get_object(str(p["object"])).get("picture", false))
+		cost += RoomSchema.part_cost(p, int(model.get("triangles", 0)), (model.get("parts", [0]) as Array).size(),
+				picture)
 	var recolours: Array = doc.get("recolour", []) if doc.get("recolour") is Array else []
 	for r: Variant in recolours:
 		if r is Dictionary and not RoomSchema.split_match(str(r.get("match", ""))).is_empty():
@@ -334,27 +347,49 @@ func apply(mode: String, patch: Dictionary, summary: String) -> Dictionary:
 		return _limit("particles", used["particles"])
 	if int(used["recolours"]) > int(RoomSchema.LIMITS["recolours"]):
 		return _limit("recolours", used["recolours"])
+	var parts: Array = doc.get("parts", [])
+	for i in parts.size():
+		var id := str(parts[i].get("object", ""))
+		if not (parts[i] as Dictionary).has("type") and ObjectLibrary.get_object(id).is_empty():
+			return {"ok": false, "error": "$.parts[%d].object: no object %s in the library (object_library lists them)"
+					% [i, id]}
 	_busy = true
 	var cache := _cache
-	var r: Dictionary = await WorkerTask.run(get_tree(), func() -> Variant: return load_assets_now(doc, cache),
-			LOAD_TIMEOUT)
+	# Rooms are made of objects: the parts sent as shapes become placements (room_keep.gd), new models and pictures
+	# user objects; then the models are read from the library.
+	var job := func() -> Variant:
+		var k := RoomKeep.keep(doc)
+		if k.has("error"):
+			return k
+		var a := load_assets_now(k["doc"], cache)
+		a["keep"] = k
+		return a
+	var r: Dictionary = await WorkerTask.run(get_tree(), job, LOAD_TIMEOUT)
 	_busy = false
 	if not r["done"]:
 		return {"ok": false, "error": "reading the models took over %d s; send smaller ones" % int(LOAD_TIMEOUT)}
 	var assets: Dictionary = r["result"]
+	var created: Array = assets.get("keep", {}).get("created", [])
 	if assets.has("error"):
+		RoomKeep.forget(created)
 		return {"ok": false, "error": assets["error"], "refused": assets.has("limit")}
+	doc = assets["keep"]["doc"]
+	var kept: Array = assets["keep"]["kept"]
 	if int(assets["triangles"]) > int(RoomSchema.LIMITS["triangles"]):
+		RoomKeep.forget(created)
 		return _limit("triangles", assets["triangles"])
 	if int(assets["textures"]) > int(RoomSchema.LIMITS["textures"]):
+		RoomKeep.forget(created)
 		return _limit("textures", assets["textures"])
 	used = _used(doc, assets)
 	if float(used["cost"]) > float(RoomSchema.LIMITS["cost"]):
+		RoomKeep.forget(created)
 		return _limit("cost", used["cost"])
 	_trim_cache(doc)
 	var m := _main()
 	var base := make_base(doc, assets)
 	if base == null:
+		RoomKeep.forget(created)
 		return {"ok": false, "error": "the base room could not be built"}
 	var name := Recipes.clean_name(str(doc.get("name", "")))
 	if name == "":
@@ -364,6 +399,7 @@ func apply(mode: String, patch: Dictionary, summary: String) -> Dictionary:
 			else "base_model:" + Recipes.PREFIX + name))
 	if not outside.is_empty():
 		base.free()
+		RoomKeep.forget(created)
 		return {"ok": false, "refused": true, "error": "%d seat%s outside the room" % [outside.size(),
 				" is" if outside.size() == 1 else "s are"], "errors": outside}
 	var err := AssistantRoom.save(doc, name)
@@ -382,12 +418,19 @@ func apply(mode: String, patch: Dictionary, summary: String) -> Dictionary:
 	m.adopt_environment_id(id)
 	if screen_changed and screen_home and seat != null:
 		seat.home_screen()
+	var said := RoomKeep.summary(kept)
+	if said != "":
+		summary = "%s; %s" % [summary, said] if summary != "" else said
 	changed.emit(summary, name)
 	used["triangles"] = assets["triangles"]
 	used["textures"] = assets["textures"]
 	var result := {"state": "kept", "name": name, "room": id, "used": used, "limits": RoomSchema.LIMITS,
 			"removed_from_models": assets["removed"],
 			"turned_in_models": assets.get("turned", []), "warnings": warnings(doc)}
+	if not kept.is_empty():
+		# What the change keeps in the object library (new: made now; else the same bytes were there already): each
+		# can be placed in any room by its id (object_place).
+		result["kept_objects"] = kept
 	var ss := seats_state(m)
 	result["viewer"] = {"seat_in_use": ss["in_use"], "moved": ss["moved"]}
 	if ss.has("was"):
@@ -452,7 +495,11 @@ func warnings(doc: Dictionary) -> Array:
 					out.append(w)
 	for p: Dictionary in doc.get("parts", []):
 		var mat: Dictionary = p.get("material", {}) if p.get("material") is Dictionary else {}
-		if (mat.has("texture") or mat.has("texture_file")) and mat.has("emission"):
+		# A picture: the part's own, or a picture object's (room_keep.gd) a placement shows.
+		var picture: bool = mat.has("texture") or mat.has("texture_file") or (mat.has("emission")
+				and not p.has("type") and RoomSchema.kind_of(p) == "model"
+				and bool(ObjectLibrary.get_object(str(p["object"])).get("picture", false)))
+		if picture and mat.has("emission"):
 			out.append({"part": p["name"], "kind": "emission_on_picture", "warning": "emission adds light on top of "
 					+ "the picture and washes it out (white makes it white); a picture already shows at its own "
 					+ "brightness, so leave emission out"})
@@ -485,6 +532,8 @@ func _trim_cache(doc: Dictionary) -> void:
 	for p: Dictionary in doc.get("parts", []):
 		if p.has("model"):
 			keep_keys[str(p["model"]).md5_text()] = true
+		elif not p.has("type") and RoomSchema.kind_of(p) == "model":
+			keep_keys[object_key(str(p["object"]))] = true
 	for k: Variant in _cache.keys():
 		if not keep_keys.has(k):
 			free_assets({"models": {"x": _cache[k]}})
@@ -524,10 +573,19 @@ static func load_assets_now(doc: Dictionary, cache := {}) -> Dictionary:
 	var parts: Array = doc.get("parts", [])
 	for i in parts.size():
 		var p: Dictionary = parts[i]
+		var r := {}
 		if p.has("model"):
-			var r := _model(str(p["model"]), cache)
+			r = _model(str(p["model"]), cache)
 			if r.has("error"):
 				return {"error": "$.parts[%d].model: %s" % [i, r["error"]]}
+		elif not p.has("type") and RoomSchema.kind_of(p) == "model":
+			# A placement: its model from the object library.
+			r = _object_model(str(p["object"]), cache)
+			if r.has("error"):
+				# A kept room whose object has gone from the library: built without it, said in the log.
+				push_warning("Assistant room: %s: %s" % [p["name"], r["error"]])
+				r = {}
+		if not r.is_empty():
 			if int(r["triangles"]) > int(lim["model_triangles"]):
 				return {"error": "$.parts[%d].model: model_triangles: %d, at most %d" % [i, r["triangles"],
 						lim["model_triangles"]], "limit": "model_triangles"}
@@ -548,11 +606,11 @@ static func load_assets_now(doc: Dictionary, cache := {}) -> Dictionary:
 						% [p["name"], r["turned"]] + "and were turned the right way; fix the exporter's winding")
 		var m: Dictionary = p.get("material", {}) if p.get("material") is Dictionary else {}
 		if m.has("texture"):
-			var r := RoomModel.decode_image(Marshalls.base64_to_raw(str(m["texture"])))
-			if r.has("error"):
-				return {"error": "$.parts[%d].material.texture: %s" % [i, r["error"]]}
-			out["images"]["part:" + str(p["name"])] = r["image"]
-			out["alpha"]["part:" + str(p["name"])] = r["alpha"]
+			var img := RoomModel.decode_image(Marshalls.base64_to_raw(str(m["texture"])))
+			if img.has("error"):
+				return {"error": "$.parts[%d].material.texture: %s" % [i, img["error"]]}
+			out["images"]["part:" + str(p["name"])] = img["image"]
+			out["alpha"]["part:" + str(p["name"])] = img["alpha"]
 	var rec: Array = doc.get("recolour", [])
 	for i in rec.size():
 		var m: Dictionary = rec[i].get("material", {}) if rec[i].get("material") is Dictionary else {}
@@ -564,6 +622,26 @@ static func load_assets_now(doc: Dictionary, cache := {}) -> Dictionary:
 			out["alpha"]["recolour:" + str(rec[i]["match"])] = r["alpha"]
 	out["textures"] += (out["images"] as Dictionary).size()
 	return out
+
+
+## A library object's model, read once per session (the cache's key: its id and the md5 its manifest keeps).
+static func _object_model(id: String, cache: Dictionary) -> Dictionary:
+	var key := object_key(id)
+	if cache.has(key):
+		return cache[key]
+	var bytes := ObjectLibrary.glb(id)
+	if bytes.is_empty():
+		return {"error": "no object %s in the library" % id}
+	var r := RoomModel.load_glb(bytes)
+	if not r.has("error"):
+		cache[key] = r
+	return r
+
+
+## The model cache's key for a library object.
+static func object_key(id: String) -> String:
+	return "object:%s:%s" % [id, ObjectLibrary.get_object(id).get("md5", "") if not ObjectLibrary.is_builtin(id)
+			else "builtin"]
 
 
 static func _model(b64: String, cache: Dictionary) -> Dictionary:

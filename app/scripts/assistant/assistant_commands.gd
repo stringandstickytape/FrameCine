@@ -640,7 +640,7 @@ func _room(cmd: String, a: Dictionary) -> Dictionary:
 			for p: Dictionary in current.get("parts", []):
 				if str(p["name"]).match(pattern):
 					var q := p.duplicate(true)
-					if str(q.get("type", "")) == "text":
+					if RoomSchema.kind_of(q) == "text":
 						# Words take their colour from text_options.
 						if mat.has("color") or reset:
 							var o: Dictionary = q.get("text_options", {})

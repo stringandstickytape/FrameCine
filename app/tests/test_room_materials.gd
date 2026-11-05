@@ -29,6 +29,8 @@ var _failures := 0
 var _checks := 0
 var main: Node3D
 var commands: AssistantCommands
+## The user objects there before the test: what it kept in the library is deleted at the end.
+var _objects_before: Array = []
 
 
 func _init() -> void:
@@ -43,6 +45,7 @@ func _run() -> void:
 	await _frames(5)
 	CommandHost.ensure(self)
 	await _frames(2)
+	_objects_before = ObjectLibrary.list("", "user").map(func(m: Dictionary) -> String: return m["id"])
 	_cleanup()
 	ObjectLibrary.editor_for(self).set("perf_after_change", false)
 	commands = AssistantCommands.new()
@@ -185,8 +188,10 @@ func _test_parts() -> void:
 	_check("recolour material on a part: another library material", r.get("ok") == true
 			and MaterialLibrary.id_of(_material_of("Crate B")) == "velvet")
 	r = await commands.run("recolour", {"match": "Crate B", "texture": _png_b64()})
+	# The picture is kept in the object library (room_keep.gd): the crate becomes a placement of a picture object.
 	_check("a picture replaces it", r.get("ok") == true and MaterialLibrary.id_of(_material_of("Crate B")) == ""
-			and not (_doc_part("Crate B")["material"] as Dictionary).has("library_material"))
+			and not (_doc_part("Crate B").get("material", {}) as Dictionary).has("library_material")
+			and ObjectLibrary.get_object(str(_doc_part("Crate B").get("object", ""))).get("picture") == true)
 	r = await commands.run("recolour", {"match": "Crate B", "tint": "#ff0000"})
 	_check("tint without a library material is refused (%s)" % r.get("error", r.get("errors", "")),
 			r.get("ok") == false and str(r).contains("only with library_material"))
@@ -550,9 +555,17 @@ func _picker_buttons(section: Node) -> Array:
 		return b.has_meta("material"))
 
 
+## A part's material: a shape's Mesh, or the first mesh of a placed object (a picture object: room_keep.gd).
 func _material_of(part: String) -> ShaderMaterial:
-	var mi := main.env.get_node_or_null("%s/%s/Mesh" % [AssistantRoom.LAYER, part]) as MeshInstance3D
-	return mi.material_override as ShaderMaterial if mi != null else null
+	var node: Node = main.env.get_node_or_null("%s/%s" % [AssistantRoom.LAYER, part])
+	var mi: MeshInstance3D = null
+	if node != null:
+		var found := node.find_children("*", "MeshInstance3D", true, false)
+		mi = node.get_node("Mesh") as MeshInstance3D if node.has_node("Mesh") else (found[0] if not found.is_empty()
+				else null)
+	if mi == null:
+		return null
+	return (mi.material_override if mi.material_override != null else mi.get_active_material(0)) as ShaderMaterial
 
 
 func _part_material(placed: String, part: String) -> ShaderMaterial:
@@ -607,6 +620,11 @@ func _cleanup() -> void:
 			DirAccess.remove_absolute(dir.path_join(f))
 		DirAccess.remove_absolute(dir)
 	DirAccess.remove_absolute(AssistantRoom.json_path(ROOM))
+	# What the room kept in the object library (a picture on a crate: room_keep.gd), once the room is gone.
+	for m: Dictionary in ObjectLibrary.list("", "user"):
+		if not (m["id"] in _objects_before):
+			ObjectLibrary.delete(m["id"])
+			ObjectLibrary.purge(m["id"])
 
 
 func _frames(n: int) -> void:

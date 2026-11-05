@@ -405,6 +405,39 @@ no HRTF: front and back, up and down sound alike, and the sound sits inside the 
 - **Would change if:** the headset's CPU proves short (then partitioned FFT convolution, or the sources summed into
   a third-order sound field and decoded once); or Steam Audio ships arm64 Linux, if its reflections were wanted.
 
+## D24. Rooms are made of objects (2026-11-05)
+
+Every part of a kept room is a placement of an object from the object library: `{name, object, position, rotation,
+scale, material}`, with a widget, motion, a text's words or a particles area where it has one. The library is the one
+source of a room's models and pictures; a kept room holds ids, never a model or a picture of its own (schema 3,
+`docs/assistant.md` "Rooms"). Before, a room kept a copy of every model and picture in its own folder, so a poster an
+assistant made for one room could not be put in another, the same model was stored once per room, and the viewer's
+Objects tab saw only what came from the library.
+
+- **The built-ins** (`object_builtins.gd`): a 1 m box, sphere, cylinder and plane, whose placement's scale is their
+  size, and two generators made per placement, text and particles. A shape in a room is a placement of one of these.
+- **An assistant still sends shapes.** A part with `type`, `size`, an inline `model` or a `texture` stays the way to
+  describe one, because that is what an assistant can make on its own machine. The app keeps it as a placement when
+  the change is applied (`room_keep.gd`): a plain shape becomes the built-in, an inline model a user object (the same
+  bytes once, by the md5 in its manifest), and a shape or model with a picture becomes a picture object. That is the
+  mesh with the picture as its unlit material, written as a `.glb`. The reply says what was kept, so the assistant can
+  place its poster in any room.
+- **The picture goes in as it came.** It is spliced into the `.glb`'s own buffer (`RoomModel.with_picture`), not
+  re-encoded by the engine's exporter. That would read it back from the GPU and turn a JPEG photo into a large PNG.
+- **Old rooms:** a kept room of schema 1 or 2 is converted once when it is loaded and saved back. One that can't be
+  converted is built as it was, and the log says why. The showrooms stay schema-2 documents shipped read-only. Only a
+  viewer's kept room puts things into the viewer's library.
+- **Delete:** an object a kept room places can't be deleted (`object_delete` and the Objects tab name the rooms). A
+  room built from a library that has lost an object would show a gap.
+- **Kept as files beside a room, still:** the pictures of `recolour` entries (a stock wall, a part inside an object),
+  the sky's picture and a `base_model`. They belong to the room's own surfaces, not to anything placed.
+- **Rejected:** building the primitives from their `.glb` (a non-uniform scale would stretch a widget's face, and a
+  box's picture layouts need its own mesh). A built-in shape is made at its size by the room builder, from the same
+  mesh the library's `.glb` is written from. Also rejected: keeping inline models in rooms beside the library (two
+  sources again).
+- **Would change if:** rooms need to travel between headsets with their objects (then an export that bundles them),
+  or a picture should be shared by shapes of different sizes (then a picture as its own library item).
+
 ## Open
 
 - Quad layer for flat video vs. drawing in the projection layer: sharpness and bandwidth comparison (spike 03-layer).
