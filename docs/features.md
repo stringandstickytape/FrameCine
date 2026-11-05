@@ -769,7 +769,8 @@ colour description from `get_video_info()` and tone maps HDR to the display.
   median error 0.8 % over 5445 block means, where the published IPT and BT.2100 LMS matrices were 5 % out) and tone
   maps as HDR10. The RPU's reshaping curves are not read: the files seen carry the limited-to-full range expansion
   only, which the range step does. Profiles 7 and 8 keep their HDR10 base, as before.
-  The status line says "Dolby Vision profile 5 (IPT, as PQ)".
+  The status line says "Dolby Vision profile 5 (IPT, as PQ)". The write-up, the fit and what the RPU still holds:
+  `docs/dolby-vision.md`; the tools in `tools/dovi/`.
 - **Per environment:** exposure (stops), knee and target brightness (100 to 400 nits), like the picture controls.
 - **Cost:** SDR BT.709 files take the same path as before, except for one uniform branch. HDR adds a few `pow` and
   `exp` per pixel.
