@@ -106,6 +106,7 @@ func _run() -> void:
 	await _input_checks()
 	await _context_checks()
 	await _small_checks()
+	_locale_checks()
 	agents.set_active("")
 	agents.hide_pane()
 	AgentTerminal.home_override = ""
@@ -823,6 +824,26 @@ func _context_checks() -> void:
 			and str(card.get("_text").text).contains("Claude Code wants to open claude.ai/oauth"))
 	card.dismiss("no")
 	await _frames(2)
+
+
+## The terminal needs a UTF-8 locale: LC_ALL wins over LANG, and the Frame's Steam sets it to C.
+func _locale_checks() -> void:
+	var kept := {}
+	for v in ["LC_ALL", "LC_CTYPE", "LANG"]:
+		kept[v] = OS.get_environment(v)
+		OS.unset_environment(v)
+	_check("no locale: not UTF-8", not AgentTerminal._utf8_locale())
+	OS.set_environment("LANG", "en_US.UTF-8")
+	_check("LANG UTF-8: fine", AgentTerminal._utf8_locale())
+	OS.set_environment("LC_ALL", "C")
+	_check("LC_ALL=C wins over LANG: not UTF-8", not AgentTerminal._utf8_locale())
+	OS.set_environment("LC_ALL", "C.UTF-8")
+	_check("LC_ALL=C.UTF-8: fine", AgentTerminal._utf8_locale())
+	for v in kept:
+		if str(kept[v]) == "":
+			OS.unset_environment(v)
+		else:
+			OS.set_environment(v, str(kept[v]))
 
 
 func _small_checks() -> void:

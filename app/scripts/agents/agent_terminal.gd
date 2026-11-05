@@ -512,15 +512,25 @@ static func start(id: String, install := false, plain := false, fresh := false) 
 	var args := terminal_args(id, t)
 	if terminal_override.size() > 1:
 		args = terminal_override.slice(1) + args
-	# The Frame starts the app with no locale: xterm would read the agent's UTF-8 as Latin-1 (-u8 doesn't win), every
-	# line and arrow mangled, and the agent's tools would make a mess of file names.
-	if OS.get_environment("LC_ALL") == "" and OS.get_environment("LC_CTYPE") == "" and OS.get_environment("LANG") == "":
-		OS.set_environment("LANG", "C.UTF-8")
+	# The Frame starts the app with no locale, or (Steam, 2026-11) with LC_ALL=C, which wins over LANG: xterm would read
+	# the agent's UTF-8 as Latin-1 (-u8 doesn't win), every line, arrow and spinner mangled into what looks like
+	# control codes, and the agent's tools would make a mess of file names. A UTF-8 locale, whatever was set.
+	if not _utf8_locale():
+		OS.set_environment("LC_ALL", "C.UTF-8")
 	var pid := OS.create_process(t, PackedStringArray(args))
 	if pid < 0:
 		return "could not start %s" % t
 	print("Agents: started %s for %s (pid %d)" % [t.get_file(), id, pid])
 	return ""
+
+
+## Whether the locale that counts (LC_ALL, else LC_CTYPE, else LANG) names a UTF-8 character set.
+static func _utf8_locale() -> bool:
+	for v in ["LC_ALL", "LC_CTYPE", "LANG"]:
+		var l := OS.get_environment(v)
+		if l != "":
+			return l.to_lower().replace("-", "").contains("utf8")
+	return false
 
 
 static func link_path(id: String) -> String:
