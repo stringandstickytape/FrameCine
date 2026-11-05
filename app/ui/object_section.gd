@@ -18,6 +18,9 @@ const WorkerTask := preload("res://scripts/dev/worker_task.gd")
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const EffectLibrary := preload("res://scripts/effects/effect_library.gd")
 const FabImport := preload("res://scripts/assistant/fab_import.gd")
+const WebPages := preload("res://scripts/net/web_pages.gd")
+## Visit Fab: the store's free scanned objects (the user's choice of page, 2026-11-05).
+const FAB_URL := "https://www.fab.com/sellers/Quixel%20Megascans?is_free=1"
 
 const COLUMNS := 4
 ## Pixels on the pane: the thumbnail, and the name under it.
@@ -84,10 +87,12 @@ func bind(p_app: Node) -> void:
 	_yours_grid = _tile_grid()
 	add_child(_yours_grid)
 	_fab_box = W.vbox()
-	_fab_box.add_child(W.label("In Downloads, from Fab", &"MutedLabel"))
+	var fab_label := W.label("In Downloads, from Fab", &"MutedLabel")
+	fab_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_fab_box.add_child(W.hbox([fab_label, W.button("Visit Fab to download objects", _visit_fab)]))
 	_fab_buttons = W.vbox()
+	_fab_buttons.visible = false
 	_fab_box.add_child(_fab_buttons)
-	_fab_box.visible = false
 	add_child(_fab_box)
 	_chosen = W.ellipsis(W.label("", &"MutedLabel"))
 	_place = W.button("Place", _start_place)
@@ -200,27 +205,44 @@ func _sync_fab(found: Array) -> void:
 		var b := W.button("Add %s" % f["name"], func() -> void: _add_fab(path), &"RowButton")
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		_fab_buttons.add_child(b)
-	_fab_box.visible = not found.is_empty()
+	_fab_buttons.visible = not found.is_empty()
 
 
+## The store's page in the Browser source (as the dev link's open_url): the panel goes so it shows.
+func _visit_fab() -> void:
+	var url := WebPages.normalized(FAB_URL)
+	WebPages.set_last_url(url)
+	app.ui.hide_panel()
+	app.open_path("browser://" + url)
+
+
+## On the main thread, behind a notice (as a room's first lightmap bake, room_lightmaps.gd): the notice is drawn, then
+## the import holds the frames for its second or so and the headset shows its own waiting view. On a worker it ran
+## alongside the frames and broke the picture up while it went (the user, 2026-11-05).
 func _add_fab(path: String) -> void:
 	if _adding:
 		return
 	_adding = true
-	app.ui.notify("Adding %s…" % path.get_file())
-	var r: Dictionary = await WorkerTask.run(get_tree(), func() -> Variant: return FabImport.import_zip(path), 120.0)
-	_adding = false
+	app.ui.notify("Adding %s: a moment." % _fab_name(path))
+	await get_tree().process_frame
+	await get_tree().process_frame
 	if not is_instance_valid(self):
 		return
-	var out: Dictionary = r["result"] if r["done"] and r["result"] is Dictionary else {"ok": false,
-			"error": "Adding it took too long."}
+	var out := FabImport.import_zip(path)
+	_adding = false
 	if out.get("ok") == true:
 		_selected = str(out["manifest"]["id"])
 		app.ui.notify("%s is in your objects." % out["manifest"]["name"])
 	else:
 		app.ui.notify(str(out.get("error", "That didn't work.")))
-	_fab_paths = []
 	sync_objects()
+
+
+func _fab_name(path: String) -> String:
+	for b in _fab_buttons.get_children():
+		if (b as Button).text.begins_with("Add ") and _fab_paths.find(path) == b.get_index():
+			return (b as Button).text.substr(4)
+	return path.get_file()
 
 
 func _tile_grid() -> GridContainer:

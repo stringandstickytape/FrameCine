@@ -589,7 +589,8 @@ Fab licence. That licence lets them use it, not hand it on (no standalone redist
 asset is ever in this repository or the release, and an import is a user object like any other (`user://objects`).
 
 - The Objects tab lists the Fab zips in the Downloads folder whose asset isn't in the library yet, under **In
-  Downloads, from Fab**: **Add <name>** imports one (on a worker thread).
+  Downloads, from Fab**: **Add <name>** imports one, on the main thread behind a notice (as a first lightmap bake:
+  the headset shows its waiting view for the second it takes, not a broken-up picture).
 - The zip: the asset's `.json` at its top (`id`, `name`, `tags`, `meta` with `small3dasset`), an `.fbx` or `.glb`, the
   maps as `<name>_<id>_<res>_<Map>.jpg`. The model is read with the engine's FBX loader (the `fbx` module, in the
   player build); the material is made from the maps, not the `.fbx`'s (which names the full asset's 4K files): the

@@ -271,7 +271,8 @@ built in (a picture frame, a wall shelf, a pot plant, a wall clock) and imported
 when there are some. One controller does it all.
 
 A scanned object downloaded from the Fab store (the Low or Medium quality zip, into Downloads on the headset) shows
-under **In Downloads, from Fab**: **Add <name>** makes it one of yours. It stays on the headset: the Fab licence lets
+under **In Downloads, from Fab**: **Add <name>** makes it one of yours. **Visit Fab to download objects**, beside
+that heading, opens the store's free scanned objects in the browser. It stays on the headset: the Fab licence lets
 you use it, not share it.
 
 1. Pick a thumbnail. The line under the thumbnails says its name, how it sits (wall, floor, ...) and how many parts it
