@@ -67,7 +67,8 @@ static func part_name(kind: String) -> String:
 
 ## A primitive at 1 m, centred, its one part grey.
 static func _primitive(id: String) -> Node3D:
-	var root := _root(part_name(id))
+	# The root named apart from the part: the .glb's node names are made unique ("Box", "Box2").
+	var root := _root(part_name(id) + "Object")
 	_part(root, part_name(id), "#b0b0b0", [[shape_mesh(id, Vector3.ONE), Transform3D()]])
 	return root
 

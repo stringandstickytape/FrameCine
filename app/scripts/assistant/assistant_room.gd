@@ -698,7 +698,8 @@ static func _model_surfaces(model: Node3D, p: Dictionary, pictures: Dictionary, 
 			var own := {"color": _material_colour(cur)}
 			var key := ""
 			if pictures.has(pic):
-				key = "picture:%s/%s" % [name, pic]
+				# By the object: two copies of a poster share its material and texture.
+				key = "picture:%s/%s" % [p.get("object", name), pic]
 				own["texture"] = true
 				assets["images"][key] = pictures[pic]["image"]
 				assets["alpha"][key] = pictures[pic]["alpha"]
