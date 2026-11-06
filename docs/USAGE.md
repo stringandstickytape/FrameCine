@@ -141,7 +141,7 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 | `[time_of_day]` | `mode` ("night"; or "clock", "dusk", "day"), `latitude` (50), `longitude` (from the time zone) | Time of day in the rooms (#84) |
 | `[zoom_lens]` | `enabled` (true), `magnification` (1.5 to 8, 3.0) | Zoom lens (#38) |
 | `[seats]` | `<env>` (the seat number) | `docs/features.md` |
-| `[picture_<env>]` | `brightness` (0), `contrast` (1), `saturation` (1), `gamma` (1), `lift` (0), `sharpen` (0); only values off their default are stored | Picture controls (#27, #90) |
+| `[picture_<env>]` | `brightness` (0), `contrast` (1), `saturation` (1), `gamma` (1), `lift` (0), `sharpen` (0), `deband` (0.5: Smooth banding, 8-bit video only); only values off their default are stored | Picture controls (#27, #90) |
 | `[picture]` | `deinterlace` ("off"), `auto_crop` (false), `auto_crop_grow` (true) | Deinterlace (#95); auto letterbox crop (#42) |
 | `[trick_play]` | `enabled` (true) | Hold the stick right to scan at 4x, then 8x (#46) |
 | `[hdr]` | `tone_map` (true) | |

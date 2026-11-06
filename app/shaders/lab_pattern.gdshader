@@ -5,6 +5,8 @@ shader_type canvas_item;
 //                   false rings (moiré) where the frequency passes what the display can show.
 //   1  starfield    single-pixel stars, a few in a thousand pixels, of random brightness: what shimmers and drops out
 //                   when a frame shrunk on the display skips texels.
+//   2  gradient     dark ramps left to right, grey above and blue below, smooth here: the card's 8-bit viewport and
+//                   the 8-bit encode then quantise them into the bands 8-bit video shows in a dark sky.
 // Pixel-exact: each output pixel is one frame pixel (px_size is the frame's size in pixels).
 
 uniform vec2 px_size = vec2(3840.0, 2160.0);
@@ -19,15 +21,17 @@ uint hash2(uvec2 p) {
 
 void fragment() {
 	vec2 p = floor(UV * px_size);
-	float v;
+	vec3 col;
 	if (kind == 0) {
 		vec2 c = p + 0.5 - px_size * 0.5;
 		float rmax = length(px_size * 0.5);
 		// Local frequency r / (2 rmax) cycles a pixel: half a cycle at the corners.
-		v = 0.5 + 0.5 * cos(PI * dot(c, c) / (2.0 * rmax));
+		col = vec3(0.5 + 0.5 * cos(PI * dot(c, c) / (2.0 * rmax)));
+	} else if (kind == 2) {
+		col = UV.y < 0.5 ? vec3(mix(0.02, 0.14, UV.x)) : mix(vec3(0.01, 0.02, 0.05), vec3(0.04, 0.08, 0.2), UV.x);
 	} else {
 		uint h = hash2(uvec2(p));
-		v = (h % 1000u) < 3u ? 0.35 + 0.65 * float((h >> 10u) % 256u) / 255.0 : 0.0;
+		col = vec3((h % 1000u) < 3u ? 0.35 + 0.65 * float((h >> 10u) % 256u) / 255.0 : 0.0);
 	}
-	COLOR = vec4(vec3(v), 1.0);
+	COLOR = vec4(col, 1.0);
 }

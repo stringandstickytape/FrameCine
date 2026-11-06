@@ -19,7 +19,8 @@ const LAYOUT_WORDS := ["Mono", "SBS", "TB"]
 const PROJECTION_KINDS := ["flat", "180", "360", "fisheye", "dualfisheye"]
 const PROJECTION_WORDS := ["Flat", "180°", "360°", "Fisheye", "Dual 360"]
 const PICTURE_NAMES := {"brightness": "Brightness", "contrast": "Contrast", "saturation": "Saturation",
-		"gamma": "Gamma", "lift": "Dark-scene lift", "sharpen": "Sharpen"}
+		"gamma": "Gamma", "lift": "Dark-scene lift", "sharpen": "Sharpen",
+		"deband": "Smooth banding"}
 const LENS_WORDS := ["Equidistant", "Equisolid", "Stereographic", "Polynomial"]
 const DEINTERLACE_WORDS := ["Off", "Bob", "Edge", "Auto"]
 

@@ -1222,6 +1222,25 @@ and fine detail shimmers and drops out as the head moves (stars in a still 4K fr
 - **To do:** time it on the Frame (the `perf` command's `gpu_ms`, with `lab://zoneplate_360` playing), with taps 1
   and 3.
 
+## Deband (Smooth banding)
+
+8-bit video shows steps in dark gradients (a night sky, a dim wall), worst in a dark room on an LCD. A picture
+control, `deband` (Smooth banding, 0 to 1, on at 0.5, per environment like the others, outside their `pc_enabled`
+block), for 8-bit sources; 10-bit ones rarely band and are left alone.
+
+- **How:** in `video_common.gdshaderinc`, after the planes are read (and filtered by footprint): four samples up to
+  16 texels away for a 1080-line frame (32 for 4K, up to 48), at a turn fixed per texel, two pairs at right angles.
+  Where all four lie within the threshold (up to 3 code values at full strength) the pixel takes their mean, fading
+  back to itself as they part, so a real edge is left alone. Luma and chroma apart. Then a triangular dither of one
+  output code value, new each frame, on the screen (`video.gdshader`) and in the film layer's copy
+  (`video_layer.gdshader`): the dither is what hides the bands, the mean spreads their edges. The floor reflection
+  keeps it off (blurred anyway). `lab://gradient` is the test card: dark grey and blue ramps that band in 8 bits.
+- **Measured** (`tests/test_deband.gd`, the film layer's shader into an 8-bit viewport, lavapipe): the grey ramp's
+  largest step between neighbouring columns 0.0078 off (two code values: the limited range's), 0.0016 on; its level
+  0.0794 and 0.0799.
+- **To do:** the cost on the Frame (eight more samples a pixel), and its look on a real dark film; whether 10-bit
+  sources want it too.
+
 ## Dual fisheye 360
 
 A 360 camera's raw file: two image circles side by side in a 2:1 frame. The left circle is the lens that looks

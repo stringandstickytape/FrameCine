@@ -31,6 +31,10 @@ void fragment() {
 	if (front > 0.001 && front < 0.999) {
 		rgb = mix(video_pixel_filtered(UV2, dx2, dy2, view), rgb, front);
 	}
+	// The deband's dither, a code value of the eye buffer's, in the gamma-encoded values it quantises.
+	if (pc_deband > 0.0 && !p010) {
+		rgb += dither(FRAGCOORD.xy, TIME);
+	}
 	// The result is gamma-encoded; ALBEDO is linear. The sRGB curve stands in for BT.709/BT.1886 here.
 	ALBEDO = srgb_to_linear(clamp(rgb, 0.0, 1.0)) * brightness;
 }

@@ -1,16 +1,16 @@
 extends Node
 
-## Picture controls (ideas #27): brightness, contrast, saturation, gamma, a dark-scene lift and a light sharpen (#90,
-## off by default), applied in video.gdshader (pc_* uniforms, skipped entirely at the defaults), remembered per
+## Picture controls (ideas #27): brightness, contrast, saturation, gamma, a dark-scene lift, a light sharpen (#90,
+## off by default) and Smooth banding (deband, on at 0.5; video_common.gdshaderinc), applied in video.gdshader (pc_* uniforms, skipped entirely at the defaults), remembered per
 ## environment: a dark cinema and the void want different settings.
 ##
-##   values                  {brightness, contrast, saturation, gamma, lift, sharpen} in effect
+##   values                  {brightness, contrast, saturation, gamma, lift, sharpen, deband} in effect
 ##   RANGES                  name -> [min, max, default, step] for the pane's sliders
 ##   set_value(name, v)      clamped, applied, saved for the current environment
 ##   reset()                 this environment back to the defaults
 ##   signal changed(values)
-## Settings: [picture_<environment id>] brightness, contrast, saturation, gamma, lift, sharpen (only values that differ
-## from the default are stored).
+## Settings: [picture_<environment id>] brightness, contrast, saturation, gamma, lift, sharpen, deband (only values
+## that differ from the default are stored).
 
 signal changed(values: Dictionary)
 
@@ -22,7 +22,11 @@ const RANGES := {
 	"lift": [0.0, 0.25, 0.0, 0.01],
 	# Light sharpen (ideas #90): off by default.
 	"sharpen": [0.0, 1.0, 0.0, 0.05],
+	# Smooth banding: the deband's strength (8-bit sources), on at half by default.
+	"deband": [0.0, 1.0, 0.5, 0.05],
 }
+## Applied whatever the others are: not part of the pc_enabled block.
+const ALWAYS := ["deband"]
 
 var main: Node3D
 var values := {}
@@ -68,6 +72,8 @@ func reset() -> void:
 
 func is_default() -> bool:
 	for k: String in RANGES:
+		if k in ALWAYS:
+			continue
 		if not is_equal_approx(float(values[k]), float(RANGES[k][2])):
 			return false
 	return true

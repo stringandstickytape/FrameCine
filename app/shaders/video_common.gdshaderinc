@@ -194,6 +194,43 @@ vec3 tone_map(vec3 c) {
 // 1 turns it off (one sample, as video_pixel()).
 uniform int footprint_taps = 3;
 
+// Deband (picture controls' "Smooth banding", pc_deband 0..1; 8-bit sources only): 8-bit video shows steps in dark
+// gradients, worst in a dark room on an LCD. Each pixel is compared with four samples up to DEBAND_RADIUS texels away
+// (for 1080 lines; the bands of a taller frame are as much wider, so the radius grows with it, up to 3 times) at a
+// random turn (two pairs at right angles); where all four lie within the threshold (up to DEBAND_THRESHOLD code
+// values at full strength) it takes their mean, fading back to itself as they part, so a real edge is left alone.
+// Luma and chroma apart. The step that remains is broken up by a dither at the output (dither(), video.gdshader and
+// video_layer.gdshader), which is what hides the bands; the mean only spreads them.
+uniform float pc_deband = 0.5;
+const float DEBAND_RADIUS = 16.0;
+const float DEBAND_THRESHOLD = 3.0 / 255.0;
+
+float hash12(vec2 p) {
+	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+	p3 += dot(p3, p3.yzx + 33.33);
+	return fract((p3.x + p3.y) * p3.z);
+}
+
+// The deband's offsets for the texel under uv (size: the plane's), fixed per texel.
+vec2 deband_offset(vec2 uv, vec2 size) {
+	vec2 cell = floor(uv * size);
+	float a = hash12(cell) * 6.2831853;
+	float r = (0.5 + 0.5 * hash12(cell + 17.31)) * DEBAND_RADIUS * clamp(size.y / 1080.0, 1.0, 3.0);
+	return vec2(cos(a), sin(a)) * r / size;
+}
+
+// How much of the four samples' mean to take, from how far the furthest is from the pixel.
+float deband_weight(float spread) {
+	float t = DEBAND_THRESHOLD * pc_deband;
+	return 1.0 - smoothstep(0.5 * t, t, spread);
+}
+
+// Triangular noise of one output code value, new each frame: the dither after a deband.
+float dither(vec2 frag, float time) {
+	vec2 seed = floor(frag) + fract(time * 7.123) * 113.0;
+	return (hash12(seed) + hash12(seed + 71.7) - 1.0) / 255.0;
+}
+
 // Taps along one axis for a footprint `texels` long: one up to a quarter past 1:1 (a bilinear sample covers that).
 int footprint_taps_for(float texels) {
 	return clamp(int(ceil(texels - 0.25)), 1, max(footprint_taps, 1));
@@ -334,6 +371,23 @@ vec3 video_pixel_filtered(vec2 mesh_uv, vec2 mesh_dx, vec2 mesh_dy, int view_ind
 		} else {
 			y = read_y(uv);
 			cbcr = read_cbcr(uv);
+		}
+		if (pc_deband > 0.0 && !p010 && deinterlace == 0) {
+			vec2 o = deband_offset(uv, vec2(textureSize(y_tex, 0)));
+			vec2 o2 = vec2(-o.y, o.x);
+			vec4 s = vec4(read_y(clamp(uv + o, lo, hi)), read_y(clamp(uv - o, lo, hi)),
+					read_y(clamp(uv + o2, lo, hi)), read_y(clamp(uv - o2, lo, hi)));
+			vec4 d = abs(s - y);
+			y = mix(y, dot(s, vec4(0.25)), deband_weight(max(max(d.x, d.y), max(d.z, d.w))));
+			// Chroma: the same offsets in the frame (the same UV), on its own half-size plane.
+			vec2 oc = o;
+			vec2 oc2 = vec2(-oc.y, oc.x);
+			vec2 c0 = read_cbcr(clamp(uv + oc, lo, hi));
+			vec2 c1 = read_cbcr(clamp(uv - oc, lo, hi));
+			vec2 c2 = read_cbcr(clamp(uv + oc2, lo, hi));
+			vec2 c3 = read_cbcr(clamp(uv - oc2, lo, hi));
+			vec2 dc = max(max(abs(c0 - cbcr), abs(c1 - cbcr)), max(abs(c2 - cbcr), abs(c3 - cbcr)));
+			cbcr = mix(cbcr, 0.25 * (c0 + c1 + c2 + c3), deband_weight(max(dc.x, dc.y)));
 		}
 		if (pc_sharpen > 0.0) {
 			vec2 t = 1.0 / vec2(textureSize(y_tex, 0));

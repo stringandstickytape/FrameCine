@@ -27,6 +27,8 @@ const CARDS: Array = [
 			"The zone plate as an 8K 360° frame: shrunk about 2 times on the display."],
 	["starfield_360", "Starfield, 360° 8K", "starfield", "360_mono", 7680, 3840, -1.0,
 			"Single-pixel stars in an 8K 360° frame: they should stay steady as you turn, not twinkle."],
+	["gradient", "Dark gradient, flat 4K", "gradient", "flat_mono", 3840, 2160, -1.0,
+			"Dark grey and blue ramps in 8 bits: bands show unless Smooth banding hides them."],
 ]
 ## The A/V sync card's audio (idea #24): a 30 ms 1 kHz beep at each whole second, silence between. 8-bit at 8 kHz:
 ## 600 s is 4.8 MB, and as the player's audio it is the master clock, so the A/V offset moves the picture against

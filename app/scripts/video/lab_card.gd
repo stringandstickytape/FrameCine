@@ -12,6 +12,7 @@ extends "res://scripts/video/test_card.gd"
 ##   av_sync       A/V latency (idea #24): the whole card flashes white for two content frames at each whole second,
 ##                 when the source's audio track beeps (LabVideoSource.beep_stream()); move the A/V offset until the
 ##                 flash and the beep land together.
+##   gradient      dark ramps that band in 8 bits, for the deband (shaders/lab_pattern.gdshader).
 ##   zoneplate, starfield   sharpness: a zone plate and single-pixel stars, pixel-exact over the whole frame
 ##                 (shaders/lab_pattern.gdshader), drawn once: how the picture holds up shrunk or stretched.
 
@@ -24,7 +25,7 @@ var frame_index := 0
 
 const DISPARITIES: Array[float] = [-64.0, -32.0, -16.0, 0.0, 16.0, 32.0, 64.0]
 const PATTERN_SHADER := preload("res://shaders/lab_pattern.gdshader")
-const PATTERNS := {"zoneplate": 0, "starfield": 1}
+const PATTERNS := {"zoneplate": 0, "starfield": 1, "gradient": 2}
 const LEFT_LINE := Color(1.0, 0.45, 0.35)
 const RIGHT_LINE := Color(0.35, 0.85, 1.0)
 

@@ -43,6 +43,7 @@ const PICTURE := {
 	"Gamma": "Lighter or darker mid tones, without changing black and white.",
 	"Dark-scene lift": "Makes dark scenes easier to see by lifting the darkest parts.",
 	"Sharpen": "Crisper edges. Too much makes a halo around them.",
+	"Smooth banding": "Hides the steps in dark gradients. Too much softens faint detail.",
 	"Deinterlace": "Removes comb lines from old TV or DVD video. Auto: when needed.",
 	"Film grain": "Adds the fine noise of projected film.",
 	"Gate weave": "Adds the small sideways wobble of film in an old projector.",
