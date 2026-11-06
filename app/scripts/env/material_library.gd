@@ -15,7 +15,8 @@ extends RefCounted
 ##   MaterialLibrary.get_material("velvet", {"tint": Color(0.5, 0.1, 0.1)})   -> ShaderMaterial, null if unknown
 ##   MaterialLibrary.apply(mesh_instance, "oak_planks", {"tiling": 1.5}, surface)   -> ShaderMaterial
 ## Options (all optional): colour (Color: the material shows this colour on average, its pattern kept; a room's own
-## colour), tint (Color, multiplies the maps' colour, after colour), tiling (metres per repeat), offset (Vector2,
+## colour), tint (Color, multiplies the maps' colour, after colour), tiling (metres per repeat), turn (degrees: the
+## pattern turned on the surface), offset (Vector2,
 ## metres), uv (true: the mesh's UVs, repeated `repeat` (Vector2) times; default: the surface's own axes in metres),
 ## triplanar (true: three blended projections, for meshes with neither flat faces nor UVs; three times the fetches),
 ## roughness_scale, normal_strength, specular, sheen, pleats (folds per metre, curtains), pleat_depth, spill and
@@ -26,8 +27,18 @@ extends RefCounted
 ## the same id and options are one shared ShaderMaterial: duplicate() it before changing it for one surface only.
 ##   MaterialLibrary.lit_variant(material, lighting)  a library material as its lit form (shared too)
 ##   MaterialLibrary.id_of(material), shown_colour(material)   which library material a surface shows, and its colour
+##
+## User materials (docs/materials.md, "User materials"): imported from Poly Haven, ambientCG or Megascans through Fab
+## (scripts/env/surface_store.gd, surface_import.gd) into user://materials/<id>.json with their maps beside it in
+## user://materials/textures (PNG or JPEG, mipmaps made on load; or .mtex where the engine can compress to ASTC).
+## They are in list(), entry() and get_material() like the bundled ones, with "user": true and their source.
+##   MaterialLibrary.user_ids(), forget_user()      the user materials; the catalogue read again (an import, a delete)
+##   MaterialLibrary.memory()                       {bytes, user_bytes, textures}: what the loaded maps take
 
 const DIR := "res://materials"
+const USER_DIR := "user://materials"
+## Where the user materials are (tests point it elsewhere).
+static var user_dir := USER_DIR
 const SHADER := preload("res://shaders/room_material.gdshader")
 const SHADER_TRIPLANAR := preload("res://shaders/room_material_triplanar.gdshader")
 const SHADER_LIT := preload("res://shaders/room_material_lit.gdshader")
@@ -45,6 +56,8 @@ const TUNABLES: Array[String] = ["roughness_scale", "normal_strength", "specular
 
 static var _catalogue := {}
 static var _textures := {}
+## path -> bytes of GPU memory a loaded map takes (its file's blocks, or its pixels with mipmaps).
+static var _texture_bytes := {}
 static var _materials := {}
 ## Whether the GPU samples ASTC (-1: not asked yet).
 static var _astc := -1
@@ -53,12 +66,15 @@ static var loads := 0
 static var hits := 0
 
 
-## Every material: [{id, name, tags, tiling, swatch, size}], sorted by name.
+## Every material: [{id, name, tags, tiling, swatch, size, source, user}], sorted by name. source: "bundled", or
+## where a user material came from ("polyhaven", "ambientcg", "megascans").
 static func list() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	for e: Dictionary in _entries().values():
+		var user := bool(e.get("user", false))
 		out.append({"id": e["id"], "name": e.get("name", e["id"]), "tags": e.get("tags", []),
-				"tiling": e.get("tiling", 1.0), "swatch": e.get("swatch", "#808080"), "size": e.get("size", 1024)})
+				"tiling": e.get("tiling", 1.0), "swatch": e.get("swatch", "#808080"), "size": e.get("size", 1024),
+				"source": str(e.get("source", {}).get("site", "")) if user else "bundled", "user": user})
 	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return str(a["name"]) < str(b["name"]))
 	return out
 
@@ -85,8 +101,9 @@ static func textures(id: String) -> Dictionary:
 	if e.is_empty():
 		return {}
 	var out := {}
+	var dir := user_dir if bool(e.get("user", false)) else DIR
 	for m in MAPS:
-		var path := DIR.path_join(str(e.get("maps", {}).get(m, "")))
+		var path := dir.path_join(str(e.get("maps", {}).get(m, "")))
 		var tex := load_texture(path)
 		if tex == null:
 			return {}
@@ -137,6 +154,7 @@ static func get_material(id: String, options := {}) -> ShaderMaterial:
 	m.set_shader_parameter("tiling", maxf(float(options.get("tiling", e.get("tiling", 1.0))), 0.01))
 	m.set_shader_parameter("uv_offset", options.get("offset", Vector2.ZERO) / maxf(float(options.get("tiling",
 			e.get("tiling", 1.0))), 0.01))
+	m.set_shader_parameter("uv_turn", deg_to_rad(float(options.get("turn", 0.0))))
 	m.set_shader_parameter("use_mesh_uv", bool(options.get("uv", false)))
 	m.set_shader_parameter("uv_repeat", options.get("repeat", Vector2.ONE))
 	for k in TUNABLES:
@@ -238,23 +256,73 @@ static func apply(target: GeometryInstance3D, id: String, options := {}, surface
 	return m
 
 
-## A .mtex file as a texture (cached by path): the ASTC blocks as they are, with their mip levels. null if bad.
+## A .mtex file as a texture (cached by path): the ASTC blocks as they are, with their mip levels. A user material's
+## PNG or JPEG (no .mtex): read, its mipmaps made, uncompressed. null if bad.
 static func load_texture(path: String) -> Texture2D:
 	if _textures.has(path):
 		hits += 1
 		return _textures[path]
+	if path.get_extension() != "mtex":
+		var img := Image.load_from_file(path) if FileAccess.file_exists(path) else null
+		if img == null or img.is_empty():
+			push_warning("material library: %s is not a picture" % path.get_file())
+			return null
+		if img.is_compressed():
+			img.decompress()
+		if not img.has_mipmaps():
+			img.generate_mipmaps()
+		loads += 1
+		var t := ImageTexture.create_from_image(img)
+		_textures[path] = t
+		# RGB is held as RGBA on the GPU.
+		_texture_bytes[path] = img.get_data_size() * (4 if img.get_format() == Image.FORMAT_RGB8 else 3) / 3
+		return t
 	var bytes := FileAccess.get_file_as_bytes(path)
 	var image := decode_mtex(bytes)
 	if image == null:
 		push_warning("material library: %s is not a texture (%d bytes)" % [path, bytes.size()])
 		return null
 	loads += 1
+	_texture_bytes[path] = bytes.size() - MTEX_HEADER
 	if not _gpu_has_astc():
 		# A PC's GPU: the engine would decompress it anyway, with a warning per texture.
 		image.decompress()
 	var tex := ImageTexture.create_from_image(image)
 	_textures[path] = tex
 	return tex
+
+
+## GPU memory of the maps loaded so far: {bytes (all), user_bytes (the user materials'), textures (how many)}.
+static func memory() -> Dictionary:
+	var all := 0
+	var user := 0
+	for p: String in _texture_bytes:
+		all += int(_texture_bytes[p])
+		if p.begins_with(user_dir):
+			user += int(_texture_bytes[p])
+	return {"bytes": all, "user_bytes": user, "textures": _texture_bytes.size()}
+
+
+## The user materials' ids.
+static func user_ids() -> Array[String]:
+	var out: Array[String] = []
+	for id: String in _entries():
+		if bool(_entries()[id].get("user", false)):
+			out.append(id)
+	out.sort()
+	return out
+
+
+## The catalogue is read again (a user material was imported or deleted); a deleted one's maps are let go.
+static func forget_user() -> void:
+	_catalogue.clear()
+	for p: String in _textures.keys():
+		if p.begins_with(user_dir) and not FileAccess.file_exists(p):
+			_textures.erase(p)
+			_texture_bytes.erase(p)
+	for k: String in _materials.keys():
+		if not has(k.get_slice(" ", 0)):
+			_materials.erase(k)
 
 
 static func _gpu_has_astc() -> bool:
@@ -305,6 +373,7 @@ static func mtex_info(bytes: PackedByteArray) -> Dictionary:
 ## Forgets the loaded textures and materials (tests; a material in use keeps its own).
 static func clear_cache() -> void:
 	_textures.clear()
+	_texture_bytes.clear()
 	_materials.clear()
 	_lit_variants.clear()
 	_catalogue.clear()
@@ -323,6 +392,15 @@ static func _entries() -> Dictionary:
 			_catalogue[e["id"]] = e
 		else:
 			push_warning("material library: %s is not a catalogue entry" % f)
+	# The user's own, beside them (an id the bundled set has stays the bundled one).
+	if DirAccess.dir_exists_absolute(user_dir):
+		for f in DirAccess.get_files_at(user_dir):
+			if f.get_extension() != "json" or _catalogue.has(f.get_basename()):
+				continue
+			var e: Variant = JSON.parse_string(FileAccess.get_file_as_string(user_dir.path_join(f)))
+			if e is Dictionary and str(e.get("id", "")) == f.get_basename() and e.get("maps") is Dictionary:
+				e["user"] = true
+				_catalogue[e["id"]] = e
 	return _catalogue
 
 
@@ -334,8 +412,9 @@ static func register_commands(_host: Node) -> void:
 			return list().filter(func(e: Dictionary) -> bool: return tag == "" or tag in e["tags"]), {
 		"description": "The material library: textured surfaces a room can use (wood floors, carpet, velvet, "
 				+ "leather, plaster, brick, stone, metal...), each with its id, name, tags, metres per repeat of its "
-				+ "pattern, mean colour (swatch) and texture size.",
+				+ "pattern, mean colour (swatch) and texture size; source: bundled (with the app), or polyhaven, "
+				+ "ambientcg or megascans for the user's own imports (material_search, material_import).",
 		"params": [{"name": "tag", "type": "string", "default": "",
 				"description": "only materials with this tag (floor, wall, seat, curtain, fabric, wood, metal, ...)"}],
 		"assistant": "read",
-		"returns": "[{id, name, tags, tiling, swatch, size}]"})
+		"returns": "[{id, name, tags, tiling, swatch, size, source, user}]"})

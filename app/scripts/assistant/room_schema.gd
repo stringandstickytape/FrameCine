@@ -88,7 +88,7 @@ const TEXT_OBJECT_LINE := 0.1
 ## An object library id (object_library.gd) or a library material's: lower-case letters, digits, - and _.
 const ID_MAX := 64
 ## A library material's own options in a material object (only with library_material), and its tiling's range.
-const LIBRARY_OPTIONS: Array[String] = ["tint", "tiling", "triplanar"]
+const LIBRARY_OPTIONS: Array[String] = ["tint", "tiling", "triplanar", "turn"]
 const TILING_MIN := 0.02
 const TILING_MAX := 20.0
 const PART_TYPES: Array[String] = ["box", "sphere", "cylinder", "plane", "model", "text", "particles"]
@@ -867,9 +867,13 @@ static func _material(v: Variant, path: String, mode: String, errors: Array, lay
 			"triplanar":
 				if not (m[k] is bool):
 					errors.append(_e(p, "true or false"))
+			"turn":
+				var x := _num(m[k])
+				if not (x >= -360.0 and x <= 360.0):
+					errors.append(_e(p, "degrees the pattern is turned, -360..360"))
 			_:
 				errors.append(_e(p, "unknown key (color, emission, emission_strength, texture, self_lit, alpha, uv, "
-						+ "effect, roughness, library_material, tint, tiling, triplanar)"))
+						+ "effect, roughness, library_material, tint, tiling, triplanar, turn)"))
 	for k in LIBRARY_OPTIONS:
 		if m.has(k) and not m.has("library_material") and not layered:
 			errors.append(_e("%s.%s" % [path, k], "only with library_material"))

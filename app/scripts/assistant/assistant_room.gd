@@ -965,6 +965,8 @@ static func library_surface(m: Dictionary, mesh_uv := Vector2.ZERO) -> ShaderMat
 		o["tint"] = RoomSchema.to_color(m["tint"])
 	if m.has("tiling"):
 		o["tiling"] = float(m["tiling"])
+	if m.has("turn"):
+		o["turn"] = float(m["turn"])
 	if bool(m.get("triplanar", false)):
 		o["triplanar"] = true
 	elif mesh_uv != Vector2.ZERO:
