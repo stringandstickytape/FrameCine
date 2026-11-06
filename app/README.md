@@ -524,15 +524,17 @@ NV12 planes. The crop, the eye selection and the sRGB decode are the same as for
 window's aspect, and the mode is not remembered for windows. The other modes can be picked from the pane. The pointer
 works only in flat mode.
 
-With the laser off the pane, the window has the input:
+With the menu hidden, the window has the input. While you look at the screen (eye gaze, else the head), the right
+stick moves a cursor drawn into the picture. While you look away, the cursor goes and the stick scrolls. The details
+are in `docs/window-source.md`, "Controller mapping".
 
 | Control | In the window |
 |---|---|
-| right laser on the screen | the pointer, with a dot where it hits. The point on the quad times the window size gives window pixels; the page's own 1.5 scale needs no correction. |
-| right trigger | left button, held as long as the trigger, so drags work |
-| right grip, tap | right button. Holding the grip still moves the screen; a tap off the window still recenters it. |
-| right stick up / down | scroll wheel, about 12 notches a second at full tilt |
-| right stick left / right | Left / Right arrow keys, repeated every 0.4 s while held. Web players seek with them. |
+| right stick, looking at the screen | moves the cursor (a curve: fine near the centre, the page's width in a second at full tilt); the X pointer follows it. The cursor jumps to the gaze when it appears and when the gaze rests far from it ([browser] pointer_follows_gaze). |
+| right trigger, looking at the screen | left button at the cursor, held as long as the trigger, so drags work |
+| right grip, tap, looking at the screen | right button at the cursor |
+| right grip held + stick, or the stick while looking away | up / down: scroll wheel, about 12 notches a second at full tilt; left / right: Left / Right arrow keys, repeated every 0.4 s while held. Web players seek with them. |
+| right laser | off on a window; [browser] laser brings it back as an alternative pointer (the cursor follows where it hits) |
 | A | Space, which plays and pauses most web players |
 | B | the browser's Back key |
 | left trigger, X, Y | nothing |
@@ -541,8 +543,10 @@ With the laser off the pane, the window has the input:
 | keyboard | types into the window. Only F1 (overlay), F3 (menu) and F12 (screenshot) stay with the player. |
 
 Input is sent as synthetic X events, which need no focus. A Bluetooth keyboard paired to the headset types into the
-page directly. An on-screen keyboard for the page is not done yet. The controller labels change to the window's
-meanings while it has the input: CLICK, R-CLICK, SCROLL / KEYS, SPACE and BACK on the right controller.
+page directly. An on-screen keyboard for the page is not done yet. With a text field selected, the pointer hand's
+bumper types what you say into it (`docs/window-source.md`, "Voice into a field"). The controller labels change to
+the window's meanings while it has the input: POINTER, CLICK, HOLD: SCROLL, SPACE and BACK while you look at it,
+SCROLL / KEYS while you look away.
 
 The player's play and pause do nothing to the page. Space would toggle the web player, so an automatic pause on focus
 loss could start a paused video. A to play or pause is the control for the page.
@@ -564,7 +568,7 @@ device, which has both the player and the window modules.
 project.godot            Mobile renderer, XR on, shader globals for the environments
 scenes/main.tscn         XR origin + camera + hands, flat camera, environment root, screen, player, overlay, UILayer
 scripts/main.gd          the core: view, bindings, arguments, playlist, modes, screen, environments, settings, overlay
-scripts/window_pointer.gd  input for a captured window: right laser as pointer, buttons, keys, desktop mouse
+scripts/window_pointer.gd  input for a captured window: the stick pointer by gaze, buttons, keys, desktop mouse
 scripts/video_mode.gd    projection / stereo layout / half / swap / fisheye FOV; ids; file-name guess; --mode= forms
 scripts/video_screen.gd  the video surface: quad (flat) or sphere / cap (spherical), one ShaderMaterial
 scripts/projection_meshes.gd  equirect 180/360, fisheye and dual fisheye 360 meshes, inside-out, per-vertex UVs

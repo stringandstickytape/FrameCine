@@ -62,6 +62,8 @@ var _thumbs: Button
 var _jog_turn: VBoxContainer
 var _zoom_lens: Button
 var _magnification: VBoxContainer
+var _pointer_gaze: Button
+var _window_laser: Button
 var _left_handed: Button
 var _palette_box: HFlowContainer
 var _palette_buttons := {}
@@ -271,6 +273,15 @@ func bind(p_app: Node) -> void:
 	_magnification = W.slider_row("Magnification", 1.5, 8.0, 0.5, func(v: float) -> String: return "%.1fx" % v,
 			func(v: float) -> void: zoom_lens.set_magnification(v))
 	box.add_child(_magnification)
+	# The browser on the big screen (scripts/window_pointer.gd): looking at the screen, the stick moves a cursor.
+	var window_pointer: Node = app.get("window_pointer")
+	if window_pointer != null:
+		_pointer_gaze = W.toggle("Browser cursor jumps to your gaze", func(on: bool) -> void:
+			window_pointer.set_follows_gaze(on))
+		_pointer_gaze.tooltip_text = "Off: the cursor stays where the stick left it"
+		_window_laser = W.toggle("Laser on the browser", func(on: bool) -> void: window_pointer.set_laser(on))
+		_window_laser.tooltip_text = "The laser points and clicks on the page too, as well as the stick"
+		box.add_child(W.flow([_pointer_gaze, _window_laser]))
 
 	box.add_child(W.section("Phone remote"))
 	_remote_toggle = W.toggle("Phone remote", func(on: bool) -> void:
@@ -399,6 +410,10 @@ func sync() -> void:
 	W.set_on(_zoom_lens, bool(zoom_lens.enabled))
 	W.set_slider(_magnification, float(zoom_lens.magnification))
 	_magnification.visible = bool(zoom_lens.enabled)
+	var window_pointer: Node = app.get("window_pointer")
+	if window_pointer != null and _pointer_gaze != null:
+		W.set_on(_pointer_gaze, bool(window_pointer.cursor.follows_gaze))
+		W.set_on(_window_laser, bool(window_pointer.laser))
 	var access: Node = app.features.access
 	W.set_on(_left_handed, bool(access.get_value("left_handed")))
 	for key: String in _layout_rows:

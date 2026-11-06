@@ -88,6 +88,7 @@ sections of `user://settings.cfg`; `<environment id>` and `<id>` sections hold o
 | [Controller look](#controller-look) | | `[controllers] look`, `look_options` | on; black as the controllers come by default |
 | [Showrooms](#showrooms) | | none | in the Room tab's Showrooms group (`docs/showrooms.md`) |
 | [Every format: old and other codecs in software](#every-format-old-and-other-codecs-in-software) | none | none | on (engine branch `frame/codecs`) |
+| [The browser: stick pointer and voice into a field](#the-browser-stick-pointer-and-voice-into-a-field) | none | `[browser] pointer_follows_gaze`, `laser`, `dictation_partials` | on (the laser off by default) |
 
 ## #36 Wall-clock end time
 
@@ -2519,3 +2520,39 @@ a mid zip by this path, the thumbnails in the lenses).
   app asks Fab nothing after a withdrawal.
 - **The dev link's code command** can write any setting, this one too. The rule "no command can accept" holds for
   every registered command, the assistant's and the dev link's.
+
+## The browser: stick pointer and voice into a field
+
+Two ways to work the browser on the big screen without the laser or a keyboard. The details, the numbers and the
+open questions are in `app/docs/window-source.md` ("Controller mapping", "Voice into a field").
+
+- **The stick pointer.** While you look at the screen (eye gaze, else the head's direction), the right stick moves a
+  cursor over the page, and the trigger clicks there. A squeeze tap is a right click. Squeeze held with the stick
+  scrolls and sends the arrow keys.
+  - When you look away, the cursor is not drawn, and the stick scrolls and sends the arrow keys as before.
+  - Pointer mode starts after 0.1 s of gaze on the screen (with a 5 % margin) and ends after 0.4 s of gaze off it. A
+    pushed stick or a held trigger keeps it on.
+  - The cursor appears where you look. It jumps to your gaze when your gaze rests far from it (over 10 % of the width,
+    for 0.15 s, with the stick still): `[browser] pointer_follows_gaze`, on by default.
+  - The stick has a curve: small tilts aim finely, and full tilt crosses the page in one second.
+  - The cursor is drawn into the picture by the screen's shader (`video_common.gdshaderinc`), so the film layer
+    shows it too. It fades in and out in 0.1 s.
+  - The laser is off on a window by default. `[browser] laser` brings it back as an alternative.
+  - The legends follow the mode.
+- **Voice into a field.** With a text field selected on the page, the talk button (the pointer hand's bumper)
+  transcribes on the headset and types the text with DevTools `Input.insertText` (any Unicode).
+  - While you hold the button, the field glows and the live words show under it. Both go on release, on a cancel and
+    on a page change.
+  - A password field is refused.
+  - With no field selected, the talk button goes to the assistant as before.
+  - Fields in cross-origin iframes are reached through the frame's own DevTools session.
+  - Without DevTools, `browser_insert_text` types into whatever has focus through the window's own text input.
+- **Commands:** `browser_pointer`, `browser_field` (never the field's contents) and `browser_insert_text`, for the dev
+  link and the assistant.
+- **Files:** `scripts/window_pointer.gd`, `scripts/video/stick_cursor.gd`, `scripts/video/browser_dictation.gd`,
+  `scripts/video/devtools_session.gd`, `scripts/video/page_field.gd`.
+- **Tested:** `tests/test_browser_pointer.gd` and `tests/test_browser_dictation.gd` (a fake DevTools page on the
+  loopback, and the page script in a stand-in DOM under Node), on the desktop.
+
+Untested: on the headset (the feel of the gaze switch and the jump, the cursor's size in the lenses), and in a real
+Chromium (the page script, cross-origin frames, `Input.insertText` into the focused frame).

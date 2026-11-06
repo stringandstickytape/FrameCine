@@ -495,6 +495,27 @@ Objects → Your objects → Fab; an assistant asks the app with `fab_search`, `
 - **Would change if:** Fab publishes an API (then that), changes these endpoints (then the `shape` errors say so), or
   refuses the app's User-Agent (then the plainest name it accepts).
 
+## D28. The browser: a stick pointer chosen by the gaze, the cursor in the picture, voice into the field (2026-11-06)
+
+On a captured window, the right stick moves a cursor while the viewer looks at the screen. While they look away, it
+scrolls and sends the arrow keys. The talk button types into the page's selected field when one is selected, and
+otherwise talks to the assistant as before (`app/docs/window-source.md`).
+
+- **Why the gaze picks the mode:** the user's design. One stick does both jobs with no switch to remember: the
+  cursor's presence is the cue. Hysteresis (0.1 s on, 0.4 s off, a 5 % margin) and a latch (stick pushed, trigger
+  held) keep the mode from flickering at the edge or ending mid-drag.
+- **Why the cursor is in the picture:** the film layer is drawn over everything in front of the screen
+  (`play/film_layer.gd`), so a cursor quad would be hidden, and so would the laser's dot. The shader draws it
+  (`video_common.gdshaderinc`), and the layer's SubViewport copies the uniforms.
+- **Why the laser is off on a window by default:** in front of the screen, it made the layer hide whenever it
+  pointed there, and it competed with the cursor. `[browser] laser` keeps it as an alternative.
+- **Why DevTools for the field:** only the page can say what has focus and whether it is a password field.
+  `Input.insertText` types any Unicode, which the synthetic X key events can't do reliably. The outline lives in the
+  page (a separate shadow-root element), so it sits on the field and follows scrolling. Without DevTools nothing can
+  tell a password field, so the talk button stays the assistant's there.
+- **Would change if:** the gaze switch feels wrong in the headset (then a button to hold for the cursor), or
+  Chromium refuses flatten auto-attach on a page socket (then the browser-level socket, `/json/version`).
+
 ## Open
 
 - Quad layer for flat video vs. drawing in the projection layer: sharpness and bandwidth comparison (spike 03-layer).

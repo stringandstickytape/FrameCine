@@ -782,6 +782,28 @@ root, `AssistantFetch`):
   (`Page.navigate` on the page's WebSocket, loopback only), else `main.open_path("browser://<url>")`. The `browse`
   event {state: opened | declined | timeout, url, how}. The API never reads cookies, logins, form fields or page
   content.
+- The browser's input (`app/docs/window-source.md`, "Controller mapping" and "Voice into a field"):
+  - `browser_pointer` (read): the stick pointer's state:
+    - `active`: a window has the controllers and the menu is hidden;
+    - `pointer_mode`: the viewer looks at the screen, so the stick moves the cursor;
+    - `cursor_shown`, and `cursor {x, y}` in window pixels;
+    - `window {width, height}`;
+    - `gaze`: eyes or head;
+    - `follows_gaze` and `laser`: the settings.
+  - `browser_field` (read): what has the keyboard focus in the page, read fresh over the page's DevTools socket:
+    `editable`, `kind` (input, textarea, contenteditable, iframe, a tag, none), `input_type`, `password` and `frame`
+    (main, same-origin or cross-origin; a cross-origin frame is asked through its own session). Never the field's
+    contents, and no hint of them. `devtools: false` when the browser has no DevTools port.
+  - `browser_insert_text {text}` (control): types into the focused field through the app, with the same checks as the
+    viewer's voice.
+    - The focus must be on a text field. A password field is always refused.
+    - The text goes in with DevTools `Input.insertText` (any Unicode).
+    - Without DevTools it goes to whatever has the keyboard focus, through the window's own text input, and the reply
+      says the field could not be checked.
+    - The reply is `{inserted, via, characters}`: never the text. The text is never logged.
+  - The viewer's voice into a field doesn't reach the assistant. When a text field is selected in the browser on the
+    big screen, the talk button types into that field instead of sending a viewer message. With no field selected, it
+    sends a message as before.
 
 ### Places
 
