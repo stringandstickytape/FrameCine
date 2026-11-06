@@ -335,9 +335,9 @@ The same card has **Clear Fab's cache** (the searches the app keeps for a day an
 how many seconds the app waits.
 
 A scanned object downloaded from the Fab store in a browser (the Low or Medium quality zip, into Downloads on the
-headset) shows in **Your objects** under **In Downloads, from Fab**: **Add <name>** makes it one of yours. **Visit Fab
-to download objects**, beside that heading, opens the store's free scanned objects in the browser. Either way it stays
-on the headset: the Fab licence lets you use it, not share it.
+headset) shows in **Your objects** under **In Downloads, from Fab** (only when there is one): **Add <name>** makes it
+one of yours. Searching Fab in the app (above) does the same without the browser. Either way it stays on the headset:
+the Fab licence lets you use it, not share it.
 
 1. Pick a thumbnail. The line under the thumbnails says its name, how it sits (wall, floor, ...) and how many parts it
    has.

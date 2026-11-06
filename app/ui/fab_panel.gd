@@ -409,7 +409,7 @@ func _error_text(r: Dictionary) -> String:
 
 # --- The licence ---------------------------------------------------------------------------------------------------
 
-## Fab's licence in full, in the Browser source (as Visit Fab): the panel goes so it shows.
+## Fab's licence in full, in the Browser source: the panel goes so it shows.
 func _read_eula() -> void:
 	var url := WebPages.normalized(FabStore.EULA_URL)
 	WebPages.set_last_url(url)

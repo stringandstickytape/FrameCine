@@ -710,9 +710,6 @@ msgstr "还没有：从下面的 Fab 添加一个。"
 msgid "In Downloads, from Fab"
 msgstr "下载文件夹中来自 Fab 的"
 
-msgid "Visit Fab to download objects"
-msgstr "访问 Fab 下载物品"
-
 msgid "In this room"
 msgstr "在此房间中"
 

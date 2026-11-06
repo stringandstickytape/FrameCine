@@ -23,10 +23,7 @@ const WorkerTask := preload("res://scripts/dev/worker_task.gd")
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const EffectLibrary := preload("res://scripts/effects/effect_library.gd")
 const FabImport := preload("res://scripts/assistant/fab_import.gd")
-const WebPages := preload("res://scripts/net/web_pages.gd")
 const FabPanel := preload("res://ui/fab_panel.gd")
-## Visit Fab: the store's free scanned objects (the user's choice of page, 2026-11-05).
-const FAB_URL := "https://www.fab.com/sellers/Quixel%20Megascans?is_free=1"
 
 const COLUMNS := 4
 ## Pixels on the pane: the thumbnail as drawn, and the name under it. A tile's minimum is TILE_MIN wide; the grid's
@@ -137,19 +134,15 @@ func bind(p_app: Node) -> void:
 		sync_objects()
 	add_child(fab)
 	fab.bind(app, self)
+	# Fab zips downloaded some other way (a browser, a PC): shown only when there are some. Searching and importing
+	# is the Fab card above (fab_panel.gd); the Visit Fab button went with it (the user, 2026-11-06).
 	_fab_box = W.vbox()
-	# An ellipsis where it is narrow (a longer language): the button keeps its room.
+	# An ellipsis where it is narrow (a longer language).
 	var fab_label := W.ellipsis(W.label("In Downloads, from Fab", &"MutedLabel"))
 	_fab_box.add_child(W.hbox([fab_label]))
-	# The card's width, its text cut short where a longer language would not fit.
-	var visit := W.button("Visit Fab to download objects", _visit_fab)
-	visit.clip_text = true
-	visit.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	visit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_fab_box.add_child(W.hbox([visit]))
 	_fab_buttons = W.vbox()
-	_fab_buttons.visible = false
 	_fab_box.add_child(_fab_buttons)
+	_fab_box.visible = false
 	add_child(_fab_box)
 
 	add_child(W.section("In this room"))
@@ -288,15 +281,7 @@ func _sync_fab(found: Array) -> void:
 		b.set_meta("fab_name", str(f["name"]))
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		_fab_buttons.add_child(b)
-	_fab_buttons.visible = not found.is_empty()
-
-
-## The store's page in the Browser source (as the dev link's open_url): the panel goes so it shows.
-func _visit_fab() -> void:
-	var url := WebPages.normalized(FAB_URL)
-	WebPages.set_last_url(url)
-	app.ui.hide_panel()
-	app.open_path("browser://" + url)
+	_fab_box.visible = not found.is_empty()
 
 
 ## On the main thread, behind a notice (as a room's first lightmap bake, room_lightmaps.gd): the notice is drawn, then
