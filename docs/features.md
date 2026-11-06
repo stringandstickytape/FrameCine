@@ -1219,8 +1219,12 @@ and fine detail shimmers and drops out as the head moves (stars in a still 4K fr
 - **Measured** (`tests/test_footprint.gd`, rendered with lavapipe at 640 x 640): the 8K 360 zone plate where its
   rings are finer than the screen shows false rings at 0.215 spread off, 0.055 on; where they are coarse, 0.357 and
   0.355 (kept). The 8K starfield turned in steps of 0.013°: a patch's light varies 0.043 off, 0.007 on.
-- **To do:** time it on the Frame (the `perf` command's `gpu_ms`, with `lab://zoneplate_360` playing), with taps 1
-  and 3.
+- **Switch:** Steady detail on the tablet's band (`[picture] steady_detail`, on by default; off sets
+  `footprint_taps` 1). Smooth banding beside it turns the deband off and back to its value.
+- **On the Frame** (2026-11-06, `lab://zoneplate_360` playing, the app's GPU cycles from its DRM fdinfo, `drm-cycles-gpu`;
+  the `perf` command's `gpu_ms` reads 0 there, the GPU timer isn't available): 150 M cycles a second with neither,
+  221 with the filter (+47 %), 271 with the deband, 329 with both, of the GPU's 903 M at its top clock; 72 fps held
+  in each. Flat films on the film layer showed no difference: the layer is drawn once per video frame.
 
 ## Deband (Smooth banding)
 

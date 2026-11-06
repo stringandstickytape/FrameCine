@@ -217,7 +217,7 @@ func _panel_checks(ui: PaneUI) -> void:
 	await _seconds(0.2)
 	_check("panel: the header shows the clock (%s)" % ui.status_line_text(), ui.status_line_text().contains(":")
 			and not ui.status_line_text().contains(" left"))
-	_check("panel: the transport over the rail", ui._transport.is_visible_in_tree() and ui._play_button.is_visible_in_tree()
+	_check("panel: the transport on the band over the rail", ui._transport.is_visible_in_tree() and ui._play_button.is_visible_in_tree()
 			and ui._transport.get_global_rect().end.y <= ui._tablet_row.get_global_rect().position.y + 1.0)
 	_check("panel: the rail, a row per tab (%s)" % [ui.tablet_tab_buttons.map(func(b: Button) -> String: return b.text)],
 			ui.tablet_tab_buttons.size() == PaneUI.TAB_NAMES.size()
@@ -440,8 +440,8 @@ func _docked_focus_checks(ui: PaneUI) -> void:
 	main.ui.on_stick(hand, Vector2.ZERO, 0.016)
 	await _frames(2)
 	var focus: Control = main.ui.panel.focus_owner()
-	_check("stick focus: stick right moves the focus to +10 s (%s)" % (focus.get("text") if focus != null else "none"),
-			focus is Button and (focus as Button).text == "+10 s")
+	_check("stick focus: stick right moves the focus to +10 s (%s)" % (focus.get_meta("label", "") if focus != null
+			else "none"), focus is Button and str((focus as Button).get_meta("label", "")) == "+10 s")
 	var pos: float = main.player.get_position()
 	main.ui.on_trigger(hand, true)
 	main.ui.on_trigger(hand, false)
@@ -464,8 +464,8 @@ func _network_checks(ui: PaneUI) -> void:
 	_check("Network place opens the host list", files.current == "network://" and files.row_button("+ Add host") != null)
 	await _click(files.row_button("+ Add host"))
 	var form = files.get_form()
-	_check("add-host form opens over the list and the transport", form.visible and not files.list_scroll().is_visible_in_tree()
-			and not ui._transport.visible)
+	_check("add-host form opens over the list and the rail", form.visible and not files.list_scroll().is_visible_in_tree()
+			and not ui._rail_scroll.visible)
 	await _frames(2)
 	_check("the host form and keyboard fit the pane (%d of %d px)" % [ui.get_combined_minimum_size().y,
 			main.ui.panel.resolution.y], ui.get_combined_minimum_size().y <= main.ui.panel.resolution.y)
@@ -480,7 +480,7 @@ func _network_checks(ui: PaneUI) -> void:
 	await _click(_find_button(ui, "Save"))
 	var hosts: Array = NetworkHosts.hosts
 	_check("Save stores the host", hosts.size() == 1 and hosts[0]["host"] == "nas.local" and hosts[0]["user"] == "viewer"
-			and files.list_scroll().is_visible_in_tree() and ui._transport.visible)
+			and files.list_scroll().is_visible_in_tree() and ui._rail_scroll.visible)
 
 	await _click(files.row_button("smb://nas.local"))
 	_check("host listing runs in the background (busy right after the click)", files.is_busy())
@@ -637,7 +637,8 @@ func _check(what: String, ok: bool) -> void:
 ## A visible button with this text; on the pane, failing that, one on another section's card of the tab on show,
 ## whose section is then picked (the tablet shows one section at a time; the others' cards are out of the tree).
 func _find_button(root: Node, text: String) -> Button:
-	var b := _find_where(root, func(c: Button) -> bool: return c.text == text)
+	# The transport's buttons are icons, their names in meta "label".
+	var b := _find_where(root, func(c: Button) -> bool: return c.text == text or str(c.get_meta("label", "")) == text)
 	if b == null:
 		push_error("No button '%s'" % text)
 	return b
@@ -826,7 +827,7 @@ func _places_checks(ui: PaneUI) -> void:
 	await _click(_find_button(ui, "Below the picture"))
 	await _click(_find_button(ui, "Find a line"))
 	var find = ui.subtitles._find_form
-	_check("Subtitles: Find a line opens the form with the keyboard", find.is_visible_in_tree() and not ui._transport.visible)
+	_check("Subtitles: Find a line opens the form with the keyboard", find.is_visible_in_tree() and not ui._rail_scroll.visible)
 	if find.is_visible_in_tree():
 		await _type_on_keyboard(ui, "line")
 		await _click(_find_button(ui, "Search"))
@@ -835,7 +836,7 @@ func _places_checks(ui: PaneUI) -> void:
 				break
 			await _frames(1)
 		_check("Subtitles: the search answers (%s)" % ui.subtitles._script_label.text, not find.is_visible_in_tree()
-				and ui._transport.visible and ui.subtitles._script_label.text != "")
+				and ui._rail_scroll.visible and ui.subtitles._script_label.text != "")
 	else:
 		# Put the tab back as Cancel would, so what follows is not hidden too.
 		ui.subtitles._hide_find()
@@ -1076,7 +1077,7 @@ func _pc_audio_checks(ui: PaneUI) -> void:
 	st.sync()
 	await _click(_find_button(ui, "Play sound on a PC"))
 	_check("PC audio: no address yet, the switch asks for one", st._pc_form.is_visible_in_tree()
-			and not ui._transport.visible)
+			and not ui._rail_scroll.visible)
 	if not st._pc_form.is_visible_in_tree():
 		# Put the tab back as Cancel would, so what follows is not hidden too.
 		st._hide_form()
@@ -1301,13 +1302,13 @@ func _party_checks(ui: PaneUI) -> void:
 	await _rail(ui, PaneUI.Tab.ROOM)
 	var room = ui.room
 	await _click(_find_button(ui, "Name: %s" % room.party_name()))
-	_check("Room: the name button opens the form", room._party_form.is_visible_in_tree() and not ui._transport.visible)
+	_check("Room: the name button opens the form", room._party_form.is_visible_in_tree() and not ui._rail_scroll.visible)
 	if room._party_form.is_visible_in_tree():
 		room._party_form.get_field().text = ""
 		await _type_on_keyboard(ui, "sam")
 		await _click(_find_button(ui, "Save"))
 		_check("Room: the name is saved (%s)" % room.party_name(), room.party_name().to_lower() == "sam"
-				and not room._party_form.is_visible_in_tree() and ui._transport.visible)
+				and not room._party_form.is_visible_in_tree() and ui._rail_scroll.visible)
 	else:
 		# Put the tab back as Cancel would, so what follows is not hidden too.
 		room._hide_form()

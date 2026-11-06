@@ -72,8 +72,9 @@ func _run() -> void:
 	_check("now playing on top, short", np.position.y > mp.end.y and np.size.y < mp.size.y * 0.5)
 	_check("a gap of %.0f mm between them" % ((np.position.y - mp.end.y) * 1000.0),
 			is_equal_approx(np.position.y - mp.end.y, Tablet.GAP))
-	_check("the top edge where it was (%.3f), the main pane 25 %% deeper (%.4f)" % [np.end.y, mp.size.y],
-			is_equal_approx(np.end.y, 0.13) and is_equal_approx(mp.size.y, 0.19 * 1.25))
+	_check("the main pane where it was (its top %.3f), 25 %% deeper (%.4f); the now playing pane grown up by its band"
+			% [mp.end.y, mp.size.y], is_equal_approx(mp.end.y, 0.13 - 0.06 - Tablet.GAP)
+			and is_equal_approx(mp.size.y, 0.19 * 1.25) and is_equal_approx(np.size.y, 0.06 + Tablet.CONTROLS_HEIGHT))
 	_check("together they fill the tablet", is_equal_approx(np.end.y - mp.position.y, Tablet.SIZE.y)
 			and is_equal_approx(np.size.x, Tablet.SIZE.x) and is_equal_approx(mp.size.x, Tablet.SIZE.x))
 	_check("the pane nodes sit there", tablet.now_playing.position.is_equal_approx(Vector3(0, np.get_center().y, 0))
@@ -158,9 +159,12 @@ func _run() -> void:
 	var ff: Font = tablet.status_label.font
 	var box_mid := (ff.get_ascent(Tablet.FONT_PX) - ff.get_descent(Tablet.FONT_PX)) * 0.5 * tablet.status_label.pixel_size
 	var caps_mid := tablet.status_label.position.y + box_mid - status_size * Tablet.CAP_MIDDLE
-	_check("the lines and the bar centred together: the block's top and bottom the same distance from the middle "
-			+ "(%.4f, %.4f)" % [caps_mid + status_h * 0.5, bar.position.y],
-			absf((caps_mid + status_h * 0.5) + bar.position.y) < 0.0005 and is_equal_approx(bar.position.y, -block * 0.5))
+	# Centred above the band: about INFO_SHIFT over the pane's middle.
+	_check("the lines and the bar centred together above the band (top %.4f, bottom %.4f, middle %.4f)"
+			% [caps_mid + status_h * 0.5, bar.position.y, Tablet.INFO_SHIFT],
+			absf((caps_mid + status_h * 0.5) + bar.position.y - 2.0 * Tablet.INFO_SHIFT) < 0.0005
+			and is_equal_approx(bar.position.y, -block * 0.5 + Tablet.INFO_SHIFT)
+			and bar.position.y > np_rect.size.y * -0.5 + Tablet.CONTROLS_HEIGHT)
 	_check("the status line above the title", tablet.status_label.position.y > tablet.title_label.position.y
 			and tablet.chapter_label.position.x < 0.0 and tablet.status_label.position.x > 0.0)
 	_check("the title above the bar, on the left; the time on the right", tablet.title_label.position.y > bar.end.y
@@ -244,8 +248,22 @@ func _run() -> void:
 			var f := sb as StyleBoxFlat
 			borders += f.border_width_left + f.border_width_top + f.border_width_right + f.border_width_bottom
 	_check("the list rows have no borders, the focus no ring (%d px)" % borders, borders == 0)
-	_check("on the main pane, a little in front", panel.global_transform.is_equal_approx(tablet.panel_transform())
-			and (panel.global_transform.origin - tablet.main_pane.global_position).length() < 0.005)
+	var main_r: Rect2 = Tablet.pane_rects()["main"]
+	var np_r: Rect2 = Tablet.pane_rects()["now_playing"]
+	_check("on the main pane and up into the now playing pane's band, a little in front (%s)" % pr,
+			panel.global_transform.is_equal_approx(tablet.panel_transform())
+			and pr.position.y > main_r.position.y and pr.end.y > np_r.position.y
+			and pr.end.y <= np_r.position.y + Tablet.CONTROLS_HEIGHT
+			and tablet.to_local(panel.global_position).z > 0.0)
+	var band_end: float = pui._band.get_global_rect().end.y
+	var row_top: float = pui._tablet_row.get_global_rect().position.y
+	var band: Dictionary = tablet.menu_band()
+	_check("the transport and the toggles in the band, the rail where the main pane begins (band to %.0f of %d px, "
+			% [band_end, band["band"]] + "rail from %.0f of %d)" % [row_top, band["band"] + band["gap"]],
+			band_end <= band["band"] + 0.5 and absf(row_top - (band["band"] + band["gap"])) <= 1.0
+			and pui._play_button.icon != null and pui._steady_toggle.is_visible_in_tree()
+			and pui._banding_toggle.is_visible_in_tree()
+			and pui._steady_toggle.get_global_rect().position.x > pui._transport.get_global_rect().end.x)
 	var rail_scroll: Control = pui._tablet_row.get_node("RailScroll")
 	var rail_rows: Control = rail_scroll.get_node("Rail")
 	var footer_end: float = pui._footer_count.get_parent().get_global_rect().end.y

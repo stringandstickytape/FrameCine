@@ -12,8 +12,10 @@ extends Node3D
 ##                 user, 2026-11-06: the menu's own header made it taller than its pane), then the title on the left,
 ##                 "played / total" on the right (LIVE before it for a live stream, the trick play speed after it), and the time bar along the bottom with a tick at each
 ##                 chapter. The seek bar's picture (features.thumbs, System "Seek bar pictures") shows over the bar,
-##                 with its time, where the laser is on the bar (hover_bar()) or where it is dragged. bar_fraction(point) gives the place in the
-##                 film for a point on or near the bar, for touching it or the laser and trigger (to come).
+##                 with its time, where the laser is on the bar (hover_bar()) or where it is dragged. bar_fraction(point)
+##                 gives the place in the film for a point on or near the bar, for touching it or the laser. Under it a
+##                 band (CONTROLS_HEIGHT) where the menu's transport and picture toggles sit (the user, 2026-11-06):
+##                 the menu's panel reaches up over the gap into it (panel_rect(), menu_band()).
 ##   main          below it, for everything else, 25 % deeper than at first (the user: the top stays, the bottom
 ##                 comes down). The old menu sits on it (the user, 2026-11-04: moved here, reshaped, its lists
 ##                 dragged): ui_layer.gd puts the panel (ui/pane.gd, in pane_ui.gd's tablet layout) at
@@ -71,12 +73,15 @@ signal layout_changed
 
 ## Metres: the now playing pane's height, the gap below it, and the main pane's height (0.19 at first, then 25 %
 ## deeper, downwards).
-const NOW_PLAYING_HEIGHT := 0.06
+## The band at the bottom of the now playing pane for the transport and the toggles (the menu's), metres.
+const CONTROLS_HEIGHT := 0.028
+const NOW_PLAYING_HEIGHT := 0.06 + CONTROLS_HEIGHT
 const GAP := 0.01
 const MAIN_HEIGHT := 0.2375
 ## Metres: the whole tablet's size (landscape), and its top edge above the point it is placed at (pose()).
 const SIZE := Vector2(0.48, NOW_PLAYING_HEIGHT + GAP + MAIN_HEIGHT)
-const TOP_EDGE := 0.13
+## Grown by the band, so the main pane stays where it was (the user's place for it).
+const TOP_EDGE := 0.13 + CONTROLS_HEIGHT
 const FORWARD := 0.35
 const DOWN := 0.34
 ## Degrees the face tilts back from vertical: 45 would face a point 45° below the horizon.
@@ -477,7 +482,18 @@ func is_grabbing() -> bool:
 ## The menu's rectangle in the tablet's space: the main pane, inset.
 func panel_rect() -> Rect2:
 	var inset := float(_get(style(), "panel/inset"))
-	return (pane_rects()["main"] as Rect2).grow(-inset)
+	var main: Rect2 = (pane_rects()["main"] as Rect2).grow(-inset)
+	var np: Rect2 = pane_rects()["now_playing"]
+	# Up over the gap into the now playing pane's band, half an inset short of the band's top.
+	return Rect2(main.position, Vector2(main.size.x, np.position.y + CONTROLS_HEIGHT - inset * 0.5 - main.position.y))
+
+
+## The menu's top, in its pixels: {band: the band's height (the transport and toggles' row), gap: from the band's
+## bottom to where the main pane's inside begins}. ui/pane_ui.gd lays its first rows out on these.
+func menu_band() -> Dictionary:
+	var inset := float(_get(style(), "panel/inset"))
+	var px := float(_get(style(), "panel/px_per_m"))
+	return {"band": roundi((CONTROLS_HEIGHT - inset * 0.5) * px), "gap": roundi((GAP + inset) * px)}
 
 
 func panel_pixels() -> Vector2i:
@@ -574,12 +590,16 @@ func bar_rect() -> Rect2:
 	var r: Rect2 = pane_rects()["now_playing"]
 	var pad := float(_get(s, "now_playing/padding"))
 	var h := float(_get(s, "now_playing/bar/height"))
-	return Rect2(-r.size.x * 0.5 + pad, -_block_height(s) * 0.5, r.size.x - 2.0 * pad, h)
+	return Rect2(-r.size.x * 0.5 + pad, -_block_height(s) * 0.5 + INFO_SHIFT, r.size.x - 2.0 * pad, h)
 
 
 ## The text row's height (its capitals), metres.
 static func _text_height(s: Dictionary) -> float:
 	return maxf(float(_get(s, "now_playing/title/size")), float(_get(s, "now_playing/time/size"))) * CAP_MIDDLE * 2.0
+
+
+## The lines and the bar are centred in the now playing pane above its band: their middle this far above the pane's.
+const INFO_SHIFT := CONTROLS_HEIGHT * 0.5
 
 
 ## The small status line's height (its capitals), metres.
@@ -733,9 +753,9 @@ func _apply_style() -> void:
 	var r: Rect2 = pane_rects()["now_playing"]
 	var pad := float(_get(s, "now_playing/padding"))
 	# The middle of each line: the capitals' middle goes there. The status line on top, then the title and time.
-	var status_mid := _block_height(s) * 0.5 - _status_height(s) * 0.5
+	var status_mid := _block_height(s) * 0.5 - _status_height(s) * 0.5 + INFO_SHIFT
 	var text_mid := _block_height(s) * 0.5 - _status_height(s) - float(_get(s, "now_playing/spacing")) \
-			- _text_height(s) * 0.5
+			- _text_height(s) * 0.5 + INFO_SHIFT
 	for row: Array in [[chapter_label, -r.size.x * 0.5 + pad], [status_label, r.size.x * 0.5 - pad]]:
 		var st: Dictionary = (_get(s, "now_playing/status") as Dictionary).duplicate()
 		st["color"] = _colour(s, "now_playing/status/color", pal["ink2"]).to_html()

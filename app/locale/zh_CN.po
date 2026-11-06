@@ -740,6 +740,12 @@ msgstr "重置"
 msgid "abc"
 msgstr "abc"
 
+msgid "Steady detail"
+msgstr "稳定细节"
+
+msgid "Smooth banding"
+msgstr "平滑色带"
+
 msgid "%s, %s"
 msgstr "%s，%s"
 
@@ -755,8 +761,23 @@ msgstr "正在聆听"
 msgid "Chapter %s"
 msgstr "章节 %s"
 
-msgid "Pause"
-msgstr "暂停"
+msgid "Fine detail filtered where the picture is shrunk, so it doesn't shimmer."
+msgstr "画面缩小处过滤细微细节，使其不闪烁。"
+
+msgid "Hides the steps in dark gradients (8-bit video)."
+msgstr "隐藏暗部渐变中的色阶（8 位视频）。"
+
+msgid "Previous"
+msgstr "上一个"
+
+msgid "−10 s"
+msgstr "−10 秒"
+
+msgid "+10 s"
+msgstr "+10 秒"
+
+msgid "Next"
+msgstr "下一个"
 
 msgid "Source"
 msgstr "片源"
@@ -779,17 +800,8 @@ msgstr "混合现实"
 msgid "System"
 msgstr "系统"
 
-msgid "Previous"
-msgstr "上一个"
-
-msgid "−10 s"
-msgstr "−10 秒"
-
-msgid "+10 s"
-msgstr "+10 秒"
-
-msgid "Next"
-msgstr "下一个"
+msgid "Pause"
+msgstr "暂停"
 
 msgid "General"
 msgstr "常规"

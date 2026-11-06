@@ -10,7 +10,9 @@ extends Node
 ##   reset()                 this environment back to the defaults
 ##   signal changed(values)
 ## Settings: [picture_<environment id>] brightness, contrast, saturation, gamma, lift, sharpen, deband (only values
-## that differ from the default are stored).
+## that differ from the default are stored); [picture] steady_detail (false: the footprint filter off; on by default).
+##   steady, set_steady(on)    the footprint filter (video_common.gdshaderinc footprint_taps 3, or 1 off)
+##   set_banding(on)           Smooth banding on (back to its value before, or the default) or off (0)
 
 signal changed(values: Dictionary)
 
@@ -31,11 +33,32 @@ const ALWAYS := ["deband"]
 var main: Node3D
 var values := {}
 var _env := ""
+## The footprint filter on (Steady detail); the deband's value before it was turned off.
+var steady := true
+var _banding_was := -1.0
 
 
 func _ready() -> void:
 	main.environment_changed.connect(func(id: String, _l: float) -> void: load_for(id))
+	steady = bool(main.settings.get_value("picture", "steady_detail", true))
 	load_for(main.env_id)
+
+
+func set_steady(on: bool) -> void:
+	steady = on
+	main.settings.set_value("picture", "steady_detail", null if on else false)
+	_apply()
+
+
+func set_banding(on: bool) -> void:
+	var now := float(values.get("deband", 0.0))
+	if on == (now > 0.0):
+		return
+	if on:
+		set_value("deband", _banding_was if _banding_was > 0.0 else float(RANGES["deband"][2]))
+	else:
+		_banding_was = now
+		set_value("deband", 0.0)
 
 
 static func defaults() -> Dictionary:
@@ -88,4 +111,5 @@ func _apply() -> void:
 	m.set_shader_parameter("pc_enabled", not is_default())
 	for k: String in RANGES:
 		m.set_shader_parameter("pc_" + k, values[k])
+	m.set_shader_parameter("footprint_taps", 3 if steady else 1)
 	changed.emit(values)
