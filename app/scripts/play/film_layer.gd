@@ -193,6 +193,15 @@ func _covered() -> String:
 	var eye := screen.affine_inverse() * cam.global_position
 	if eye.z <= 0.01:
 		return ""
+	# A curved screen (cylinder layers drew over an icicle, 2026-11-04): every point of the curve lies on or in front
+	# of the plane through its middle, so that plane never misses what is in front; its edges come forward by the
+	# sagitta, so seen from the eyes they reach wider than the flat half-width: widened to match.
+	var radius := float(main.screen.get("curve_radius")) if kind == "cylinder" else 0.0
+	if radius > 0.0:
+		var phi := half.x / radius
+		var sag := radius * (1.0 - cos(phi))
+		var reach := radius * sin(phi) * eye.z / maxf(eye.z - sag, 0.01)
+		half.x = maxf(half.x, reach) * 1.02
 	for n: Node3D in nodes:
 		if fresh.has(n.get_instance_id()):
 			_local_aabbs.erase(n.get_instance_id())
@@ -292,7 +301,7 @@ func _update() -> void:
 	# Marking a window to the real room: the whole view is the cameras, the screen too (real_windows.gd).
 	var rw: Node = main.features.get("real_windows") if main.get("features") != null else null
 	var hold := bool(main.get("menu_shown")) or (rw != null and bool(rw.get("marking")))
-	if not hold and kind == "quad":
+	if not hold and kind in ["quad", "cylinder"]:
 		var by := _covered()
 		if by != "":
 			covered_by = by

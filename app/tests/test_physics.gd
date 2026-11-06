@@ -251,6 +251,26 @@ func _test_screen() -> void:
 		await _frames(2)
 		_check("put down in the lap: held a second more, then the layer back (%s)" % film.covered_by, still_held
 				and not film.held)
+		# A curved screen as cylinder layers (drawn over everything too, 2026-11-04): a controller just in front of
+		# the curve's edge counts, though the edge stands forward of the middle's plane and wider than the flat width.
+		var was_radius := float(main.screen.curve_radius)
+		main.screen.set_curve_radius(maxf(main.screen.get_flat_size().x * 0.6, 2.0))
+		await _frames(2)
+		var fx: Transform3D = main.screen.get_node("Flat").global_transform
+		var sx := Transform3D(fx.basis.orthonormalized(), fx.origin)
+		var rad := float(main.screen.curve_radius)
+		var phi: float = main.screen.get_flat_size().x * 0.5 / rad
+		var edge_local := Vector3(rad * sin(phi * 0.97), 0.0, rad * (1.0 - cos(phi * 0.97)))
+		var eye_w: Vector3 = cam.global_position
+		var edge_w: Vector3 = sx * edge_local
+		var near_edge: Vector3 = edge_w + (eye_w - edge_w).normalized() * 0.3
+		hand.global_transform = Transform3D(Basis.looking_at((edge_w - near_edge).normalized(), Vector3.UP), near_edge)
+		var saved_kind: String = film.kind
+		film.kind = "cylinder"
+		var by: String = film._covered()
+		film.kind = saved_kind
+		_check("a curved screen: a controller in front of its edge covers it (%s)" % by, by.begins_with(str(hand.name)))
+		main.screen.set_curve_radius(was_radius)
 		hand.global_transform = was_xf
 		hand.visible = was_visible
 		hand.show_when_tracked = was_shown

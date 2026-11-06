@@ -1677,7 +1677,8 @@ System tab can turn it off. Code: `app/scripts/play/film_layer.gd`, `app/shaders
     So the layer hides, and the screen's mesh draws the film, while the menu is open and while something is between
     the eyes and the picture: a room object (placed, held, in flight, or attached text), a controller, the laser or
     its dot, whose bounds, seen from the eyes, cover part of the picture. The layer comes back one second after the
-    view is clear (`film_layer.gd _covered()`, `COVER_RELEASE`).
+    view is clear (`film_layer.gd _covered()`, `COVER_RELEASE`). The same for a curved screen drawn by cylinder layers
+    ([view] cylinder_layers): tested against the plane through its middle, widened by how far its edges come forward.
 - **Same as before:** colour (BT.709 / 601 / 2020, PQ and HLG tone mapping, 10-bit planes), picture controls,
   sharpen, deinterlace, zoom and pan, 3D depth shift, edge fade, film grain, and the dimming when the menu opens or
   the sleep timer fades. The bias light, the floor reflection and the room's light from the screen read the video
