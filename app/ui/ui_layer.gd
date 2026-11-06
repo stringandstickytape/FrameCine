@@ -496,7 +496,7 @@ func hide_panel() -> void:
 
 ## Opens or closes the panel (seat picking: cancels that instead). hand: the pointer when it opens.
 func toggle_panel(hand: XRHand = null) -> void:
-	if cancel_seat_pick() or cancel_object_place():
+	if cancel_seat_pick() or cancel_object_place() or cancel_window_mark():
 		return
 	if _open:
 		hide_panel()
@@ -520,11 +520,12 @@ func recentre() -> void:
 ## brings it in front of the head (with that controller as the pointer). Seat picking: the press cancels it.
 func on_menu(hand: XRHand, pressed: bool) -> bool:
 	if pressed:
-		var cancel := _seat_pick or is_placing_object()
+		var cancel := _seat_pick or is_placing_object() or is_marking_window()
 		match menu.press(hand, _open, cancel):
 			"cancel":
 				cancel_seat_pick()
 				cancel_object_place()
+				cancel_window_mark()
 			"open":
 				show_panel(hand)
 	elif menu.release(hand) == "close":
@@ -614,7 +615,12 @@ func _update_pointer() -> void:
 	var laser_on := _pointed or _card_pointed or not _tablet_hit.is_empty()
 	if not (_seat_pick and not laser_on) and seat_ring_shown():
 		_seat_ring.visible = false
-	if is_placing_object() and not laser_on and pointer_hand.get_is_active():
+	if is_marking_window():
+		# Marking: no laser; the controller's tip is what sweeps (scripts/play/real_windows.gd).
+		pointer_hand.set_laser(false)
+		if pointer_hand.get_is_active():
+			_real_windows().add_point(pointer_hand.get_ray_origin())
+	elif is_placing_object() and not laser_on and pointer_hand.get_is_active():
 		pointer_hand.set_laser(true, _placer.update(pointer_hand), true, PaneStyle.color(&"laser"),
 				PaneStyle.color(&"laser_dot"))
 	elif _seat_pick and not laser_on and pointer_hand.get_is_active():
@@ -775,9 +781,10 @@ func cancel_seat_pick() -> bool:
 	return true
 
 
-## The main.gd hook for B (the right hand's "previous file" button): cancels seat picking or placing an object.
+## The main.gd hook for B (the right hand's "previous file" button): cancels seat picking, placing an object or marking
+## a window.
 func on_back(_hand: XRHand) -> bool:
-	return cancel_seat_pick() or cancel_object_place()
+	return cancel_seat_pick() or cancel_object_place() or cancel_window_mark()
 
 
 ## Place (the Room tab's objects): the panel goes, and the object follows the laser on the walls and the floor until
@@ -808,6 +815,51 @@ func _ensure_placer() -> ObjectPlacer:
 		_placer.app = app
 		add_child(_placer)
 	return _placer
+
+
+## Marking a window to the real room (the Objects tab's Mark an area; scripts/play/real_windows.gd): the panel goes, the
+## view is the cameras, the trigger held sweeps the controller over the place, letting go keeps it. B or menu cancels.
+func start_window_mark() -> bool:
+	var rw := _real_windows()
+	if rw == null or not rw.start_mark():
+		notify("The headset's cameras can't show here." if rw == null or not rw.available()
+				else "That's as many areas as there can be: delete one first.")
+		return false
+	cancel_seat_pick()
+	cancel_object_place()
+	hide_panel()
+	notify("Hold the trigger and sweep the controller over the place. Let go to keep it. B cancels.")
+	return true
+
+
+func is_marking_window() -> bool:
+	var rw := _real_windows()
+	return rw != null and rw.marking
+
+
+func cancel_window_mark() -> bool:
+	if not is_marking_window():
+		return false
+	_real_windows().cancel_mark()
+	notify("Nothing marked")
+	return true
+
+
+## The trigger let go: the swept box is kept. The panel comes back with Undo in its footer.
+func _finish_window_mark() -> void:
+	var rw := _real_windows()
+	var w: Dictionary = rw.finish()
+	show_panel()
+	if w.is_empty():
+		notify("Nothing marked")
+		return
+	ui.show_toast("%s added: the cameras show there" % w["name"], "Undo", func() -> void:
+		rw.remove(str(w["id"]))
+		ui.hide_toast(), 8.0)
+
+
+func _real_windows() -> Node:
+	return app.features.get("real_windows") if app.features != null else null
 
 
 func is_placing_object() -> bool:
@@ -913,6 +965,14 @@ func seat_ring_shown() -> bool:
 func on_trigger(hand: XRHand, pressed: bool) -> bool:
 	if hand != pointer_hand:
 		return false
+	if is_marking_window():
+		if pressed:
+			_real_windows().sweep(true)
+			hand.pulse()
+		elif _real_windows().sweeping:
+			_finish_window_mark()
+			hand.pulse()
+		return true
 	if is_placing_object() and not _pointed and not _card_pointed:
 		if pressed:
 			_commit_object()

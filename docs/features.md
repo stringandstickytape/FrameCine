@@ -870,6 +870,27 @@ in colour, with no change in the app (`research-cameras-and-splats.md`).
   behind the screen. Switching to the cinema and back turns it off and on. The look of the dimming is not checked yet.
 - The `--passthrough` spike flag (`xr-spikes.md`) does the same without the room list.
 
+### Windows to the real room
+
+A real place (the coffee table, the arm of the sofa) marked once and shown by the headset's cameras in every room
+(`scripts/play/real_windows.gd`, `shaders/real_window.gdshader`; the user, 2026-11-06). The Objects tab's **Mark an
+area**: the whole view becomes the cameras', the trigger held sweeps the controller's tip over the place (the box
+shows tinted as it grows), letting go keeps an upright box round it, turned to the way the viewer faced, 4 cm round.
+
+- **Fixed to the real room:** kept in the runtime's tracking space (the Stage reference space, from the headset's room
+  setup), placed each frame by XROrigin3D times XRServer's reference frame. Recentring the screen leaves the windows
+  on the table; they are there next session (`user://real_windows.json`). A new room setup moves them: mark again.
+- **Showing the cameras:** while a window is on, the ALPHA_BLEND blend mode with the viewport's alpha kept (as the
+  passthrough room) and a black backstop far out so nothing else lets the cameras through. Each window draws
+  back faces with no depth test and multiply blending: colour times 1 - reveal, alpha times 1 - reveal x light. So it
+  shows through whatever the room has in front, and the panel, subtitles and other see-through things still draw
+  over it. With none on, opaque again (no camera cost).
+- **Light:** the room light dims the cameras' view as in the passthrough room, never under 40 %: a window is for
+  finding the cup in the dark.
+- **While marking** the film layer steps aside (the screen's mesh draws the film, wiped to the cameras' view too).
+- A window over the screen shows the film, not the cameras: the film layer is between them.
+- Each area: On (off: not drawn, and with none on the cameras stop) and Delete, with Undo. At most 16.
+
 ## #52 More environments, #18 photo rooms, #53 glTF rooms
 
 Four more built-in rooms, any 360 photo as a room, and rooms from glTF files at runtime. They all follow the

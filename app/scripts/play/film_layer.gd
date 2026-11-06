@@ -191,7 +191,9 @@ func _update() -> void:
 	if kind == "":
 		held = false
 		return
-	var hold := bool(main.get("menu_shown"))
+	# Marking a window to the real room: the whole view is the cameras, the screen too (real_windows.gd).
+	var rw: Node = main.features.get("real_windows") if main.get("features") != null else null
+	var hold := bool(main.get("menu_shown")) or (rw != null and bool(rw.get("marking")))
 	if hold != held:
 		held = hold
 		for layer in layers:

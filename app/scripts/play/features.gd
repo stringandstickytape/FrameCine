@@ -79,6 +79,7 @@ const Subtitles := preload("res://scripts/play/subtitles.gd")
 const CatchUp := preload("res://scripts/play/catch_up.gd")
 const Chapters := preload("res://scripts/play/chapters.gd")
 const RoomLight := preload("res://scripts/env/room_light.gd")
+const RealWindows := preload("res://scripts/play/real_windows.gd")
 const SleepTimer := preload("res://scripts/comfort/sleep_timer.gd")
 const LightFollow := preload("res://scripts/env/light_follow.gd")
 const PictureControls := preload("res://scripts/play/picture_controls.gd")
@@ -194,6 +195,8 @@ var thumbs: SeekThumbnails
 var crossfade: Crossfade
 var hwvideo: HwVideo
 var film_layer: FilmLayer
+## Windows to the real room: marked places where the headset's cameras show (scripts/play/real_windows.gd).
+var real_windows: RealWindows
 var lightmaps: RoomLightmaps
 
 
@@ -261,6 +264,7 @@ func _ready() -> void:
 	hwvideo = _add(HwVideo.new(), "HwVideo")
 	film_layer = _add(FilmLayer.new(), "FilmLayer")
 	lightmaps = _add(RoomLightmaps.new(), "RoomLightmaps")
+	real_windows = _add(RealWindows.new(), "RealWindows")
 
 
 func _add(node: Node, node_name: String) -> Node:

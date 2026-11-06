@@ -304,6 +304,17 @@ you use it, not share it.
 kept room has the object in it, Delete says which rooms instead: rooms are made of the library's objects, so remove it
 there first.
 
+**Windows to the real room**, at the end of the tab: a real place you mark once, the coffee table say, shows through
+the headset's cameras in every room.
+
+1. **Mark an area**. The panel goes and you see the real room.
+2. Hold the trigger and sweep the controller over the place: across the table top, round the cup. A tinted box shows
+   what it will keep.
+3. Let go. The panel comes back with Undo in its footer.
+
+Each area has **On** and **Delete** (with Undo). They stay on the real place when you recentre and next time you
+start; a new room setup on the headset moves them, so mark them again then. B or the menu button cancels marking.
+
 ## The Library
 
 Files has a Library place: `~/Videos/Library` as posters, seasons and episodes, made the first time you open it. One click
