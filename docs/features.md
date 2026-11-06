@@ -882,10 +882,12 @@ the user, 2026-11-06). While making or changing one, the whole view is the camer
   monitor diagonal inside.
 - **Corners:** the trigger on three corners of a flat thing; the first edge gives the turn, the third corner the
   depth, the stick the height; 1.5 cm round.
-- **Move with the controller:** the trigger held grabs the area (it follows the controller, moved and turned about
-  up), the stick turns and sizes it, menu keeps, B puts back. **Mark again**, width, height and depth sliders, On,
-  All on, All off, Delete, each with Undo. The areas show tinted while the menu is open (a setting), the picked one
-  brighter.
+- **Edit, a face at a time** (the user, 2026-11-06: one way to move and size instead of two, and a turn): the chosen
+  face shows as a bright slab and the stick moves it along its own axis the way the stick is pushed as the viewer
+  sees it (`_push`: up for a face up or away, right for a face on the right), squared for fine control, 25 cm a
+  second at full stick, the opposite face kept (`move_face`). The trigger steps through the faces nearest-first and
+  then Turn (45 degrees a second). Menu keeps, B puts back. **Mark again**, On, All on, All off, Delete, each with
+  Undo. No outlines while the menu is open: an area is seen by turning it on.
 
 - **Fixed to the real room:** kept in the runtime's tracking space (the Stage reference space, from the headset's room
   setup), placed each frame by XROrigin3D times XRServer's reference frame. Recentring the screen leaves the windows

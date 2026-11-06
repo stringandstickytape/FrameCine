@@ -319,11 +319,12 @@ moves them; mark them again then).
   the next corner along an edge, then one across. Stick up and down sets how high the box goes; the trigger (or the
   menu button) keeps it. The box lines up with the edge you touched.
 - Each area: its name (pick it), its size, **On**. **All on**, **All off**.
-- The picked area shows brighter while the menu is open (all of them show faintly, if **Show the areas while the menu
-  is open** is on), and has **Move with the controller** (hold the trigger and the box moves and turns with the
-  controller; stick left and right turns it, up and down sizes it; the menu button keeps it, B puts it back), **Mark
-  again** (a new sweep for it), **Width**, **Height** and **Depth**, and **Delete**. Each change has Undo in the
-  footer.
+- Pick an area for **Edit**, **Mark again** (a new sweep for it) and **Delete**. Each change has Undo in the footer.
+- **Edit** works a face at a time. You see the real room, the box tinted and one face of it bright, starting with the
+  face towards you. The stick moves that face the way you push it: up and down for the top and bottom, left and right
+  for a face on your left or right, up (away) and down (nearer) for a face towards or away from you. The opposite
+  face stays put, so moving faces both sizes and moves the box. The trigger goes to the next face, and after the six
+  to **Turn**, where left and right turn the box. The menu button keeps it; B puts it back.
 - **Cameras' view when the room dims**: the room light dims the cameras' view too, never below this (40 % at first).
 
 B cancels any of them.

@@ -23,20 +23,22 @@ extends Node3D
 ##   corners  the trigger touched to three corners of a flat thing (a table, a keyboard): the first two give its edge
 ##            and so its turn, the third its depth; the stick sets the height above it; the trigger again keeps it,
 ##            CORNER_MARGIN round
-##   adjust   an area already kept: the trigger held grabs it (it follows the controller, moved and turned about up),
-##            the stick turns it (left, right) and sizes it (up, down); done() keeps it, cancel puts it back
-## While the menu is open the areas show tinted (`outlines`, [real_room] outlines), the chosen one (`selected`) more.
+##   edit     an area already kept, a face at a time (the user, 2026-11-06): the chosen face shows bright and the stick
+##            moves it along its own axis, the way the stick is pushed as the viewer sees it (up: a top face up, a face
+##            towards the viewer away; right: a face on the right to the right); the trigger goes to the next face,
+##            and after the six to Turn, where left and right turn the box about up. finish() keeps it, cancel puts
+##            it back. Moving the box is moving its faces.
 ##
 ## The room light dims the cameras' view as in the passthrough room, but never under `light_min` ([real_room]
 ## light_min, 0.4): a window is there to find the cup in the dark.
 ##
 ##   windows                          [{id, name, center [x, y, z], size [w, h, d], yaw (radians), on}] (tracking space)
-##   start_mark() / start_corners() / start_adjust(id) -> bool   false without the cameras' view, unless `force`
+##   start_mark() / start_corners() / start_edit(id) -> bool   false without the cameras' view, unless `force`
 ##   sweep(on), add_point(p)          the sweep: trigger held / let go; a point (scene coordinates) while held
 ##   corner(p) -> "more" | "height" | "done"    the corners: one touched (scene coordinates)
-##   grab(on, hand), drag(hand)       adjust: the trigger on / off, the controller's transform each frame
-##   on_stick(stick, delta)           corners: the height; adjust: turn and size
-##   finish() -> window or {}         sweep, corners or adjust kept; cancel_mark() puts things back
+##   next_face() -> its name, face_name(), face_hint()     edit: the trigger
+##   on_stick(stick, delta)           corners: the height; edit: the face, or the turn
+##   finish() -> window or {}         sweep, corners or edit kept; cancel_mark() puts things back
 ##   set_on(id, on), set_all(on), set_size(id, size), remove(id) -> removed, restore(window), mark_again(id)
 ##   status() -> String
 ## Kept in user://real_windows.json.
@@ -58,8 +60,13 @@ const LIGHT_MIN := 0.4
 const CORNER_HEIGHT := 0.1
 const HEIGHT_RATE := 0.3
 ## Adjust: degrees a second at full stick, and the size's rate (e-folds a second).
-const TURN_RATE := 60.0
-const SIZE_RATE := 0.6
+## Edit: metres a second for a face and degrees a second for the turn at full stick (squared: fine near the middle).
+const FACE_RATE := 0.25
+const TURN_RATE := 45.0
+## The faces as the box's own axis and side: [axis 0 x, 1 y, 2 z, sign].
+const FACES := [[0, 1], [0, -1], [1, 1], [1, -1], [2, 1], [2, -1]]
+const FACE_THICKNESS := 0.004
+const FACE_COLOR := Color(1.0, 0.8, 0.3, 0.55)
 const STICK_DEAD := 0.2
 ## fit_yaw(): footprints within this fraction of the least count as the same.
 const FIT_TIE := 0.03
@@ -69,14 +76,12 @@ const BACKSTOP_RADIUS := 900.0
 ## played, the user, 2026-11-06); before the menu (the tablet from 4, the panel 11, 12), subtitles and toasts (10).
 const PRIORITY := 2
 const PREVIEW_COLOR := Color(0.35, 0.65, 1.0, 0.22)
-const OUTLINE_COLOR := Color(0.35, 0.65, 1.0, 0.1)
-const SELECTED_COLOR := Color(1.0, 0.8, 0.3, 0.22)
 
 var main: Node3D
 ## Builds and blend-mode handling without an XR session (tests).
 var force := false
 var windows: Array = []
-## "", "sweep", "corners" or "adjust".
+## "", "sweep", "corners" or "edit".
 var mode := ""
 var marking: bool:
 	get:
@@ -84,7 +89,6 @@ var marking: bool:
 var sweeping := false
 ## The area chosen in the tab ("" none): drawn brighter while the menu is open.
 var selected := ""
-var outlines := true
 var light_min := LIGHT_MIN
 ## Corners: the touched points (tracking space) and the height above them.
 var corners := PackedVector3Array()
@@ -94,20 +98,18 @@ var _points := PackedVector3Array()
 var _yaw := 0.0
 ## The sweep: the way the viewer faced when it began.
 var _facing := 0.0
-## Mark again / adjust: the area being changed, and how it was.
+## Mark again / edit: the area being changed, and how it was.
 var _target := ""
 var _before := {}
 ## Adjust: the box now ({center, size} tracking space, _yaw), the grab's start (hand and box).
 var _box := {}
-var _grab_hand := Transform3D()
-var _grab_box := {}
-var _grab_yaw := 0.0
-var _grabbing := false
+## Edit: the faces in the order the trigger goes through them (nearest the viewer first), and where it is
+## (FACES.size(): Turn).
+var _face_order: Array = []
+var _face := 0
+var _face_mark: MeshInstance3D
 var _boxes := {}
-var _outline_boxes := {}
 var _mat: ShaderMaterial
-var _outline_mat: StandardMaterial3D
-var _selected_mat: StandardMaterial3D
 var _full: MeshInstance3D
 var _preview: MeshInstance3D
 var _backstop: MeshInstance3D
@@ -121,10 +123,7 @@ func _ready() -> void:
 	_mat = ShaderMaterial.new()
 	_mat.shader = SHADER
 	_mat.render_priority = PRIORITY
-	_outline_mat = _tint(OUTLINE_COLOR)
-	_selected_mat = _tint(SELECTED_COLOR)
 	if main != null and main.get("settings") != null:
-		outlines = bool(main.settings.get_value("real_room", "outlines", true))
 		light_min = clampf(float(main.settings.get_value("real_room", "light_min", LIGHT_MIN)), 0.0, 1.0)
 	_load()
 	_build_helpers()
@@ -155,29 +154,27 @@ func start_corners() -> bool:
 	return _start("corners", "")
 
 
-func start_adjust(id: String) -> bool:
+func start_edit(id: String) -> bool:
 	var i := _find(id)
-	if i < 0 or not _start("adjust", id):
+	if i < 0 or not _start("edit", id):
 		return false
 	var w: Dictionary = windows[i]
 	_box = {"center": _vec(w["center"]), "size": _vec(w["size"])}
 	_yaw = float(w.get("yaw", 0.0))
+	_face_order = _faces_by_view()
+	_face = 0
 	_show_preview(_box)
-	# The area itself steps aside while it is changed: the tinted box is where it will be.
-	if _boxes.has(id):
-		(_boxes[id] as Node3D).visible = false
 	return true
 
 
 func _start(m: String, target: String) -> bool:
-	if not available() or (target == "" and m != "adjust" and windows.size() >= MAX_WINDOWS):
+	if not available() or (target == "" and windows.size() >= MAX_WINDOWS):
 		return false
 	cancel_mark()
 	mode = m
 	_target = target
 	_before = (windows[_find(target)] as Dictionary).duplicate(true) if target != "" else {}
 	sweeping = false
-	_grabbing = false
 	_points.clear()
 	corners.clear()
 	height = CORNER_HEIGHT
@@ -243,44 +240,102 @@ static func corner_yaw(pts: PackedVector3Array) -> float:
 	return atan2(-e.z, e.x)
 
 
-## Adjust: the trigger on (`hand`: the pointer controller's transform, scene coordinates) or off.
-func grab(on: bool, hand: Transform3D) -> void:
-	if mode != "adjust":
-		return
-	_grabbing = on
-	if on:
-		_grab_hand = global_transform.affine_inverse() * hand
-		_grab_box = _box.duplicate()
-		_grab_yaw = _yaw
-
-
-## Adjust: while grabbed, the box follows the controller (moved, and turned about up as the controller turns).
-func drag(hand: Transform3D) -> void:
-	if not (mode == "adjust" and _grabbing):
-		return
-	var now := global_transform.affine_inverse() * hand
-	var turn := _yaw_of(now.basis) - _yaw_of(_grab_hand.basis)
-	var offset: Vector3 = _grab_box["center"] - _grab_hand.origin
-	_box = {"center": now.origin + Basis(Vector3.UP, turn) * offset, "size": _grab_box["size"]}
-	_yaw = _grab_yaw + turn
+## Edit: the trigger. The next face (or Turn after the last); its name.
+func next_face() -> String:
+	if mode != "edit":
+		return ""
+	_face = (_face + 1) % (FACES.size() + 1)
 	_show_preview(_box)
+	return face_name()
 
 
-## Corners: up and down set the height. Adjust: left and right turn the box, up and down size it.
+## "front", "back", "left", "right", "top", "bottom" as the viewer sees the face now; "turn".
+func face_name() -> String:
+	if _face >= FACES.size() or _face_order.is_empty():
+		return "turn"
+	var n := _view_dir(_face_normal(_face_order[_face]))
+	if absf(n.y) >= maxf(absf(n.x), absf(n.z)):
+		return "top" if n.y > 0.0 else "bottom"
+	if absf(n.x) >= absf(n.z):
+		return "right" if n.x > 0.0 else "left"
+	return "front" if n.z > 0.0 else "back"
+
+
+## What the stick does now, for the notice.
+func face_hint() -> String:
+	match face_name():
+		"turn":
+			return "Turn: stick left and right. Trigger: the faces again. Menu keeps it; B puts it back."
+		"top", "bottom":
+			return "The %s face: stick up and down moves it. Trigger: next face. Menu keeps it." % face_name()
+		"left", "right":
+			return "The %s face: stick left and right moves it. Trigger: next face. Menu keeps it." % face_name()
+		_:
+			return "The %s face: stick up moves it away, down nearer. Trigger: next face. Menu keeps it." % face_name()
+
+
+## Corners: up and down set the height. Edit: the face moves the way the stick is pushed (as the viewer sees it), or,
+## on Turn, left and right turn the box.
 func on_stick(stick: Vector2, delta: float) -> void:
 	if mode == "corners" and corners.size() >= 3 and absf(stick.y) > STICK_DEAD:
 		height = clampf(height + stick.y * HEIGHT_RATE * delta, 0.0, MAX_SIDE)
 		_show_preview(corner_box(corners, height))
-	elif mode == "adjust":
-		if absf(stick.x) > STICK_DEAD:
-			_yaw -= deg_to_rad(stick.x * TURN_RATE * delta)
-		if absf(stick.y) > STICK_DEAD:
-			var s: Vector3 = _box["size"] * exp(stick.y * SIZE_RATE * delta)
-			_box["size"] = s.clamp(Vector3.ONE * MIN_SIDE, Vector3.ONE * MAX_SIDE)
+	elif mode == "edit":
+		if _face >= FACES.size():
+			if absf(stick.x) > STICK_DEAD:
+				_yaw -= deg_to_rad(stick.x * absf(stick.x) * TURN_RATE * delta)
+		else:
+			var push := _push(_face_order[_face], stick)
+			if absf(push) > STICK_DEAD:
+				move_face(_face_order[_face], push * absf(push) * FACE_RATE * delta)
 		_show_preview(_box)
 
 
-## What the mode made, kept: a new area (sweep, corners), or the area changed (mark again, adjust). {} when nothing
+## Moves face f (an index into FACES) `d` metres outwards (negative: inwards); the opposite face stays.
+func move_face(f: int, d: float) -> void:
+	var axis: int = FACES[f][0]
+	var size: Vector3 = _box["size"]
+	var old := size[axis]
+	size[axis] = clampf(old + d, MIN_SIDE, MAX_SIDE)
+	_box["size"] = size
+	_box["center"] = (_box["center"] as Vector3) + _face_normal(f) * ((size[axis] - old) * 0.5)
+
+
+## The stick's push along face f's normal as the viewer sees it: up for a face up or away, right for a face on the
+## right (and their opposites, negative).
+func _push(f: int, stick: Vector2) -> float:
+	var n := _view_dir(_face_normal(f))
+	if absf(n.y) >= maxf(absf(n.x), absf(n.z)):
+		return stick.y * signf(n.y)
+	if absf(n.x) >= absf(n.z):
+		return stick.x * signf(n.x)
+	return stick.y * -signf(n.z)
+
+
+## Face f's outward normal (tracking space).
+func _face_normal(f: int) -> Vector3:
+	var n := Vector3.ZERO
+	n[FACES[f][0]] = float(FACES[f][1])
+	return Basis(Vector3.UP, _yaw) * n
+
+
+## A direction (tracking space) as the viewer sees it: x right, y up, z towards the viewer.
+func _view_dir(d: Vector3) -> Vector3:
+	var cam: Node3D = main.get("xr_camera") if main != null else null
+	var world := global_transform.basis * d
+	if cam == null or not cam.is_inside_tree():
+		return world
+	return cam.global_transform.basis.inverse() * world
+
+
+## The faces nearest the viewer first: the front, then the sides, top and bottom, the back last.
+func _faces_by_view() -> Array:
+	var order := range(FACES.size())
+	order.sort_custom(func(a: int, b: int) -> bool: return _view_dir(_face_normal(a)).z > _view_dir(_face_normal(b)).z)
+	return order
+
+
+## What the mode made, kept: a new area (sweep, corners), or the area changed (mark again, edit). {} when nothing
 ## was made (nothing swept, fewer than three corners).
 func finish() -> Dictionary:
 	var box := {}
@@ -292,7 +347,7 @@ func finish() -> Dictionary:
 			if corners.size() >= 3:
 				box = corner_box(corners, height)
 				_yaw = float(box["yaw"])
-		"adjust":
+		"edit":
 			box = _box
 	var w := {}
 	if not box.is_empty():
@@ -313,7 +368,7 @@ func finish() -> Dictionary:
 	return w
 
 
-## Leaves the mode; an area being adjusted or marked again keeps what it had.
+## Leaves the mode; an area being edited or marked again keeps what it had.
 func cancel_mark() -> void:
 	if _target != "" and not _before.is_empty():
 		var i := _find(_target)
@@ -333,11 +388,13 @@ func before() -> Dictionary:
 func _end_mode() -> void:
 	mode = ""
 	sweeping = false
-	_grabbing = false
 	_points.clear()
 	corners.clear()
+	_face_order = []
 	if _preview != null:
 		_preview.visible = false
+	if _face_mark != null:
+		_face_mark.visible = false
 	if _full != null:
 		_full.visible = false
 
@@ -446,12 +503,6 @@ func window_by_id(id: String) -> Dictionary:
 	return windows[i] if i >= 0 else {}
 
 
-func set_outlines(on: bool) -> void:
-	outlines = on
-	if main != null and main.get("settings") != null:
-		main.settings.set_value("real_room", "outlines", on)
-
-
 func set_light_min(v: float) -> void:
 	light_min = clampf(v, 0.0, 1.0)
 	if main != null and main.get("settings") != null:
@@ -484,11 +535,6 @@ func _process(_delta: float) -> void:
 		var cam: Node3D = main.get("xr_camera")
 		if cam != null:
 			_full.global_position = cam.global_position
-	var show_outlines := outlines and bool(main.get("menu_shown")) and not marking
-	for id: String in _outline_boxes:
-		var o: MeshInstance3D = _outline_boxes[id]
-		o.visible = show_outlines or (id == selected and bool(main.get("menu_shown")) and not marking)
-		o.material_override = _selected_mat if id == selected else _outline_mat
 	_blend(marking or any_on())
 
 
@@ -559,6 +605,16 @@ func _build_helpers() -> void:
 	_preview.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_preview)
 
+	var fm := _tint(FACE_COLOR)
+	fm.render_priority = PRIORITY + 2
+	_face_mark = MeshInstance3D.new()
+	_face_mark.name = "FaceMark"
+	_face_mark.mesh = BoxMesh.new()
+	_face_mark.material_override = fm
+	_face_mark.visible = false
+	_face_mark.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_face_mark)
+
 	var bm := StandardMaterial3D.new()
 	bm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	bm.albedo_color = Color.BLACK
@@ -581,24 +637,25 @@ func _build_helpers() -> void:
 func _show_preview(box: Dictionary) -> void:
 	_preview.transform = box_transform(box, float(box.get("yaw", _yaw)))
 	_preview.visible = true
+	# Edit: the chosen face, a thin bright slab on it (none on Turn).
+	var on_face := mode == "edit" and _face < FACES.size() and not _face_order.is_empty()
+	_face_mark.visible = on_face
+	if on_face:
+		var f: int = _face_order[_face]
+		var axis: int = FACES[f][0]
+		var size: Vector3 = box["size"]
+		var slab := size
+		slab[axis] = FACE_THICKNESS
+		_face_mark.transform = box_transform({"center": (box["center"] as Vector3) + _face_normal(f) * (size[axis] * 0.5),
+				"size": slab}, _yaw)
 
 
 func _rebuild() -> void:
-	for b: Node in _boxes.values() + _outline_boxes.values():
+	for b: Node in _boxes.values():
 		b.queue_free()
 	_boxes.clear()
-	_outline_boxes.clear()
 	for w: Dictionary in windows:
 		var t := box_transform({"center": _vec(w["center"]), "size": _vec(w["size"])}, float(w.get("yaw", 0.0)))
-		var o := MeshInstance3D.new()
-		o.name = "Outline_%s" % w["id"]
-		o.mesh = BoxMesh.new()
-		o.material_override = _outline_mat
-		o.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		o.transform = t
-		o.visible = false
-		add_child(o)
-		_outline_boxes[w["id"]] = o
 		if not bool(w.get("on", true)):
 			continue
 		var mi := MeshInstance3D.new()

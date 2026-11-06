@@ -2,15 +2,12 @@ extends ScrollContainer
 
 ## The Mixed reality tab (above System; the user, 2026-11-06): windows to the real room (scripts/play/real_windows.gd;
 ## docs/USAGE.md "The Mixed reality tab"). Make an area by sweeping the controller over the place or by touching three
-## of its corners; each area with On and a pick; the picked one shows brighter while the menu is open and has Move
-## (with the controller: the trigger held moves it, the stick turns and sizes it), Mark again, its width, height and
-## depth, and Delete (with Undo). All on, All off. Settings: the areas shown while the menu is open, and how far the
-## cameras' view may dim with the room.
+## of its corners; each area with On and a pick; the picked one has Edit (a face at a time: the face shows bright, the
+## stick moves it, the trigger goes to the next face and then Turn), Mark again and Delete (with Undo). All on, All
+## off. Settings: how far the cameras' view may dim with the room.
 
 const W := preload("res://ui/pane_widgets.gd")
 const PaneStyle := preload("res://ui/pane_style.gd")
-
-const SIDE_CM := Vector2(5.0, 400.0)
 
 var app: Node
 var box: VBoxContainer
@@ -18,11 +15,8 @@ var _status: Label
 var _rows: VBoxContainer
 var _editor: VBoxContainer
 var _editor_title: Label
-var _sliders: Array = []
-var _outlines: Button
 var _light: Control
-## What the list was built from (ids, names, On, the pick): rebuilt only when that changes, so a size slider being
-## dragged is not remade under the laser.
+## What the list was built from (ids, names, On, the pick): rebuilt only when that changes.
 var _shape := ""
 var _size_labels := {}
 var _picks := {}
@@ -56,22 +50,14 @@ func bind(p_app: Node) -> void:
 	_editor = W.vbox()
 	_editor_title = W.label("", &"MutedLabel")
 	_editor.add_child(_editor_title)
-	_editor.add_child(W.hbox([W.button("Move with the controller", func() -> void:
-				app.ui.start_window_adjust(_rw().selected)),
+	_editor.add_child(W.hbox([W.button("Edit", func() -> void: app.ui.start_window_edit(_rw().selected)),
 			W.button("Mark again", func() -> void: app.ui.start_window_mark_again(_rw().selected)),
 			W.button("Delete", _delete)]))
-	for i in 3:
-		var axis := i
-		var row := W.slider_row(["Width", "Height", "Depth"][i], SIDE_CM.x, SIDE_CM.y, 1.0,
-				func(v: float) -> String: return "%d cm" % roundi(v),
-				func(v: float) -> void: _set_side(axis, v))
-		_sliders.append(row)
-		_editor.add_child(row)
+	_editor.add_child(W.help("Edit: a face at a time. The stick moves the bright face; the trigger goes to the next "
+			+ "face, then Turn. Menu keeps it; B puts it back."))
 	box.add_child(_editor)
 
 	box.add_child(W.section("Settings"))
-	_outlines = W.toggle("Show the areas while the menu is open", func(on: bool) -> void: _rw().set_outlines(on))
-	box.add_child(_outlines)
 	_light = W.slider_row("Cameras' view when the room dims", 0.0, 100.0, 5.0,
 			func(v: float) -> String: return "%d %%" % roundi(v),
 			func(v: float) -> void: _rw().set_light_min(v / 100.0))
@@ -96,7 +82,6 @@ func sync() -> void:
 	if rw == null:
 		return
 	_status.text = rw.status()
-	W.set_on(_outlines, rw.outlines)
 	W.set_slider(_light, rw.light_min * 100.0)
 	if not rw.selected.is_empty() and rw.window_by_id(rw.selected).is_empty():
 		rw.selected = ""
@@ -112,11 +97,7 @@ func sync() -> void:
 	var picked: Dictionary = rw.window_by_id(rw.selected)
 	_editor.visible = not picked.is_empty()
 	if not picked.is_empty():
-		_editor_title.text = "%s: move it, mark it again, or set its size." % picked["name"]
-		for i in 3:
-			var slider: HSlider = W.slider_of(_sliders[i])
-			if not slider.has_focus() and not slider.get_meta("dragging", false):
-				W.set_slider(_sliders[i], float(picked["size"][i]) * 100.0)
+		_editor_title.text = "%s, %s" % [picked["name"], _size_text(picked)]
 
 
 func _build_rows(rw: Node) -> void:
@@ -147,16 +128,6 @@ func _build_rows(rw: Node) -> void:
 func _size_text(w: Dictionary) -> String:
 	var s: Array = w["size"]
 	return "%d x %d x %d cm" % [roundi(float(s[0]) * 100.0), roundi(float(s[1]) * 100.0), roundi(float(s[2]) * 100.0)]
-
-
-func _set_side(axis: int, cm: float) -> void:
-	var rw := _rw()
-	var w: Dictionary = rw.window_by_id(rw.selected)
-	if w.is_empty():
-		return
-	var size := Vector3(float(w["size"][0]), float(w["size"][1]), float(w["size"][2]))
-	size[axis] = cm / 100.0
-	rw.set_size(rw.selected, size)
 
 
 func _delete() -> void:

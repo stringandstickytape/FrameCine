@@ -168,26 +168,45 @@ func _test_modes() -> void:
 			and absf(cs.z - (0.15 + RealWindows.CORNER_MARGIN * 2.0)) < 0.01
 			and absf(cs.y - (0.05 + RealWindows.CORNER_MARGIN * 2.0)) < 0.01)
 
-	# Adjust: grabbed, moved 30 cm with the controller and turned 90 degrees, then put back with B; then again, kept.
+	# Edit, a face at a time. The viewer looks along -Z (the desktop camera), the area square to them.
 	var id := str(cw["id"])
+	rw.restore({"id": id, "name": cw["name"], "center": [0.0, 1.0, -1.0], "size": [0.4, 0.2, 0.3], "yaw": 0.0,
+			"on": true})
 	var before: Dictionary = rw.window_by_id(id).duplicate(true)
-	_check("adjust: started", ui.start_window_adjust(id) and rw.mode == "adjust")
-	var hand := Transform3D(Basis(), Vector3(0, 1, -0.5))
-	rw.grab(true, hand)
-	rw.drag(Transform3D(Basis(Vector3.UP, PI / 2.0), hand.origin + Vector3(0.3, 0, 0)))
+	_check("edit: started on the face towards the viewer", ui.start_window_edit(id) and rw.mode == "edit"
+			and rw.face_name() == "front" and rw.get_node("FaceMark").visible)
+	rw.on_stick(Vector2(0, 1), 0.4)
+	var b: Dictionary = rw._box
+	_check("edit: stick up moves the front face away (%s, %s)" % [b["size"], b["center"]],
+			absf(b["size"].z - 0.2) < 0.001 and absf(b["center"].z - -1.05) < 0.001 and absf(b["size"].x - 0.4) < 0.001)
+	var names := [rw.face_name()]
+	for k in 6:
+		names.append(rw.next_face())
+	_check("edit: the trigger goes round the six faces, then Turn (%s)" % [names], names.size() == 7
+			and names[6] == "turn" and names.slice(0, 6).has("top") and names.slice(0, 6).has("right")
+			and names.slice(0, 6).has("left") and names.slice(0, 6).has("bottom") and names[5] == "back")
+	_check("edit: Turn shows no face", not rw.get_node("FaceMark").visible)
+	rw.on_stick(Vector2(1, 0), 1.0)
+	_check("edit: Turn turns it (%.1f deg)" % rad_to_deg(rw._yaw), absf(rad_to_deg(rw._yaw) + RealWindows.TURN_RATE) < 0.5)
 	_check("B puts it back", ui.on_back(null) and rw.window_by_id(id) == before and rw.mode == "")
-	ui.start_window_adjust(id)
-	rw.grab(true, hand)
-	rw.drag(Transform3D(Basis(Vector3.UP, PI / 2.0), hand.origin + Vector3(0.3, 0, 0)))
-	rw.grab(false, hand)
-	rw.on_stick(Vector2(0, 1), 0.5)
-	var moved: Dictionary = rw.finish()
-	var c_before := RealWindows._vec(before["center"])
-	var c_after := RealWindows._vec(moved["center"])
-	var expect := Vector3(0.3, 0, 0) + hand.origin + Basis(Vector3.UP, PI / 2.0) * (c_before - hand.origin)
-	_check("adjust: moved and turned with the controller (%s, expect %s)" % [c_after, expect],
-			c_after.is_equal_approx(expect.snappedf(0.001)) and absf(float(moved["yaw"]) - (float(before["yaw"]) + PI / 2.0)) < 0.001)
-	_check("adjust: the stick made it bigger", RealWindows._vec(moved["size"]).x > RealWindows._vec(before["size"]).x)
+	ui.start_window_edit(id)
+	while rw.face_name() != "top":
+		rw.next_face()
+	rw.on_stick(Vector2(0, 1), 0.4)
+	_check("edit: stick up raises the top face", absf(rw._box["size"].y - 0.3) < 0.001
+			and absf(rw._box["center"].y - 1.05) < 0.001)
+	while rw.face_name() != "right":
+		rw.next_face()
+	rw.on_stick(Vector2(1, 0), 0.4)
+	_check("edit: stick right moves the right face right", absf(rw._box["size"].x - 0.5) < 0.001
+			and absf(rw._box["center"].x - 0.05) < 0.001)
+	rw.on_stick(Vector2(-1, 0), 10.0)
+	_check("edit: a face stops at the least size", absf(rw._box["size"].x - RealWindows.MIN_SIDE) < 0.001)
+	rw.on_stick(Vector2(1, 0), 0.4)
+	var kept: Dictionary = rw.finish()
+	_check("edit: kept (%s, %s)" % [kept["size"], kept["center"]], kept["id"] == id
+			and absf(float(kept["size"][1]) - 0.3) < 0.002 and absf(float(kept["center"][1]) - 1.05) < 0.002)
+	cw = kept
 
 	# Mark again: the box replaced, the name and On kept.
 	_check("mark again: started", ui.start_window_mark_again(id) and rw.mode == "sweep")
