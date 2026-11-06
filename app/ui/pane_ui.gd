@@ -3,8 +3,11 @@ extends PanelContainer
 ## The menu on the tablet's main pane (ui/tablet.gd; the user, 2026-11-06: the front panel, the first UI, is gone),
 ## in the pane's SubViewport (ui/pane.gd).
 ##
-## Top to bottom: the transport (previous, -10 s, play / pause, +10 s, next, hold 4x / 8x
-## for trick play; the skips and the trick buttons hide when the source can't seek), then a row: down the left a rail
+## Top to bottom: a band over the tablet's now playing pane (the panel reaches up into it, ui/tablet.gd menu_band();
+## the user, 2026-11-06): the transport on the left as icons (previous, -10 s, play / pause, +10 s, next; hold 4x / 8x
+## for trick play; the skips and the trick buttons hide when the source can't seek) and on the right the picture's
+## toggles (Steady detail: the footprint filter; Smooth banding: the deband). A see-through spacer over the gap
+## between the panes. Then a row: down the left a rail
 ## of the tabs (Source, Picture, Sound, Subtitles, Room, Objects, Mixed reality, System), an icon (ui/icons.gd) and
 ## the name each; beside it Source's places (the files tab's own column) or any other tab's sections (the user,
 ## 2026-11-06: every tab its own list), the section picked as a card the full width (W.card_layout(),
@@ -44,9 +47,9 @@ const TABLET_TAB_NAMES: Array[String] = ["Source", "Picture", "Sound", "Subtitle
 const TABLET_TAB_ICONS: Array[String] = ["source", "picture", "sound", "subtitles", "room", "objects", "mixed-reality",
 		"system"]
 const TABLET_TABS_WIDTH := 190
-const RAIL_ICON_PX := 26
+const RAIL_ICON_PX := 30
 ## The rail's rows, pixels.
-const RAIL_ROW := 38
+const RAIL_ROW := 44
 const VIEWS: Array[String] = ["details", "list", "grid"]
 const Icons := preload("res://ui/icons.gd")
 
@@ -68,6 +71,12 @@ var _open: VBoxContainer
 ## low controllers, "Listening").
 var _now: Label
 var _status_line: Label
+## The band's row (the transport and the toggles), the spacer under it, the transport's icon buttons, the toggles.
+var _band: HBoxContainer
+var _band_gap: Control
+var _transport_icons: Array[Button] = []
+var _steady_toggle: Button
+var _banding_toggle: Button
 var _transport: HBoxContainer
 var _play_button: Button
 ## Trick play (#46): hold 4x or 8x to scan with pictures; let go and it plays on. The skip buttons and the trick
@@ -135,13 +144,17 @@ func apply_style() -> void:
 		_content.theme = null if _tablet_theme != null else PaneStyle.docked_focus_theme()
 	if _tablet_row != null:
 		_refresh_rail()
+	_refresh_transport()
 	if files != null:
 		files.set_places_width(PaneStyle.constant(&"places_width") * text_scale)
 	if _sections_scroll != null:
 		_sections_scroll.custom_minimum_size.x = PaneStyle.constant(&"places_width") * text_scale
-	# No backdrop: the tablet's pane shows through (the theme's margins kept).
+	# No backdrop: the tablet's pane shows through (the theme's margins kept, but a small one on top: the band's row
+	# sits on the now playing pane's band).
 	remove_theme_stylebox_override("panel")
-	add_theme_stylebox_override("panel", _clear(get_theme_stylebox("panel")))
+	var clear := _clear(get_theme_stylebox("panel"))
+	clear.content_margin_top = 2.0
+	add_theme_stylebox_override("panel", clear)
 	if _body != null:
 		_body.remove_theme_stylebox_override("panel")
 		_body.add_theme_stylebox_override("panel", _clear(_body.get_theme_stylebox("panel")))
@@ -165,23 +178,30 @@ func _build_open() -> void:
 	header.visible = false
 	_open.add_child(header)
 
+	_band = W.hbox()
 	_transport = W.hbox()
-	_transport.alignment = BoxContainer.ALIGNMENT_CENTER
 	var bh := PaneStyle.constant(&"button_height")
-	for spec: Array in [["Previous", func() -> void: previous_requested.emit()],
-			["−10 s", func() -> void: skip_requested.emit(-10.0)], ["play", Callable()],
-			["+10 s", func() -> void: skip_requested.emit(10.0)], ["Next", func() -> void: next_requested.emit()]]:
+	# Icons; each button's name in its tooltip and meta "label" (what it does, for the stick focus and tests).
+	for spec: Array in [["previous", "Previous", func() -> void: previous_requested.emit()],
+			["back-10", "−10 s", func() -> void: skip_requested.emit(-10.0)], ["play", "Play", Callable()],
+			["forward-10", "+10 s", func() -> void: skip_requested.emit(10.0)],
+			["next", "Next", func() -> void: next_requested.emit()]]:
+		var b: Button
 		if spec[0] == "play":
-			# A row of the buttons' height: the menu has to fit the tablet's pane.
-			_play_button = W.button("Play", func() -> void: play_pause_pressed.emit(), &"PlayButton")
-			_play_button.custom_minimum_size = Vector2(bh * 2.2, bh)
-			_transport.add_child(_play_button)
+			_play_button = W.button("", func() -> void: play_pause_pressed.emit(), &"PlayButton")
+			b = _play_button
 		else:
-			var b := W.button(spec[0], spec[1], &"TransportButton")
-			b.custom_minimum_size = Vector2(bh * 2, bh)
-			_transport.add_child(b)
-			if str(spec[0]).ends_with(" s"):
+			b = W.button("", spec[2], &"TransportButton")
+			if str(spec[1]).ends_with(" s"):
 				_skip_buttons.append(b)
+		b.custom_minimum_size = Vector2(bh * 1.3, bh)
+		b.set_meta("icon", spec[0])
+		b.set_meta("label", spec[1])
+		b.tooltip_text = spec[1]
+		b.expand_icon = false
+		b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_transport.add_child(b)
+		_transport_icons.append(b)
 	for speed: float in [4.0, 8.0]:
 		var b := W.button("%dx" % roundi(speed), Callable(), &"TransportButton")
 		b.custom_minimum_size = Vector2(bh * 1.4, bh)
@@ -189,7 +209,26 @@ func _build_open() -> void:
 		b.button_up.connect(func() -> void: _trick(0.0))
 		_transport.add_child(b)
 		_trick_buttons.append(b)
-	_open.add_child(_transport)
+	_band.add_child(_transport)
+	var fill := Control.new()
+	fill.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_band.add_child(fill)
+	_steady_toggle = W.toggle("Steady detail", func(on: bool) -> void:
+		if app != null:
+			app.features.picture.set_steady(on))
+	_steady_toggle.tooltip_text = "Fine detail filtered where the picture is shrunk, so it doesn't shimmer."
+	_banding_toggle = W.toggle("Smooth banding", func(on: bool) -> void:
+		if app != null:
+			app.features.picture.set_banding(on))
+	_banding_toggle.tooltip_text = "Hides the steps in dark gradients (8-bit video)."
+	_band.add_child(_steady_toggle)
+	_band.add_child(_banding_toggle)
+	_open.add_child(_band)
+	# Over the gap between the tablet's panes: nothing, so the gap shows.
+	_band_gap = Control.new()
+	_band_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_open.add_child(_band_gap)
 
 	_body = PanelContainer.new()
 	_body.theme_type_variation = &"BodyPanel"
@@ -262,14 +301,15 @@ func bind(p_app: Node) -> void:
 		view = "details"
 	files.set_view(view)
 	_refresh_rail()
+	app.features.picture.changed.connect(func(_v: Dictionary) -> void: sync_toggles())
+	sync_toggles()
 	show_tab(Tab.FILES)
 
 
-## A form with the keyboard is open: the transport and the rail make room for it (the form has the pane's width
-## and height; Cancel or Save bring them back).
+## A form with the keyboard is open: the rail makes room for it (the form has the main pane's width; Cancel or Save
+## bring it back). The transport stays, on the now playing pane.
 func set_form_mode(on: bool) -> void:
 	_form_mode = on
-	_transport.visible = not on
 	if _rail_scroll != null:
 		_rail_scroll.visible = not on
 		_rail_rule.visible = not on
@@ -401,6 +441,33 @@ func _build_tablet_row() -> void:
 	# In the footer, at the right by the count: the title row has no room for it at the tablet's text size.
 	_footer_count.get_parent().add_child(_views)
 	_footer_count.get_parent().move_child(_views, _footer_count.get_index())
+
+
+## The menu's top rows on the tablet's band and gap (pixels, Tablet.menu_band()): the band's row just fills the band
+## under the panel's top margin; the spacer takes the rest down to the main pane's inside.
+func set_band(band_px: int, gap_px: int) -> void:
+	if _band == null:
+		return
+	var top := get_theme_stylebox("panel").get_margin(SIDE_TOP)
+	var sep := _open.get_theme_constant("separation")
+	_band.custom_minimum_size.y = maxf(band_px - top, 0.0)
+	_band_gap.custom_minimum_size.y = maxf(gap_px - 2 * sep, 0.0)
+
+
+## The picture toggles as the settings have them (the picture controls' changed signal).
+func sync_toggles() -> void:
+	if app == null or _steady_toggle == null:
+		return
+	var pc: Node = app.features.picture
+	W.set_on(_steady_toggle, bool(pc.steady))
+	W.set_on(_banding_toggle, float(pc.values.get("deband", 0.0)) > 0.0)
+
+
+## The transport's icons in the theme's text colour.
+func _refresh_transport() -> void:
+	var px := roundi(PaneStyle.constant(&"button_height") * 0.62)
+	for b in _transport_icons:
+		b.icon = Icons.texture(str(b.get_meta("icon")), px, PaneStyle.color(&"text"))
 
 
 ## The rail's and the view selector's icons in the theme's colours (the chosen one bright or in the accent).
@@ -603,7 +670,12 @@ func _update_footer() -> void:
 
 ## The playback state, a few times a second while the pane shows (the time is on the tablet's now playing pane).
 func set_playback(_position_s: float, _duration: float, playing: bool, can_seek: bool) -> void:
-	_play_button.text = "Pause" if playing else "Play"
+	var label := "Pause" if playing else "Play"
+	if str(_play_button.get_meta("label", "")) != label:
+		_play_button.set_meta("label", label)
+		_play_button.set_meta("icon", "pause" if playing else "play")
+		_play_button.tooltip_text = label
+		_refresh_transport()
 	# A live stream (or HTTP without ranges) can't seek: no skips or trick play (LIVE by the tablet's time).
 	_seekable = can_seek
 	for b in _skip_buttons:

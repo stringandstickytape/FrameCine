@@ -445,6 +445,8 @@ func is_open() -> bool:
 func apply_tablet() -> void:
 	panel.halo_shown = false
 	panel.configure(tablet.panel_rect().size, tablet.panel_pixels(), tablet.panel_render_scale())
+	var band: Dictionary = tablet.menu_band()
+	ui.set_band(int(band["band"]), int(band["gap"]))
 	var menu_theme: Theme = PaneStyle.tablet_theme(tablet.menu_colours())
 	ui.set_tablet_theme(menu_theme)
 	PaneStyle.set_active(menu_theme)

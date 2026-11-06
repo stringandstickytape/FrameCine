@@ -46,6 +46,24 @@ func _run() -> void:
 	var refl_mat: ShaderMaterial = refl.get("_material") if refl != null else null
 	_check("the floor reflection keeps it off", refl_mat == null
 			or is_equal_approx(float(refl_mat.get_shader_parameter("pc_deband")), 0.0))
+	# The toggles on the tablet's band (ui/pane_ui.gd): Steady detail (the footprint filter) and Smooth banding.
+	var pui: Node = main.ui.ui
+	_check("Steady detail on at first: the footprint filter's 3 taps, the toggle pressed", pc.steady
+			and int(mat.get_shader_parameter("footprint_taps")) == 3 and pui._steady_toggle.button_pressed)
+	pui._steady_toggle.toggled.emit(false)
+	_check("Steady detail off: one tap, saved", not pc.steady and int(mat.get_shader_parameter("footprint_taps")) == 1
+			and main.settings.get_value("picture", "steady_detail", true) == false)
+	pui._steady_toggle.toggled.emit(true)
+	_check("and on again", pc.steady and int(mat.get_shader_parameter("footprint_taps")) == 3
+			and not main.settings.has_value("picture", "steady_detail"))
+	pc.set_value("deband", 0.7)
+	pui._banding_toggle.toggled.emit(false)
+	_check("Smooth banding off: 0, the toggle up", is_equal_approx(float(mat.get_shader_parameter("pc_deband")), 0.0)
+			and not pui._banding_toggle.button_pressed)
+	pui._banding_toggle.toggled.emit(true)
+	_check("on again: back to what it was (0.7)", is_equal_approx(float(mat.get_shader_parameter("pc_deband")), 0.7)
+			and pui._banding_toggle.button_pressed)
+	pc.reset()
 	_check("the dark gradient card is listed", preload("res://scripts/video/lab_video_source.gd").list_cards().any(
 			func(c: Dictionary) -> bool: return c["path"] == "lab://gradient"))
 

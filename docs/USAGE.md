@@ -141,7 +141,7 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 | `[time_of_day]` | `mode` ("night"; or "clock", "dusk", "day"), `latitude` (50), `longitude` (from the time zone) | Time of day in the rooms (#84) |
 | `[zoom_lens]` | `enabled` (true), `magnification` (1.5 to 8, 3.0) | Zoom lens (#38) |
 | `[seats]` | `<env>` (the seat number) | `docs/features.md` |
-| `[picture_<env>]` | `brightness` (0), `contrast` (1), `saturation` (1), `gamma` (1), `lift` (0), `sharpen` (0), `deband` (0.5: Smooth banding, 8-bit video only); only values off their default are stored | Picture controls (#27, #90) |
+| `[picture_<env>]` | `brightness` (0), `contrast` (1), `saturation` (1), `gamma` (1), `lift` (0), `sharpen` (0), `deband` (0.5: Smooth banding, 8-bit video only); only values off their default are stored. `[picture] steady_detail` (true: the footprint filter) | Picture controls (#27, #90) |
 | `[picture]` | `deinterlace` ("off"), `auto_crop` (false), `auto_crop_grow` (true) | Deinterlace (#95); auto letterbox crop (#42) |
 | `[trick_play]` | `enabled` (true) | Hold the stick right to scan at 4x, then 8x (#46) |
 | `[hdr]` | `tone_map` (true) | |
@@ -207,9 +207,11 @@ it; you can also touch it. One controller is enough.
 The tablet has two panes. The top one shows a small line with the chapter and the clock, time left, end time and
 battery; under it the title and the time (LIVE for a live stream, 4x or 8x while scanning); and the time bar with a
 tick at each chapter: drag the bar with the laser and trigger, or with a controller's tip, to skip. With **Seek bar
-pictures** on (System), the laser on the bar shows a picture of the film there. The main pane has Previous, -10 s,
-Play or Pause, +10 s and Next (hold 4x or 8x to scan) at the top, then the tabs down the left. While a form with
-the keyboard is open, it has the whole pane.
+pictures** on (System), the laser on the bar shows a picture of the film there. Under the bar, on the left:
+Previous, -10 s, Play or Pause, +10 s and Next (hold 4x or 8x to scan); on the right two switches for the picture:
+**Steady detail** (fine detail filtered where the picture is shrunk, so it doesn't shimmer) and **Smooth banding**
+(the steps in dark gradients hidden, 8-bit video). The main pane has the tabs down the left and the tab beside them.
+While a form with the keyboard is open, it has the whole main pane.
 
 | Control | Panel closed | Panel open (the pointer controller) | Keyboard and mouse |
 |---|---|---|---|
