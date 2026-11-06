@@ -307,14 +307,27 @@ func notify(text: String) -> void:
 		world_toast.show_text(text)
 
 
-## The hand whose bumper is push-to-talk (the pointer hand while the dev link or an assistant is connected), or
-## null.
+## The hand whose bumper is push-to-talk (the pointer hand while the dev link or an assistant is connected, or while
+## the browser on the big screen can take voice into a field), or null.
 func talk_hand() -> XRHand:
-	return pointer_hand if _ptt != null and is_instance_valid(_ptt) else null
+	if _ptt != null and is_instance_valid(_ptt):
+		return pointer_hand
+	var dictation: Node = app.get("browser_dictation") if app != null else null
+	return pointer_hand if dictation != null and dictation.wants_talk() else null
 
 
 ## The bumper (the app's "labels" action): on the talk hand, hold to record and release to send. True when used.
+## With the browser on the big screen it asks the page first (scripts/video/browser_dictation.gd): a selected text
+## field takes the voice, anything else leaves the button as it was (_talk_as_before()).
 func on_bumper(hand: XRHand, held: bool) -> bool:
+	var dictation: Node = app.get("browser_dictation") if app != null else null
+	if hand == pointer_hand and dictation != null and dictation.on_talk(held, _talk_as_before.bind(hand)):
+		return true
+	return _talk_as_before(held, hand)
+
+
+## The bumper as it was before the browser's fields: the assistant, the dev link or an agent.
+func _talk_as_before(held: bool, hand: XRHand) -> bool:
 	if _ptt == null or not is_instance_valid(_ptt) or hand != pointer_hand:
 		return false
 	if app.local_agents != null and _ptt == app.local_agents.push_to_talk():

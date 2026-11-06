@@ -408,6 +408,12 @@ func navigate(to_url: String) -> String:
 	return err
 
 
+## The page's DevTools WebSocket (127.0.0.1 only), "" until the page was read or without DevTools. It stays inside
+## the player (scripts/video/browser_dictation.gd), like the target id.
+func page_ws() -> String:
+	return str(_page.get("ws", "")) if devtools_port > 0 else ""
+
+
 ## The page shown: {url, title, via: devtools | window title, opened_url, note?}. Without DevTools only the window's
 ## title is known (url null).
 func page_info() -> Dictionary:
@@ -553,6 +559,18 @@ func send_godot_key(key: Key, pressed: bool) -> void:
 func tap_key(key: Key) -> void:
 	send_godot_key(key, true)
 	send_godot_key(key, false)
+
+
+## Text typed into whatever has the window's focus, as the on-screen keyboard does (the engine's send_text: each
+## character as a key press, Unicode included). No check of what has focus: the fallback without DevTools.
+func send_text(text: String) -> void:
+	if win == null or window_id == 0:
+		return
+	if win.has_method("send_text"):
+		win.call("send_text", text)
+		return
+	for i in text.length():
+		send_char(text.unicode_at(i))
 
 
 ## A typed character (keeps the keyboard layout's shifted symbols right).

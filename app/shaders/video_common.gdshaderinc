@@ -30,6 +30,14 @@ uniform float brightness = 1.0;
 // from rgb_tex and the YUV matrix is skipped; the projection, stereo layout, visible rectangle and sRGB decode apply.
 uniform bool rgb_source = false;
 uniform sampler2D rgb_tex : filter_linear, repeat_disable;
+// The stick pointer's cursor on a captured window (scripts/window_pointer.gd, scripts/video/stick_cursor.gd): the
+// capture has no cursor in it, so this draws one into the picture itself, where the film layer can't hide it (a quad
+// in front of the screen would be covered by the layer). cursor_px is its centre in window pixels (the texture's);
+// cursor_alpha 0 hides it (the default, and always for video). A white ring with a dark edge either side and a dot in
+// the middle, so it shows on light and dark pages; cursor_radius is the ring's radius in window pixels.
+uniform vec2 cursor_px = vec2(-1000.0);
+uniform float cursor_alpha = 0.0;
+uniform float cursor_radius = 11.0;
 // 3D depth (scripts/play/stereo_depth.gd): each view's picture moves sideways by half of this, in opposite directions,
 // as a fraction of one eye's width. > 0 moves the left view left and the right view right, so the picture sits
 // further away; < 0 brings it nearer. Stereo layouts only. Outside the picture is black, except in 360 (wrap_x).
@@ -234,6 +242,18 @@ float dither(vec2 frag, float time) {
 // Taps along one axis for a footprint `texels` long: one up to a quarter past 1:1 (a bilinear sample covers that).
 int footprint_taps_for(float texels) {
 	return clamp(int(ceil(texels - 0.25)), 1, max(footprint_taps, 1));
+}
+
+// The cursor over rgb at uv (the texture's UV); aa: a screen pixel's size in texels (0 or 1 when drawn 1:1).
+vec3 draw_cursor(vec3 rgb, vec2 uv, float aa) {
+	vec2 d = uv * vec2(textureSize(rgb_tex, 0)) - cursor_px;
+	float r = length(d);
+	float e = max(aa, 1.0);
+	float ring = abs(r - cursor_radius);
+	float white = max(1.0 - smoothstep(1.5, 1.5 + e, ring), 1.0 - smoothstep(1.5, 1.5 + e, r));
+	float dark = max(1.0 - smoothstep(3.2, 3.2 + e, ring), 1.0 - smoothstep(3.2, 3.2 + e, r));
+	rgb = mix(rgb, vec3(0.04), dark * 0.85 * cursor_alpha);
+	return mix(rgb, vec3(1.0), white * cursor_alpha);
 }
 
 // The planes' samples on the 8-bit scale, whatever the packing (see p010).
@@ -459,6 +479,9 @@ vec3 video_pixel_filtered(vec2 mesh_uv, vec2 mesh_dx, vec2 mesh_dy, int view_ind
 		float n = fract(sin(dot(cell + grain_seed, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
 		float l = clamp(dot(rgb, vec3(0.2126, 0.7152, 0.0722)), 0.0, 1.0);
 		rgb += n * film_grain * 0.16 * (0.25 + 3.0 * l * (1.0 - l));
+	}
+	if (rgb_source && cursor_alpha > 0.0) {
+		rgb = draw_cursor(rgb, uv, length(duv_dx * vec2(textureSize(rgb_tex, 0))));
 	}
 	if (outside || (circle_mask && length(p - 0.5) > 0.5)) {
 		rgb = vec3(0.0);

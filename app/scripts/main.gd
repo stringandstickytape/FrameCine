@@ -90,6 +90,7 @@ const SavedPlaces := preload("res://scripts/net/saved_places.gd")
 const WindowVideoSource := preload("res://scripts/video/window_video_source.gd")
 const LibraryIndex := preload("res://scripts/library/library_index.gd")
 const WindowPointer := preload("res://scripts/window_pointer.gd")
+const BrowserDictation := preload("res://scripts/video/browser_dictation.gd")
 const LocalAgents := preload("res://scripts/agents/local_agents.gd")
 const AndroidApps := preload("res://scripts/android/android_apps.gd")
 const VREnvironment := preload("res://environments/vr_environment.gd")
@@ -148,9 +149,27 @@ const CONTROL_LABELS := {
 }
 ## The right controller's legends while a captured window has the input (scripts/window_pointer.gd); actions not
 ## listed keep CONTROL_LABELS. The left controller drops trigger, NEXT and PREV then (they do nothing on a window).
+## These are the laser's ([browser] laser, while the viewer looks away); the stick pointer has the two below.
 const WINDOW_LABELS := {
 	"trigger": "CLICK",
 	"squeeze": "R-CLICK",
+	"thumbstick": "SCROLL / KEYS",
+	"next_file": "SPACE",
+	"prev_file": "BACK",
+}
+## Pointer mode (the viewer looks at the screen): the stick moves the cursor, the trigger clicks, squeeze held + stick
+## scrolls (a squeeze tap is still the right click).
+const WINDOW_POINTER_LABELS := {
+	"trigger": "CLICK",
+	"squeeze": "HOLD: SCROLL",
+	"thumbstick": "POINTER",
+	"next_file": "SPACE",
+	"prev_file": "BACK",
+}
+## Looking away: no cursor, the stick does its normal job; the trigger and the squeeze do nothing ("" hides them).
+const WINDOW_AWAY_LABELS := {
+	"trigger": "",
+	"squeeze": "",
 	"thumbstick": "SCROLL / KEYS",
 	"next_file": "SPACE",
 	"prev_file": "BACK",
@@ -273,6 +292,8 @@ var _grab_labelled := false
 static var _binding_cache := {}
 ## Input for a captured window (browser) on the screen.
 var window_pointer: WindowPointer
+## Voice into the browser's selected field (scripts/video/browser_dictation.gd): the talk button asks the page first.
+var browser_dictation: BrowserDictation
 ## The agents on the headset, in their terminals (scripts/agents/local_agents.gd).
 var local_agents: LocalAgents
 ## Android apps on the big screen (scripts/android/android_apps.gd).
@@ -302,6 +323,10 @@ func _ready() -> void:
 	window_pointer.name = "WindowPointer"
 	window_pointer.main = self
 	add_child(window_pointer)
+	browser_dictation = BrowserDictation.new()
+	browser_dictation.name = "BrowserDictation"
+	browser_dictation.main = self
+	add_child(browser_dictation)
 	local_agents = LocalAgents.new()
 	local_agents.name = "LocalAgents"
 	local_agents.main = self
@@ -1244,11 +1269,13 @@ func update_controller_labels() -> void:
 	var terminal := local_agents != null and (local_agents.waiting() and local_agents.pane_shown()
 			or local_agents.looking() or local_agents.on_big_screen())
 	_grab_labelled = features != null and features.physics.available()
+	# The stick pointer's mode: pointer (looking at the screen) or away (scripts/window_pointer.gd).
+	var window_texts: Dictionary = window_pointer.window_labels() if on_window else {}
 	for hand in hands:
 		var side := "left" if hand == left_hand else "right"
 		var holding := features != null and features.grab.holding(hand) != ""
 		var texts := controller_labels(hand.profile if use_xr else PREVIEW_PROFILE, side, menu_shown, on_window,
-				terminal, _grab_labelled, holding)
+				terminal, _grab_labelled, holding, window_texts)
 		if ui != null and ui.talk_hand() == hand and texts.has("bumper"):
 			texts["bumper"] = tr("TALK")
 		hand.visual.set_texts(texts)
@@ -1268,10 +1295,12 @@ func set_labels_held(holder: Variant, held: bool) -> void:
 ## input (controller_visual.gd anchor name) -> label text, for one hand of `profile`. on_window: a captured window
 ## has the input (menu hidden), WINDOW_LABELS apply; terminal: an agent's terminal has it, TERMINAL_LABELS apply.
 ## grab: the room has objects to pick up (the squeeze says GRAB_LABEL, menu hidden); holding: this controller holds
-## one, HOLD_LABELS apply (over everything else).
+## one, HOLD_LABELS apply (over everything else). window_texts: the window's legends for its mode now
+## (WINDOW_POINTER_LABELS or WINDOW_AWAY_LABELS, window_pointer.gd's window_labels()); {}: WINDOW_LABELS.
 static func controller_labels(profile: String, side: String, p_menu_shown: bool, on_window := false,
-		terminal := false, grab := false, holding := false) -> Dictionary:
+		terminal := false, grab := false, holding := false, window_texts := {}) -> Dictionary:
 	var out := {}
+	var window_map: Dictionary = window_texts if not window_texts.is_empty() else WINDOW_LABELS
 	for b: Array in _profile_bindings(profile, side):
 		var texts: Array = CONTROL_LABELS.get(b[1], [])
 		if texts.is_empty():
@@ -1280,8 +1309,8 @@ static func controller_labels(profile: String, side: String, p_menu_shown: bool,
 		if on_window and not p_menu_shown:
 			if side == "left" and b[1] in WINDOW_LEFT_HIDDEN:
 				continue
-			if side == "right" and WINDOW_LABELS.has(b[1]):
-				legend = WINDOW_LABELS[b[1]]
+			if side == "right" and window_map.has(b[1]):
+				legend = window_map[b[1]]
 		if terminal and not p_menu_shown and side == "right" and TERMINAL_LABELS.has(b[1]):
 			legend = TERMINAL_LABELS[b[1]]
 		if grab and not p_menu_shown and not on_window and not terminal and b[1] == "squeeze":
