@@ -226,7 +226,7 @@ func _run() -> void:
 	_check("the header, seek bar, transport and tab bar give way", not pui._title.is_visible_in_tree()
 			and not pui.seek.is_visible_in_tree() and not pui._transport.is_visible_in_tree()
 			and not pui._tabs_box.is_visible_in_tree())
-	_check("the tabs as a list down the left, Source first", pui.tablet_tab_buttons.size() == 7
+	_check("the tabs as a list down the left, Source first", pui.tablet_tab_buttons.size() == pui.TAB_NAMES.size()
 			and pui.tablet_tab_buttons[0].text == "Source" and pui.tablet_tab_buttons[0].is_visible_in_tree()
 			and pui.tablet_tab_buttons[0].get_global_rect().position.x < 60.0)
 	pui.tablet_tab_buttons[0].pressed.emit()

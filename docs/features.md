@@ -873,9 +873,19 @@ in colour, with no change in the app (`research-cameras-and-splats.md`).
 ### Windows to the real room
 
 A real place (the coffee table, the arm of the sofa) marked once and shown by the headset's cameras in every room
-(`scripts/play/real_windows.gd`, `shaders/real_window.gdshader`; the user, 2026-11-06). The Objects tab's **Mark an
-area**: the whole view becomes the cameras', the trigger held sweeps the controller's tip over the place (the box
-shows tinted as it grows), letting go keeps an upright box round it, turned to the way the viewer faced, 4 cm round.
+(`scripts/play/real_windows.gd`, `shaders/real_window.gdshader`; the Mixed reality tab, `ui/mixed_reality_tab.gd`;
+the user, 2026-11-06). While making or changing one, the whole view is the cameras' and the box shows tinted.
+
+- **Sweep:** the trigger held sweeps the controller's tip over the place; letting go keeps an upright box round it,
+  4 cm round, turned to the least floor area within 45 degrees of the way the viewer faced (`fit_yaw`; ties go to the
+  facing turn, so a table in front stays square). A monitor at 45 degrees first gave a box across it with the
+  monitor diagonal inside.
+- **Corners:** the trigger on three corners of a flat thing; the first edge gives the turn, the third corner the
+  depth, the stick the height; 1.5 cm round.
+- **Move with the controller:** the trigger held grabs the area (it follows the controller, moved and turned about
+  up), the stick turns and sizes it, menu keeps, B puts back. **Mark again**, width, height and depth sliders, On,
+  All on, All off, Delete, each with Undo. The areas show tinted while the menu is open (a setting), the picked one
+  brighter.
 
 - **Fixed to the real room:** kept in the runtime's tracking space (the Stage reference space, from the headset's room
   setup), placed each frame by XROrigin3D times XRServer's reference frame. Recentring the screen leaves the windows
@@ -883,10 +893,13 @@ shows tinted as it grows), letting go keeps an upright box round it, turned to t
 - **Showing the cameras:** while a window is on, the ALPHA_BLEND blend mode with the viewport's alpha kept (as the
   passthrough room) and a black backstop far out so nothing else lets the cameras through. Each window draws
   back faces with no depth test and multiply blending: colour times 1 - reveal, alpha times 1 - reveal x light. So it
-  shows through whatever the room has in front, and the panel, subtitles and other see-through things still draw
-  over it. With none on, opaque again (no camera cost).
-- **Light:** the room light dims the cameras' view as in the passthrough room, never under 40 %: a window is for
-  finding the cup in the dark.
+  shows through whatever the room has in front. With none on, opaque again (no camera cost).
+- **Draw order:** windows at render priority 2, after the room's see-through effects (0 and 1): the cinema's
+  projector beam, drawn after a window, put its alpha back and the top of a window by the screen went black while the
+  film played. Before the tablet (moved up to 4..7), the watch card (4), subtitles and toasts (10) and the panel
+  (11, 12), which still draw over a window.
+- **Light:** the room light dims the cameras' view as in the passthrough room, never under `[real_room] light_min`
+  (40 %; the tab's slider): a window is for finding the cup in the dark.
 - **While marking** the film layer steps aside (the screen's mesh draws the film, wiped to the cameras' view too).
 - A window over the screen shows the film, not the cameras: the film layer is between them.
 - Each area: On (off: not drawn, and with none on the cameras stop) and Delete, with Undo. At most 16.

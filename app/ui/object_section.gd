@@ -73,9 +73,6 @@ var _fab_box: VBoxContainer
 var _fab_buttons: VBoxContainer
 var _fab_paths: Array = []
 var _adding := false
-## Windows to the real room (scripts/play/real_windows.gd): Mark an area, then each area with On and Delete.
-var _real_status: Label
-var _real_rows: VBoxContainer
 
 
 func bind(p_app: Node) -> void:
@@ -110,18 +107,6 @@ func bind(p_app: Node) -> void:
 	add_child(_placed_box)
 	_parts_box = W.vbox()
 	add_child(_parts_box)
-	add_child(W.section("Windows to the real room"))
-	_real_status = W.label("", &"MutedLabel")
-	_real_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	add_child(W.hbox([_real_status, W.button("Mark an area", _mark_area)]))
-	add_child(W.help("Mark a real place, the coffee table say: the headset's cameras show it in every room. Hold the "
-			+ "trigger and sweep the controller over it; let go to keep it."))
-	_real_rows = VBoxContainer.new()
-	_real_rows.add_theme_constant_override("separation", 0)
-	add_child(_real_rows)
-	var rw: Node = _real_windows()
-	if rw != null:
-		rw.changed.connect(_sync_real)
 	visibility_changed.connect(func() -> void:
 		if is_visible_in_tree():
 			sync_objects())
@@ -134,7 +119,6 @@ func sync_objects() -> void:
 	if is_visible_in_tree():
 		_sync_library()
 	_sync_placed()
-	_sync_real()
 
 
 # --- The library -------------------------------------------------------------------------------------------------
@@ -259,40 +243,6 @@ func _fab_name(path: String) -> String:
 		if (b as Button).text.begins_with("Add ") and _fab_paths.find(path) == b.get_index():
 			return (b as Button).text.substr(4)
 	return path.get_file()
-
-
-# --- Windows to the real room ---------------------------------------------------------------------------------------
-
-func _real_windows() -> Node:
-	return app.features.get("real_windows") if app != null and app.get("features") != null else null
-
-
-func _mark_area() -> void:
-	app.ui.start_window_mark()
-
-
-func _sync_real() -> void:
-	var rw: Node = _real_windows()
-	if rw == null or _real_rows == null:
-		return
-	_real_status.text = rw.status()
-	for c in _real_rows.get_children():
-		_real_rows.remove_child(c)
-		c.queue_free()
-	for w: Dictionary in rw.windows:
-		var id := str(w["id"])
-		var size: Array = w["size"]
-		var name := W.ellipsis(W.label("%s  ·  %d x %d x %d cm" % [w["name"], roundi(float(size[0]) * 100.0),
-				roundi(float(size[1]) * 100.0), roundi(float(size[2]) * 100.0)]))
-		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var on := W.toggle("On", func(v: bool) -> void: rw.set_on(id, v))
-		W.set_on(on, bool(w.get("on", true)))
-		var del := W.button("Delete", func() -> void:
-			var gone: Dictionary = rw.remove(id)
-			app.ui.ui.show_toast("%s deleted" % gone.get("name", "Area"), "Undo", func() -> void:
-				rw.restore(gone)
-				app.ui.ui.hide_toast(), 8.0))
-		_real_rows.add_child(W.hbox([name, on, del]))
 
 
 func _tile_grid() -> GridContainer:

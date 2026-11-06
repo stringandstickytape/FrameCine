@@ -31,6 +31,7 @@ func _run() -> void:
 		await process_frame
 	_test_box()
 	await _test_mark()
+	_test_modes()
 	await _test_kept()
 	_restore_file()
 	print("test_real_windows: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
@@ -45,7 +46,8 @@ func _test_box() -> void:
 			size.is_equal_approx(Vector3(0.6, 0.3, 0.4) + Vector3.ONE * RealWindows.MARGIN * 2.0))
 	_check("box: centred on them (%s)" % b["center"], (b["center"] as Vector3).is_equal_approx(Vector3(0.3, 0.65, -1.2)))
 	var one := RealWindows.box_of(PackedVector3Array([Vector3(1, 1, 1)]), 0.0)
-	_check("box: one point gives the least size", (one["size"] as Vector3).is_equal_approx(Vector3.ONE * RealWindows.MIN_SIDE))
+	_check("box: one point gives the margin round it", (one["size"] as Vector3).is_equal_approx(
+			Vector3.ONE * maxf(RealWindows.MIN_SIDE, RealWindows.MARGIN * 2.0)))
 	var far := RealWindows.box_of(PackedVector3Array([Vector3.ZERO, Vector3(9, 0, 0)]), 0.0)
 	_check("box: a side at most %.0f m" % RealWindows.MAX_SIDE, (far["size"] as Vector3).x == RealWindows.MAX_SIDE)
 	# A line along a 45-degree yaw: in the box's own frame it is long one way and thin the other.
@@ -131,6 +133,85 @@ func _ui_sweep(ui: Node, rw: Node, hand: Node) -> bool:
 	return rw.windows.size() == 2 and not ui.is_marking_window() and rw.windows[1]["name"] == "Area 2"
 
 
+func _test_modes() -> void:
+	var rw: Node = main.features.real_windows
+	var ui: Node = main.ui
+	# The sweep fits its turn: points along a line at 45 degrees give a box along it, not one across it.
+	var line := PackedVector3Array()
+	for i in 20:
+		var t := i / 19.0
+		line.append(Vector3(t * 0.5, 0.8 + 0.3 * (i % 2), -t * 0.5))
+	var yaw: float = RealWindows.fit_yaw(line, 0.0)
+	var fitted: Vector3 = RealWindows.box_of(line, yaw)["size"]
+	_check("sweep: turned to fit a thing at 45 degrees (%.1f deg, %s)" % [rad_to_deg(yaw), fitted],
+			absf(absf(rad_to_deg(yaw)) - 45.0) <= 1.5 and minf(fitted.x, fitted.z) < 0.1)
+	var square := PackedVector3Array([Vector3(-0.3, 0.7, -0.6), Vector3(0.3, 0.7, -0.6), Vector3(0.3, 0.7, -1.2),
+			Vector3(-0.3, 0.7, -1.2)])
+	_check("sweep: a square thing in front stays square to the viewer",
+			absf(RealWindows.fit_yaw(square, 0.0)) < 0.001)
+
+	# Corners: a keyboard 45 x 15 cm at 45 degrees, touched at three corners; the box along its edge.
+	var e := Vector3(cos(PI / 4.0), 0, -sin(PI / 4.0))
+	var across := Vector3(sin(PI / 4.0), 0, cos(PI / 4.0))
+	var c0 := Vector3(0.2, 0.75, -0.6)
+	_check("corners: started", ui.start_window_corners() and rw.mode == "corners")
+	_check("corners: first two say more", rw.corner(c0) == "more" and rw.corner(c0 + e * 0.45) == "more")
+	_check("corners: the third asks the height", rw.corner(c0 + e * 0.45 + across * 0.15) == "height")
+	var h0: float = rw.height
+	rw.on_stick(Vector2(0, 1), 0.2)
+	_check("corners: the stick raises it", rw.height > h0)
+	rw.height = 0.05
+	var cw: Dictionary = rw.finish()
+	var cs: Vector3 = RealWindows._vec(cw.get("size", [0, 0, 0]))
+	_check("corners: kept along the edge (%s, %.1f deg)" % [cs, rad_to_deg(float(cw.get("yaw", 0.0)))],
+			absf(rad_to_deg(float(cw["yaw"])) - 45.0) < 0.5 and absf(cs.x - (0.45 + RealWindows.CORNER_MARGIN * 2.0)) < 0.01
+			and absf(cs.z - (0.15 + RealWindows.CORNER_MARGIN * 2.0)) < 0.01
+			and absf(cs.y - (0.05 + RealWindows.CORNER_MARGIN * 2.0)) < 0.01)
+
+	# Adjust: grabbed, moved 30 cm with the controller and turned 90 degrees, then put back with B; then again, kept.
+	var id := str(cw["id"])
+	var before: Dictionary = rw.window_by_id(id).duplicate(true)
+	_check("adjust: started", ui.start_window_adjust(id) and rw.mode == "adjust")
+	var hand := Transform3D(Basis(), Vector3(0, 1, -0.5))
+	rw.grab(true, hand)
+	rw.drag(Transform3D(Basis(Vector3.UP, PI / 2.0), hand.origin + Vector3(0.3, 0, 0)))
+	_check("B puts it back", ui.on_back(null) and rw.window_by_id(id) == before and rw.mode == "")
+	ui.start_window_adjust(id)
+	rw.grab(true, hand)
+	rw.drag(Transform3D(Basis(Vector3.UP, PI / 2.0), hand.origin + Vector3(0.3, 0, 0)))
+	rw.grab(false, hand)
+	rw.on_stick(Vector2(0, 1), 0.5)
+	var moved: Dictionary = rw.finish()
+	var c_before := RealWindows._vec(before["center"])
+	var c_after := RealWindows._vec(moved["center"])
+	var expect := Vector3(0.3, 0, 0) + hand.origin + Basis(Vector3.UP, PI / 2.0) * (c_before - hand.origin)
+	_check("adjust: moved and turned with the controller (%s, expect %s)" % [c_after, expect],
+			c_after.is_equal_approx(expect.snappedf(0.001)) and absf(float(moved["yaw"]) - (float(before["yaw"]) + PI / 2.0)) < 0.001)
+	_check("adjust: the stick made it bigger", RealWindows._vec(moved["size"]).x > RealWindows._vec(before["size"]).x)
+
+	# Mark again: the box replaced, the name and On kept.
+	_check("mark again: started", ui.start_window_mark_again(id) and rw.mode == "sweep")
+	rw.sweep(true)
+	rw.add_point(Vector3(2, 1, 2))
+	rw.add_point(Vector3(2.2, 1.1, 2.1))
+	var again: Dictionary = rw.finish()
+	_check("mark again: the same area, a new box", again["id"] == id and again["name"] == cw["name"]
+			and RealWindows._vec(again["center"]).distance_to(Vector3(2.1, 1.05, 2.05)) < 0.06)
+
+	rw.set_size(id, Vector3(0.3, 0.2, 0.1))
+	_check("set_size", RealWindows._vec(rw.window_by_id(id)["size"]).is_equal_approx(Vector3(0.3, 0.2, 0.1)))
+	rw.set_all(false)
+	_check("all off", not rw.any_on())
+	rw.set_all(true)
+	_check("all on", rw.windows.all(func(w: Dictionary) -> bool: return w["on"]))
+	# Draw order: after the room's see-through effects (0, 1), before the tablet (from 4), panel and subtitles.
+	var box: MeshInstance3D = rw.get_node("Window_%s" % id)
+	var tablet_base: int = load("res://ui/tablet.gd").PRIORITY_BASE
+	_check("drawn after the room's effects, before the menu (%d)" % box.material_override.render_priority,
+			box.material_override.render_priority == RealWindows.PRIORITY and RealWindows.PRIORITY > 1
+			and RealWindows.PRIORITY + 1 < tablet_base)
+
+
 func _test_kept() -> void:
 	var rw: Node = main.features.real_windows
 	var before: Array = rw.windows.duplicate(true)
@@ -140,9 +221,14 @@ func _test_kept() -> void:
 			and RealWindows._vec(again.windows[0]["center"]).is_equal_approx(RealWindows._vec(before[0]["center"]))
 			and is_equal_approx(float(again.windows[0]["yaw"]), float(before[0]["yaw"])))
 	again.free()
-	var tab: Node = main.ui.ui.get("objects")
-	_check("the Objects tab's section exists", tab != null and _has_text(tab, "Windows to the real room")
-			and _has_text(tab, "Mark an area"))
+	var tab: Node = main.ui.ui.get("mixed_reality")
+	var pui: Node = main.ui.ui
+	_check("the Mixed reality tab, before System", tab != null and _has_text(tab, "Sweep an area")
+			and _has_text(tab, "Touch corners") and pui.tabs.find(tab) == pui.Tab.MIXED_REALITY
+			and pui.Tab.MIXED_REALITY + 1 == pui.Tab.SYSTEM and pui.TAB_NAMES[pui.Tab.MIXED_REALITY] == "Mixed reality")
+	_check("its icon", load("res://ui/icons.gd").has("mixed-reality")
+			and pui.TABLET_TAB_ICONS[pui.Tab.MIXED_REALITY] == "mixed-reality")
+	_check("not in the Objects tab any more", not _has_text(pui.get("objects"), "Windows to the real room"))
 	for w: Dictionary in rw.windows.duplicate():
 		rw.remove(w["id"])
 	await process_frame

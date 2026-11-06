@@ -304,16 +304,29 @@ you use it, not share it.
 kept room has the object in it, Delete says which rooms instead: rooms are made of the library's objects, so remove it
 there first.
 
-**Windows to the real room**, at the end of the tab: a real place you mark once, the coffee table say, shows through
-the headset's cameras in every room.
 
-1. **Mark an area**. The panel goes and you see the real room.
-2. Hold the trigger and sweep the controller over the place: across the table top, round the cup. A tinted box shows
-   what it will keep.
-3. Let go. The panel comes back with Undo in its footer.
+## The Mixed reality tab
 
-Each area has **On** and **Delete** (with Undo). They stay on the real place when you recentre and next time you
-start; a new room setup on the headset moves them, so mark them again then. B or the menu button cancels marking.
+The **Mixed reality** tab (MR on the front panel's tab bar, above System) holds windows to the real room: real
+places, the coffee table or the keyboard say, that show through the headset's cameras in every room. Each is a box
+fixed to the real place: it stays there when you recentre and next time you start (a new room setup on the headset
+moves them; mark them again then).
+
+- **Sweep an area**: the panel goes and you see the real room. Hold the trigger and pass the controller over the
+  place; a tinted box shows what it will keep, turned to fit what you swept (a monitor at an angle gets a box along
+  it). Let go to keep it.
+- **Touch corners**: for something flat with edges. Touch the controller's tip to a corner and pull the trigger, then
+  the next corner along an edge, then one across. Stick up and down sets how high the box goes; the trigger (or the
+  menu button) keeps it. The box lines up with the edge you touched.
+- Each area: its name (pick it), its size, **On**. **All on**, **All off**.
+- The picked area shows brighter while the menu is open (all of them show faintly, if **Show the areas while the menu
+  is open** is on), and has **Move with the controller** (hold the trigger and the box moves and turns with the
+  controller; stick left and right turns it, up and down sizes it; the menu button keeps it, B puts it back), **Mark
+  again** (a new sweep for it), **Width**, **Height** and **Depth**, and **Delete**. Each change has Undo in the
+  footer.
+- **Cameras' view when the room dims**: the room light dims the cameras' view too, never below this (40 % at first).
+
+B cancels any of them.
 
 ## The Library
 

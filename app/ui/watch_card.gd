@@ -100,7 +100,8 @@ func _ready() -> void:
 	_mat.shader = shader
 	_mat.set_shader_parameter("tex", viewport.get_texture())
 	_mat.set_shader_parameter("opacity", 0.0)
-	_mat.render_priority = 2
+	# Above the windows to the real room (scripts/play/real_windows.gd PRIORITY, 2).
+	_mat.render_priority = 4
 	_mesh = MeshInstance3D.new()
 	_mesh.name = "CardQuad"
 	_mesh.mesh = QuadMesh.new()

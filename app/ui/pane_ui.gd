@@ -4,7 +4,8 @@ extends PanelContainer
 ##
 ## Top to bottom: header ("Now playing" and, on the right, the clock, time left with the end time, and the battery;
 ## then the title and the time in tabular numerals), seek bar with chapter ticks, transport (previous, -10 s, play /
-## pause ringed, +10 s, next), tabs (Files, Picture, Sound, Subtitles, Room, System), the tab's body, and a footer line (the mode and how it was
+## pause ringed, +10 s, next), tabs (Files, Picture, Sound, Subtitles, Room, Objects, Mixed reality (MR on the front
+## panel's bar), System), the tab's body, and a footer line (the mode and how it was
 ## chosen, or a short toast with an action such as Undo; the item count on the right). The panel has one view: the
 ## glance view of the hand-held pane is gone, its lines are in the header (docs/ui-design.md, "Revision 2").
 ##
@@ -28,6 +29,7 @@ const SoundTab := preload("res://ui/sound_tab.gd")
 const SubtitlesTab := preload("res://ui/subtitles_tab.gd")
 const RoomTab := preload("res://ui/room_tab.gd")
 const ObjectsTab := preload("res://ui/objects_tab.gd")
+const MixedRealityTab := preload("res://ui/mixed_reality_tab.gd")
 const SystemTab := preload("res://ui/system_tab.gd")
 const EndTime := preload("res://scripts/play/end_time.gd")
 
@@ -37,11 +39,15 @@ signal next_requested
 signal seek_requested(seconds: float)
 signal skip_requested(delta_seconds: float)
 
-enum Tab { FILES, PICTURE, SOUND, SUBTITLES, ROOM, OBJECTS, SYSTEM }
-const TAB_NAMES: Array[String] = ["Files", "Picture", "Sound", "Subtitles", "Room", "Objects", "System"]
+enum Tab { FILES, PICTURE, SOUND, SUBTITLES, ROOM, OBJECTS, MIXED_REALITY, SYSTEM }
+const TAB_NAMES: Array[String] = ["Files", "Picture", "Sound", "Subtitles", "Room", "Objects", "Mixed reality", "System"]
+## The front panel's tab bar shares one row: the long names shortened there.
+const TAB_CAPTIONS := {"Mixed reality": "MR"}
 ## The tablet layout's names and icons for the tabs, the rail's width and its icons' size (pixels), and the views.
-const TABLET_TAB_NAMES: Array[String] = ["Source", "Picture", "Sound", "Subtitles", "Room", "Objects", "System"]
-const TABLET_TAB_ICONS: Array[String] = ["source", "picture", "sound", "subtitles", "room", "objects", "system"]
+const TABLET_TAB_NAMES: Array[String] = ["Source", "Picture", "Sound", "Subtitles", "Room", "Objects", "Mixed reality",
+		"System"]
+const TABLET_TAB_ICONS: Array[String] = ["source", "picture", "sound", "subtitles", "room", "objects", "mixed-reality",
+		"system"]
 const TABLET_TABS_WIDTH := 190
 const RAIL_ICON_PX := 30
 const VIEWS: Array[String] = ["details", "list", "grid"]
@@ -54,6 +60,7 @@ var sound: SoundTab
 var subtitles: SubtitlesTab
 var room: RoomTab
 var objects: ObjectsTab
+var mixed_reality: MixedRealityTab
 var system: SystemTab
 var tabs: Array[Control] = []
 var tab_buttons: Array[Button] = []
@@ -207,7 +214,8 @@ func _build_open() -> void:
 	var group := ButtonGroup.new()
 	for i in TAB_NAMES.size():
 		# Buttons have no uppercase flag: the caption is the name in capitals (the theme letter-spaces it).
-		var b := W.button(TAB_NAMES[i].to_upper(), func() -> void: show_tab(i), &"TabButton")
+		var b := W.button(str(TAB_CAPTIONS.get(TAB_NAMES[i], TAB_NAMES[i])).to_upper(), func() -> void: show_tab(i),
+				&"TabButton")
 		b.custom_minimum_size = Vector2(0, PaneStyle.constant(&"tab_height"))
 		b.set_meta("tab", TAB_NAMES[i])
 		b.toggle_mode = true
@@ -270,12 +278,13 @@ func bind(p_app: Node) -> void:
 	subtitles = SubtitlesTab.new()
 	room = RoomTab.new()
 	objects = ObjectsTab.new()
+	mixed_reality = MixedRealityTab.new()
 	system = SystemTab.new()
-	tabs = [files, picture, sound, subtitles, room, objects, system]
+	tabs = [files, picture, sound, subtitles, room, objects, mixed_reality, system]
 	for t in tabs:
 		t.visible = false
 		_body.add_child(t)
-	for t in [picture, sound, subtitles, room, objects, system]:
+	for t in [picture, sound, subtitles, room, objects, mixed_reality, system]:
 		t.bind(app)
 	files.form_shown.connect(set_form_mode)
 	files.listing_changed.connect(_update_footer)

@@ -711,6 +711,11 @@ func _bar(p_name: String, role: String, priority: int) -> MeshInstance3D:
 	return mi
 
 
+## The tablet's draw order starts here, above the room's see-through effects (0, 1) and the windows to the real room
+## (scripts/play/real_windows.gd PRIORITY, 2): a window drawn after the tablet would take it away.
+const PRIORITY_BASE := 4
+
+
 func _rounded(p_name: String, size: Vector2, role: String, priority: int) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	mi.name = p_name
@@ -719,7 +724,7 @@ func _rounded(p_name: String, size: Vector2, role: String, priority: int) -> Mes
 	mi.mesh = mesh
 	var m := ShaderMaterial.new()
 	m.shader = SHADER
-	m.render_priority = priority
+	m.render_priority = PRIORITY_BASE + priority
 	m.set_shader_parameter("size", size)
 	m.set_shader_parameter("opacity", _opacity)
 	m.set_meta("role", role)
@@ -736,7 +741,7 @@ func make_label(p_name: String, align: HorizontalAlignment, parent: Node3D) -> L
 	l.horizontal_alignment = align
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	l.outline_size = 0
-	l.render_priority = 3
+	l.render_priority = PRIORITY_BASE + 3
 	l.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	parent.add_child(l)
 	_labels.append(l)

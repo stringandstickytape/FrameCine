@@ -525,7 +525,11 @@ func on_menu(hand: XRHand, pressed: bool) -> bool:
 			"cancel":
 				cancel_seat_pick()
 				cancel_object_place()
-				cancel_window_mark()
+				# Corners and adjust: the menu button keeps what is shown (B puts it back); the sweep keeps on letting go.
+				if is_marking_window() and _real_windows().mode in ["corners", "adjust"]:
+					_finish_window_mark()
+				else:
+					cancel_window_mark()
 			"open":
 				show_panel(hand)
 	elif menu.release(hand) == "close":
@@ -616,10 +620,11 @@ func _update_pointer() -> void:
 	if not (_seat_pick and not laser_on) and seat_ring_shown():
 		_seat_ring.visible = false
 	if is_marking_window():
-		# Marking: no laser; the controller's tip is what sweeps (scripts/play/real_windows.gd).
+		# Marking: no laser; the controller's tip is what sweeps or touches (scripts/play/real_windows.gd).
 		pointer_hand.set_laser(false)
 		if pointer_hand.get_is_active():
 			_real_windows().add_point(pointer_hand.get_ray_origin())
+			_real_windows().drag(pointer_hand.global_transform)
 	elif is_placing_object() and not laser_on and pointer_hand.get_is_active():
 		pointer_hand.set_laser(true, _placer.update(pointer_hand), true, PaneStyle.color(&"laser"),
 				PaneStyle.color(&"laser_dot"))
@@ -817,18 +822,41 @@ func _ensure_placer() -> ObjectPlacer:
 	return _placer
 
 
-## Marking a window to the real room (the Objects tab's Mark an area; scripts/play/real_windows.gd): the panel goes, the
-## view is the cameras, the trigger held sweeps the controller over the place, letting go keeps it. B or menu cancels.
+## Windows to the real room (the Mixed reality tab; scripts/play/real_windows.gd): the panel goes and the view is the
+## cameras'. Sweep: the trigger held sweeps the controller over the place, letting go keeps it. Corners: the trigger on
+## three corners, the stick for the height, the trigger again (or menu) keeps it. Adjust: the trigger held moves the
+## area with the controller, the stick turns and sizes it, menu keeps it. B cancels each.
 func start_window_mark() -> bool:
+	return _start_window(_real_windows() != null and _real_windows().start_mark(),
+			"Hold the trigger and sweep the controller over the place. Let go to keep it. B cancels.")
+
+
+func start_window_corners() -> bool:
+	return _start_window(_real_windows() != null and _real_windows().start_corners(),
+			"Touch the controller's tip to a corner and pull the trigger; then the next corner along the edge, then one "
+			+ "across. B cancels.")
+
+
+func start_window_adjust(id: String) -> bool:
+	return _start_window(_real_windows() != null and _real_windows().start_adjust(id),
+			"Hold the trigger to move it with the controller. Stick: turn and size. Menu keeps it; B puts it back.")
+
+
+func start_window_mark_again(id: String) -> bool:
+	return _start_window(_real_windows() != null and _real_windows().mark_again(id),
+			"Hold the trigger and sweep the controller over the place again. Let go to keep it. B cancels.")
+
+
+func _start_window(started: bool, hint: String) -> bool:
 	var rw := _real_windows()
-	if rw == null or not rw.start_mark():
+	if not started:
 		notify("The headset's cameras can't show here." if rw == null or not rw.available()
 				else "That's as many areas as there can be: delete one first.")
 		return false
 	cancel_seat_pick()
 	cancel_object_place()
 	hide_panel()
-	notify("Hold the trigger and sweep the controller over the place. Let go to keep it. B cancels.")
+	notify(hint)
 	return true
 
 
@@ -845,17 +873,25 @@ func cancel_window_mark() -> bool:
 	return true
 
 
-## The trigger let go: the swept box is kept. The panel comes back with Undo in its footer.
+## The area made or changed is kept. The panel comes back with Undo in its footer.
 func _finish_window_mark() -> void:
 	var rw := _real_windows()
+	var was: Dictionary = rw.before()
 	var w: Dictionary = rw.finish()
 	show_panel()
 	if w.is_empty():
 		notify("Nothing marked")
 		return
-	ui.show_toast("%s added: the cameras show there" % w["name"], "Undo", func() -> void:
-		rw.remove(str(w["id"]))
-		ui.hide_toast(), 8.0)
+	rw.selected = str(w["id"])
+	rw.changed.emit()
+	if was.is_empty():
+		ui.show_toast("%s added: the cameras show there" % w["name"], "Undo", func() -> void:
+			rw.remove(str(w["id"]))
+			ui.hide_toast(), 8.0)
+	else:
+		ui.show_toast("%s changed" % w["name"], "Undo", func() -> void:
+			rw.restore(was)
+			ui.hide_toast(), 8.0)
 
 
 func _real_windows() -> Node:
@@ -966,12 +1002,27 @@ func on_trigger(hand: XRHand, pressed: bool) -> bool:
 	if hand != pointer_hand:
 		return false
 	if is_marking_window():
-		if pressed:
-			_real_windows().sweep(true)
-			hand.pulse()
-		elif _real_windows().sweeping:
-			_finish_window_mark()
-			hand.pulse()
+		var rw := _real_windows()
+		match rw.mode:
+			"sweep":
+				if pressed:
+					rw.sweep(true)
+					hand.pulse()
+				elif rw.sweeping:
+					_finish_window_mark()
+					hand.pulse()
+			"corners":
+				if pressed:
+					hand.pulse()
+					match rw.corner(hand.get_ray_origin()):
+						"height":
+							notify("Stick up and down: how high. Trigger or menu keeps it; B cancels.")
+						"done":
+							_finish_window_mark()
+			"adjust":
+				rw.grab(pressed, hand.global_transform)
+				if pressed:
+					hand.pulse()
 		return true
 	if is_placing_object() and not _pointed and not _card_pointed:
 		if pressed:
@@ -1026,6 +1077,11 @@ func on_stick(hand: XRHand, stick: Vector2, delta: float) -> bool:
 	var gaze: Node = app.features.get_node_or_null("EyeGaze") if app.features != null else null
 	if gaze != null and gaze.calibrating:
 		return true
+	if is_marking_window():
+		if hand == pointer_hand:
+			_real_windows().on_stick(stick, delta)
+			return true
+		return false
 	if is_placing_object() and not _pointed:
 		# The pointer controller's stick turns and sizes the object; the other one's is left alone.
 		if hand == pointer_hand:
