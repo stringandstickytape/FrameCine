@@ -24,6 +24,9 @@ const FilesCommands := preload("res://scripts/dev/files_commands.gd")
 const ObjectCommands := preload("res://scripts/assistant/object_commands.gd")
 const FabStore := preload("res://scripts/assistant/fab_store.gd")
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
+const SurfaceStore := preload("res://scripts/env/surface_store.gd")
+const PartApply := preload("res://scripts/assistant/part_apply.gd")
+const PictureLibrary := preload("res://scripts/pictures/picture_library.gd")
 const NODE_NAME := "CommandHost"
 
 ## The main scene (scripts/main.gd): the tree's current scene.
@@ -90,6 +93,9 @@ func _register() -> void:
 	ObjectCommands.register_commands(self)
 	# Fab in the app (scripts/assistant/fab_store.gd): its search and import as commands.
 	FabStore.register_commands(self)
+	SurfaceStore.register_commands(self)
+	PartApply.register_commands(self)
+	PictureLibrary.register_commands(self)
 	# Loaded, not preloaded: the agents reach the assistant service, which preloads this file.
 	load("res://scripts/agents/local_agents.gd").register_commands(self)
 

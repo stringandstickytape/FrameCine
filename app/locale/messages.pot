@@ -6,117 +6,129 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: scripts/main.gd:1280
+#: scripts/main.gd:1306
 msgid "TALK"
 msgstr ""
 
-#: scripts/main.gd:1325
+#: scripts/main.gd:1353
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
 
-#: scripts/main.gd:137
+#: scripts/main.gd:138
 msgid "PLAY / PAUSE"
 msgstr ""
 
-#: scripts/main.gd:137 scripts/main.gd:154 scripts/main.gd:163
+#: scripts/main.gd:138 scripts/main.gd:157 scripts/main.gd:166
 msgid "CLICK"
 msgstr ""
 
-#: scripts/main.gd:139
+#: scripts/main.gd:140
 msgid "SEEK / DIST"
 msgstr ""
 
-#: scripts/main.gd:139
+#: scripts/main.gd:140
 msgid "SCROLL"
 msgstr ""
 
-#: scripts/main.gd:140
+#: scripts/main.gd:141 scripts/main.gd:143
 msgid "MENU"
 msgstr ""
 
-#: scripts/main.gd:140
+#: scripts/main.gd:141 scripts/main.gd:143
 msgid "CLOSE"
 msgstr ""
 
-#: scripts/main.gd:141
+#: scripts/main.gd:144
 msgid "INFO"
 msgstr ""
 
-#: scripts/main.gd:142
+#: scripts/main.gd:145
 msgid "NEXT"
 msgstr ""
 
-#: scripts/main.gd:143
+#: scripts/main.gd:146
 msgid "PREV"
 msgstr ""
 
-#: scripts/main.gd:144
+#: scripts/main.gd:147
 msgid "LABELS"
 msgstr ""
 
-#: scripts/main.gd:146
+#: scripts/main.gd:149
 msgid "CHAPTER -"
 msgstr ""
 
-#: scripts/main.gd:147
+#: scripts/main.gd:150
 msgid "CHAPTER +"
 msgstr ""
 
-#: scripts/main.gd:148
+#: scripts/main.gd:151
 msgid "REPLAY"
 msgstr ""
 
-#: scripts/main.gd:155
+#: scripts/main.gd:158
 msgid "R-CLICK"
 msgstr ""
 
-#: scripts/main.gd:156 scripts/main.gd:173
+#: scripts/main.gd:159 scripts/main.gd:186
 msgid "SCROLL / KEYS"
 msgstr ""
 
-#: scripts/main.gd:157 scripts/main.gd:166 scripts/main.gd:174 scripts/main.gd:186
+#: scripts/main.gd:160 scripts/main.gd:169 scripts/main.gd:187 scripts/main.gd:199
 msgid "SPACE"
 msgstr ""
 
-#: scripts/main.gd:158 scripts/main.gd:167 scripts/main.gd:175
+#: scripts/main.gd:161 scripts/main.gd:170 scripts/main.gd:188
 msgid "BACK"
 msgstr ""
 
-#: scripts/main.gd:164 scripts/main.gd:184
+#: scripts/main.gd:167 scripts/main.gd:197
 msgid "HOLD: SCROLL"
 msgstr ""
 
-#: scripts/main.gd:165
+#: scripts/main.gd:168
 msgid "POINTER"
 msgstr ""
 
-#: scripts/main.gd:183
-msgid "ENTER"
+#: scripts/main.gd:175
+msgid "KEEP PICTURE"
 msgstr ""
 
-#: scripts/main.gd:185
-msgid "ARROWS"
+#: scripts/main.gd:178
+msgid "APPLY"
 msgstr ""
 
-#: scripts/main.gd:187
-msgid "ESC"
+#: scripts/main.gd:179
+msgid "SIZE / TURN"
 msgstr ""
 
-#: scripts/main.gd:191
-msgid "GRAB"
-msgstr ""
-
-#: scripts/main.gd:194
-msgid "LET GO: THROW"
-msgstr ""
-
-#: scripts/main.gd:195
-msgid "NEAR-FAR / TURN"
+#: scripts/main.gd:180 scripts/main.gd:209
+msgid "CANCEL"
 msgstr ""
 
 #: scripts/main.gd:196
-msgid "CANCEL"
+msgid "ENTER"
+msgstr ""
+
+#: scripts/main.gd:198
+msgid "ARROWS"
+msgstr ""
+
+#: scripts/main.gd:200
+msgid "ESC"
+msgstr ""
+
+#: scripts/main.gd:204
+msgid "GRAB"
+msgstr ""
+
+#: scripts/main.gd:207
+msgid "LET GO: THROW"
+msgstr ""
+
+#: scripts/main.gd:208
+msgid "NEAR-FAR / TURN"
 msgstr ""
 
 #: scripts/video_mode.gd:126
@@ -278,14 +290,19 @@ msgstr ""
 msgid "Let the assistant run apps"
 msgstr ""
 
-#: scripts/assistant/fab_store.gd:661 ui/fab_panel.gd:372 ui/object_section.gd:294
+#: scripts/assistant/fab_store.gd:651 ui/fab_panel.gd:372 ui/object_section.gd:319 ui/surface_panel.gd:368
 #, c-format
 msgid "Adding %s: a moment."
 msgstr ""
 
-#: scripts/assistant/fab_store.gd:678 ui/fab_panel.gd:374 ui/object_section.gd:303
+#: scripts/assistant/fab_store.gd:668 ui/fab_panel.gd:374 ui/object_section.gd:328
 #, c-format
 msgid "%s is in your objects."
+msgstr ""
+
+#: scripts/assistant/fab_store.gd:695 scripts/env/surface_store.gd:662 ui/surface_panel.gd:370
+#, c-format
+msgid "%s is in your materials."
 msgstr ""
 
 #: scripts/assistant/object_builtins.gd:21
@@ -316,15 +333,27 @@ msgstr ""
 msgid "Picture frame"
 msgstr ""
 
-#: scripts/assistant/object_builtins.gd:30
+#: scripts/assistant/object_builtins.gd:32 ui/picture_panel.gd:66
+msgid "Poster"
+msgstr ""
+
+#: scripts/assistant/object_builtins.gd:33 ui/picture_panel.gd:68
+msgid "Canvas"
+msgstr ""
+
+#: scripts/assistant/object_builtins.gd:34 ui/picture_panel.gd:69
+msgid "Cut-out"
+msgstr ""
+
+#: scripts/assistant/object_builtins.gd:35
 msgid "Wall shelf"
 msgstr ""
 
-#: scripts/assistant/object_builtins.gd:31
+#: scripts/assistant/object_builtins.gd:36
 msgid "Pot plant"
 msgstr ""
 
-#: scripts/assistant/object_builtins.gd:33
+#: scripts/assistant/object_builtins.gd:38
 msgid "Wall clock"
 msgstr ""
 
@@ -351,6 +380,28 @@ msgstr ""
 
 #: scripts/library/library_index.gd:21
 msgid "Library"
+msgstr ""
+
+#: scripts/pictures/picture_keeper.gd:197
+msgid "No picture under the pointer"
+msgstr ""
+
+#: scripts/pictures/picture_keeper.gd:198 scripts/pictures/picture_keeper.gd:373
+msgid "That picture could not be kept"
+msgstr ""
+
+#: scripts/pictures/picture_keeper.gd:376
+#, c-format
+msgid "Picture kept: %s"
+msgstr ""
+
+#: scripts/pictures/picture_keeper.gd:378
+#, c-format
+msgid "Already in your pictures: %s"
+msgstr ""
+
+#: scripts/pictures/picture_library.gd:85 ui/object_section.gd:499 ui/pane_ui.gd:52 ui/picture_tab.gd:288
+msgid "Picture"
 msgstr ""
 
 #: scripts/play/auto_crop.gd:84
@@ -992,11 +1043,11 @@ msgstr ""
 msgid "Search Fab"
 msgstr ""
 
-#: ui/fab_panel.gd:98
+#: ui/fab_panel.gd:98 ui/surface_panel.gd:90
 msgid "More"
 msgstr ""
 
-#: ui/fab_panel.gd:103
+#: ui/fab_panel.gd:103 ui/surface_panel.gd:95
 msgid "Import"
 msgstr ""
 
@@ -1008,7 +1059,7 @@ msgstr ""
 msgid "Withdraw"
 msgstr ""
 
-#: ui/fab_panel.gd:147
+#: ui/fab_panel.gd:147 ui/surface_panel.gd:146
 #, c-format
 msgid "Results for “%s”"
 msgstr ""
@@ -1021,7 +1072,7 @@ msgstr ""
 msgid "Searching Fab..."
 msgstr ""
 
-#: ui/fab_panel.gd:157
+#: ui/fab_panel.gd:157 ui/surface_panel.gd:154
 msgid "Nothing found. Try other words, in English."
 msgstr ""
 
@@ -1029,7 +1080,7 @@ msgstr ""
 msgid "It is in your objects already."
 msgstr ""
 
-#: ui/fab_panel.gd:179
+#: ui/fab_panel.gd:179 ui/surface_panel.gd:180
 msgid "Pick one, then Import."
 msgstr ""
 
@@ -1043,17 +1094,17 @@ msgstr ""
 msgid "Asking Fab for %s..."
 msgstr ""
 
-#: ui/fab_panel.gd:369
+#: ui/fab_panel.gd:369 ui/surface_panel.gd:365
 #, c-format
 msgid "Downloading %s: %.1f of %.1f MB"
 msgstr ""
 
-#: ui/fab_panel.gd:370
+#: ui/fab_panel.gd:370 ui/surface_panel.gd:366
 #, c-format
 msgid "Downloading %s: %.1f MB"
 msgstr ""
 
-#: ui/fab_panel.gd:378 ui/fab_panel.gd:404
+#: ui/fab_panel.gd:378 ui/fab_panel.gd:404 ui/surface_panel.gd:374
 msgid "Cancelled."
 msgstr ""
 
@@ -1083,11 +1134,11 @@ msgstr ""
 msgid "This object's download is too big for the headset."
 msgstr ""
 
-#: ui/fab_panel.gd:400
+#: ui/fab_panel.gd:400 ui/surface_panel.gd:397
 msgid "A download is under way."
 msgstr ""
 
-#: ui/fab_panel.gd:402
+#: ui/fab_panel.gd:402 ui/surface_panel.gd:399
 #, c-format
 msgid "The import failed: %s"
 msgstr ""
@@ -1108,7 +1159,8 @@ msgstr ""
 msgid "Search Fab's free Megascans"
 msgstr ""
 
-#: ui/fab_panel.gd:120 ui/files_tab.gd:1329 ui/files_tab.gd:396 ui/search_form.gd:16
+#: ui/fab_panel.gd:120 ui/files_tab.gd:1329 ui/files_tab.gd:396 ui/picture_panel.gd:75
+#: ui/search_form.gd:16 ui/surface_panel.gd:125
 msgid "Search"
 msgstr ""
 
@@ -1823,7 +1875,7 @@ msgstr ""
 msgid "Hold the trigger and pass the controller over the place; let go to keep it."
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:43 ui/mixed_reality_tab.gd:76
+#: ui/mixed_reality_tab.gd:43 ui/mixed_reality_tab.gd:76 ui/picture_panel.gd:52
 msgid "None yet."
 msgstr ""
 
@@ -1851,7 +1903,8 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:104 ui/object_section.gd:128 ui/object_section.gd:371
+#: ui/mixed_reality_tab.gd:104 ui/object_section.gd:133 ui/object_section.gd:396 ui/picture_panel.gd:70
+#: ui/picture_panel.gd:199 ui/surface_panel.gd:119 ui/surface_panel.gd:468
 msgid "Delete"
 msgstr ""
 
@@ -1865,272 +1918,280 @@ msgstr ""
 msgid "%s deleted"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:732 ui/system_tab.gd:646 ui/ui_layer.gd:225
-#: ui/ui_layer.gd:399 ui/ui_layer.gd:917 ui/ui_layer.gd:921 ui/ui_layer.gd:949
+#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:646 ui/ui_layer.gd:225
+#: ui/ui_layer.gd:399 ui/ui_layer.gd:942 ui/ui_layer.gd:946 ui/ui_layer.gd:980
 msgid "Undo"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:885
+#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:910
 msgid "The headset's cameras can't show here."
 msgstr ""
 
-#: ui/object_section.gd:104
+#: ui/object_placer.gd:258
+msgid "Point at a part first"
+msgstr ""
+
+#: ui/object_section.gd:109
 msgid "Built-in objects"
 msgstr ""
 
-#: ui/object_section.gd:110 ui/object_section.gd:127
+#: ui/object_section.gd:115 ui/object_section.gd:132
 msgid "Place"
 msgstr ""
 
-#: ui/object_section.gd:112
+#: ui/object_section.gd:117
 msgid "Place: point at a wall or the floor, trigger to set it. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/object_section.gd:114
+#: ui/object_section.gd:119
 msgid "Your objects"
 msgstr ""
 
-#: ui/object_section.gd:115
+#: ui/object_section.gd:120
 msgid "Imported, or kept from a room."
 msgstr ""
 
-#: ui/object_section.gd:117
+#: ui/object_section.gd:122
 msgid "None yet: add one from Fab below."
 msgstr ""
 
-#: ui/object_section.gd:141
+#: ui/object_section.gd:146
 msgid "In Downloads, from Fab"
 msgstr ""
 
-#: ui/object_section.gd:148
+#: ui/object_section.gd:154
+msgid "Pictures"
+msgstr ""
+
+#: ui/object_section.gd:161
+msgid "Surfaces"
+msgstr ""
+
+#: ui/object_section.gd:167
 msgid "In this room"
 msgstr ""
 
-#: ui/object_section.gd:149
+#: ui/object_section.gd:168
 msgid "Nothing from the library yet."
 msgstr ""
 
-#: ui/object_section.gd:155
+#: ui/object_section.gd:174
 msgid "Tidy up"
 msgstr ""
 
-#: ui/object_section.gd:157
+#: ui/object_section.gd:176
 msgid "Pick up: point at an object and hold the grip. Let go to drop it, or throw it. Tidy up puts everything back."
 msgstr ""
 
-#: ui/object_section.gd:271 ui/object_section.gd:279
+#: ui/object_section.gd:296 ui/object_section.gd:304
 #, c-format
 msgid "Add %s"
 msgstr ""
 
-#: ui/object_section.gd:306 ui/object_section.gd:734
+#: ui/object_section.gd:331 ui/object_section.gd:759 ui/picture_panel.gd:182
 msgid "That didn't work."
 msgstr ""
 
-#: ui/object_section.gd:336
+#: ui/object_section.gd:361
 #, c-format
 msgid "%d part"
 msgid_plural "%d parts"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/object_section.gd:337
+#: ui/object_section.gd:362
 msgid "Pick an object, then Place."
 msgstr ""
 
-#: ui/object_section.gd:339
+#: ui/object_section.gd:364
 msgid "Pick one, then Place."
 msgstr ""
 
-#: ui/object_section.gd:369
+#: ui/object_section.gd:394 ui/picture_panel.gd:203
 #, c-format
 msgid "%s is in %s: remove it there first."
 msgstr ""
 
-#: ui/object_section.gd:371
+#: ui/object_section.gd:396
 #, c-format
 msgid "Delete %s from the library?"
 msgstr ""
 
-#: ui/object_section.gd:379 ui/object_section.gd:726
+#: ui/object_section.gd:404 ui/object_section.gd:751 ui/picture_panel.gd:207 ui/surface_panel.gd:476
 msgid "Keep"
 msgstr ""
 
-#: ui/object_section.gd:435
+#: ui/object_section.gd:460
 msgid "Move"
 msgstr ""
 
-#: ui/object_section.gd:436 ui/object_section.gd:723
+#: ui/object_section.gd:461 ui/object_section.gd:748
 msgid "Remove"
 msgstr ""
 
-#: ui/object_section.gd:441
+#: ui/object_section.gd:466
 msgid "Attach"
 msgstr ""
 
-#: ui/object_section.gd:445
+#: ui/object_section.gd:470
 msgid "Detach"
 msgstr ""
 
-#: ui/object_section.gd:447
+#: ui/object_section.gd:472
 msgid "Put back"
 msgstr ""
 
-#: ui/object_section.gd:452
+#: ui/object_section.gd:477
 #, c-format
 msgid "Follows %s"
 msgstr ""
 
-#: ui/object_section.gd:469
+#: ui/object_section.gd:494
 msgid "(changed)"
 msgstr ""
 
-#: ui/object_section.gd:471
+#: ui/object_section.gd:496
 msgid "Colour"
 msgstr ""
 
-#: ui/object_section.gd:474 ui/pane_ui.gd:52 ui/picture_tab.gd:288
-msgid "Picture"
-msgstr ""
-
-#: ui/object_section.gd:476
+#: ui/object_section.gd:501
 msgid "Material"
 msgstr ""
 
-#: ui/object_section.gd:479
+#: ui/object_section.gd:504
 msgid "Effect"
 msgstr ""
 
-#: ui/object_section.gd:482
+#: ui/object_section.gd:507
 msgid "Reset"
 msgstr ""
 
-#: ui/object_section.gd:642
+#: ui/object_section.gd:667
 msgid "Open a picture on the headset first (Files); then Picture puts it on the part."
 msgstr ""
 
-#: ui/object_section.gd:646
+#: ui/object_section.gd:671
 #, c-format
 msgid "That picture is too big for a part (at most %d MB)."
 msgstr ""
 
-#: ui/object_section.gd:656
+#: ui/object_section.gd:681
 msgid "its own colour"
 msgstr ""
 
-#: ui/object_section.gd:656
+#: ui/object_section.gd:681
 msgid "changed"
 msgstr ""
 
-#: ui/object_section.gd:680
+#: ui/object_section.gd:705
 msgid "Follows:"
 msgstr ""
 
-#: ui/object_section.gd:705
+#: ui/object_section.gd:730
 #, c-format
 msgid "%s follows %s"
 msgstr ""
 
-#: ui/object_section.gd:705
+#: ui/object_section.gd:730
 #, c-format
 msgid "%s stays where it is"
 msgstr ""
 
-#: ui/object_section.gd:711
+#: ui/object_section.gd:736
 #, c-format
 msgid "%s is back where it was placed"
 msgstr ""
 
-#: ui/object_section.gd:718
+#: ui/object_section.gd:743
 #, c-format
 msgid "Tidied up: %d object back"
 msgid_plural "Tidied up: %d objects back"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/object_section.gd:723
+#: ui/object_section.gd:748
 #, c-format
 msgid "Remove %s from the room?"
 msgstr ""
 
-#: ui/object_section.gd:726
+#: ui/object_section.gd:751
 #, c-format
 msgid "Removed %s"
 msgstr ""
 
-#: ui/object_section.gd:42
+#: ui/object_section.gd:44 ui/surface_panel.gd:27
 msgid "All"
 msgstr ""
 
-#: ui/object_section.gd:42
+#: ui/object_section.gd:44
 msgid "Floors"
 msgstr ""
 
-#: ui/object_section.gd:42
+#: ui/object_section.gd:44
 msgid "Walls"
 msgstr ""
 
-#: ui/object_section.gd:42
+#: ui/object_section.gd:44
 msgid "Fabric"
 msgstr ""
 
-#: ui/object_section.gd:42
+#: ui/object_section.gd:44
 msgid "Wood"
 msgstr ""
 
-#: ui/object_section.gd:42
+#: ui/object_section.gd:44
 msgid "Leather"
 msgstr ""
 
-#: ui/object_section.gd:42
+#: ui/object_section.gd:44
 msgid "Metal"
 msgstr ""
 
-#: ui/object_section.gd:42
+#: ui/object_section.gd:44
 msgid "Stone"
 msgstr ""
 
-#: ui/object_section.gd:46
+#: ui/object_section.gd:48
 msgid "Classic"
 msgstr ""
 
-#: ui/object_section.gd:46
+#: ui/object_section.gd:48
 msgid "Energy"
 msgstr ""
 
-#: ui/object_section.gd:46
+#: ui/object_section.gd:48
 msgid "Nature"
 msgstr ""
 
-#: ui/object_section.gd:46
+#: ui/object_section.gd:48
 msgid "Reactive"
 msgstr ""
 
-#: ui/object_section.gd:47
+#: ui/object_section.gd:49
 msgid "Skies"
 msgstr ""
 
-#: ui/object_section.gd:47
+#: ui/object_section.gd:49
 msgid "Stylised"
 msgstr ""
 
-#: ui/object_section.gd:47
+#: ui/object_section.gd:49
 msgid "Transitions"
 msgstr ""
 
-#: ui/object_section.gd:47
+#: ui/object_section.gd:49
 msgid "Materials"
 msgstr ""
 
-#: ui/object_section.gd:50
+#: ui/object_section.gd:52
 msgid "free"
 msgstr ""
 
-#: ui/object_section.gd:50
+#: ui/object_section.gd:52
 msgid "wall"
 msgstr ""
 
-#: ui/object_section.gd:50
+#: ui/object_section.gd:52
 msgid "floor"
 msgstr ""
 
@@ -2236,6 +2297,47 @@ msgstr ""
 
 #: ui/pane_widgets.gd:12
 msgid "General"
+msgstr ""
+
+#: ui/picture_panel.gd:48 ui/picture_panel.gd:75
+msgid "Find pictures"
+msgstr ""
+
+#: ui/picture_panel.gd:49
+msgid "Browse yourself. On an image, the right stick click keeps it; Copy image and saving to Downloads keep it too."
+msgstr ""
+
+#: ui/picture_panel.gd:65
+msgid "Place as:"
+msgstr ""
+
+#: ui/picture_panel.gd:67
+msgid "Framed"
+msgstr ""
+
+#: ui/picture_panel.gd:70 ui/surface_panel.gd:116
+msgid "Apply to a part"
+msgstr ""
+
+#: ui/picture_panel.gd:72
+msgid "Kept pictures stay on this headset, for your own use: the app never uploads or shares them."
+msgstr ""
+
+#: ui/picture_panel.gd:111
+msgid "Pick a picture, then place it or apply it."
+msgstr ""
+
+#: ui/picture_panel.gd:171
+msgid "On an image, the right stick click keeps it."
+msgstr ""
+
+#: ui/picture_panel.gd:199
+#, c-format
+msgid "Delete %s from your pictures?"
+msgstr ""
+
+#: ui/picture_panel.gd:75
+msgid "words to search for, such as autumn forest"
 msgstr ""
 
 #: ui/picture_tab.gd:144
@@ -2657,7 +2759,7 @@ msgstr ""
 msgid "Built in"
 msgstr ""
 
-#: ui/room_tab.gd:92
+#: ui/room_tab.gd:92 ui/surface_panel.gd:27
 msgid "Yours"
 msgstr ""
 
@@ -2669,7 +2771,7 @@ msgstr ""
 msgid "Showrooms"
 msgstr ""
 
-#: ui/room_tab.gd:107 ui/ui_layer.gd:968
+#: ui/room_tab.gd:107 ui/ui_layer.gd:999
 msgid "Seat"
 msgstr ""
 
@@ -3250,7 +3352,7 @@ msgstr ""
 msgid "No subtitle files found for this video"
 msgstr ""
 
-#: ui/subtitles_tab.gd:208
+#: ui/subtitles_tab.gd:208 ui/surface_panel.gd:150
 msgid "Searching..."
 msgstr ""
 
@@ -3300,6 +3402,75 @@ msgstr ""
 
 #: ui/subtitles_tab.gd:113
 msgid "Find a line by its words (\"quoted phrases\" too)"
+msgstr ""
+
+#: ui/surface_panel.gd:71 ui/surface_panel.gd:125
+msgid "Find surfaces"
+msgstr ""
+
+#: ui/surface_panel.gd:121
+msgid "Apply: point at a wall, the floor, a seat or an object's part; the trigger puts it there. Stick: size and turn the pattern."
+msgstr ""
+
+#: ui/surface_panel.gd:147 ui/surface_panel.gd:401
+msgid "Search for a surface by its name, in English."
+msgstr ""
+
+#: ui/surface_panel.gd:176 ui/surface_panel.gd:372
+msgid "It is in your materials already."
+msgstr ""
+
+#: ui/surface_panel.gd:361
+#, c-format
+msgid "Asking for %s..."
+msgstr ""
+
+#: ui/surface_panel.gd:383
+msgid "Accept Fab's licence in Your objects first."
+msgstr ""
+
+#: ui/surface_panel.gd:385
+#, c-format
+msgid "The site is busy: the app waits %d s before it asks again."
+msgstr ""
+
+#: ui/surface_panel.gd:387
+msgid "The site can't be reached. Is the headset online?"
+msgstr ""
+
+#: ui/surface_panel.gd:389
+#, c-format
+msgid "The site answered with an error (HTTP %d). Try again later."
+msgstr ""
+
+#: ui/surface_panel.gd:391
+msgid "The site's answer was not as expected. Try again later."
+msgstr ""
+
+#: ui/surface_panel.gd:393
+msgid "This surface has no download the app can use."
+msgstr ""
+
+#: ui/surface_panel.gd:395
+msgid "This surface's download is too big for the headset."
+msgstr ""
+
+#: ui/surface_panel.gd:440
+msgid "Pick a material, then Apply to a part."
+msgstr ""
+
+#: ui/surface_panel.gd:443 ui/surface_panel.gd:445
+#, c-format
+msgid "%.1f m a repeat"
+msgstr ""
+
+#: ui/surface_panel.gd:468
+#, c-format
+msgid "Delete %s from your materials?"
+msgstr ""
+
+#: ui/surface_panel.gd:125
+msgid "words in English, such as brick or oak floor"
 msgstr ""
 
 #: ui/system_tab.gd:124
@@ -3663,41 +3834,57 @@ msgstr ""
 msgid "Seat unchanged"
 msgstr ""
 
-#: ui/ui_layer.gd:853
+#: ui/ui_layer.gd:856
+msgid "That can't be applied here"
+msgstr ""
+
+#: ui/ui_layer.gd:860
+msgid "Point at a part and pull the trigger. Stick: size and turn the pattern. B cancels."
+msgstr ""
+
+#: ui/ui_layer.gd:861
+msgid "Point at a part and pull the trigger. B cancels."
+msgstr ""
+
+#: ui/ui_layer.gd:873
 msgid "That object can't be placed here"
 msgstr ""
 
-#: ui/ui_layer.gd:857
+#: ui/ui_layer.gd:877
 msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:886
+#: ui/ui_layer.gd:911
 msgid "That's as many areas as there can be: delete one first."
 msgstr ""
 
-#: ui/ui_layer.gd:903 ui/ui_layer.gd:914
+#: ui/ui_layer.gd:928 ui/ui_layer.gd:939
 msgid "Nothing marked"
 msgstr ""
 
-#: ui/ui_layer.gd:917
+#: ui/ui_layer.gd:942
 #, c-format
 msgid "%s added: the cameras show there"
 msgstr ""
 
-#: ui/ui_layer.gd:921
+#: ui/ui_layer.gd:946
 #, c-format
 msgid "%s changed"
 msgstr ""
 
-#: ui/ui_layer.gd:938
+#: ui/ui_layer.gd:964
+msgid "Nothing changed"
+msgstr ""
+
+#: ui/ui_layer.gd:964
 msgid "Nothing placed"
 msgstr ""
 
-#: ui/ui_layer.gd:952
+#: ui/ui_layer.gd:983
 msgid "Not placed"
 msgstr ""
 
-#: ui/ui_layer.gd:966
+#: ui/ui_layer.gd:997
 msgid "No seat there"
 msgstr ""
 

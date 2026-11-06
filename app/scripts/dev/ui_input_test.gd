@@ -342,7 +342,8 @@ func _section_click_checks(ui: PaneUI) -> void:
 		_check("Picture: clicking %s shows its card alone (%s)" % [want, on_show.call()], ui.section_shown() == want
 				and on_show.call() == [want] and b != null and b.button_pressed)
 	# The other tabs with sections of their own.
-	for spec: Array in [[PaneUI.Tab.OBJECTS, ["Built-in objects", "Your objects", "In this room"]],
+	for spec: Array in [[PaneUI.Tab.OBJECTS, ["Built-in objects", "Your objects", "Pictures", "Surfaces",
+			"In this room"]],
 			[PaneUI.Tab.MIXED_REALITY, ["Areas", "Settings"]]]:
 		await _rail(ui, spec[0])
 		await _frames(2)

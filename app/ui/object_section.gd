@@ -24,6 +24,8 @@ const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const EffectLibrary := preload("res://scripts/effects/effect_library.gd")
 const FabImport := preload("res://scripts/assistant/fab_import.gd")
 const FabPanel := preload("res://ui/fab_panel.gd")
+const PicturePanel := preload("res://ui/picture_panel.gd")
+const SurfacePanel := preload("res://ui/surface_panel.gd")
 
 const COLUMNS := 4
 ## Pixels on the pane: the thumbnail as drawn, and the name under it. A tile's minimum is TILE_MIN wide; the grid's
@@ -96,6 +98,9 @@ var fab: FabPanel
 var _fab_buttons: VBoxContainer
 var _fab_paths: Array = []
 var _adding := false
+## Objects → Pictures (ui/picture_panel.gd) and Objects → Surfaces (ui/surface_panel.gd).
+var pictures: PicturePanel
+var surfaces: SurfacePanel
 
 
 func bind(p_app: Node) -> void:
@@ -145,6 +150,20 @@ func bind(p_app: Node) -> void:
 	_fab_box.visible = false
 	add_child(_fab_box)
 
+	# Pictures kept from the browser, as posters, frames, canvases and cut-outs, or on any part (the user, 2026-11-06).
+	add_child(W.section("Pictures"))
+	pictures = PicturePanel.new()
+	pictures.size_tile = _size_tile
+	pictures.on_made = func(id: String) -> void: _selected = id
+	add_child(pictures)
+	pictures.bind(app, self)
+	# Surfaces from Megascans, Poly Haven and ambientCG, and the materials to apply to a part.
+	add_child(W.section("Surfaces"))
+	surfaces = SurfacePanel.new()
+	surfaces.size_tile = _size_tile
+	add_child(surfaces)
+	surfaces.bind(app, self)
+
 	add_child(W.section("In this room"))
 	_empty = W.label("Nothing from the library yet.", &"MutedLabel")
 	add_child(_empty)
@@ -172,6 +191,10 @@ func sync_objects() -> void:
 	_sync_placed()
 	if fab != null:
 		fab.sync()
+	if pictures != null:
+		pictures.sync()
+	if surfaces != null:
+		surfaces.sync()
 
 
 # --- The library -------------------------------------------------------------------------------------------------
@@ -182,8 +205,10 @@ func _sync_library() -> void:
 		return
 	_loading = true
 	var r: Dictionary = await WorkerTask.run(get_tree(), func() -> Variant:
-		# Text and particles are made from their options (an assistant's): not placed from here.
-		var list := ObjectLibrary.list().filter(func(m: Dictionary) -> bool: return not m.has("generator"))
+		# Text and particles are made from their options (an assistant's): not placed from here. The objects made from
+		# a kept picture are under Pictures (picture_panel.gd), not here.
+		var list := ObjectLibrary.list().filter(func(m: Dictionary) -> bool:
+			return not m.has("generator") and not m.has("picture_id"))
 		for m: Dictionary in list:
 			ObjectLibrary.thumbnail(str(m["id"]))
 		return {"list": list, "fab": FabImport.downloads()})
