@@ -606,9 +606,8 @@ func _set_c() -> void:
 			await _frames(2)
 			_plain_content_skipped(pui.tabs[tab], plain)
 	_check("pseudo: no plain English on the Room, Objects and Mixed reality tabs (%s)" % " | ".join(plain), plain.is_empty())
-	# Every card fits its tab in Chinese and in the pseudo-locale (the longest), or is no wider than in English (the
-	# Objects tab's grid of four thumbnails is wider than the tab in English too).
-	var english := {}
+	# Every card fits its tab, in English, in Chinese and in the pseudo-locale (the longest). The Objects tab's grids
+	# size their tiles to the card (object_section.gd _size_tile()).
 	for code: String in ["en", "zh_CN", I18n.PSEUDO]:
 		I18n.set_language(code)
 		for tab: int in [pui.Tab.ROOM, pui.Tab.OBJECTS, pui.Tab.MIXED_REALITY]:
@@ -621,14 +620,22 @@ func _set_c() -> void:
 				for c: Control in pui.cards(tab):
 					if c.get_parent() == null or not c.is_visible_in_tree():
 						continue
-					var key := "%d %s" % [tab, W.card_section(c)]
 					var w := c.get_combined_minimum_size().x
-					if code == "en":
-						english[key] = w
-					elif w > maxf(width, float(english.get(key, 0.0))) + 0.5:
-						wide.append("%s %s %.0f of %.0f (English %.0f)" % [code, W.card_section(c), w, width,
-								float(english.get(key, 0.0))])
-	_check("every card of the three tabs fits, in Chinese and pseudo (%s)" % " | ".join(wide), wide.is_empty())
+					if w > width + 0.5:
+						wide.append("%s %s %.0f of %.0f" % [code, W.card_section(c), w, width])
+	_check("every card of the three tabs fits, in English, Chinese and pseudo (%s)" % " | ".join(wide), wide.is_empty())
+	# The built-in objects' tiles fill their grid's width, four to a row.
+	I18n.set_language("en")
+	pui.show_tab(pui.Tab.OBJECTS)
+	pui.show_section("Built-in objects")
+	await _frames(3)
+	var obj_grid: GridContainer = main.ui.ui.objects.section._grid
+	var obj_gap := float(obj_grid.get_theme_constant("h_separation"))
+	var first_tile := obj_grid.get_child(0) as Control if obj_grid.get_child_count() > 0 else null
+	var tile_side := first_tile.size.x if first_tile != null else 0.0
+	_check("Objects: four square tiles fill the grid (%.0f px each, grid %.0f)" % [tile_side, obj_grid.size.x], first_tile != null
+			and 4.0 * tile_side + 3.0 * obj_gap <= obj_grid.size.x + 0.5 and 4.0 * (tile_side + 1.0) + 3.0 * obj_gap > obj_grid.size.x - 0.5
+			and absf(first_tile.size.y - tile_side - 26.0) < 1.0)
 	I18n.set_language("en")
 	pui.show_tab(pui.Tab.FILES)
 	await _frames(1)

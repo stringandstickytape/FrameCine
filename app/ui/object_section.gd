@@ -28,8 +28,12 @@ const WebPages := preload("res://scripts/net/web_pages.gd")
 const FAB_URL := "https://www.fab.com/sellers/Quixel%20Megascans?is_free=1"
 
 const COLUMNS := 4
-## Pixels on the pane: the thumbnail, and the name under it.
+## Pixels on the pane: the thumbnail as drawn, and the name under it. A tile's minimum is TILE_MIN wide; the grid's
+## columns share what is left of its width (each tile expands), and a tile is as tall as it is wide, plus the name
+## (_size_tile()). So four always fit the card, whatever its width, and the grid's minimum never follows the tiles.
+## TILE_MIN keeps a grid wider than half the tab, so its card has a row of its own (W.refresh_cards()).
 const THUMB := Vector2i(120, 120)
+const TILE_MIN := 88
 const CARD_TEXT := 26
 const SWATCH := Vector2(28, 28)
 ## The colours a part can take from the palette, as text (the panel's own colours are the theme's).
@@ -204,32 +208,46 @@ func _tile(m: Dictionary, group: ButtonGroup) -> void:
 	b.theme_type_variation = &"RowButton"
 	b.toggle_mode = true
 	b.button_group = group
-	b.custom_minimum_size = Vector2(THUMB.x, THUMB.y + CARD_TEXT)
 	var img := ObjectLibrary.thumbnail(id)
 	if img != null:
 		var art := TextureRect.new()
 		art.texture = ImageTexture.create_from_image(img)
 		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		art.position = Vector2.ZERO
-		art.size = Vector2(THUMB)
+		art.name = "Art"
 		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(art)
 	var title := W.ellipsis(W.label(str(m["name"])))
 	# A built-in's name is a key (object_builtins.gd); the viewer's own object's is content.
 	if not ObjectLibrary.is_builtin(id):
 		W.content(title)
-	title.position = Vector2(4, THUMB.y + 2)
-	title.size = Vector2(THUMB.x - 8, 20)
-	title.custom_minimum_size = Vector2(THUMB.x - 8, 0)
+	title.name = "Title"
 	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	b.add_child(title)
 	b.pressed.connect(func() -> void:
 		_selected = id
 		_sync_chosen()
 		_show_place())
-	(_grid if str(m.get("source", "user")) == "builtin" else _yours_grid).add_child(b)
+	var grid := _grid if str(m.get("source", "user")) == "builtin" else _yours_grid
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.custom_minimum_size = Vector2(TILE_MIN, TILE_MIN + CARD_TEXT)
+	b.resized.connect(_size_tile.bind(b))
+	grid.add_child(b)
 	_tiles[id] = b
+
+
+## A tile's thumbnail and name for its width (the grid's share), and its height: square, plus the name.
+func _size_tile(b: Button) -> void:
+	var side := b.size.x
+	if absf(b.custom_minimum_size.y - (side + CARD_TEXT)) > 0.5:
+		b.custom_minimum_size.y = side + CARD_TEXT
+	var art := b.get_node_or_null("Art") as Control
+	if art != null:
+		art.position = Vector2.ZERO
+		art.size = Vector2(side, side)
+	var title := b.get_node("Title") as Control
+	title.position = Vector2(4, side + 2)
+	title.size = Vector2(side - 8, 20)
 
 
 ## A button for each Fab zip in Downloads; pressing it adds the asset as one of the viewer's objects.
@@ -297,6 +315,7 @@ func _tile_grid() -> GridContainer:
 	g.columns = COLUMNS
 	g.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
 	g.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	g.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return g
 
 
