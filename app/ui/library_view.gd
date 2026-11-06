@@ -5,6 +5,8 @@ extends RefCounted
 ## Rows go through the tab (add_library_row), so one click opens, the playlist is the rows on show, and focus and tests
 ## work as in any folder. What was watched comes from the resume data, shown by marks that update in place.
 ## Pictures come from scripts/library/library_images.gd: nothing here touches a file.
+## Languages (docs/i18n.md): titles, plots, genres and episode numbers are the NFOs' (content); the rows and the page
+## heads are content controls, and the words built around them (counts, "Watched", minutes) are translated here.
 
 const LibraryImages := preload("res://scripts/library/library_images.gd")
 const W := preload("res://ui/pane_widgets.gd")
@@ -24,7 +26,7 @@ const HERO_PLOT_LINES := 5
 const ROW_PLOT_LINES := 2
 ## How far the fanart shows through behind a page's title.
 const FANART_ALPHA := 0.32
-const EMPTY_TEXT := "Nothing here yet. Ask an agent on the headset to fill it, or add folders to %s"
+const EMPTY_TEXT := "Nothing here yet. Ask an agent on the headset to fill it, or add folders to %s" # i18n
 
 var tab: Control
 var images: Node
@@ -74,7 +76,7 @@ func _draw_home(data: Dictionary) -> void:
 		tab.add_library_control(W.section("Films"))
 		_grid(films)
 	if shows.is_empty() and films.is_empty() and (data["plain"] as Array).is_empty():
-		var l := _plot(EMPTY_TEXT % tab.current, HERO_PLOT_LINES)
+		var l := _plot(tr(EMPTY_TEXT) % tab.current, HERO_PLOT_LINES)
 		l.custom_minimum_size.y = PaneStyle.constant(&"row_height") * 2
 		tab.add_library_control(l)
 	_plain(data)
@@ -152,6 +154,7 @@ func _card(grid: Control, c: Dictionary) -> void:
 ## A page's head: the fanart dim behind the poster, the title, a line of facts and the plot.
 func _hero(title: String, facts: String, plot: String, poster: String, fanart: String) -> void:
 	var hero := Control.new()
+	W.content(hero)
 	hero.custom_minimum_size = Vector2(0, HERO.y)
 	hero.clip_contents = true
 	hero.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -185,7 +188,7 @@ func _draw_show(data: Dictionary) -> void:
 	if int(c["year"]) > 0:
 		facts.append(str(c["year"]))
 	if seasons.size() > 0:
-		facts.append("%d season%s" % [seasons.size(), "" if seasons.size() == 1 else "s"])
+		facts.append(tr_n("%d season", "%d seasons", seasons.size()) % seasons.size())
 	for g: String in (c["genre"] as Array).slice(0, 2):
 		facts.append(g)
 	if tab.view != "list":
@@ -194,17 +197,27 @@ func _draw_show(data: Dictionary) -> void:
 		var b := _row(SEASON_ROW)
 		var line := W.hbox()
 		_fill(b, line)
-		line.add_child(_mouseless(W.ellipsis(W.label(str(s["title"])))))
+		var season := season_name(str(s["title"]), int(s["number"]))
+		line.add_child(_mouseless(W.ellipsis(W.label(season))))
 		var mark := _mouseless(W.label("", &"MutedLabel"))
 		line.add_child(mark)
 		_marks.append({"keys": s["keys"], "label": mark, "bar": null, "show": true, "year": 0})
-		tab.add_library_row(b, {"kind": "dir", "path": str(s["path"]), "text": str(s["title"])})
+		tab.add_library_row(b, {"kind": "dir", "path": str(s["path"]), "text": season})
 	_files(data["episodes"])
 
 
 func _draw_season(data: Dictionary) -> void:
-	tab.set_library_title("%s, %s" % [data["show"], data["title"]])
+	tab.set_library_title("%s, %s" % [data["show"], season_name(str(data["title"]), int(data.get("number", -1)))])
 	_files(data["episodes"])
+
+
+## A season's name: the index's own "Season 3" and "Specials" in the menus' language; a name from the NFO as it is.
+static func season_name(title: String, number: int) -> String:
+	if number > 0 and title == "Season %d" % number:
+		return TranslationServer.translate("Season %d") % number
+	if number == 0 and title == "Specials":
+		return TranslationServer.translate("Specials")
+	return title
 
 
 func _draw_film(f: Dictionary) -> void:
@@ -212,7 +225,7 @@ func _draw_film(f: Dictionary) -> void:
 	if int(f["year"]) > 0:
 		facts.append(str(f["year"]))
 	if int(f["runtime"]) > 0:
-		facts.append("%d min" % int(f["runtime"]))
+		facts.append(tr("%d min") % int(f["runtime"]))
 	for g: String in (f["genre"] as Array).slice(0, 2):
 		facts.append(g)
 	if tab.view != "list":
@@ -220,11 +233,12 @@ func _draw_film(f: Dictionary) -> void:
 	var b := _row(SEASON_ROW)
 	var line := W.hbox()
 	_fill(b, line)
-	line.add_child(_mouseless(W.ellipsis(W.label("Play"))))
+	# The row is a content control (add_library_row()): its word is translated here.
+	line.add_child(_mouseless(W.ellipsis(W.label(tr("Play")))))
 	var mark := _mouseless(W.label("", &"MutedLabel"))
 	line.add_child(mark)
 	_marks.append({"keys": f["keys"], "label": mark, "bar": null, "show": false, "year": 0, "runtime": f["runtime"]})
-	tab.add_library_row(b, {"kind": "file", "path": str(f["video"]), "text": "Play"})
+	tab.add_library_row(b, {"kind": "file", "path": str(f["video"]), "text": tr("Play")})
 
 
 ## Thumbnail, S01E01, title and on the right how far it was watched; the short plot under them. The list view: the
@@ -295,6 +309,7 @@ func _episode_row(e: Dictionary, flow: Control = null) -> void:
 ## A plot, wrapped, the last line it has room for ending in dots if there is more.
 func _plot(text: String, lines: int) -> Label:
 	var l := W.label(text, &"MutedLabel")
+	W.content(l)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.max_lines_visible = lines
 	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -396,17 +411,18 @@ func update_marks() -> void:
 		var words := ""
 		if bool(m.get("show", false)):
 			if seen >= total and total > 0:
-				words = "Watched"
+				words = tr("Watched")
 			elif seen > 0:
-				words = "%d of %d" % [seen, total]
+				# Episodes watched of the show's or the season's.
+				words = tr("%d of %d") % [seen, total]
 			elif text == "" and total > 0:
-				words = "%d episode%s" % [total, "" if total == 1 else "s"]
+				words = tr_n("%d episode", "%d episodes", total) % total
 		elif seen > 0:
-			words = "Watched"
+			words = tr("Watched")
 		elif position > 0.0:
 			words = "%s ▶" % W.short_clock(position)
 		elif int(m.get("runtime", 0)) > 0:
-			words = "%d min" % int(m["runtime"])
+			words = tr("%d min") % int(m["runtime"])
 		label.text = "  ".join(PackedStringArray([text, words])).strip_edges() if text != "" else words
 		label.theme_type_variation = &"AccentLabel" if seen > 0 or position > 0.0 else label.theme_type_variation
 		var bar: Control = m["bar"]

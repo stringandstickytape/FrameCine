@@ -9,25 +9,46 @@ const LabCard := preload("res://scripts/video/lab_card.gd")
 const LAB_SCHEME := "lab://"
 
 ## [id, label, card, mode id, width, height, content fps (0: static, redrawn at 10 Hz; -1: a still, drawn once),
-## description]
+## description]. The label is on a line of its own, marked: it is a key (docs/i18n.md), and the menus translate it
+## (the System tab's card buttons). The ids and the description (drawn into the picture) are not keys.
 const CARDS: Array = [
-	["alignment", "Per-eye alignment", "alignment", "flat_sbs", 3840, 1080, 0.0,
+	["alignment",
+			"Per-eye alignment", # i18n
+			"alignment", "flat_sbs", 3840, 1080, 0.0,
 			"Nonius lines and grids per eye: the half-lines meet in one cross when the eyes line up."],
-	["convergence", "Convergence and IPD", "convergence", "flat_sbs", 3840, 1080, 0.0,
+	["convergence",
+			"Convergence and IPD", # i18n
+			"convergence", "flat_sbs", 3840, 1080, 0.0,
 			"Rings from near to far: every ring should fuse into one."],
-	["judder_24", "Judder 24 fps", "judder", "flat_mono", 1280, 720, 24.0,
+	["judder_24",
+			"Judder 24 fps", # i18n
+			"judder", "flat_mono", 1280, 720, 24.0,
 			"Motion at the film rate: the bar should glide evenly."],
-	["judder_30", "Judder 30 fps", "judder", "flat_mono", 1280, 720, 30.0, "Motion at 30 fps."],
-	["judder_60", "Judder 60 fps", "judder", "flat_mono", 1280, 720, 60.0, "Motion at 60 fps."],
-	["av_sync", "A/V sync", "av_sync", "flat_mono", 1280, 720, 60.0,
+	["judder_30",
+			"Judder 30 fps", # i18n
+			"judder", "flat_mono", 1280, 720, 30.0, "Motion at 30 fps."],
+	["judder_60",
+			"Judder 60 fps", # i18n
+			"judder", "flat_mono", 1280, 720, 60.0, "Motion at 60 fps."],
+	["av_sync",
+			"A/V sync", # i18n
+			"av_sync", "flat_mono", 1280, 720, 60.0,
 			"A flash and a beep each second: move the A/V offset until they land together."],
-	["zoneplate", "Zone plate, flat 4K", "zoneplate", "flat_mono", 3840, 2160, -1.0,
+	["zoneplate",
+			"Zone plate, flat 4K", # i18n
+			"zoneplate", "flat_mono", 3840, 2160, -1.0,
 			"Rings down to the finest the frame holds: false rings show where the picture aliases."],
-	["zoneplate_360", "Zone plate, 360° 8K", "zoneplate", "360_mono", 7680, 3840, -1.0,
+	["zoneplate_360",
+			"Zone plate, 360° 8K", # i18n
+			"zoneplate", "360_mono", 7680, 3840, -1.0,
 			"The zone plate as an 8K 360° frame: shrunk about 2 times on the display."],
-	["starfield_360", "Starfield, 360° 8K", "starfield", "360_mono", 7680, 3840, -1.0,
+	["starfield_360",
+			"Starfield, 360° 8K", # i18n
+			"starfield", "360_mono", 7680, 3840, -1.0,
 			"Single-pixel stars in an 8K 360° frame: they should stay steady as you turn, not twinkle."],
-	["gradient", "Dark gradient, flat 4K", "gradient", "flat_mono", 3840, 2160, -1.0,
+	["gradient",
+			"Dark gradient, flat 4K", # i18n
+			"gradient", "flat_mono", 3840, 2160, -1.0,
 			"Dark grey and blue ramps in 8 bits: bands show unless Smooth banding hides them."],
 ]
 ## The A/V sync card's audio (idea #24): a 30 ms 1 kHz beep at each whole second, silence between. 8-bit at 8 kHz:

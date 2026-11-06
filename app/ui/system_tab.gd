@@ -174,8 +174,8 @@ func bind(p_app: Node) -> void:
 	var cards := W.hbox()
 	for card: Dictionary in TestLab.cards():
 		var card_path: String = card["path"]
+		# The card's name is a key (scripts/video/lab_video_source.gd CARDS): the button translates it.
 		var card_button := W.button(str(card["label"]), func() -> void: app.open_path(card_path, false))
-		W.content(card_button)
 		cards.add_child(card_button)
 	box.add_child(W.label("Calibration cards", &"MutedLabel"))
 	var cards_scroll := ScrollContainer.new()

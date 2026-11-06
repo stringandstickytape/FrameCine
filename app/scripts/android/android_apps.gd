@@ -126,14 +126,16 @@ func on_big_screen() -> bool:
 			and (src as WindowVideoSource).window_id == _window
 
 
-## What the Files place says about now, or "".
-func status_line() -> String:
+## What the Files place says about now, or "". `localised`: in the menus' language (docs/i18n.md), the steps marked
+## i18n too; the app's name and the failure's own words stay as they are.
+func status_line(localised := false) -> String:
+	var t := func(s: String) -> String: return tr(s) if localised else s
 	match state:
 		State.STARTING, State.STOPPING:
-			return "%s: %s ..." % [label(), step]
+			return "%s: %s ..." % [label(), t.call(step)]
 		State.RUNNING:
-			return "%s is on the big screen" % label()
-	return "Last try: %s" % last_error.get_slice("\n", 0) if last_error != "" else ""
+			return t.call("%s is on the big screen") % label() # i18n
+	return t.call("Last try: %s") % last_error.get_slice("\n", 0) if last_error != "" else "" # i18n
 
 
 ## For the dev link. Steps, names and reasons only.
@@ -189,14 +191,14 @@ func _refuse(why: String) -> String:
 
 ## The steps of a start, one after another. Each await can come back to a start that was cancelled.
 func _start(run: int) -> void:
-	_set_step("Getting ready")
+	_set_step("Getting ready") # i18n
 	_show_card(true)
 	var r := runner
 	var left_over: Variant = await _job(func() -> Variant: return Lepton.units_alive(r))
 	if not _live(run):
 		return
 	if left_over == true:
-		_set_step("Clearing what was left from last time")
+		_set_step("Clearing what was left from last time") # i18n
 		var cleared: bool = await _stop_units(run)
 		if not _live(run):
 			return
@@ -207,7 +209,7 @@ func _start(run: int) -> void:
 	if why != "":
 		_fail(why)
 		return
-	_set_step("Starting the display")
+	_set_step("Starting the display") # i18n
 	why = await _spawn(func() -> String: return Lepton.start_display(r))
 	if not _live(run):
 		return
@@ -221,7 +223,7 @@ func _start(run: int) -> void:
 		_note_log(Lepton.LogTail.new(Lepton.display_log()))
 		_fail("The display's window did not come within %d seconds.%s" % [display_timeout, _log_words()])
 		return
-	_set_step("Starting Android")
+	_set_step("Starting Android") # i18n
 	_tail = Lepton.LogTail.new(Lepton.run_log())
 	why = await _spawn(func() -> String: return Lepton.start_android(r))
 	if not _live(run):
@@ -231,7 +233,7 @@ func _start(run: int) -> void:
 		return
 	if not await _follow_log(run):
 		return
-	_set_step("Opening the app")
+	_set_step("Opening the app") # i18n
 	if await _open_app(run, app["apk"], package):
 		_show()
 
@@ -381,7 +383,7 @@ func _show() -> void:
 		return
 	if main.ui != null and main.ui.has_method("hide_panel"):
 		main.ui.hide_panel()
-	_set_step("Ready")
+	_set_step("Ready") # i18n
 	_show_card(false, READY_SECONDS, _card_text(false))
 	changed.emit()
 

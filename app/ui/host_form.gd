@@ -9,6 +9,10 @@ signal saved(index: int, entry: Dictionary)
 signal deleted(index: int)
 signal cancelled
 
+## The fields in order: key (the saved entry's) -> label.
+const FIELDS := {"host": "Host", "share": "Share", "user": "User", "password": "Password", "domain": "Domain"} # i18n
+const HINTS := {"host": "nas.local or 192.168.1.10", "share": "optional", "domain": "optional"} # i18n
+
 var _index := -1
 var _fields := {}
 var _keyboard: OnscreenKeyboard
@@ -28,21 +32,21 @@ func _ready() -> void:
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 4)
 	add_child(grid)
-	for spec: Array in [["host", "Host"], ["share", "Share"], ["user", "User"], ["password", "Password"],
-			["domain", "Domain"]]:
+	# The labels and the hints translate themselves (docs/i18n.md); what the viewer types in a field never does.
+	for key: String in FIELDS:
 		var l := Label.new()
-		l.text = spec[1]
+		l.text = FIELDS[key]
 		grid.add_child(l)
 		var e := LineEdit.new()
 		e.custom_minimum_size = Vector2(150, 0)
 		e.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		e.virtual_keyboard_enabled = false
-		e.placeholder_text = {"host": "nas.local or 192.168.1.10", "share": "optional", "domain": "optional"}.get(spec[0], "")
-		if spec[0] == "password":
+		e.placeholder_text = HINTS.get(key, "")
+		if key == "password":
 			e.secret = true
 		e.focus_entered.connect(func() -> void: _keyboard.target = e)
 		grid.add_child(e)
-		_fields[spec[0]] = e
+		_fields[key] = e
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 10)
 	buttons.add_child(_title)
