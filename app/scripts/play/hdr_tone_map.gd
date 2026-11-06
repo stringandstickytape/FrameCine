@@ -100,13 +100,13 @@ static func describe(info: Dictionary) -> Dictionary:
 	if mdl is Vector2 and (mdl as Vector2).y > 0.0:
 		mastering = (mdl as Vector2).y
 	var peak := DEFAULT_PEAK_NITS
-	var from := "default"
+	var from := "default" # i18n
 	if cll > 0.0:
 		peak = minf(cll, mastering) if mastering > 0.0 else cll
-		from = "content light level"
+		from = "content light level" # i18n
 	elif mastering > 0.0:
 		peak = mastering
-		from = "mastering display"
+		from = "mastering display" # i18n
 	return {"matrix": matrix, "transfer": transfer, "primaries_bt2020": bt2020,
 			"full_range": dovi == 0 and (bool(info.get("full_range", false)) or str(info.get("color_range", "")) == "pc"),
 			"dovi": dovi,
@@ -126,12 +126,22 @@ func is_hdr() -> bool:
 	return int(current["transfer"]) != TRANSFER_SDR
 
 
-func text() -> String:
+## The HDR line: "HDR10 (PQ), peak 1000 nits (mastering display), tone mapping off". English for the dev link;
+## localised: in the menus' language (the Picture tab, docs/i18n.md).
+func text(localised := false) -> String:
 	if not is_hdr():
 		return ""
 	var kind := "HDR10 (PQ)" if int(current["transfer"]) == TRANSFER_PQ else "HLG"
 	if int(current.get("dovi", 0)) == 1:
-		kind = "DV profile 5 (IPT, as PQ)"
+		kind = "DV profile 5 (IPT, as PQ)" # i18n
+	if localised:
+		var line: String = TranslationServer.translate("%s, peak %d nits (%s)") % [TranslationServer.translate(kind),
+				roundi(float(current["peak_nits"])), TranslationServer.translate(str(current["peak_from"]))]
+		if uses_engine_curve():
+			line = TranslationServer.translate("%s, BT.2390") % line
+		if not enabled:
+			line = TranslationServer.translate("%s, tone mapping off") % line
+		return line
 	return "%s, peak %d nits (%s)%s%s" % [kind,
 			roundi(float(current["peak_nits"])), current["peak_from"], ", BT.2390" if uses_engine_curve() else "",
 			"" if enabled else ", tone mapping off"]

@@ -69,7 +69,8 @@ func set_grow(on: bool) -> void:
 	_apply()
 
 
-func state() -> Dictionary:
+## localised: text in the menus' language (the footer, docs/i18n.md); else English (the dev link).
+func state(localised := false) -> Dictionary:
 	var known := bool(_lb.get("known", false))
 	var bars := bool(_lb.get("bars", false))
 	var detecting := enabled and not _lb.is_empty() and not bool(_lb.get("done", false)) and not known
@@ -80,9 +81,11 @@ func state() -> Dictionary:
 		elif detecting:
 			text = "Looking for bars"
 		elif known and bars:
-			text = "Cropped to %.2f:1" % aspect
+			text = (TranslationServer.translate("Cropped to %.2f:1") if localised else "Cropped to %.2f:1") % aspect
 		else:
 			text = "No bars"
+	if localised and not (known and bars and enabled):
+		text = TranslationServer.translate(text)
 	return {"enabled": enabled, "detecting": detecting, "known": known, "bars": bars, "aspect": aspect, "text": text}
 
 

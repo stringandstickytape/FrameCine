@@ -17,8 +17,10 @@ enum Layout { MONO, SBS, TB }
 
 const PROJECTION_IDS: Array[String] = ["flat", "180", "360", "fisheye", "dualfisheye"]
 const LAYOUT_IDS: Array[String] = ["mono", "sbs", "tb"]
-const PROJECTION_NAMES: Array[String] = ["Flat", "180°", "360°", "Fisheye", "Dual fisheye 360°"]
+const PROJECTION_NAMES: Array[String] = ["Flat", "180°", "360°", "Fisheye", "Dual fisheye 360°"] # i18n
 const LAYOUT_NAMES: Array[String] = ["Mono", "Side by side", "Top / bottom"]
+## describe(true): the layout after the projection, one phrase each (docs/i18n.md: no glued fragments).
+const LAYOUT_PHRASES: Array[String] = ["%s, mono", "%s, side by side", "%s, top / bottom"] # i18n
 
 var projection: Proj = Proj.FLAT
 var layout: Layout = Layout.MONO
@@ -98,7 +100,11 @@ static func from_id(id: String) -> VideoMode:
 	return m
 
 
-func describe() -> String:
+## The mode in words: "Flat, side by side (half), eyes swapped". English for the dev link, the assistant, the log and
+## the test cards; localised: in the menus' language (the Picture tab and the footer, docs/i18n.md).
+func describe(localised := false) -> String:
+	if localised:
+		return _describe_localised()
 	if projection == Proj.DUAL_FISHEYE:
 		return PROJECTION_NAMES[projection]
 	var text := PROJECTION_NAMES[projection]
@@ -109,6 +115,20 @@ func describe() -> String:
 		text += " (half)"
 	if swap and layout != Layout.MONO:
 		text += ", eyes swapped"
+	return text
+
+
+func _describe_localised() -> String:
+	var text: String = TranslationServer.translate(PROJECTION_NAMES[projection])
+	if projection == Proj.DUAL_FISHEYE:
+		return text
+	if projection == Proj.FISHEYE:
+		text = TranslationServer.translate("Fisheye %d°") % roundi(fisheye_fov)
+	text = TranslationServer.translate(LAYOUT_PHRASES[layout]) % text
+	if half and layout != Layout.MONO:
+		text = TranslationServer.translate("%s (half)") % text
+	if swap and layout != Layout.MONO:
+		text = TranslationServer.translate("%s, eyes swapped") % text
 	return text
 
 

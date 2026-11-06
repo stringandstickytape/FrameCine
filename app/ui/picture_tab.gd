@@ -8,6 +8,10 @@ extends ScrollContainer
 ## presets (#55), head follow and lying down (#33, #12), deinterlace (#95), sharpen (#90), HDR tone mapping (#85),
 ## auto crop of letterbox bars (#42), the projector's grain and gate weave (#92), and a stereo screenshot (#66).
 ## Talks to the app (scripts/main.gd) and its features hub (docs/features.md) directly.
+##
+## Languages (docs/i18n.md): the words of the constants below are keys; the built lines (the Auto line, the folder
+## rule, HDR, the corner film, the loop, the footer's mode line) are built with tr() and again in sync(), which the pane
+## calls on a language switch. The film's file name and the folder are content.
 
 const VideoMode := preload("res://scripts/video_mode.gd")
 const ModeDiagram := preload("res://ui/mode_diagram.gd")
@@ -15,14 +19,22 @@ const W := preload("res://ui/pane_widgets.gd")
 const HelpTexts := preload("res://ui/help_texts.gd")
 
 const LAYOUT_KINDS := ["mono", "sbs", "tb"]
-const LAYOUT_WORDS := ["Mono", "SBS", "TB"]
+const LAYOUT_WORDS := ["Mono", "SBS", "TB"] # i18n
 const PROJECTION_KINDS := ["flat", "180", "360", "fisheye", "dualfisheye"]
-const PROJECTION_WORDS := ["Flat", "180°", "360°", "Fisheye", "Dual 360"]
+const PROJECTION_WORDS := ["Flat", "180°", "360°", "Fisheye", "Dual 360"] # i18n
+# i18n: begin
 const PICTURE_NAMES := {"brightness": "Brightness", "contrast": "Contrast", "saturation": "Saturation",
 		"gamma": "Gamma", "lift": "Dark-scene lift", "sharpen": "Sharpen",
 		"deband": "Smooth banding"}
-const LENS_WORDS := ["Equidistant", "Equisolid", "Stereographic", "Polynomial"]
-const DEINTERLACE_WORDS := ["Off", "Bob", "Edge", "Auto"]
+# i18n: end
+const LENS_WORDS := ["Equidistant", "Equisolid", "Stereographic", "Polynomial"] # i18n
+const DEINTERLACE_WORDS := ["Off", "Bob", "Edge", "Auto"] # i18n
+## The footer's mode line by how the mode was chosen (main.gd mode_source): one phrase each, the mode as %s.
+# i18n: begin
+const HOW_CHOSEN := {"user": "%s (your choice)", "arg": "%s (from the command line)", "pattern": "%s (test pattern)",
+		"window": "%s (window)", "file": "%s (remembered for this file)", "sidecar": "%s (from the file's sidecar)",
+		"folder": "%s (the folder's rule)"}
+# i18n: end
 
 var app: Node
 var box: VBoxContainer
@@ -67,6 +79,8 @@ var _crop_grow: Button
 var _slideshow: Button
 var _slide_seconds: VBoxContainer
 var _crossfade: VBoxContainer
+## The Auto line shows (main.gd sent one since the file opened); built again in the menus' language by sync().
+var _auto_shown := false
 
 
 func _init() -> void:
@@ -111,6 +125,9 @@ func bind(p_app: Node) -> void:
 
 
 func sync() -> void:
+	if _auto_shown:
+		_auto_label.text = _auto_line()
+	_sync_loop()
 	_sync_stereo()
 	_sync_screen()
 	_sync_horizon()
@@ -148,6 +165,7 @@ func _build() -> void:
 		projections.add_child(b)
 		_projection_buttons.append(b)
 	_auto_label = W.ellipsis(W.label("", &"MutedLabel"))
+	W.content(_auto_label)
 	box.add_child(W.hbox([W.button("Auto", func() -> void: app.auto_mode()), _auto_label]))
 	_half = W.toggle("Half", func(on: bool) -> void: _edit(func(m: VideoMode) -> void: m.half = on))
 	_swap = W.toggle("Swap eyes", func(on: bool) -> void: _edit(func(m: VideoMode) -> void: m.swap = on))
@@ -161,6 +179,7 @@ func _build() -> void:
 	_use_folder = W.button("Use for this folder", func() -> void: folder_modes.use_current_for_folder())
 	box.add_child(W.flow([_use_folder, _clear_folder]))
 	_folder_label = W.ellipsis(W.label("", &"MutedLabel"))
+	W.content(_folder_label)
 	box.add_child(_folder_label)
 	_fov_row = W.slider_row("Fisheye field", 120.0, 240.0, 5.0, func(v: float) -> String: return "%d°" % roundi(v),
 			func(v: float) -> void: _edit(func(m: VideoMode) -> void: m.fisheye_fov = v))
@@ -213,12 +232,13 @@ func _build() -> void:
 				W.slider_of(_rows["height"]).value)
 	_rows["width"] = W.slider_row("Size", 0.5, 30.0, 0.1, _metres, emit_screen)
 	_rows["distance"] = W.slider_row("Distance", 0.5, 30.0, 0.1, _metres, emit_screen)
-	_rows["height"] = W.slider_row("Height", -3.0, 6.0, 0.05, func(v: float) -> String: return "%+.2f m" % v, emit_screen)
+	_rows["height"] = W.slider_row("Height", -3.0, 6.0, 0.05, func(v: float) -> String: return tr("%+.2f m") % v,
+			emit_screen)
 	_flat_box = W.vbox()
 	var curve: Node = app.features.curve
 	# 0 % flat, 100 %: the screen wraps evenly around you (radius = the distance; scripts/play/curved_screen.gd).
 	_rows["curve"] = W.slider_row("Curvature", 0.0, 100.0, 1.0,
-			func(v: float) -> String: return "flat" if v < 1.0 else "%d %%" % roundi(v),
+			func(v: float) -> String: return tr("flat") if v < 1.0 else "%d %%" % roundi(v),
 			func(v: float) -> void: curve.set_amount(v / 100.0))
 	var zoom: Node = app.features.zoom
 	_rows["zoom"] = W.slider_row("Zoom", 1.0, zoom.MAX_ZOOM, 0.05, func(v: float) -> String: return "%.2fx" % v,
@@ -292,17 +312,19 @@ func _build() -> void:
 	_hdr_box.add_child(W.section("HDR"))
 	var hdr: Node = app.features.hdr
 	_hdr_label = W.label("", &"MutedLabel")
+	W.content(_hdr_label)
 	_hdr_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hdr_box.add_child(_hdr_label)
 	_tone_map = W.toggle("Tone map", func(on: bool) -> void: hdr.set_enabled(on))
 	_hdr_box.add_child(W.hbox([_tone_map, W.button("Reset HDR", func() -> void: hdr.reset())]))
 	var r: Dictionary = hdr.RANGES
 	_rows["hdr_exposure"] = W.slider_row("Exposure", r["exposure"][0], r["exposure"][1], r["exposure"][3],
-			func(v: float) -> String: return "%+.1f stops" % v, func(v: float) -> void: hdr.set_value("exposure", v))
+			func(v: float) -> String: return tr("%+.1f stops") % v, func(v: float) -> void: hdr.set_value("exposure", v))
 	_rows["hdr_knee"] = W.slider_row("Knee", r["knee"][0], r["knee"][1], r["knee"][3],
 			func(v: float) -> String: return "%d %%" % roundi(v * 100.0), func(v: float) -> void: hdr.set_value("knee", v))
 	_rows["hdr_target"] = W.slider_row("HDR brightness", r["target_nits"][0], r["target_nits"][1], 1.0,
-			func(v: float) -> String: return "%d nits" % roundi(v), func(v: float) -> void: hdr.set_value("target_nits", v))
+			func(v: float) -> String: return tr("%d nits") % roundi(v),
+			func(v: float) -> void: hdr.set_value("target_nits", v))
 	_hdr_box.add_child(_rows["hdr_exposure"])
 	_hdr_box.add_child(_rows["hdr_target"])
 	_hdr_box.add_child(_rows["hdr_knee"])
@@ -312,11 +334,11 @@ func _build() -> void:
 	var slideshow: Node = app.features.slideshow
 	_slideshow = W.toggle("Slideshow", func(on: bool) -> void: slideshow.set_enabled(on))
 	box.add_child(W.hbox([_slideshow]))
-	_slide_seconds = W.slider_row("Each picture", 2.0, 60.0, 1.0, func(v: float) -> String: return "%d s" % roundi(v),
+	_slide_seconds = W.slider_row("Each picture", 2.0, 60.0, 1.0, func(v: float) -> String: return tr("%d s") % roundi(v),
 			func(v: float) -> void: slideshow.set_seconds(v))
 	box.add_child(_slide_seconds)
 	_crossfade = W.slider_row("Crossfade", 0.0, 3.0, 0.25,
-			func(v: float) -> String: return "cut" if v <= 0.0 else ("%.2f" % v).rstrip("0").rstrip(".") + " s",
+			func(v: float) -> String: return tr("cut") if v <= 0.0 else tr("%s s") % ("%.2f" % v).rstrip("0").rstrip("."),
 			func(v: float) -> void: slideshow.set_crossfade(v))
 	box.add_child(_crossfade)
 	slideshow.changed.connect(_sync_slideshow)
@@ -334,6 +356,7 @@ func _build() -> void:
 	_pip_box.add_child(W.section("Corner film"))
 	var pip: Node = app.features.pip
 	_pip_label = W.ellipsis(W.label("", &"MutedLabel"))
+	W.content(_pip_label)
 	_pip_box.add_child(_pip_label)
 	_pip_box.add_child(W.flow([W.button("Swap", func() -> void: pip.swap()),
 			W.button("Close corner", func() -> void: pip.close())]))
@@ -344,12 +367,13 @@ func _build() -> void:
 			func(i: int) -> void: pip.set_corner(pip.CORNERS[i]))
 	_pip_box.add_child(_pip_corner)
 	_loop_label = W.label("", &"MutedLabel")
+	W.content(_loop_label)
 	box.add_child(_loop_label)
-	step_loop.loop_changed.connect(func(_on: bool, _a: float, _b: float) -> void: _loop_label.text = step_loop.text())
+	step_loop.loop_changed.connect(func(_on: bool, _a: float, _b: float) -> void: _sync_loop())
 
 
 static func _metres(v: float) -> String:
-	return "%.1f m" % v
+	return TranslationServer.translate("%.1f m") % v
 
 
 func _edit(change: Callable) -> void:
@@ -375,7 +399,8 @@ func set_mode(mode: VideoMode, auto_text: String) -> void:
 	W.set_slider(_fov_row, mode.fisheye_fov)
 	_fov_row.visible = mode.projection == VideoMode.Proj.FISHEYE
 	if auto_text != "" or app.mode_source != "auto":
-		_auto_label.text = auto_text
+		_auto_shown = auto_text != ""
+		_auto_label.text = _auto_line() if _auto_shown else ""
 	_stereo_box.visible = mode.layout != VideoMode.Layout.MONO
 	_flat_box.visible = not mode.is_spherical()
 	_horizon_box.visible = mode.is_spherical()
@@ -385,15 +410,30 @@ func set_mode(mode: VideoMode, auto_text: String) -> void:
 		(_rows[key] as Control).visible = not mode.is_spherical()
 
 
-## The footer's line: the mode and how it was chosen.
+## The footer's line: the mode and how it was chosen, in the menus' language.
 func mode_text() -> String:
 	var source := str(app.mode_source)
 	if source in ["auto", "metadata"] and _auto_label.text != "":
 		return _auto_label.text
-	var how := {"user": "your choice", "arg": "from the command line", "pattern": "test pattern",
-			"window": "window", "file": "remembered for this file", "sidecar": "from the file's sidecar",
-			"folder": "the folder's rule"}
-	return "%s (%s)" % [_mode.describe(), how.get(source, source)]
+	if HOW_CHOSEN.has(source):
+		return tr(HOW_CHOSEN[source]) % _mode.describe(true)
+	return _mode.describe(true) if source == "" else "%s (%s)" % [_mode.describe(true), source]
+
+
+## The Auto line: what the guess would choose and why (main.gd's auto_text says the same in English, for the dev link;
+## this is built from the same parts in the menus' language).
+func _auto_line() -> String:
+	var guessed: Variant = app.call("_guessed_mode")
+	if not guessed is VideoMode:
+		return ""
+	var container: Dictionary = app.call("_container_mode")
+	var reason := str(container.get("local", ""))
+	var mode_words: String = (guessed as VideoMode).describe(true)
+	return tr("Auto: %s (%s)") % [mode_words, reason] if reason != "" else tr("Auto: %s") % mode_words
+
+
+func _sync_loop() -> void:
+	_loop_label.text = str(app.features.step_loop.text(true))
 
 
 func _sync_stereo() -> void:
@@ -439,8 +479,8 @@ func _sync_folder() -> void:
 	# Test patterns, windows, test lab cards and nothing open have no folder.
 	var path := str(app.current_path)
 	_use_folder.disabled = path == "" or path.begins_with("stub://") or path.begins_with("window://") 			or path.begins_with("browser://") or path.begins_with("lab://")
-	_folder_label.text = "Folder rule: %s for %s" % [VideoMode.from_id(str(rule["mode"])).describe(), rule["folder"]] \
-			if not rule.is_empty() else ""
+	_folder_label.text = tr("Folder rule: %s for %s") % [VideoMode.from_id(str(rule["mode"])).describe(true),
+			rule["folder"]] if not rule.is_empty() else ""
 	_folder_label.visible = not rule.is_empty()
 
 
@@ -455,7 +495,7 @@ func _sync_lens() -> void:
 func _sync_hdr() -> void:
 	var hdr: Node = app.features.hdr
 	_hdr_box.visible = bool(hdr.is_hdr())
-	_hdr_label.text = str(hdr.text())
+	_hdr_label.text = str(hdr.text(true))
 	W.set_on(_tone_map, bool(hdr.enabled))
 	var values: Dictionary = hdr.values
 	W.set_slider(_rows["hdr_exposure"], float(values.get("exposure", hdr.RANGES["exposure"][2])))
@@ -471,7 +511,8 @@ func _sync_pip() -> void:
 	var pip: Node = app.features.pip
 	var st := str(pip.state)
 	_pip_box.visible = st != ""
-	_pip_label.text = "%s%s" % [str(pip.path).get_file(), "  (opening...)" if st == "opening" else ""]
+	var film := str(pip.path).get_file()
+	_pip_label.text = tr("%s  (opening...)") % film if st == "opening" else film
 	W.set_slider(_rows["pip_size"], float(pip.size))
 	W.set_choice(_pip_corner, (pip.CORNERS as Array).find(str(pip.corner)))
 
@@ -486,14 +527,14 @@ func _sync_crop() -> void:
 ## The footer's extra: what auto crop found ("Cropped to 2.39:1"), while it is on; else "".
 func crop_text() -> String:
 	var auto_crop: Node = app.features.auto_crop
-	return str(auto_crop.state().get("text", "")) if bool(auto_crop.enabled) else ""
+	return str(auto_crop.state(true).get("text", "")) if bool(auto_crop.enabled) else ""
 
 
 ## The frame on screen as a picture in the video's own layout (#66); the pane or the world says where it went.
 func _screenshot() -> void:
 	var shot: Node = app.features.screenshot
 	var path: String = await shot.capture()
-	app.ui.notify("Screenshot saved: %s" % path.get_file() if path != "" else "No screenshot: %s" % shot.last_error)
+	app.ui.notify(tr("Screenshot saved: %s") % path.get_file() if path != "" else tr("No screenshot: %s") % shot.last_error)
 
 
 func _sync_picture() -> void:

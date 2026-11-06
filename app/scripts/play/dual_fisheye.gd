@@ -38,7 +38,7 @@ const ProjectionMeshes := preload("res://scripts/projection_meshes.gd")
 signal changed(profile: String)
 
 const PROFILES := ["camera360", "camera360_photo", "generic"]
-const PROFILE_NAMES := ["360 camera video", "360 camera photo", "Other camera"]
+const PROFILE_NAMES := ["360 camera video", "360 camera photo", "Other camera"] # i18n
 ## Picture files (scripts/play/image_source.gd's EXTENSIONS).
 const PICTURE_EXTENSIONS := ["jpg", "jpeg", "png", "webp"]
 const LENS_KEYS := ["fov", "cx", "cy", "radius", "yaw", "pitch", "roll"]

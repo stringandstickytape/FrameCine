@@ -54,6 +54,9 @@ func _fit_word() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_THEME_CHANGED and word != null and is_node_ready():
 		_fit_word()
+	elif what == NOTIFICATION_TRANSLATION_CHANGED and word != null and is_node_ready():
+		# The word translates itself (a key, docs/i18n.md) after this button hears of the switch: fit it after.
+		_fit_word.call_deferred()
 
 
 func _draw() -> void:

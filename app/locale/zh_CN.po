@@ -1595,3 +1595,365 @@ msgstr "墨黑配天蓝"
 msgid "Espresso & peach"
 msgstr "咖啡配蜜桃"
 
+# --- stage 2, set B ---
+
+msgid "Fisheye %d°"
+msgstr "鱼眼 %d°"
+
+msgid "%s (half)"
+msgstr "%s（半幅）"
+
+msgid "%s, eyes swapped"
+msgstr "%s，左右眼互换"
+
+msgid "Flat"
+msgstr "平面"
+
+msgid "Fisheye"
+msgstr "鱼眼"
+
+msgid "Dual fisheye 360°"
+msgstr "双鱼眼 360°"
+
+msgid "%s, mono"
+msgstr "%s，单画面"
+
+msgid "%s, side by side"
+msgstr "%s，左右并排"
+
+msgid "%s, top / bottom"
+msgstr "%s，上下排列"
+
+msgid "Large format"
+msgstr "巨幕"
+
+msgid "Living room"
+msgstr "客厅"
+
+msgid "In bed"
+msgstr "床上"
+
+msgid "Cropped to %.2f:1"
+msgstr "已裁切为 %.2f:1"
+
+msgid "Container says %s; not supported yet"
+msgstr "容器标注为 %s；暂不支持"
+
+msgid "Container says %s 3D; not supported"
+msgstr "容器标注为 %s 3D；不支持"
+
+msgid "container: %s"
+msgstr "容器：%s"
+
+msgid "fisheye"
+msgstr "鱼眼"
+
+msgid "side by side"
+msgstr "左右并排"
+
+msgid "top / bottom"
+msgstr "上下排列"
+
+msgid "mono"
+msgstr "单画面"
+
+msgid "right eye first"
+msgstr "右眼在前"
+
+msgid "360 camera video"
+msgstr "360 相机视频"
+
+msgid "360 camera photo"
+msgstr "360 相机照片"
+
+msgid "Other camera"
+msgstr "其他相机"
+
+msgid "loop %s-%s"
+msgstr "循环 %s-%s"
+
+msgid "%s, peak %d nits (%s)"
+msgstr "%s，峰值 %d 尼特（%s）"
+
+msgid "%s, BT.2390"
+msgstr "%s，BT.2390"
+
+msgid "%s, tone mapping off"
+msgstr "%s，色调映射已关闭"
+
+msgid "default"
+msgstr "默认"
+
+msgid "content light level"
+msgstr "内容亮度级别"
+
+msgid "mastering display"
+msgstr "母版显示器"
+
+msgid "Dummy head A"
+msgstr "假人头 A"
+
+msgid "Dummy head B"
+msgstr "假人头 B"
+
+msgid "Listener H3"
+msgstr "听者 H3"
+
+msgid "Listener H4"
+msgstr "听者 H4"
+
+msgid "Listener H5"
+msgstr "听者 H5"
+
+msgid "Listener H6"
+msgstr "听者 H6"
+
+msgid "Dummy head, MIT (normal ear)"
+msgstr "假人头，MIT（标准耳）"
+
+msgid "HUTUBS listener 1"
+msgstr "HUTUBS 听者 1"
+
+msgid "ARI listener NH2"
+msgstr "ARI 听者 NH2"
+
+msgid "CIPIC subject 003"
+msgstr "CIPIC 受试者 003"
+
+msgid "%+.2f m"
+msgstr "%+.2f 米"
+
+msgid "flat"
+msgstr "平直"
+
+msgid "%+.1f stops"
+msgstr "%+.1f 档"
+
+msgid "%d nits"
+msgstr "%d 尼特"
+
+msgid "%d s"
+msgstr "%d 秒"
+
+msgid "cut"
+msgstr "硬切"
+
+msgid "%s s"
+msgstr "%s 秒"
+
+msgid "%.1f m"
+msgstr "%.1f 米"
+
+msgid "Auto: %s (%s)"
+msgstr "自动：%s（%s）"
+
+msgid "Auto: %s"
+msgstr "自动：%s"
+
+msgid "Folder rule: %s for %s"
+msgstr "文件夹规则：%s，用于 %s"
+
+msgid "%s  (opening...)"
+msgstr "%s（正在打开……）"
+
+msgid "Screenshot saved: %s"
+msgstr "截图已保存：%s"
+
+msgid "No screenshot: %s"
+msgstr "未能截图：%s"
+
+msgid "Mono"
+msgstr "单画面"
+
+msgid "SBS"
+msgstr "左右"
+
+msgid "TB"
+msgstr "上下"
+
+msgid "Dual 360"
+msgstr "双 360"
+
+msgid "Brightness"
+msgstr "亮度"
+
+msgid "Contrast"
+msgstr "对比度"
+
+msgid "Saturation"
+msgstr "饱和度"
+
+msgid "Gamma"
+msgstr "Gamma"
+
+msgid "Dark-scene lift"
+msgstr "暗部提亮"
+
+msgid "Sharpen"
+msgstr "锐化"
+
+msgid "Equidistant"
+msgstr "等距"
+
+msgid "Equisolid"
+msgstr "等立体角"
+
+msgid "Stereographic"
+msgstr "体视"
+
+msgid "Polynomial"
+msgstr "多项式"
+
+msgid "Bob"
+msgstr "Bob"
+
+msgid "Edge"
+msgstr "边缘"
+
+msgid "%s (your choice)"
+msgstr "%s（你的选择）"
+
+msgid "%s (from the command line)"
+msgstr "%s（来自命令行）"
+
+msgid "%s (test pattern)"
+msgstr "%s（测试图）"
+
+msgid "%s (window)"
+msgstr "%s（窗口）"
+
+msgid "%s (remembered for this file)"
+msgstr "%s（为此文件记住）"
+
+msgid "%s (from the file's sidecar)"
+msgstr "%s（来自旁挂文件）"
+
+msgid "%s (the folder's rule)"
+msgstr "%s（文件夹规则）"
+
+msgid "%+d ms"
+msgstr "%+d 毫秒"
+
+msgid "%.1f s"
+msgstr "%.1f 秒"
+
+msgid "Fetching..."
+msgstr "正在获取……"
+
+msgid "Fetched; choose it above."
+msgstr "已获取；请在上方选择。"
+
+msgid "Could not fetch %s: %s"
+msgstr "无法获取 %s：%s"
+
+msgid "%d ch"
+msgstr "%d 声道"
+
+msgid "Track %d"
+msgstr "轨道 %d"
+
+msgid "the 360 sound field"
+msgstr "360 声场"
+
+msgid "From the room: %s. Headphones."
+msgstr "来自房间：%s。耳机。"
+
+msgid "From the room: %s. The headset's speakers."
+msgstr "来自房间：%s。头显扬声器。"
+
+msgid "At this speed the stereo mix plays."
+msgstr "此速度下播放立体声混音。"
+
+msgid "Tuned to your ears: head size %d %%."
+msgstr "已按你的耳朵调校：头部大小 %d %%。"
+
+msgid "Fetch: %s"
+msgstr "获取：%s"
+
+msgid "Licence: %s"
+msgstr "许可：%s"
+
+msgid "Download %s"
+msgstr "下载 %s"
+
+msgid "PC: %s"
+msgstr "电脑：%s"
+
+msgid "none set"
+msgstr "未设置"
+
+msgid "Playing on %s; the picture is held back %d ms."
+msgstr "正在 %s 上播放；画面延迟 %d 毫秒。"
+
+msgid "Connecting to %s... (%s)"
+msgstr "正在连接 %s……（%s）"
+
+msgid "Connecting to %s..."
+msgstr "正在连接 %s……"
+
+msgid "commentary"
+msgstr "解说"
+
+msgid "description"
+msgstr "口述影像"
+
+msgid "SDH"
+msgstr "听障"
+
+msgid "forced"
+msgstr "强制"
+
+msgid "original"
+msgstr "原版"
+
+msgid "The PC running tools/audio_sink.py: its address, or address:port"
+msgstr "运行 tools/audio_sink.py 的电脑：地址，或 地址:端口"
+
+msgid "%.2f m"
+msgstr "%.2f 米"
+
+msgid "%+.1f s"
+msgstr "%+.1f 秒"
+
+msgid "file"
+msgstr "文件"
+
+msgid "picture"
+msgstr "图像"
+
+msgid "Loaded: %s"
+msgstr "已加载：%s"
+
+msgid "No subtitle files found for this video"
+msgstr "没有找到此视频的字幕文件"
+
+msgid "%d line with \"%s\""
+msgid_plural "%d lines with \"%s\""
+msgstr[0] "%d 行含有“%s”"
+
+msgid "No script for this file: %s"
+msgstr "此文件没有台词：%s"
+
+msgid "no subtitle text"
+msgstr "没有字幕文字"
+
+msgid "Lines around %s"
+msgstr "%s 附近的台词"
+
+msgid "Reading the film for its subtitles: %d s"
+msgstr "正在读取影片中的字幕：%d 秒"
+
+msgid "%s %d s"
+msgstr "%s %d 秒"
+
+msgid "Script from: %s"
+msgstr "台词来源：%s"
+
+msgid "Find a line by its words (\"quoted phrases\" too)"
+msgstr "按词语查找台词（也可用 \"带引号的短语\"）"
+
+msgid "+%.1f dB"
+msgstr "+%.1f dB"
+
+msgid "DV profile 5 (IPT, as PQ)"
+msgstr "DV 配置文件 5（IPT，按 PQ）"

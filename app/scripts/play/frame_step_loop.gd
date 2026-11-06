@@ -80,9 +80,11 @@ func clear() -> void:
 		loop_changed.emit(false, -1.0, -1.0)
 
 
-func text() -> String:
+## "loop 0:01:02-0:01:10", "A 0:01:02" or "". English for the dev link and the header; localised: in the menus'
+## language (the Picture tab, docs/i18n.md).
+func text(localised := false) -> String:
 	if active:
-		return "loop %s-%s" % [_clock(a), _clock(b)]
+		return (TranslationServer.translate("loop %s-%s") if localised else "loop %s-%s") % [_clock(a), _clock(b)]
 	if a >= 0.0:
 		return "A %s" % _clock(a)
 	return ""

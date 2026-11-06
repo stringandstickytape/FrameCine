@@ -17,11 +17,13 @@ signal changed(angle: float)
 
 const MIN_ANGLE := 10.0
 const MAX_ANGLE := 120.0
+# i18n: begin name
 const PRESETS := {
 	"large_format": {"name": "Large format", "angle": 70.0, "distance": 14.0, "lying": false},
 	"living_room": {"name": "Living room", "angle": 32.0, "distance": 3.2, "lying": false},
 	"in_bed": {"name": "In bed", "angle": 42.0, "distance": 2.4, "lying": true},
 }
+# i18n: end
 
 var main: Node3D
 

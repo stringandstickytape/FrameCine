@@ -99,6 +99,48 @@ msgstr ""
 msgid "ESC"
 msgstr ""
 
+#: scripts/video_mode.gd:126
+#, c-format
+msgid "Fisheye %d°"
+msgstr ""
+
+#: scripts/video_mode.gd:129
+#, c-format
+msgid "%s (half)"
+msgstr ""
+
+#: scripts/video_mode.gd:131
+#, c-format
+msgid "%s, eyes swapped"
+msgstr ""
+
+#: scripts/video_mode.gd:20 ui/picture_tab.gd:24
+msgid "Flat"
+msgstr ""
+
+#: scripts/video_mode.gd:20 ui/picture_tab.gd:24
+msgid "Fisheye"
+msgstr ""
+
+#: scripts/video_mode.gd:20
+msgid "Dual fisheye 360°"
+msgstr ""
+
+#: scripts/video_mode.gd:23
+#, c-format
+msgid "%s, mono"
+msgstr ""
+
+#: scripts/video_mode.gd:23
+#, c-format
+msgid "%s, side by side"
+msgstr ""
+
+#: scripts/video_mode.gd:23
+#, c-format
+msgid "%s, top / bottom"
+msgstr ""
+
 #: scripts/assistant/assistant_switches.gd:11
 msgid "Let the assistant control playback"
 msgstr ""
@@ -119,16 +161,80 @@ msgstr ""
 msgid "Let the assistant run apps"
 msgstr ""
 
-#: scripts/play/auto_crop.gd:79
+#: scripts/comfort/screen_angle.gd:22
+msgid "Large format"
+msgstr ""
+
+#: scripts/comfort/screen_angle.gd:23
+msgid "Living room"
+msgstr ""
+
+#: scripts/comfort/screen_angle.gd:24
+msgid "In bed"
+msgstr ""
+
+#: scripts/play/auto_crop.gd:84
+#, c-format
+msgid "Cropped to %.2f:1"
+msgstr ""
+
+#: scripts/play/auto_crop.gd:80
 msgid "Not available for this file"
 msgstr ""
 
-#: scripts/play/auto_crop.gd:81
+#: scripts/play/auto_crop.gd:82
 msgid "Looking for bars"
 msgstr ""
 
-#: scripts/play/auto_crop.gd:85
+#: scripts/play/auto_crop.gd:86
 msgid "No bars"
+msgstr ""
+
+#: scripts/play/container_mode.gd:66
+#, c-format
+msgid "Container says %s; not supported yet"
+msgstr ""
+
+#: scripts/play/container_mode.gd:90
+#, c-format
+msgid "Container says %s 3D; not supported"
+msgstr ""
+
+#: scripts/play/container_mode.gd:115
+#, c-format
+msgid "container: %s"
+msgstr ""
+
+#: scripts/play/container_mode.gd:62
+msgid "fisheye"
+msgstr ""
+
+#: scripts/play/container_mode.gd:77
+msgid "side by side"
+msgstr ""
+
+#: scripts/play/container_mode.gd:80
+msgid "top / bottom"
+msgstr ""
+
+#: scripts/play/container_mode.gd:83
+msgid "mono"
+msgstr ""
+
+#: scripts/play/container_mode.gd:95
+msgid "right eye first"
+msgstr ""
+
+#: scripts/play/dual_fisheye.gd:41
+msgid "360 camera video"
+msgstr ""
+
+#: scripts/play/dual_fisheye.gd:41
+msgid "360 camera photo"
+msgstr ""
+
+#: scripts/play/dual_fisheye.gd:41
+msgid "Other camera"
 msgstr ""
 
 #: scripts/play/end_time.gd:36
@@ -240,6 +346,42 @@ msgstr ""
 msgid "In use: one quad layer, %d x %d px."
 msgstr ""
 
+#: scripts/play/frame_step_loop.gd:87
+#, c-format
+msgid "loop %s-%s"
+msgstr ""
+
+#: scripts/play/hdr_tone_map.gd:138
+#, c-format
+msgid "%s, peak %d nits (%s)"
+msgstr ""
+
+#: scripts/play/hdr_tone_map.gd:141
+#, c-format
+msgid "%s, BT.2390"
+msgstr ""
+
+#: scripts/play/hdr_tone_map.gd:143
+#, c-format
+msgid "%s, tone mapping off"
+msgstr ""
+
+#: scripts/play/hdr_tone_map.gd:103 ui/sound_tab.gd:20
+msgid "default"
+msgstr ""
+
+#: scripts/play/hdr_tone_map.gd:106
+msgid "content light level"
+msgstr ""
+
+#: scripts/play/hdr_tone_map.gd:109
+msgid "mastering display"
+msgstr ""
+
+#: scripts/play/hdr_tone_map.gd:136
+msgid "DV profile 5 (IPT, as PQ)"
+msgstr ""
+
 #: scripts/play/hw_video.gd:32
 msgid "on (P010 from the system's video driver)"
 msgstr ""
@@ -323,6 +465,46 @@ msgstr ""
 msgid ""
 "%s\n"
 "Menu: keep it  ·  B: put it back"
+msgstr ""
+
+#: scripts/play/spatial_audio.gd:63
+msgid "Dummy head A"
+msgstr ""
+
+#: scripts/play/spatial_audio.gd:64
+msgid "Dummy head B"
+msgstr ""
+
+#: scripts/play/spatial_audio.gd:65
+msgid "Listener H3"
+msgstr ""
+
+#: scripts/play/spatial_audio.gd:66
+msgid "Listener H4"
+msgstr ""
+
+#: scripts/play/spatial_audio.gd:67
+msgid "Listener H5"
+msgstr ""
+
+#: scripts/play/spatial_audio.gd:68
+msgid "Listener H6"
+msgstr ""
+
+#: scripts/play/spatial_audio.gd:74
+msgid "Dummy head, MIT (normal ear)"
+msgstr ""
+
+#: scripts/play/spatial_audio.gd:78
+msgid "HUTUBS listener 1"
+msgstr ""
+
+#: scripts/play/spatial_audio.gd:81
+msgid "ARI listener NH2"
+msgstr ""
+
+#: scripts/play/spatial_audio.gd:85
+msgid "CIPIC subject 003"
 msgstr ""
 
 #: scripts/xr/controller_look.gd:48
@@ -774,7 +956,7 @@ msgstr ""
 msgid "The sound plays on a PC, in time with the picture."
 msgstr ""
 
-#: ui/host_form.gd:52
+#: ui/host_form.gd:52 ui/sound_tab.gd:324
 msgid "Save"
 msgstr ""
 
@@ -919,7 +1101,7 @@ msgstr ""
 msgid "Colour"
 msgstr ""
 
-#: ui/object_section.gd:390 ui/pane_ui.gd:52 ui/picture_tab.gd:268
+#: ui/object_section.gd:390 ui/pane_ui.gd:52 ui/picture_tab.gd:288
 msgid "Picture"
 msgstr ""
 
@@ -943,7 +1125,7 @@ msgstr ""
 msgid "Steady detail"
 msgstr ""
 
-#: ui/pane_ui.gd:235
+#: ui/pane_ui.gd:235 ui/picture_tab.gd:28
 msgid "Smooth banding"
 msgstr ""
 
@@ -1031,252 +1213,423 @@ msgstr ""
 msgid "General"
 msgstr ""
 
-#: ui/picture_tab.gd:127
+#: ui/picture_tab.gd:144
 msgid "Mode"
 msgstr ""
 
-#: ui/picture_tab.gd:151 ui/sound_tab.gd:109
+#: ui/picture_tab.gd:169 ui/picture_tab.gd:31 ui/sound_tab.gd:122
 msgid "Auto"
 msgstr ""
 
-#: ui/picture_tab.gd:152
+#: ui/picture_tab.gd:170
 msgid "Half"
 msgstr ""
 
-#: ui/picture_tab.gd:153
+#: ui/picture_tab.gd:171
 msgid "Swap eyes"
 msgstr ""
 
-#: ui/picture_tab.gd:157
+#: ui/picture_tab.gd:175
 msgid "Clear folder rule"
 msgstr ""
 
-#: ui/picture_tab.gd:161
+#: ui/picture_tab.gd:179
 msgid "Use for this folder"
 msgstr ""
 
-#: ui/picture_tab.gd:165
+#: ui/picture_tab.gd:184
 msgid "Fisheye field"
 msgstr ""
 
-#: ui/picture_tab.gd:173
+#: ui/picture_tab.gd:192
 msgid "Lens"
 msgstr ""
 
-#: ui/picture_tab.gd:181
+#: ui/picture_tab.gd:200
 msgid "Camera"
 msgstr ""
 
-#: ui/picture_tab.gd:183
+#: ui/picture_tab.gd:202
 msgid "Lens field"
 msgstr ""
 
-#: ui/picture_tab.gd:185
+#: ui/picture_tab.gd:204
 msgid "Seam"
 msgstr ""
 
-#: ui/picture_tab.gd:189
+#: ui/picture_tab.gd:208
 msgid "Reset lens"
 msgstr ""
 
-#: ui/picture_tab.gd:193 ui/picture_tab.gd:194
+#: ui/picture_tab.gd:212 ui/picture_tab.gd:213
 msgid "3D"
 msgstr ""
 
-#: ui/picture_tab.gd:194 ui/system_tab.gd:165
+#: ui/picture_tab.gd:213 ui/system_tab.gd:165
 msgid "Left eye"
 msgstr ""
 
-#: ui/picture_tab.gd:194 ui/system_tab.gd:165
+#: ui/picture_tab.gd:213 ui/system_tab.gd:165
 msgid "Right eye"
 msgstr ""
 
-#: ui/picture_tab.gd:195
+#: ui/picture_tab.gd:214
 msgid "Show"
 msgstr ""
 
-#: ui/picture_tab.gd:197
+#: ui/picture_tab.gd:216
 msgid "Depth"
 msgstr ""
 
-#: ui/picture_tab.gd:201
+#: ui/picture_tab.gd:220
 msgid "This file only"
 msgstr ""
 
-#: ui/picture_tab.gd:207
+#: ui/picture_tab.gd:226
 msgid "Soft edges"
 msgstr ""
 
-#: ui/picture_tab.gd:210
+#: ui/picture_tab.gd:229
 msgid "Screen"
 msgstr ""
 
-#: ui/picture_tab.gd:214 ui/subtitles_tab.gd:64
+#: ui/picture_tab.gd:233 ui/subtitles_tab.gd:68
 msgid "Size"
 msgstr ""
 
-#: ui/picture_tab.gd:215
+#: ui/picture_tab.gd:234
 msgid "Distance"
 msgstr ""
 
-#: ui/picture_tab.gd:216
+#: ui/picture_tab.gd:235
 msgid "Height"
 msgstr ""
 
-#: ui/picture_tab.gd:220
+#: ui/picture_tab.gd:235
+#, c-format
+msgid "%+.2f m"
+msgstr ""
+
+#: ui/picture_tab.gd:240
 msgid "Curvature"
 msgstr ""
 
-#: ui/picture_tab.gd:224
+#: ui/picture_tab.gd:241
+msgid "flat"
+msgstr ""
+
+#: ui/picture_tab.gd:244
 msgid "Zoom"
 msgstr ""
 
-#: ui/picture_tab.gd:228
+#: ui/picture_tab.gd:248
 msgid "Size in degrees"
 msgstr ""
 
-#: ui/picture_tab.gd:242
+#: ui/picture_tab.gd:262
 msgid "Follow my head"
 msgstr ""
 
-#: ui/picture_tab.gd:243
+#: ui/picture_tab.gd:263
 msgid "Lying down"
 msgstr ""
 
-#: ui/picture_tab.gd:247
+#: ui/picture_tab.gd:267
 msgid "Reset zoom"
 msgstr ""
 
-#: ui/picture_tab.gd:250
+#: ui/picture_tab.gd:270
 msgid "Auto crop bars"
 msgstr ""
 
-#: ui/picture_tab.gd:251
+#: ui/picture_tab.gd:271
 msgid "Grow the screen to keep its height"
 msgstr ""
 
-#: ui/picture_tab.gd:257
+#: ui/picture_tab.gd:277
 msgid "Horizon"
 msgstr ""
 
-#: ui/picture_tab.gd:262
+#: ui/picture_tab.gd:282
 msgid "Pitch"
 msgstr ""
 
-#: ui/picture_tab.gd:263
+#: ui/picture_tab.gd:283
 msgid "Roll"
 msgstr ""
 
-#: ui/picture_tab.gd:266
+#: ui/picture_tab.gd:286
 msgid "Level"
 msgstr ""
 
-#: ui/picture_tab.gd:278
+#: ui/picture_tab.gd:298
 msgid "Deinterlace"
 msgstr ""
 
-#: ui/picture_tab.gd:281
+#: ui/picture_tab.gd:301
 msgid "Film grain"
 msgstr ""
 
-#: ui/picture_tab.gd:283
+#: ui/picture_tab.gd:303
 msgid "Gate weave"
 msgstr ""
 
-#: ui/picture_tab.gd:287
+#: ui/picture_tab.gd:307
 msgid "Reset picture"
 msgstr ""
 
-#: ui/picture_tab.gd:292
+#: ui/picture_tab.gd:312
 msgid "HDR"
 msgstr ""
 
-#: ui/picture_tab.gd:297
+#: ui/picture_tab.gd:318
 msgid "Tone map"
 msgstr ""
 
-#: ui/picture_tab.gd:298
+#: ui/picture_tab.gd:319
 msgid "Reset HDR"
 msgstr ""
 
-#: ui/picture_tab.gd:300
+#: ui/picture_tab.gd:321
 msgid "Exposure"
 msgstr ""
 
-#: ui/picture_tab.gd:302
+#: ui/picture_tab.gd:322
+#, c-format
+msgid "%+.1f stops"
+msgstr ""
+
+#: ui/picture_tab.gd:323
 msgid "Knee"
 msgstr ""
 
-#: ui/picture_tab.gd:304
+#: ui/picture_tab.gd:325
 msgid "HDR brightness"
 msgstr ""
 
-#: ui/picture_tab.gd:311 ui/picture_tab.gd:313
+#: ui/picture_tab.gd:326
+#, c-format
+msgid "%d nits"
+msgstr ""
+
+#: ui/picture_tab.gd:333 ui/picture_tab.gd:335
 msgid "Slideshow"
 msgstr ""
 
-#: ui/picture_tab.gd:315
+#: ui/picture_tab.gd:337
 msgid "Each picture"
 msgstr ""
 
-#: ui/picture_tab.gd:318
-msgid "Crossfade"
-msgstr ""
-
-#: ui/picture_tab.gd:324
-msgid "Frame"
-msgstr ""
-
-#: ui/picture_tab.gd:326
-msgid "Frame back"
-msgstr ""
-
-#: ui/picture_tab.gd:327
-msgid "Frame forward"
-msgstr ""
-
-#: ui/picture_tab.gd:328
-msgid "Mark A / B"
-msgstr ""
-
-#: ui/picture_tab.gd:329
-msgid "Clear loop"
-msgstr ""
-
-#: ui/picture_tab.gd:330
-msgid "Screenshot"
-msgstr ""
-
-#: ui/picture_tab.gd:334
-msgid "Corner film"
-msgstr ""
-
-#: ui/picture_tab.gd:338
-msgid "Swap"
-msgstr ""
-
-#: ui/picture_tab.gd:339
-msgid "Close corner"
+#: ui/picture_tab.gd:337
+#, c-format
+msgid "%d s"
 msgstr ""
 
 #: ui/picture_tab.gd:340
+msgid "Crossfade"
+msgstr ""
+
+#: ui/picture_tab.gd:341
+msgid "cut"
+msgstr ""
+
+#: ui/picture_tab.gd:341
+#, c-format
+msgid "%s s"
+msgstr ""
+
+#: ui/picture_tab.gd:346
+msgid "Frame"
+msgstr ""
+
+#: ui/picture_tab.gd:348
+msgid "Frame back"
+msgstr ""
+
+#: ui/picture_tab.gd:349
+msgid "Frame forward"
+msgstr ""
+
+#: ui/picture_tab.gd:350
+msgid "Mark A / B"
+msgstr ""
+
+#: ui/picture_tab.gd:351
+msgid "Clear loop"
+msgstr ""
+
+#: ui/picture_tab.gd:352
+msgid "Screenshot"
+msgstr ""
+
+#: ui/picture_tab.gd:356
+msgid "Corner film"
+msgstr ""
+
+#: ui/picture_tab.gd:361
+msgid "Swap"
+msgstr ""
+
+#: ui/picture_tab.gd:362
+msgid "Close corner"
+msgstr ""
+
+#: ui/picture_tab.gd:363
 msgid "Corner size"
 msgstr ""
 
-#: ui/picture_tab.gd:343
+#: ui/picture_tab.gd:366
 msgid "Top right"
 msgstr ""
 
-#: ui/picture_tab.gd:343
+#: ui/picture_tab.gd:366
 msgid "Top left"
 msgstr ""
 
-#: ui/picture_tab.gd:343
+#: ui/picture_tab.gd:366
 msgid "Bottom right"
 msgstr ""
 
-#: ui/picture_tab.gd:343
+#: ui/picture_tab.gd:366
 msgid "Bottom left"
+msgstr ""
+
+#: ui/picture_tab.gd:376
+#, c-format
+msgid "%.1f m"
+msgstr ""
+
+#: ui/picture_tab.gd:432
+#, c-format
+msgid "Auto: %s (%s)"
+msgstr ""
+
+#: ui/picture_tab.gd:432
+#, c-format
+msgid "Auto: %s"
+msgstr ""
+
+#: ui/picture_tab.gd:482
+#, c-format
+msgid "Folder rule: %s for %s"
+msgstr ""
+
+#: ui/picture_tab.gd:515
+#, c-format
+msgid "%s  (opening...)"
+msgstr ""
+
+#: ui/picture_tab.gd:537
+#, c-format
+msgid "Screenshot saved: %s"
+msgstr ""
+
+#: ui/picture_tab.gd:537
+#, c-format
+msgid "No screenshot: %s"
+msgstr ""
+
+#: ui/picture_tab.gd:22
+msgid "Mono"
+msgstr ""
+
+#: ui/picture_tab.gd:22
+msgid "SBS"
+msgstr ""
+
+#: ui/picture_tab.gd:22
+msgid "TB"
+msgstr ""
+
+#: ui/picture_tab.gd:24
+msgid "Dual 360"
+msgstr ""
+
+#: ui/picture_tab.gd:26
+msgid "Brightness"
+msgstr ""
+
+#: ui/picture_tab.gd:26
+msgid "Contrast"
+msgstr ""
+
+#: ui/picture_tab.gd:26
+msgid "Saturation"
+msgstr ""
+
+#: ui/picture_tab.gd:27
+msgid "Gamma"
+msgstr ""
+
+#: ui/picture_tab.gd:27
+msgid "Dark-scene lift"
+msgstr ""
+
+#: ui/picture_tab.gd:27
+msgid "Sharpen"
+msgstr ""
+
+#: ui/picture_tab.gd:30
+msgid "Equidistant"
+msgstr ""
+
+#: ui/picture_tab.gd:30
+msgid "Equisolid"
+msgstr ""
+
+#: ui/picture_tab.gd:30
+msgid "Stereographic"
+msgstr ""
+
+#: ui/picture_tab.gd:30
+msgid "Polynomial"
+msgstr ""
+
+#: ui/picture_tab.gd:31 ui/system_tab.gd:41
+msgid "Off"
+msgstr ""
+
+#: ui/picture_tab.gd:31
+msgid "Bob"
+msgstr ""
+
+#: ui/picture_tab.gd:31
+msgid "Edge"
+msgstr ""
+
+#: ui/picture_tab.gd:34
+#, c-format
+msgid "%s (your choice)"
+msgstr ""
+
+#: ui/picture_tab.gd:34
+#, c-format
+msgid "%s (from the command line)"
+msgstr ""
+
+#: ui/picture_tab.gd:34
+#, c-format
+msgid "%s (test pattern)"
+msgstr ""
+
+#: ui/picture_tab.gd:35
+#, c-format
+msgid "%s (window)"
+msgstr ""
+
+#: ui/picture_tab.gd:35
+#, c-format
+msgid "%s (remembered for this file)"
+msgstr ""
+
+#: ui/picture_tab.gd:35
+#, c-format
+msgid "%s (from the file's sidecar)"
+msgstr ""
+
+#: ui/picture_tab.gd:36
+#, c-format
+msgid "%s (the folder's rule)"
 msgstr ""
 
 #: ui/room_tab.gd:96
@@ -1467,184 +1820,375 @@ msgstr ""
 msgid "End party"
 msgstr ""
 
-#: ui/sound_tab.gd:52
+#: ui/sound_tab.gd:63
 msgid "Audio track"
 msgstr ""
 
-#: ui/sound_tab.gd:56
+#: ui/sound_tab.gd:67
 msgid "Level and timing"
 msgstr ""
 
-#: ui/sound_tab.gd:57
+#: ui/sound_tab.gd:68
 msgid "Volume"
 msgstr ""
 
-#: ui/sound_tab.gd:60
+#: ui/sound_tab.gd:71
 msgid "A/V offset"
 msgstr ""
 
-#: ui/sound_tab.gd:63
+#: ui/sound_tab.gd:71
+#, c-format
+msgid "%+d ms"
+msgstr ""
+
+#: ui/sound_tab.gd:74
 msgid "Calibrate"
 msgstr ""
 
-#: ui/sound_tab.gd:66
+#: ui/sound_tab.gd:77
 msgid "Live delay"
 msgstr ""
 
-#: ui/sound_tab.gd:70 ui/system_tab.gd:524
+#: ui/sound_tab.gd:77
+#, c-format
+msgid "%.1f s"
+msgstr ""
+
+#: ui/sound_tab.gd:81 ui/system_tab.gd:524
 msgid "Speed"
 msgstr ""
 
-#: ui/sound_tab.gd:82 ui/sound_tab.gd:83
+#: ui/sound_tab.gd:95 ui/sound_tab.gd:96
 msgid "Night mode"
 msgstr ""
 
-#: ui/sound_tab.gd:85
+#: ui/sound_tab.gd:98
 msgid "Evening out"
 msgstr ""
 
-#: ui/sound_tab.gd:88
+#: ui/sound_tab.gd:101
 msgid "Dialogue boost"
 msgstr ""
 
-#: ui/sound_tab.gd:94 ui/sound_tab.gd:96
+#: ui/sound_tab.gd:101
+#, c-format
+msgid "+%.1f dB"
+msgstr ""
+
+#: ui/sound_tab.gd:107 ui/sound_tab.gd:109
 msgid "Spatial sound"
 msgstr ""
 
-#: ui/sound_tab.gd:99
+#: ui/sound_tab.gd:112
 msgid "Bass channel"
 msgstr ""
 
-#: ui/sound_tab.gd:105
+#: ui/sound_tab.gd:118
 msgid "Room sound"
 msgstr ""
 
-#: ui/sound_tab.gd:108
+#: ui/sound_tab.gd:121
 msgid "Sound plays on"
 msgstr ""
 
-#: ui/sound_tab.gd:109
+#: ui/sound_tab.gd:122
 msgid "Headset speakers"
 msgstr ""
 
-#: ui/sound_tab.gd:109
+#: ui/sound_tab.gd:122
 msgid "Headphones"
 msgstr ""
 
-#: ui/sound_tab.gd:113
+#: ui/sound_tab.gd:126
 msgid "Head measurements (HRTF)"
 msgstr ""
 
-#: ui/sound_tab.gd:123
+#: ui/sound_tab.gd:133
+msgid "Fetching..."
+msgstr ""
+
+#: ui/sound_tab.gd:139
 msgid "Tune spatial sound"
 msgstr ""
 
-#: ui/sound_tab.gd:164
+#: ui/sound_tab.gd:148
+msgid "Fetched; choose it above."
+msgstr ""
+
+#: ui/sound_tab.gd:148
+#, c-format
+msgid "Could not fetch %s: %s"
+msgstr ""
+
+#: ui/sound_tab.gd:182
 msgid "No audio tracks"
 msgstr ""
 
-#: ui/sound_tab.gd:279
-msgid "Play on a PC"
+#: ui/sound_tab.gd:192
+#, c-format
+msgid "%d ch"
 msgstr ""
 
-#: ui/sound_tab.gd:280
-msgid "Play sound on a PC"
+#: ui/sound_tab.gd:196 ui/subtitles_tab.gd:160 ui/subtitles_tab.gd:338
+#, c-format
+msgid "Track %d"
 msgstr ""
 
-#: ui/sound_tab.gd:224
+#: ui/sound_tab.gd:246
 msgid "Sound from speakers in the room, in front, behind and above you, outside your head; dialogue from the screen. It stays put when you turn your head."
 msgstr ""
 
-#: ui/sound_tab.gd:227
+#: ui/sound_tab.gd:249
 msgid "This player has no spatial sound (an older engine): the stereo mix plays."
 msgstr ""
 
-#: ui/sound_tab.gd:236
+#: ui/sound_tab.gd:253
+msgid "the 360 sound field"
+msgstr ""
+
+#: ui/sound_tab.gd:254
+#, c-format
+msgid "From the room: %s. Headphones."
+msgstr ""
+
+#: ui/sound_tab.gd:255
+#, c-format
+msgid "From the room: %s. The headset's speakers."
+msgstr ""
+
+#: ui/sound_tab.gd:257
+msgid "At this speed the stereo mix plays."
+msgstr ""
+
+#: ui/sound_tab.gd:259
 msgid "The stereo mix plays for now (PC sound on, or no file open)."
 msgstr ""
 
-#: ui/sound_tab.gd:331
+#: ui/sound_tab.gd:262
+#, c-format
+msgid "Tuned to your ears: head size %d %%."
+msgstr ""
+
+#: ui/sound_tab.gd:280
+#, c-format
+msgid "Fetch: %s"
+msgstr ""
+
+#: ui/sound_tab.gd:288
+#, c-format
+msgid "Licence: %s"
+msgstr ""
+
+#: ui/sound_tab.gd:300
+#, c-format
+msgid "Download %s"
+msgstr ""
+
+#: ui/sound_tab.gd:306
+msgid "Play on a PC"
+msgstr ""
+
+#: ui/sound_tab.gd:307
+msgid "Play sound on a PC"
+msgstr ""
+
+#: ui/sound_tab.gd:359
+#, c-format
+msgid "PC: %s"
+msgstr ""
+
+#: ui/sound_tab.gd:359
+msgid "none set"
+msgstr ""
+
+#: ui/sound_tab.gd:361
 msgid "The headset goes silent and holds its picture back to match the PC's speakers."
 msgstr ""
 
-#: ui/subtitles_tab.gd:53
+#: ui/sound_tab.gd:365
+#, c-format
+msgid "Playing on %s; the picture is held back %d ms."
+msgstr ""
+
+#: ui/sound_tab.gd:370
+#, c-format
+msgid "Connecting to %s... (%s)"
+msgstr ""
+
+#: ui/sound_tab.gd:371
+#, c-format
+msgid "Connecting to %s..."
+msgstr ""
+
+#: ui/sound_tab.gd:20
+msgid "commentary"
+msgstr ""
+
+#: ui/sound_tab.gd:20
+msgid "description"
+msgstr ""
+
+#: ui/sound_tab.gd:21
+msgid "SDH"
+msgstr ""
+
+#: ui/sound_tab.gd:21
+msgid "forced"
+msgstr ""
+
+#: ui/sound_tab.gd:21
+msgid "original"
+msgstr ""
+
+#: ui/sound_tab.gd:324
+msgid "The PC running tools/audio_sink.py: its address, or address:port"
+msgstr ""
+
+#: ui/subtitles_tab.gd:57
 msgid "Replay 10 s"
 msgstr ""
 
-#: ui/subtitles_tab.gd:54
+#: ui/subtitles_tab.gd:58
 msgid "Track"
 msgstr ""
 
-#: ui/subtitles_tab.gd:58
+#: ui/subtitles_tab.gd:62
 msgid "Second track"
 msgstr ""
 
-#: ui/subtitles_tab.gd:62
+#: ui/subtitles_tab.gd:66
 msgid "Look and timing"
 msgstr ""
 
-#: ui/subtitles_tab.gd:67
+#: ui/subtitles_tab.gd:71
 msgid "Below the picture"
 msgstr ""
 
-#: ui/subtitles_tab.gd:67
+#: ui/subtitles_tab.gd:71
 msgid "Inside the picture"
 msgstr ""
 
-#: ui/subtitles_tab.gd:70
+#: ui/subtitles_tab.gd:74
 msgid "Offset"
 msgstr ""
 
-#: ui/subtitles_tab.gd:73
+#: ui/subtitles_tab.gd:77
 msgid "Nearer"
 msgstr ""
 
-#: ui/subtitles_tab.gd:76
-msgid "Background"
+#: ui/subtitles_tab.gd:77
+#, c-format
+msgid "%.2f m"
 msgstr ""
 
 #: ui/subtitles_tab.gd:80
-msgid "Delay"
-msgstr ""
-
-#: ui/subtitles_tab.gd:83
-msgid "Reset delay"
+msgid "Background"
 msgstr ""
 
 #: ui/subtitles_tab.gd:84
+msgid "Delay"
+msgstr ""
+
+#: ui/subtitles_tab.gd:84
+#, c-format
+msgid "%+.1f s"
+msgstr ""
+
+#: ui/subtitles_tab.gd:87
+msgid "Reset delay"
+msgstr ""
+
+#: ui/subtitles_tab.gd:88
 msgid "Subtitle files"
 msgstr ""
 
-#: ui/subtitles_tab.gd:86
+#: ui/subtitles_tab.gd:90
 msgid "Find files next to the video"
 msgstr ""
 
-#: ui/subtitles_tab.gd:95
+#: ui/subtitles_tab.gd:100
 msgid "Script"
 msgstr ""
 
-#: ui/subtitles_tab.gd:96
+#: ui/subtitles_tab.gd:101
 msgid "Find a line"
 msgstr ""
 
-#: ui/subtitles_tab.gd:96
+#: ui/subtitles_tab.gd:101
 msgid "Lines around now"
 msgstr ""
 
-#: ui/subtitles_tab.gd:140
+#: ui/subtitles_tab.gd:146
 msgid "This file has no subtitle tracks"
 msgstr ""
 
-#: ui/subtitles_tab.gd:303
-msgid "A second track needs a subtitle file next to the video"
+#: ui/subtitles_tab.gd:156
+msgid "file"
 msgstr ""
 
-#: ui/subtitles_tab.gd:199
+#: ui/subtitles_tab.gd:158
+msgid "picture"
+msgstr ""
+
+#: ui/subtitles_tab.gd:178
+#, c-format
+msgid "Loaded: %s"
+msgstr ""
+
+#: ui/subtitles_tab.gd:179
+msgid "No subtitle files found for this video"
+msgstr ""
+
+#: ui/subtitles_tab.gd:208
 msgid "Searching..."
 msgstr ""
 
-#: ui/subtitles_tab.gd:210
+#: ui/subtitles_tab.gd:215
+#, c-format
+msgid "%d line with \"%s\""
+msgid_plural "%d lines with \"%s\""
+msgstr[0] ""
+msgstr[1] ""
+
+#: ui/subtitles_tab.gd:221
+#, c-format
+msgid "No script for this file: %s"
+msgstr ""
+
+#: ui/subtitles_tab.gd:221
+msgid "no subtitle text"
+msgstr ""
+
+#: ui/subtitles_tab.gd:226
 msgid "Reading the script..."
+msgstr ""
+
+#: ui/subtitles_tab.gd:232
+#, c-format
+msgid "Lines around %s"
+msgstr ""
+
+#: ui/subtitles_tab.gd:257
+#, c-format
+msgid "Reading the film for its subtitles: %d s"
+msgstr ""
+
+#: ui/subtitles_tab.gd:258
+#, c-format
+msgid "%s %d s"
+msgstr ""
+
+#: ui/subtitles_tab.gd:272
+#, c-format
+msgid "Script from: %s"
+msgstr ""
+
+#: ui/subtitles_tab.gd:325
+msgid "A second track needs a subtitle file next to the video"
+msgstr ""
+
+#: ui/subtitles_tab.gd:113
+msgid "Find a line by its words (\"quoted phrases\" too)"
 msgstr ""
 
 #: ui/system_tab.gd:123
@@ -1910,10 +2454,6 @@ msgstr ""
 
 #: ui/system_tab.gd:39
 msgid "Deny"
-msgstr ""
-
-#: ui/system_tab.gd:41
-msgid "Off"
 msgstr ""
 
 #: ui/system_tab.gd:41

@@ -16,9 +16,10 @@ extends RefCounted
 ##   projection_bounds Vector4(left, top, right, bottom) cropped fractions (also bound_left / bound_right)
 ##   stereo_fov        horizontal field of view in degrees (fisheye lenses; also stereo_hfov)
 ##
-## from_info(info, file_name, width, height) -> {mode: VideoMode or null, reason: String}
+## from_info(info, file_name, width, height) -> {mode: VideoMode or null, reason: String, local: String}
 ##   mode null: the metadata says nothing usable (absent, "2d" alone, or a layout or projection the app can't show);
-##   reason says why in that case too, for the footer ("Container says cubemap; not supported yet").
+##   reason says why in that case too, for the footer ("Container says cubemap; not supported yet"). reason is
+##   English (the dev link, the log); local is the same in the menus' language (docs/i18n.md), absent with no reason.
 ## What the metadata doesn't say is filled in from the file-name guess: a projection without a stereo layout keeps the
 ## guess's layout (and its frame-shape rule), a stereo layout without a projection is flat. Half or full for flat SBS
 ## / TB comes from the frame shape as in the guess.
@@ -58,9 +59,11 @@ static func from_info(info: Dictionary, file_name: String, width := 0, height :=
 				lens = (pf as Vector2).x
 			if lens >= 120.0 and lens <= 240.0:
 				m.fisheye_fov = lens
-			parts.append("fisheye")
+			parts.append("fisheye") # i18n
 		"cubemap", "equirectangular_tile", "parametric_immersive", "other":
-			return {"mode": null, "reason": "Container says %s; not supported yet" % projection.replace("_", " ")}
+			var what := projection.replace("_", " ")
+			return {"mode": null, "reason": "Container says %s; not supported yet" % what,
+					"local": TranslationServer.translate("Container says %s; not supported yet") % what}
 		_:
 			if stereo != "" and guess.is_spherical():
 				pass  # The name's projection stands; the metadata gives the layout.
@@ -71,23 +74,25 @@ static func from_info(info: Dictionary, file_name: String, width := 0, height :=
 	match stereo:
 		"side_by_side":
 			m.layout = VideoMode.Layout.SBS
-			parts.append("side by side")
+			parts.append("side by side") # i18n
 		"top_bottom":
 			m.layout = VideoMode.Layout.TB
-			parts.append("top / bottom")
+			parts.append("top / bottom") # i18n
 		"2d", "mono":
 			m.layout = VideoMode.Layout.MONO
-			parts.append("mono")
+			parts.append("mono") # i18n
 		"", "unspec":
 			stereo_known = false
 		_:
 			if parts.is_empty():
-				return {"mode": null, "reason": "Container says %s 3D; not supported" % stereo.replace("_", " ")}
+				var what := stereo.replace("_", " ")
+				return {"mode": null, "reason": "Container says %s 3D; not supported" % what,
+						"local": TranslationServer.translate("Container says %s 3D; not supported") % what}
 			stereo_known = false
 	if stereo_known:
 		m.swap = bool(info.get("stereo_inverted", false)) and m.layout != VideoMode.Layout.MONO
 		if m.swap:
-			parts.append("right eye first")
+			parts.append("right eye first") # i18n
 	elif m.is_spherical() and m.layout == VideoMode.Layout.MONO and width > 0 and height > 0:
 		# The guess's frame-shape rule, for a projection that came from the metadata.
 		var aspect := float(width) / float(height)
@@ -103,4 +108,8 @@ static func from_info(info: Dictionary, file_name: String, width := 0, height :=
 		m.half = a < 2.5 if m.layout == VideoMode.Layout.SBS else a > 1.2
 	else:
 		m.half = guess.half if guess.layout == m.layout else true
-	return {"mode": m, "reason": "container: " + ", ".join(parts)}
+	var local: Array[String] = []
+	for part in parts:
+		local.append(TranslationServer.translate(part))
+	return {"mode": m, "reason": "container: " + ", ".join(parts),
+			"local": TranslationServer.translate("container: %s") % ", ".join(local)}

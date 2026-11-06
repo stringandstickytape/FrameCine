@@ -22,6 +22,14 @@ const SHARED := ["ui/pane_ui.gd", "ui/pane_widgets.gd", "ui/tablet.gd", "ui/syst
 		"scripts/main.gd", "scripts/play/end_time.gd", "scripts/play/film_layer.gd", "scripts/play/real_windows.gd",
 		"scripts/play/hw_video.gd", "scripts/xr/controller_look.gd", "scripts/assistant/assistant_switches.gd",
 		"ui/themes/tablet.json"]
+## Stage 2, set B: the Picture, Sound and Subtitles tabs and the texts they show.
+const SET_B := ["ui/picture_tab.gd", "ui/sound_tab.gd", "ui/subtitles_tab.gd", "ui/mode_diagram.gd",
+		"scripts/video_mode.gd", "scripts/play/container_mode.gd", "scripts/play/hdr_tone_map.gd",
+		"scripts/play/frame_step_loop.gd", "scripts/play/auto_crop.gd", "scripts/play/dual_fisheye.gd",
+		"scripts/comfort/screen_angle.gd", "scripts/play/spatial_audio.gd"]
+const VideoMode := preload("res://scripts/video_mode.gd")
+const ContainerMode := preload("res://scripts/play/container_mode.gd")
+const SoundTab := preload("res://ui/sound_tab.gd")
 
 var _failures := 0
 var _checks := 0
@@ -47,6 +55,7 @@ func _run() -> void:
 	await _legends()
 	_fonts()
 	_wrapping()
+	await _set_b()
 	I18n.set_language("en")
 	print("test_i18n: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	quit(_failures)
@@ -287,6 +296,115 @@ func _wrapping() -> void:
 		widest = maxf(widest, p.get_line_width(i))
 	_check("a Chinese sentence wraps into lines (%d, widest %.0f px)" % [p.get_line_count(), widest],
 			p.get_line_count() >= 4 and widest <= 200.0)
+
+
+## Stage 2, set B: the Picture, Sound and Subtitles tabs. Their keys are in zh_CN.po; the mode line, the container's
+## reason and the tabs' built lines in Chinese, the English for the dev link unchanged; content stays; the pseudo-locale
+## leaves no plain English in any of their sections or the footer, and no card is wider than its tab.
+func _set_b() -> void:
+	var pot := _pot_refs()
+	var po_keys := {}
+	for e: Array in I18n.pot_entries(PO):
+		po_keys[e[0]] = true
+	var missing: Array = []
+	for k: String in pot:
+		if (pot[k] as Array).any(func(ref: String) -> bool: return ref.get_slice(":", 0) in SET_B) and not po_keys.has(k):
+			missing.append(k)
+	_check("set B: every key is in zh_CN.po (%s)" % ", ".join(missing), missing.is_empty())
+	_check("set B: the pot has its keys", pot.has("%s, side by side") and pot.has("Large format") and pot.has("SDH")
+			and pot.has("%d line with \"%s\"") and pot.has("Brightness") and pot.has("Dummy head A"))
+	_check("set B: no id is a key", not pot.has("visual_impaired") and not pot.has("hearing_impaired")
+			and not pot.has("large_format") and not pot.has("camera360"))
+
+	var m := VideoMode.make(VideoMode.Proj.FLAT, VideoMode.Layout.SBS, true, true)
+	var fish := VideoMode.make(VideoMode.Proj.FISHEYE, VideoMode.Layout.TB, false, false, 200.0)
+	var info := {"projection": "equirectangular", "stereo_mode": "tb"}
+	_check("the mode in English (%s)" % m.describe(true), m.describe(true) == m.describe()
+			and m.describe() == "Flat, side by side (half), eyes swapped")
+	_check("the container's reason in English", ContainerMode.from_info(info, "a.mkv", 4096, 4096)["local"]
+			== "container: 360°, top / bottom")
+	var pui: Node = main.ui.ui
+	var layer: Node = main.ui
+	layer.show_panel()
+	I18n.set_language("zh_CN")
+	pui.show_tab(pui.Tab.PICTURE)
+	await _frames(3)
+	_check("the mode in Chinese (%s)" % m.describe(true), m.describe(true) == "平面，左右并排（半幅），左右眼互换")
+	_check("a fisheye in Chinese (%s)" % fish.describe(true), fish.describe(true) == "鱼眼 200°，上下排列")
+	_check("the dev link's mode stays English (%s)" % m.describe(),
+			m.describe() == "Flat, side by side (half), eyes swapped")
+	var cm := ContainerMode.from_info(info, "a.mkv", 4096, 4096)
+	_check("the container's reason in Chinese (%s), English kept (%s)" % [cm["local"], cm["reason"]],
+			cm["local"] == "容器：360°, 上下排列" and cm["reason"] == "container: 360°, top / bottom")
+	var footer: String = pui._footer_text.text
+	_check("the footer's mode line in Chinese (%s)" % footer, footer != "" and _cjk(footer)
+			and not RegEx.create_from_string("Flat|mono|choice|Auto").search(footer))
+	var diagram: Button = pui.picture._layout_buttons[1]
+	_check("a mode diagram's word in Chinese (%s), the button wide enough" % _shown(diagram.word),
+			_shown(diagram.word) == "左右" and diagram.custom_minimum_size.x >= diagram.word.get_combined_minimum_size().x)
+	# The presets' card may be out of the tree (one section shows at a time): the row itself.
+	var presets: Array = (pui.picture._presets as Node).get_children().map(func(b: Node) -> String: return _shown(b))
+	_check("the size presets in Chinese (%s)" % [presets], presets == ["巨幕", "客厅", "床上"])
+	_check("the sound tab's status in Chinese (%s)" % pui.sound._speakers_status.text,
+			_cjk(pui.sound._speakers_status.text))
+	_check("the PC's address in Chinese (%s)" % pui.sound._pc_address.text,
+			str(pui.sound._pc_address.text).begins_with("电脑："))
+	_check("a track flag in Chinese", tr("SDH") == "听障" and SoundTab.track_flags({"hearing_impaired": true}) == ["SDH"])
+	_check("the subtitle files line in Chinese (%s)" % pui.subtitles._files_label.text,
+			_cjk(pui.subtitles._files_label.text))
+	# A line of the subtitles that is also a key stays as it is; the heading is built in Chinese.
+	pui.subtitles._show_lines([{"start": 62.0, "text": "Room", "i": 0}],
+			tr_n("%d line with \"%s\"", "%d lines with \"%s\"", 1) % [1, "Room"])
+	var row: Button = pui.subtitles._script_rows.get_child(0)
+	_check("a subtitle line is content (%s)" % _shown(row), _shown(row).ends_with("Room") and row.has_meta("content"))
+	_check("the find heading in Chinese, the words as typed (%s)" % _shown(pui.subtitles._script_label),
+			_shown(pui.subtitles._script_label) == "1 行含有“Room”")
+	pui.subtitles._clear_script()
+	for tab: int in [pui.Tab.PICTURE, pui.Tab.SOUND, pui.Tab.SUBTITLES]:
+		pui.show_tab(tab)
+		await _frames(2)
+		_check("zh_CN: no card of %s wider than the tab" % pui.tabs[tab].name, _cards_fit(pui, tab))
+
+	I18n.set_language(I18n.PSEUDO)
+	await _frames(2)
+	var plain: Array[String] = []
+	for tab: int in [pui.Tab.PICTURE, pui.Tab.SOUND, pui.Tab.SUBTITLES]:
+		pui.show_tab(tab)
+		await _frames(2)
+		var box: VBoxContainer = pui.tabs[tab].get("box")
+		var sections: Array[String] = W.shown_sections(box)
+		var wide: Array[String] = []
+		for s in sections:
+			pui.show_section(s)
+			await _frames(1)
+			_plain_under(pui.tabs[tab], [], plain)
+			if not _cards_fit(pui, tab):
+				wide.append(s)
+		_check("pseudo: %s has its sections (%d), each fits the tab (%s)" % [pui.tabs[tab].name, sections.size(),
+				", ".join(wide)], sections.size() >= 3 and wide.is_empty())
+	pui.show_tab(pui.Tab.PICTURE)
+	await _frames(2)
+	_plain_under(pui._footer_text, [], plain)
+	if not str(pui._footer_text.text).begins_with("["):
+		plain.append("footer '%s'" % pui._footer_text.text)
+	_check("pseudo: no plain English in Picture, Sound, Subtitles or the footer (%s)" % " | ".join(plain), plain.is_empty())
+	I18n.set_language("en")
+	await _frames(2)
+	_check("English again: the footer's mode line (%s)" % pui._footer_text.text,
+			not _cjk(pui._footer_text.text) and not str(pui._footer_text.text).begins_with("["))
+	pui.show_tab(pui.Tab.FILES)
+	await _frames(1)
+
+
+## No card of the tab is wider than the tab.
+func _cards_fit(pui: Node, tab: int) -> bool:
+	var width: float = (pui.tabs[tab] as Control).size.x
+	return pui.cards(tab).all(func(c: Control) -> bool:
+			return c.get_parent() == null or not c.is_visible_in_tree() or c.get_combined_minimum_size().x <= width + 0.5)
+
+
+func _cjk(s: String) -> bool:
+	return RegEx.create_from_string("[\\x{4e00}-\\x{9fff}]").search(s) != null
 
 
 ## The visible Labels and Buttons under `n` (not under `skip`) whose text is plain English in the pseudo-locale.

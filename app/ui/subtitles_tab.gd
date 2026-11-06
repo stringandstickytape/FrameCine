@@ -6,6 +6,10 @@ extends ScrollContainer
 ## 10 s": back 10 s with subtitles on, #11), and subtitle files next to the video (#50): on or off, and which were
 ## loaded. Script (director mode, #8): find a line by its words with the on-pane keyboard, or list the lines around
 ## now; a row jumps there (0.5 s before the line). Subtitle depth comes when the feature exists.
+##
+## Languages (docs/i18n.md): a track's title and language come from the file, a subtitle file's name from the folder,
+## the script's lines from the subtitles and the search from the viewer: content. The words around them are built
+## with tr(); the track rows again in sync(), which the pane calls on a language switch.
 
 const W := preload("res://ui/pane_widgets.gd")
 const SoundTab := preload("res://ui/sound_tab.gd")
@@ -70,14 +74,14 @@ func bind(p_app: Node) -> void:
 	_offset = W.slider_row("Offset", -0.5, 0.5, 0.01, func(v: float) -> String: return "%+d %%" % roundi(v * 100.0),
 			func(v: float) -> void: display.set_offset(v))
 	box.add_child(_offset)
-	_depth = W.slider_row("Nearer", 0.0, 2.0, 0.05, func(v: float) -> String: return "%.2f m" % v,
+	_depth = W.slider_row("Nearer", 0.0, 2.0, 0.05, func(v: float) -> String: return tr("%.2f m") % v,
 			func(v: float) -> void: display.set_depth(v))
 	box.add_child(_depth)
 	_background = W.slider_row("Background", 0.0, 1.0, 0.05, func(v: float) -> String: return "%d %%" % roundi(v * 100.0),
 			func(v: float) -> void: display.set_background(v))
 	box.add_child(_background)
 	var sub_delay: Node = app.features.sub_delay
-	_delay = W.slider_row("Delay", -5.0, 5.0, 0.1, func(v: float) -> String: return "%+.1f s" % v,
+	_delay = W.slider_row("Delay", -5.0, 5.0, 0.1, func(v: float) -> String: return tr("%+.1f s") % v,
 			func(v: float) -> void: sub_delay.set_delay(v))
 	box.add_child(_delay)
 	box.add_child(W.flow([W.button("Reset delay", func() -> void: sub_delay.reset())]))
@@ -86,6 +90,7 @@ func bind(p_app: Node) -> void:
 	_find_files = W.toggle("Find files next to the video", func(on: bool) -> void: sub_files.set_enabled(on))
 	box.add_child(W.hbox([_find_files]))
 	_files_label = W.label("", &"MutedLabel")
+	W.content(_files_label)
 	_files_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_files_label)
 	sub_files.loaded_changed.connect(func(_l: Array) -> void:
@@ -98,13 +103,14 @@ func bind(p_app: Node) -> void:
 	_script_tracks.add_theme_constant_override("separation", 0)
 	box.add_child(_script_tracks)
 	_script_label = W.label("", &"MutedLabel")
+	W.content(_script_label)
 	_script_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_script_label)
 	_script_rows = VBoxContainer.new()
 	_script_rows.add_theme_constant_override("separation", 0)
 	box.add_child(_script_rows)
 	_find_form = SearchForm.new()
-	_find_form.title_text = "Find a line by its words (\"quoted phrases\" too)"
+	_find_form.title_text = "Find a line by its words (\"quoted phrases\" too)" # i18n
 	_find_form.visible = false
 	_find_form.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_find_form.search_requested.connect(func(q: String) -> void:
@@ -145,14 +151,16 @@ func sync() -> void:
 				parts.append(str(t[key]))
 		for flag in SoundTab.track_flags(t):
 			if flag != "default":
-				parts.append(flag)
+				parts.append(tr(flag))
 		if bool(t.get("external", false)):
-			parts.append("file")
+			parts.append(tr("file"))
 		if bool(t.get("bitmap", false)):
-			parts.append("picture")
+			parts.append(tr("picture"))
 		var index := int(t.get("index", 0))
-		var b := _row(" / ".join(parts) if not parts.is_empty() else "Track %d" % index,
+		var b := _row(" / ".join(parts) if not parts.is_empty() else tr("Track %d") % index,
 				func() -> void: subs.select_track(index), group)
+		# The file's own title and language, and words translated above.
+		W.content(b)
 		b.set_pressed_no_signal(subs.enabled and int(subs.track) == index)
 	var display: Node = subs.display
 	W.set_slider(_size, float(display.scale_factor))
@@ -167,7 +175,8 @@ func sync() -> void:
 	var names: Array[String] = []
 	for f: Dictionary in sub_files.loaded:
 		names.append(str(f.get("path", "")).get_file())
-	_files_label.text = ("Loaded: " + ", ".join(names)) if not names.is_empty() else "No subtitle files found for this video"
+	_files_label.text = tr("Loaded: %s") % ", ".join(names) if not names.is_empty() \
+			else tr("No subtitle files found for this video")
 
 
 func _row(text: String, on_pressed: Callable, group: ButtonGroup) -> Button:
@@ -196,24 +205,32 @@ func _hide_find() -> void:
 func _find(q: String) -> void:
 	_query = q
 	_script_again = _find.bind(q)
-	_script_label.text = "Searching..."
+	_script_label.text = tr("Searching...")
 	var idx: Dictionary = await _script_index()
 	if int(idx.get("count", 0)) == 0:
-		_show_lines([], "No script for this file: %s" % idx.get("error", "no subtitle text"))
+		_show_lines([], _no_script(idx))
 		return
 	var hits := Director.search(idx, q, 50)
-	_show_lines(hits, "%d line%s with \"%s\"" % [hits.size(), "" if hits.size() == 1 else "s", q])
+	# What the viewer typed, as typed.
+	_show_lines(hits, tr_n("%d line with \"%s\"", "%d lines with \"%s\"", hits.size()) % [hits.size(), q])
+
+
+## "No script for this file: ..." The reason as the index gives it (a reader's error), or its own words for none.
+func _no_script(idx: Dictionary) -> String:
+	var error := str(idx.get("error", ""))
+	return tr("No script for this file: %s") % (error if error != "" else tr("no subtitle text"))
 
 
 func _around_now() -> void:
 	_script_again = _around_now
-	_script_label.text = "Reading the script..."
+	_script_label.text = tr("Reading the script...")
 	var idx: Dictionary = await _script_index()
 	if int(idx.get("count", 0)) == 0:
-		_show_lines([], "No script for this file: %s" % idx.get("error", "no subtitle text"))
+		_show_lines([], _no_script(idx))
 		return
 	var at := Director.line_at(idx, app.player.get_position())
-	_show_lines(Director.lines(idx, maxi(0, at - 4), 12), "Lines around %s" % W.clock(app.player.get_position()), at)
+	_show_lines(Director.lines(idx, maxi(0, at - 4), 12), tr("Lines around %s") % W.clock(app.player.get_position()),
+			at)
 
 
 ## The index for the chosen track; refreshes the "Script from" rows when the file has more than one track.
@@ -237,7 +254,8 @@ func tick() -> void:
 	if b.is_empty():
 		return
 	var s := roundi(float(b.get("seconds", 0.0)))
-	_script_label.text = "Reading the film for its subtitles: %d s" % s if str(b.get("source", "")) == "engine" 			else "%s %d s" % [_indexing_text, s]
+	_script_label.text = tr("Reading the film for its subtitles: %d s") % s if str(b.get("source", "")) == "engine" \
+			else tr("%s %d s") % [_indexing_text, s]
 
 
 ## One row per track ("Script from: English"), only when there is a choice.
@@ -250,7 +268,9 @@ func _set_script_tracks(tracks: Array, chosen: String) -> void:
 	var group := ButtonGroup.new()
 	for t: Dictionary in tracks:
 		var id := str(t.get("id", ""))
-		var b := W.button("Script from: %s" % t.get("label", id), func() -> void: _pick_script_track(id), &"RowButton")
+		# The track's label from the file (its language or title).
+		var b := W.button(tr("Script from: %s") % t.get("label", id), func() -> void: _pick_script_track(id), &"RowButton")
+		W.content(b)
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.clip_text = true
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -275,6 +295,8 @@ func _show_lines(entries: Array, heading: String, now := -1) -> void:
 	for e: Dictionary in entries:
 		var b := W.button("%s  %s" % [W.clock(float(e.get("start", 0.0))), str(e.get("text", "")).replace("\n", " ")],
 				Callable(), &"RowButton")
+		# A line of the subtitles.
+		W.content(b)
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.clip_text = true
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -313,8 +335,9 @@ func _sync_second() -> void:
 			if str(t.get(key, "")) != "":
 				parts.append(str(t[key]))
 		var index := int(t.get("index", 0))
-		var b := _row_in(_second, " / ".join(parts) if not parts.is_empty() else "Track %d" % index,
+		var b := _row_in(_second, " / ".join(parts) if not parts.is_empty() else tr("Track %d") % index,
 				func() -> void: subs.select_secondary(index), group)
+		W.content(b)
 		b.set_pressed_no_signal(int(subs.secondary) == index)
 
 

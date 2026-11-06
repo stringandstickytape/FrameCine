@@ -56,7 +56,9 @@ const STANDARD_ROOM := {"box": AABB(Vector3(-2.5, 0, -3), Vector3(5, 2.6, 5.5)),
 const SPHERE_ROOM := {"reflect": 0.0, "rt60": 0.3, "wet": 0.25}
 const DETECT_SECONDS := 10.0
 
-## Bundled sets (app/audio/hrtf, credits there): SADIE II, University of York, Apache License 2.0.
+## Bundled sets (app/audio/hrtf, credits there): SADIE II, University of York, Apache License 2.0. Their names are
+## keys (docs/i18n.md); the licences stay as written.
+# i18n: begin name
 const BUNDLED := [
 	{"id": "sadie2_d1", "name": "Dummy head A", "file": "res://audio/hrtf/sadie2_d1.fhrtf"},
 	{"id": "sadie2_d2", "name": "Dummy head B", "file": "res://audio/hrtf/sadie2_d2.fhrtf"},
@@ -85,6 +87,7 @@ const DOWNLOADS := [
 		"licence": "CIPIC HRTF database, University of California, Davis (Algazi et al., 2001): the database's own "
 				+ "terms, copyright The Regents of the University of California; cite the authors."},
 ]
+# i18n: end
 const DOWNLOAD_DIR := "user://hrtf"
 
 var main: Node3D
