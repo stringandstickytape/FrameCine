@@ -207,7 +207,7 @@ controller opens it, and that controller points at it. One controller is enough.
 |---|---|---|---|
 | Trigger | Play or pause | Laser on the panel: click. Laser off the panel: the focused control | Space, K, mouse click |
 | Stick left or right | Seek 10 s back or on, repeats while held | Laser on a slider: move it. Laser off: move the focus | Left, Right, J, L |
-| Stick up or down | Screen farther or nearer (flat) | Laser on the panel: scroll (on a slider: move it). Laser off: move the focus | Up, Down, wheel |
+| Stick up or down | Screen farther or nearer (flat) | Laser on the panel: scroll, smoothly, faster the further it is pushed (on a slider: move it). Laser off: move the focus | Up, Down, wheel |
 | A (right) | Next video | Same | N |
 | B (right) | Previous video, or the start of this one after 3 s | Same | P |
 | Y (right), the sparkle on its cap, while the right hand points | An agent's terminal on or off. With none running, start the last one used. It keeps working while hidden. | Nothing | |

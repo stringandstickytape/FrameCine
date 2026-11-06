@@ -293,6 +293,28 @@ func pointer_button(pixel: Vector2, pressed: bool) -> void:
 	viewport.push_input(ev, true)
 
 
+## The stick's smooth scroll (scroll_by()): the list it moves and where, to a fraction of a pixel.
+var _smooth: ScrollContainer
+var _smooth_pos := 0.0
+
+
+## Smooth scrolling (the stick; the user, 2026-11-06: wheel steps jumped): the list under the pointer moves by
+## `pixels` (> 0 up), the fraction of a pixel kept for the next frame. False when nothing there scrolls (a slider,
+## a list that fits): the caller steps the wheel instead.
+func scroll_by(pixels: float) -> bool:
+	var sc := scroll_under(hovered_control())
+	if sc == null:
+		return false
+	if sc != _smooth or sc.scroll_vertical != roundi(_smooth_pos):
+		_smooth = sc
+		_smooth_pos = sc.scroll_vertical
+	_coast = null
+	var bar := sc.get_v_scroll_bar()
+	_smooth_pos = clampf(_smooth_pos - pixels, 0.0, maxf(bar.max_value - bar.page, 0.0))
+	sc.scroll_vertical = roundi(_smooth_pos)
+	return true
+
+
 ## steps > 0 scrolls up.
 func pointer_scroll(pixel: Vector2, steps: int) -> void:
 	for i in absi(steps):

@@ -339,6 +339,18 @@ func _run() -> void:
 	panel.pointer_button(tap + Vector2(0, 3), false)
 	_check("a press that hardly moves is a click (%d clicks, scroll %d)" % [clicks[0], sc.scroll_vertical],
 			clicks[0] == 1 and sc.scroll_vertical == 0)
+	# The stick scrolls smoothly: fractions of a pixel a frame add up, never a wheel step's jump.
+	panel.pointer_move(tap)
+	var most := 0
+	var last := sc.scroll_vertical
+	for i in 30:
+		panel.scroll_by(-0.4)
+		most = maxi(most, absi(sc.scroll_vertical - last))
+		last = sc.scroll_vertical
+	_check("the stick: 0.4 px a frame for 30 frames is 12 px, a pixel at most a frame (%d, %d)"
+			% [sc.scroll_vertical, most], sc.scroll_vertical == 12 and most <= 1)
+	panel.scroll_by(100.0)
+	_check("and back up, no further than the top (%d)" % sc.scroll_vertical, sc.scroll_vertical == 0)
 	lst.custom_minimum_size.y = 0
 	layer.hide_panel()
 	tablet.show_at(head)

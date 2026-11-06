@@ -54,6 +54,11 @@ const DEFAULT_SCALE := 1.6
 const LAYOUT_DEFAULTS := {"scale": DEFAULT_SCALE, "distance": PanePose.DISTANCE,
 		"recentre_hold": PanePose.RECENTRE_HOLD, "world_locked": true}
 const STICK_SCROLL_RATE := 10.0
+## The stick's smooth scroll: pixels a second at full stick, past STICK_SCROLL_DEAD, rising as the push's
+## STICK_SCROLL_CURVE power (a light push creeps, a full one runs).
+const STICK_SCROLL_SPEED := 1100.0
+const STICK_SCROLL_DEAD := 0.2
+const STICK_SCROLL_CURVE := 1.6
 ## Stick focus: past this deflection, one step, then repeats.
 const FOCUS_STICK := 0.6
 const FOCUS_REPEAT_FIRST := 0.4
@@ -1074,8 +1079,15 @@ func on_stick(hand: XRHand, stick: Vector2, delta: float) -> bool:
 		return false
 	if _pointed:
 		var axis := stick.y
-		if panel.hovered_control() is Slider and absf(stick.x) > absf(stick.y):
+		var on_slider := panel.hovered_control() is Slider
+		if on_slider and absf(stick.x) > absf(stick.y):
 			axis = stick.x
+		# A list moves smoothly; a slider (and anything else) still steps.
+		if not on_slider:
+			var push := clampf((absf(axis) - STICK_SCROLL_DEAD) / (1.0 - STICK_SCROLL_DEAD), 0.0, 1.0)
+			if push <= 0.0 or panel.scroll_by(signf(axis) * pow(push, STICK_SCROLL_CURVE) * STICK_SCROLL_SPEED * delta):
+				_scroll_acc[hand] = 0.0
+				return true
 		var acc: float = _scroll_acc.get(hand, 0.0) + axis * STICK_SCROLL_RATE * delta
 		if absf(axis) < 0.2:
 			acc = 0.0
