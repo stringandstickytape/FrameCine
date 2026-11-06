@@ -44,6 +44,10 @@ Objects tab calls the same functions (`app/ui/object_section.gd`, `app/ui/object
 | Objects: Place (laser, stick turns and sizes, trigger sets) | `object_place` {id, at, position, rotation, turn, scale} (room) |
 | Objects: Delete (imported only, asked first) | `object_delete` {id} (room; destructive; undo restores it) |
 | Objects: importing (no panel control: an assistant or the dev link brings the file) | `object_import` {name, data, format, tags, mount, width, depth, bevel, part_names} (room); `path` instead of `data`: the dev link only |
+| Your objects, Fab: Accept, Withdraw (the licence) | none, on purpose: only the user accepts Fab's licence; `fab_status` (read) says whether they have |
+| Your objects, Fab: Search Fab, More | `fab_search` {query, cursor} (read; refused with error eula until accepted) |
+| Your objects, Fab: Import, its progress, Cancel | `fab_import` {uid} (room), `fab_status` (read), `fab_cancel` (room) |
+| Your objects, Fab: Clear Fab's cache, Read Fab's licence | none (the viewer's own) |
 | In this room: the list, a pick's parts and their colours | `room_state` objects (read); `object_info` {placed} (read) |
 | In this room: Move | `object_move` {name, at, position, rotation, turn, scale} (room) |
 | In this room: Remove (asked first) | `remove` {name} (room) |
