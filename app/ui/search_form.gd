@@ -9,11 +9,12 @@ signal search_requested(query: String)
 signal cancelled
 
 var _field: LineEdit
-## The line above the field (set before the form enters the tree).
-var title_text := "Search your favourites, history, queue and the last local folder"
+## The line above the field (set before the form enters the tree). These three are fixed English: the title, the
+## button and the hint translate themselves (docs/i18n.md), so a caller of set_texts() marks its strings `# i18n`.
+var title_text := "Search your favourites, history, queue and the last local folder" # i18n
 ## The action button's text, the field's hint, and whether an empty field is an answer (a PIN cleared).
-var button_text := "Search"
-var placeholder := "words from the name"
+var button_text := "Search" # i18n
+var placeholder := "words from the name" # i18n
 var allow_empty := false
 var _keyboard: OnscreenKeyboard
 var _title: Label

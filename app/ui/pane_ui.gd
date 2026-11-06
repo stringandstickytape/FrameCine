@@ -58,6 +58,8 @@ const RAIL_ICON_PX := 30
 ## The rail's rows, pixels.
 const RAIL_ROW := 44
 const VIEWS: Array[String] = ["details", "list", "grid"]
+## The view buttons' tooltips (keys: the buttons translate them).
+const VIEW_NAMES := {"details": "Details", "list": "List", "grid": "Grid"} # i18n
 const Icons := preload("res://ui/icons.gd")
 const I18n := preload("res://scripts/i18n.gd")
 
@@ -454,7 +456,7 @@ func _build_tablet_row() -> void:
 		b.toggle_mode = true
 		b.button_group = view_group
 		b.set_meta("icon", "view-" + v)
-		b.tooltip_text = v.capitalize()
+		b.tooltip_text = VIEW_NAMES[v]
 		_views.add_child(b)
 		_view_buttons.append(b)
 	# In the footer, at the right by the count: the title row has no room for it at the tablet's text size.

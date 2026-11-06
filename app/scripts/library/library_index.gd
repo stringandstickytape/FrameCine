@@ -18,7 +18,7 @@ const LibraryNfo := preload("res://scripts/library/library_nfo.gd")
 const VideoSourceFactory := preload("res://scripts/video/video_source_factory.gd")
 const FileKey := preload("res://scripts/play/file_key.gd")
 
-const FOLDER_NAME := "Library"
+const FOLDER_NAME := "Library" # i18n
 const TV_SHOWS := "TV Shows"
 const MOVIES := "Movies"
 const SHOW_NFO := "tvshow.nfo"
@@ -166,7 +166,7 @@ static func _season(p: String) -> Dictionary:
 	var show := str(nfo.get("title", _clean_name(show_dir.get_file())))
 	var n := _season_number(p.get_file())
 	var named: Dictionary = nfo.get("named_seasons", {})
-	return {"view": "season", "title": str(named.get(n, _season_title(p.get_file(), n))), "show": show,
+	return {"view": "season", "title": str(named.get(n, _season_title(p.get_file(), n))), "number": n, "show": show,
 			"parent": show_dir, "fanart": _image(show_dir, "fanart"), "episodes": _episodes(p, show)}
 
 

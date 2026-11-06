@@ -15,6 +15,10 @@ const LabelFont := preload("res://scripts/xr/label_font.gd")
 const LabelLayout := preload("res://scripts/xr/label_layout.gd")
 const LabelSurface := preload("res://scripts/xr/label_surface.gd")
 const TestLab := preload("res://scripts/dev/test_lab.gd")
+const FilesTab := preload("res://ui/files_tab.gd")
+const LibraryView := preload("res://ui/library_view.gd")
+const LibraryIndex := preload("res://scripts/library/library_index.gd")
+const VideoMode := preload("res://scripts/video_mode.gd")
 const PO := "res://locale/zh_CN.po"
 ## The stage-1 files (docs/i18n.md): their keys are all in zh_CN.po.
 const SHARED := ["ui/pane_ui.gd", "ui/pane_widgets.gd", "ui/tablet.gd", "ui/system_tab.gd", "ui/ui_layer.gd",
@@ -27,7 +31,6 @@ const SET_B := ["ui/picture_tab.gd", "ui/sound_tab.gd", "ui/subtitles_tab.gd", "
 		"scripts/video_mode.gd", "scripts/play/container_mode.gd", "scripts/play/hdr_tone_map.gd",
 		"scripts/play/frame_step_loop.gd", "scripts/play/auto_crop.gd", "scripts/play/dual_fisheye.gd",
 		"scripts/comfort/screen_angle.gd", "scripts/play/spatial_audio.gd"]
-const VideoMode := preload("res://scripts/video_mode.gd")
 const ContainerMode := preload("res://scripts/play/container_mode.gd")
 const SoundTab := preload("res://ui/sound_tab.gd")
 ## Stage 2, set C: the Room, Objects and Mixed reality tabs, and what they show from elsewhere.
@@ -65,6 +68,7 @@ func _run() -> void:
 	_wrapping()
 	await _set_b()
 	await _set_c()
+	await _source_tab()
 	I18n.set_language("en")
 	print("test_i18n: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	quit(_failures)
@@ -305,6 +309,98 @@ func _wrapping() -> void:
 		widest = maxf(widest, p.get_line_width(i))
 	_check("a Chinese sentence wraps into lines (%d, widest %.0f px)" % [p.get_line_count(), widest],
 			p.get_line_count() >= 4 and widest <= 200.0)
+
+
+## Stage 2, set A: the Source tab. Its headings, rows and counts follow the language, live; names (an agent, a drive, a
+## folder the viewer added, the rows' file names) are content; the test patterns, the calibration cards, the chips,
+## the Library's words and the forms translate; in the pseudo-locale no plain English is left in its lists.
+func _source_tab() -> void:
+	var layer: Node = main.ui
+	var pui: Node = layer.ui
+	var files: Node = pui.files
+	layer.show_panel()
+	pui.show_tab(pui.Tab.FILES)
+	files.open_folder(FilesTab.PATTERNS_FOLDER)
+	await _frames(2)
+	var heading: Label = files.get("_path_label")
+	_check("English: the patterns' heading and names", heading.text == "Test patterns (generated, no decoder)"
+			and files.row_texts().has("Flat 2D"))
+	I18n.set_language("zh_CN")
+	await _frames(2)
+	_check("Chinese: the heading is built again (%s)" % heading.text, heading.text == "测试图案（程序生成，不用解码器）")
+	_check("the patterns' names in Chinese (%s)" % ", ".join(files.row_texts().slice(0, 2)),
+			files.row_texts().has("平面 2D") and files.row_texts().has("双鱼眼 360°（前后镜头）"))
+	var row: Button = files.row_button("平面 2D")
+	_check("a row is a content control: a file called Room stays Room", row != null
+			and bool(row.get_meta("content", false)) and not row.can_auto_translate())
+	_check("the footer's count in Chinese (%s)" % files.count_text(), files.count_text().ends_with("个项目"))
+	var by_path := {}
+	for b in (files.get("_places_box") as Node).get_children():
+		if b is Button and b.has_meta("path"):
+			by_path[str(b.get_meta("path"))] = b
+	_check("the app's places in Chinese (%s, %s)" % [_shown(by_path.get("network://", heading)),
+			_shown(by_path.get(LibraryIndex.root(), heading))], _shown(by_path.get("network://", heading)) == "网络"
+			and _shown(by_path.get(LibraryIndex.root(), heading)) == "片库"
+			and _shown(by_path.get("search://", heading)) == "搜索")
+	var agent: Button = by_path.get("agent://claude")
+	_check("an agent's place keeps its name", agent != null and _shown(agent) == agent.text
+			and bool(agent.get_meta("content", false)))
+	_check("a drive or a folder the viewer added is named by itself", not FilesTab.is_named_place("/run/media/Room")
+			and not FilesTab.is_named_place("smb://nas/films") and FilesTab.is_named_place(FilesTab.BROWSER_FOLDER))
+	var list_view: Button = pui._view_buttons[1]
+	_check("the view buttons' tooltips (%s)" % list_view.atr(list_view.tooltip_text),
+			list_view.atr(list_view.tooltip_text) == "列表")
+	_check("the chips in Chinese (%s)" % FilesTab.chip_text(VideoMode.guess("Trip_180_SBS.mp4")),
+			FilesTab.chip_text(VideoMode.guess("Trip_180_SBS.mp4")) == "180 左右")
+	_check("the Library's own season names translate, an NFO's stay",
+			LibraryView.season_name("Season 2", 2) == "第 2 季" and LibraryView.season_name("Specials", 0) == "特别篇"
+			and LibraryView.season_name("The Early Years", 3) == "The Early Years")
+	var card: Dictionary = TestLab.cards()[0]
+	# The System tab's cards (its section in the tree only while it shows).
+	pui.show_tab(pui.Tab.SYSTEM)
+	pui.show_section("Test and setup")
+	await _frames(1)
+	var card_button := _find(pui.system, func(c: Node) -> bool: return c is Button and c.text == str(card["label"]))
+	_check("a calibration card's name is a key (%s)" % (_shown(card_button) if card_button != null else "none"),
+			card_button != null and _shown(card_button) == "每眼对齐")
+	pui.show_tab(pui.Tab.FILES)
+	await _frames(1)
+	var form: Node = files.get_form()
+	var password := _find(form, func(c: Node) -> bool: return c is Label and c.text == "Password")
+	var share: LineEdit = form.get_field("share")
+	_check("the host form's labels and hints (%s, %s)" % [_shown(password) if password != null else "none",
+			share.atr(share.placeholder_text)], password != null and _shown(password) == "密码"
+			and share.atr(share.placeholder_text) == "可选")
+	var search_title := _find(files.get_search_form(), func(c: Node) -> bool: return c is Label)
+	_check("the search form's line (%s)" % _shown(search_title), _shown(search_title).begins_with("搜索收藏"))
+	files.open_folder(FilesTab.SEARCH_FOLDER)
+	await _frames(1)
+	_check("built rows: Search: %s (%s)" % ["type a name...", files.row_texts()[0]],
+			files.row_texts()[0] == "搜索：输入名称……" and heading.text == "搜索")
+	files.open_folder(FilesTab.QUEUE_FOLDER)
+	await _frames(1)
+	var repeat: Button = files.get("_repeat")
+	_check("the Repeat button (%s)" % _shown(repeat), _shown(repeat).begins_with("重复："))
+	I18n.set_language("en")
+	await _frames(1)
+	_check("back to English: the queue's heading and Repeat", heading.text.begins_with("Queue")
+			and _shown(repeat).begins_with("Repeat: "))
+	# The pseudo-locale: nothing plain in the lists that hold no names (the patterns, Search), nor in their bar.
+	I18n.set_language(I18n.PSEUDO)
+	await _frames(1)
+	var plain: Array[String] = []
+	# The places named by a drive or an agent stay as they are (built again on the switch, so looked up now).
+	var named_places: Array = (files.get("_places_box") as Node).get_children().filter(func(b: Node) -> bool:
+		return b is Button and bool(b.get_meta("content", false)))
+	for place: String in [FilesTab.PATTERNS_FOLDER, FilesTab.SEARCH_FOLDER]:
+		files.open_folder(place)
+		await _frames(1)
+		_plain_under(files, named_places, plain)
+	_check("pseudo: no plain English in the Source tab (%s)" % " | ".join(plain), plain.is_empty())
+	I18n.set_language("en")
+	files.open_folder(FilesTab.PATTERNS_FOLDER)
+	await _frames(1)
+	_check("English again: Flat 2D", files.row_texts().has("Flat 2D") and heading.text.begins_with("Test patterns"))
 
 
 ## Stage 2, set B: the Picture, Sound and Subtitles tabs. Their keys are in zh_CN.po; the mode line, the container's
@@ -578,9 +674,6 @@ func _is_built(c: Node) -> bool:
 
 ## The visible Labels and Buttons under `n` (not under `skip`) whose text is plain English in the pseudo-locale.
 func _plain_under(n: Node, skip: Array, out: Array[String]) -> void:
-	var cards := {}
-	for c: Dictionary in TestLab.cards():
-		cards[str(c["label"])] = true
 	for c in n.find_children("*", "", true, false):
 		if not (c is Label or c is Button) or not (c as CanvasItem).is_visible_in_tree():
 			continue
@@ -589,9 +682,9 @@ func _plain_under(n: Node, skip: Array, out: Array[String]) -> void:
 		var s := _shown(c)
 		if not RegEx.create_from_string("[A-Za-z]{2,}").search(s) or s.begins_with("["):
 			continue
-		# Content left as it is on purpose: the player's name, the lab's card names (to have keys in stage 2), the
-		# languages' own names, an assistant service's own status line.
-		if s.begins_with("VR Video Player") or cards.has(s) or s == "English":
+		# Content left as it is on purpose: the player's name, the languages' own names, an assistant service's own
+		# status line. (The lab's card names are keys since stage 2.)
+		if s.begins_with("VR Video Player") or s == "English":
 			continue
 		var line := "%s '%s'" % [c.name, s]
 		if not out.has(line):

@@ -81,9 +81,13 @@ func _ready() -> void:
 	viewport.add_child(_root)
 	var box := W.vbox()
 	_root.add_child(box)
+	# The title and the text show as given (docs/i18n.md): an assistant's answer, a name, or words the caller translated.
+	# The choices' buttons are fixed words and translate themselves.
 	_title = W.caps("")
+	W.content(_title)
 	box.add_child(_title)
 	_text = W.label("")
+	W.content(_text)
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text.custom_minimum_size = Vector2(WIDTH_PX - 2 * PaneStyle.constant(&"pad"), 0)
 	box.add_child(_text)

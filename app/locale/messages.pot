@@ -141,6 +141,70 @@ msgstr ""
 msgid "%s, top / bottom"
 msgstr ""
 
+#: scripts/android/android_apps.gd:137
+#, c-format
+msgid "%s is on the big screen"
+msgstr ""
+
+#: scripts/android/android_apps.gd:138
+#, c-format
+msgid "Last try: %s"
+msgstr ""
+
+#: scripts/android/android_apps.gd:194
+msgid "Getting ready"
+msgstr ""
+
+#: scripts/android/android_apps.gd:201
+msgid "Clearing what was left from last time"
+msgstr ""
+
+#: scripts/android/android_apps.gd:212
+msgid "Starting the display"
+msgstr ""
+
+#: scripts/android/android_apps.gd:226
+msgid "Starting Android"
+msgstr ""
+
+#: scripts/android/android_apps.gd:236
+msgid "Opening the app"
+msgstr ""
+
+#: scripts/android/android_apps.gd:386
+msgid "Ready"
+msgstr ""
+
+#: scripts/android/lepton.gd:152
+msgid "Lepton isn't on this headset."
+msgstr ""
+
+#: scripts/android/lepton.gd:153
+msgid "Install the Lepton tool from Steam, then come back here."
+msgstr ""
+
+#: scripts/android/lepton.gd:155
+#, c-format
+msgid "The compositor isn't on this headset (%s)."
+msgstr ""
+
+#: scripts/android/lepton.gd:161
+msgid "No Android apps yet."
+msgstr ""
+
+#: scripts/android/lepton.gd:162
+#, c-format
+msgid "Put an APK in a folder of its own: ~/%s/<name>/app.apk"
+msgstr ""
+
+#: scripts/android/lepton.gd:163
+msgid "The folder's name is the name shown here."
+msgstr ""
+
+#: scripts/assistant/assistant_fetch.gd:25
+msgid "From assistant"
+msgstr ""
+
 #: scripts/assistant/assistant_service.gd:445
 #, c-format
 msgid "%s asks to pair. Tell it this code:"
@@ -253,6 +317,10 @@ msgstr ""
 #: scripts/comfort/sleep_timer.gd:117
 #, c-format
 msgid "sleep in %d min"
+msgstr ""
+
+#: scripts/library/library_index.gd:21
+msgid "Library"
 msgstr ""
 
 #: scripts/play/auto_crop.gd:84
@@ -589,6 +657,98 @@ msgstr ""
 msgid "CIPIC subject 003"
 msgstr ""
 
+#: scripts/video/lab_video_source.gd:16
+msgid "Per-eye alignment"
+msgstr ""
+
+#: scripts/video/lab_video_source.gd:20
+msgid "Convergence and IPD"
+msgstr ""
+
+#: scripts/video/lab_video_source.gd:24
+msgid "Judder 24 fps"
+msgstr ""
+
+#: scripts/video/lab_video_source.gd:28
+msgid "Judder 30 fps"
+msgstr ""
+
+#: scripts/video/lab_video_source.gd:31
+msgid "Judder 60 fps"
+msgstr ""
+
+#: scripts/video/lab_video_source.gd:34
+msgid "A/V sync"
+msgstr ""
+
+#: scripts/video/lab_video_source.gd:38
+msgid "Zone plate, flat 4K"
+msgstr ""
+
+#: scripts/video/lab_video_source.gd:42
+msgid "Zone plate, 360° 8K"
+msgstr ""
+
+#: scripts/video/lab_video_source.gd:46
+msgid "Starfield, 360° 8K"
+msgstr ""
+
+#: scripts/video/lab_video_source.gd:50
+msgid "Dark gradient, flat 4K"
+msgstr ""
+
+#: scripts/video/stub_video_source.gd:38
+msgid "Flat 2D"
+msgstr ""
+
+#: scripts/video/stub_video_source.gd:40
+msgid "Flat 3D, side by side (full)"
+msgstr ""
+
+#: scripts/video/stub_video_source.gd:42
+msgid "Flat 3D, side by side (half)"
+msgstr ""
+
+#: scripts/video/stub_video_source.gd:44
+msgid "Flat 3D, top/bottom (full)"
+msgstr ""
+
+#: scripts/video/stub_video_source.gd:46
+msgid "Flat 3D, top/bottom (half)"
+msgstr ""
+
+#: scripts/video/stub_video_source.gd:48
+msgid "180° mono"
+msgstr ""
+
+#: scripts/video/stub_video_source.gd:50
+msgid "180° 3D, side by side"
+msgstr ""
+
+#: scripts/video/stub_video_source.gd:52
+msgid "360° mono"
+msgstr ""
+
+#: scripts/video/stub_video_source.gd:54
+msgid "360° 3D, top/bottom"
+msgstr ""
+
+#: scripts/video/stub_video_source.gd:56
+msgid "Fisheye 180° mono"
+msgstr ""
+
+#: scripts/video/stub_video_source.gd:58
+msgid "Fisheye 180° 3D, side by side"
+msgstr ""
+
+#: scripts/video/stub_video_source.gd:60
+msgid "Fisheye 200° 3D, side by side"
+msgstr ""
+
+#: scripts/video/stub_video_source.gd:62
+msgid "Dual fisheye 360° (front and back lens)"
+msgstr ""
+
 #: scripts/xr/controller_look.gd:48
 msgid "Black"
 msgstr ""
@@ -669,7 +829,8 @@ msgstr ""
 msgid "An AI assistant on a computer on this network sees what plays, answers you on a card, and hears you while you hold the bumper. No program to install."
 msgstr ""
 
-#: ui/assistant_row.gd:80 ui/host_form.gd:56 ui/search_form.gd:42 ui/url_form.gd:59
+#: ui/assistant_row.gd:80 ui/files_tab.gd:850 ui/host_form.gd:60 ui/search_form.gd:43
+#: ui/url_form.gd:59
 msgid "Cancel"
 msgstr ""
 
@@ -741,60 +902,347 @@ msgstr ""
 msgid "Starts, stops, shows and hides Android apps and the agents on this headset."
 msgstr ""
 
-#: ui/files_tab.gd:143
+#: ui/files_tab.gd:149
 msgid "Add host"
 msgstr ""
 
-#: ui/files_tab.gd:145
+#: ui/files_tab.gd:151 ui/files_tab.gd:536
 msgid "Edit hosts"
 msgstr ""
 
-#: ui/files_tab.gd:159
+#: ui/files_tab.gd:165
 msgid "Favourite"
 msgstr ""
 
-#: ui/files_tab.gd:165
+#: ui/files_tab.gd:171
 msgid "In corner"
 msgstr ""
 
-#: ui/files_tab.gd:168
+#: ui/files_tab.gd:174
 msgid "Shuffle"
 msgstr ""
 
-#: ui/files_tab.gd:169
+#: ui/files_tab.gd:175 ui/files_tab.gd:65
 msgid "Repeat: off"
 msgstr ""
 
-#: ui/files_tab.gd:172
+#: ui/files_tab.gd:178
 msgid "Play on"
 msgstr ""
 
-#: ui/files_tab.gd:173
+#: ui/files_tab.gd:179
 msgid "Gapless"
 msgstr ""
 
-#: ui/files_tab.gd:181
+#: ui/files_tab.gd:187
 msgid "Clear upcoming"
 msgstr ""
 
-#: ui/files_tab.gd:494
+#: ui/files_tab.gd:523
 #, c-format
 msgid "%d folders, %d items"
 msgstr ""
 
-#: ui/files_tab.gd:496
+#: ui/files_tab.gd:525
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/files_tab.gd:497
+#: ui/files_tab.gd:526
 #, c-format
 msgid "%d item"
 msgid_plural "%d items"
 msgstr[0] ""
 msgstr[1] ""
+
+#: ui/files_tab.gd:564
+msgid "Test patterns (generated, no decoder)"
+msgstr ""
+
+#: ui/files_tab.gd:570
+msgid "Network: pick a host to edit"
+msgstr ""
+
+#: ui/files_tab.gd:570
+msgid "Network (SMB)"
+msgstr ""
+
+#: ui/files_tab.gd:580 ui/files_tab.gd:610
+#, c-format
+msgid "Edit: %s"
+msgstr ""
+
+#: ui/files_tab.gd:582
+msgid "+ Add host..."
+msgstr ""
+
+#: ui/files_tab.gd:584
+msgid "Looking for hosts on this network..."
+msgstr ""
+
+#: ui/files_tab.gd:586
+msgid "Find hosts on this network"
+msgstr ""
+
+#: ui/files_tab.gd:589
+#, c-format
+msgid "Found: %s   (%s)"
+msgstr ""
+
+#: ui/files_tab.gd:592
+msgid "(simulated: this engine build has no MediaBrowser yet)"
+msgstr ""
+
+#: ui/files_tab.gd:604
+msgid "Browser: pick a page to edit"
+msgstr ""
+
+#: ui/files_tab.gd:604
+msgid "Browser (web pages and desktop windows)"
+msgstr ""
+
+#: ui/files_tab.gd:606
+#, c-format
+msgid "Stop showing: %s"
+msgstr ""
+
+#: ui/files_tab.gd:608
+msgid "+ Open a web page or a stream..."
+msgstr ""
+
+#: ui/files_tab.gd:612
+msgid "Desktop windows"
+msgstr ""
+
+#: ui/files_tab.gd:618
+msgid "(no windows)"
+msgstr ""
+
+#: ui/files_tab.gd:620
+msgid "(untitled)"
+msgstr ""
+
+#: ui/files_tab.gd:644 ui/files_tab.gd:664
+#, c-format
+msgid "%s   (loading...)"
+msgstr ""
+
+#: ui/files_tab.gd:646
+msgid "Looking for media servers on this network..."
+msgstr ""
+
+#: ui/files_tab.gd:647
+msgid "Loading..."
+msgstr ""
+
+#: ui/files_tab.gd:741 ui/files_tab.gd:393
+msgid "Media servers"
+msgstr ""
+
+#: ui/files_tab.gd:742
+#, c-format
+msgid "%s   (simulated)"
+msgstr ""
+
+#: ui/files_tab.gd:751
+msgid "Look again for media servers"
+msgstr ""
+
+#: ui/files_tab.gd:763
+msgid "(no folders, videos or pictures here)"
+msgstr ""
+
+#: ui/files_tab.gd:813
+msgid "No such agent"
+msgstr ""
+
+#: ui/files_tab.gd:817
+msgid "Running in its terminal"
+msgstr ""
+
+#: ui/files_tab.gd:817
+msgid "Not running"
+msgstr ""
+
+#: ui/files_tab.gd:819
+msgid "Not installed"
+msgstr ""
+
+#: ui/files_tab.gd:822
+msgid "Show on the controller"
+msgstr ""
+
+#: ui/files_tab.gd:823
+msgid "Restart, briefed on the player"
+msgstr ""
+
+#: ui/files_tab.gd:824
+msgid "Restart plain, no briefing"
+msgstr ""
+
+#: ui/files_tab.gd:826
+msgid "Start, briefed on the player"
+msgstr ""
+
+#: ui/files_tab.gd:827
+msgid "Start plain, no briefing"
+msgstr ""
+
+#: ui/files_tab.gd:829
+msgid "Hide from the controller (it keeps working)"
+msgstr ""
+
+#: ui/files_tab.gd:830
+msgid "Put it on the big screen"
+msgstr ""
+
+#: ui/files_tab.gd:838 ui/files_tab.gd:399
+msgid "Android apps"
+msgstr ""
+
+#: ui/files_tab.gd:852
+#, c-format
+msgid "Stop %s"
+msgstr ""
+
+#: ui/files_tab.gd:859
+#, c-format
+msgid "%s: its APK's file name has spaces, so it can't run yet"
+msgstr ""
+
+#: ui/files_tab.gd:960
+#, c-format
+msgid "PICTURE %s"
+msgstr ""
+
+#: ui/files_tab.gd:960
+msgid "PICTURE"
+msgstr ""
+
+#: ui/files_tab.gd:962
+msgid "MUSIC"
+msgstr ""
+
+#: ui/files_tab.gd:978
+msgid "FISHEYE"
+msgstr ""
+
+#: ui/files_tab.gd:980
+msgid "DUAL 360"
+msgstr ""
+
+#: ui/files_tab.gd:983 ui/picture_tab.gd:22
+msgid "SBS"
+msgstr ""
+
+#: ui/files_tab.gd:985 ui/picture_tab.gd:22
+msgid "TB"
+msgstr ""
+
+#: ui/files_tab.gd:1280
+msgid "Queue: pick a file to remove"
+msgstr ""
+
+#: ui/files_tab.gd:1280 ui/files_tab.gd:395
+msgid "Queue"
+msgstr ""
+
+#: ui/files_tab.gd:1293
+msgid "(nothing queued: open a file from a folder)"
+msgstr ""
+
+#: ui/files_tab.gd:1299
+#, c-format
+msgid "Playing: %s"
+msgstr ""
+
+#: ui/files_tab.gd:1301 ui/files_tab.gd:1322
+#, c-format
+msgid "Remove: %s"
+msgstr ""
+
+#: ui/files_tab.gd:1310
+msgid "Favourites: pick one to remove"
+msgstr ""
+
+#: ui/files_tab.gd:1310 ui/files_tab.gd:395
+msgid "Favourites"
+msgstr ""
+
+#: ui/files_tab.gd:1314
+msgid "+ Add the playing file"
+msgstr ""
+
+#: ui/files_tab.gd:1317
+msgid "(no favourites yet: open a folder and press Favourite)"
+msgstr ""
+
+#: ui/files_tab.gd:1329 ui/files_tab.gd:1330
+#, c-format
+msgid "Search: %s"
+msgstr ""
+
+#: ui/files_tab.gd:1329 ui/files_tab.gd:396 ui/search_form.gd:16
+msgid "Search"
+msgstr ""
+
+#: ui/files_tab.gd:1330
+msgid "type a name..."
+msgstr ""
+
+#: ui/files_tab.gd:1341
+msgid "(nothing found yet)"
+msgstr ""
+
+#: ui/files_tab.gd:65
+msgid "Repeat: one"
+msgstr ""
+
+#: ui/files_tab.gd:65
+msgid "Repeat: all"
+msgstr ""
+
+#: ui/files_tab.gd:392 ui/system_tab.gd:172
+msgid "Test patterns"
+msgstr ""
+
+#: ui/files_tab.gd:393
+msgid "Network"
+msgstr ""
+
+#: ui/files_tab.gd:394
+msgid "Browser"
+msgstr ""
+
+#: ui/files_tab.gd:405
+msgid "Home"
+msgstr ""
+
+#: ui/files_tab.gd:406
+msgid "Device home"
+msgstr ""
+
+#: ui/files_tab.gd:407
+msgid "Videos"
+msgstr ""
+
+#: ui/files_tab.gd:408
+msgid "Downloads"
+msgstr ""
+
+#: ui/files_tab.gd:535
+msgid "Edit pages"
+msgstr ""
+
+#: ui/files_tab.gd:535
+msgid "Edit queue"
+msgstr ""
+
+#: ui/files_tab.gd:536
+msgid "Edit favourites"
+msgstr ""
 
 #: ui/help_texts.gd:104
 #, c-format
@@ -1038,27 +1486,55 @@ msgstr ""
 msgid "The sound plays on a PC, in time with the picture."
 msgstr ""
 
-#: ui/host_form.gd:52 ui/room_tab.gd:611 ui/room_tab.gd:615 ui/sound_tab.gd:324
+#: ui/host_form.gd:56 ui/room_tab.gd:611 ui/room_tab.gd:615 ui/sound_tab.gd:324
 msgid "Save"
 msgstr ""
 
-#: ui/host_form.gd:60
+#: ui/host_form.gd:64
 msgid "Delete host"
 msgstr ""
 
-#: ui/host_form.gd:64
+#: ui/host_form.gd:68
 msgid "Show password"
 msgstr ""
 
-#: ui/host_form.gd:78
+#: ui/host_form.gd:82
 msgid "Add a network host (SMB)"
 msgstr ""
 
-#: ui/host_form.gd:78
+#: ui/host_form.gd:82
 msgid "Edit network host"
 msgstr ""
 
-#: ui/hw_video_row.gd:25
+#: ui/host_form.gd:13
+msgid "Server"
+msgstr ""
+
+#: ui/host_form.gd:13
+msgid "Share"
+msgstr ""
+
+#: ui/host_form.gd:13
+msgid "User"
+msgstr ""
+
+#: ui/host_form.gd:13
+msgid "Password"
+msgstr ""
+
+#: ui/host_form.gd:13
+msgid "Domain"
+msgstr ""
+
+#: ui/host_form.gd:14
+msgid "nas.local or 192.168.1.10"
+msgstr ""
+
+#: ui/host_form.gd:14
+msgid "optional"
+msgstr ""
+
+#: ui/hw_video_row.gd:25 ui/pane_ui.gd:62
 msgid "Details"
 msgstr ""
 
@@ -1067,16 +1543,58 @@ msgstr ""
 msgid "Hardware 10-bit video: %s"
 msgstr ""
 
-#: ui/library_view.gd:71
+#: ui/library_view.gd:73
 msgid "TV shows"
 msgstr ""
 
-#: ui/library_view.gd:74
+#: ui/library_view.gd:76
 msgid "Films"
 msgstr ""
 
-#: ui/library_view.gd:223 ui/pane_ui.gd:51 ui/pane_ui.gd:698
+#: ui/library_view.gd:191
+#, c-format
+msgid "%d season"
+msgid_plural "%d seasons"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ui/library_view.gd:217
+#, c-format
+msgid "Season %d"
+msgstr ""
+
+#: ui/library_view.gd:219
+msgid "Specials"
+msgstr ""
+
+#: ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:235
+#, c-format
+msgid "%d min"
+msgstr ""
+
+#: ui/library_view.gd:237 ui/library_view.gd:241 ui/pane_ui.gd:51 ui/pane_ui.gd:700
 msgid "Play"
+msgstr ""
+
+#: ui/library_view.gd:414 ui/library_view.gd:421
+msgid "Watched"
+msgstr ""
+
+#: ui/library_view.gd:417
+#, c-format
+msgid "%d of %d"
+msgstr ""
+
+#: ui/library_view.gd:419
+#, c-format
+msgid "%d episode"
+msgid_plural "%d episodes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ui/library_view.gd:29
+#, c-format
+msgid "Nothing here yet. Ask an agent on the headset to fill it, or add folders to %s"
 msgstr ""
 
 #: ui/mixed_reality_tab.gd:36
@@ -1373,43 +1891,43 @@ msgstr ""
 msgid "abc"
 msgstr ""
 
-#: ui/pane_ui.gd:231
+#: ui/pane_ui.gd:233
 msgid "Steady detail"
 msgstr ""
 
-#: ui/pane_ui.gd:235 ui/picture_tab.gd:28
+#: ui/pane_ui.gd:237 ui/picture_tab.gd:28
 msgid "Smooth banding"
 msgstr ""
 
-#: ui/pane_ui.gd:616
+#: ui/pane_ui.gd:618
 #, c-format
 msgid "%s, %s"
 msgstr ""
 
-#: ui/pane_ui.gd:619
+#: ui/pane_ui.gd:621
 #, c-format
 msgid "battery %d %%, charging"
 msgstr ""
 
-#: ui/pane_ui.gd:620
+#: ui/pane_ui.gd:622
 #, c-format
 msgid "battery %d %%"
 msgstr ""
 
-#: ui/pane_ui.gd:624 ui/pane_ui.gd:663 ui/ui_layer.gd:452
+#: ui/pane_ui.gd:626 ui/pane_ui.gd:665 ui/ui_layer.gd:452
 msgid "Listening"
 msgstr ""
 
-#: ui/pane_ui.gd:740
+#: ui/pane_ui.gd:742
 #, c-format
 msgid "Chapter %s"
 msgstr ""
 
-#: ui/pane_ui.gd:234
+#: ui/pane_ui.gd:236
 msgid "Fine detail filtered where the picture is shrunk, so it doesn't shimmer."
 msgstr ""
 
-#: ui/pane_ui.gd:238
+#: ui/pane_ui.gd:240
 msgid "Hides the steps in dark gradients (8-bit video)."
 msgstr ""
 
@@ -1457,7 +1975,15 @@ msgstr ""
 msgid "System"
 msgstr ""
 
-#: ui/pane_ui.gd:698
+#: ui/pane_ui.gd:62
+msgid "List"
+msgstr ""
+
+#: ui/pane_ui.gd:62
+msgid "Grid"
+msgstr ""
+
+#: ui/pane_ui.gd:700
 msgid "Pause"
 msgstr ""
 
@@ -1785,14 +2311,6 @@ msgstr ""
 msgid "Mono"
 msgstr ""
 
-#: ui/picture_tab.gd:22
-msgid "SBS"
-msgstr ""
-
-#: ui/picture_tab.gd:22
-msgid "TB"
-msgstr ""
-
 #: ui/picture_tab.gd:24
 msgid "Dual 360"
 msgstr ""
@@ -2022,11 +2540,6 @@ msgstr ""
 
 #: ui/room_tab.gd:231
 msgid "Up next in"
-msgstr ""
-
-#: ui/room_tab.gd:235
-#, c-format
-msgid "%d min"
 msgstr ""
 
 #: ui/room_tab.gd:244
@@ -2305,6 +2818,14 @@ msgstr ""
 
 #: ui/room_tab.gd:616
 msgid "digits"
+msgstr ""
+
+#: ui/search_form.gd:14
+msgid "Search your favourites, history, queue and the last local folder"
+msgstr ""
+
+#: ui/search_form.gd:17
+msgid "words from the name"
 msgstr ""
 
 #: ui/sound_tab.gd:63
@@ -2737,10 +3258,6 @@ msgstr ""
 
 #: ui/system_tab.gd:171
 msgid "Test and setup"
-msgstr ""
-
-#: ui/system_tab.gd:172
-msgid "Test patterns"
 msgstr ""
 
 #: ui/system_tab.gd:173

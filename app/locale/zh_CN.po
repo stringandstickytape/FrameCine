@@ -1939,6 +1939,228 @@ msgstr "未能截图：%s"
 
 msgid "Mono"
 msgstr "单画面"
+# --- stage 2, set A ---
+# The Source tab (ui/files_tab.gd), the Library (ui/library_view.gd), the host and search forms, the test patterns and
+# the calibration cards, the Android apps place.
+
+msgid "Server"
+msgstr "服务器"
+
+msgid "Library"
+msgstr "片库"
+
+msgid "From assistant"
+msgstr "来自助手"
+
+msgid "Network"
+msgstr "网络"
+
+msgid "Media servers"
+msgstr "媒体服务器"
+
+msgid "Browser"
+msgstr "浏览器"
+
+msgid "Queue"
+msgstr "队列"
+
+msgid "Favourites"
+msgstr "收藏"
+
+msgid "Search"
+msgstr "搜索"
+
+msgid "Android apps"
+msgstr "安卓应用"
+
+msgid "Home"
+msgstr "主文件夹"
+
+msgid "Device home"
+msgstr "设备主文件夹"
+
+msgid "Videos"
+msgstr "视频"
+
+msgid "Downloads"
+msgstr "下载"
+
+msgid "Edit pages"
+msgstr "编辑网页"
+
+msgid "Edit queue"
+msgstr "编辑队列"
+
+msgid "Edit favourites"
+msgstr "编辑收藏"
+
+msgid "Repeat: one"
+msgstr "重复：单个"
+
+msgid "Repeat: all"
+msgstr "重复：全部"
+
+msgid "Test patterns (generated, no decoder)"
+msgstr "测试图案（程序生成，不用解码器）"
+
+msgid "Network: pick a host to edit"
+msgstr "网络：选择要编辑的主机"
+
+msgid "Network (SMB)"
+msgstr "网络（SMB）"
+
+msgid "Edit: %s"
+msgstr "编辑：%s"
+
+msgid "+ Add host..."
+msgstr "+ 添加主机……"
+
+msgid "Looking for hosts on this network..."
+msgstr "正在此网络上查找主机……"
+
+msgid "Find hosts on this network"
+msgstr "在此网络上查找主机"
+
+msgid "Found: %s   (%s)"
+msgstr "已找到：%s   (%s)"
+
+msgid "(simulated: this engine build has no MediaBrowser yet)"
+msgstr "（模拟：此引擎版本还没有 MediaBrowser）"
+
+msgid "Browser: pick a page to edit"
+msgstr "浏览器：选择要编辑的网页"
+
+msgid "Browser (web pages and desktop windows)"
+msgstr "浏览器（网页和桌面窗口）"
+
+msgid "Stop showing: %s"
+msgstr "停止显示：%s"
+
+msgid "+ Open a web page or a stream..."
+msgstr "+ 打开网页或流……"
+
+msgid "Desktop windows"
+msgstr "桌面窗口"
+
+msgid "(no windows)"
+msgstr "（没有窗口）"
+
+msgid "(untitled)"
+msgstr "（无标题）"
+
+msgid "%s   (loading...)"
+msgstr "%s   （正在加载……）"
+
+msgid "Looking for media servers on this network..."
+msgstr "正在此网络上查找媒体服务器……"
+
+msgid "Loading..."
+msgstr "正在加载……"
+
+msgid "%s   (simulated)"
+msgstr "%s   （模拟）"
+
+msgid "Look again for media servers"
+msgstr "重新查找媒体服务器"
+
+msgid "(no folders, videos or pictures here)"
+msgstr "（这里没有文件夹、视频或图片）"
+
+msgid "No such agent"
+msgstr "没有这个代理"
+
+msgid "Running in its terminal"
+msgstr "正在其终端中运行"
+
+msgid "Not running"
+msgstr "未运行"
+
+msgid "Not installed"
+msgstr "未安装"
+
+msgid "Show on the controller"
+msgstr "在手柄上显示"
+
+msgid "Restart, briefed on the player"
+msgstr "重新启动，附带播放器说明"
+
+msgid "Restart plain, no briefing"
+msgstr "直接重新启动，不附说明"
+
+msgid "Start, briefed on the player"
+msgstr "启动，附带播放器说明"
+
+msgid "Start plain, no briefing"
+msgstr "直接启动，不附说明"
+
+msgid "Hide from the controller (it keeps working)"
+msgstr "从手柄上隐藏（它会继续工作）"
+
+msgid "Put it on the big screen"
+msgstr "放到大屏幕上"
+
+msgid "Stop %s"
+msgstr "停止 %s"
+
+msgid "%s: its APK's file name has spaces, so it can't run yet"
+msgstr "%s：它的 APK 文件名有空格，所以还不能运行"
+
+msgid "%s is on the big screen"
+msgstr "%s 正在大屏幕上"
+
+msgid "Last try: %s"
+msgstr "上次尝试：%s"
+
+msgid "Getting ready"
+msgstr "正在准备"
+
+msgid "Clearing what was left from last time"
+msgstr "正在清理上次留下的内容"
+
+msgid "Starting the display"
+msgstr "正在启动显示"
+
+msgid "Starting Android"
+msgstr "正在启动安卓"
+
+msgid "Opening the app"
+msgstr "正在打开应用"
+
+msgid "Ready"
+msgstr "就绪"
+
+msgid "Lepton isn't on this headset."
+msgstr "这台头显上没有 Lepton。"
+
+msgid "Install the Lepton tool from Steam, then come back here."
+msgstr "请从 Steam 安装 Lepton 工具，然后回到这里。"
+
+msgid "The compositor isn't on this headset (%s)."
+msgstr "这台头显上没有合成器（%s）。"
+
+msgid "No Android apps yet."
+msgstr "还没有安卓应用。"
+
+msgid "Put an APK in a folder of its own: ~/%s/<name>/app.apk"
+msgstr "把 APK 放进单独的文件夹：~/%s/<名称>/app.apk"
+
+msgid "The folder's name is the name shown here."
+msgstr "文件夹的名称就是这里显示的名称。"
+
+msgid "PICTURE %s"
+msgstr "图片 %s"
+
+msgid "PICTURE"
+msgstr "图片"
+
+msgid "MUSIC"
+msgstr "音乐"
+
+msgid "FISHEYE"
+msgstr "鱼眼"
+
+msgid "DUAL 360"
+msgstr "双鱼眼 360"
 
 msgid "SBS"
 msgstr "左右"
@@ -2313,3 +2535,157 @@ msgstr "日落天空"
 
 msgid "Cloud layers sky"
 msgstr "云层天空"
+msgid "Queue: pick a file to remove"
+msgstr "队列：选择要移除的文件"
+
+msgid "(nothing queued: open a file from a folder)"
+msgstr "（队列为空：从文件夹中打开一个文件）"
+
+msgid "Playing: %s"
+msgstr "正在播放：%s"
+
+msgid "Remove: %s"
+msgstr "移除：%s"
+
+msgid "Favourites: pick one to remove"
+msgstr "收藏：选择要移除的一项"
+
+msgid "+ Add the playing file"
+msgstr "+ 添加正在播放的文件"
+
+msgid "(no favourites yet: open a folder and press Favourite)"
+msgstr "（还没有收藏：打开一个文件夹并按“收藏”）"
+
+msgid "Search: %s"
+msgstr "搜索：%s"
+
+msgid "type a name..."
+msgstr "输入名称……"
+
+msgid "(nothing found yet)"
+msgstr "（还没有找到）"
+
+msgid "Search your favourites, history, queue and the last local folder"
+msgstr "搜索收藏、历史记录、队列和上次打开的本地文件夹"
+
+msgid "words from the name"
+msgstr "名称中的词"
+
+msgid "Share"
+msgstr "共享"
+
+msgid "User"
+msgstr "用户"
+
+msgid "Password"
+msgstr "密码"
+
+msgid "Domain"
+msgstr "域"
+
+msgid "nas.local or 192.168.1.10"
+msgstr "nas.local 或 192.168.1.10"
+
+msgid "optional"
+msgstr "可选"
+
+msgid "%d season"
+msgid_plural "%d seasons"
+msgstr[0] "%d 季"
+
+msgid "Season %d"
+msgstr "第 %d 季"
+
+msgid "Specials"
+msgstr "特别篇"
+
+msgid "%d min"
+msgstr "%d 分钟"
+
+msgid "Watched"
+msgstr "已看"
+
+msgid "%d of %d"
+msgstr "已看 %d/%d"
+
+msgid "%d episode"
+msgid_plural "%d episodes"
+msgstr[0] "%d 集"
+
+msgid "Nothing here yet. Ask an agent on the headset to fill it, or add folders to %s"
+msgstr "这里还没有内容。可以让头显上的代理来填充，或把文件夹添加到 %s"
+
+msgid "Flat 2D"
+msgstr "平面 2D"
+
+msgid "Flat 3D, side by side (full)"
+msgstr "平面 3D，左右（全宽）"
+
+msgid "Flat 3D, side by side (half)"
+msgstr "平面 3D，左右（半宽）"
+
+msgid "Flat 3D, top/bottom (full)"
+msgstr "平面 3D，上下（全高）"
+
+msgid "Flat 3D, top/bottom (half)"
+msgstr "平面 3D，上下（半高）"
+
+msgid "180° mono"
+msgstr "180° 单目"
+
+msgid "180° 3D, side by side"
+msgstr "180° 3D，左右"
+
+msgid "360° mono"
+msgstr "360° 单目"
+
+msgid "360° 3D, top/bottom"
+msgstr "360° 3D，上下"
+
+msgid "Fisheye 180° mono"
+msgstr "鱼眼 180° 单目"
+
+msgid "Fisheye 180° 3D, side by side"
+msgstr "鱼眼 180° 3D，左右"
+
+msgid "Fisheye 200° 3D, side by side"
+msgstr "鱼眼 200° 3D，左右"
+
+msgid "Dual fisheye 360° (front and back lens)"
+msgstr "双鱼眼 360°（前后镜头）"
+
+msgid "Per-eye alignment"
+msgstr "每眼对齐"
+
+msgid "Convergence and IPD"
+msgstr "会聚与瞳距"
+
+msgid "Judder 24 fps"
+msgstr "抖动 24 fps"
+
+msgid "Judder 30 fps"
+msgstr "抖动 30 fps"
+
+msgid "Judder 60 fps"
+msgstr "抖动 60 fps"
+
+msgid "A/V sync"
+msgstr "音画同步"
+
+msgid "Zone plate, flat 4K"
+msgstr "波带片，平面 4K"
+
+msgid "Zone plate, 360° 8K"
+msgstr "波带片，360° 8K"
+
+msgid "Starfield, 360° 8K"
+msgstr "星空，360° 8K"
+
+msgid "Dark gradient, flat 4K"
+msgstr "暗部渐变，平面 4K"
+
+msgid "List"
+msgstr "列表"
+
+msgid "Grid"
+msgstr "网格"

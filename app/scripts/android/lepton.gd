@@ -145,19 +145,26 @@ static func x_display() -> String:
 	return d if d != "" else X_DISPLAY
 
 
-## What is missing to run any app here, in plain words (one line a row), or [].
-static func missing() -> Array[String]:
+## What is missing to run any app here, in plain words (one line a row), or []. English (android_status, an
+## assistant), or with `localised` in the menus' language (the Files place; docs/i18n.md).
+static func missing(localised := false) -> Array[String]:
 	if not FileAccess.file_exists(lepton()):
-		return ["Lepton isn't on this headset.", "Install the Lepton tool from Steam, then come back here."]
+		return [_t("Lepton isn't on this headset.", localised), # i18n
+				_t("Install the Lepton tool from Steam, then come back here.", localised)] # i18n
 	if not FileAccess.file_exists(compositor):
-		return ["The compositor isn't on this headset (%s)." % compositor]
+		return [_t("The compositor isn't on this headset (%s).", localised) % compositor] # i18n
 	return []
 
 
-## How to add an app, in plain words (one line a row).
-static func how_to_add() -> Array[String]:
-	return ["No Android apps yet.", "Put an APK in a folder of its own: ~/%s/<name>/app.apk" % FOLDER,
-			"The folder's name is the name shown here."]
+## How to add an app, in plain words (one line a row). `localised` as for missing().
+static func how_to_add(localised := false) -> Array[String]:
+	return [_t("No Android apps yet.", localised), # i18n
+			_t("Put an APK in a folder of its own: ~/%s/<name>/app.apk", localised) % FOLDER, # i18n
+			_t("The folder's name is the name shown here.", localised)] # i18n
+
+
+static func _t(text: String, localised: bool) -> String:
+	return TranslationServer.translate(text) if localised else text
 
 
 ## The apps, by folder name: [{name, label, folder, apk}], in order. spaces: the APK's file name has spaces, so it can't

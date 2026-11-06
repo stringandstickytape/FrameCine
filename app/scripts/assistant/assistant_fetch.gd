@@ -22,7 +22,7 @@ const VideoMode := preload("res://scripts/video_mode.gd")
 const LibraryIndex := preload("res://scripts/library/library_index.gd")
 const LibraryCopy := preload("res://scripts/library/library_copy.gd")
 const NODE_NAME := "AssistantFetch"
-const FOLDER_NAME := "From assistant"
+const FOLDER_NAME := "From assistant" # i18n
 ## Bytes kept free on the disk.
 const KEEP_FREE := 2 * 1024 * 1024 * 1024
 const MAX_REDIRECTS := 5

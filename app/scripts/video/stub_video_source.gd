@@ -31,21 +31,35 @@ const SUB_TRACKS: Array[Dictionary] = [
 			"bitmap": false, "default": false, "forced": false},
 ]
 
-## [mode id, label, width, height] -- typical frame sizes for each kind of content.
+## [mode id, label, width, height] -- typical frame sizes for each kind of content. The label is on a marked line, off
+## the id's: it is a key (docs/i18n.md), and the Files tab's Test patterns place translates it.
 const PATTERNS: Array = [
-	["flat_mono", "Flat 2D", 1920, 1080],
-	["flat_sbs", "Flat 3D, side by side (full)", 3840, 1080],
-	["flat_sbs_half", "Flat 3D, side by side (half)", 1920, 1080],
-	["flat_tb", "Flat 3D, top/bottom (full)", 1920, 2160],
-	["flat_tb_half", "Flat 3D, top/bottom (half)", 1920, 1080],
-	["180_mono", "180° mono", 2048, 2048],
-	["180_sbs", "180° 3D, side by side", 4096, 2048],
-	["360_mono", "360° mono", 3840, 1920],
-	["360_tb", "360° 3D, top/bottom", 2880, 2880],
-	["fisheye_mono", "Fisheye 180° mono", 2048, 2048],
-	["fisheye_sbs", "Fisheye 180° 3D, side by side", 3840, 1920],
-	["fisheye_sbs_fov200", "Fisheye 200° 3D, side by side", 3840, 1920],
-	["dualfisheye_mono", "Dual fisheye 360° (front and back lens)", 3840, 1920],
+	["flat_mono",
+			"Flat 2D", 1920, 1080], # i18n
+	["flat_sbs",
+			"Flat 3D, side by side (full)", 3840, 1080], # i18n
+	["flat_sbs_half",
+			"Flat 3D, side by side (half)", 1920, 1080], # i18n
+	["flat_tb",
+			"Flat 3D, top/bottom (full)", 1920, 2160], # i18n
+	["flat_tb_half",
+			"Flat 3D, top/bottom (half)", 1920, 1080], # i18n
+	["180_mono",
+			"180° mono", 2048, 2048], # i18n
+	["180_sbs",
+			"180° 3D, side by side", 4096, 2048], # i18n
+	["360_mono",
+			"360° mono", 3840, 1920], # i18n
+	["360_tb",
+			"360° 3D, top/bottom", 2880, 2880], # i18n
+	["fisheye_mono",
+			"Fisheye 180° mono", 2048, 2048], # i18n
+	["fisheye_sbs",
+			"Fisheye 180° 3D, side by side", 3840, 1920], # i18n
+	["fisheye_sbs_fov200",
+			"Fisheye 200° 3D, side by side", 3840, 1920], # i18n
+	["dualfisheye_mono",
+			"Dual fisheye 360° (front and back lens)", 3840, 1920], # i18n
 ]
 
 var _host: Node

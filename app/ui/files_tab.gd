@@ -59,6 +59,10 @@ const SEARCH_FOLDER := "search://"
 ## Media servers on the LAN (UPnP/DLNA, scripts/net/media_servers.gd): upnp:// lists the servers, then their folders.
 const MEDIA_SERVERS_FOLDER := "upnp://"
 const DISCOVERY_SECONDS := 3.0
+## The headset user's home (a place of its own when the app runs as another user).
+const DEVICE_HOME := "/home/steamos"
+## The Repeat button's words for the queue's repeat ("off", "one", "all").
+const REPEAT_TEXTS := {"off": "Repeat: off", "one": "Repeat: one", "all": "Repeat: all"} # i18n
 
 ## scripts/main.gd, for the resume markers (main.features.resume); may be null.
 var app: Node
@@ -138,7 +142,9 @@ func _ready() -> void:
 	add_child(right)
 	var bar := W.hbox()
 	right.add_child(bar)
+	# A path, a title, or a heading the code translated itself (docs/i18n.md).
 	_path_label = W.ellipsis(W.label("", &"MutedLabel"))
+	W.content(_path_label)
 	bar.add_child(_path_label)
 	_add_button = W.button("Add host", func() -> void: _show_form(-1, {}))
 	bar.add_child(_add_button)
@@ -273,8 +279,28 @@ func _build_places() -> void:
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		b.toggle_mode = true
 		b.set_meta("path", p)
+		# The app's own places translate their names; a drive, a share, a folder the viewer added or an agent keeps its.
+		if not is_named_place(p):
+			W.content(b)
 		_places_box.add_child(b)
 	_mark_place()
+
+
+## The language changed (ui/pane_ui.gd): the places and the list are built again in it.
+func sync() -> void:
+	_build_places()
+	if not is_form_open():
+		_refresh()
+
+
+## A place the app names itself (get_places(): the lines marked i18n, the Library, what an assistant fetched): its
+## name is a key. Anything else is named by its folder, its drive or the viewer: content.
+static func is_named_place(path: String) -> bool:
+	if path in [PATTERNS_FOLDER, NETWORK_FOLDER, MEDIA_SERVERS_FOLDER, BROWSER_FOLDER, QUEUE_FOLDER, FAVOURITES_FOLDER,
+			SEARCH_FOLDER, ANDROID_FOLDER]:
+		return true
+	return path != "" and path in [LibraryIndex.root(), _home(), DEVICE_HOME, _system_dir(OS.SYSTEM_DIR_MOVIES),
+			_system_dir(OS.SYSTEM_DIR_DOWNLOADS), AssistantFetch.folder()]
 
 
 func _mark_place() -> void:
@@ -358,30 +384,28 @@ static func _place_rank(path: String) -> int:
 	return i if i >= 0 else named.size()
 
 
-## [{label, path}] in display order; only places that exist.
+## [{label, path}] in display order; only places that exist. The labels stay English (an assistant and the dev link
+## read them); the places column translates the app's own (is_named_place()).
 static func get_places() -> Array[Dictionary]:
 	# Offered before it exists: opening it makes it.
 	var out: Array[Dictionary] = [{"label": LibraryIndex.FOLDER_NAME, "path": LibraryIndex.root()},
-			{"label": "Test patterns", "path": PATTERNS_FOLDER},
-			{"label": "Network", "path": NETWORK_FOLDER}, {"label": "Media servers", "path": MEDIA_SERVERS_FOLDER},
-			{"label": "Browser", "path": BROWSER_FOLDER},
-			{"label": "Queue", "path": QUEUE_FOLDER}, {"label": "Favourites", "path": FAVOURITES_FOLDER},
-			{"label": "Search", "path": SEARCH_FOLDER}]
+			{"label": "Test patterns", "path": PATTERNS_FOLDER}, # i18n
+			{"label": "Network", "path": NETWORK_FOLDER}, {"label": "Media servers", "path": MEDIA_SERVERS_FOLDER}, # i18n
+			{"label": "Browser", "path": BROWSER_FOLDER}, # i18n
+			{"label": "Queue", "path": QUEUE_FOLDER}, {"label": "Favourites", "path": FAVOURITES_FOLDER}, # i18n
+			{"label": "Search", "path": SEARCH_FOLDER}] # i18n
 	for id: String in AgentTerminal.AGENTS:
 		out.append({"label": str(AgentTerminal.AGENTS[id]["name"]), "path": AGENT_PREFIX + id})
-	out.append({"label": "Android apps", "path": ANDROID_FOLDER})
+	out.append({"label": "Android apps", "path": ANDROID_FOLDER}) # i18n
 	var seen := {}
 	var add := func(label: String, p: String) -> void:
 		if p != "" and not seen.has(p) and DirAccess.dir_exists_absolute(p):
 			seen[p] = true
 			out.append({"label": label, "path": p})
-	var home := OS.get_environment("HOME")
-	if home == "":
-		home = OS.get_environment("USERPROFILE").replace("\\", "/")
-	add.call("Home", home)
-	add.call("Device home", "/home/steamos")
-	add.call("Videos", _system_dir(OS.SYSTEM_DIR_MOVIES))
-	add.call("Downloads", _system_dir(OS.SYSTEM_DIR_DOWNLOADS))
+	add.call("Home", _home()) # i18n
+	add.call("Device home", DEVICE_HOME) # i18n
+	add.call("Videos", _system_dir(OS.SYSTEM_DIR_MOVIES)) # i18n
+	add.call("Downloads", _system_dir(OS.SYSTEM_DIR_DOWNLOADS)) # i18n
 	# What an assistant fetched (scripts/assistant/assistant_fetch.gd), once there is anything.
 	add.call(AssistantFetch.FOLDER_NAME, AssistantFetch.folder())
 	# Folders the viewer added (an assistant's add_place, confirmed): scripts/net/saved_places.gd.
@@ -402,6 +426,11 @@ static func get_places() -> Array[Dictionary]:
 			var drive := DirAccess.get_drive_name(i)
 			add.call(drive, drive + "/")
 	return out
+
+
+static func _home() -> String:
+	var home := OS.get_environment("HOME")
+	return home if home != "" else OS.get_environment("USERPROFILE").replace("\\", "/")
 
 
 ## OS.get_system_dir(), asked once: on Linux each call runs xdg-user-dir (about 45 ms on the headset), and the
@@ -503,8 +532,8 @@ func _refresh() -> void:
 			or (current == BROWSER_FOLDER and not WebPages.pages.is_empty()) \
 			or (current == QUEUE_FOLDER and _queue() != null) \
 			or (current == FAVOURITES_FOLDER and _library() != null and not _library().favourites().is_empty())
-	_edit_button.text = {BROWSER_FOLDER: "Edit pages", QUEUE_FOLDER: "Edit queue",
-			FAVOURITES_FOLDER: "Edit favourites"}.get(current, "Edit hosts")
+	_edit_button.text = {BROWSER_FOLDER: "Edit pages", QUEUE_FOLDER: "Edit queue", # i18n
+			FAVOURITES_FOLDER: "Edit favourites"}.get(current, "Edit hosts") # i18n
 	_queue_bar.visible = current == QUEUE_FOLDER and _queue() != null
 	_favourite_folder.visible = not _is_virtual(current) and _library() != null
 	_in_corner.visible = _feature("pip") != null and current not in [NETWORK_FOLDER, BROWSER_FOLDER, PATTERNS_FOLDER,
@@ -532,32 +561,35 @@ func _refresh() -> void:
 		_list_search()
 		return
 	if current == PATTERNS_FOLDER:
-		_clear("Test patterns (generated, no decoder)")
+		_clear(tr("Test patterns (generated, no decoder)"))
 		for pattern in StubVideoSource.list_patterns():
-			_add_row(str(pattern["label"]), {"kind": "file", "path": pattern["path"]})
+			_add_row(tr(str(pattern["label"])), {"kind": "file", "path": pattern["path"]})
 		listing_changed.emit()
 		return
 	if current == NETWORK_FOLDER:
-		_clear("Network: pick a host to edit" if _edit_hosts else "Network (SMB)")
+		_clear(tr("Network: pick a host to edit") if _edit_hosts else tr("Network (SMB)"))
 		for i in NetworkHosts.hosts.size():
 			var h := NetworkHosts.hosts[i]
 			var user := str(h["user"])
+			# The host's label, address and user are the viewer's: only "Edit:" is translated.
 			var shown := NetworkHosts.root_path(h)
 			if str(h.get("label", "")) != "":
 				shown = "%s  %s" % [h["label"], shown]
-			_add_row("%s%s%s" % ["Edit: " if _edit_hosts else "", shown,
-					"   (%s)" % user if user != "" else ""], {"kind": "host", "path": NetworkHosts.root_path(h), "index": i})
-		_add_row("+ Add host...", {"kind": "add", "path": ""})
+			if user != "":
+				shown += "   (%s)" % user
+			_add_row(tr("Edit: %s") % shown if _edit_hosts else shown,
+					{"kind": "host", "path": NetworkHosts.root_path(h), "index": i})
+		_add_row(tr("+ Add host..."), {"kind": "add", "path": ""})
 		if _discovery != null:
-			_add_row("Looking for hosts on this network...", {"kind": "none", "path": ""})
+			_add_row(tr("Looking for hosts on this network..."), {"kind": "none", "path": ""})
 		else:
-			_add_row("Find hosts on this network", {"kind": "discover", "path": ""})
+			_add_row(tr("Find hosts on this network"), {"kind": "discover", "path": ""})
 		for h in _found:
 			var target := str(h.get("name", "")) if str(h.get("name", "")) != "" else str(h.get("address", ""))
-			_add_row("Found: %s   (%s)" % [target, h.get("address", "")], {"kind": "found", "path": "smb://" + target,
+			_add_row(tr("Found: %s   (%s)") % [target, h.get("address", "")], {"kind": "found", "path": "smb://" + target,
 					"host": h})
 		if not DirectoryLister.has_media_browser():
-			_add_row("(simulated: this engine build has no MediaBrowser yet)", {"kind": "none", "path": ""})
+			_add_row(tr("(simulated: this engine build has no MediaBrowser yet)"), {"kind": "none", "path": ""})
 		listing_changed.emit()
 		return
 	if LibraryIndex.is_inside(current):
@@ -569,21 +601,23 @@ func _refresh() -> void:
 ## The Browser place: open a page, the saved pages, the desktop's windows (listed on the spot: a local X server
 ## answers in well under a millisecond), and stopping the window on show.
 func _list_browser() -> void:
-	_clear("Browser: pick a page to edit" if _edit_pages else "Browser (web pages and desktop windows)")
+	_clear(tr("Browser: pick a page to edit") if _edit_pages else tr("Browser (web pages and desktop windows)"))
 	if WindowVideoSource.is_window_path(active_path):
-		_add_row("Stop showing: %s" % (active_title if active_title != "" else WindowVideoSource.describe_path(active_path)),
-				{"kind": "stop", "path": active_path})
-	_add_row("+ Open a web page or a stream...", {"kind": "url", "path": ""})
+		_add_row(tr("Stop showing: %s") % (active_title if active_title != ""
+				else WindowVideoSource.describe_path(active_path)), {"kind": "stop", "path": active_path})
+	_add_row(tr("+ Open a web page or a stream..."), {"kind": "url", "path": ""})
 	for u in WebPages.pages:
-		_add_row(("Edit: " if _edit_pages else "") + u, {"kind": "page", "path": WindowVideoSource.browser_path(u), "url": u})
-	_add_row("Desktop windows", {"kind": "none", "path": ""})
+		_add_row(tr("Edit: %s") % u if _edit_pages else u,
+				{"kind": "page", "path": WindowVideoSource.browser_path(u), "url": u})
+	_add_row(tr("Desktop windows"), {"kind": "none", "path": ""})
 	var listing := WindowVideoSource.list_desktop_windows()
+	# The windows' titles and classes are theirs; an error stays as the window source words it (English).
 	if listing["error"] != "":
 		_add_row("(%s)" % listing["error"], {"kind": "none", "path": ""})
 	elif (listing["windows"] as Array).is_empty():
-		_add_row("(no windows)", {"kind": "none", "path": ""})
+		_add_row(tr("(no windows)"), {"kind": "none", "path": ""})
 	for w: Dictionary in listing["windows"]:
-		var title: String = w["title"] if w["title"] != "" else "(untitled)"
+		var title: String = w["title"] if w["title"] != "" else tr("(untitled)")
 		_add_row("%s   (%s, %dx%d)" % [title, w["class"] if w["class"] != "" else w["instance"], w["width"], w["height"]],
 				{"kind": "window", "path": WindowVideoSource.window_path(w["id"])})
 	listing_changed.emit()
@@ -607,10 +641,10 @@ func _start_listing(p: String, rediscover := false) -> void:
 	var id := _request
 	_clear(p)
 	_busy = true
-	_path_label.text = p + "   (loading...)"
+	_path_label.text = tr("%s   (loading...)") % p
 	var upnp := MediaServers.is_upnp(p)
-	_add_row("Looking for media servers on this network..." if upnp and (p == MEDIA_SERVERS_FOLDER or rediscover)
-			else "Loading...", {"kind": "none", "path": ""})
+	_add_row(tr("Looking for media servers on this network...") if upnp and (p == MEDIA_SERVERS_FOLDER or rediscover)
+			else tr("Loading..."), {"kind": "none", "path": ""})
 	listing_changed.emit()
 	# The worker holds the tab only weakly; the tab waits for its workers before it goes (_wait_tasks).
 	var me: WeakRef = weakref(self)
@@ -627,7 +661,7 @@ func _start_listing(p: String, rediscover := false) -> void:
 func _start_library(p: String) -> void:
 	_request += 1
 	var id := _request
-	_clear(LibraryIndex.FOLDER_NAME + "   (loading...)")
+	_clear(tr("%s   (loading...)") % tr(LibraryIndex.FOLDER_NAME))
 	_busy = true
 	listing_changed.emit()
 	var me: WeakRef = weakref(self)
@@ -645,7 +679,8 @@ func _on_library_read(id: int, p: String, data: Dictionary) -> void:
 	if data["view"] == "plain":
 		_start_listing(p)
 		return
-	_clear(str(data["title"]))
+	# The Library's home is named by the app; a shelf, a show or a film by its folder or its NFO (content).
+	_clear(tr(LibraryIndex.FOLDER_NAME) if data["view"] == "home" else str(data["title"]))
 	_library_shown = true
 	if _library_images == null:
 		_library_images = LibraryImages.new()
@@ -682,6 +717,8 @@ func set_library_title(text: String) -> void:
 func add_library_row(b: Button, row: Dictionary, parent: Control = null) -> void:
 	_tiles = null
 	row["library"] = true
+	# Titles, episode numbers and the marks: content, or words ui/library_view.gd translated.
+	W.content(b)
 	b.set_meta("text", row["text"])
 	b.set_pressed_no_signal(row["kind"] == "file" and row["path"] == active_path)
 	var index := _rows.size()
@@ -701,15 +738,17 @@ func _on_listed(id: int, p: String, result: Dictionary) -> void:
 		return  # The user has moved on.
 	# A media server's entries carry their own paths (folders upnp://..., videos the server's http:// URLs) and parent.
 	var upnp := MediaServers.is_upnp(p)
-	_clear(("Media servers" if p == MEDIA_SERVERS_FOLDER else p) + ("   (simulated)" if result.get("simulated", false) else ""))
+	var heading := tr("Media servers") if p == MEDIA_SERVERS_FOLDER else p
+	_clear(tr("%s   (simulated)") % heading if result.get("simulated", false) else heading)
 	var parent := str(result.get("parent", "")) if upnp else _parent_of(p)
 	if parent != "":
 		_add_row("..", {"kind": "up", "path": parent})
+	# A lister's error stays as it words it (English, shared with the dev link).
 	var error: String = result.get("error", "")
 	if error != "":
 		_add_row("(%s)" % error, {"kind": "none", "path": ""})
 	if p == MEDIA_SERVERS_FOLDER:
-		_add_row("Look again for media servers", {"kind": "rediscover", "path": ""})
+		_add_row(tr("Look again for media servers"), {"kind": "rediscover", "path": ""})
 	var shown := 0
 	for e: Dictionary in result["entries"]:
 		var full := str(e["path"]) if upnp and e.has("path") else _join(p, e["name"])
@@ -721,7 +760,7 @@ func _on_listed(id: int, p: String, result: Dictionary) -> void:
 					"duration": float(e.get("duration", 0.0))})
 			shown += 1
 	if shown == 0 and error == "":
-		_add_row("(no folders, videos or pictures here)", {"kind": "none", "path": ""})
+		_add_row(tr("(no folders, videos or pictures here)"), {"kind": "none", "path": ""})
 	listing_changed.emit()
 
 
@@ -771,24 +810,24 @@ func _list_agent(id: String) -> void:
 	var a: Dictionary = AgentTerminal.AGENTS.get(id, {})
 	var agents: Node = get_tree().current_scene.get("local_agents") if get_tree().current_scene != null else null
 	if a.is_empty() or agents == null:
-		_clear("No such agent")
+		_clear(tr("No such agent"))
 		return
 	_clear(str(a["name"]))
 	var running: bool = agents.is_running(id)
-	var state := "Running in its terminal" if running else "Not running"
+	var state := tr("Running in its terminal") if running else tr("Not running")
 	if not AgentTerminal.installed(id):
-		state = "Not installed"
+		state = tr("Not installed")
 	_add_row(state, {"kind": "none", "path": ""})
 	if running:
-		_add_row("Show on the controller", {"kind": "agent_pane", "path": id})
-		_add_row("Restart, briefed on the player", {"kind": "agent_restart", "path": id})
-		_add_row("Restart plain, no briefing", {"kind": "agent_restart_plain", "path": id})
+		_add_row(tr("Show on the controller"), {"kind": "agent_pane", "path": id})
+		_add_row(tr("Restart, briefed on the player"), {"kind": "agent_restart", "path": id})
+		_add_row(tr("Restart plain, no briefing"), {"kind": "agent_restart_plain", "path": id})
 	else:
-		_add_row("Start, briefed on the player", {"kind": "agent_pane", "path": id})
-		_add_row("Start plain, no briefing", {"kind": "agent_plain", "path": id})
+		_add_row(tr("Start, briefed on the player"), {"kind": "agent_pane", "path": id})
+		_add_row(tr("Start plain, no briefing"), {"kind": "agent_plain", "path": id})
 	if agents.active == id and agents.pane_shown():
-		_add_row("Hide from the controller (it keeps working)", {"kind": "agent_hide", "path": id})
-	_add_row("Put it on the big screen", {"kind": "agent_screen", "path": id})
+		_add_row(tr("Hide from the controller (it keeps working)"), {"kind": "agent_hide", "path": id})
+	_add_row(tr("Put it on the big screen"), {"kind": "agent_screen", "path": id})
 	listing_changed.emit()
 
 
@@ -796,38 +835,43 @@ func _list_agent(id: String) -> void:
 ## Rebuilt on each step (the `changed` signal), so the rows are the card's steps as well.
 func _list_android() -> void:
 	var apps := _android()
-	_clear("Android apps")
+	_clear(tr("Android apps"))
 	if apps == null:
 		return
 	Lepton.ensure_folder()
-	var missing := Lepton.missing()
+	# An app's name is its folder's (content); the lines about it are in the menus' language.
+	var missing := Lepton.missing(true)
 	for line in missing:
 		_add_row(line, {"kind": "none", "path": ""})
-	var state_line: String = apps.status_line()
+	var state_line: String = apps.status_line(true)
 	if state_line != "":
 		_add_row(state_line, {"kind": "none", "path": ""})
 	if apps.state == apps.State.STARTING:
-		_add_row("Cancel", {"kind": "android_cancel", "path": ""})
+		_add_row(tr("Cancel"), {"kind": "android_cancel", "path": ""})
 	elif apps.state == apps.State.RUNNING:
-		_add_row("Stop %s" % apps.label(), {"kind": "android_stop", "path": ""})
+		_add_row(tr("Stop %s") % apps.label(), {"kind": "android_stop", "path": ""})
 	var list := Lepton.apps()
 	if list.is_empty():
-		for line in Lepton.how_to_add():
+		for line in Lepton.how_to_add(true):
 			_add_row(line, {"kind": "none", "path": ""})
 	for a: Dictionary in list:
 		if bool(a["spaces"]):
-			_add_row("%s: its APK's file name has spaces, so it can't run yet" % a["label"], {"kind": "none", "path": ""})
+			_add_row(tr("%s: its APK's file name has spaces, so it can't run yet") % a["label"],
+					{"kind": "none", "path": ""})
 		elif not apps.is_app(a["name"]) and missing.is_empty():
 			_add_row(str(a["label"]), {"kind": "android_app", "path": a["name"]})
 	listing_changed.emit()
 
 
+## `text` as shown: a name (content), or words the caller translated (docs/i18n.md). Never translated here, so a file
+## called "Room" stays "Room".
 func _add_row(text: String, row: Dictionary) -> void:
 	row["text"] = text
 	var h := PaneStyle.constant(&"row_height")
 	if row["kind"] == "none":
 		_tiles = null
 		var l := W.ellipsis(W.label(text, &"MutedLabel"))
+		W.content(l)
 		l.custom_minimum_size = Vector2(0, h)
 		_list.add_child(l)
 		row["button"] = null
@@ -836,6 +880,7 @@ func _add_row(text: String, row: Dictionary) -> void:
 	var b := Button.new()
 	b.theme_type_variation = &"RowButton"
 	b.toggle_mode = true
+	W.content(b)
 	b.set_pressed_no_signal(row["kind"] == "file" and row["path"] == active_path)
 	b.set_meta("text", text)
 	var extras: Array[Control] = []
@@ -912,15 +957,16 @@ func _row_extras(row: Dictionary) -> Array[Control]:
 	if path.begins_with("stub://"):
 		chip = ""
 	if VideoSourceFactory.is_image_file(path):
-		chip = ("PICTURE " + chip).strip_edges()
+		chip = (tr("PICTURE %s") % chip).strip_edges() if chip != "" else tr("PICTURE")
 	elif VideoSourceFactory.is_music_file(path):
-		chip = "MUSIC"
+		chip = tr("MUSIC")
 	if chip != "":
 		out.append(W.label(chip, &"ChipLabel"))
 	return out
 
 
-## The mode chip: what isn't plain flat 2D ("SBS", "180 SBS", "360 TB", "FISHEYE", "DUAL 360"), or "".
+## The mode chip: what isn't plain flat 2D ("SBS", "180 SBS", "360 TB", "FISHEYE", "DUAL 360"), or "". In the menus'
+## language.
 static func chip_text(m: VideoMode) -> String:
 	var parts: Array[String] = []
 	match m.projection:
@@ -929,14 +975,14 @@ static func chip_text(m: VideoMode) -> String:
 		VideoMode.Proj.EQUIRECT_360:
 			parts.append("360")
 		VideoMode.Proj.FISHEYE:
-			parts.append("FISHEYE")
+			parts.append(TranslationServer.translate("FISHEYE"))
 		VideoMode.Proj.DUAL_FISHEYE:
-			parts.append("DUAL 360")
+			parts.append(TranslationServer.translate("DUAL 360"))
 	match m.layout:
 		VideoMode.Layout.SBS:
-			parts.append("SBS")
+			parts.append(TranslationServer.translate("SBS"))
 		VideoMode.Layout.TB:
-			parts.append("TB")
+			parts.append(TranslationServer.translate("TB"))
 	return " ".join(parts)
 
 
@@ -1231,7 +1277,7 @@ func start_discovery() -> void:
 ## The play queue (#78): the files in order, the playing one marked. A row jumps there; "Edit queue" removes.
 func _list_queue() -> void:
 	var q := _queue()
-	_clear("Queue: pick a file to remove" if _edit_queue else "Queue")
+	_clear(tr("Queue: pick a file to remove") if _edit_queue else tr("Queue"))
 	if q == null:
 		return
 	_shuffle.set_pressed_no_signal(bool(q.shuffle))
@@ -1240,15 +1286,20 @@ func _list_queue() -> void:
 	_gapless.visible = g != null
 	if g != null:
 		_gapless.set_pressed_no_signal(bool(g.enabled))
-	_repeat.text = "Repeat: %s" % str(q.repeat)
+	# A fixed text (REPEAT_TEXTS): the button translates it.
+	_repeat.text = str(REPEAT_TEXTS.get(str(q.repeat), "Repeat: %s" % str(q.repeat)))
 	var items: Array = q.items()
 	if items.is_empty():
-		_add_row("(nothing queued: open a file from a folder)", {"kind": "none", "path": ""})
+		_add_row(tr("(nothing queued: open a file from a folder)"), {"kind": "none", "path": ""})
 	for i in items.size():
 		var it: Dictionary = items[i]
 		var current_item := bool(it.get("current", false))
-		_add_row("%s%s%s" % ["Remove: " if _edit_queue and not current_item else "", "Playing: " if current_item else "",
-				it.get("title", "")], {"kind": "queued", "path": it.get("path", ""), "index": i})
+		var title := str(it.get("title", ""))
+		if current_item:
+			title = tr("Playing: %s") % title
+		elif _edit_queue:
+			title = tr("Remove: %s") % title
+		_add_row(title, {"kind": "queued", "path": it.get("path", ""), "index": i})
 	listing_changed.emit()
 
 
@@ -1256,26 +1307,27 @@ func _list_queue() -> void:
 ## added here.
 func _list_favourites() -> void:
 	var lib := _library()
-	_clear("Favourites: pick one to remove" if _edit_favourites else "Favourites")
+	_clear(tr("Favourites: pick one to remove") if _edit_favourites else tr("Favourites"))
 	if lib == null:
 		return
 	if active_path != "" and not lib.is_favourite(active_path) and not WindowVideoSource.is_window_path(active_path):
-		_add_row("+ Add the playing file", {"kind": "add_favourite", "path": active_path})
+		_add_row(tr("+ Add the playing file"), {"kind": "add_favourite", "path": active_path})
 	var favs: Array = lib.favourites()
 	if favs.is_empty():
-		_add_row("(no favourites yet: open a folder and press Favourite)", {"kind": "none", "path": ""})
+		_add_row(tr("(no favourites yet: open a folder and press Favourite)"), {"kind": "none", "path": ""})
 	for f: Dictionary in favs:
 		var is_dir := bool(f.get("is_dir", false))
 		var title := str(f.get("title", "")) if str(f.get("title", "")) != "" else str(f.get("path", "")).get_file()
-		_add_row("%s%s%s" % ["Remove: " if _edit_favourites else "", title, "/" if is_dir else ""],
+		title += "/" if is_dir else ""
+		_add_row(tr("Remove: %s") % title if _edit_favourites else title,
 				{"kind": "favourite", "path": f.get("path", ""), "is_dir": is_dir})
 	listing_changed.emit()
 
 
 ## Search (#76): the query row opens the form; results from search_known at once, then the last local folder's walk.
 func _list_search() -> void:
-	_clear("Search" + (": " + _query if _query != "" else ""))
-	_add_row("Search: %s" % (_query if _query != "" else "type a name..."), {"kind": "query", "path": ""})
+	_clear(tr("Search: %s") % _query if _query != "" else tr("Search"))
+	_add_row(tr("Search: %s") % (_query if _query != "" else tr("type a name...")), {"kind": "query", "path": ""})
 	var seen := {}
 	for r: Dictionary in _search_results + _search_folder_results:
 		var path := str(r.get("path", ""))
@@ -1286,7 +1338,7 @@ func _list_search() -> void:
 		_add_row("%s%s" % [str(r.get("title", path.get_file())), "/" if is_dir else ""],
 				{"kind": "result", "path": path, "is_dir": is_dir})
 	if _query != "" and seen.is_empty():
-		_add_row("(nothing found yet)", {"kind": "none", "path": ""})
+		_add_row(tr("(nothing found yet)"), {"kind": "none", "path": ""})
 	listing_changed.emit()
 
 
