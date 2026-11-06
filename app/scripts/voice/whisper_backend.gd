@@ -269,7 +269,15 @@ static func wav(pcm: PackedByteArray) -> PackedByteArray:
 	return h
 
 
-## The text of the server's JSON answer, on one line, without whisper's markers such as [BLANK_AUDIO].
+## Whole answers whisper makes up from silence or noise (the user heard "The game is over." a few times, 2026-11-06),
+## compared without case, spaces or punctuation: such an answer counts as nothing said. Only whole answers: the same
+## words inside a longer sentence are kept. "Thank you" is left out on purpose: people say it.
+const MADE_UP := ["the game is over", "thanks for watching", "thank you for watching", "thank you so much for watching",
+		"please subscribe", "subscribe to my channel", "you", "bye", "the end", "subtitles by the amaraorg community"]
+
+
+## The text of the server's JSON answer, on one line, without whisper's markers such as [BLANK_AUDIO], and "" for an
+## answer it makes up from silence (MADE_UP).
 static func parse_text(body: String) -> String:
 	var json := JSON.new()
 	if json.parse(body) != OK or not json.data is Dictionary:
@@ -277,7 +285,13 @@ static func parse_text(body: String) -> String:
 	var text := str(json.data.get("text", "")).replace("\n", " ").replace("\t", " ")
 	var re := RegEx.create_from_string("\\[[A-Z_ ]+\\]|\\((?:music|silence|inaudible|blank audio)\\)")
 	text = re.sub(text, " ", true)
-	return " ".join(text.split(" ", false))
+	text = " ".join(text.split(" ", false))
+	return "" if is_made_up(text) else text
+
+
+static func is_made_up(text: String) -> bool:
+	var bare := RegEx.create_from_string("[^a-z ]").sub(text.to_lower(), "", true)
+	return " ".join(bare.split(" ", false)) in MADE_UP
 
 
 ## One HTTP request to the server, blocking (worker threads only). {code, body, error}.

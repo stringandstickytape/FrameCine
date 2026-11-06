@@ -111,7 +111,7 @@ The gaze is the calibrated eye gaze (`eye_gaze.gd ray()`). Without eye tracking,
 | squeeze, tap | right button at the cursor (context menu). A squeeze that scrolled with the stick is no tap. | nothing |
 | A | Space (play / pause in web players) | the same |
 | B | browser Back (`send_godot_key(KEY_BACK, ...)`, XF86Back); an Android app's own Back | the same |
-| bumper (the pointer hand's) | talk: voice into the selected field, else the assistant (see "Voice into a field") | the same |
+| bumper (the pointer hand's) | talk: voice into the selected field, else the assistant (see "Voice into a field") | talk to the assistant or agent (Claude, Codex) as always |
 | menu, view | unchanged (menu, overlay) | the same |
 
 The printed legends follow the mode: `WINDOW_POINTER_LABELS` (POINTER, CLICK, HOLD: SCROLL) and `WINDOW_AWAY_LABELS`
@@ -156,8 +156,10 @@ The info overlay can show `get_stats()["mode"]` (`dmabuf` is zero copy, `shm` is
 
 ## Voice into a field
 
-While the browser is on the big screen and the menu is hidden, the talk button (the pointer hand's bumper,
-`ui_layer.gd talk_hand()`) first asks the page what has focus (`scripts/video/browser_dictation.gd`):
+While the browser is on the big screen, the menu is hidden **and you are looking at it** (the stick pointer is on: the
+ring shows), the talk button (the pointer hand's bumper, `ui_layer.gd talk_hand()`) first asks the page what has focus
+(`scripts/video/browser_dictation.gd`). Looking anywhere else, it is the assistant's or the agent's as always, so
+Claude or Codex can be talked to without their window open (the user, 2026-11-06):
 
 - **A text field has focus:** an input of a text type (text, search, url, tel, email), a textarea, or
   `isContentEditable`. The recording is transcribed on the headset (`scripts/voice/transcriber.gd`, the whisper

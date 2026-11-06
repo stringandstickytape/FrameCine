@@ -268,6 +268,7 @@ func _run() -> void:
 	dict.recorder = rec
 	_script_checks()
 	await _open_browser()
+	await _gaze_checks()
 	await _connect_checks()
 	await _dictation_checks()
 	await _chinese_and_space_checks()
@@ -357,6 +358,36 @@ func _script_checks() -> void:
 	else:
 		_check("the page's script in a stand-in DOM: check, mark, words, unmark, frames (%s)" % ("" if code == 0
 				else str(out)), code == 0)
+
+
+## Where the viewer looks (window_pointer.gd's gaze override, as in the headset without a session): at the screen's
+## middle, or well off it. The pointer mode follows after its hysteresis (stick_cursor.gd).
+func _gaze(on_screen: bool) -> void:
+	var wp: Node = main.window_pointer
+	wp.test_xr = true
+	wp.use_gaze_override = true
+	var eye: Vector3 = main.camera.global_position
+	var target: Vector3 = main.screen.global_position
+	if not on_screen:
+		target = eye + (eye - target)
+	wp.gaze_override = [eye, (target - eye).normalized()]
+	await create_timer(0.7).timeout
+	await _frames(2)
+
+
+## The talk button is the page's only while the viewer looks at the browser; looking away it is Claude's or Codex's
+## as always (the user, 2026-11-06).
+func _gaze_checks() -> void:
+	await _until(func() -> bool: return dict.session.is_open(), 3.0)
+	await _gaze(false)
+	_check("looking away from the browser: the talk button is not the page's", not dict.wants_talk()
+			and not main.window_pointer.cursor.mode)
+	var before := []
+	var took: bool = dict.on_talk(true, func(held: bool) -> bool: before.append(held); return true)
+	_check("and a press goes on to the assistant or agent, untouched", not took)
+	await _gaze(true)
+	_check("looking at the browser: the page's (the stick pointer on)", dict.wants_talk()
+			and main.window_pointer.cursor.mode)
 
 
 func _connect_checks() -> void:

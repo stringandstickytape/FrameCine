@@ -2539,12 +2539,15 @@ open questions are in `app/docs/window-source.md` ("Controller mapping", "Voice 
     shows it too. It fades in and out in 0.1 s.
   - The laser is off on a window by default. `[browser] laser` brings it back as an alternative.
   - The legends follow the mode.
-- **Voice into a field.** With a text field selected on the page, the talk button (the pointer hand's bumper)
-  transcribes on the headset and types the text with DevTools `Input.insertText` (any Unicode).
+- **Voice into a field.** While you look at the browser (the ring shows) with a text field selected on the page, the
+  talk button (the pointer hand's bumper) transcribes on the headset and types the text with DevTools `Input.insertText` (any Unicode).
   - While you hold the button, the field glows and the live words show under it. Both go on release, on a cancel and
     on a page change.
   - A password field is refused.
-  - With no field selected, the talk button goes to the assistant as before.
+  - With no field selected, or while you look anywhere else, the talk button goes to the assistant or agent (Claude,
+    Codex) as before, whether or not its window is open.
+  - Whole answers speech-to-text makes up from silence ("The game is over.", "Thanks for watching!", a lone "you")
+    count as nothing said, everywhere (`whisper_backend.gd MADE_UP`).
   - Fields in cross-origin iframes are reached through the frame's own DevTools session.
   - Without DevTools, `browser_insert_text` types into whatever has focus through the window's own text input.
 - **Commands:** `browser_pointer`, `browser_field` (never the field's contents) and `browser_insert_text`, for the dev

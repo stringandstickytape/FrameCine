@@ -56,6 +56,13 @@ func _test_units() -> void:
 	_check(Backend.parse_text('{"text":" Dim the  lights\\n and skip.\\n"}') == "Dim the lights and skip.",
 			"text on one line: %s" % Backend.parse_text('{"text":" Dim the  lights\\n and skip.\\n"}'))
 	_check(Backend.parse_text("not json") == "", "bad answer gives empty text")
+	# Whole answers made up from silence count as nothing said (the user heard "The game is over.", 2026-11-06).
+	_check(Backend.parse_text('{"text":" The game is over.\n"}') == "", "made up from silence: \"The game is over.\" dropped")
+	_check(Backend.parse_text('{"text":" Thanks for watching!"}') == "", "made up: \"Thanks for watching!\" dropped")
+	_check(Backend.parse_text('{"text":" you"}') == "", "made up: a lone \"you\" dropped")
+	_check(Backend.parse_text('{"text":" The game is over, pause it."}') == "The game is over, pause it.",
+			"the same words in a longer sentence are kept")
+	_check(Backend.parse_text('{"text":" Thank you."}') == "Thank you.", "\"Thank you.\" is kept: people say it")
 
 	var form: Array = Backend.request_body(PackedByteArray([0, 0]), true)
 	var text: String = (form[1] as PackedByteArray).slice(0, 1200).get_string_from_ascii()
