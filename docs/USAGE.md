@@ -176,7 +176,7 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 | `[battery]` | `margin_ok_minutes` (15) | Battery forecast |
 | `[display]` | `clock_24h` (true) | |
 | `[pane]` | `recentre_hold` (0.6 s: hold the menu button this long to recentre), `tablet_style` (the tablet's look, its palette among it), `theme` (`res://ui/themes/default.tres`) | `docs/ui-design.md`. Also in System, Panel. |
-| `[browser]` | `last_folder`, `last_url`, `pages` ([]) | Files place; web pages |
+| `[browser]` | `last_folder`, `last_url`, `pages` ([]), `pointer_follows_gaze` (true), `laser` (false), `dictation_partials` (true) | Files place; web pages; the stick pointer (the cursor jumps to the gaze; the laser as well on a window) and the live words under a field (`app/docs/window-source.md`). The first two are also in System, Controllers. |
 | `[network]` | `hosts` ([]), `live_latency` (0.1 to 2.5 s, 0.5) | Saved file shares (private: holds credentials); the live stream buffer |
 | `[remote]` | `enabled` (false), `port` (47880), `key` | Phone remote. `key` is the pairing code: private, never logged. |
 | `[share]` | `enabled` (false), `folders` ([]), `drop` ("") | Headset file sharing |
@@ -225,7 +225,7 @@ While a form with the keyboard is open, it has the whole main pane.
 | Grip, hold, pointing at an object or in one | Pick it up (`docs/physics.md`): stick up or down nearer or farther, left or right turns it, let go to drop it or throw it, B puts it back where it was picked up; the trigger does nothing meanwhile | Same, with the laser off the panel | |
 | Grip, hold and point | Move the flat screen (stick: nearer or farther); in 180 and 360, turn the sphere | Held 2 s with the laser on the panel, in dev mode: allow remote changes for an hour | G held and mouse |
 | Grip, tap | Screen (or the sphere's front) to where you look | Same | R (also recenters) |
-| Pointer hand's bumper, hold | Push to talk, when the dev link is on (`docs/dev/voice.md`), an assistant is paired, or an agent runs on the headset | | F8 held |
+| Pointer hand's bumper, hold | Push to talk, when the dev link is on (`docs/dev/voice.md`), an assistant is paired, or an agent runs on the headset. With the browser on the big screen and a text field selected: speak into that field | | F8 held |
 | Pointer hand's bumper, quick tap | With an agent's pane showing: hide it | | |
 | Left bumper + A | Snapshot, with `--snapshot-dir` | | F12 |
 | - | - | - | V, O, H, X: next projection, layout, half, swap eyes. E: next environment. Drag: look. |
@@ -238,6 +238,37 @@ takes the trigger as Enter, the stick as arrows, and B as Escape. Say "one" to "
 for that key at any time, and "yes" or "no" while a prompt waits. Other words are not typed while a prompt waits. A
 keyboard paired to the headset types into the terminal while the pane shows. With a window on the big screen as well,
 such as the browser, it types into the terminal while you look at the pane and into the window otherwise.
+
+### The browser on the big screen
+
+With the panel closed, the right controller works the page in two modes. Look at the screen, and a cursor appears
+where you look. Look away, and the cursor goes. The legends on the controller change with the mode.
+
+| Control | Looking at the screen (a cursor shows) | Looking away (no cursor) |
+|---|---|---|
+| Stick | Move the cursor: a small push for fine aim, all the way to cross the page in a second | Up or down: scroll. Left or right: the arrow keys (most web players seek with them) |
+| Grip held + stick | Scroll and arrow keys; the cursor stays put | The same |
+| Trigger | Click at the cursor; hold it to drag | Nothing |
+| Grip, tap | Right click at the cursor | Nothing |
+| A, B | Space (play or pause), the browser's Back | The same |
+| Pointer hand's bumper, hold | With a text field selected: speak into it | The same |
+
+- **Switching modes.** The cursor appears after a tenth of a second of looking at the screen and goes after
+  0.4 s of looking away. While you push the stick or hold the trigger, it stays.
+- **Where the cursor goes.** When the cursor appears, it is where you look. If you then look somewhere else on the
+  page and leave the stick alone, it jumps there; the stick fine-tunes. To stop the jumps, switch off **Browser cursor
+  jumps to your gaze** in System, Controllers.
+- **Without eye tracking.** Where your head points stands in for where you look.
+- **The laser.** It is off on the browser. **Laser on the browser** in System, Controllers turns it on as well as the
+  stick.
+- **Speaking into a field.** Click into a search box or any text field, then hold the bumper and speak. The field
+  glows while you hold the button, and your words show under it as you speak. When you let go, the text is typed into
+  the field, Chinese and other scripts too.
+  - With no field selected, the bumper talks to the assistant as before.
+  - A password field is refused: type it with a keyboard.
+  - If speech to text isn't working on the headset, a notice says so and nothing is typed.
+  - A browser the player didn't open (one that was already running) can't say which field is selected, so the bumper
+    stays the assistant's there.
 
 While the panel is open, the other controller keeps the "Panel closed" functions. On the generic controller profile:
 right primary is next, right secondary is previous, left primary or right stick click is the menu, left secondary or
@@ -372,8 +403,8 @@ takes longest, and later ones take about 20 seconds. The film goes on until the 
 in Files stops the start. If it fails, the card says why. When the app is ready, its window goes on the big screen and
 the panel closes.
 
-The window works like any other: the laser is the pointer, the trigger clicks, and the stick scrolls. **B is the app's
-Back.** If Back doesn't get you out of a full-screen player, B goes to the app's main screen instead.
+The window works like the browser (Controls, "The browser on the big screen"): look at it, and the stick moves a
+cursor and the trigger clicks; look away, and the stick scrolls. **B is the app's Back.** If Back doesn't get you out of a full-screen player, B goes to the app's main screen instead.
 
 **Leaving stops it.** When the app stops being on the big screen, for any reason, the app and Android shut down
 completely: opening a file, Stop in Files, closing it from the panel, the app quitting, or the player closing. Nothing
