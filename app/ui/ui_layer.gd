@@ -653,16 +653,32 @@ func _update_pointer() -> void:
 		pointer_hand.set_laser(true, float(_seat_aim.get("distance", floor_distance(o, d))), aimed,
 				PaneStyle.color(&"laser"), PaneStyle.color(&"laser_dot"))
 		_show_seat_ring(_seat_aim)
+	elif _grab_owns(pointer_hand) and not laser_on:
+		pass  # aimed at an object, or holding one on the laser: the grab draws it (scripts/play/object_grab.gd)
 	elif not app.window_pointer_owns(pointer_hand) or _card_pointed or not _tablet_hit.is_empty():
 		pointer_hand.set_laser(laser_on, float((hit if _pointed else card_hit).get("distance", 3.0)), laser_on,
 				PaneStyle.color(&"laser"), PaneStyle.color(&"laser_dot"))
-	if other_hand != null and not app.window_pointer_owns(other_hand):
+	if other_hand != null and not app.window_pointer_owns(other_hand) and not _grab_owns(other_hand):
 		other_hand.set_laser(false)
 	if _pointed:
 		panel.pointer_move(hit["pixel"])
 	elif not panel.is_pressed():
 		panel.pointer_exit()
 	_check_hover(pointer_hand)
+
+
+func _grab_owns(hand: XRHand) -> bool:
+	var grab: Node = app.features.get("grab") if app.features != null else null
+	return grab != null and grab.owns_laser(hand)
+
+
+## Whether this hand's laser is the menu's (or Place's, seat picking's, marking's) now: object physics' grab
+## (scripts/play/object_grab.gd) leaves it alone then.
+func laser_in_use(hand: XRHand) -> bool:
+	if _seat_pick or is_placing_object() or is_marking_window():
+		return true
+	return hand == pointer_hand and (_pointed or _card_pointed or not _tablet_hit.is_empty() or panel.is_pressed()
+			or _scrub_hand == hand)
 
 
 ## One haptic tick when the pointer moves onto a new target (features.haptics, #32).

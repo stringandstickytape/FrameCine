@@ -262,6 +262,7 @@ static func build(p_doc: Dictionary, base: Node3D, assets: Dictionary, p_base_id
 		if p.has("motion"):
 			motion.add(node, p)
 	_recolour_parts(layer, p_doc, assets)
+	_attach_parts(layer, p_doc)
 	if motion.count() > 0:
 		room.add_child(motion)
 	else:
@@ -285,6 +286,20 @@ static func build(p_doc: Dictionary, base: Node3D, assets: Dictionary, p_base_id
 		_add_contact_shadows(layer, p_doc)
 	_lighting = {}
 	return room
+
+
+## Texts and particles areas attached to another placement (attach, offset: RoomSchema.attach_offset()) stand where
+## that object is, turned with it; object physics moves them with it (scripts/play/object_physics.gd). One whose
+## object isn't there stays at its own position.
+static func _attach_parts(layer: Node3D, p_doc: Dictionary) -> void:
+	for p: Dictionary in p_doc.get("parts", []):
+		var to := str(p.get("attach", ""))
+		var node := layer.get_node_or_null(str(p["name"])) as Node3D
+		var target := layer.get_node_or_null(to) as Node3D if to != "" else null
+		if node == null or target == null or target == node:
+			continue
+		var q := target.transform.basis.orthonormalized()
+		node.transform = Transform3D(q, target.transform.origin) * RoomSchema.attach_offset(p)
 
 
 ## The key light (sun or moon; its shadows, fitted to the room) and the point and spot lights, with their flicker.

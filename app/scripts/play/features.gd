@@ -69,6 +69,9 @@ extends Node
 ##   film_layer scripts/play/film_layer.gd: the flat film as an OpenXR layer (#70), on by default
 ##   lightmaps  scripts/env/room_lightmaps.gd: a room built for it bakes its own lightmap on the headset the first
 ##              time it is shown, and keeps it; on by default
+##   physics    scripts/play/object_physics.gd: placed objects picked up, thrown, bouncing off the room and the screen,
+##              resting where they land (docs/physics.md); its thud (scripts/play/thud.gd)
+##   grab       scripts/play/object_grab.gd: the controllers pick objects up (laser or hand), turn, drop and throw them
 
 const EndTime := preload("res://scripts/play/end_time.gd")
 const RoomLightmaps := preload("res://scripts/env/room_lightmaps.gd")
@@ -133,6 +136,8 @@ const Crossfade := preload("res://scripts/play/crossfade.gd")
 const MusicSource := preload("res://scripts/play/music_source.gd")
 const HwVideo := preload("res://scripts/play/hw_video.gd")
 const FilmLayer := preload("res://scripts/play/film_layer.gd")
+const ObjectPhysics := preload("res://scripts/play/object_physics.gd")
+const ObjectGrab := preload("res://scripts/play/object_grab.gd")
 
 ## The app core (scripts/main.gd). Untyped: main.gd preloads this script, so a typed reference would be circular.
 var main: Node3D
@@ -198,6 +203,8 @@ var film_layer: FilmLayer
 ## Windows to the real room: marked places where the headset's cameras show (scripts/play/real_windows.gd).
 var real_windows: RealWindows
 var lightmaps: RoomLightmaps
+var physics: ObjectPhysics
+var grab: ObjectGrab
 
 
 func _ready() -> void:
@@ -265,6 +272,8 @@ func _ready() -> void:
 	film_layer = _add(FilmLayer.new(), "FilmLayer")
 	lightmaps = _add(RoomLightmaps.new(), "RoomLightmaps")
 	real_windows = _add(RealWindows.new(), "RealWindows")
+	physics = _add(ObjectPhysics.new(), "ObjectPhysics")
+	grab = _add(ObjectGrab.new(), "ObjectGrab")
 
 
 func _add(node: Node, node_name: String) -> Node:

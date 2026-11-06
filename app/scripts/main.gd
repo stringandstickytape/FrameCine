@@ -17,6 +17,8 @@ extends Node3D
 ##   grip                quick squeeze: right click on a captured window (no longer moves the screen); a desktop
 ##                       still moves it with G (hold) + mouse
 ##   grip + trigger      180 / 360: the zoom lens on the aimed part of the picture (hold)   -
+##   grip (hold)         pointing at an object (or in one): picks it up; stick near-far / turn, let go to drop or
+##                       throw, B back (scripts/play/object_grab.gd, docs/physics.md)                   -
 ##   -                   recenter                                                           R
 ##   -                   next projection / layout / half / swap eyes / environment          V / O / H / X / E
 ## While a captured window (Browser place) is on the screen and the menu is hidden, the right controller, the mouse
@@ -166,6 +168,15 @@ const TERMINAL_LABELS := {
 	"next_file": "SPACE",
 	"prev_file": "ESC",
 }
+## Object physics (docs/physics.md): the squeeze's legend while the room has objects to pick up (menu hidden), and a
+## controller's legends while it holds one ("" hides an action's legend: the trigger does nothing then).
+const GRAB_LABEL := "GRAB"
+const HOLD_LABELS := {
+	"trigger": "",
+	"squeeze": "LET GO: THROW",
+	"thumbstick": "NEAR-FAR / TURN",
+	"prev_file": "CANCEL",
+}
 # i18n: end
 ## Back in focus (dashboard closed, headset on): resume this long after, if focus loss paused playback.
 const AUTO_RESUME_DELAY := 0.3
@@ -257,6 +268,8 @@ var _auto_toggle := false
 var _resume_at_msec := -1
 ## Who holds the labels button: hand -> true. Only the snapshot chord asks.
 var _labels_holders := {}
+## The legends were last printed with GRAB on the squeeze (object physics had objects then).
+var _grab_labelled := false
 ## "profile|side" -> [[input, action, press], ...] from the action map.
 static var _binding_cache := {}
 ## Input for a captured window (browser) on the screen.
@@ -327,6 +340,9 @@ func _ready() -> void:
 			if not window_pointer.on_button(h as XRHand, "next_file"):
 				next_file())
 		hand.prev_pressed.connect(func(h: XRController3D) -> void:
+			# B while holding an object puts it back where it was picked up (object_grab.gd).
+			if features != null and features.grab.on_back(h):
+				return
 			# B cancels the pane's seat picking (ui_layer.gd) before it means "previous file".
 			if ui != null and ui.on_back(h as XRHand):
 				return
@@ -371,6 +387,11 @@ func _ready() -> void:
 	features.name = "Features"
 	features.main = self
 	add_child(features)
+	# The legends follow object physics: GRAB while there are objects to pick up, the holding ones while holding.
+	features.grab.changed.connect(update_controller_labels)
+	features.physics.changed.connect(func() -> void:
+		if features.physics.available() != _grab_labelled:
+			update_controller_labels())
 	if ui != null:
 		ui.setup(self)
 	set_environment(_env_from_arg(str(_args.get("env", settings.get_value("view", "environment", "void")))))
@@ -1094,6 +1115,9 @@ func on_menu(hand: XRHand, pressed: bool) -> void:
 # --- Controllers -------------------------------------------------------------------------------------------------
 
 func _on_trigger(hand: XRController3D, pressed: bool) -> void:
+	# Holding an object: the trigger does nothing (scripts/play/object_grab.gd).
+	if features != null and features.grab.on_trigger(hand, pressed):
+		return
 	if ui != null and ui.on_trigger(hand, pressed):
 		return
 	if local_agents.on_trigger(hand, pressed):
@@ -1110,6 +1134,11 @@ func _on_trigger(hand: XRController3D, pressed: bool) -> void:
 
 func _on_grip(hand: XRController3D, pressed: bool) -> void:
 	var h := hand as XRHand
+	# Pointing at an object (or in one): the grip picks it up; letting go drops or throws it (object_grab.gd). Its
+	# release goes there first, so nothing else keeps it.
+	if features != null and features.grab.on_grip(h, pressed):
+		_grip_down.erase(h)
+		return
 	if ui != null and ui.on_grip(h, pressed):
 		return
 	# Squeeze no longer moves the screen or turns it to the gaze (the user, in the headset, 2026-10-31: the Room and
@@ -1168,6 +1197,10 @@ func _update_sticks(delta: float) -> void:
 		if _grab.get("hand") == hand:
 			continue
 		var stick := hand.get_stick()
+		# Holding an object: the stick brings it nearer or further and turns it (object_grab.gd).
+		if features != null and features.grab.on_stick(hand, stick, delta):
+			_seek_hold[hand] = -1.0
+			continue
 		if (ui != null and ui.on_stick(hand, stick, delta)) or local_agents.on_stick(hand, stick, delta) \
 				or window_pointer.on_stick(hand, stick, delta):
 			_seek_hold[hand] = -1.0
@@ -1214,10 +1247,12 @@ func update_controller_labels() -> void:
 	var on_window := window_pointer != null and window_pointer.is_active()
 	var terminal := local_agents != null and (local_agents.waiting() and local_agents.pane_shown()
 			or local_agents.looking() or local_agents.on_big_screen())
+	_grab_labelled = features != null and features.physics.available()
 	for hand in hands:
 		var side := "left" if hand == left_hand else "right"
+		var holding := features != null and features.grab.holding(hand) != ""
 		var texts := controller_labels(hand.profile if use_xr else PREVIEW_PROFILE, side, menu_shown, on_window,
-				terminal)
+				terminal, _grab_labelled, holding)
 		if ui != null and ui.talk_hand() == hand and texts.has("bumper"):
 			texts["bumper"] = tr("TALK")
 		hand.visual.set_texts(texts)
@@ -1236,8 +1271,10 @@ func set_labels_held(holder: Variant, held: bool) -> void:
 
 ## input (controller_visual.gd anchor name) -> label text, for one hand of `profile`. on_window: a captured window
 ## has the input (menu hidden), WINDOW_LABELS apply; terminal: an agent's terminal has it, TERMINAL_LABELS apply.
+## grab: the room has objects to pick up (the squeeze says GRAB_LABEL, menu hidden); holding: this controller holds
+## one, HOLD_LABELS apply (over everything else).
 static func controller_labels(profile: String, side: String, p_menu_shown: bool, on_window := false,
-		terminal := false) -> Dictionary:
+		terminal := false, grab := false, holding := false) -> Dictionary:
 	var out := {}
 	for b: Array in _profile_bindings(profile, side):
 		var texts: Array = CONTROL_LABELS.get(b[1], [])
@@ -1251,6 +1288,10 @@ static func controller_labels(profile: String, side: String, p_menu_shown: bool,
 				legend = WINDOW_LABELS[b[1]]
 		if terminal and not p_menu_shown and side == "right" and TERMINAL_LABELS.has(b[1]):
 			legend = TERMINAL_LABELS[b[1]]
+		if grab and not p_menu_shown and not on_window and not terminal and b[1] == "squeeze":
+			legend = GRAB_LABEL
+		if holding and HOLD_LABELS.has(b[1]):
+			legend = HOLD_LABELS[b[1]]
 		# Last: an action with no legend of its own can have one on a window or a terminal.
 		if legend == "":
 			continue

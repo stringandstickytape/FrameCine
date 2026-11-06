@@ -22,12 +22,17 @@ extends RefCounted
 ##   import_svg(text, name, options) -> the same                       delete(id), restore(id), purge(id)
 ##   find_by_md5(md5) -> id or ""          rooms_using(id) -> [kept room names]
 ##   thumbnail(id) -> Image or null          aim(), pose(): where a placed object goes (object_commands.gd)
+##   collision(id, model) -> [PackedVector3Array]   a model's hulls for object physics (docs/physics.md), kept
 
 const RoomModel := preload("res://scripts/assistant/room_model.gd")
 const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
 const ObjectBuiltins := preload("res://scripts/assistant/object_builtins.gd")
 const ObjectThumb := preload("res://scripts/assistant/object_thumb.gd")
 const SvgExtrude := preload("res://scripts/assistant/svg_extrude.gd")
+const PhysicsShapes := preload("res://scripts/play/physics_shapes.gd")
+## A user object's collision hulls, beside its model (object physics): {version, md5 (the model's), hulls}.
+const COLLISION := "collision.json"
+const COLLISION_VERSION := 1
 
 const USER_DIR := "user://objects"
 ## The kept rooms (assistant_room.gd RECIPE_DIR, scripts/dev/recipes.gd ROOM_SUFFIX): what places an object.
@@ -52,6 +57,8 @@ static var _builtin := {}
 static var _thumbs := {}
 ## User objects' manifests read this session: id -> manifest.
 static var _manifests := {}
+## Collision hulls read or worked out this session: id -> [PackedVector3Array].
+static var _hulls := {}
 ## The Room tab reads the catalogue on a worker thread while a command may read it here: one at a time. Held only to
 ## read and store the caches, never while a model is built or drawn: that reads meshes back from the renderer, which
 ## from a worker waits for the main thread, and the main thread may be waiting here (the Objects tab hung the app so).
@@ -139,6 +146,79 @@ static func _thumbnail(id: String) -> Image:
 		img = ObjectThumb.render(r["node"], THUMB_SIZE)
 		(r["node"] as Node).free()
 	return img
+
+
+## A model object's collision for object physics (docs/physics.md): one convex hull a part, in the model's own frame
+## (PhysicsShapes.hulls_of). A user object's is worked out once (at its import, or the first time it is asked for: an
+## object imported before physics) and kept beside its model, with the md5 of the model it was made from; a built-in's
+## for the session. model: the object's model already read (a placed copy's "Model"), else it is read from the
+## library. [] for an object without a model.
+static func collision(id: String, model: Node3D = null) -> Array:
+	_lock.lock()
+	var known: Variant = _hulls.get(id)
+	_lock.unlock()
+	if known is Array:
+		return known
+	var builtin := is_builtin(id)
+	if not builtin and not RoomSchema.id_ok(id):
+		return []
+	var md5 := "" if builtin else str(_read_manifest(id).get("md5", ""))
+	var path := USER_DIR.path_join(id).path_join(COLLISION)
+	var hulls: Array = [] if builtin else _read_hulls(path, md5)
+	if hulls.is_empty():
+		var made := model
+		var read := {}
+		if made == null:
+			var bytes := glb(id)
+			if bytes.is_empty():
+				return []
+			read = RoomModel.load_glb(bytes)
+			if read.has("error"):
+				return []
+			made = read["node"]
+		hulls = PhysicsShapes.hulls_of(made)
+		if read.has("node"):
+			(read["node"] as Node).free()
+		if not builtin and DirAccess.dir_exists_absolute(USER_DIR.path_join(id)) and not hulls.is_empty():
+			_write_hulls(path, md5, hulls)
+	_lock.lock()
+	_hulls[id] = hulls
+	_lock.unlock()
+	return hulls
+
+
+static func _read_hulls(path: String, md5: String) -> Array:
+	if not FileAccess.file_exists(path):
+		return []
+	var j := JSON.new()
+	if j.parse(FileAccess.get_file_as_string(path)) != OK or not (j.data is Dictionary):
+		return []
+	var d: Dictionary = j.data
+	if int(d.get("version", 0)) != COLLISION_VERSION or str(d.get("md5", "")) != md5 or not (d.get("hulls") is Array):
+		return []
+	var out: Array = []
+	for h: Variant in d["hulls"]:
+		if not (h is Array) or (h as Array).size() % 3 != 0:
+			return []
+		var pts := PackedVector3Array()
+		for i in range(0, (h as Array).size(), 3):
+			pts.append(Vector3(float(h[i]), float(h[i + 1]), float(h[i + 2])))
+		out.append(pts)
+	return out
+
+
+static func _write_hulls(path: String, md5: String, hulls: Array) -> void:
+	var flat: Array = []
+	for h: PackedVector3Array in hulls:
+		var row: Array = []
+		for p in h:
+			row.append_array([snappedf(p.x, 0.0001), snappedf(p.y, 0.0001), snappedf(p.z, 0.0001)])
+		flat.append(row)
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	if f == null:
+		return
+	f.store_string(JSON.stringify({"version": COLLISION_VERSION, "md5": md5, "hulls": flat}))
+	f.close()
 
 
 static func _user_ids() -> Array:
@@ -298,6 +378,7 @@ static func import_glb(bytes: PackedByteArray, name: String, tags: Array = [], m
 		if k != "replace":
 			m[k] = extra[k]
 	var thumb := ObjectThumb.render(r["node"], THUMB_SIZE)
+	var hulls := PhysicsShapes.hulls_of(r["node"])
 	(r["node"] as Node).free()
 	var dir := USER_DIR.path_join(id)
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -307,6 +388,11 @@ static func import_glb(bytes: PackedByteArray, name: String, tags: Array = [], m
 	f.store_buffer(bytes)
 	f.close()
 	thumb.save_png(dir.path_join(THUMB))
+	# Its collision hulls, worked out once now (object physics): the model is read already.
+	_lock.lock()
+	_hulls.erase(id)
+	_lock.unlock()
+	_write_hulls(dir.path_join(COLLISION), str(m["md5"]), hulls)
 	var saved := m.duplicate(true)
 	saved.erase("id")
 	f = FileAccess.open(dir.path_join(MANIFEST), FileAccess.WRITE)
@@ -390,6 +476,7 @@ static func delete(id: String) -> Dictionary:
 		return {"ok": false, "error": "can't delete %s" % id}
 	_lock.lock()
 	_thumbs.erase(id)
+	_hulls.erase(id)
 	_lock.unlock()
 	_forget_manifest(id)
 	return {"ok": true}

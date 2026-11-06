@@ -40,6 +40,19 @@ extends "res://environments/vr_environment.gd"
 
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const RoomMesh := preload("res://scripts/env/room_mesh.gd")
+const PhysicsShapes := preload("res://scripts/play/physics_shapes.gd")
+## Object physics (collision_shapes()): the walls' boxes this thick, the tiers in this many blocks along their arc
+## (the arc strays under a centimetre from a block's straight edge), and a seat's two boxes in its own frame (the
+## seat's floor point at the origin, facing -Z, seat_mesh()): the cushion with its standards and pedestal down to
+## the floor, and the back, turned with it.
+const WALL_THICKNESS := 1.0
+const TIER_SEGMENTS := 8
+const SEAT_BOX_CENTRE := Vector3(0.0, 0.24, -0.05)
+const SEAT_BOX_SIZE := Vector3(0.55, 0.48, 0.52)
+const SEAT_BACK_PIVOT := Vector3(0.0, 0.42, 0.2)
+const SEAT_BACK_TILT_DEG := 13.0
+const SEAT_BACK_CENTRE := Vector3(0.0, 0.35, 0.03)
+const SEAT_BACK_SIZE := Vector3(0.52, 0.72, 0.14)
 const ENV_SHADER := preload("res://shaders/env_unlit.gdshader")
 const LAMP_SHADER := preload("res://shaders/room_lamp.gdshader")
 const BEAM_SHADER := preload("res://shaders/room_beam.gdshader")
@@ -195,6 +208,72 @@ func get_seats() -> Array[Vector3]:
 func get_sound_room() -> Dictionary:
 	return {"box": AABB(ROOM_MIN, ROOM_MAX - ROOM_MIN), "reflect": [0.3, 0.3, 0.25, 0.35, 0.2, 0.3], "rt60": 0.7,
 			"wet": 0.55, "surround_height": 4.0, "array": 3, "array_spacing": 3.0}
+
+
+## Object physics (scripts/play/object_physics.gd, docs/physics.md): the room as cheap boxes, [[Shape3D, Transform3D]]
+## in its own frame. A slab under the floor, the walls and the ceiling (WALL_THICKNESS thick, outside the room), the
+## stage, each row's tier as TIER_SEGMENTS solid blocks along its arc (down to the pit's floor), the side aisles'
+## steps, the rear walkway, and two boxes a seat from seat_transforms(): the cushion with its standards, and the
+## tilted back. The seats share two shapes.
+func collision_shapes() -> Array:
+	var out: Array = []
+	var lo := ROOM_MIN
+	var hi := ROOM_MAX
+	var size := hi - lo
+	var mid := (lo + hi) * 0.5
+	var t := WALL_THICKNESS
+	out.append(PhysicsShapes.box(Vector3(mid.x, lo.y - t * 0.5, mid.z), Vector3(size.x + 2.0 * t, t, size.z + 2.0 * t)))
+	out.append(PhysicsShapes.box(Vector3(mid.x, hi.y + t * 0.5, mid.z), Vector3(size.x + 2.0 * t, t, size.z + 2.0 * t)))
+	for s: float in [-1.0, 1.0]:
+		out.append(PhysicsShapes.box(Vector3(mid.x + s * (size.x + t) * 0.5, mid.y, mid.z),
+				Vector3(t, size.y + 2.0 * t, size.z + 2.0 * t)))
+		out.append(PhysicsShapes.box(Vector3(mid.x, mid.y, mid.z + s * (size.z + t) * 0.5),
+				Vector3(size.x + 2.0 * t, size.y + 2.0 * t, t)))
+	var stage_h := STAGE_TOP - lo.y
+	out.append(PhysicsShapes.box(Vector3(0.0, lo.y + stage_h * 0.5, lo.z + STAGE_DEPTH * 0.5),
+			Vector3(size.x, stage_h, STAGE_DEPTH)))
+	for row in range(-ROWS_BACK, ROWS_FRONT + 1):
+		var r := row_radius(row)
+		var top := row_floor(row)
+		var h := top - lo.y
+		if h <= 0.01:
+			continue
+		var reach := asin(BLOCK_X / (r + ROW_DEPTH * 0.5))
+		for i in TIER_SEGMENTS:
+			var a0 := lerpf(-reach, reach, float(i) / TIER_SEGMENTS)
+			var a1 := lerpf(-reach, reach, float(i + 1) / TIER_SEGMENTS)
+			var a := (a0 + a1) * 0.5
+			# The back edge's chord is the widest: the blocks meet there and overlap a little in front.
+			var chord := 2.0 * (r + ROW_DEPTH * 0.5) * sin((a1 - a0) * 0.5) * 1.02
+			out.append(PhysicsShapes.box(Vector3(r * sin(a), lo.y + h * 0.5, -ROW_RADIUS + r * cos(a)),
+					Vector3(chord, h, ROW_DEPTH), Basis(Vector3.UP, a)))
+		# The side aisles: two steps a row, straight across to the wall.
+		var zf := arc_z(r - ROW_DEPTH * 0.5, BLOCK_X)
+		var zb := arc_z(r + ROW_DEPTH * 0.5, BLOCK_X)
+		var zm := (zf + zb) * 0.5
+		var low := top - ROW_RISE * 0.5
+		var aisle_w := hi.x - BLOCK_X
+		for s: float in [-1.0, 1.0]:
+			var x := s * (BLOCK_X + aisle_w * 0.5)
+			out.append(PhysicsShapes.box(Vector3(x, lo.y + h * 0.5, (zm + zb) * 0.5), Vector3(aisle_w, h, zb - zm)))
+			if low - lo.y > 0.01:
+				out.append(PhysicsShapes.box(Vector3(x, (lo.y + low) * 0.5, (zf + zm) * 0.5),
+						Vector3(aisle_w, low - lo.y, zm - zf)))
+	# The rear walkway: level with the back row, from the back row's arc at the aisles to the rear wall.
+	var walk := row_floor(-ROWS_BACK)
+	var walk_from := arc_z(row_radius(-ROWS_BACK) + ROW_DEPTH * 0.5, BLOCK_X)
+	out.append(PhysicsShapes.box(Vector3(mid.x, (lo.y + walk) * 0.5, (walk_from + hi.z) * 0.5),
+			Vector3(size.x, walk - lo.y, hi.z - walk_from)))
+	var cushion := BoxShape3D.new()
+	cushion.size = SEAT_BOX_SIZE
+	var back := BoxShape3D.new()
+	back.size = SEAT_BACK_SIZE
+	var tilt := Transform3D(Basis(Vector3.RIGHT, deg_to_rad(SEAT_BACK_TILT_DEG)), SEAT_BACK_PIVOT)
+	var back_xf := Transform3D(tilt.basis, tilt * SEAT_BACK_CENTRE)
+	for st in seat_transforms():
+		out.append([cushion, st * Transform3D(Basis(), SEAT_BOX_CENTRE)])
+		out.append([back, st * back_xf])
+	return out
 
 
 # --- Building ------------------------------------------------------------------------------------------------------

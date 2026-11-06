@@ -30,6 +30,18 @@ func get_sound_room() -> Dictionary:
 			"rt60": 0.4, "wet": 0.45}
 
 
+## Object physics (scripts/play/object_physics.gd, docs/physics.md): the real room is unknown but for its floor, a
+## slab under y = 0 (the play space's floor) FLOOR_SIZE metres across. The Mixed reality tab's areas (a table, a
+## desk) are boxes too: object_physics adds them, as they are kept in the real room's frame.
+func collision_shapes() -> Array:
+	var slab := BoxShape3D.new()
+	slab.size = Vector3(FLOOR_SIZE, 1.0, FLOOR_SIZE)
+	return [[slab, Transform3D(Basis(), Vector3(0, -0.5, 0))]]
+
+
+const FLOOR_SIZE := 40.0
+
+
 func _ready() -> void:
 	_build_shell()
 	_xr = XRServer.find_interface("OpenXR")

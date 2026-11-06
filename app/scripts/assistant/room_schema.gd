@@ -8,7 +8,12 @@ extends RefCounted
 ##   placement: {"name": "Poster", "object": "<library id>", "position": [x, y, z], "rotation": [x, y, z],
 ##               "scale": s or [x, y, z], "material": material without a picture (an override: color, self_lit,
 ##               emission, emission_strength, alpha, library_material and its options, effect), "widget",
-##               "widget_options", "motion"; object "text": "text", "text_options"; object "particles": "particles"}
+##               "widget_options", "motion"; object "text": "text", "text_options"; object "particles": "particles";
+##               object physics (docs/physics.md): "home" {position, rotation, mounted?}: where it was placed, kept
+##               once it has been moved by hand or thrown (Put back and Tidy up return it there); "mounted": false, a
+##               wall object pulled off its wall; a text or particles area: "attach" (another placement's name) and
+##               "offset" [x, y, z] (metres in that object's frame): it follows that object, its rotation then
+##               relative to it}
 ##
 ## The built-in primitives (object_builtins.gd) are a 1 m box, a 1 m sphere, a cylinder 1 m across and 1 m tall and a
 ## 1 x 1 m plane facing up: a placement's scale is their size (box [w, h, d], sphere s, cylinder [d, h, d], plane
@@ -75,7 +80,9 @@ const PRIMITIVES: Array[String] = ["box", "sphere", "cylinder", "plane"]
 const GENERATORS: Array[String] = ["text", "particles"]
 ## A placement's keys (a kept room's parts).
 const PLACEMENT_KEYS: Array[String] = ["name", "object", "position", "rotation", "scale", "material", "widget",
-		"widget_options", "motion", "text", "text_options", "particles"]
+		"widget_options", "motion", "text", "text_options", "particles", "home", "mounted", "attach", "offset"]
+## A placement's object physics keys (docs/physics.md): checked by the placement, not by the part it is built as.
+const PHYSICS_KEYS: Array[String] = ["home", "mounted", "attach", "offset"]
 ## A text object at scale 1: one line this high (metres).
 const TEXT_OBJECT_LINE := 0.1
 ## An object library id (object_library.gd) or a library material's: lower-case letters, digits, - and _.
@@ -1020,9 +1027,12 @@ static func _placement(p: Dictionary, path: String, mode: String, names: Diction
 			if (m as Dictionary).has(k):
 				errors.append(_e("%s.material.%s" % [path, k], "a placement's material has no picture of its own: "
 						+ "the object carries it (a part sent with material.texture becomes a picture object)"))
+	_physics_keys(p, kind, path, errors)
 	# The rest is checked as the part it is built as (its size from its scale).
 	var f := build_form(p)
 	f.erase("object")
+	for k: String in PHYSICS_KEYS:
+		f.erase(k)
 	if kind == "text":
 		f.erase("size")
 	var sub: Array = []
@@ -1032,6 +1042,44 @@ static func _placement(p: Dictionary, path: String, mode: String, names: Diction
 		if str(e["path"]).ends_with(".size") or str(e["path"]).ends_with(".model") or str(e["path"]).ends_with(".type"):
 			continue
 		errors.append(e)
+
+
+## Object physics' keys on a placement: home {position, rotation, mounted?} (where it was placed, once moved),
+## mounted (false: a wall object pulled off its wall), attach and offset (a text or particles area following another
+## placement).
+static func _physics_keys(p: Dictionary, kind: String, path: String, errors: Array) -> void:
+	if p.has("home"):
+		var h: Variant = p["home"]
+		var placed: Dictionary = h if h is Dictionary else {}
+		if placed.is_empty() or not _vec(placed.get("position"), 3) or not _vec(placed.get("rotation"), 3):
+			errors.append(_e(path + ".home", "where it was placed: {position: [x, y, z], rotation: [x, y, z]}"))
+		else:
+			for k: Variant in h:
+				if not (str(k) in ["position", "rotation", "mounted"]):
+					errors.append(_e("%s.home.%s" % [path, k], "unknown key (position, rotation, mounted)"))
+			if (h as Dictionary).has("mounted") and not ((h as Dictionary)["mounted"] is bool):
+				errors.append(_e(path + ".home.mounted", "true or false"))
+	if p.has("mounted") and not (p["mounted"] is bool):
+		errors.append(_e(path + ".mounted", "true or false (false: a wall object pulled off its wall)"))
+	if p.has("attach"):
+		if not (kind in GENERATORS):
+			errors.append(_e(path + ".attach", "a text or particles area only: the placement it follows"))
+		elif not _name_ok(p["attach"]) or str(p["attach"]) == str(p.get("name", "")):
+			errors.append(_e(path + ".attach", "another placement's name (room_state's objects)"))
+	if p.has("offset"):
+		if not p.has("attach"):
+			errors.append(_e(path + ".offset", "only with attach"))
+		elif not _vec(p["offset"], 3) or (p["offset"] as Array).any(func(x: Variant) -> bool:
+				return absf(float(x)) > float(LIMITS["extent_m"])):
+			errors.append(_e(path + ".offset", "[x, y, z] metres in the attached object's frame"))
+
+
+## An attached part's place in its object's frame (object physics; assistant_room.gd places it there, and
+## scripts/play/object_physics.gd moves it with the object): its offset, and its rotation (degrees) relative to it.
+static func attach_offset(p: Dictionary) -> Transform3D:
+	var rot: Array = p.get("rotation", [0, 0, 0]) if _vec(p.get("rotation"), 3) else [0, 0, 0]
+	return Transform3D(Basis.from_euler(Vector3(deg_to_rad(float(rot[0])), deg_to_rad(float(rot[1])),
+			deg_to_rad(float(rot[2])))), vec3(p.get("offset", [0, 0, 0])) if _vec(p.get("offset"), 3) else Vector3.ZERO)
 
 
 ## What a part is built as: its type ("box", "text", "model", ...), from its object when it is a placement.

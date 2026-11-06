@@ -25,6 +25,10 @@ window/size/viewport_height=720
 
 ; Pointers raycast for themselves; the viewport's own picking only warns that it can't work in stereo.
 common/enable_object_picking=false
+; Object physics (docs/physics.md): Jolt, compiled into the device build. The ticks stay at 60 a second; the moving
+; objects are interpolated to the frame by scripts/play/object_physics.gd itself (the engine's own interpolation
+; stays off: it would delay every node the app moves in _process).
+3d/physics_engine="Jolt Physics"
 
 [rendering]
 
