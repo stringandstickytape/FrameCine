@@ -320,10 +320,25 @@ built in (a picture frame, a wall shelf, a pot plant, a wall clock) and imported
 objects**, **Your objects** (this install's own: imported, or kept from a room) and **In this room** (what the room
 has from the library, with its parts). Each list of objects has its own **Place**. One controller does it all.
 
-A scanned object downloaded from the Fab store (the Low or Medium quality zip, into Downloads on the headset) shows
-in **Your objects** under **In Downloads, from Fab**: **Add <name>** makes it one of yours. **Visit Fab to download objects**, beside
-that heading, opens the store's free scanned objects in the browser. It stays on the headset: the Fab licence lets
-you use it, not share it.
+**Fab, in the app.** Under **Your objects**, **Fab** searches Quixel Megascans' free 3D objects on the Fab store and
+imports them, with no browser and no sign-in:
+
+1. The first time, read the short summary of Fab's licence. **Read Fab's licence** opens the full text in the
+   browser. **Accept** starts it (the app keeps the date: `[fab] eula_accepted` in `settings.cfg`). Until you accept,
+   the app asks Fab nothing, and an assistant can't either.
+2. **Search Fab**, type a word or two in English (rock, chair, cabbage) and **Search**. The results show as
+   thumbnails with names. **More**, under them, loads the next page.
+3. Pick one, then **Import**. The line under it says how far the download is; **Cancel** stops it. The object comes
+   in as one of **Your objects**, picked, ready to **Place**. One you have already is not downloaded again.
+
+The same card has **Clear Fab's cache** (the searches the app keeps for a day and the thumbnails) and **Withdraw**
+(takes your acceptance back: the app asks Fab nothing until you accept again). If Fab is busy, the card says so and
+how many seconds the app waits.
+
+A scanned object downloaded from the Fab store in a browser (the Low or Medium quality zip, into Downloads on the
+headset) shows in **Your objects** under **In Downloads, from Fab**: **Add <name>** makes it one of yours. **Visit Fab
+to download objects**, beside that heading, opens the store's free scanned objects in the browser. Either way it stays
+on the headset: the Fab licence lets you use it, not share it.
 
 1. Pick a thumbnail. The line under the thumbnails says its name, how it sits (wall, floor, ...) and how many parts it
    has.

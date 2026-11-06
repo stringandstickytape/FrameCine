@@ -604,6 +604,34 @@ asset is ever in this repository or the release, and an import is a user object 
 - Small3dAsset puts it on a table, else the floor. The manifest keeps the asset's id as `fab`, so a download is added
   once. Use the Low or Medium download: the object limits (150,000 triangles) refuse the full scan.
 
+**In the app, with no browser** (`scripts/assistant/fab_store.gd`, `ui/fab_panel.gd`; `docs/features.md` "Fab in the
+app"; D27). The app itself searches Fab for Quixel Megascans' free 3D models and downloads the chosen one's FBX zip
+(mid, else low, else high) into the same import. An assistant asks the app with the commands below; the app makes
+every request, one at a time, at least 1 s apart, and backs off when Fab says it is busy.
+
+**The licence comes first, and only the user can accept it.** Until the user has accepted Fab's licence (its EULA)
+in the headset's menu, in **Objects → Your objects → Fab**, every Fab command but `fab_status` refuses with
+`{"ok": false, "error": "eula", "message": "Ask the user to accept Fab's licence in Objects → Your objects → Fab
+first. ..."}`. No command can accept it. Ask the user to open that card, read the summary (or the full licence), and
+press **Accept**; `fab_status` then says `eula_accepted: true`. The user can withdraw it in the same place, and the
+commands refuse again.
+
+| Command | Level | What |
+|---|---|---|
+| `fab_status` | read | `{eula_accepted, eula_date, where, message (until accepted), backoff_s, busy, job}`; `job` is the import under way or the last one: `{uid, title, state, file, quality, bytes, total, error, message, object: {id, name}}` with `state` files, link, download, import (under way), then done, already, failed or cancelled |
+| `fab_search {query, cursor}` | read | 24 results a page: `{query, results: [{uid, title, category, tags, importable, in_library}], count, next, cached}`. `next` is the next page's cursor (empty on the last page); give it as `cursor` for that page. `in_library` is the object's id when it is in the library already. Titles are English, as Fab gives them; search in English |
+| `fab_import {uid}` | room | starts the import in the background: `{state: started, uid, title}`; poll `fab_status` until `job.state` is done (then `object_place {id: job.object.id}`), already, failed or cancelled. In the library already: `{state: already, object: {id, name}}`, at once and with no download |
+| `fab_cancel` | room | stops the import under way: `{cancelled}` |
+
+Errors, beside `ok: false`: `error` is a code and `message` says it in English. `eula` (above); `backoff` (Fab asked
+the app to wait: `wait` seconds, `http` 429 or 5xx; nothing is sent until then, so don't retry sooner); `network`,
+`http`, `shape` (Fab's answer was not as expected: its site may have changed); `busy` (one import at a time);
+`no_file` (no FBX zip: not importable); `too_big`; `uid`; `query`; and `import` (the importer's own reason). From
+the dev link the error is one string, `"<code>: <message>"`.
+
+A search page is kept a day, so the same search again costs Fab nothing; there is no way to list the whole catalogue,
+on purpose. Ask for the next page only when the user wants more.
+
 ### Lighting
 
 A room is flat (unlit shaders, `env_unlit*.gdshader`) unless its document has `light.key`, `light.sky`,

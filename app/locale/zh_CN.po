@@ -2640,6 +2640,106 @@ msgid "Tidied up: %d object back"
 msgid_plural "Tidied up: %d objects back"
 msgstr[0] "已整理：%d 个物体放回原处"
 
+# --- Fab in the app (ui/fab_panel.gd) ---
+msgid "Fab"
+msgstr "Fab"
+
+msgid "Search and import Quixel Megascans' free 3D objects from Fab here. Fab's licence (its EULA) covers what you download: you may use the objects; you may not pass the files on. Read it, then accept it to start."
+msgstr "在这里从 Fab 搜索并导入 Quixel Megascans 的免费 3D 物品。你下载的内容受 Fab 的许可（其 EULA）约束：你可以使用这些物品，但不可以转交文件。请先阅读，然后接受即可开始。"
+
+msgid "Read Fab's licence"
+msgstr "阅读 Fab 的许可"
+
+msgid "Accept"
+msgstr "接受"
+
+msgid "Search Fab"
+msgstr "搜索 Fab"
+
+msgid "More"
+msgstr "更多"
+
+msgid "Import"
+msgstr "导入"
+
+msgid "Clear Fab's cache"
+msgstr "清除 Fab 缓存"
+
+msgid "Withdraw"
+msgstr "撤回"
+
+msgid "Results for “%s”"
+msgstr "“%s”的结果"
+
+msgid "Search for an object by its name, in English."
+msgstr "用英文按名称搜索物品。"
+
+msgid "Searching Fab..."
+msgstr "正在搜索 Fab..."
+
+msgid "Nothing found. Try other words, in English."
+msgstr "什么也没找到。请换些英文词再试。"
+
+msgid "It is in your objects already."
+msgstr "它已在你的物品中。"
+
+msgid "Pick one, then Import."
+msgstr "选择一个，然后导入。"
+
+msgid "You accepted Fab's licence on %s."
+msgstr "你已于 %s 接受 Fab 的许可。"
+
+msgid "Asking Fab for %s..."
+msgstr "正在向 Fab 请求 %s..."
+
+msgid "Downloading %s: %.1f of %.1f MB"
+msgstr "正在下载 %s：%.1f / %.1f MB"
+
+msgid "Downloading %s: %.1f MB"
+msgstr "正在下载 %s：%.1f MB"
+
+msgid "Cancelled."
+msgstr "已取消。"
+
+msgid "Fab is busy: the app waits %d s before it asks again."
+msgstr "Fab 正忙：应用会等待 %d 秒后再请求。"
+
+msgid "Fab can't be reached. Is the headset online?"
+msgstr "无法连接 Fab。头显联网了吗？"
+
+msgid "Fab answered with an error (HTTP %d). Try again later."
+msgstr "Fab 返回了错误（HTTP %d）。请稍后再试。"
+
+msgid "Fab's answer was not as expected. Try again later."
+msgstr "Fab 的回复与预期不符。请稍后再试。"
+
+msgid "This object has no download the app can use."
+msgstr "这个物品没有应用能用的下载文件。"
+
+msgid "This object's download is too big for the headset."
+msgstr "这个物品的下载文件对头显来说太大。"
+
+msgid "A download is under way."
+msgstr "正在下载中。"
+
+msgid "The import failed: %s"
+msgstr "导入失败：%s"
+
+msgid "Fab's licence accepted. Search Fab to find objects."
+msgstr "已接受 Fab 的许可。搜索 Fab 来查找物品。"
+
+msgid "Fab's licence withdrawn: the app asks Fab nothing until you accept it again."
+msgstr "已撤回 Fab 的许可：在你再次接受之前，应用不会向 Fab 请求任何内容。"
+
+msgid "Fab's cache is cleared."
+msgstr "Fab 缓存已清除。"
+
+msgid "Search Fab's free Megascans"
+msgstr "搜索 Fab 的免费 Megascans"
+
+msgid "words in English, such as rock or chair"
+msgstr "英文词，例如 rock 或 chair"
+
 msgid "POINTER"
 msgstr "光标"
 

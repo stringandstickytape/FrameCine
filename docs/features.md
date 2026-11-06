@@ -2457,6 +2457,70 @@ numbers and the open questions are in `docs/physics.md`.
 Untested: on the headset (the feel of a throw, the trail of a held object, the thud through the earbuds, the step's
 cost on the Frame's cores with a 4K film decoding).
 
+## Fab in the app
+
+Quixel Megascans' free 3D objects, searched and imported from Fab inside the app: no browser, no sign-in, no zip in
+Downloads. The viewer does it in **Objects → Your objects → Fab**. An assistant does it with commands, and the app
+makes every request (`app/scripts/assistant/fab_store.gd`, `app/ui/fab_panel.gd`, decision D27).
+
+- **The licence first.** Until the viewer accepts Fab's licence (its EULA) in the headset's menu, the app asks Fab
+  nothing. The card shows a short summary, **Read Fab's licence** (the full text, https://www.fab.com/eula, in the
+  headset's browser) and **Accept**. The date is kept as `[fab] eula_accepted`. **Withdraw**, in the same place,
+  takes it back: an import under way stops, and the commands refuse again. No command can accept it.
+- **Search.** **Search Fab** opens the on-pane keyboard's form. The results are thumbnails with names, four to a row,
+  filling the card as the object tiles do. **More** loads the next page, and only then. A pick's line has **Import**;
+  while the object comes in, its progress (`Downloading Cabbage: 3.1 of 10.6 MB`) and **Cancel**. Then the object is
+  in Your objects, picked, ready to **Place** (and to pick up and throw: `docs/physics.md`). Errors and Fab's
+  back-off show in a line under the search.
+- **Only Megascans, only free.** Every search sends `seller=Quixel Megascans`, `is_free=1` and
+  `listing_types=3d-model` (only what the importer can make an object of). No licence price is checked (the user's
+  decision: all Megascans are free).
+- **The file.** The FBX zip: **mid** (2K maps), else **low**, else **high**; never raw. It is what `fab_import.gd`
+  reads (an `.fbx`, the maps by name, the asset's `.json` for name, tags, mount and id), and it is proved on the
+  headset with downloads from the browser. The "gltf" zips hold a `.gltf` with a `.bin` and Unreal-packed maps
+  (`_B`, `_ORM`, `_N`). The importer reads neither `.gltf` nor those names, so they are not used (see the open
+  questions). Mid suits the Frame's memory: high has 4K maps, which the import cuts to 2K anyway.
+- **The download.** The listing's files (`/i/listings/{uid}/asset-formats`), then the file's signed link
+  (`.../download-info`: a CDN URL good for a few hours), then the zip, streamed to `user://fab/tmp`, then
+  `FabImport.import_zip()` on the main thread behind a notice (as the Downloads list's Add). Then the temporary file
+  goes. The manifest keeps the listing's uid as `fab_listing` beside the asset's id (`fab`).
+- **Not downloaded twice.** A listing already imported is in the library at once (`fab_listing`). Another listing of
+  the same asset, or one added from Downloads, is found from the asset's id in the file's name, before the download.
+- **Gentle on Fab.** One request at a time. At least 1 s between the end of one request and each of Fab's pages
+  (`API_GAP`); 0.25 s before a thumbnail or the download (`THUMB_GAP`). A thumbnail waits while a page or the
+  download is waiting. A 429 or a 5xx: the app asks nothing for Retry-After seconds, else 2 s, doubled for each one in
+  a row, at most 300 s, and the tab says "Fab is busy" with the seconds left. Searches are kept a day
+  (`user://fab/search`), thumbnails until **Clear Fab's cache** (`user://fab/thumbs`, at most 16 MB: the oldest go
+  first). No crawl and no bundled list.
+- **User-Agent.** `VRVideoPlayer/<version> (+https://github.com/stringandstickytape/steam-frame-vr-video-player)`, the
+  version from the release's `VERSION` file, else `dev`. Fab accepted it on 2026-11-06: the search, the files, the
+  link and the CDN's download all answered 200.
+- **Commands:** `fab_status`, `fab_search {query, cursor}`, `fab_import {uid}`, `fab_cancel` (`docs/assistant.md`,
+  "Objects from Fab").
+- **Tested:** `tests/test_fab_store.gd` (282 checks) with a fake transport and answers written by hand in Fab's
+  shapes (no Fab answer, thumbnail or zip is in the repository): the licence gate, search and pages, the caches, the
+  spacing, the back-off, the file and size, download and import, already in the library, Cancel, the commands, the
+  tab in three languages. Checked live from the PC on 2026-11-06: the endpoints' shapes, the User-Agent, and the
+  contents of one low gltf zip (in a scratch folder, never the repository).
+
+Untested: on the headset (the download over the headset's network, TLS with the engine's certificates, the import of
+a mid zip by this path, the thumbnails in the lenses).
+
+### Open questions
+
+- **The thumbnails' spacing.** The thumbnails come from `media.fab.com`, a CDN. They are spaced 0.25 s, not 1 s: at
+  1 s a page of 24 would take 24 s to fill. The 1 s holds for Fab's own pages (search, files, link). Set `THUMB_GAP`
+  to 1.0 if the CDN should count as Fab too.
+- **fab_status never refuses.** It is the command that says whether the licence is accepted, so it answers with
+  `eula_accepted: false` and the message, not with an error. Every other Fab command refuses with `error: "eula"`.
+- **The gltf zips.** They are a little smaller at low (1.6 MB against 2.8 MB) and larger at mid (13.9 MB against
+  10.6 MB). To read them, the importer would need the `.gltf` with its `.bin` from the zip, and the `ORM` map split
+  into occlusion and roughness. Not worth it while the FBX path works.
+- **Withdraw keeps the cache.** The cached searches and thumbnails stay until **Clear Fab's cache**. Either way, the
+  app asks Fab nothing after a withdrawal.
+- **The dev link's code command** can write any setting, this one too. The rule "no command can accept" holds for
+  every registered command, the assistant's and the dev link's.
+
 ## The browser: stick pointer and voice into a field
 
 Two ways to work the browser on the big screen without the laser or a keyboard. The details, the numbers and the

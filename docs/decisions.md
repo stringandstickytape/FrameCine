@@ -468,6 +468,33 @@ shapes (the cinema as boxes, two a seat).
   the job fan-out over every worker thread: 1.4 ms, against 0.23 ms on one or two threads). Then a fork setting for
   Jolt's thread count, or a smaller worker pool.
 
+## D27. Fab in the app: Fab's own site endpoints, the licence first, gentle on Fab (2026-11-06)
+
+The app searches Fab for Quixel Megascans' free 3D models and imports them into the object library, with no browser
+and no sign-in (`docs/features.md` "Fab in the app", `app/scripts/assistant/fab_store.gd`). The viewer does it in
+Objects → Your objects → Fab; an assistant asks the app with `fab_search`, `fab_import`, `fab_status` and
+`fab_cancel`, and the app makes every request.
+
+- **The endpoints:** the site's own (`/i/listings/search`, `/i/listings/{uid}/asset-formats`, `.../download-info`),
+  plain GETs with no sign-in. There is no published API. Every answer is read with care: a shape that changed is an
+  error (`shape`), never a crash. The signed link of `/p/egl/...` needs a Bearer token and is not used.
+- **The licence first:** the viewer accepts Fab's licence (its EULA) in the headset's menu before the app asks Fab
+  anything; `[fab] eula_accepted` keeps the date, and Withdraw takes it back. No command can accept it: the user's
+  acceptance must be the user's.
+- **Megascans and free only:** every search sends `seller=Quixel Megascans` and `is_free=1` (and only 3D models). No
+  licence price is checked: the user is certain that all Megascans are free. Downloads are the end user's matter;
+  the project distributes nothing of Fab's.
+- **Gentle on Fab:** search on demand, the next page only when asked, one request at a time, 1 s before each of Fab's
+  pages, a back-off on 429 and 5xx (Retry-After, else exponential), searches kept a day and thumbnails until cleared.
+  No crawl of the catalogue and no bundled list.
+- **The FBX zip, mid:** what `fab_import.gd` already reads and what was proved on the headset; mid's 2K maps suit the
+  Frame's memory. The gltf zips hold a `.gltf` with Unreal-packed maps, which the importer does not read.
+- **An honest User-Agent:** the app's own name, version and project URL, not a browser's. Fab accepted it.
+- **Rejected:** a bundled list of the catalogue, or a crawl to make one (slow, and a load on Fab's servers); the
+  assistant downloading on its own machine (the app must make every call); a command to accept the licence.
+- **Would change if:** Fab publishes an API (then that), changes these endpoints (then the `shape` errors say so), or
+  refuses the app's User-Agent (then the plainest name it accepts).
+
 ## D28. The browser: a stick pointer chosen by the gaze, the cursor in the picture, voice into the field (2026-11-06)
 
 On a captured window, the right stick moves a cursor while the viewer looks at the screen. While they look away, it

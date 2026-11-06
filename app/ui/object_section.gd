@@ -3,7 +3,7 @@ extends VBoxContainer
 ## The Objects tab (ui/objects_tab.gd; docs/assistant.md "Objects", docs/USAGE.md "Objects"), in three sections: Built-in
 ## objects and Your objects, the library as thumbnails with names, each with its own Place (which hands the laser to
 ## ui/object_placer.gd), Your objects with Delete (asked first, in the footer, as the panel's other choices are) and
-## Fab's downloads; and In this room, what this room has from the library: pick one for its parts, each with its colour, a palette, the picture on show as its picture, a material
+## Fab (ui/fab_panel.gd: search and import in the app) and Fab's downloads; and In this room, what this room has from the library: pick one for its parts, each with its colour, a palette, the picture on show as its picture, a material
 ## from the material library (a picker: each material's swatch and name, filtered by kind), an effect from the effect
 ## library (a picker: each effect's preview and name, filtered by group, its options at their defaults), and Reset;
 ## and Move and Remove (asked first). Everything here calls what the commands call
@@ -24,6 +24,7 @@ const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const EffectLibrary := preload("res://scripts/effects/effect_library.gd")
 const FabImport := preload("res://scripts/assistant/fab_import.gd")
 const WebPages := preload("res://scripts/net/web_pages.gd")
+const FabPanel := preload("res://ui/fab_panel.gd")
 ## Visit Fab: the store's free scanned objects (the user's choice of page, 2026-11-05).
 const FAB_URL := "https://www.fab.com/sellers/Quixel%20Megascans?is_free=1"
 
@@ -93,6 +94,8 @@ var _loading := false
 var _empty: Label
 ## Fab downloads in the Downloads folder not in the library yet (fab_import.gd): a button each to add it.
 var _fab_box: VBoxContainer
+## Fab in the app (ui/fab_panel.gd): the licence, the search and the import.
+var fab: FabPanel
 var _fab_buttons: VBoxContainer
 var _fab_paths: Array = []
 var _adding := false
@@ -127,6 +130,13 @@ func bind(p_app: Node) -> void:
 	_yours_place = W.button("Place", _start_place)
 	_delete = W.button("Delete", _ask_delete)
 	add_child(W.hbox([_yours_chosen, _yours_place, _delete]))
+	fab = FabPanel.new()
+	fab.size_tile = _size_tile
+	fab.on_imported = func(id: String) -> void:
+		_selected = id
+		sync_objects()
+	add_child(fab)
+	fab.bind(app, self)
 	_fab_box = W.vbox()
 	# An ellipsis where it is narrow (a longer language): the button keeps its room.
 	var fab_label := W.ellipsis(W.label("In Downloads, from Fab", &"MutedLabel"))
@@ -167,6 +177,8 @@ func sync_objects() -> void:
 	if is_visible_in_tree():
 		_sync_library()
 	_sync_placed()
+	if fab != null:
+		fab.sync()
 
 
 # --- The library -------------------------------------------------------------------------------------------------

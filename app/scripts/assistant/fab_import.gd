@@ -16,8 +16,10 @@ extends RefCounted
 ## brings it up (the user, 2026-11-05: "rather too dark").
 ##
 ##   is_fab_zip(path) -> bool             read_zip(path) -> {id, name, tags, mount, model, model_name, maps} or {error}
-##   import_zip(path, again) -> import_glb's result (+ "already" when that asset is in the library; again: made again
-##                                       under the same id, so the rooms that place it show the new one)
+##   import_zip(path, again, listing) -> import_glb's result (+ "already" when that asset is in the library; again:
+##                                       made again under the same id, so the rooms that place it show the new one;
+##                                       listing: the Fab listing's uid, kept as `fab_listing`)
+## The in-app import (fab_store.gd) downloads the zip itself and hands it here.
 ##   downloads() -> [{path, id, name}]   the Fab zips in the Downloads folder not yet in the library
 
 const ObjectLibrary := preload("res://scripts/assistant/object_library.gd")
@@ -97,12 +99,15 @@ static func read_zip(path: String) -> Dictionary:
 	return out
 
 
-## Adds the asset in a Fab zip to the library. Safe on a worker thread.
-static func import_zip(path: String, again := false) -> Dictionary:
+## Adds the asset in a Fab zip to the library. Safe on a worker thread. listing: the Fab listing it came from (the
+## in-app import, fab_store.gd), kept as the manifest's `fab_listing`, so a search shows it is in the library.
+static func import_zip(path: String, again := false, listing := "") -> Dictionary:
 	var a := read_zip(path)
 	if a.has("error"):
 		return {"ok": false, "error": a["error"]}
 	var extra := {"fab": a["id"]}
+	if listing != "":
+		extra["fab_listing"] = listing
 	for m: Dictionary in ObjectLibrary.list("", "user"):
 		if str(m.get("fab", "")) == a["id"]:
 			if not again:
