@@ -4,11 +4,13 @@ extends Label3D
 ## window to the real room, scripts/play/real_windows.gd hint()). A notice (world_toast.gd) is placed once where the
 ## head looked and fades in seconds: the steps' instructions kept going while the viewer looked down at the table
 ## (the user, 2026-11-06). The card follows the controller, a little above it, turned to the head, and stays until the
-## task ends. Text, outline and font from the pane's tokens (ui/pane_style.gd).
+## task ends. Text, outline and font from the pane's tokens (ui/pane_style.gd). The text shows as given: the caller
+## translates it (docs/i18n.md).
 ##
 ##   show_over(hand, head, text)   each frame while the task lasts; hide_hint() after
 
 const PaneStyle := preload("res://ui/pane_style.gd")
+const W := preload("res://ui/pane_widgets.gd")
 
 ## Metres above the controller, and the line width in pixels before it wraps.
 const LIFT := 0.075
@@ -17,6 +19,7 @@ const WIDTH := 520.0
 
 func _ready() -> void:
 	name = "HandHint"
+	W.content(self)
 	top_level = true
 	no_depth_test = true
 	render_priority = 10

@@ -233,7 +233,9 @@ bar, transport, tabs, footer) and one script per tab.
   the custom parts' tokens under the theme type "Tokens" (`ui/pane_style.gd` reads them). No pane script writes a
   colour or a font; `tests/test_pane.gd` checks. Another theme is another `.tres`: `[pane] theme = "res://..."`.
   `[pane] scale` scales the panel's physical size (1 = 24 cm wide, default 1.6). The font is Fira Sans Condensed (SIL OFL 1.1,
-  `ui/fonts/LICENSE.FiraSansCondensed.txt`) in four weights, with tabular numerals.
+  `ui/fonts/LICENSE.FiraSansCondensed.txt`) in four weights, with tabular numerals. Behind it, for Chinese, a subset
+  of Noto Sans SC Medium (SIL OFL 1.1, `ui/fonts/LICENSE.NotoSansSC.txt`; from github.com/notofonts/noto-cjk,
+  Sans/SubsetOTF/SC, cut to WOFF2 by `tools/i18n.py font`; docs/i18n.md).
 - **Alpha:** the panel quad maps alpha as 1 - (1 - a)^2.2, so the doc's 94 % surface and the fades look as they
   would composited in sRGB. Blended in linear light as given, a bright film showed through at about a quarter of its
   brightness.

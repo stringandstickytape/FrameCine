@@ -273,7 +273,7 @@ func _update_now_playing() -> void:
 		var f: Node = app.get("features")
 		var live: Node = f.get("live") if f != null else null
 		if live != null and bool(live.live):
-			t = "LIVE" + (("  " + t) if t != "" else "")
+			t = tr("LIVE") + (("  " + t) if t != "" else "")
 		var trick: Node = f.get("trick") if f != null else null
 		if trick != null and float(trick.speed) > 0.0:
 			t += "  ·  %dx" % roundi(float(trick.speed))
@@ -839,9 +839,12 @@ func _rounded(p_name: String, size: Vector2, role: String, priority: int) -> Mes
 	return mi
 
 
+## A label of the now playing pane. Its text shows as given (W.content(), docs/i18n.md): the title is the film's own,
+## the times are numbers, and LIVE comes translated.
 func make_label(p_name: String, align: HorizontalAlignment, parent: Node3D) -> Label3D:
 	var l := Label3D.new()
 	l.name = p_name
+	W.content(l)
 	l.font_size = FONT_PX
 	l.horizontal_alignment = align
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER

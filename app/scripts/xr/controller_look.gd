@@ -42,6 +42,8 @@ const DEFAULT := "black"
 ##   material, tiling, reflection   a metal: its library id, metres a repeat of its picture, how much it reflects
 ##   effect, options     an effect: its id and the options it starts from (the user's go over them)
 ## The default's numbers are only for print_style(): controller_visual.gd keeps the model's own black.
+## The names are keys of the menus' languages (the System tab's buttons translate them; docs/i18n.md).
+# i18n: begin name
 const LOOKS := {
 	"black": {"name": "Black", "kind": "plastic", "color": "#191919", "lift": 0.003, "rim": 0.07, "sheen": 0.014,
 			"description": "the black plastic the controllers come in (the default)"},
@@ -81,6 +83,7 @@ const LOOKS := {
 			"options": {"size": 0.004, "coat": 0.3},
 			"description": "woven carbon fibre under a glossy clear coat"},
 }
+# i18n: end
 ## The plastics' shape in a dark room, unless the preset says otherwise.
 const LIFT := 0.01
 const RIM := 0.1

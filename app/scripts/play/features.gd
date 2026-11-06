@@ -289,9 +289,10 @@ func remaining_real() -> float:
 	return remaining() / (speed.speed if speed != null else 1.0)
 
 
-## "ends 23:20" for what is playing (at the playback speed), or "" (nothing open, no duration).
-func end_text() -> String:
-	return EndTime.format_end(remaining(), speed.speed if speed != null else 1.0)
+## "ends 23:20" for what is playing (at the playback speed), or "" (nothing open, no duration). localised: in the
+## menus' language (the menu's header); else English.
+func end_text(localised := false) -> String:
+	return EndTime.format_end(remaining(), speed.speed if speed != null else 1.0, -1.0, null, localised)
 
 
 ## The music card's visualiser (#64): one of MusicSource.STYLES ("bars", "mirror", "line", "radial", "off"; names for

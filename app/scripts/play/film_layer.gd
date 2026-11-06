@@ -127,27 +127,30 @@ func wanted_kind() -> String:
 	return "quad"
 
 
+## The line under the System tab's switch, in the menus' language (docs/i18n.md).
 func status() -> String:
 	if not enabled:
-		return "Off: the film is drawn in the room."
+		return tr("Off: the film is drawn in the room.")
 	if not available():
-		return "This engine has no OpenXR layers."
+		return tr("This engine has no OpenXR layers.")
 	if not _xr_running():
-		return "Only in the headset: here the film is drawn in the room."
+		return tr("Only in the headset: here the film is drawn in the room.")
 	if kind == "":
 		if main.player.has_source() and main.screen.mode.projection != VideoMode.Proj.FLAT:
-			return "180, 360 and fisheye films are drawn in the room."
+			return tr("180, 360 and fisheye films are drawn in the room.")
 		if main.player.has_source() and float(main.screen.curve_radius) > 0.0:
 			if _has_cylinder() and not cylinder_layers:
-				return "A curved screen is drawn in the room (curved layers are off)."
-			return "This headset has no curved layers: a curved screen is drawn in the room."
-		return "On; nothing to show."
+				return tr("A curved screen is drawn in the room (curved layers are off).")
+			return tr("This headset has no curved layers: a curved screen is drawn in the room.")
+		return tr("On; nothing to show.")
 	var px: Vector2i = viewports[0].size
 	if held:
-		return "On; the room draws the film while the menu is open, so the menu shows in front."
+		return tr("On; the room draws the film while the menu is open, so the menu shows in front.")
 	if layers.size() == 2:
-		return "In use: two %s layers, one per eye, %d x %d px each." % [kind, px.x, px.y]
-	return "In use: one %s layer, %d x %d px." % [kind, px.x, px.y]
+		return (tr("In use: two cylinder layers, one per eye, %d x %d px each.") if kind == "cylinder"
+				else tr("In use: two quad layers, one per eye, %d x %d px each.")) % [px.x, px.y]
+	return (tr("In use: one cylinder layer, %d x %d px.") if kind == "cylinder"
+			else tr("In use: one quad layer, %d x %d px.")) % [px.x, px.y]
 
 
 func _xr_running() -> bool:

@@ -5,6 +5,8 @@ extends RefCounted
 ## Each is off until the viewer turns it on. read and card have none: they always work. A small file of its own, so
 ## the pane (ui/assistant_row.gd) and the agents' first-start card read it without loading the command registry.
 
+## The labels are keys of the menus' languages (the System tab's switches; docs/i18n.md).
+# i18n: begin label
 const SWITCHES := {
 	"control": {"key": "allow_control", "label": "Let the assistant control playback", "doing": "control playback",
 			"what": "playback: play, pause, seek, open a file, tracks, volume, recentring"},
@@ -17,6 +19,7 @@ const SWITCHES := {
 	"apps": {"key": "allow_apps", "label": "Let the assistant run apps", "doing": "run apps",
 			"what": "Android apps and the agents on the headset: start, stop, show, hide"},
 }
+# i18n: end
 ## The levels with no switch.
 const ALWAYS := {
 	"read": "what plays, places and folders, chapters, tracks, the room, the measured cost",

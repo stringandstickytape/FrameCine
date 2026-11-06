@@ -24,6 +24,7 @@ const HwVideoRow := preload("res://ui/hw_video_row.gd")
 const AssistantRow := preload("res://ui/assistant_row.gd")
 const ControllerLook := preload("res://scripts/xr/controller_look.gd")
 const ObjectSection := preload("res://ui/object_section.gd")
+const I18n := preload("res://scripts/i18n.gd")
 
 ## Open a place of the Files tab (test patterns, network hosts).
 signal open_place(path: String)
@@ -35,14 +36,14 @@ signal reset_layout_requested
 signal reload_theme_requested
 
 const REMOTE_MODES := ["ask", "allow", "deny"]
-const REMOTE_WORDS := ["Ask", "Allow", "Deny"]
+const REMOTE_WORDS := ["Ask", "Allow", "Deny"] # i18n
 ## main.gd's FOVEATION_LEVELS, in order.
-const FOVEATION_WORDS := ["Off", "Low", "Medium", "High"]
-const FOVEATION_HELP := "Saves GPU time at the edges of your view. High can look blocky."
-const FOVEATION_UNAVAILABLE := "Foveation isn't available: this build starts without it."
+const FOVEATION_WORDS := ["Off", "Low", "Medium", "High"] # i18n
+const FOVEATION_HELP := "Saves GPU time at the edges of your view. High can look blocky." # i18n
+const FOVEATION_UNAVAILABLE := "Foveation isn't available: this build starts without it." # i18n
 ## A controller look's button: wide enough for the icon and a name, three to a row.
 const LOOK_WIDTH := 150
-const LOOK_HELP := "Both controllers. The labels change ink, or get a dark outline, to stay readable."
+const LOOK_HELP := "Both controllers. The labels change ink, or get a dark outline, to stay readable." # i18n
 
 var app: Node
 var box: VBoxContainer
@@ -100,6 +101,9 @@ var _changes: VBoxContainer
 var _ring: Node
 ## The stats view refreshes at 2 Hz (stats.gd's collect() is meant for 1 to 4 Hz).
 var _stats_next_msec := 0
+## The Language row's buttons, one per code offered (I18n.languages(): the pseudo-locale only in dev mode).
+var _language_row: HFlowContainer
+var _language_codes: Array = []
 
 
 func _init() -> void:
@@ -125,6 +129,7 @@ func bind(p_app: Node) -> void:
 			_stop_stats())
 	box.add_child(W.hbox([_overlay, _stats_toggle]))
 	_stats_label = W.label("", &"MutedLabel")
+	W.content(_stats_label)
 	_stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_stats_label.visible = false
 	box.add_child(_stats_label)
@@ -134,7 +139,7 @@ func bind(p_app: Node) -> void:
 		app.settings.set_value("pane", key, v)
 		layout_changed.emit()
 	_layout_rows["recentre_hold"] = W.slider_row("Hold menu to recentre", 0.3, 1.5, 0.05,
-			func(v: float) -> String: return "%.2f s" % v, func(v: float) -> void: set_layout.call("recentre_hold", v))
+			func(v: float) -> String: return tr("%.2f s") % v, func(v: float) -> void: set_layout.call("recentre_hold", v))
 	box.add_child(_layout_rows["recentre_hold"])
 	var access: Node = app.features.access
 	_left_handed = W.toggle("Left-handed", func(on: bool) -> void: access.set_value("left_handed", on))
@@ -144,6 +149,13 @@ func bind(p_app: Node) -> void:
 	# The tablet's colours (ui/tablet.gd: the palettes of its style document).
 	_palette_box = W.flow([])
 	box.add_child(_palette_box)
+
+	# The menus' language (scripts/i18n.gd, [language] ui): each name in its own language, so not translated.
+	box.add_child(W.section("Language"))
+	_language_row = W.flow()
+	W.content(_language_row)
+	box.add_child(_language_row)
+	box.add_child(W.help("The menus and the controller labels. Names of films and files stay as they are."))
 
 	box.add_child(W.section("Accessibility"))
 	_ui_scale = W.slider_row("Larger panel", 1.0, 2.0, 0.05, func(v: float) -> String: return "%.2fx" % v,
@@ -162,7 +174,9 @@ func bind(p_app: Node) -> void:
 	var cards := W.hbox()
 	for card: Dictionary in TestLab.cards():
 		var card_path: String = card["path"]
-		cards.add_child(W.button(str(card["label"]), func() -> void: app.open_path(card_path, false)))
+		var card_button := W.button(str(card["label"]), func() -> void: app.open_path(card_path, false))
+		W.content(card_button)
+		cards.add_child(card_button)
 	box.add_child(W.label("Calibration cards", &"MutedLabel"))
 	var cards_scroll := ScrollContainer.new()
 	cards_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -175,10 +189,12 @@ func bind(p_app: Node) -> void:
 	_lab_path.placeholder_text = "a file on a share, e.g. smb://host/share/film.mkv"
 	box.add_child(W.hbox([_lab_path, W.button("Measure bandwidth", _measure)]))
 	_lab_result = W.label("", &"MutedLabel")
+	W.content(_lab_result)
 	_lab_result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_lab_result)
 	box.add_child(W.flow([W.button("Run benchmark", _run_benchmark)]))
 	_bench_label = W.label("", &"MutedLabel")
+	W.content(_bench_label)
 	_bench_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_bench_label)
 	app.file_opened.connect(func(p: String) -> void:
@@ -186,6 +202,7 @@ func bind(p_app: Node) -> void:
 			_lab_path.text = p)
 
 	_tour_label = W.ellipsis(W.label("", &"MutedLabel"))
+	W.content(_tour_label)
 	_tour_box = W.hbox([_tour_label, W.button("Stop tour", func() -> void:
 		Tour.stop()
 		_sync_tour())])
@@ -218,7 +235,9 @@ func bind(p_app: Node) -> void:
 		_film_layer_help.text = film_layer.status())
 	_cylinder_layers.tooltip_text = "A curved screen as the headset's cylinder layer; off: drawn in the room, where things in front of it cover it"
 	box.add_child(W.flow([_film_layer, _cylinder_layers]))
+	# The film layer's own line, translated there.
 	_film_layer_help = W.help(film_layer.status())
+	W.content(_film_layer_help)
 	box.add_child(_film_layer_help)
 
 	box.add_child(W.section("Controllers"))
@@ -268,6 +287,7 @@ func bind(p_app: Node) -> void:
 			server.new_key()
 			_show_address())]))
 	_remote_url = W.label("", &"TimeLabel")
+	W.content(_remote_url)
 	box.add_child(_remote_url)
 	_remote_qr = TextureRect.new()
 	_remote_qr.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
@@ -289,6 +309,7 @@ func bind(p_app: Node) -> void:
 	share_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(share_note)
 	_share_url = W.label("", &"TimeLabel")
+	W.content(_share_url)
 	box.add_child(_share_url)
 	_share_qr = TextureRect.new()
 	_share_qr.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
@@ -303,6 +324,7 @@ func bind(p_app: Node) -> void:
 	box.add_child(_dev_box)
 	_dev_box.add_child(W.section("Dev tools"))
 	_dev_status = W.label("", &"MutedLabel")
+	W.content(_dev_status)
 	_dev_box.add_child(_dev_status)
 	_dev_box.add_child(W.flow([W.button("Reload theme", func() -> void: reload_theme_requested.emit())]))
 	_dev_box.add_child(W.label("Remote changes"))
@@ -324,8 +346,11 @@ func bind(p_app: Node) -> void:
 
 	box.add_child(W.section("About"))
 	var version := str(ProjectSettings.get_setting("application/config/version", ""))
-	box.add_child(W.label("VR Video Player%s" % ((" " + version) if version != "" else "")))
-	box.add_child(W.ellipsis(W.label("Engine %s, %s" % [Engine.get_version_info().get("string", ""),
+	var about := W.label("VR Video Player%s" % ((" " + version) if version != "" else ""))
+	W.content(about)
+	box.add_child(about)
+	box.add_child(W.ellipsis(W.live_label(func() -> String: return tr("Engine %s, %s") % [
+			Engine.get_version_info().get("string", ""),
 			str(ProjectSettings.get_setting("rendering/renderer/rendering_method", ""))], &"MutedLabel")))
 	app.audio_settings_changed.connect(sync)
 	sync()
@@ -389,6 +414,28 @@ func sync() -> void:
 	_sync_benchmark()
 	_sync_remote()
 	_sync_dev()
+	_sync_language()
+
+
+## The Language row: made again when the languages offered change (dev mode comes up after the tab), the one on
+## show pressed.
+func _sync_language() -> void:
+	var langs := I18n.languages()
+	var codes := langs.map(func(l: Array) -> String: return str(l[0]))
+	if codes != _language_codes:
+		_language_codes = codes
+		for c in _language_row.get_children():
+			_language_row.remove_child(c)
+			c.queue_free()
+		var group := ButtonGroup.new()
+		for l: Array in langs:
+			var code := str(l[0])
+			var b := W.button(str(l[1]), func() -> void: I18n.choose(app.settings, code))
+			b.toggle_mode = true
+			b.button_group = group
+			b.set_meta("language", code)
+			_language_row.add_child(b)
+	W.set_choice(_language_row, codes.find(I18n.language))
 
 
 ## A few times a second while the tab shows.
@@ -403,6 +450,8 @@ func tick() -> void:
 	_sync_tour()
 	_film_layer_help.text = app.features.film_layer.status()
 	assistant_row.tick()
+	if I18n.languages().size() != _language_codes.size():
+		_sync_language()
 
 
 func _start_stats() -> void:
@@ -559,9 +608,9 @@ func _sync_dev() -> void:
 	if ring != null and ring != _ring:
 		_ring = ring
 		ring.remote_change.connect(func(_e: Dictionary) -> void: _sync_changes())
-	var reload := "hot-reload on" if dev.get("hot_reload") != null else "hot-reload off"
+	var reload := tr("hot-reload on") if dev.get("hot_reload") != null else tr("hot-reload off")
 	var allowed := float(_ring.allowed_seconds()) if _ring != null else 0.0
-	_dev_status.text = "%s; remote changes allowed for %d more min" % [reload, ceili(allowed / 60.0)] if allowed > 0.0 \
+	_dev_status.text = tr("%s; remote changes allowed for %d more min") % [reload, ceili(allowed / 60.0)] if allowed > 0.0 \
 			else reload
 	var m := str(_ring.mode()) if _ring != null else "ask"
 	W.set_choice(_remote_mode, REMOTE_MODES.find(m))
@@ -578,7 +627,9 @@ func _sync_changes() -> void:
 	var hist: Array = _ring.status()["history"]
 	for i in range(hist.size() - 1, maxi(-1, hist.size() - 6), -1):
 		var e: Dictionary = hist[i]
+		# The change as the dev link said it.
 		var line := W.ellipsis(W.label("%s (%s)" % [e["summary"], e["state"]], &"MutedLabel"))
+		W.content(line)
 		var row := W.hbox([line])
 		if bool(e.get("undoable", false)):
 			var id := int(e["id"])
@@ -592,13 +643,14 @@ func _measure() -> void:
 	if path == "" or _lab_busy:
 		return
 	_lab_busy = true
-	_lab_result.text = "Measuring %s ..." % path.get_file()
+	_lab_result.text = tr("Measuring %s ...") % path.get_file()
 	var r: Dictionary = await TestLab.measure_async(get_tree(), path, 8.0)
 	_lab_busy = false
 	if r.has("error"):
-		_lab_result.text = "Can't measure: %s" % r["error"]
+		_lab_result.text = tr("Can't measure: %s") % r["error"]
 	else:
-		_lab_result.text = "%.0f Mbit/s average, %.0f peak, opened in %d ms, %.0f MB read" % [float(r.get("mbps_avg", 0.0)),
+		_lab_result.text = tr("%.0f Mbit/s average, %.0f peak, opened in %d ms, %.0f MB read") % [
+				float(r.get("mbps_avg", 0.0)),
 				float(r.get("mbps_peak", 0.0)), int(r.get("open_ms", 0)), float(r.get("megabytes", 0.0))]
 
 
@@ -608,7 +660,7 @@ func _run_benchmark() -> void:
 		return
 	_bench = Benchmark.start(app)
 	if _bench == null:
-		_bench_label.text = "This engine build can't run the benchmark."
+		_bench_label.text = tr("This engine build can't run the benchmark.")
 		return
 	_bench.progress.connect(func(_f: float, text: String) -> void: _bench_label.text = text)
 	_bench.finished.connect(func(_r: Dictionary) -> void:
@@ -630,6 +682,7 @@ func _sync_tour() -> void:
 	if t == null:
 		return
 	var st: Dictionary = t.status()
-	_tour_label.text = "Tour %s%s: round %d, step %d of %d" % [st.get("name", ""),
-			" (kiosk)" if bool(st.get("kiosk", false)) else "", int(st.get("round", 0)), int(st.get("step", 0)) + 1,
+	var fmt := tr("Tour %s (kiosk): round %d, step %d of %d") if bool(st.get("kiosk", false)) \
+			else tr("Tour %s: round %d, step %d of %d")
+	_tour_label.text = fmt % [st.get("name", ""), int(st.get("round", 0)), int(st.get("step", 0)) + 1,
 			int(st.get("steps", 0))]

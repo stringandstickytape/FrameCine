@@ -203,27 +203,36 @@ func face_name() -> String:
 
 
 ## Edit: the face (or Turn) and what the stick does to it.
+## In the menus' language (docs/i18n.md): each face a whole text of its own.
 func face_hint() -> String:
 	match face_name():
 		"turn":
-			return "Turn\nStick left / right: turn it\nTrigger: the faces again"
-		"top", "bottom":
-			return "The %s face\nStick up / down: move it" % face_name() + "\nTrigger: next face"
-		"left", "right":
-			return "The %s face\nStick left / right: move it" % face_name() + "\nTrigger: next face"
+			return tr("Turn\nStick left / right: turn it\nTrigger: the faces again")
+		"top":
+			return tr("The top face\nStick up / down: move it\nTrigger: next face")
+		"bottom":
+			return tr("The bottom face\nStick up / down: move it\nTrigger: next face")
+		"left":
+			return tr("The left face\nStick left / right: move it\nTrigger: next face")
+		"right":
+			return tr("The right face\nStick left / right: move it\nTrigger: next face")
+		"front":
+			return tr("The front face\nStick up: away, down: nearer\nTrigger: next face")
 		_:
-			return "The %s face\nStick up: away, down: nearer" % face_name() + "\nTrigger: next face"
+			return tr("The back face\nStick up: away, down: nearer\nTrigger: next face")
 
 
-## What to do now, a few short lines: the card over the controller shows it for as long as the mode lasts.
+## What to do now, a few short lines: the card over the controller shows it for as long as the mode lasts. In the
+## menus' language.
 func hint() -> String:
 	match mode:
 		"sweep":
 			if sweeping:
-				return "Sweeping\nLet go of the trigger to keep it"
-			return "Hold the trigger and sweep\nthe controller over the place\nB: cancel"
+				return tr("Sweeping\nLet go of the trigger to keep it")
+			return tr("Hold the trigger and sweep\nthe controller over the place\nB: cancel")
 		"edit":
-			return face_hint() + "\nMenu: keep it  ·  B: put it back"
+			# The face's lines, then how to end.
+			return tr("%s\nMenu: keep it  ·  B: put it back") % face_hint()
 	return ""
 
 

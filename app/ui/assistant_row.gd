@@ -4,12 +4,15 @@ extends VBoxContainer
 ## an assistant on this network can read the guide and ask to pair; the address and the time left, with Stop); the
 ## pairing prompt (the code in large digits, who asks, Cancel); the paired assistants with Forget; what the assistant
 ## may do; and, for developers with the dev link connected too, where the voice goes. Nothing is typed here.
+## Languages (docs/i18n.md): the fixed words translate themselves; the built lines are made again when the language
+## changes. The service's own status line (scripts/assistant/) stays English.
 
 const W := preload("res://ui/pane_widgets.gd")
 const Assistant := preload("res://scripts/assistant/assistant.gd")
 const AgentTerminal := preload("res://scripts/agents/agent_terminal.gd")
 const AssistantSwitches := preload("res://scripts/assistant/assistant_switches.gd")
 ## The line under each switch.
+# i18n: begin
 const SWITCH_HELP := {
 	"control": "Off: it can see what plays and answer on the card, nothing else.",
 	"room": "Each change shows at once and is kept as a room in the Room tab. Ask the assistant to change it back, "
@@ -18,6 +21,7 @@ const SWITCH_HELP := {
 	"files": "Copies and downloads into the Library, places and saved hosts. It never sees a share's login.",
 	"apps": "Starts, stops, shows and hides Android apps and the agents on this headset.",
 }
+# i18n: end
 
 
 var app: Node
@@ -62,14 +66,17 @@ func bind(p_app: Node) -> void:
 	_body = W.vbox()
 	add_child(_body)
 	_status = W.label("")
+	W.content(_status)
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_body.add_child(_status)
 
 	_pair_box = W.vbox()
 	_pair_who = W.label("")
+	W.content(_pair_who)
 	_pair_who.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_pair_box.add_child(_pair_who)
 	_code = W.label("", &"TitleLabel")  # the largest text style
+	W.content(_code)
 	_pair_box.add_child(W.hbox([_code, W.button("Cancel", func() -> void:
 		if _service != null:
 			_service.cancel_pairing())]))
@@ -84,7 +91,9 @@ func bind(p_app: Node) -> void:
 		refresh.call_deferred())
 	_body.add_child(W.hbox([_find_button]))
 	_address = W.label("", &"TimeLabel")
+	W.content(_address)
 	_left = W.label("", &"MutedLabel")
+	W.content(_left)
 	_window_box = W.hbox([_address, _left, W.button("Stop", func() -> void:
 		if _service != null:
 			_service.close_window())])
@@ -141,13 +150,13 @@ func voice_targets() -> Dictionary:
 	var out := {}
 	var dev := get_tree().root.get_node_or_null("DevHost") if is_inside_tree() else null
 	if dev != null and dev.get_node_or_null("PushToTalk") != null:
-		out["dev"] = "Dev link"
+		out["dev"] = tr("Dev link")
 	if Assistant.push_to_talk() != null:
-		out["assistant"] = "Assistant"
+		out["assistant"] = tr("Assistant")
 	var agents: Node = app.get("local_agents")
 	if agents != null:
 		for id: String in agents.running():
-			out[id] = "%s on this headset" % AgentTerminal.AGENTS[id]["name"]
+			out[id] = tr("%s on this headset") % AgentTerminal.AGENTS[id]["name"]
 	return out
 
 
@@ -205,8 +214,9 @@ func refresh() -> void:
 			child.queue_free()
 		for c: Dictionary in service.paired():
 			var id: String = c["id"]
-			var label := W.ellipsis(W.label("%s, paired %s" % [c["name"], str(c["paired_at"]).get_slice(" ", 0)],
+			var label := W.ellipsis(W.label(tr("%s, paired %s") % [c["name"], str(c["paired_at"]).get_slice(" ", 0)],
 					&"MutedLabel"))
+			W.content(label)
 			_paired_box.add_child(W.hbox([label, W.button("Forget", func() -> void:
 				if _service != null:
 					_service.forget(id))]))
@@ -218,7 +228,7 @@ func _refresh_window() -> void:
 	var p: Dictionary = s.pairing()
 	_pair_box.visible = not p.is_empty()
 	if not p.is_empty():
-		_pair_who.text = "%s asks to pair with this headset." % p["client"]
+		_pair_who.text = tr("%s asks to pair with this headset.") % p["client"]
 		_code.text = "%s %s" % [str(p["code"]).left(3), str(p["code"]).right(3)]
 	var open: bool = s.window_open()
 	_window_box.visible = open
@@ -226,4 +236,13 @@ func _refresh_window() -> void:
 	if open:
 		_address.text = s.guide_address()
 		var pin: String = s.pin_short()
-		_left.text = "%d min left%s" % [ceili(float(s.window_left()) / 60.0), ("  ·  pin " + pin) if pin != "" else ""]
+		var minutes := ceili(float(s.window_left()) / 60.0)
+		_left.text = tr("%d min left  ·  pin %s") % [minutes, pin] if pin != "" else tr("%d min left") % minutes
+
+
+## The language changed: the paired list and the voice choice are made again in it.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED and app != null and _paired_box != null:
+		_paired_ids = []
+		_voice_targets = []
+		refresh()

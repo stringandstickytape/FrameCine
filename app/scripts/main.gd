@@ -49,6 +49,7 @@ extends Node3D
 ##   --browser-command="CMD ARGS"  --browser-match=TEXT   run CMD instead of the browser, and find its window by class
 ##                          (tests; see scripts/video/window_video_source.gd)
 ##   --no-save              don't read or write user://settings.cfg
+##   --pseudo-locale        the menus in the pseudo-locale for this run (scripts/i18n.gd, docs/i18n.md; a dev check)
 ##   --benchmark[=PATH]     decode the biggest video in a folder (or PATH) for 10 s and report what the device can do
 ##                          (scripts/dev/benchmark.gd; it also runs once by itself on the first run)
 ##   --tour=FILE            run a tour: a room, a playlist and screen / camera moves from a JSON file (FILE: a path or
@@ -74,6 +75,7 @@ signal playback_ended
 const VideoMode := preload("res://scripts/video_mode.gd")
 const RoomParticles := preload("res://scripts/assistant/room_particles.gd")
 const AppSettings := preload("res://scripts/app_settings.gd")
+const I18n := preload("res://scripts/i18n.gd")
 const PlaybackController := preload("res://scripts/playback_controller.gd")
 const VideoScreen := preload("res://scripts/video_screen.gd")
 const VideoSource := preload("res://scripts/video/video_source.gd")
@@ -127,6 +129,8 @@ const OVERLAY_SCALE_PER_METRE := 0.9
 ## Controller labels: what each action of the action map does, [menu hidden, menu shown] ("" = no label). The one
 ## place for this text: the controller labels print it on the controller next to whatever input the bound profile
 ## maps the action to. Short legends, like print on a device: 5 to 6 mm per line, and the face plate is crowded.
+## Printed in the menus' language (controller_labels(); the legends of the three tables are keys, docs/i18n.md).
+# i18n: begin
 const CONTROL_LABELS := {
 	"trigger": ["PLAY / PAUSE", "CLICK"],
 	"squeeze": ["", ""],
@@ -150,7 +154,9 @@ const WINDOW_LABELS := {
 	"next_file": "SPACE",
 	"prev_file": "BACK",
 }
+# i18n: end
 const WINDOW_LEFT_HIDDEN: Array[String] = ["trigger", "next_file", "prev_file"]
+# i18n: begin
 ## The pointer controller's legends while an agent's terminal has the input (scripts/agents/local_agents.gd: a prompt
 ## waits on the pane, the viewer looks at it, or the terminal is on the big screen). Squeeze held + stick scrolls back.
 const TERMINAL_LABELS := {
@@ -160,6 +166,7 @@ const TERMINAL_LABELS := {
 	"next_file": "SPACE",
 	"prev_file": "ESC",
 }
+# i18n: end
 ## Back in focus (dashboard closed, headset on): resume this long after, if focus loss paused playback.
 const AUTO_RESUME_DELAY := 0.3
 ## Without a runtime (desktop, screenshot tour) the labels preview this profile.
@@ -269,6 +276,9 @@ func _ready() -> void:
 	if _args.has("no-save") or _args.has("shots") or _args.has("ui-test") or _args.has("window-test"):
 		settings.read_only = true
 	settings.load_file()
+	# The menus' language ([language] ui) and its fonts, before anything builds a text (docs/i18n.md).
+	I18n.setup(settings, _args.has("pseudo-locale"))
+	I18n.holder().changed.connect(_on_language_changed)
 	NetworkHosts.load_from(settings)
 	WebPages.load_from(settings)
 	SavedPlaces.load_from(settings)
@@ -1191,6 +1201,12 @@ func _stick_seek(key: Variant, x: float, delta: float) -> void:
 
 # --- Controller labels -------------------------------------------------------------------------------------------
 
+## The menus' language changed (scripts/i18n.gd): the legends in it.
+func _on_language_changed(_code: String) -> void:
+	if is_node_ready():
+		update_controller_labels()
+
+
 ## Sets each controller's label texts from CONTROL_LABELS and the bindings of the profile the runtime bound for it
 ## (menu shown or not). Called when a profile changes and when the menu shows / hides, never per frame.
 func update_controller_labels() -> void:
@@ -1203,7 +1219,7 @@ func update_controller_labels() -> void:
 		var texts := controller_labels(hand.profile if use_xr else PREVIEW_PROFILE, side, menu_shown, on_window,
 				terminal)
 		if ui != null and ui.talk_hand() == hand and texts.has("bumper"):
-			texts["bumper"] = "TALK"
+			texts["bumper"] = tr("TALK")
 		hand.visual.set_texts(texts)
 		hand.visual.set_print_state("menu" if menu_shown else ("window" if on_window else "normal"))
 		hand.visual.set_input_bindings(_profile_bindings(hand.profile if use_xr else PREVIEW_PROFILE, side))
@@ -1238,7 +1254,9 @@ static func controller_labels(profile: String, side: String, p_menu_shown: bool,
 		# Last: an action with no legend of its own can have one on a window or a terminal.
 		if legend == "":
 			continue
-		var text: String = ("PUSH: " if b[2] else "") + legend
+		# In the menus' language (docs/i18n.md); English when none is loaded.
+		legend = TranslationServer.translate(legend)
+		var text: String = TranslationServer.translate("PUSH: %s") % legend if b[2] else legend
 		out[b[0]] = text if not out.has(b[0]) else str(out[b[0]]) + "\n" + text
 	return out
 

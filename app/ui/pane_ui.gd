@@ -16,6 +16,11 @@ extends PanelContainer
 ## Everything looks the way the theme says (ui/pane_style.gd, the tablet's theme); this file sets no colour and no
 ## font. No backdrop of its own: the tablet's pane shows through. The tabs talk to the app directly; the transport
 ## emits signals that ui_layer.gd turns into app calls. Lists are dragged to scroll (ui/pane.gd).
+##
+## Languages (docs/i18n.md): the rail, the transport and the section buttons are given the English and translate it
+## themselves. The header, the footer and the toasts show text as it is given (W.content()): the callers of
+## show_toast(), show_choice() and set_status() translate it (tr()), and names in it stay as they are. When the
+## language changes, each tab's sync() runs and the header and the footer are built again.
 
 const PaneStyle := preload("res://ui/pane_style.gd")
 const W := preload("res://ui/pane_widgets.gd")
@@ -38,14 +43,15 @@ enum Tab { FILES, PICTURE, SOUND, SUBTITLES, ROOM, OBJECTS, MIXED_REALITY, SYSTE
 const TAB_NAMES: Array[String] = ["Files", "Picture", "Sound", "Subtitles", "Room", "Objects", "Mixed reality", "System"]
 ## The rail's names and icons for the tabs (Files is called Source there), its width and its icons' size (pixels), and
 ## Source's views.
-const TABLET_TAB_NAMES: Array[String] = ["Source", "Picture", "Sound", "Subtitles", "Room", "Objects", "Mixed reality",
-		"System"]
+const TABLET_TAB_NAMES: Array[String] = ["Source", "Picture", "Sound", "Subtitles", "Room", "Objects", "Mixed reality", # i18n
+		"System"] # i18n
 const TABLET_TAB_ICONS: Array[String] = ["source", "picture", "sound", "subtitles", "room", "objects", "mixed-reality",
 		"system"]
 const TABLET_TABS_WIDTH := 190
 const RAIL_ICON_PX := 30
 const VIEWS: Array[String] = ["details", "list", "grid"]
 const Icons := preload("res://ui/icons.gd")
+const I18n := preload("res://scripts/i18n.gd")
 
 var app: Node
 var files: FilesTab
@@ -113,6 +119,7 @@ func _ready() -> void:
 	theme = PaneStyle.theme()
 	theme_type_variation = &"PaneRoot"
 	PaneStyle.holder().changed.connect(apply_style)
+	I18n.holder().changed.connect(_on_language_changed)
 	_content = VBoxContainer.new()
 	_content.add_theme_constant_override("separation", 0)
 	add_child(_content)
@@ -150,18 +157,21 @@ func _build_open() -> void:
 	_content.add_child(_open)
 
 	_now = W.ellipsis(W.label("", &"MutedLabel"))
+	W.content(_now)
 	_now.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_status_line = W.label("", &"MutedLabel")
+	W.content(_status_line)
 	_status_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_open.add_child(W.hbox([_now, _status_line]))
 
 	_transport = W.hbox()
 	_transport.alignment = BoxContainer.ALIGNMENT_CENTER
 	var bh := PaneStyle.constant(&"button_height")
-	for spec: Array in [["Previous", func() -> void: previous_requested.emit()],
-			["−10 s", func() -> void: skip_requested.emit(-10.0)], ["play", Callable()],
-			["+10 s", func() -> void: skip_requested.emit(10.0)], ["Next", func() -> void: next_requested.emit()]]:
-		if spec[0] == "play":
+	# "": the play button's place.
+	for spec: Array in [["Previous", func() -> void: previous_requested.emit()], # i18n
+			["−10 s", func() -> void: skip_requested.emit(-10.0)], ["", Callable()], # i18n
+			["+10 s", func() -> void: skip_requested.emit(10.0)], ["Next", func() -> void: next_requested.emit()]]: # i18n
+		if spec[0] == "":
 			var ps := PaneStyle.constant(&"play_size")
 			_play_button = W.button("Play", func() -> void: play_pause_pressed.emit(), &"PlayButton")
 			_play_button.custom_minimum_size = Vector2(ps + 24, ps)
@@ -174,6 +184,7 @@ func _build_open() -> void:
 				_skip_buttons.append(b)
 	for speed: float in [4.0, 8.0]:
 		var b := W.button("%dx" % roundi(speed), Callable(), &"TransportButton")
+		W.content(b)
 		b.custom_minimum_size = Vector2(bh * 1.4, bh)
 		b.button_down.connect(func() -> void: _trick(speed))
 		b.button_up.connect(func() -> void: _trick(0.0))
@@ -189,20 +200,24 @@ func _build_open() -> void:
 	_open.add_child(HSeparator.new())
 	var footer := W.hbox()
 	_footer_text = W.ellipsis(W.label("", &"MutedLabel"))
+	W.content(_footer_text)
 	footer.add_child(_footer_text)
 	_toast_label = W.ellipsis(W.label(""))
+	W.content(_toast_label)
 	_toast_button = W.button("", func() -> void:
 		var action := _toast_action
 		hide_toast()
 		if action.is_valid():
 			action.call())
 	_toast_button.custom_minimum_size.y = 0
+	W.content(_toast_button)
 	_toast_button2 = W.button("", func() -> void:
 		var action := _toast_action2
 		hide_toast()
 		if action.is_valid():
 			action.call())
 	_toast_button2.custom_minimum_size.y = 0
+	W.content(_toast_button2)
 	_toast_button2.visible = false
 	_toast = W.hbox([_toast_label, _toast_button, _toast_button2])
 	_toast.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -215,6 +230,7 @@ func _build_open() -> void:
 	_toast.visibility_changed.connect(func() -> void: toast_panel.visible = _toast.visible)
 	footer.add_child(toast_panel)
 	_footer_count = W.label("", &"MutedLabel")
+	W.content(_footer_count)
 	footer.add_child(_footer_count)
 	_open.add_child(footer)
 	_build_tablet_row()
@@ -493,28 +509,33 @@ func status_line_text() -> String:
 
 
 ## The header's right side: "21:42  ·  1:12 left, ends 22:54  ·  battery 74 %", then low controllers and
-## "Listening". Empty parts are left out.
+## "Listening". Empty parts are left out. In the menus' language (the times and `extra` come translated).
 static func status_text(clock: String, remaining_text: String, end_text: String, battery_percent: int,
 		charging: bool, extra := "", p_listening := false) -> String:
 	var parts: Array[String] = [clock]
 	if remaining_text != "":
-		parts.append(remaining_text + ((", " + end_text) if end_text != "" else ""))
+		# "1:12 left, ends 22:54"
+		parts.append(TranslationServer.translate("%s, %s") % [remaining_text, end_text] if end_text != ""
+				else remaining_text)
 	if battery_percent >= 0:
-		parts.append("battery %d %%%s" % [battery_percent, ", charging" if charging else ""])
+		parts.append((TranslationServer.translate("battery %d %%, charging") if charging
+				else TranslationServer.translate("battery %d %%")) % battery_percent)
 	if extra != "":
 		parts.append(extra)
 	if p_listening:
-		parts.append("Listening")
+		parts.append(TranslationServer.translate("Listening"))
 	return "  ·  ".join(parts.filter(func(s: String) -> bool: return s != ""))
 
 
-## A lasting status line in the footer ("Connecting...", "Starting the browser..."), or "" for the mode line.
+## A lasting status line in the footer ("Connecting...", "Starting the browser..."), or "" for the mode line. The
+## caller translates it (tr()); it shows as given.
 func set_status(text: String) -> void:
 	_status = text
 	_update_footer()
 
 
-## A short line in the footer with an optional action button ("Undo", "Start over"), for `seconds`.
+## A short line in the footer with an optional action button ("Undo", "Start over"), for `seconds`. The caller
+## translates both texts (tr("Undo")); they show as given, so a name in them stays as it is.
 func show_toast(text: String, action_text := "", action := Callable(), seconds := 6.0) -> void:
 	_toast_label.text = text
 	_toast_button.text = action_text
@@ -527,7 +548,8 @@ func show_toast(text: String, action_text := "", action := Callable(), seconds :
 	_footer_text.visible = false
 
 
-## A line in the footer with two buttons (Keep / Undo), until one is pressed or `seconds` pass.
+## A line in the footer with two buttons (Keep / Undo), until one is pressed or `seconds` pass. Translated by the
+## caller, as show_toast().
 func show_choice(text: String, first_text: String, first: Callable, second_text: String, second: Callable,
 		seconds := INF) -> void:
 	show_toast(text, first_text, first, seconds)
@@ -540,7 +562,7 @@ func show_choice(text: String, first_text: String, first: Callable, second_text:
 ## conversation card's live line and its dancing dots show it (the user, in the headset, 2026-10-31).
 func set_listening(on: bool) -> void:
 	listening = on
-	if _toast_label.text == "Listening":
+	if _toast_label.text == tr("Listening"):
 		hide_toast()
 
 
@@ -587,6 +609,17 @@ func set_playback(_position_s: float, _duration: float, playing: bool, can_seek:
 		b.visible = trick_ok
 
 
+## The language changed (scripts/i18n.gd): fixed words translate themselves; the texts the tabs build come again from
+## their sync(), the header and the footer from tick().
+func _on_language_changed(_code: String) -> void:
+	if app == null:
+		return
+	for t in tabs:
+		if t.has_method("sync"):
+			t.sync()
+	tick()
+
+
 ## Refreshes the header's status line and the per-second parts of the panel.
 func tick() -> void:
 	if app == null:
@@ -596,11 +629,12 @@ func tick() -> void:
 	var forecast: Dictionary = f.battery.get_forecast() if f.get("battery") != null else {}
 	var available := bool(forecast.get("available", false))
 	_status_line.text = status_text(EndTime.clock_at(Time.get_unix_time_from_system()),
-			EndTime.format_remaining(remaining), f.end_text() if remaining > 0.0 else "",
+			EndTime.format_remaining(remaining, true), f.end_text(true) if remaining > 0.0 else "",
 			int(forecast.get("percent", -1)) if available else -1, available and bool(forecast.get("charging", false)),
 			header_extra, listening)
+	# "Chapter 3/12 Title": the chapter's title as the file has it.
 	var chapter: String = f.chapters.title_text() if int(f.chapters.current) >= 0 else ""
-	_now.text = ("Chapter " + chapter) if chapter != "" else ""
+	_now.text = tr("Chapter %s") % chapter if chapter != "" else ""
 	_update_footer()
 	if current_tab != Tab.FILES:
 		_pack_cards()

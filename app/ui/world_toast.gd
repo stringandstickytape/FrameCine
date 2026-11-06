@@ -2,9 +2,11 @@ extends Label3D
 
 ## A quiet line of text in the world for when the pane is not open (a controller battery running low, #75): placed
 ## once, 1.2 m ahead where the head looks and a little below, never head-locked; it fades after a few seconds. Text,
-## outline and font come from the pane's tokens (ui/pane_style.gd).
+## outline and font come from the pane's tokens (ui/pane_style.gd). The text shows as given: the caller translates it
+## (docs/i18n.md), and a name in it stays as it is.
 
 const PaneStyle := preload("res://ui/pane_style.gd")
+const W := preload("res://ui/pane_widgets.gd")
 
 const SHOW_SECONDS := 5.0
 const FADE_SECONDS := 0.6
@@ -17,6 +19,7 @@ var _left := 0.0
 
 
 func _ready() -> void:
+	W.content(self)
 	top_level = true
 	no_depth_test = true
 	render_priority = 10

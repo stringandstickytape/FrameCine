@@ -1,0 +1,1571 @@
+# Simplified Chinese for the menus and the controller labels of VR Video Player (docs/i18n.md).
+#
+# MACHINE DRAFT: written by a language model, not yet checked by a native reader. Corrections are welcome. The
+# entries are not marked fuzzy on purpose: Godot's loader skips fuzzy entries, and the draft is better than English.
+#
+# Glossary (keep these the same everywhere):
+#   Source (the rail) 片源 · film 影片 · video 视频 · file 文件 · folder 文件夹 · Library 片库
+#   Picture 画面 · Sound 声音 · Subtitles 字幕 · Room 房间 · Objects 物品 · Mixed reality 混合现实 · System 系统
+#   play 播放 · pause 暂停 · next / previous 下一个 / 上一个 · Undo 撤销 · Cancel 取消 · Reset 重置
+#   headset 头显 · controller 手柄 · trigger 扳机 · grip 握把 · stick 摇杆 · bumper 肩键 · menu (button) 菜单
+#   panel 面板 · screen 屏幕 · seat 座位 · assistant 助手 · pair 配对 · host 主机 · share 共享
+#   the headset's cameras 摄像头 · area 区域 · layer 图层 · foveation 注视点渲染 · 3D, HDR, PC: as they are
+#   Units: s 秒, min 分钟, px 像素; "%%" stays; full-width ，：（） in Chinese text, ASCII around numbers.
+#
+# Make it again from messages.pot with tools/i18n.py merge app/locale/zh_CN.po; check with tools/i18n.py check.
+msgid ""
+msgstr ""
+"Project-Id-Version: VR Video Player\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8-bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgid "TALK"
+msgstr "说话"
+
+msgid "PUSH: %s"
+msgstr "按下：%s"
+
+msgid "PLAY / PAUSE"
+msgstr "播放 / 暂停"
+
+msgid "CLICK"
+msgstr "点击"
+
+msgid "SEEK / DIST"
+msgstr "跳转 / 距离"
+
+msgid "SCROLL"
+msgstr "滚动"
+
+msgid "MENU"
+msgstr "菜单"
+
+msgid "CLOSE"
+msgstr "关闭"
+
+msgid "INFO"
+msgstr "信息"
+
+msgid "NEXT"
+msgstr "下一个"
+
+msgid "PREV"
+msgstr "上一个"
+
+msgid "LABELS"
+msgstr "标签"
+
+msgid "CHAPTER -"
+msgstr "章节 -"
+
+msgid "CHAPTER +"
+msgstr "章节 +"
+
+msgid "REPLAY"
+msgstr "重播"
+
+msgid "R-CLICK"
+msgstr "右键"
+
+msgid "SCROLL / KEYS"
+msgstr "滚动 / 按键"
+
+msgid "SPACE"
+msgstr "空格"
+
+msgid "BACK"
+msgstr "返回"
+
+msgid "ENTER"
+msgstr "回车"
+
+msgid "HOLD: SCROLL"
+msgstr "按住：滚动"
+
+msgid "ARROWS"
+msgstr "方向键"
+
+msgid "ESC"
+msgstr "ESC"
+
+msgid "Let the assistant control playback"
+msgstr "允许助手控制播放"
+
+msgid "Let the assistant change the room"
+msgstr "允许助手更改房间"
+
+msgid "Let the assistant change settings"
+msgstr "允许助手更改设置"
+
+msgid "Let the assistant manage files"
+msgstr "允许助手管理文件"
+
+msgid "Let the assistant run apps"
+msgstr "允许助手运行应用"
+
+msgid "Not available for this file"
+msgstr "此文件不可用"
+
+msgid "Looking for bars"
+msgstr "正在查找黑边"
+
+msgid "No bars"
+msgstr "没有黑边"
+
+msgid "ends %s"
+msgstr "%s 结束"
+
+msgid "ends %s tomorrow"
+msgstr "明天 %s 结束"
+
+msgid "ends %s %s"
+msgstr "%s（%s）结束"
+
+msgid "%d:%02d left"
+msgstr "剩余 %d:%02d"
+
+msgid "%d min left"
+msgstr "剩余 %d 分钟"
+
+msgid "<1 min left"
+msgstr "剩余不到 1 分钟"
+
+msgid "Sun"
+msgstr "周日"
+
+msgid "Mon"
+msgstr "周一"
+
+msgid "Tue"
+msgstr "周二"
+
+msgid "Wed"
+msgstr "周三"
+
+msgid "Thu"
+msgstr "周四"
+
+msgid "Fri"
+msgstr "周五"
+
+msgid "Sat"
+msgstr "周六"
+
+msgid "Off: the film is drawn in the room."
+msgstr "关：影片在房间中绘制。"
+
+msgid "This engine has no OpenXR layers."
+msgstr "此引擎没有 OpenXR 图层。"
+
+msgid "Only in the headset: here the film is drawn in the room."
+msgstr "仅在头显中可用：这里影片在房间中绘制。"
+
+msgid "180, 360 and fisheye films are drawn in the room."
+msgstr "180°、360° 和鱼眼影片在房间中绘制。"
+
+msgid "A curved screen is drawn in the room (curved layers are off)."
+msgstr "曲面屏幕在房间中绘制（曲面图层已关闭）。"
+
+msgid "This headset has no curved layers: a curved screen is drawn in the room."
+msgstr "此头显没有曲面图层：曲面屏幕在房间中绘制。"
+
+msgid "On; nothing to show."
+msgstr "开；没有可显示的内容。"
+
+msgid "On; the room draws the film while the menu is open, so the menu shows in front."
+msgstr "开；菜单打开时由房间绘制影片，菜单因此显示在前面。"
+
+msgid "In use: two cylinder layers, one per eye, %d x %d px each."
+msgstr "使用中：两个圆柱图层，每只眼睛一个，各 %d x %d 像素。"
+
+msgid "In use: two quad layers, one per eye, %d x %d px each."
+msgstr "使用中：两个平面图层，每只眼睛一个，各 %d x %d 像素。"
+
+msgid "In use: one cylinder layer, %d x %d px."
+msgstr "使用中：一个圆柱图层，%d x %d 像素。"
+
+msgid "In use: one quad layer, %d x %d px."
+msgstr "使用中：一个平面图层，%d x %d 像素。"
+
+msgid "on (P010 from the system's video driver)"
+msgstr "开（P010，来自系统的视频驱动）"
+
+msgid "on (Q10C through the GPU, stock driver)"
+msgstr "开（Q10C，经 GPU，原装驱动）"
+
+msgid "off: 10-bit plays in software"
+msgstr "关：10 位视频用软件播放"
+
+msgid "checking ..."
+msgstr "正在检查……"
+
+msgid ""
+"Turn\n"
+"Stick left / right: turn it\n"
+"Trigger: the faces again"
+msgstr ""
+"旋转\n"
+"摇杆左 / 右：旋转\n"
+"扳机：再次调整各面"
+
+msgid ""
+"The top face\n"
+"Stick up / down: move it\n"
+"Trigger: next face"
+msgstr ""
+"顶面\n"
+"摇杆上 / 下：移动\n"
+"扳机：下一个面"
+
+msgid ""
+"The bottom face\n"
+"Stick up / down: move it\n"
+"Trigger: next face"
+msgstr ""
+"底面\n"
+"摇杆上 / 下：移动\n"
+"扳机：下一个面"
+
+msgid ""
+"The left face\n"
+"Stick left / right: move it\n"
+"Trigger: next face"
+msgstr ""
+"左面\n"
+"摇杆左 / 右：移动\n"
+"扳机：下一个面"
+
+msgid ""
+"The right face\n"
+"Stick left / right: move it\n"
+"Trigger: next face"
+msgstr ""
+"右面\n"
+"摇杆左 / 右：移动\n"
+"扳机：下一个面"
+
+msgid ""
+"The front face\n"
+"Stick up: away, down: nearer\n"
+"Trigger: next face"
+msgstr ""
+"前面\n"
+"摇杆上：远离，下：靠近\n"
+"扳机：下一个面"
+
+msgid ""
+"The back face\n"
+"Stick up: away, down: nearer\n"
+"Trigger: next face"
+msgstr ""
+"后面\n"
+"摇杆上：远离，下：靠近\n"
+"扳机：下一个面"
+
+msgid ""
+"Sweeping\n"
+"Let go of the trigger to keep it"
+msgstr ""
+"正在扫描\n"
+"松开扳机即可保留"
+
+msgid ""
+"Hold the trigger and sweep\n"
+"the controller over the place\n"
+"B: cancel"
+msgstr ""
+"按住扳机，\n"
+"用手柄扫过该处\n"
+"B：取消"
+
+msgid ""
+"%s\n"
+"Menu: keep it  ·  B: put it back"
+msgstr ""
+"%s\n"
+"菜单：保留  ·  B：恢复原样"
+
+msgid "Black"
+msgstr "黑色"
+
+msgid "White"
+msgstr "白色"
+
+msgid "Graphite"
+msgstr "石墨灰"
+
+msgid "Red"
+msgstr "红色"
+
+msgid "Blue"
+msgstr "蓝色"
+
+msgid "Any colour"
+msgstr "任意颜色"
+
+msgid "Brushed steel"
+msgstr "拉丝钢"
+
+msgid "Dark metal"
+msgstr "暗色金属"
+
+msgid "Brass"
+msgstr "黄铜"
+
+msgid "Plasma"
+msgstr "等离子"
+
+msgid "Cold plasma"
+msgstr "冷色等离子"
+
+msgid "Embers"
+msgstr "余烬"
+
+msgid "Circuit"
+msgstr "电路"
+
+msgid "Neon"
+msgstr "霓虹"
+
+msgid "Starfield"
+msgstr "星空"
+
+msgid "Liquid chrome"
+msgstr "液态铬"
+
+msgid "Iridescent"
+msgstr "虹彩"
+
+msgid "Carbon fibre"
+msgstr "碳纤维"
+
+msgid "Assistant"
+msgstr "助手"
+
+msgid "An AI assistant on a computer on this network sees what plays, answers you on a card, and hears you while you hold the bumper. No program to install."
+msgstr "本网络中一台电脑上的 AI 助手能看到正在播放的内容，在卡片上回答你，并在你按住肩键时听你说话。无需安装程序。"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Read this code out to the assistant. Cancel if you did not ask for it."
+msgstr "把这个代码读给助手听。如果不是你发起的请求，请取消。"
+
+msgid "Let an assistant find me"
+msgstr "让助手找到我"
+
+msgid "Stop"
+msgstr "停止"
+
+msgid "Give the assistant this address. For an hour it can ask to pair; then it shows a code here for you to read out."
+msgstr "把这个地址告诉助手。一小时内它可以请求配对；之后这里会显示一个代码，由你读出。"
+
+msgid "Voice goes to"
+msgstr "语音发送到"
+
+msgid "Dev link"
+msgstr "开发连接"
+
+msgid "%s on this headset"
+msgstr "此头显上的 %s"
+
+msgid "%s, paired %s"
+msgstr "%s，配对于 %s"
+
+msgid "Forget"
+msgstr "忘记"
+
+msgid "%s asks to pair with this headset."
+msgstr "%s 请求与此头显配对。"
+
+msgid "%d min left  ·  pin %s"
+msgstr "剩余 %d 分钟  ·  PIN %s"
+
+msgid "Off: it can see what plays and answer on the card, nothing else."
+msgstr "关：它只能看到正在播放的内容并在卡片上回答，别的都不能做。"
+
+msgid "Each change shows at once and is kept as a room in the Room tab. Ask the assistant to change it back, or Reset room for the stock room."
+msgstr "每次更改都会立即显示，并作为一个房间保存在“房间”页中。可以让助手改回来，或用“重置房间”恢复原装房间。"
+
+msgid "Picture, sound, subtitles and system preferences, kept as if you set them."
+msgstr "画面、声音、字幕和系统偏好，保存得就像你自己设置的一样。"
+
+msgid "Copies and downloads into the Library, places and saved hosts. It never sees a share's login."
+msgstr "复制和下载到片库、位置和已保存的主机。它永远看不到共享的登录信息。"
+
+msgid "Starts, stops, shows and hides Android apps and the agents on this headset."
+msgstr "启动、停止、显示和隐藏此头显上的安卓应用和代理。"
+
+msgid "Add host"
+msgstr "添加主机"
+
+msgid "Edit hosts"
+msgstr "编辑主机"
+
+msgid "Favourite"
+msgstr "收藏"
+
+msgid "In corner"
+msgstr "放到角落"
+
+msgid "Shuffle"
+msgstr "随机播放"
+
+msgid "Repeat: off"
+msgstr "重复：关"
+
+msgid "Play on"
+msgstr "继续播放"
+
+msgid "Gapless"
+msgstr "无缝播放"
+
+msgid "Clear upcoming"
+msgstr "清空待播"
+
+msgid "%s: %s"
+msgstr "%s：%s"
+
+msgid "Guess the 3D layout and shape from the file name and picture size."
+msgstr "根据文件名和画面尺寸猜测 3D 布局和形状。"
+
+msgid "Each eye is squeezed to half width or height in the file: stretch it."
+msgstr "文件中每只眼睛被压缩到一半宽度或高度：将其拉伸。"
+
+msgid "Swap left and right if the 3D looks inside out or hurts."
+msgstr "如果 3D 看起来里外颠倒或让眼睛不适，交换左右。"
+
+msgid "Open every file in this folder with this mode."
+msgstr "用此模式打开此文件夹中的每个文件。"
+
+msgid "Forget the mode set for this folder."
+msgstr "忘记为此文件夹设置的模式。"
+
+msgid "How wide the fisheye lens was. Wrong: straight lines bend."
+msgstr "鱼眼镜头的视野有多宽。设置错误时直线会弯曲。"
+
+msgid "How wide each lens sees. Wrong: things double at the join."
+msgstr "每个镜头的视野有多宽。设置错误时接缝处会出现重影。"
+
+msgid "Slides the back picture sideways until the two halves meet at the join."
+msgstr "左右移动后方画面，直到两半在接缝处对齐。"
+
+msgid "Moves the whole 3D picture nearer or farther. Use it if 3D strains your eyes."
+msgstr "把整个 3D 画面移近或移远。如果 3D 让眼睛疲劳，请使用它。"
+
+msgid "Keep this depth for this file only."
+msgstr "此深度只用于此文件。"
+
+msgid "Fades the sides of 3D, so the frame does not cut what comes out."
+msgstr "淡化 3D 画面的两侧，让画框不会切断凸出的内容。"
+
+msgid "How wide the screen is."
+msgstr "屏幕有多宽。"
+
+msgid "How far away the screen is."
+msgstr "屏幕有多远。"
+
+msgid "Moves the screen up or down."
+msgstr "把屏幕上移或下移。"
+
+msgid "Bends the screen around you. 100 % wraps it evenly around your seat."
+msgstr "让屏幕环绕你弯曲。100 % 时均匀环绕你的座位。"
+
+msgid "Enlarges the picture inside the screen (crops the edges)."
+msgstr "在屏幕内放大画面（裁掉边缘）。"
+
+msgid "How much of your view the screen fills, whatever its distance."
+msgstr "无论距离多远，屏幕占你视野的多少。"
+
+msgid "The screen comes back in front of you after you look away."
+msgstr "你转开视线后，屏幕会回到你面前。"
+
+msgid "Turns the screen to face you when you lie back (this session)."
+msgstr "你躺下时，把屏幕转向你（仅本次）。"
+
+msgid "Shows the whole picture again."
+msgstr "重新显示整个画面。"
+
+msgid "Finds black bars above and below the film and removes them."
+msgstr "找到影片上下的黑边并去掉。"
+
+msgid "Without bars, widen the screen."
+msgstr "去掉黑边后，加宽屏幕。"
+
+msgid "Tilts a 180° or 360° picture up or down if the camera was not level."
+msgstr "如果拍摄时相机不水平，把 180° 或 360° 画面向上或向下倾斜。"
+
+msgid "Turns a 180° or 360° picture if the horizon is crooked."
+msgstr "如果地平线歪斜，旋转 180° 或 360° 画面。"
+
+msgid "Removes the pitch and roll corrections."
+msgstr "去掉俯仰和横滚校正。"
+
+msgid "Lighter or darker overall."
+msgstr "整体更亮或更暗。"
+
+msgid "More or less difference between light and dark."
+msgstr "明暗差别更大或更小。"
+
+msgid "More or less colour. 0 is black and white."
+msgstr "颜色更多或更少。0 为黑白。"
+
+msgid "Lighter or darker mid tones, without changing black and white."
+msgstr "中间调更亮或更暗，黑白不变。"
+
+msgid "Makes dark scenes easier to see by lifting the darkest parts."
+msgstr "提亮最暗的部分，让暗场景更容易看清。"
+
+msgid "Crisper edges. Too much makes a halo around them."
+msgstr "边缘更清晰。过多会在边缘周围产生光晕。"
+
+msgid "Removes comb lines from old TV or DVD video. Auto: when needed."
+msgstr "去掉老电视或 DVD 视频中的梳状线。自动：需要时启用。"
+
+msgid "Adds the fine noise of projected film."
+msgstr "加入胶片放映的细微颗粒。"
+
+msgid "Adds the small sideways wobble of film in an old projector."
+msgstr "加入老式放映机中胶片的轻微左右晃动。"
+
+msgid "Brightness, contrast and the rest back to normal."
+msgstr "亮度、对比度等全部恢复正常。"
+
+msgid "Fits bright HDR parts to the headset. Off clips them."
+msgstr "让 HDR 的高亮部分适应头显。关闭时会被截断。"
+
+msgid "Brighter or darker HDR picture."
+msgstr "HDR 画面更亮或更暗。"
+
+msgid "Where the brightest parts start to compress. Higher: more highlight detail."
+msgstr "最亮部分从哪里开始压缩。越高：高光细节越多。"
+
+msgid "How bright white is. Lower makes the HDR picture brighter."
+msgstr "白色有多亮。越低 HDR 画面越亮。"
+
+msgid "How long each photo shows in the slideshow."
+msgstr "幻灯片中每张照片显示多久。"
+
+msgid "How long one photo fades into the next."
+msgstr "一张照片淡入下一张用多久。"
+
+msgid "Press at the start and the end of a part to repeat it."
+msgstr "在一段的开头和结尾各按一次，即可重复播放这一段。"
+
+msgid "How big the small film in the corner is."
+msgstr "角落里的小影片有多大。"
+
+msgid "How loud the film is."
+msgstr "影片的音量有多大。"
+
+msgid "Moves the sound earlier or later if lips and voices do not match."
+msgstr "如果口型和声音对不上，把声音提前或延后。"
+
+msgid "Opens a test that helps you find the correct offset."
+msgstr "打开一个测试，帮你找到正确的偏移。"
+
+msgid "Live streams: shorter is nearer to live, longer has fewer gaps."
+msgstr "直播流：越短越接近实时，越长卡顿越少。"
+
+msgid "Loud scenes quieter, quiet speech louder: for late at night."
+msgstr "响的场景变轻，轻的对白变响：适合深夜。"
+
+msgid "How strongly night mode evens out loud and quiet."
+msgstr "夜间模式拉平响度差别的力度。"
+
+msgid "Makes voices louder. Only for 5.1 sound and more."
+msgstr "让人声更响。仅适用于 5.1 及以上声道。"
+
+msgid "Sound from speakers around you and above you, not inside your head."
+msgstr "声音来自你周围和上方的扬声器，而不是在你脑袋里。"
+
+msgid "Plays the film's separate bass channel (the .1 of 5.1) too."
+msgstr "同时播放影片单独的低音声道（5.1 中的 .1）。"
+
+msgid "How much echo of the room you hear. More: the speakers seem farther."
+msgstr "你能听到多少房间回声。越多：扬声器显得越远。"
+
+msgid "The headset sees what the sound plays on: its own speakers or headphones."
+msgstr "头显会识别声音从哪里播放：它自己的扬声器还是耳机。"
+
+msgid "Settings for the headset's own speakers."
+msgstr "头显自带扬声器的设置。"
+
+msgid "Settings for earbuds or headphones."
+msgstr "入耳式耳机或头戴耳机的设置。"
+
+msgid "Hear a sound two ways, pick the better; it then fits your ears."
+msgstr "用两种方式听同一个声音，选更好的那个；之后它会更适合你的耳朵。"
+
+msgid "The sound plays on a PC, in time with the picture."
+msgstr "声音在电脑上播放，与画面同步。"
+
+msgid "Save"
+msgstr "保存"
+
+msgid "Delete host"
+msgstr "删除主机"
+
+msgid "Show password"
+msgstr "显示密码"
+
+msgid "Add a network host (SMB)"
+msgstr "添加网络主机（SMB）"
+
+msgid "Edit network host"
+msgstr "编辑网络主机"
+
+msgid "Details"
+msgstr "详情"
+
+msgid "Hardware 10-bit video: %s"
+msgstr "硬件 10 位视频：%s"
+
+msgid "TV shows"
+msgstr "电视剧"
+
+msgid "Films"
+msgstr "电影"
+
+msgid "Play"
+msgstr "播放"
+
+msgid "Areas"
+msgstr "区域"
+
+msgid "Mark areas to see through to the cameras."
+msgstr "标出区域，透过它看到摄像头画面。"
+
+msgid "Sweep an area"
+msgstr "扫描一个区域"
+
+msgid "Hold the trigger and pass the controller over the place; let go to keep it."
+msgstr "按住扳机，用手柄扫过该处；松开即可保留。"
+
+msgid "None yet."
+msgstr "还没有。"
+
+msgid "All on"
+msgstr "全部开"
+
+msgid "All off"
+msgstr "全部关"
+
+msgid "Settings"
+msgstr "设置"
+
+msgid "Passthrough dimming"
+msgstr "透视调暗"
+
+msgid "On"
+msgstr "开"
+
+msgid "Edit"
+msgstr "编辑"
+
+msgid "Delete"
+msgstr "删除"
+
+msgid "The headset's cameras can't show here."
+msgstr "头显的摄像头无法在这里显示。"
+
+msgid "Built-in objects"
+msgstr "内置物品"
+
+msgid "Place"
+msgstr "放置"
+
+msgid "Place: point at a wall or the floor, trigger to set it. Stick: turn and size. B cancels."
+msgstr "放置：指向墙或地面，按扳机放好。摇杆：旋转和缩放。B 取消。"
+
+msgid "Your objects"
+msgstr "你的物品"
+
+msgid "Imported, or kept from a room."
+msgstr "导入的，或从房间中保留下来的。"
+
+msgid "None yet: add one from Fab below."
+msgstr "还没有：从下面的 Fab 添加一个。"
+
+msgid "In Downloads, from Fab"
+msgstr "下载文件夹中来自 Fab 的"
+
+msgid "Visit Fab to download objects"
+msgstr "访问 Fab 下载物品"
+
+msgid "In this room"
+msgstr "在此房间中"
+
+msgid "Nothing from the library yet."
+msgstr "片库中还没有任何物品。"
+
+msgid "Move"
+msgstr "移动"
+
+msgid "Remove"
+msgstr "移除"
+
+msgid "Colour"
+msgstr "颜色"
+
+msgid "Picture"
+msgstr "画面"
+
+msgid "Material"
+msgstr "材质"
+
+msgid "Effect"
+msgstr "效果"
+
+msgid "Reset"
+msgstr "重置"
+
+msgid "abc"
+msgstr "abc"
+
+msgid "%s, %s"
+msgstr "%s，%s"
+
+msgid "battery %d %%, charging"
+msgstr "电量 %d %%，充电中"
+
+msgid "battery %d %%"
+msgstr "电量 %d %%"
+
+msgid "Listening"
+msgstr "正在聆听"
+
+msgid "Chapter %s"
+msgstr "章节 %s"
+
+msgid "Pause"
+msgstr "暂停"
+
+msgid "Source"
+msgstr "片源"
+
+msgid "Sound"
+msgstr "声音"
+
+msgid "Subtitles"
+msgstr "字幕"
+
+msgid "Room"
+msgstr "房间"
+
+msgid "Objects"
+msgstr "物品"
+
+msgid "Mixed reality"
+msgstr "混合现实"
+
+msgid "System"
+msgstr "系统"
+
+msgid "Previous"
+msgstr "上一个"
+
+msgid "−10 s"
+msgstr "−10 秒"
+
+msgid "+10 s"
+msgstr "+10 秒"
+
+msgid "Next"
+msgstr "下一个"
+
+msgid "General"
+msgstr "常规"
+
+msgid "Mode"
+msgstr "模式"
+
+msgid "Auto"
+msgstr "自动"
+
+msgid "Half"
+msgstr "半宽"
+
+msgid "Swap eyes"
+msgstr "交换左右眼"
+
+msgid "Clear folder rule"
+msgstr "清除文件夹规则"
+
+msgid "Use for this folder"
+msgstr "用于此文件夹"
+
+msgid "Fisheye field"
+msgstr "鱼眼视野"
+
+msgid "Lens"
+msgstr "镜头"
+
+msgid "Camera"
+msgstr "相机"
+
+msgid "Lens field"
+msgstr "镜头视野"
+
+msgid "Seam"
+msgstr "接缝"
+
+msgid "Reset lens"
+msgstr "重置镜头"
+
+msgid "3D"
+msgstr "3D"
+
+msgid "Left eye"
+msgstr "左眼"
+
+msgid "Right eye"
+msgstr "右眼"
+
+msgid "Show"
+msgstr "显示"
+
+msgid "Depth"
+msgstr "深度"
+
+msgid "This file only"
+msgstr "仅此文件"
+
+msgid "Soft edges"
+msgstr "柔化边缘"
+
+msgid "Screen"
+msgstr "屏幕"
+
+msgid "Size"
+msgstr "大小"
+
+msgid "Distance"
+msgstr "距离"
+
+msgid "Height"
+msgstr "高度"
+
+msgid "Curvature"
+msgstr "曲率"
+
+msgid "Zoom"
+msgstr "缩放"
+
+msgid "Size in degrees"
+msgstr "按角度设定大小"
+
+msgid "Follow my head"
+msgstr "跟随我的头部"
+
+msgid "Lying down"
+msgstr "躺着看"
+
+msgid "Reset zoom"
+msgstr "重置缩放"
+
+msgid "Auto crop bars"
+msgstr "自动裁掉黑边"
+
+msgid "Grow the screen to keep its height"
+msgstr "加宽屏幕以保持高度"
+
+msgid "Horizon"
+msgstr "地平线"
+
+msgid "Pitch"
+msgstr "俯仰"
+
+msgid "Roll"
+msgstr "横滚"
+
+msgid "Level"
+msgstr "水平"
+
+msgid "Deinterlace"
+msgstr "去隔行"
+
+msgid "Film grain"
+msgstr "胶片颗粒"
+
+msgid "Gate weave"
+msgstr "片门晃动"
+
+msgid "Reset picture"
+msgstr "重置画面"
+
+msgid "HDR"
+msgstr "HDR"
+
+msgid "Tone map"
+msgstr "色调映射"
+
+msgid "Reset HDR"
+msgstr "重置 HDR"
+
+msgid "Exposure"
+msgstr "曝光"
+
+msgid "Knee"
+msgstr "拐点"
+
+msgid "HDR brightness"
+msgstr "HDR 亮度"
+
+msgid "Slideshow"
+msgstr "幻灯片"
+
+msgid "Each picture"
+msgstr "每张图片"
+
+msgid "Crossfade"
+msgstr "交叉淡化"
+
+msgid "Frame"
+msgstr "帧"
+
+msgid "Frame back"
+msgstr "后退一帧"
+
+msgid "Frame forward"
+msgstr "前进一帧"
+
+msgid "Mark A / B"
+msgstr "标记 A / B"
+
+msgid "Clear loop"
+msgstr "清除循环"
+
+msgid "Screenshot"
+msgstr "截图"
+
+msgid "Corner film"
+msgstr "角落影片"
+
+msgid "Swap"
+msgstr "交换"
+
+msgid "Close corner"
+msgstr "关闭角落影片"
+
+msgid "Corner size"
+msgstr "角落大小"
+
+msgid "Top right"
+msgstr "右上"
+
+msgid "Top left"
+msgstr "左上"
+
+msgid "Bottom right"
+msgstr "右下"
+
+msgid "Bottom left"
+msgstr "左下"
+
+msgid "Environment"
+msgstr "环境"
+
+msgid "Built in"
+msgstr "内置"
+
+msgid "Yours"
+msgstr "你的"
+
+msgid "Use this picture as the room"
+msgstr "用这张图片作为房间"
+
+msgid "Showrooms"
+msgstr "展示厅"
+
+msgid "Seat"
+msgstr "座位"
+
+msgid "Previous seat"
+msgstr "上一个座位"
+
+msgid "Next seat"
+msgstr "下一个座位"
+
+msgid "Room's own spot"
+msgstr "房间默认位置"
+
+msgid "Pick a seat"
+msgstr "选择座位"
+
+msgid "Floor reflection"
+msgstr "地面反射"
+
+msgid "Reflection"
+msgstr "反射"
+
+msgid "Effects"
+msgstr "效果"
+
+msgid "Bias light"
+msgstr "背景光"
+
+msgid "React to the film"
+msgstr "随影片变化"
+
+msgid "Projector beam"
+msgstr "放映光束"
+
+msgid "Reaction"
+msgstr "反应"
+
+msgid "Time of day"
+msgstr "时间段"
+
+msgid "Night"
+msgstr "夜晚"
+
+msgid "Now"
+msgstr "现在"
+
+msgid "Dusk"
+msgstr "黄昏"
+
+msgid "Day"
+msgstr "白天"
+
+msgid "Latitude"
+msgstr "纬度"
+
+msgid "Room light"
+msgstr "房间灯光"
+
+msgid "Dim while playing"
+msgstr "播放时调暗"
+
+msgid "Dimmed to"
+msgstr "调暗到"
+
+msgid "Placement"
+msgstr "位置"
+
+msgid "Reset room"
+msgstr "重置房间"
+
+msgid "Reset screen"
+msgstr "重置屏幕"
+
+msgid "Reset room: back to the room's own seat, facing the screen, view recentred."
+msgstr "重置房间：回到房间默认座位，面向屏幕，视角重新居中。"
+
+msgid "The showing"
+msgstr "放映"
+
+msgid "Curtains"
+msgstr "幕布"
+
+msgid "Up next countdown"
+msgstr "下一部倒计时"
+
+msgid "Intermission"
+msgstr "中场休息"
+
+msgid "Up next in"
+msgstr "下一部开始于"
+
+msgid "Crossfade music"
+msgstr "音乐交叉淡化"
+
+msgid "Crossfade films"
+msgstr "影片交叉淡化"
+
+msgid "Sleep timer"
+msgstr "睡眠定时"
+
+msgid "Watch party"
+msgstr "一起看"
+
+msgid "Host"
+msgstr "主持"
+
+msgid "Join"
+msgstr "加入"
+
+msgid "Leave"
+msgstr "离开"
+
+msgid "Find it"
+msgstr "查找"
+
+msgid "Flashes only in rooms that react, such as the drive-in; the room pulses with the bass."
+msgstr "只在会做出反应的房间（如汽车影院）中闪烁；房间随低音律动。"
+
+msgid "Curtains: in the cinema and the home theatre, flat screen."
+msgstr "幕布：用于电影院和家庭影院中的平面屏幕。"
+
+msgid "Looking for a host..."
+msgstr "正在查找主持人……"
+
+msgid "End party"
+msgstr "结束一起看"
+
+msgid "Audio track"
+msgstr "音轨"
+
+msgid "Level and timing"
+msgstr "音量和时间"
+
+msgid "Volume"
+msgstr "音量"
+
+msgid "A/V offset"
+msgstr "音画偏移"
+
+msgid "Calibrate"
+msgstr "校准"
+
+msgid "Live delay"
+msgstr "直播延迟"
+
+msgid "Speed"
+msgstr "速度"
+
+msgid "Night mode"
+msgstr "夜间模式"
+
+msgid "Evening out"
+msgstr "均衡力度"
+
+msgid "Dialogue boost"
+msgstr "对白增强"
+
+msgid "Spatial sound"
+msgstr "空间音效"
+
+msgid "Bass channel"
+msgstr "低音声道"
+
+msgid "Room sound"
+msgstr "房间声音"
+
+msgid "Sound plays on"
+msgstr "声音播放于"
+
+msgid "Headset speakers"
+msgstr "头显扬声器"
+
+msgid "Headphones"
+msgstr "耳机"
+
+msgid "Head measurements (HRTF)"
+msgstr "头部测量（HRTF）"
+
+msgid "Tune spatial sound"
+msgstr "调校空间音效"
+
+msgid "No audio tracks"
+msgstr "没有音轨"
+
+msgid "Play on a PC"
+msgstr "在电脑上播放"
+
+msgid "Play sound on a PC"
+msgstr "在电脑上播放声音"
+
+msgid "Sound from speakers in the room, in front, behind and above you, outside your head; dialogue from the screen. It stays put when you turn your head."
+msgstr "声音来自房间里你前方、后方和上方的扬声器，在你脑袋之外；对白来自屏幕。你转头时声音位置不变。"
+
+msgid "This player has no spatial sound (an older engine): the stereo mix plays."
+msgstr "此播放器没有空间音效（较旧的引擎）：播放立体声混音。"
+
+msgid "The stereo mix plays for now (PC sound on, or no file open)."
+msgstr "当前播放立体声混音（电脑声音已开启，或没有打开文件）。"
+
+msgid "The headset goes silent and holds its picture back to match the PC's speakers."
+msgstr "头显会静音，并延迟画面以配合电脑的扬声器。"
+
+msgid "Replay 10 s"
+msgstr "重播 10 秒"
+
+msgid "Track"
+msgstr "轨道"
+
+msgid "Second track"
+msgstr "第二轨道"
+
+msgid "Look and timing"
+msgstr "外观和时间"
+
+msgid "Below the picture"
+msgstr "画面下方"
+
+msgid "Inside the picture"
+msgstr "画面内"
+
+msgid "Offset"
+msgstr "偏移"
+
+msgid "Nearer"
+msgstr "更近"
+
+msgid "Background"
+msgstr "背景"
+
+msgid "Delay"
+msgstr "延迟"
+
+msgid "Reset delay"
+msgstr "重置延迟"
+
+msgid "Subtitle files"
+msgstr "字幕文件"
+
+msgid "Find files next to the video"
+msgstr "查找视频旁的文件"
+
+msgid "Script"
+msgstr "台词"
+
+msgid "Find a line"
+msgstr "查找台词"
+
+msgid "Lines around now"
+msgstr "当前附近的台词"
+
+msgid "This file has no subtitle tracks"
+msgstr "此文件没有字幕轨道"
+
+msgid "A second track needs a subtitle file next to the video"
+msgstr "第二轨道需要视频旁有字幕文件"
+
+msgid "Searching..."
+msgstr "正在搜索……"
+
+msgid "Reading the script..."
+msgstr "正在读取台词……"
+
+msgid "Views"
+msgstr "视图"
+
+msgid "Info overlay"
+msgstr "信息叠加"
+
+msgid "Stats"
+msgstr "统计"
+
+msgid "Panel"
+msgstr "面板"
+
+msgid "Hold menu to recentre"
+msgstr "按住菜单以重新居中"
+
+msgid "%.2f s"
+msgstr "%.2f 秒"
+
+msgid "Left-handed"
+msgstr "左手模式"
+
+msgid "Reset layout"
+msgstr "重置布局"
+
+msgid "Language"
+msgstr "语言"
+
+msgid "The menus and the controller labels. Names of films and files stay as they are."
+msgstr "用于菜单和手柄标签。影片和文件的名称保持不变。"
+
+msgid "Accessibility"
+msgstr "辅助功能"
+
+msgid "Larger panel"
+msgstr "放大面板"
+
+msgid "One eye for 3D"
+msgstr "单眼观看 3D"
+
+msgid "Subtitles always on"
+msgstr "字幕始终开启"
+
+msgid "Test and setup"
+msgstr "测试和设置"
+
+msgid "Test patterns"
+msgstr "测试图案"
+
+msgid "Network hosts"
+msgstr "网络主机"
+
+msgid "Calibration cards"
+msgstr "校准卡"
+
+msgid "Measure bandwidth"
+msgstr "测量带宽"
+
+msgid "Run benchmark"
+msgstr "运行基准测试"
+
+msgid "Stop tour"
+msgstr "停止导览"
+
+msgid "Hardware video"
+msgstr "硬件视频"
+
+msgid "Rendering"
+msgstr "渲染"
+
+msgid "Foveation"
+msgstr "注视点渲染"
+
+msgid "Sharp while the panel shows"
+msgstr "面板显示时保持清晰"
+
+msgid "Film drawn by the headset"
+msgstr "由头显绘制影片"
+
+msgid "Curved screen too"
+msgstr "曲面屏幕也是"
+
+msgid "Controllers"
+msgstr "手柄"
+
+msgid "Haptic ticks"
+msgstr "触觉滴答"
+
+msgid "Tick strength"
+msgstr "滴答强度"
+
+msgid "Jog wheel"
+msgstr "飞梭转盘"
+
+msgid "One turn"
+msgstr "转一圈"
+
+msgid "Seek bar pictures"
+msgstr "进度条预览图"
+
+msgid "Zoom lens"
+msgstr "放大镜"
+
+msgid "Magnification"
+msgstr "放大倍数"
+
+msgid "Phone remote"
+msgstr "手机遥控"
+
+msgid "Unpair phones"
+msgstr "解除手机配对"
+
+msgid "Share files"
+msgstr "共享文件"
+
+msgid "Share this headset's files"
+msgstr "共享此头显的文件"
+
+msgid "Phones and computers on this network can download and upload files. Scan the code: it holds the pairing code, which is shown nowhere else."
+msgstr "本网络中的手机和电脑可以下载和上传文件。扫描二维码：其中包含配对码，配对码不会在其他地方显示。"
+
+msgid "Dev tools"
+msgstr "开发工具"
+
+msgid "Reload theme"
+msgstr "重新加载主题"
+
+msgid "Remote changes"
+msgstr "远程更改"
+
+msgid "Allow for an hour"
+msgstr "允许一小时"
+
+msgid "Revoke"
+msgstr "撤回"
+
+msgid "About"
+msgstr "关于"
+
+msgid "Engine %s, %s"
+msgstr "引擎 %s，%s"
+
+msgid "Look"
+msgstr "外观"
+
+msgid "hot-reload on"
+msgstr "热重载开"
+
+msgid "hot-reload off"
+msgstr "热重载关"
+
+msgid "%s; remote changes allowed for %d more min"
+msgstr "%s；远程更改还允许 %d 分钟"
+
+msgid "Undo"
+msgstr "撤销"
+
+msgid "Measuring %s ..."
+msgstr "正在测量 %s ……"
+
+msgid "Can't measure: %s"
+msgstr "无法测量：%s"
+
+msgid "%.0f Mbit/s average, %.0f peak, opened in %d ms, %.0f MB read"
+msgstr "平均 %.0f Mbit/s，峰值 %.0f，打开用时 %d 毫秒，读取 %.0f MB"
+
+msgid "This engine build can't run the benchmark."
+msgstr "此引擎版本无法运行基准测试。"
+
+msgid "Tour %s (kiosk): round %d, step %d of %d"
+msgstr "导览 %s（展台模式）：第 %d 轮，第 %d 步，共 %d 步"
+
+msgid "Tour %s: round %d, step %d of %d"
+msgstr "导览 %s：第 %d 轮，第 %d 步，共 %d 步"
+
+msgid "a file on a share, e.g. smb://host/share/film.mkv"
+msgstr "共享上的文件，例如 smb://host/share/film.mkv"
+
+msgid "A curved screen as the headset's cylinder layer; off: drawn in the room, where things in front of it cover it"
+msgstr "曲面屏幕作为头显的圆柱图层；关：在房间中绘制，前面的物体会遮住它"
+
+msgid "In 180 and 360: hold the grip and pull the trigger for a magnifier"
+msgstr "在 180° 和 360° 中：按住握把并扣动扳机即可使用放大镜"
+
+msgid "Ask"
+msgstr "询问"
+
+msgid "Allow"
+msgstr "允许"
+
+msgid "Deny"
+msgstr "拒绝"
+
+msgid "Off"
+msgstr "关"
+
+msgid "Low"
+msgstr "低"
+
+msgid "Medium"
+msgstr "中"
+
+msgid "High"
+msgstr "高"
+
+msgid "Saves GPU time at the edges of your view. High can look blocky."
+msgstr "在视野边缘节省 GPU 时间。“高”可能出现块状。"
+
+msgid "Foveation isn't available: this build starts without it."
+msgstr "注视点渲染不可用：此版本启动时没有启用它。"
+
+msgid "Both controllers. The labels change ink, or get a dark outline, to stay readable."
+msgstr "两个手柄都适用。标签会改变颜色或加上深色描边，以保持清晰可读。"
+
+msgid "LIVE"
+msgstr "直播"
+
+msgid "Resumed at %s"
+msgstr "从 %s 继续播放"
+
+msgid "Start over"
+msgstr "从头开始"
+
+msgid "Remote: %s"
+msgstr "远程：%s"
+
+msgid "Assistant: %s"
+msgstr "助手：%s"
+
+msgid "Left controller battery %d %%"
+msgstr "左手柄电量 %d %%"
+
+msgid "Right controller battery %d %%"
+msgstr "右手柄电量 %d %%"
+
+msgid "Controller battery %d %%"
+msgstr "手柄电量 %d %%"
+
+msgid "Left controller %d %%"
+msgstr "左手柄 %d %%"
+
+msgid "Right controller %d %%"
+msgstr "右手柄 %d %%"
+
+msgid "Controller %d %%"
+msgstr "手柄 %d %%"
+
+msgid "Remote changes allowed for an hour"
+msgstr "远程更改已允许一小时"
+
+msgid "Connecting..."
+msgstr "正在连接……"
+
+msgid "Starting the browser..."
+msgstr "正在启动浏览器……"
+
+msgid "Point at a seat and pull the trigger. B cancels."
+msgstr "指向一个座位并扣动扳机。B 取消。"
+
+msgid "Seat unchanged"
+msgstr "座位未改变"
+
+msgid "That object can't be placed here"
+msgstr "该物品不能放在这里"
+
+msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
+msgstr "指向墙或地面并扣动扳机。摇杆：旋转和缩放。B 取消。"
+
+msgid "That's as many areas as there can be: delete one first."
+msgstr "区域数量已达上限：请先删除一个。"
+
+msgid "Nothing marked"
+msgstr "没有标记任何区域"
+
+msgid "%s added: the cameras show there"
+msgstr "已添加 %s：摄像头画面会显示在那里"
+
+msgid "%s changed"
+msgstr "%s 已更改"
+
+msgid "Nothing placed"
+msgstr "没有放置任何物品"
+
+msgid "Not placed"
+msgstr "未放置"
+
+msgid "No seat there"
+msgstr "那里没有座位"
+
+msgid "example.com, https://.../film.mkv or udp://@:1234"
+msgstr "example.com、https://.../film.mkv 或 udp://@:1234"
+
+msgid "Open"
+msgstr "打开"
+
+msgid "Play as video"
+msgstr "作为视频播放"
+
+msgid "Save page"
+msgstr "保存网页"
+
+msgid "Remove page"
+msgstr "移除网页"
+
+msgid "Saved page"
+msgstr "已保存的网页"
+
+msgid "Open a web page or a stream"
+msgstr "打开网页或流"
+
+msgid "Plum & gold"
+msgstr "梅紫配金"
+
+msgid "Graphite & amber"
+msgstr "石墨配琥珀"
+
+msgid "Midnight & coral"
+msgstr "午夜蓝配珊瑚"
+
+msgid "Slate & mint"
+msgstr "石板灰配薄荷"
+
+msgid "Ink & sky"
+msgstr "墨黑配天蓝"
+
+msgid "Espresso & peach"
+msgstr "咖啡配蜜桃"
+

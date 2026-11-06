@@ -1,0 +1,2066 @@
+# The menus' text: every key of app/, written by tools/i18n.py extract. Do not edit; see docs/i18n.md.
+msgid ""
+msgstr ""
+"Project-Id-Version: VR Video Player\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8-bit\n"
+
+#: scripts/main.gd:1222
+msgid "TALK"
+msgstr ""
+
+#: scripts/main.gd:1259
+#, c-format
+msgid "PUSH: %s"
+msgstr ""
+
+#: scripts/main.gd:135
+msgid "PLAY / PAUSE"
+msgstr ""
+
+#: scripts/main.gd:135 scripts/main.gd:151
+msgid "CLICK"
+msgstr ""
+
+#: scripts/main.gd:137
+msgid "SEEK / DIST"
+msgstr ""
+
+#: scripts/main.gd:137
+msgid "SCROLL"
+msgstr ""
+
+#: scripts/main.gd:138
+msgid "MENU"
+msgstr ""
+
+#: scripts/main.gd:138
+msgid "CLOSE"
+msgstr ""
+
+#: scripts/main.gd:139
+msgid "INFO"
+msgstr ""
+
+#: scripts/main.gd:140
+msgid "NEXT"
+msgstr ""
+
+#: scripts/main.gd:141
+msgid "PREV"
+msgstr ""
+
+#: scripts/main.gd:142
+msgid "LABELS"
+msgstr ""
+
+#: scripts/main.gd:144
+msgid "CHAPTER -"
+msgstr ""
+
+#: scripts/main.gd:145
+msgid "CHAPTER +"
+msgstr ""
+
+#: scripts/main.gd:146
+msgid "REPLAY"
+msgstr ""
+
+#: scripts/main.gd:152
+msgid "R-CLICK"
+msgstr ""
+
+#: scripts/main.gd:153
+msgid "SCROLL / KEYS"
+msgstr ""
+
+#: scripts/main.gd:154 scripts/main.gd:166
+msgid "SPACE"
+msgstr ""
+
+#: scripts/main.gd:155
+msgid "BACK"
+msgstr ""
+
+#: scripts/main.gd:163
+msgid "ENTER"
+msgstr ""
+
+#: scripts/main.gd:164
+msgid "HOLD: SCROLL"
+msgstr ""
+
+#: scripts/main.gd:165
+msgid "ARROWS"
+msgstr ""
+
+#: scripts/main.gd:167
+msgid "ESC"
+msgstr ""
+
+#: scripts/assistant/assistant_switches.gd:11
+msgid "Let the assistant control playback"
+msgstr ""
+
+#: scripts/assistant/assistant_switches.gd:13
+msgid "Let the assistant change the room"
+msgstr ""
+
+#: scripts/assistant/assistant_switches.gd:15
+msgid "Let the assistant change settings"
+msgstr ""
+
+#: scripts/assistant/assistant_switches.gd:17
+msgid "Let the assistant manage files"
+msgstr ""
+
+#: scripts/assistant/assistant_switches.gd:19
+msgid "Let the assistant run apps"
+msgstr ""
+
+#: scripts/play/auto_crop.gd:79
+msgid "Not available for this file"
+msgstr ""
+
+#: scripts/play/auto_crop.gd:81
+msgid "Looking for bars"
+msgstr ""
+
+#: scripts/play/auto_crop.gd:85
+msgid "No bars"
+msgstr ""
+
+#: scripts/play/end_time.gd:36
+#, c-format
+msgid "ends %s"
+msgstr ""
+
+#: scripts/play/end_time.gd:38
+#, c-format
+msgid "ends %s tomorrow"
+msgstr ""
+
+#: scripts/play/end_time.gd:39
+#, c-format
+msgid "ends %s %s"
+msgstr ""
+
+#: scripts/play/end_time.gd:56
+#, c-format
+msgid "%d:%02d left"
+msgstr ""
+
+#: scripts/play/end_time.gd:58 ui/assistant_row.gd:240
+#, c-format
+msgid "%d min left"
+msgstr ""
+
+#: scripts/play/end_time.gd:59
+msgid "<1 min left"
+msgstr ""
+
+#: scripts/play/end_time.gd:71
+msgid "Sun"
+msgstr ""
+
+#: scripts/play/end_time.gd:71
+msgid "Mon"
+msgstr ""
+
+#: scripts/play/end_time.gd:71
+msgid "Tue"
+msgstr ""
+
+#: scripts/play/end_time.gd:71
+msgid "Wed"
+msgstr ""
+
+#: scripts/play/end_time.gd:71
+msgid "Thu"
+msgstr ""
+
+#: scripts/play/end_time.gd:71
+msgid "Fri"
+msgstr ""
+
+#: scripts/play/end_time.gd:71
+msgid "Sat"
+msgstr ""
+
+#: scripts/play/film_layer.gd:133
+msgid "Off: the film is drawn in the room."
+msgstr ""
+
+#: scripts/play/film_layer.gd:135
+msgid "This engine has no OpenXR layers."
+msgstr ""
+
+#: scripts/play/film_layer.gd:137
+msgid "Only in the headset: here the film is drawn in the room."
+msgstr ""
+
+#: scripts/play/film_layer.gd:140
+msgid "180, 360 and fisheye films are drawn in the room."
+msgstr ""
+
+#: scripts/play/film_layer.gd:143
+msgid "A curved screen is drawn in the room (curved layers are off)."
+msgstr ""
+
+#: scripts/play/film_layer.gd:144
+msgid "This headset has no curved layers: a curved screen is drawn in the room."
+msgstr ""
+
+#: scripts/play/film_layer.gd:145
+msgid "On; nothing to show."
+msgstr ""
+
+#: scripts/play/film_layer.gd:148
+msgid "On; the room draws the film while the menu is open, so the menu shows in front."
+msgstr ""
+
+#: scripts/play/film_layer.gd:150
+#, c-format
+msgid "In use: two cylinder layers, one per eye, %d x %d px each."
+msgstr ""
+
+#: scripts/play/film_layer.gd:151
+#, c-format
+msgid "In use: two quad layers, one per eye, %d x %d px each."
+msgstr ""
+
+#: scripts/play/film_layer.gd:152
+#, c-format
+msgid "In use: one cylinder layer, %d x %d px."
+msgstr ""
+
+#: scripts/play/film_layer.gd:153
+#, c-format
+msgid "In use: one quad layer, %d x %d px."
+msgstr ""
+
+#: scripts/play/hw_video.gd:32
+msgid "on (P010 from the system's video driver)"
+msgstr ""
+
+#: scripts/play/hw_video.gd:33
+msgid "on (Q10C through the GPU, stock driver)"
+msgstr ""
+
+#: scripts/play/hw_video.gd:34
+msgid "off: 10-bit plays in software"
+msgstr ""
+
+#: scripts/play/hw_video.gd:35
+msgid "checking ..."
+msgstr ""
+
+#: scripts/play/real_windows.gd:210
+msgid ""
+"Turn\n"
+"Stick left / right: turn it\n"
+"Trigger: the faces again"
+msgstr ""
+
+#: scripts/play/real_windows.gd:212
+msgid ""
+"The top face\n"
+"Stick up / down: move it\n"
+"Trigger: next face"
+msgstr ""
+
+#: scripts/play/real_windows.gd:214
+msgid ""
+"The bottom face\n"
+"Stick up / down: move it\n"
+"Trigger: next face"
+msgstr ""
+
+#: scripts/play/real_windows.gd:216
+msgid ""
+"The left face\n"
+"Stick left / right: move it\n"
+"Trigger: next face"
+msgstr ""
+
+#: scripts/play/real_windows.gd:218
+msgid ""
+"The right face\n"
+"Stick left / right: move it\n"
+"Trigger: next face"
+msgstr ""
+
+#: scripts/play/real_windows.gd:220
+msgid ""
+"The front face\n"
+"Stick up: away, down: nearer\n"
+"Trigger: next face"
+msgstr ""
+
+#: scripts/play/real_windows.gd:222
+msgid ""
+"The back face\n"
+"Stick up: away, down: nearer\n"
+"Trigger: next face"
+msgstr ""
+
+#: scripts/play/real_windows.gd:231
+msgid ""
+"Sweeping\n"
+"Let go of the trigger to keep it"
+msgstr ""
+
+#: scripts/play/real_windows.gd:232
+msgid ""
+"Hold the trigger and sweep\n"
+"the controller over the place\n"
+"B: cancel"
+msgstr ""
+
+#: scripts/play/real_windows.gd:235
+#, c-format
+msgid ""
+"%s\n"
+"Menu: keep it  ·  B: put it back"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:48
+msgid "Black"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:50
+msgid "White"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:52
+msgid "Graphite"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:54
+msgid "Red"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:55
+msgid "Blue"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:56
+msgid "Any colour"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:58
+msgid "Brushed steel"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:60
+msgid "Dark metal"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:62
+msgid "Brass"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:64
+msgid "Plasma"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:66
+msgid "Cold plasma"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:69
+msgid "Embers"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:71
+msgid "Circuit"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:73
+msgid "Neon"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:75
+msgid "Starfield"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:78
+msgid "Liquid chrome"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:80
+msgid "Iridescent"
+msgstr ""
+
+#: scripts/xr/controller_look.gd:82
+msgid "Carbon fibre"
+msgstr ""
+
+#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/system_tab.gd:318 ui/ui_layer.gd:416
+msgid "Assistant"
+msgstr ""
+
+#: ui/assistant_row.gd:64
+msgid "An AI assistant on a computer on this network sees what plays, answers you on a card, and hears you while you hold the bumper. No program to install."
+msgstr ""
+
+#: ui/assistant_row.gd:80 ui/host_form.gd:50 ui/search_form.gd:42 ui/url_form.gd:59
+msgid "Cancel"
+msgstr ""
+
+#: ui/assistant_row.gd:83
+msgid "Read this code out to the assistant. Cancel if you did not ask for it."
+msgstr ""
+
+#: ui/assistant_row.gd:87
+msgid "Let an assistant find me"
+msgstr ""
+
+#: ui/assistant_row.gd:97
+msgid "Stop"
+msgstr ""
+
+#: ui/assistant_row.gd:102
+msgid "Give the assistant this address. For an hour it can ask to pair; then it shows a code here for you to read out."
+msgstr ""
+
+#: ui/assistant_row.gd:118
+msgid "Voice goes to"
+msgstr ""
+
+#: ui/assistant_row.gd:153
+msgid "Dev link"
+msgstr ""
+
+#: ui/assistant_row.gd:159
+#, c-format
+msgid "%s on this headset"
+msgstr ""
+
+#: ui/assistant_row.gd:217
+#, c-format
+msgid "%s, paired %s"
+msgstr ""
+
+#: ui/assistant_row.gd:220
+msgid "Forget"
+msgstr ""
+
+#: ui/assistant_row.gd:231
+#, c-format
+msgid "%s asks to pair with this headset."
+msgstr ""
+
+#: ui/assistant_row.gd:240
+#, c-format
+msgid "%d min left  ·  pin %s"
+msgstr ""
+
+#: ui/assistant_row.gd:17
+msgid "Off: it can see what plays and answer on the card, nothing else."
+msgstr ""
+
+#: ui/assistant_row.gd:18
+msgid "Each change shows at once and is kept as a room in the Room tab. Ask the assistant to change it back, or Reset room for the stock room."
+msgstr ""
+
+#: ui/assistant_row.gd:20
+msgid "Picture, sound, subtitles and system preferences, kept as if you set them."
+msgstr ""
+
+#: ui/assistant_row.gd:21
+msgid "Copies and downloads into the Library, places and saved hosts. It never sees a share's login."
+msgstr ""
+
+#: ui/assistant_row.gd:22
+msgid "Starts, stops, shows and hides Android apps and the agents on this headset."
+msgstr ""
+
+#: ui/files_tab.gd:143
+msgid "Add host"
+msgstr ""
+
+#: ui/files_tab.gd:145
+msgid "Edit hosts"
+msgstr ""
+
+#: ui/files_tab.gd:159
+msgid "Favourite"
+msgstr ""
+
+#: ui/files_tab.gd:165
+msgid "In corner"
+msgstr ""
+
+#: ui/files_tab.gd:168
+msgid "Shuffle"
+msgstr ""
+
+#: ui/files_tab.gd:169
+msgid "Repeat: off"
+msgstr ""
+
+#: ui/files_tab.gd:172
+msgid "Play on"
+msgstr ""
+
+#: ui/files_tab.gd:173
+msgid "Gapless"
+msgstr ""
+
+#: ui/files_tab.gd:181
+msgid "Clear upcoming"
+msgstr ""
+
+#: ui/help_texts.gd:103
+#, c-format
+msgid "%s: %s"
+msgstr ""
+
+#: ui/help_texts.gd:20
+msgid "Guess the 3D layout and shape from the file name and picture size."
+msgstr ""
+
+#: ui/help_texts.gd:21
+msgid "Each eye is squeezed to half width or height in the file: stretch it."
+msgstr ""
+
+#: ui/help_texts.gd:22
+msgid "Swap left and right if the 3D looks inside out or hurts."
+msgstr ""
+
+#: ui/help_texts.gd:23
+msgid "Open every file in this folder with this mode."
+msgstr ""
+
+#: ui/help_texts.gd:24
+msgid "Forget the mode set for this folder."
+msgstr ""
+
+#: ui/help_texts.gd:25
+msgid "How wide the fisheye lens was. Wrong: straight lines bend."
+msgstr ""
+
+#: ui/help_texts.gd:26
+msgid "How wide each lens sees. Wrong: things double at the join."
+msgstr ""
+
+#: ui/help_texts.gd:27
+msgid "Slides the back picture sideways until the two halves meet at the join."
+msgstr ""
+
+#: ui/help_texts.gd:28
+msgid "Moves the whole 3D picture nearer or farther. Use it if 3D strains your eyes."
+msgstr ""
+
+#: ui/help_texts.gd:29
+msgid "Keep this depth for this file only."
+msgstr ""
+
+#: ui/help_texts.gd:30
+msgid "Fades the sides of 3D, so the frame does not cut what comes out."
+msgstr ""
+
+#: ui/help_texts.gd:31
+msgid "How wide the screen is."
+msgstr ""
+
+#: ui/help_texts.gd:32
+msgid "How far away the screen is."
+msgstr ""
+
+#: ui/help_texts.gd:33
+msgid "Moves the screen up or down."
+msgstr ""
+
+#: ui/help_texts.gd:34
+#, c-format
+msgid "Bends the screen around you. 100 % wraps it evenly around your seat."
+msgstr ""
+
+#: ui/help_texts.gd:35
+msgid "Enlarges the picture inside the screen (crops the edges)."
+msgstr ""
+
+#: ui/help_texts.gd:36
+msgid "How much of your view the screen fills, whatever its distance."
+msgstr ""
+
+#: ui/help_texts.gd:37
+msgid "The screen comes back in front of you after you look away."
+msgstr ""
+
+#: ui/help_texts.gd:38
+msgid "Turns the screen to face you when you lie back (this session)."
+msgstr ""
+
+#: ui/help_texts.gd:39
+msgid "Shows the whole picture again."
+msgstr ""
+
+#: ui/help_texts.gd:40
+msgid "Finds black bars above and below the film and removes them."
+msgstr ""
+
+#: ui/help_texts.gd:41
+msgid "Without bars, widen the screen."
+msgstr ""
+
+#: ui/help_texts.gd:42
+msgid "Tilts a 180° or 360° picture up or down if the camera was not level."
+msgstr ""
+
+#: ui/help_texts.gd:43
+msgid "Turns a 180° or 360° picture if the horizon is crooked."
+msgstr ""
+
+#: ui/help_texts.gd:44
+msgid "Removes the pitch and roll corrections."
+msgstr ""
+
+#: ui/help_texts.gd:45
+msgid "Lighter or darker overall."
+msgstr ""
+
+#: ui/help_texts.gd:46
+msgid "More or less difference between light and dark."
+msgstr ""
+
+#: ui/help_texts.gd:47
+msgid "More or less colour. 0 is black and white."
+msgstr ""
+
+#: ui/help_texts.gd:48
+msgid "Lighter or darker mid tones, without changing black and white."
+msgstr ""
+
+#: ui/help_texts.gd:49
+msgid "Makes dark scenes easier to see by lifting the darkest parts."
+msgstr ""
+
+#: ui/help_texts.gd:50
+msgid "Crisper edges. Too much makes a halo around them."
+msgstr ""
+
+#: ui/help_texts.gd:51
+msgid "Removes comb lines from old TV or DVD video. Auto: when needed."
+msgstr ""
+
+#: ui/help_texts.gd:52
+msgid "Adds the fine noise of projected film."
+msgstr ""
+
+#: ui/help_texts.gd:53
+msgid "Adds the small sideways wobble of film in an old projector."
+msgstr ""
+
+#: ui/help_texts.gd:54
+msgid "Brightness, contrast and the rest back to normal."
+msgstr ""
+
+#: ui/help_texts.gd:55
+msgid "Fits bright HDR parts to the headset. Off clips them."
+msgstr ""
+
+#: ui/help_texts.gd:56
+msgid "Brighter or darker HDR picture."
+msgstr ""
+
+#: ui/help_texts.gd:57
+msgid "Where the brightest parts start to compress. Higher: more highlight detail."
+msgstr ""
+
+#: ui/help_texts.gd:58
+msgid "How bright white is. Lower makes the HDR picture brighter."
+msgstr ""
+
+#: ui/help_texts.gd:59
+msgid "How long each photo shows in the slideshow."
+msgstr ""
+
+#: ui/help_texts.gd:60
+msgid "How long one photo fades into the next."
+msgstr ""
+
+#: ui/help_texts.gd:61
+msgid "Press at the start and the end of a part to repeat it."
+msgstr ""
+
+#: ui/help_texts.gd:62
+msgid "How big the small film in the corner is."
+msgstr ""
+
+#: ui/help_texts.gd:66
+msgid "How loud the film is."
+msgstr ""
+
+#: ui/help_texts.gd:67
+msgid "Moves the sound earlier or later if lips and voices do not match."
+msgstr ""
+
+#: ui/help_texts.gd:68
+msgid "Opens a test that helps you find the correct offset."
+msgstr ""
+
+#: ui/help_texts.gd:69
+msgid "Live streams: shorter is nearer to live, longer has fewer gaps."
+msgstr ""
+
+#: ui/help_texts.gd:70
+msgid "Loud scenes quieter, quiet speech louder: for late at night."
+msgstr ""
+
+#: ui/help_texts.gd:71
+msgid "How strongly night mode evens out loud and quiet."
+msgstr ""
+
+#: ui/help_texts.gd:72
+msgid "Makes voices louder. Only for 5.1 sound and more."
+msgstr ""
+
+#: ui/help_texts.gd:73
+msgid "Sound from speakers around you and above you, not inside your head."
+msgstr ""
+
+#: ui/help_texts.gd:74
+msgid "Plays the film's separate bass channel (the .1 of 5.1) too."
+msgstr ""
+
+#: ui/help_texts.gd:75
+msgid "How much echo of the room you hear. More: the speakers seem farther."
+msgstr ""
+
+#: ui/help_texts.gd:76
+msgid "The headset sees what the sound plays on: its own speakers or headphones."
+msgstr ""
+
+#: ui/help_texts.gd:77
+msgid "Settings for the headset's own speakers."
+msgstr ""
+
+#: ui/help_texts.gd:78
+msgid "Settings for earbuds or headphones."
+msgstr ""
+
+#: ui/help_texts.gd:79
+msgid "Hear a sound two ways, pick the better; it then fits your ears."
+msgstr ""
+
+#: ui/help_texts.gd:80
+msgid "The sound plays on a PC, in time with the picture."
+msgstr ""
+
+#: ui/host_form.gd:46
+msgid "Save"
+msgstr ""
+
+#: ui/host_form.gd:54
+msgid "Delete host"
+msgstr ""
+
+#: ui/host_form.gd:58
+msgid "Show password"
+msgstr ""
+
+#: ui/host_form.gd:72
+msgid "Add a network host (SMB)"
+msgstr ""
+
+#: ui/host_form.gd:72
+msgid "Edit network host"
+msgstr ""
+
+#: ui/hw_video_row.gd:25
+msgid "Details"
+msgstr ""
+
+#: ui/hw_video_row.gd:48
+#, c-format
+msgid "Hardware 10-bit video: %s"
+msgstr ""
+
+#: ui/library_view.gd:71
+msgid "TV shows"
+msgstr ""
+
+#: ui/library_view.gd:74
+msgid "Films"
+msgstr ""
+
+#: ui/library_view.gd:223 ui/pane_ui.gd:176 ui/pane_ui.gd:600
+msgid "Play"
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:34
+msgid "Areas"
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:35
+msgid "Mark areas to see through to the cameras."
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:36
+msgid "Sweep an area"
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:37
+msgid "Hold the trigger and pass the controller over the place; let go to keep it."
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:38
+msgid "None yet."
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:43
+msgid "All on"
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:44
+msgid "All off"
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:45
+msgid "Settings"
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:46
+msgid "Passthrough dimming"
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:93
+msgid "On"
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:95
+msgid "Edit"
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:96 ui/object_section.gd:105
+msgid "Delete"
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:71 ui/ui_layer.gd:854
+msgid "The headset's cameras can't show here."
+msgstr ""
+
+#: ui/object_section.gd:86
+msgid "Built-in objects"
+msgstr ""
+
+#: ui/object_section.gd:91 ui/object_section.gd:104
+msgid "Place"
+msgstr ""
+
+#: ui/object_section.gd:93
+msgid "Place: point at a wall or the floor, trigger to set it. Stick: turn and size. B cancels."
+msgstr ""
+
+#: ui/object_section.gd:95
+msgid "Your objects"
+msgstr ""
+
+#: ui/object_section.gd:96
+msgid "Imported, or kept from a room."
+msgstr ""
+
+#: ui/object_section.gd:98
+msgid "None yet: add one from Fab below."
+msgstr ""
+
+#: ui/object_section.gd:108
+msgid "In Downloads, from Fab"
+msgstr ""
+
+#: ui/object_section.gd:110
+msgid "Visit Fab to download objects"
+msgstr ""
+
+#: ui/object_section.gd:116
+msgid "In this room"
+msgstr ""
+
+#: ui/object_section.gd:117
+msgid "Nothing from the library yet."
+msgstr ""
+
+#: ui/object_section.gd:373
+msgid "Move"
+msgstr ""
+
+#: ui/object_section.gd:374
+msgid "Remove"
+msgstr ""
+
+#: ui/object_section.gd:387
+msgid "Colour"
+msgstr ""
+
+#: ui/object_section.gd:390 ui/pane_ui.gd:46 ui/picture_tab.gd:267
+msgid "Picture"
+msgstr ""
+
+#: ui/object_section.gd:392
+msgid "Material"
+msgstr ""
+
+#: ui/object_section.gd:395
+msgid "Effect"
+msgstr ""
+
+#: ui/object_section.gd:398
+msgid "Reset"
+msgstr ""
+
+#: ui/onscreen_keyboard.gd:61
+msgid "abc"
+msgstr ""
+
+#: ui/pane_ui.gd:518
+#, c-format
+msgid "%s, %s"
+msgstr ""
+
+#: ui/pane_ui.gd:521
+#, c-format
+msgid "battery %d %%, charging"
+msgstr ""
+
+#: ui/pane_ui.gd:522
+#, c-format
+msgid "battery %d %%"
+msgstr ""
+
+#: ui/pane_ui.gd:526 ui/pane_ui.gd:565 ui/ui_layer.gd:452
+msgid "Listening"
+msgstr ""
+
+#: ui/pane_ui.gd:637
+#, c-format
+msgid "Chapter %s"
+msgstr ""
+
+#: ui/pane_ui.gd:600
+msgid "Pause"
+msgstr ""
+
+#: ui/pane_ui.gd:46
+msgid "Source"
+msgstr ""
+
+#: ui/pane_ui.gd:46
+msgid "Sound"
+msgstr ""
+
+#: ui/pane_ui.gd:46
+msgid "Subtitles"
+msgstr ""
+
+#: ui/pane_ui.gd:46
+msgid "Room"
+msgstr ""
+
+#: ui/pane_ui.gd:46
+msgid "Objects"
+msgstr ""
+
+#: ui/pane_ui.gd:46
+msgid "Mixed reality"
+msgstr ""
+
+#: ui/pane_ui.gd:47
+msgid "System"
+msgstr ""
+
+#: ui/pane_ui.gd:171
+msgid "Previous"
+msgstr ""
+
+#: ui/pane_ui.gd:172
+msgid "−10 s"
+msgstr ""
+
+#: ui/pane_ui.gd:173
+msgid "+10 s"
+msgstr ""
+
+#: ui/pane_ui.gd:173
+msgid "Next"
+msgstr ""
+
+#: ui/pane_widgets.gd:12
+msgid "General"
+msgstr ""
+
+#: ui/picture_tab.gd:126
+msgid "Mode"
+msgstr ""
+
+#: ui/picture_tab.gd:150 ui/sound_tab.gd:109
+msgid "Auto"
+msgstr ""
+
+#: ui/picture_tab.gd:151
+msgid "Half"
+msgstr ""
+
+#: ui/picture_tab.gd:152
+msgid "Swap eyes"
+msgstr ""
+
+#: ui/picture_tab.gd:156
+msgid "Clear folder rule"
+msgstr ""
+
+#: ui/picture_tab.gd:160
+msgid "Use for this folder"
+msgstr ""
+
+#: ui/picture_tab.gd:164
+msgid "Fisheye field"
+msgstr ""
+
+#: ui/picture_tab.gd:172
+msgid "Lens"
+msgstr ""
+
+#: ui/picture_tab.gd:180
+msgid "Camera"
+msgstr ""
+
+#: ui/picture_tab.gd:182
+msgid "Lens field"
+msgstr ""
+
+#: ui/picture_tab.gd:184
+msgid "Seam"
+msgstr ""
+
+#: ui/picture_tab.gd:188
+msgid "Reset lens"
+msgstr ""
+
+#: ui/picture_tab.gd:192 ui/picture_tab.gd:193
+msgid "3D"
+msgstr ""
+
+#: ui/picture_tab.gd:193 ui/system_tab.gd:165
+msgid "Left eye"
+msgstr ""
+
+#: ui/picture_tab.gd:193 ui/system_tab.gd:165
+msgid "Right eye"
+msgstr ""
+
+#: ui/picture_tab.gd:194
+msgid "Show"
+msgstr ""
+
+#: ui/picture_tab.gd:196
+msgid "Depth"
+msgstr ""
+
+#: ui/picture_tab.gd:200
+msgid "This file only"
+msgstr ""
+
+#: ui/picture_tab.gd:206
+msgid "Soft edges"
+msgstr ""
+
+#: ui/picture_tab.gd:209
+msgid "Screen"
+msgstr ""
+
+#: ui/picture_tab.gd:213 ui/subtitles_tab.gd:64
+msgid "Size"
+msgstr ""
+
+#: ui/picture_tab.gd:214
+msgid "Distance"
+msgstr ""
+
+#: ui/picture_tab.gd:215
+msgid "Height"
+msgstr ""
+
+#: ui/picture_tab.gd:219
+msgid "Curvature"
+msgstr ""
+
+#: ui/picture_tab.gd:223
+msgid "Zoom"
+msgstr ""
+
+#: ui/picture_tab.gd:227
+msgid "Size in degrees"
+msgstr ""
+
+#: ui/picture_tab.gd:241
+msgid "Follow my head"
+msgstr ""
+
+#: ui/picture_tab.gd:242
+msgid "Lying down"
+msgstr ""
+
+#: ui/picture_tab.gd:246
+msgid "Reset zoom"
+msgstr ""
+
+#: ui/picture_tab.gd:249
+msgid "Auto crop bars"
+msgstr ""
+
+#: ui/picture_tab.gd:250
+msgid "Grow the screen to keep its height"
+msgstr ""
+
+#: ui/picture_tab.gd:256
+msgid "Horizon"
+msgstr ""
+
+#: ui/picture_tab.gd:261
+msgid "Pitch"
+msgstr ""
+
+#: ui/picture_tab.gd:262
+msgid "Roll"
+msgstr ""
+
+#: ui/picture_tab.gd:265
+msgid "Level"
+msgstr ""
+
+#: ui/picture_tab.gd:277
+msgid "Deinterlace"
+msgstr ""
+
+#: ui/picture_tab.gd:280
+msgid "Film grain"
+msgstr ""
+
+#: ui/picture_tab.gd:282
+msgid "Gate weave"
+msgstr ""
+
+#: ui/picture_tab.gd:286
+msgid "Reset picture"
+msgstr ""
+
+#: ui/picture_tab.gd:291
+msgid "HDR"
+msgstr ""
+
+#: ui/picture_tab.gd:296
+msgid "Tone map"
+msgstr ""
+
+#: ui/picture_tab.gd:297
+msgid "Reset HDR"
+msgstr ""
+
+#: ui/picture_tab.gd:299
+msgid "Exposure"
+msgstr ""
+
+#: ui/picture_tab.gd:301
+msgid "Knee"
+msgstr ""
+
+#: ui/picture_tab.gd:303
+msgid "HDR brightness"
+msgstr ""
+
+#: ui/picture_tab.gd:310 ui/picture_tab.gd:312
+msgid "Slideshow"
+msgstr ""
+
+#: ui/picture_tab.gd:314
+msgid "Each picture"
+msgstr ""
+
+#: ui/picture_tab.gd:317
+msgid "Crossfade"
+msgstr ""
+
+#: ui/picture_tab.gd:323
+msgid "Frame"
+msgstr ""
+
+#: ui/picture_tab.gd:325
+msgid "Frame back"
+msgstr ""
+
+#: ui/picture_tab.gd:326
+msgid "Frame forward"
+msgstr ""
+
+#: ui/picture_tab.gd:327
+msgid "Mark A / B"
+msgstr ""
+
+#: ui/picture_tab.gd:328
+msgid "Clear loop"
+msgstr ""
+
+#: ui/picture_tab.gd:329
+msgid "Screenshot"
+msgstr ""
+
+#: ui/picture_tab.gd:333
+msgid "Corner film"
+msgstr ""
+
+#: ui/picture_tab.gd:337
+msgid "Swap"
+msgstr ""
+
+#: ui/picture_tab.gd:338
+msgid "Close corner"
+msgstr ""
+
+#: ui/picture_tab.gd:339
+msgid "Corner size"
+msgstr ""
+
+#: ui/picture_tab.gd:342
+msgid "Top right"
+msgstr ""
+
+#: ui/picture_tab.gd:342
+msgid "Top left"
+msgstr ""
+
+#: ui/picture_tab.gd:342
+msgid "Bottom right"
+msgstr ""
+
+#: ui/picture_tab.gd:342
+msgid "Bottom left"
+msgstr ""
+
+#: ui/room_tab.gd:96
+msgid "Environment"
+msgstr ""
+
+#: ui/room_tab.gd:97
+msgid "Built in"
+msgstr ""
+
+#: ui/room_tab.gd:102
+msgid "Yours"
+msgstr ""
+
+#: ui/room_tab.gd:105
+msgid "Use this picture as the room"
+msgstr ""
+
+#: ui/room_tab.gd:109
+msgid "Showrooms"
+msgstr ""
+
+#: ui/room_tab.gd:117 ui/ui_layer.gd:937
+msgid "Seat"
+msgstr ""
+
+#: ui/room_tab.gd:121
+msgid "Previous seat"
+msgstr ""
+
+#: ui/room_tab.gd:122
+msgid "Next seat"
+msgstr ""
+
+#: ui/room_tab.gd:123
+msgid "Room's own spot"
+msgstr ""
+
+#: ui/room_tab.gd:125
+msgid "Pick a seat"
+msgstr ""
+
+#: ui/room_tab.gd:135
+msgid "Floor reflection"
+msgstr ""
+
+#: ui/room_tab.gd:137
+msgid "Reflection"
+msgstr ""
+
+#: ui/room_tab.gd:143
+msgid "Effects"
+msgstr ""
+
+#: ui/room_tab.gd:145 ui/room_tab.gd:157
+msgid "Bias light"
+msgstr ""
+
+#: ui/room_tab.gd:149
+msgid "React to the film"
+msgstr ""
+
+#: ui/room_tab.gd:153
+msgid "Projector beam"
+msgstr ""
+
+#: ui/room_tab.gd:160
+msgid "Reaction"
+msgstr ""
+
+#: ui/room_tab.gd:173
+msgid "Time of day"
+msgstr ""
+
+#: ui/room_tab.gd:174
+msgid "Night"
+msgstr ""
+
+#: ui/room_tab.gd:174
+msgid "Now"
+msgstr ""
+
+#: ui/room_tab.gd:174
+msgid "Dusk"
+msgstr ""
+
+#: ui/room_tab.gd:174
+msgid "Day"
+msgstr ""
+
+#: ui/room_tab.gd:178
+msgid "Latitude"
+msgstr ""
+
+#: ui/room_tab.gd:181
+msgid "Room light"
+msgstr ""
+
+#: ui/room_tab.gd:185
+msgid "Dim while playing"
+msgstr ""
+
+#: ui/room_tab.gd:187
+msgid "Dimmed to"
+msgstr ""
+
+#: ui/room_tab.gd:191
+msgid "Placement"
+msgstr ""
+
+#: ui/room_tab.gd:194
+msgid "Reset room"
+msgstr ""
+
+#: ui/room_tab.gd:195
+msgid "Reset screen"
+msgstr ""
+
+#: ui/room_tab.gd:196
+msgid "Reset room: back to the room's own seat, facing the screen, view recentred."
+msgstr ""
+
+#: ui/room_tab.gd:198
+msgid "The showing"
+msgstr ""
+
+#: ui/room_tab.gd:200
+msgid "Curtains"
+msgstr ""
+
+#: ui/room_tab.gd:202
+msgid "Up next countdown"
+msgstr ""
+
+#: ui/room_tab.gd:204 ui/room_tab.gd:212
+msgid "Intermission"
+msgstr ""
+
+#: ui/room_tab.gd:209
+msgid "Up next in"
+msgstr ""
+
+#: ui/room_tab.gd:221
+msgid "Crossfade music"
+msgstr ""
+
+#: ui/room_tab.gd:224
+msgid "Crossfade films"
+msgstr ""
+
+#: ui/room_tab.gd:228
+msgid "Sleep timer"
+msgstr ""
+
+#: ui/room_tab.gd:406
+msgid "Watch party"
+msgstr ""
+
+#: ui/room_tab.gd:410
+msgid "Host"
+msgstr ""
+
+#: ui/room_tab.gd:410
+msgid "Join"
+msgstr ""
+
+#: ui/room_tab.gd:412 ui/room_tab.gd:519
+msgid "Leave"
+msgstr ""
+
+#: ui/room_tab.gd:420
+msgid "Find it"
+msgstr ""
+
+#: ui/room_tab.gd:367
+msgid "Flashes only in rooms that react, such as the drive-in; the room pulses with the bass."
+msgstr ""
+
+#: ui/room_tab.gd:383
+msgid "Curtains: in the cinema and the home theatre, flat screen."
+msgstr ""
+
+#: ui/room_tab.gd:514
+msgid "Looking for a host..."
+msgstr ""
+
+#: ui/room_tab.gd:519
+msgid "End party"
+msgstr ""
+
+#: ui/sound_tab.gd:52
+msgid "Audio track"
+msgstr ""
+
+#: ui/sound_tab.gd:56
+msgid "Level and timing"
+msgstr ""
+
+#: ui/sound_tab.gd:57
+msgid "Volume"
+msgstr ""
+
+#: ui/sound_tab.gd:60
+msgid "A/V offset"
+msgstr ""
+
+#: ui/sound_tab.gd:63
+msgid "Calibrate"
+msgstr ""
+
+#: ui/sound_tab.gd:66
+msgid "Live delay"
+msgstr ""
+
+#: ui/sound_tab.gd:70 ui/system_tab.gd:524
+msgid "Speed"
+msgstr ""
+
+#: ui/sound_tab.gd:82 ui/sound_tab.gd:83
+msgid "Night mode"
+msgstr ""
+
+#: ui/sound_tab.gd:85
+msgid "Evening out"
+msgstr ""
+
+#: ui/sound_tab.gd:88
+msgid "Dialogue boost"
+msgstr ""
+
+#: ui/sound_tab.gd:94 ui/sound_tab.gd:96
+msgid "Spatial sound"
+msgstr ""
+
+#: ui/sound_tab.gd:99
+msgid "Bass channel"
+msgstr ""
+
+#: ui/sound_tab.gd:105
+msgid "Room sound"
+msgstr ""
+
+#: ui/sound_tab.gd:108
+msgid "Sound plays on"
+msgstr ""
+
+#: ui/sound_tab.gd:109
+msgid "Headset speakers"
+msgstr ""
+
+#: ui/sound_tab.gd:109
+msgid "Headphones"
+msgstr ""
+
+#: ui/sound_tab.gd:113
+msgid "Head measurements (HRTF)"
+msgstr ""
+
+#: ui/sound_tab.gd:123
+msgid "Tune spatial sound"
+msgstr ""
+
+#: ui/sound_tab.gd:164
+msgid "No audio tracks"
+msgstr ""
+
+#: ui/sound_tab.gd:279
+msgid "Play on a PC"
+msgstr ""
+
+#: ui/sound_tab.gd:280
+msgid "Play sound on a PC"
+msgstr ""
+
+#: ui/sound_tab.gd:224
+msgid "Sound from speakers in the room, in front, behind and above you, outside your head; dialogue from the screen. It stays put when you turn your head."
+msgstr ""
+
+#: ui/sound_tab.gd:227
+msgid "This player has no spatial sound (an older engine): the stereo mix plays."
+msgstr ""
+
+#: ui/sound_tab.gd:236
+msgid "The stereo mix plays for now (PC sound on, or no file open)."
+msgstr ""
+
+#: ui/sound_tab.gd:331
+msgid "The headset goes silent and holds its picture back to match the PC's speakers."
+msgstr ""
+
+#: ui/subtitles_tab.gd:53
+msgid "Replay 10 s"
+msgstr ""
+
+#: ui/subtitles_tab.gd:54
+msgid "Track"
+msgstr ""
+
+#: ui/subtitles_tab.gd:58
+msgid "Second track"
+msgstr ""
+
+#: ui/subtitles_tab.gd:62
+msgid "Look and timing"
+msgstr ""
+
+#: ui/subtitles_tab.gd:67
+msgid "Below the picture"
+msgstr ""
+
+#: ui/subtitles_tab.gd:67
+msgid "Inside the picture"
+msgstr ""
+
+#: ui/subtitles_tab.gd:70
+msgid "Offset"
+msgstr ""
+
+#: ui/subtitles_tab.gd:73
+msgid "Nearer"
+msgstr ""
+
+#: ui/subtitles_tab.gd:76
+msgid "Background"
+msgstr ""
+
+#: ui/subtitles_tab.gd:80
+msgid "Delay"
+msgstr ""
+
+#: ui/subtitles_tab.gd:83
+msgid "Reset delay"
+msgstr ""
+
+#: ui/subtitles_tab.gd:84
+msgid "Subtitle files"
+msgstr ""
+
+#: ui/subtitles_tab.gd:86
+msgid "Find files next to the video"
+msgstr ""
+
+#: ui/subtitles_tab.gd:95
+msgid "Script"
+msgstr ""
+
+#: ui/subtitles_tab.gd:96
+msgid "Find a line"
+msgstr ""
+
+#: ui/subtitles_tab.gd:96
+msgid "Lines around now"
+msgstr ""
+
+#: ui/subtitles_tab.gd:140
+msgid "This file has no subtitle tracks"
+msgstr ""
+
+#: ui/subtitles_tab.gd:305
+msgid "A second track needs a subtitle file next to the video"
+msgstr ""
+
+#: ui/subtitles_tab.gd:201
+msgid "Searching..."
+msgstr ""
+
+#: ui/subtitles_tab.gd:212
+msgid "Reading the script..."
+msgstr ""
+
+#: ui/system_tab.gd:123
+msgid "Views"
+msgstr ""
+
+#: ui/system_tab.gd:124
+msgid "Info overlay"
+msgstr ""
+
+#: ui/system_tab.gd:125
+msgid "Stats"
+msgstr ""
+
+#: ui/system_tab.gd:137
+msgid "Panel"
+msgstr ""
+
+#: ui/system_tab.gd:141
+msgid "Hold menu to recentre"
+msgstr ""
+
+#: ui/system_tab.gd:142
+#, c-format
+msgid "%.2f s"
+msgstr ""
+
+#: ui/system_tab.gd:145
+msgid "Left-handed"
+msgstr ""
+
+#: ui/system_tab.gd:146
+msgid "Reset layout"
+msgstr ""
+
+#: ui/system_tab.gd:154
+msgid "Language"
+msgstr ""
+
+#: ui/system_tab.gd:158
+msgid "The menus and the controller labels. Names of films and files stay as they are."
+msgstr ""
+
+#: ui/system_tab.gd:160
+msgid "Accessibility"
+msgstr ""
+
+#: ui/system_tab.gd:161
+msgid "Larger panel"
+msgstr ""
+
+#: ui/system_tab.gd:164
+msgid "One eye for 3D"
+msgstr ""
+
+#: ui/system_tab.gd:167
+msgid "Subtitles always on"
+msgstr ""
+
+#: ui/system_tab.gd:171
+msgid "Test and setup"
+msgstr ""
+
+#: ui/system_tab.gd:172
+msgid "Test patterns"
+msgstr ""
+
+#: ui/system_tab.gd:173
+msgid "Network hosts"
+msgstr ""
+
+#: ui/system_tab.gd:180
+msgid "Calibration cards"
+msgstr ""
+
+#: ui/system_tab.gd:190
+msgid "Measure bandwidth"
+msgstr ""
+
+#: ui/system_tab.gd:195
+msgid "Run benchmark"
+msgstr ""
+
+#: ui/system_tab.gd:206
+msgid "Stop tour"
+msgstr ""
+
+#: ui/system_tab.gd:214
+msgid "Hardware video"
+msgstr ""
+
+#: ui/system_tab.gd:220
+msgid "Rendering"
+msgstr ""
+
+#: ui/system_tab.gd:222
+msgid "Foveation"
+msgstr ""
+
+#: ui/system_tab.gd:225
+msgid "Sharp while the panel shows"
+msgstr ""
+
+#: ui/system_tab.gd:230
+msgid "Film drawn by the headset"
+msgstr ""
+
+#: ui/system_tab.gd:233
+msgid "Curved screen too"
+msgstr ""
+
+#: ui/system_tab.gd:243
+msgid "Controllers"
+msgstr ""
+
+#: ui/system_tab.gd:246
+msgid "Haptic ticks"
+msgstr ""
+
+#: ui/system_tab.gd:248
+msgid "Tick strength"
+msgstr ""
+
+#: ui/system_tab.gd:253
+msgid "Jog wheel"
+msgstr ""
+
+#: ui/system_tab.gd:257
+msgid "One turn"
+msgstr ""
+
+#: ui/system_tab.gd:262
+msgid "Seek bar pictures"
+msgstr ""
+
+#: ui/system_tab.gd:266
+msgid "Zoom lens"
+msgstr ""
+
+#: ui/system_tab.gd:271
+msgid "Magnification"
+msgstr ""
+
+#: ui/system_tab.gd:275 ui/system_tab.gd:276
+msgid "Phone remote"
+msgstr ""
+
+#: ui/system_tab.gd:284
+msgid "Unpair phones"
+msgstr ""
+
+#: ui/system_tab.gd:297
+msgid "Share files"
+msgstr ""
+
+#: ui/system_tab.gd:298
+msgid "Share this headset's files"
+msgstr ""
+
+#: ui/system_tab.gd:307
+msgid "Phones and computers on this network can download and upload files. Scan the code: it holds the pairing code, which is shown nowhere else."
+msgstr ""
+
+#: ui/system_tab.gd:325
+msgid "Dev tools"
+msgstr ""
+
+#: ui/system_tab.gd:329
+msgid "Reload theme"
+msgstr ""
+
+#: ui/system_tab.gd:330
+msgid "Remote changes"
+msgstr ""
+
+#: ui/system_tab.gd:335
+msgid "Allow for an hour"
+msgstr ""
+
+#: ui/system_tab.gd:339 ui/ui_layer.gd:753
+msgid "Revoke"
+msgstr ""
+
+#: ui/system_tab.gd:347
+msgid "About"
+msgstr ""
+
+#: ui/system_tab.gd:352
+#, c-format
+msgid "Engine %s, %s"
+msgstr ""
+
+#: ui/system_tab.gd:494
+msgid "Look"
+msgstr ""
+
+#: ui/system_tab.gd:611
+msgid "hot-reload on"
+msgstr ""
+
+#: ui/system_tab.gd:611
+msgid "hot-reload off"
+msgstr ""
+
+#: ui/system_tab.gd:613
+#, c-format
+msgid "%s; remote changes allowed for %d more min"
+msgstr ""
+
+#: ui/system_tab.gd:636 ui/ui_layer.gd:225 ui/ui_layer.gd:386 ui/ui_layer.gd:886
+#: ui/ui_layer.gd:890 ui/ui_layer.gd:918
+msgid "Undo"
+msgstr ""
+
+#: ui/system_tab.gd:646
+#, c-format
+msgid "Measuring %s ..."
+msgstr ""
+
+#: ui/system_tab.gd:650
+#, c-format
+msgid "Can't measure: %s"
+msgstr ""
+
+#: ui/system_tab.gd:652
+#, c-format
+msgid "%.0f Mbit/s average, %.0f peak, opened in %d ms, %.0f MB read"
+msgstr ""
+
+#: ui/system_tab.gd:663
+msgid "This engine build can't run the benchmark."
+msgstr ""
+
+#: ui/system_tab.gd:685
+#, c-format
+msgid "Tour %s (kiosk): round %d, step %d of %d"
+msgstr ""
+
+#: ui/system_tab.gd:686
+#, c-format
+msgid "Tour %s: round %d, step %d of %d"
+msgstr ""
+
+#: ui/system_tab.gd:189
+msgid "a file on a share, e.g. smb://host/share/film.mkv"
+msgstr ""
+
+#: ui/system_tab.gd:236
+msgid "A curved screen as the headset's cylinder layer; off: drawn in the room, where things in front of it cover it"
+msgstr ""
+
+#: ui/system_tab.gd:269
+msgid "In 180 and 360: hold the grip and pull the trigger for a magnifier"
+msgstr ""
+
+#: ui/system_tab.gd:39
+msgid "Ask"
+msgstr ""
+
+#: ui/system_tab.gd:39
+msgid "Allow"
+msgstr ""
+
+#: ui/system_tab.gd:39
+msgid "Deny"
+msgstr ""
+
+#: ui/system_tab.gd:41
+msgid "Off"
+msgstr ""
+
+#: ui/system_tab.gd:41
+msgid "Low"
+msgstr ""
+
+#: ui/system_tab.gd:41
+msgid "Medium"
+msgstr ""
+
+#: ui/system_tab.gd:41
+msgid "High"
+msgstr ""
+
+#: ui/system_tab.gd:42
+msgid "Saves GPU time at the edges of your view. High can look blocky."
+msgstr ""
+
+#: ui/system_tab.gd:43
+msgid "Foveation isn't available: this build starts without it."
+msgstr ""
+
+#: ui/system_tab.gd:46
+msgid "Both controllers. The labels change ink, or get a dark outline, to stay readable."
+msgstr ""
+
+#: ui/tablet.gd:276
+msgid "LIVE"
+msgstr ""
+
+#: ui/ui_layer.gd:190
+#, c-format
+msgid "Resumed at %s"
+msgstr ""
+
+#: ui/ui_layer.gd:190
+msgid "Start over"
+msgstr ""
+
+#: ui/ui_layer.gd:225
+#, c-format
+msgid "Remote: %s"
+msgstr ""
+
+#: ui/ui_layer.gd:386 ui/ui_layer.gd:391
+#, c-format
+msgid "Assistant: %s"
+msgstr ""
+
+#: ui/ui_layer.gd:429
+#, c-format
+msgid "Left controller battery %d %%"
+msgstr ""
+
+#: ui/ui_layer.gd:431
+#, c-format
+msgid "Right controller battery %d %%"
+msgstr ""
+
+#: ui/ui_layer.gd:432
+#, c-format
+msgid "Controller battery %d %%"
+msgstr ""
+
+#: ui/ui_layer.gd:439
+#, c-format
+msgid "Left controller %d %%"
+msgstr ""
+
+#: ui/ui_layer.gd:441
+#, c-format
+msgid "Right controller %d %%"
+msgstr ""
+
+#: ui/ui_layer.gd:442
+#, c-format
+msgid "Controller %d %%"
+msgstr ""
+
+#: ui/ui_layer.gd:753
+msgid "Remote changes allowed for an hour"
+msgstr ""
+
+#: ui/ui_layer.gd:765
+msgid "Connecting..."
+msgstr ""
+
+#: ui/ui_layer.gd:775
+msgid "Starting the browser..."
+msgstr ""
+
+#: ui/ui_layer.gd:789
+msgid "Point at a seat and pull the trigger. B cancels."
+msgstr ""
+
+#: ui/ui_layer.gd:799
+msgid "Seat unchanged"
+msgstr ""
+
+#: ui/ui_layer.gd:822
+msgid "That object can't be placed here"
+msgstr ""
+
+#: ui/ui_layer.gd:826
+msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
+msgstr ""
+
+#: ui/ui_layer.gd:855
+msgid "That's as many areas as there can be: delete one first."
+msgstr ""
+
+#: ui/ui_layer.gd:872 ui/ui_layer.gd:883
+msgid "Nothing marked"
+msgstr ""
+
+#: ui/ui_layer.gd:886
+#, c-format
+msgid "%s added: the cameras show there"
+msgstr ""
+
+#: ui/ui_layer.gd:890
+#, c-format
+msgid "%s changed"
+msgstr ""
+
+#: ui/ui_layer.gd:907
+msgid "Nothing placed"
+msgstr ""
+
+#: ui/ui_layer.gd:921
+msgid "Not placed"
+msgstr ""
+
+#: ui/ui_layer.gd:935
+msgid "No seat there"
+msgstr ""
+
+#: ui/url_form.gd:32
+msgid "example.com, https://.../film.mkv or udp://@:1234"
+msgstr ""
+
+#: ui/url_form.gd:39
+msgid "Open"
+msgstr ""
+
+#: ui/url_form.gd:43
+msgid "Play as video"
+msgstr ""
+
+#: ui/url_form.gd:49
+msgid "Save page"
+msgstr ""
+
+#: ui/url_form.gd:55
+msgid "Remove page"
+msgstr ""
+
+#: ui/url_form.gd:72
+msgid "Saved page"
+msgstr ""
+
+#: ui/url_form.gd:72
+msgid "Open a web page or a stream"
+msgstr ""
+
+#: ui/themes/tablet.json
+msgid "Plum & gold"
+msgstr ""
+
+#: ui/themes/tablet.json
+msgid "Graphite & amber"
+msgstr ""
+
+#: ui/themes/tablet.json
+msgid "Midnight & coral"
+msgstr ""
+
+#: ui/themes/tablet.json
+msgid "Slate & mint"
+msgstr ""
+
+#: ui/themes/tablet.json
+msgid "Ink & sky"
+msgstr ""
+
+#: ui/themes/tablet.json
+msgid "Espresso & peach"
+msgstr ""
+

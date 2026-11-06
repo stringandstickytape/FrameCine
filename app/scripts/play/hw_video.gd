@@ -26,12 +26,15 @@ const DEVICE := "/dev/video-dec0"
 const PROBE_TIMEOUT := 10.0
 
 ## The paths, as status()["path"] gives them, and how the System row says each.
+## Shown in the System tab in the menus' language (ui/hw_video_row.gd; docs/i18n.md); English here.
+# i18n: begin
 const PATH_TEXTS := {
 	"p010": "on (P010 from the system's video driver)",
 	"q10c": "on (Q10C through the GPU, stock driver)",
 	"software": "off: 10-bit plays in software",
 	"unknown": "checking ...",
 }
+# i18n: end
 
 ## The app core (scripts/main.gd). Untyped: main.gd preloads the hub, which preloads this.
 var main: Node

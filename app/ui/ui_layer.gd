@@ -45,6 +45,7 @@ const WorldToast := preload("res://ui/world_toast.gd")
 const HandHint := preload("res://ui/hand_hint.gd")
 const WatchCard := preload("res://ui/watch_card.gd")
 const Assistant := preload("res://scripts/assistant/assistant.gd")
+const I18n := preload("res://scripts/i18n.gd")
 ## The header lists the controller batteries at or below this.
 const CONTROLLER_BATTERY_HEADER := 20
 
@@ -118,8 +119,9 @@ var _card_hit := {}
 var _ptt: Node
 var _ptt_check := 0.0
 var _talking := false
-## The header's extra items: low controller batteries, and "Assistant" while the assistant link is connected.
-var _battery_extra := ""
+## The header's extra items: low controller batteries (from the last levels: side -> percent), and "Assistant" while
+## the assistant link is connected.
+var _battery_levels := {}
 var _assistant: Node
 ## Seat picking (#19, the Room tab's "Pick a seat"): the laser goes out to the floor; the seat the ray passes nearest
 ## (within SEAT_AIM metres of it) gets a ring on the floor; the trigger takes it; B or menu cancels.
@@ -185,7 +187,7 @@ func setup(p_app: Node3D) -> void:
 	app.playback_ended.connect(show_panel)
 	var f: Node = app.features
 	f.resume.resumed.connect(func(position_s: float) -> void:
-		ui.show_toast("Resumed at %s" % W.clock(position_s), "Start over", func() -> void: f.resume.start_over()))
+		ui.show_toast(tr("Resumed at %s") % W.clock(position_s), tr("Start over"), func() -> void: f.resume.start_over()))
 	f.resume.entries_changed.connect(func() -> void: ui.files.refresh_markers())
 	_connect_dev.call_deferred()
 	card = WatchCard.new()
@@ -203,14 +205,11 @@ func setup(p_app: Node3D) -> void:
 	controller_battery.name = "ControllerBattery"
 	add_child(controller_battery)
 	controller_battery.low.connect(func(side: String, pct: int) -> void:
-		notify("%s battery %d %%" % ["Controller" if side == "controller" else side.capitalize() + " controller", pct]))
+		notify(_battery_notice(side, pct)))
 	controller_battery.changed.connect(func(levels: Dictionary) -> void:
-		var low: Array[String] = []
-		for side: String in levels:
-			if int(levels[side]) <= CONTROLLER_BATTERY_HEADER:
-				low.append("%s controller %d %%" % [side.capitalize(), int(levels[side])])
-		_battery_extra = ", ".join(low)
+		_battery_levels = levels.duplicate()
 		_update_header_extra())
+	I18n.holder().changed.connect(_on_language_changed)
 
 	files.open_folder(str(app.settings.get_value("browser", "last_folder", "")))
 
@@ -223,7 +222,7 @@ func _connect_dev() -> void:
 	dev.permissions.remote_change.connect(func(e: Dictionary) -> void:
 		if str(e.get("state", "")) == "done":
 			var id := int(e["id"])
-			ui.show_toast("Remote: %s" % e["summary"], "Undo" if bool(e.get("undoable", false)) else "",
+			ui.show_toast(tr("Remote: %s") % e["summary"], tr("Undo") if bool(e.get("undoable", false)) else "",
 					func() -> void: dev.permissions.undo(id), 8.0))
 
 
@@ -300,6 +299,7 @@ func reset_layout() -> void:
 
 
 ## A short notice: in the panel's footer when it is open, else a quiet line in the world where the head looks.
+## (The caller translates `text`, tr(); it shows as given, docs/i18n.md.)
 func notify(text: String) -> void:
 	if _open:
 		ui.show_toast(text)
@@ -383,12 +383,12 @@ func _check_assistant() -> void:
 
 
 func _on_assistant_change(summary: String, undo: Callable) -> void:
-	ui.show_toast("Assistant: %s" % summary, "Undo" if undo.is_valid() else "", undo, 8.0)
+	ui.show_toast(tr("Assistant: %s") % summary, tr("Undo") if undo.is_valid() else "", undo, 8.0)
 
 
 ## An assistant changed the room: on show and kept at once (docs/assistant.md); a short note, nothing to decide.
 func _on_room_changed(summary: String) -> void:
-	ui.show_toast("Assistant: %s" % summary, "", Callable(), 5.0)
+	ui.show_toast(tr("Assistant: %s") % summary, "", Callable(), 5.0)
 
 
 ## An assistant asks to pair: the panel opens at the System tab's code (the card beside the screen shows it too).
@@ -409,11 +409,37 @@ func _on_assistant_connected(_on: bool) -> void:
 
 func _update_header_extra() -> void:
 	var parts: Array[String] = []
-	if _battery_extra != "":
-		parts.append(_battery_extra)
+	for side: String in _battery_levels:
+		if int(_battery_levels[side]) <= CONTROLLER_BATTERY_HEADER:
+			parts.append(_battery_header(side, int(_battery_levels[side])))
 	if _assistant != null and is_instance_valid(_assistant) and _assistant.is_link_connected():
-		parts.append("Assistant")
+		parts.append(tr("Assistant"))
 	ui.header_extra = ", ".join(parts)
+
+
+## The language changed (scripts/i18n.gd): the header's extra items in it.
+func _on_language_changed(_code: String) -> void:
+	_update_header_extra()
+
+
+## "Left controller battery 14 %" (a notice), whole sentences per side (docs/i18n.md).
+func _battery_notice(side: String, pct: int) -> String:
+	match side:
+		"left":
+			return tr("Left controller battery %d %%") % pct
+		"right":
+			return tr("Right controller battery %d %%") % pct
+	return tr("Controller battery %d %%") % pct
+
+
+## "Left controller 14 %" (the header).
+func _battery_header(side: String, pct: int) -> String:
+	match side:
+		"left":
+			return tr("Left controller %d %%") % pct
+		"right":
+			return tr("Right controller %d %%") % pct
+	return tr("Controller %d %%") % pct
 
 
 func _on_listening(on: bool) -> void:
@@ -423,7 +449,7 @@ func _on_listening(on: bool) -> void:
 		return
 	if not _open:
 		if on:
-			world_toast.show_text("Listening", INF)
+			world_toast.show_text(tr("Listening"), INF)
 		else:
 			world_toast.hide_now()
 
@@ -724,7 +750,7 @@ func _update_grip_hold(delta: float) -> void:
 		var dev := DevHost.instance()
 		if dev != null and dev.get("permissions") != null:
 			dev.permissions.allow_for(3600.0)
-			ui.show_toast("Remote changes allowed for an hour", "Revoke", func() -> void: dev.permissions.revoke())
+			ui.show_toast(tr("Remote changes allowed for an hour"), tr("Revoke"), func() -> void: dev.permissions.revoke())
 			pointer_hand.pulse()
 
 
@@ -736,7 +762,7 @@ func _refresh() -> void:
 	ui.tick()
 	var src = player.source
 	if src == null:
-		ui.set_status("Connecting..." if player.connecting_path != "" else "")
+		ui.set_status(tr("Connecting...") if player.connecting_path != "" else "")
 		return
 	if src.get_kind() == "window":
 		var title: String = app.display_title()
@@ -746,7 +772,7 @@ func _refresh() -> void:
 		if src.is_ended():
 			ui.set_status(src.last_error)
 		elif not src.has_frame():
-			ui.set_status("Starting the browser...")
+			ui.set_status(tr("Starting the browser..."))
 		else:
 			ui.set_status("")
 		return
@@ -760,7 +786,7 @@ func start_seat_pick() -> void:
 	_seat_pick = true
 	_seat_aim = {}
 	hide_panel()
-	notify("Point at a seat and pull the trigger. B cancels.")
+	notify(tr("Point at a seat and pull the trigger. B cancels."))
 
 
 ## B or menu while picking a seat: stop, nothing changes. True when it was picking (the button is used up).
@@ -770,7 +796,7 @@ func cancel_seat_pick() -> bool:
 	_seat_pick = false
 	_seat_aim = {}
 	_show_seat_ring({})
-	notify("Seat unchanged")
+	notify(tr("Seat unchanged"))
 	return true
 
 
@@ -793,11 +819,11 @@ func start_object_move(placed_name: String) -> bool:
 
 func _start_placer(started: bool) -> bool:
 	if not started:
-		notify("That object can't be placed here")
+		notify(tr("That object can't be placed here"))
 		return false
 	cancel_seat_pick()
 	hide_panel()
-	notify("Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels.")
+	notify(tr("Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."))
 	return true
 
 
@@ -825,8 +851,8 @@ func start_window_edit(id: String) -> bool:
 func _start_window(started: bool) -> bool:
 	var rw := _real_windows()
 	if not started:
-		notify("The headset's cameras can't show here." if rw == null or not rw.available()
-				else "That's as many areas as there can be: delete one first.")
+		notify(tr("The headset's cameras can't show here.") if rw == null or not rw.available()
+				else tr("That's as many areas as there can be: delete one first."))
 		return false
 	cancel_seat_pick()
 	cancel_object_place()
@@ -843,7 +869,7 @@ func cancel_window_mark() -> bool:
 	if not is_marking_window():
 		return false
 	_real_windows().cancel_mark()
-	notify("Nothing marked")
+	notify(tr("Nothing marked"))
 	return true
 
 
@@ -854,14 +880,14 @@ func _finish_window_mark() -> void:
 	var w: Dictionary = rw.finish()
 	show_panel()
 	if w.is_empty():
-		notify("Nothing marked")
+		notify(tr("Nothing marked"))
 		return
 	if was.is_empty():
-		ui.show_toast("%s added: the cameras show there" % w["name"], "Undo", func() -> void:
+		ui.show_toast(tr("%s added: the cameras show there") % w["name"], tr("Undo"), func() -> void:
 			rw.remove(str(w["id"]))
 			ui.hide_toast(), 8.0)
 	else:
-		ui.show_toast("%s changed" % w["name"], "Undo", func() -> void:
+		ui.show_toast(tr("%s changed") % w["name"], tr("Undo"), func() -> void:
 			rw.restore(was)
 			ui.hide_toast(), 8.0)
 
@@ -878,7 +904,7 @@ func is_placing_object() -> bool:
 func cancel_object_place() -> bool:
 	if _placer == null or not _placer.cancel():
 		return false
-	notify("Nothing placed")
+	notify(tr("Nothing placed"))
 	return true
 
 
@@ -889,10 +915,10 @@ func _commit_object() -> void:
 	if r.get("ok") == true:
 		var said := str(r.get("summary", "placed"))
 		show_panel()
-		ui.show_toast(said.left(1).to_upper() + said.substr(1), "Undo" if r.get("undo") is Callable else "",
+		ui.show_toast(said.left(1).to_upper() + said.substr(1), tr("Undo") if r.get("undo") is Callable else "",
 				r.get("undo", Callable()), 8.0)
 	else:
-		notify(str(r.get("error", "Not placed")))
+		notify(str(r.get("error", tr("Not placed"))))
 
 
 func is_picking_seat() -> bool:
@@ -906,9 +932,9 @@ func pick_seat(aim: Dictionary) -> bool:
 	_show_seat_ring({})
 	var seat: Node = app.features.seat
 	if aim.is_empty() or not seat.choose_seat_at(aim["point"], true):
-		notify("No seat there")
+		notify(tr("No seat there"))
 		return false
-	notify(str(seat.names()[int(aim["index"])]) if int(aim.get("index", -1)) >= 0 else "Seat")
+	notify(str(seat.names()[int(aim["index"])]) if int(aim.get("index", -1)) >= 0 else tr("Seat"))
 	return true
 
 

@@ -2,8 +2,43 @@ extends RefCounted
 
 ## Builders for the pane's ordinary controls. Looks come from the theme (ui/themes/default.tres) by type variation;
 ## sizes from the tokens. Nothing here writes a colour or a font.
+##
+## Languages (docs/i18n.md): give the builders the English. A control translates its own fixed text (Godot's
+## auto-translate), and again when the language changes. Text built from parts goes through tr() / tr_n(); content
+## (names, titles, paths, what the viewer typed) goes on a control marked with content(), so it is never translated.
 
 const PaneStyle := preload("res://ui/pane_style.gd")
+## The section of what comes before a tab's first heading (group_sections()).
+const GENERAL := "General" # i18n
+
+
+## Marks a control, and what is inside it, as showing content: file and film names, titles, host names, numbers, what
+## the viewer typed, or text the code translated itself. Godot's auto-translate is off there, so a folder named "Room"
+## stays "Room" in every language. Meta "content" says so (tests/test_i18n.gd).
+static func content(c: Node) -> void:
+	c.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	c.set_meta("content", true)
+
+
+## A label whose text `make` builds (tr(), tr_n(), with names or numbers in it), built again when the language
+## changes. A content() label: what make returns shows as it is.
+static func live_label(make: Callable, variation := &"") -> Label:
+	var l := LiveLabel.new()
+	l.make = make
+	l.theme_type_variation = variation
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	content(l)
+	l.text = make.call()
+	return l
+
+
+class LiveLabel:
+	extends Label
+	var make: Callable
+
+	func _notification(what: int) -> void:
+		if what == NOTIFICATION_TRANSLATION_CHANGED and make.is_valid():
+			text = make.call()
 
 
 static func label(text: String, variation := &"") -> Label:
@@ -97,6 +132,8 @@ static func slider_row(text: String, min_v: float, max_v: float, step: float, fm
 	s.size_flags_vertical = Control.SIZE_FILL
 	s.custom_minimum_size = Vector2(0, PaneStyle.constant(&"button_height") - 8)
 	var value_label := label("", &"TimeLabel")
+	# fmt's text as it is: a number, or a unit fmt translated itself.
+	content(value_label)
 	value_label.custom_minimum_size = Vector2(84, 0)
 	value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	head.add_child(value_label)
@@ -123,9 +160,10 @@ static func slider_of(row: Control) -> HSlider:
 
 
 ## A help line under a control (ui/help_texts.gd): muted, up to two lines (an ellipsis if it is longer still: a
-## half-width card holds few words to a line), not clickable. Its meta "help" marks it.
-static func help(text: String) -> Label:
-	var l := ellipsis(label(text, &"MutedLabel"))
+## half-width card holds few words to a line), not clickable. Its meta "help" marks it. make: a line built from parts
+## instead (live_label()).
+static func help(text: String, make := Callable()) -> Label:
+	var l := ellipsis(live_label(make, &"MutedLabel") if make.is_valid() else label(text, &"MutedLabel"))
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.max_lines_visible = 2
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -161,7 +199,7 @@ static func group_sections(box: VBoxContainer) -> Array[VBoxContainer]:
 		if title != "" or group == null:
 			group = vbox()
 			group.add_theme_constant_override("separation", box.get_theme_constant("separation"))
-			group.set_meta("section", title if title != "" else "General")
+			group.set_meta("section", title if title != "" else GENERAL)
 			groups.append(group)
 			box.add_child(group)
 		group.add_child(c)

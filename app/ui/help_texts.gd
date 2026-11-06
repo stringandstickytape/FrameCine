@@ -8,9 +8,14 @@ extends RefCounted
 ## label); no colour or font here.
 ##
 ## Written so far: the Picture and Sound tabs. The other tabs get theirs as the user names what is unclear.
+##
+## Languages (docs/i18n.md): the keys are the controls' English names (what their text property holds, in any
+## language); the lines are translated where they show: a line alone translates itself, "Name: text" is built with
+## tr() and built again when the language changes.
 
 const W := preload("res://ui/pane_widgets.gd")
 
+# i18n: begin
 const PICTURE := {
 	"Auto": "Guess the 3D layout and shape from the file name and picture size.",
 	"Half": "Each eye is squeezed to half width or height in the file: stretch it.",
@@ -74,6 +79,7 @@ const SOUND := {
 	"Tune spatial sound": "Hear a sound two ways, pick the better; it then fits your ears.",
 	"Play sound on a PC": "The sound plays on a PC, in time with the picture.",
 }
+# i18n: end
 
 const TABS := {"picture": PICTURE, "sound": SOUND}
 
@@ -83,14 +89,19 @@ static func attach(root: Control, tab: String) -> int:
 	var texts: Dictionary = TABS.get(tab, {})
 	if texts.is_empty():
 		return 0
-	# [target, anchor, text]: found first, inserted after, so the walk sees no new nodes.
+	# [target, anchor, text, caption ("" for a line alone)]: found first, inserted after, so the walk sees no new
+	# nodes.
 	var found: Array = []
 	_find(root, texts, found)
 	var after := {}
 	for f: Array in found:
 		var target: Control = f[0]
 		var anchor: Control = f[1]
-		var line := W.help(f[2])
+		var text: String = f[2]
+		var caption: String = f[3]
+		var line := W.help(text) if caption == "" else W.help("", func() -> String:
+			return TranslationServer.translate("%s: %s") % [TranslationServer.translate(caption),
+					TranslationServer.translate(text)])
 		var parent := anchor.get_parent()
 		parent.add_child(line)
 		# Several lines under one row of buttons keep the buttons' order.
@@ -109,7 +120,7 @@ static func _find(node: Node, texts: Dictionary, found: Array) -> void:
 		if c is HBoxContainer and c.has_meta("slider"):
 			var name_label := c.get_child(0) as Label
 			if name_label != null and texts.has(name_label.text):
-				found.append([c, c, str(texts[name_label.text])])
+				found.append([c, c, str(texts[name_label.text]), ""])
 			continue
 		# Not section titles (the caps label) and not one choice of a row of choices (its own words say it).
 		var skip: bool = (c is Label and (c as Label).theme_type_variation == &"CapsLabel") \
@@ -118,8 +129,8 @@ static func _find(node: Node, texts: Dictionary, found: Array) -> void:
 			var caption := str(c.get("text"))
 			var parent := c.get_parent()
 			if parent is HBoxContainer:
-				found.append([c, parent, "%s: %s" % [caption, texts[caption]]])
+				found.append([c, parent, str(texts[caption]), caption])
 			else:
-				found.append([c, c, str(texts[caption])])
+				found.append([c, c, str(texts[caption]), ""])
 			continue
 		_find(c, texts, found)
