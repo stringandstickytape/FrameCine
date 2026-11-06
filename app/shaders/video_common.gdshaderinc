@@ -183,6 +183,22 @@ vec3 tone_map(vec3 c) {
 	return c * (mapped / m);
 }
 
+// Filtering by footprint (the picture shrunk on the display: an 8K 360 frame has about twice the texels a degree the
+// eye image has, a 4K flat film on a 60° screen six times): one bilinear sample skips texels then, and fine detail
+// shimmers and drops out (stars in a still 4K frame). video_pixel_filtered() is given the screen pixel's footprint in
+// the eye's picture (its UV's derivatives) and averages a grid of bilinear samples across it, up to footprint_taps
+// along each axis, separately for luma and the half-size chroma; no more than one sample where the picture is near
+// 1:1 or stretched. No mipmaps: the decoder's frames are imported as they are, and building a chain per frame would
+// cost the bandwidth this saves. The samples lie close together, so most come from the texture cache. Where the eye
+// image is coarser (the foveated edge), each pixel covers more texels and is filtered more, as it should be.
+// 1 turns it off (one sample, as video_pixel()).
+uniform int footprint_taps = 3;
+
+// Taps along one axis for a footprint `texels` long: one up to a quarter past 1:1 (a bilinear sample covers that).
+int footprint_taps_for(float texels) {
+	return clamp(int(ceil(texels - 0.25)), 1, max(footprint_taps, 1));
+}
+
 // The planes' samples on the 8-bit scale, whatever the packing (see p010).
 const float P010_SCALE = 65535.0 / 65280.0;
 float read_y(vec2 uv) {
@@ -234,9 +250,34 @@ vec2 field_chroma(vec2 uv) {
 			+ read_cbcr(vec2(uv.x, (row + 1.5) / size.y)));
 }
 
+// A plane's mean over a screen pixel's footprint (duv_dx, duv_dy: the frame UV's derivatives), each sample kept
+// inside [lo, hi]. which: 0 luma, 1 chroma, 2 the RGB source's.
+vec4 footprint_mean(int which, vec2 uv, vec2 duv_dx, vec2 duv_dy, vec2 lo, vec2 hi) {
+	vec2 size = vec2(which == 0 ? textureSize(y_tex, 0) : (which == 1 ? textureSize(uv_tex, 0) : textureSize(rgb_tex, 0)));
+	int kx = footprint_taps_for(length(duv_dx * size));
+	int ky = footprint_taps_for(length(duv_dy * size));
+	vec4 sum = vec4(0.0);
+	for (int i = 0; i < kx; i++) {
+		for (int j = 0; j < ky; j++) {
+			vec2 o = ((float(i) + 0.5) / float(kx) - 0.5) * duv_dx + ((float(j) + 0.5) / float(ky) - 0.5) * duv_dy;
+			vec2 q = clamp(uv + o, lo, hi);
+			if (which == 0) {
+				sum.r += read_y(q);
+			} else if (which == 1) {
+				sum.rg += read_cbcr(q);
+			} else {
+				sum.rgb += textureLod(rgb_tex, q, 0.0).rgb;
+			}
+		}
+	}
+	return sum / float(kx * ky);
+}
+
 // The picture at mesh_uv (the position inside ONE EYE's picture, 0..1) for view_index (VIEW_INDEX), gamma-encoded,
-// with zoom / pan, depth shift, stereo layout, masks, picture controls and the edge fade applied.
-vec3 video_pixel(vec2 mesh_uv, int view_index) {
+// with zoom / pan, depth shift, stereo layout, masks, picture controls and the edge fade applied, filtered over the
+// screen pixel's footprint: mesh_dx, mesh_dy are mesh_uv's derivatives (dFdx, dFdy), taken by the caller in uniform
+// control flow (the dual fisheye seam picks its UV in a branch). Zero derivatives: one sample.
+vec3 video_pixel_filtered(vec2 mesh_uv, vec2 mesh_dx, vec2 mesh_dy, int view_index) {
 	int view = force_eye >= 0 ? force_eye : view_index;
 	int src_view = mono_eye >= 0 ? mono_eye : view;
 	int eye = swap_eyes ? 1 - src_view : src_view;
@@ -263,11 +304,18 @@ vec3 video_pixel(vec2 mesh_uv, int view_index) {
 	// Keep the bilinear footprint inside the eye's rectangle: half a chroma texel (one luma texel) from its edges, so
 	// neither the padding nor the other eye's half bleeds in.
 	vec2 margin = 0.5 / vec2(rgb_source ? textureSize(rgb_tex, 0) : textureSize(uv_tex, 0));
-	vec2 uv = clamp(rect.xy + p * rect.zw, rect.xy + margin, rect.xy + rect.zw - margin);
+	vec2 lo = rect.xy + margin;
+	vec2 hi = rect.xy + rect.zw - margin;
+	vec2 uv = clamp(rect.xy + p * rect.zw, lo, hi);
+	// The footprint in the frame: the mesh UV's derivatives through the zoom and the eye's rectangle (the wrap of a
+	// 360 frame is taken after, so its seam doesn't look like a huge footprint).
+	vec2 duv_dx = mesh_dx / zoom * rect.zw;
+	vec2 duv_dy = mesh_dy / zoom * rect.zw;
+	bool filtered = footprint_taps > 1 && deinterlace == 0 && (mesh_dx != vec2(0.0) || mesh_dy != vec2(0.0));
 
 	vec3 rgb;
 	if (rgb_source) {
-		rgb = textureLod(rgb_tex, uv, 0.0).rgb;
+		rgb = filtered ? footprint_mean(2, uv, duv_dx, duv_dy, lo, hi).rgb : textureLod(rgb_tex, uv, 0.0).rgb;
 		if (pc_sharpen > 0.0) {
 			vec2 t = 1.0 / vec2(textureSize(rgb_tex, 0));
 			vec3 n = textureLod(rgb_tex, uv + vec2(t.x, 0.0), 0.0).rgb + textureLod(rgb_tex, uv - vec2(t.x, 0.0), 0.0).rgb
@@ -280,6 +328,9 @@ vec3 video_pixel(vec2 mesh_uv, int view_index) {
 		if (deinterlace > 0) {
 			y = field_luma(uv);
 			cbcr = field_chroma(uv);
+		} else if (filtered) {
+			y = footprint_mean(0, uv, duv_dx, duv_dy, lo, hi).r;
+			cbcr = footprint_mean(1, uv, duv_dx, duv_dy, lo, hi).rg;
 		} else {
 			y = read_y(uv);
 			cbcr = read_cbcr(uv);
@@ -363,4 +414,10 @@ vec3 video_pixel(vec2 mesh_uv, int view_index) {
 		rgb *= smoothstep(0.0, edge_fade, e.x) * smoothstep(0.0, edge_fade * 0.5, e.y);
 	}
 	return rgb;
+}
+
+// As video_pixel_filtered() with one bilinear sample: the reflection, the magnifier and the film layer's copy (blurred,
+// or drawn 1:1). The screen and the crossfade use video_pixel_filtered().
+vec3 video_pixel(vec2 mesh_uv, int view_index) {
+	return video_pixel_filtered(mesh_uv, vec2(0.0), vec2(0.0), view_index);
 }

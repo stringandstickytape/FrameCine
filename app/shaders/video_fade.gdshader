@@ -9,6 +9,7 @@ render_mode unshaded, blend_mix, depth_draw_never, cull_back, shadows_disabled, 
 uniform float fade = 1.0;
 
 void fragment() {
-	ALBEDO = srgb_to_linear(clamp(video_pixel(UV, int(VIEW_INDEX)), 0.0, 1.0)) * brightness;
+	ALBEDO = srgb_to_linear(clamp(video_pixel_filtered(UV, dFdx(UV), dFdy(UV), int(VIEW_INDEX)), 0.0, 1.0))
+			* brightness;
 	ALPHA = clamp(fade, 0.0, 1.0);
 }

@@ -1201,6 +1201,27 @@ right half, or in front of its centre (1.8 times larger), and low ahead in 180 a
     the headset.
   - Sharpen's look on a real film in the headset.
 
+## Filtering by footprint (a picture shrunk on the display)
+
+Most video is shrunk on the Frame, not stretched: the eye image is about 10.5 pixels a degree at its centre, an 8K
+360 frame about 21, a 4K flat film on a 60° screen about 64. One bilinear sample per screen pixel then skips texels,
+and fine detail shimmers and drops out as the head moves (stars in a still 4K frame aliased on the sphere).
+
+- **How:** `video_pixel_filtered()` in `shaders/video_common.gdshaderinc` takes the screen pixel's footprint in the
+  frame (the mesh UV's derivatives, through the zoom and the eye's rectangle) and averages a grid of bilinear samples
+  across it: as many along each axis as the footprint is texels long, up to `footprint_taps` (3), separately for luma
+  and the half-size chroma. Near 1:1 or stretched it is one sample, as before. No mipmaps: the decoder's frames are
+  imported as they are, and a mip chain per frame would cost the bandwidth this saves; the samples lie close
+  together, so most come from the texture cache. The foveated edge, where the eye image is coarser, is filtered more,
+  as it should be. The derivatives are taken in `video.gdshader` before the dual fisheye seam's branch. The screen
+  and the crossfade use it; the floor reflection, the magnifier and the film layer's copy keep one sample (blurred,
+  or drawn 1:1). Flat films on the film layer are drawn by the compositor, not this shader.
+- **Measured** (`tests/test_footprint.gd`, rendered with lavapipe at 640 x 640): the 8K 360 zone plate where its
+  rings are finer than the screen shows false rings at 0.215 spread off, 0.055 on; where they are coarse, 0.357 and
+  0.355 (kept). The 8K starfield turned in steps of 0.013°: a patch's light varies 0.043 off, 0.007 on.
+- **To do:** time it on the Frame (the `perf` command's `gpu_ms`, with `lab://zoneplate_360` playing), with taps 1
+  and 3.
+
 ## Dual fisheye 360
 
 A 360 camera's raw file: two image circles side by side in a 2:1 frame. The left circle is the lens that looks
