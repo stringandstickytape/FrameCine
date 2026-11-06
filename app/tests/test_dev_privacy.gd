@@ -10,11 +10,11 @@ var _fails := 0
 
 
 func _init() -> void:
-	for p in ["remote/key", "party/pin", "network/hosts", "network/anything", "_key", "_server:_key", "share/password",
+	for p in ["remote/key", "x/pin", "network/hosts", "network/anything", "_key", "_server:_key", "share/password",
 			"x/api_token", "a/b_secret", "dev/smb_credentials", "mesh:_private", "Remote/_key"]:
 		_check(BuiltinCommands.is_private(p), "private: " + p)
 	for p in ["audio/volume", "subtitles/size", "pane/scale", "position", "mesh:size", "keyboard_visible", "mapping",
-			"spinner", "remote/port", "remote/enabled", "party/name", "monkey", "material_override:albedo_color"]:
+			"spinner", "remote/port", "remote/enabled", "monkey", "material_override:albedo_color"]:
 		_check(not BuiltinCommands.is_private(p), "not private: " + p)
 	print("test_dev_privacy: %s" % ("all passed" if _fails == 0 else "%d FAILED" % _fails))
 	quit(1 if _fails > 0 else 0)

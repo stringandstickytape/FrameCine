@@ -51,7 +51,7 @@ See the conversation notes in `docs/decisions.md` once written.
 
 ```
 app/                 the player: a project for the engine fork (scripts, shaders, scenes; no compiled code)
-tools/               PC tools: dev listener, cast, voice, watch-party peer, audio sink, packaging and install
+tools/               PC tools: dev listener, cast, voice, audio sink, packaging and install
 docs/                documentation (above)
 build/               engine cross-build (build-frame.sh, build-player.sh), the static FFmpeg (ffmpeg-build.sh) and
                      libsmb2 (libsmb2-build.sh, patches in libsmb2-patches/)

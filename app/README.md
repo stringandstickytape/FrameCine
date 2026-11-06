@@ -70,7 +70,6 @@ a file. Over ssh, give everything as arguments after `--`:
 | `--remote` | the phone remote: a web page on the LAN, address and QR code in the pane (`../docs/remote.md`) |
 | (no flag) | Assistant: System tab, "Assistant" (off by default). The headset serves an HTTPS API on port 47801 (`scripts/assistant/assistant_service.gd`): an AI assistant on the LAN reads the guide at `/`, pairs with a code the headset shows, and then takes a short list of commands, cards, voice and room changes (`../docs/assistant.md`). Works in a release build. |
 | `--benchmark[=PATH]` | decode the biggest video in a folder (or PATH) for 10 s and log what the device can do. It also runs once by itself on the first run (`../docs/benchmark.md`). |
-| `--party=host\|join\|join:IP` | watch party on the LAN; `--party-name=NAME`, `--party-pin=PIN` (`../docs/watch-party.md`) |
 | `--tour=FILE`, `--kiosk` | run a tour: a room, a playlist and screen and camera moves from a JSON file (a path or a name in `user://tours`); `--kiosk` loops it for ever (`../docs/tours.md`) |
 | `--dev-allow=MIN`, `--dev-code` | let the listener change the scene and settings for MIN minutes; let it run code (`../docs/dev/permission-ring.md`) |
 | `--debug` | info overlay on, and every controller input logged (`--verbose-input` logs inputs only). Each run always logs the interaction profile the runtime bound per hand and when the aim pose is tracked. |
@@ -208,8 +207,7 @@ bar, transport, tabs, footer) and one script per tab.
   - **Room:** the environments as rows (photo and glTF rooms included; "Use this picture as the room"), seat (next,
     previous, own spot, and Pick a seat with the laser), floor reflection, effects (bias light, react to the film,
     projector beam), time of day (outdoor rooms), room light, dim while playing, reset screen, recentre, the
-    showing (curtains, up next, intermission, crossfades), the sleep timer and the watch party (host, join, people,
-    the host's file not here with Find it).
+    showing (curtains, up next, intermission, crossfades) and the sleep timer.
   - **System:** info overlay, stats; Panel (size, distance, hold to recentre, Follow my head, Left-handed, Reset layout);
     accessibility; test patterns, calibration cards, bandwidth meter, benchmark; a running tour; controllers
     (haptics, jog wheel, zoom lens, seek bar pictures); Hardware video ("Hardware 10-bit video: on (P010 ...) / on
@@ -220,7 +218,7 @@ bar, transport, tabs, footer) and one script per tab.
   shows in the header and the footer, or in the world while the panel is closed.
 - **Keyboard:** letters, a symbols layer, Shift (twice locks), caret keys, Del, Clear, Paste, Done, and a row of whole
   strings per form (https://, .com, udp://@: for web pages and streams; smb://, .local for hosts). The same form,
-  with other words, asks for the watch party's name and PIN and the PC's address.
+  with other words, asks for the PC's address.
 - **Notices:** a low controller battery (#75; read from the peripheral batteries under `/sys/class/power_supply`,
   15 % and 5 %) shows in the footer when the pane is open, else as a quiet line in the world where you look
   (`ui/world_toast.gd`). `--fake-controller-battery=left:12` stubs it on a desktop.
@@ -739,8 +737,8 @@ pointer events. It covers the panel (open at launch, either controller's menu bu
 world-locked, lying back, head follow, the slider nudge, the dev link's menu command), the places, the file rows, tabs, mode diagrams, Auto and the footer, a
 seek-bar click, +10 s, a slider drag, the environment buttons, wheel scrolling, Previous and Next, the stick
 focus and trigger, the keys V, N, P, Up, Tab, M and Esc, a real mouse click on the window, the host form with the
-on-pane keyboard, and focus loss. It also covers each tab's feature controls (they reach the features hub), the
-watch party, sharing, PC audio, push-to-talk, seat picking, live and trick play on the transport, the URL form's
+on-pane keyboard, and focus loss. It also covers each tab's feature controls (they reach the features hub),
+sharing, PC audio, push-to-talk, seat picking, live and trick play on the transport, the URL form's
 routing, the seek-bar thumbnail (seeded, as the desktop has no second decoder), and the read-only hardware 10-bit
 video row (its words, Details, no setup left). The pose and button logic (front pose, head follow, press and hold) is
 also covered by `tests/test_pane.gd`.

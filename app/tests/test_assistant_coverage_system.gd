@@ -1,16 +1,15 @@
 extends SceneTree
 
-## The Room tab, System tab, watch party, eye gaze and director commands for the assistant
+## The Room tab, System tab, eye gaze and director commands for the assistant
 ## (docs/dev/assistant-coverage/room-system.md), through DevCommands.execute against the real main scene: every
 ## command of the area is tagged with a consumer level and describes every parameter; each change shows its effect,
-## reads back the same, syncs the tab and can be undone; the watch party's PIN never shows in a reply or a summary and a
-## join beyond the LAN is refused; no tagged command can reach the assistant's own permission switches.
+## reads back the same, syncs the tab and can be undone; no tagged command can reach the assistant's own permission
+## switches.
 ## godot --headless --xr-mode off --path app --script res://tests/test_assistant_coverage_system.gd
 
 const DevCommands := preload("res://scripts/dev/dev_commands.gd")
 const AssistantCommands := preload("res://scripts/assistant/assistant_commands.gd")
 const CommandHost := preload("res://scripts/dev/command_host.gd")
-const WatchParty := preload("res://scripts/party/watch_party.gd")
 
 const CONSUMER_LEVELS := ["read", "card", "control", "room", "settings", "files", "apps"]
 ## The commands of this area and the consumer level each must have.
@@ -18,8 +17,7 @@ const AREA := {
 	"room_settings": "read", "set_environment": "room", "use_picture_as_room": "room", "seat": "control",
 	"floor_reflection": "room", "bias_light": "room", "react_to_film": "room", "projector_beam": "room",
 	"time_of_day": "room", "room_light": "room", "dim_while_playing": "room", "curtains": "room", "up_next": "room",
-	"intermission": "room", "crossfade": "room", "sleep_timer": "control", "party_settings": "settings",
-	"party_host": "control", "party_join": "control", "party_leave": "control", "party_status": "read",
+	"intermission": "room", "crossfade": "room", "sleep_timer": "control",
 	"system_settings": "read", "panel_layout": "settings", "reset_panel_layout": "settings",
 	"accessibility": "settings", "foveation": "settings", "controller_looks": "read", "controller_look": "settings",
 	"haptics": "settings", "jog_wheel": "settings", "seek_bar_pictures": "settings",
@@ -29,7 +27,6 @@ const AREA := {
 }
 ## Words that would mark a command reaching the assistant's own permissions or its pairing.
 const FORBIDDEN_WORDS := ["allow", "pair", "forget", "permission", "token"]
-const PIN := "4826"
 
 var _failures := 0
 var _checks := 0
@@ -56,13 +53,11 @@ func _run() -> void:
 	await _test_effects()
 	await _test_showing()
 	await _test_sleep()
-	await _test_party()
 	await _test_system()
 	await _test_rest()
 
 	_check("the assistant's switches unchanged by every command (%s)" % [_assistant_switches()],
 			_assistant_switches() == allow_before)
-	WatchParty.leave()
 	main.queue_free()
 	await _frames(2)
 	print("test_assistant_coverage_system: %d checks, %s" % [_checks,
@@ -271,49 +266,6 @@ func _test_sleep() -> void:
 	_check("sleep_timer: off", r["ok"] and not sleep.active)
 	r = await _run_cmd("sleep_timer", {"set": "45"})
 	_check("sleep_timer: a choice outside the list refused", not r["ok"])
-
-
-# --- The watch party -------------------------------------------------------------------------------------------------
-
-func _test_party() -> void:
-	WatchParty.leave()
-	await _frames(1)
-	var r := await _run_cmd("party_settings", {"name": "Test headset", "pin": PIN})
-	_check("party_settings: saved", r["ok"] and WatchParty.saved_name(main) == "Test headset"
-			and WatchParty.saved_pin(main) == PIN and r["result"]["pin_set"] == true)
-	_check("party_settings: the PIN is in neither the reply nor the summary", not PIN in JSON.stringify(r["result"])
-			and not PIN in (r["call"] as DevCommands.Call).summary)
-	var st := await _read("room_settings")
-	_check("room_settings: the party's name, not its PIN", st["party"]["name"] == "Test headset"
-			and st["party"]["pin_set"] == true and not PIN in JSON.stringify(st))
-	var room_tab: Node = _tab("room")
-	if room_tab != null:
-		_check("party_settings: the tab shows the name", (room_tab._party_name as Button).text.contains("Test headset"))
-
-	r = await _run_cmd("party_join", {"host": "8.8.8.8"})
-	_check("party_join: an address beyond the LAN refused (%s)" % r.get("error"), not r["ok"]
-			and "LAN" in str(r["error"]) and WatchParty.instance() == null)
-	r = await _run_cmd("party_join", {"host": "nas.example"})
-	_check("party_join: a name instead of an address refused", not r["ok"] and WatchParty.instance() == null)
-
-	r = await _run_cmd("party_host", {})
-	var p := WatchParty.instance()
-	if r["ok"] and p != null:
-		_check("party_host: the saved name and PIN", p.my_name == "Test headset" and p.pin == PIN)
-		_check("party_host: no PIN in the reply", not PIN in JSON.stringify(r["result"]))
-		var s := await _run_cmd("party_status", {})
-		_check("party_status: no PIN", s["ok"] and s["result"]["role"] == "host" and not PIN in JSON.stringify(s["result"]))
-		var again := await _run_cmd("party_settings", {"name": "Other"})
-		_check("party_settings: refused while the party runs", not again["ok"]
-				and WatchParty.saved_name(main) == "Test headset")
-		r = await _run_cmd("party_leave", {})
-		await _frames(1)
-		_check("party_leave: ended", r["ok"] and r["result"]["left"] == true and WatchParty.instance() == null)
-	else:
-		# UDP 47890 taken on this machine: the host can't start, which is not this test's subject.
-		print("note: party_host could not start here (%s)" % r.get("error"))
-	r = await _run_cmd("party_settings", {"name": "", "pin": ""})
-	_check("party_settings: cleared", r["ok"] and WatchParty.saved_pin(main) == "")
 
 
 # --- The System tab ---------------------------------------------------------------------------------------------------

@@ -1106,32 +1106,11 @@ msgstr "影片交叉淡化"
 msgid "Sleep timer"
 msgstr "睡眠定时"
 
-msgid "Watch party"
-msgstr "一起看"
-
-msgid "Host"
-msgstr "主持"
-
-msgid "Join"
-msgstr "加入"
-
-msgid "Leave"
-msgstr "离开"
-
-msgid "Find it"
-msgstr "查找"
-
 msgid "Flashes only in rooms that react, such as the drive-in; the room pulses with the bass."
 msgstr "只在会做出反应的房间（如汽车影院）中闪烁；房间随低音律动。"
 
 msgid "Curtains: in the cinema and the home theatre, flat screen."
 msgstr "幕布：用于电影院和家庭影院中的平面屏幕。"
-
-msgid "Looking for a host..."
-msgstr "正在查找主持人……"
-
-msgid "End party"
-msgstr "结束一起看"
 
 msgid "Audio track"
 msgstr "音轨"
@@ -2395,60 +2374,6 @@ msgstr "这部影片将在 %s 暂停。"
 msgid "Films over %d min with chapters stop once, near the middle."
 msgstr "超过 %d 分钟且有章节的影片会在中间附近暂停一次。"
 
-msgid "Watch party ended: %s"
-msgstr "一起看已结束：%s"
-
-msgid "the host refused: %s"
-msgstr "主持方拒绝了：%s"
-
-msgid "The host plays %s. It isn't open here."
-msgstr "主持方在播放 %s。这里没有打开它。"
-
-msgid "The host plays a file that isn't open here."
-msgstr "主持方在播放一个这里没有打开的文件。"
-
-msgid "Host plays one file on every headset on this network, on one clock; Join finds the first host."
-msgstr "“主持”在此网络中的每台头显上按同一个时钟播放同一个文件；“加入”会找到第一个主持方。"
-
-msgid "Ended: %s. %s"
-msgstr "已结束：%s。%s"
-
-msgid "Hosting as %s. %s"
-msgstr "正以 %s 的名字主持。%s"
-
-msgid "Nobody has joined yet."
-msgstr "还没有人加入。"
-
-msgid "%d joined."
-msgstr "%d 人已加入。"
-
-msgid "Joined, seat %d. %s"
-msgstr "已加入，座位 %d。%s"
-
-msgid "%s (you)"
-msgstr "%s（你）"
-
-msgid "Seat %d   %s"
-msgstr "座位 %d   %s"
-
-msgid "The host plays %s, which isn't open here."
-msgstr "主持方在播放 %s，这里没有打开它。"
-
-msgid "Name: %s"
-msgstr "名字：%s"
-
-msgid "PIN: set"
-msgstr "PIN：已设置"
-
-msgid "PIN: none"
-msgstr "PIN：无"
-
-msgid "Waiting for the host's file."
-msgstr "正在等待主持方的文件。"
-
-msgid "In step within %d ms."
-msgstr "同步误差在 %d 毫秒以内。"
-
 msgid "15 min"
 msgstr "15 分钟"
 
@@ -2487,30 +2412,6 @@ msgstr "天文馆"
 
 msgid "Dome"
 msgstr "圆顶"
-
-msgid "you left"
-msgstr "你离开了"
-
-msgid "no host found"
-msgstr "没有找到主持方"
-
-msgid "the host went quiet"
-msgstr "主持方没有回应了"
-
-msgid "the host ended the party"
-msgstr "主持方结束了一起看"
-
-msgid "Your name in the watch party"
-msgstr "你在一起看中的名字"
-
-msgid "a name"
-msgstr "名字"
-
-msgid "The party's PIN (the host sets it, guests give the same; empty for none)"
-msgstr "一起看的 PIN（主持方设置，加入者输入相同的；留空表示没有）"
-
-msgid "digits"
-msgstr "数字"
 
 msgid "Effects gallery"
 msgstr "效果展厅"

@@ -15,7 +15,6 @@ const Tablet := preload("res://ui/tablet.gd")
 const W := preload("res://ui/pane_widgets.gd")
 const NetworkHosts := preload("res://scripts/net/network_hosts.gd")
 const DirectoryLister := preload("res://scripts/net/directory_lister.gd")
-const WatchParty := preload("res://scripts/party/watch_party.gd")
 const Remote := preload("res://scripts/remote/remote.gd")
 const PCAudio := preload("res://scripts/dev/pc_audio.gd")
 
@@ -871,7 +870,6 @@ func _places_checks(ui: PaneUI) -> void:
 	_check("Picture: Frame forward pauses and steps (%.3f -> %.3f)" % [before, main.player.get_position()],
 			not main.player.is_playing())
 	main.player.play()
-	await _party_checks(ui)
 	await _picture_checks(ui)
 	await _picture_batch_checks(ui)
 	await _room_batch_checks(ui)
@@ -1295,48 +1293,6 @@ func _picture_checks(ui: PaneUI) -> void:
 	_check("Picture: Slideshow turns it on and shows its timing", slideshow.enabled and ui.picture._slide_seconds.visible
 			and ui.picture._crossfade.visible)
 	slideshow.set_enabled(was)
-
-
-## Room, Watch party (#51): the name form, Host, the people, the host's file not here and Find it, End party.
-func _party_checks(ui: PaneUI) -> void:
-	await _rail(ui, PaneUI.Tab.ROOM)
-	var room = ui.room
-	await _click(_find_button(ui, "Name: %s" % room.party_name()))
-	_check("Room: the name button opens the form", room._party_form.is_visible_in_tree() and not ui._rail_scroll.visible)
-	if room._party_form.is_visible_in_tree():
-		room._party_form.get_field().text = ""
-		await _type_on_keyboard(ui, "sam")
-		await _click(_find_button(ui, "Save"))
-		_check("Room: the name is saved (%s)" % room.party_name(), room.party_name().to_lower() == "sam"
-				and not room._party_form.is_visible_in_tree() and ui._rail_scroll.visible)
-	else:
-		# Put the tab back as Cancel would, so what follows is not hidden too.
-		room._hide_form()
-		print("SKIP Room: the party name: its form did not show")
-	await _click(_find_button(ui, "Host"))
-	await _frames(3)
-	var party: Node = room._party
-	_check("Room: Host starts a party (%s)" % room._party_status.text, party != null
-			and room._party_status.text.begins_with("Hosting") and room._party_leave.is_visible_in_tree()
-			and not room._party_start.is_visible_in_tree())
-	if party == null:
-		main.settings.set_value("party", "name", "")
-		return
-	_check("Room: the people list has this headset", room._party_people.get_child_count() == 1
-			and (room._party_people.get_child(0) as Label).text.contains("(you)"))
-	party.file_needed.emit({"name": "Other.Film.mkv", "path": "/elsewhere/Other.Film.mkv", "duration": 60.0})
-	await _frames(1)
-	_check("Room: the host's file not here is shown", room._party_file.is_visible_in_tree()
-			and room._party_file_label.text.contains("Other.Film.mkv"))
-	await _click(_find_button(ui, "Find it"))
-	_check("Room: Find it searches the Files tab (%s, %s)" % [ui.files.current, ui.files._query],
-			ui.current_tab == PaneUI.Tab.FILES and ui.files.current == "search://" and ui.files._query == "Other.Film")
-	await _rail(ui, PaneUI.Tab.ROOM)
-	await _click(_find_button(ui, "End party"))
-	await _frames(3)
-	_check("Room: End party ends it (%s)" % room._party_status.text, WatchParty.instance() == null
-			and room._party_status.text.begins_with("Ended") and room._party_start.is_visible_in_tree())
-	main.settings.set_value("party", "name", "")
 
 
 ## Help lines under the Picture and Sound tabs' controls (ui/help_texts.gd), and the Curvature slider as a percentage

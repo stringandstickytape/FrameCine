@@ -438,6 +438,19 @@ Objects tab saw only what came from the library.
 - **Would change if:** rooms need to travel between headsets with their objects (then an export that bundles them),
   or a picture should be shared by shapes of different sizes (then a picture as its own library item).
 
+## D25. The watch party is removed (2026-11-06)
+
+The watch party (idea #51: two or more headsets on the LAN play one file on one clock over UDP, and each shows the
+others in the seats beside it) is removed: the code (`app/scripts/party/watch_party.gd`), its commands (`party_host`,
+`party_join`, `party_leave`, `party_status`, `party_settings`), the Room tab's section, `--party`, the `[party]`
+settings, the PC peer (`tools/party_peer.py`) and `docs/watch-party.md`.
+
+- **Why:** it was never tested with a second headset, and there is no prospect that it will be. Nobody used it. An
+  untested feature that nobody uses is code and menu space with no return.
+- **Kept:** everything is in git history (the last commit with it is the parent of this removal). A settings file that
+  still has a `[party]` section loads as before; the section is not read.
+- **Would change if:** users ask for it. Then it comes back from git history and is tested on two headsets.
+
 ## Open
 
 - Quad layer for flat video vs. drawing in the projection layer: sharpness and bandwidth comparison (spike 03-layer).

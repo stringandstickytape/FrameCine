@@ -1,11 +1,10 @@
 extends SceneTree
 
-## PC audio and the watch party restart cleanly (app-shell's report): a start while one runs replaces it under the
-## same node name, also twice in one frame, and the party's new host gets the UDP port of the old one.
+## PC audio restarts cleanly (app-shell's report): a start while one runs replaces it under the same node name, also
+## twice in one frame.
 ## godot --headless --xr-mode off --path app --script res://tests/test_dev_restart.gd
 
 const PCAudio := preload("res://scripts/dev/pc_audio.gd")
-const WatchParty := preload("res://scripts/party/watch_party.gd")
 
 var main: Node3D
 var _fails := 0
@@ -60,23 +59,6 @@ func _run() -> void:
 	PCAudio.stop()  # stopped before it was added
 	await _frames(2)
 	_check(_named("PCAudio").is_empty() and PCAudio.instance() == null, "pc audio: stop before the add leaves none")
-
-	var h := WatchParty.host(main, "A", "", 47893)
-	await _frames(2)
-	_check(h.is_inside_tree() and str(h.get("role")) == "host", "party: host up")
-	var h2 := WatchParty.host(main, "B", "", 47893)  # same port, at once
-	await _frames(2)
-	_check(_named("WatchParty") == [WatchParty.NODE_NAME] and WatchParty.instance() == h2,
-			"party: rehost keeps the name (%s)" % [_named("WatchParty")])
-	_check(str(h2.get("role")) == "host", "party: the new host got the UDP port of the old one")
-	WatchParty.join(main, "C", "127.0.0.1:47893")
-	var j := WatchParty.join(main, "D", "127.0.0.1:47893")
-	await _frames(2)
-	_check(_named("WatchParty") == [WatchParty.NODE_NAME] and WatchParty.instance() == j,
-			"party: two joins in a frame leave the second (%s)" % [_named("WatchParty")])
-	WatchParty.leave()
-	await _frames(2)
-	_check(_named("WatchParty").is_empty(), "party: leave removes it")
 
 	print("test_dev_restart: %s" % ("all passed" if _fails == 0 else "%d FAILED" % _fails))
 	quit(1 if _fails > 0 else 0)

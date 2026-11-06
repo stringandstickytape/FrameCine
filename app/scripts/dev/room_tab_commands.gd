@@ -1,16 +1,15 @@
 extends RefCounted
 
 ## The Room tab's controls as commands (ui/room_tab.gd; docs/dev/assistant-coverage/room-system.md): the room, the
-## seat, the floor reflection, the effects, the time of day, the room light, the showing, the sleep timer and the watch
-## party's name and PIN. Each handler calls what the tab's control calls, then syncs the tab. Registered by
-## command_host.gd for every client of the registry; "assistant" in a spec is the consumer level that reaches it
-## (scripts/assistant/assistant_commands.gd). The room document (scripts/assistant/room_*.gd) has its own commands.
+## seat, the floor reflection, the effects, the time of day, the room light, the showing and the sleep timer. Each
+## handler calls what the tab's control calls, then syncs the tab. Registered by command_host.gd for every client of
+## the registry; "assistant" in a spec is the consumer level that reaches it (scripts/assistant/assistant_commands.gd).
+## The room document (scripts/assistant/room_*.gd) has its own commands.
 ##
 ## A change command takes only what it changes: a parameter left out stays as it is.
 
 const DevCommands := preload("res://scripts/dev/dev_commands.gd")
 const EnvLibrary := preload("res://scripts/env/env_library.gd")
-const WatchParty := preload("res://scripts/party/watch_party.gd")
 const TimeOfDay := preload("res://scripts/env/time_of_day.gd")
 
 ## The sleep timer's choices, as the tab shows them: off, 15 / 30 / 60 / 90 minutes, the end of the file.
@@ -28,10 +27,9 @@ func register_all() -> void:
 	var R := DevCommands
 	R.register("room_settings", _cmd_room_settings, {
 		"description": "Everything the Room tab shows: the room and the rooms to pick from, the seat, the floor "
-				+ "reflection, the effects, the time of day, the room light, the showing, the sleep timer and the watch "
-				+ "party's name (never its PIN, only whether one is set).",
+				+ "reflection, the effects, the time of day, the room light, the showing and the sleep timer.",
 		"returns": "{environment, environments, seat, reflection, bias_light, react, projector_beam, time_of_day, "
-				+ "room_light, dim_while_playing, showing, sleep, party}",
+				+ "room_light, dim_while_playing, showing, sleep}",
 		"assistant": "read"})
 	R.register("set_environment", _cmd_set_environment, {
 		"description": "Changes the room around the screen (as a row of the Room tab's Environment list).",
@@ -114,14 +112,6 @@ func register_all() -> void:
 		"params": [{"name": "set", "type": "string", "required": true, "enum": SLEEP_CHOICES,
 				"description": "off, a number of minutes (15, 30, 60 or 90), or end_of_file."}],
 		"level": "control", "returns": "{active, end_of_file, remaining, status}", "assistant": "control"})
-	R.register("party_settings", _cmd_party_settings, {
-		"description": "The watch party's name and PIN on this headset (as the Room tab's Name and PIN buttons), used "
-				+ "by the next host or join. Not while a party runs.",
-		"params": [{"name": "name", "type": "string",
-				"description": "The name the others see; empty for the login name."},
-				{"name": "pin", "type": "string",
-				"description": "The party's PIN: the host sets it, guests give the same; empty for none."}],
-		"level": "change", "returns": "{name, pin_set}", "assistant": "settings"})
 
 
 # --- Reads -------------------------------------------------------------------------------------------------------
@@ -157,8 +147,6 @@ static func room_settings(m: Node) -> Dictionary:
 		"dim_while_playing": {"on": bool(f.light_follow.enabled), "level": snappedf(float(f.light_follow.play_level), 0.01)},
 		"showing": showing,
 		"sleep": _sleep_state(m),
-		"party": {"name": WatchParty.saved_name(m), "pin_set": WatchParty.saved_pin(m) != "",
-				"running": WatchParty.instance() != null and str(WatchParty.instance().get("role")) != ""},
 	}
 
 
@@ -201,11 +189,6 @@ static func _none(args: Dictionary, ctx: DevCommands.Call, keys: Array) -> bool:
 			return false
 	ctx.fail("give %s" % " or ".join(keys))
 	return true
-
-
-## A saved value as it is in the file, null when it isn't there (setting null back takes it out again).
-static func _raw(settings: RefCounted, section: String, key: String) -> Variant:
-	return settings.get_value(section, key, null) if settings.has_value(section, key) else null
 
 
 static func _percent(v: float) -> String:
@@ -486,7 +469,7 @@ func _cmd_crossfade(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 	return {"music_seconds": float(c.music_seconds), "video_seconds": float(c.video_seconds)}
 
 
-# --- The sleep timer and the party ------------------------------------------------------------------------------------
+# --- The sleep timer --------------------------------------------------------------------------------------------------
 
 func _cmd_sleep(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 	var m := _main()
@@ -511,29 +494,3 @@ func _cmd_sleep(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 			sleep.start(maxf(ceilf(was[2] / 60.0), 1.0))
 		_sync_tab()
 	return _sleep_state(m)
-
-
-func _cmd_party_settings(args: Dictionary, ctx: DevCommands.Call) -> Variant:
-	if _none(args, ctx, ["name", "pin"]):
-		return null
-	var p := WatchParty.instance()
-	if p != null and str(p.get("role")) != "":
-		return ctx.fail("leave the watch party first (the name and PIN are fixed while it runs)")
-	var m := _main()
-	var settings: RefCounted = m.settings
-	var was := [_raw(settings, "party", "name"), _raw(settings, "party", "pin")]
-	var changed: Array[String] = []
-	# What the tab's Name and PIN forms save. The PIN goes in no summary, reply or log.
-	if args.has("name"):
-		settings.set_value("party", "name", str(args["name"]).strip_edges())
-		changed.append("name")
-	if args.has("pin"):
-		settings.set_value("party", "pin", str(args["pin"]).strip_edges())
-		changed.append("PIN")
-	_sync_tab()
-	ctx.summary = "watch party %s saved" % " and ".join(changed)
-	ctx.undo = func() -> void:
-		settings.set_value("party", "name", was[0])
-		settings.set_value("party", "pin", was[1])
-		_sync_tab()
-	return {"name": WatchParty.saved_name(m), "pin_set": WatchParty.saved_pin(m) != ""}

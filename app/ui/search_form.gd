@@ -12,10 +12,9 @@ var _field: LineEdit
 ## The line above the field (set before the form enters the tree). These three are fixed English: the title, the
 ## button and the hint translate themselves (docs/i18n.md), so a caller of set_texts() marks its strings `# i18n`.
 var title_text := "Search your favourites, history, queue and the last local folder" # i18n
-## The action button's text, the field's hint, and whether an empty field is an answer (a PIN cleared).
+## The action button's text and the field's hint.
 var button_text := "Search" # i18n
 var placeholder := "words from the name" # i18n
-var allow_empty := false
 var _keyboard: OnscreenKeyboard
 var _title: Label
 var _button: Button
@@ -55,12 +54,11 @@ func edit(query: String) -> void:
 	_field.caret_column = query.length()
 
 
-## One form for several questions (the watch party's name and PIN): new texts for the next edit().
-func set_texts(title: String, button: String, hint: String, empty_ok: bool) -> void:
+## The same form for another question (the Sound tab's PC address): new texts for the next edit().
+func set_texts(title: String, button: String, hint: String) -> void:
 	title_text = title
 	button_text = button
 	placeholder = hint
-	allow_empty = empty_ok
 	if _title != null:
 		_title.text = title
 		_button.text = button
@@ -73,7 +71,7 @@ func get_field() -> LineEdit:
 
 func _search() -> void:
 	var q := _field.text.strip_edges()
-	if q == "" and not allow_empty:
+	if q == "":
 		_field.grab_focus()
 		return
 	search_requested.emit(q)

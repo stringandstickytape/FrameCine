@@ -582,10 +582,6 @@ pass. Details in `spikes/03-player/README.md`, "Subtitle pictures and styles".
 - [ ] System, during a tour (`--tour=...`): the tour's name, round and step, and Stop tour stops it.
 - [ ] Subtitles, Script from (36594c8): on a file with two subtitle tracks (or a track and a file next to it), Lines
       around now lists "Script from:" rows; pick the other one and the lines come from it.
-- [ ] Room, Watch party (178d374): set a Name, then Host on one headset (or `python tools/party_peer.py join <IP>` on
-      the PC) and Join on the other. Both list the people by seat; End party on the host ends it on both, with the
-      reason shown. Open a file on the host that the guest doesn't have: the guest says so once, and Find it searches
-      the Files tab for its name.
 - [ ] Files, pictures (eab5339): a folder with photos lists them with a PICTURE chip; one opens like a video. Picture,
       Slideshow on: each picture shows for "Each picture" seconds, then the next opens with the crossfade. Pause holds.
 - [ ] Files, Media servers (a04ab58): with a DLNA server on the LAN (a NAS, Plex, Jellyfin, minidlna), the place
@@ -602,15 +598,6 @@ pass. Details in `spikes/03-player/README.md`, "Subtitle pictures and styles".
       Left-handed on). Hold it: "Listening" shows in the pane's footer, in the glance line, or as a line in the world
       with the pane closed. Let go: the clip goes to the PC. The other bumper's label says LABELS.
 - [ ] Without the dev link, both bumpers' labels say LABELS and TALK never appears.
-### #51 Watch party (`docs/watch-party.md`)
-
-- [ ] **One headset:** start it with `--party=host --file=<a film>`. On the PC, on the same Wi-Fi:
-      `python tools/party_peer.py join <headset IP> --script "pause@4,seek:120@6,play@8"`. The film pauses, jumps
-      and plays. A box head with two moving boxes shows 0.8 m to your right.
-- [ ] **One headset:** `python tools/party_peer.py host --rate 1.0` on the PC, then `party_join` on the headset (or
-      `--party=join`). `send party_status`: note `rtt_ms` and `error_ms` over Wi-Fi.
-- [ ] **Needs a second headset:** both open the same file (the same share). One hosts, the other joins. They stay in
-      step through pause, seek and 10 minutes of play. Each sees the other's head and controllers in the next seat.
 
 ### #85 HDR tone mapping (app-features)
 

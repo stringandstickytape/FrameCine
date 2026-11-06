@@ -263,7 +263,7 @@ section still apply to the panel.
       side-by-side file; another file in that folder with no mode of its own opens as 180 side by side.
 - [ ] **Music files** (#64; PLAYER_INPUTS): a music file (mp3, flac, ...): the pane shows the cover and the title
       and artist from the tags, and the audio plays.
-- [ ] **Media servers place** (a04ab58): see D8.
+- [ ] **Media servers place** (a04ab58): see D7.
 
 **Picture**
 
@@ -529,20 +529,7 @@ section still apply to the panel.
       "dim the lights and skip to chapter 2", let go: the clip goes to the PC; with a transcriber both happen; without
       one, type `say dim the lights` in the listener.
 
-### D6. Watch party (#51; `docs/watch-party.md`)
-
-- [ ] One headset: `app --party=host --file=<a film>`; on the PC, same Wi-Fi, `python tools/party_peer.py join
-      <headset IP> --script "pause@4,seek:120@6,play@8"`: the film pauses, jumps and plays; a box head with two moving
-      boxes shows 0.8 m to your right.
-- [ ] One headset: `python tools/party_peer.py host --rate 1.0` on the PC, then Join in Room (or `send party_join`, or
-      `--party=join`): `send party_status`: note `rtt_ms` and `error_ms` over Wi-Fi.
-- [ ] Room, Watch party (178d374): set a Name, Host here and Join on the peer: both list people by seat; End party on
-      the host ends it on both with the reason; a file the guest lacks: the guest says so once, and Find it searches
-      Files for its name.
-- [ ] A second headset (when there is one): the same file on the share, one hosts, one joins; in step through pause,
-      seek and 10 minutes of play; each sees the other's head and controllers in the next seat.
-
-### D7. Hands, passthrough and the runtime's extensions (`docs/xr-spikes.md`)
+### D6. Hands, passthrough and the runtime's extensions (`docs/xr-spikes.md`)
 
 - [ ] Any XR start: copy the log's `OpenXR capabilities:` line (hand tracking, hand interaction profile, eye gaze,
       refresh rates, blend modes).
@@ -563,7 +550,7 @@ section still apply to the panel.
       means hole punching does not work here. GPU frame time (overlay stats) with and without each flag, same film and
       room.
 
-### D8. Media servers, and the headset as one (#68, #86, #89)
+### D7. Media servers, and the headset as one (#68, #86, #89)
 
 - [ ] A media server (UPnP/DLNA) on the LAN, or `python tools/fake_media_server.py --dir <films>` on the PC: `send
       media_servers` lists it (missing: multicast does not reach the headset over Wi-Fi; note it, and try

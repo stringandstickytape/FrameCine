@@ -314,9 +314,6 @@ func bind(p_app: Node) -> void:
 	system.open_place.connect(func(p: String) -> void:
 		show_tab(Tab.FILES)
 		files.open_folder(p))
-	room.find_requested.connect(func(q: String) -> void:
-		show_tab(Tab.FILES)
-		files.search_for(q))
 	view = str(app.settings.get_value("browser", "view", "details"))
 	if not view in VIEWS:
 		view = "details"

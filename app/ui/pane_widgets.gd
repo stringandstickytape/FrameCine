@@ -242,10 +242,9 @@ static func card_layout(box: VBoxContainer, on: bool) -> void:
 		box.remove_meta("cards")
 
 
-## A keyboard form that takes its tab's place (Find a line, the party's name, the PC's address): on, everything else
-## in the tab's box hidden and the form shown; off, the other way round. Laid out as cards (card_layout()), the form
-## sits inside a card, which would hide with the rest: it is lifted out into the box while it shows and put back in
-## its place after.
+## A keyboard form that takes its tab's place (Find a line, the PC's address): on, everything else in the tab's box
+## hidden and the form shown; off, the other way round. Laid out as cards (card_layout()), the form sits inside a
+## card, which would hide with the rest: it is lifted out into the box while it shows and put back in its place after.
 static func show_form(box: VBoxContainer, form: Control, on: bool) -> void:
 	if on:
 		if form.get_parent() != box:
