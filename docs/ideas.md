@@ -65,7 +65,7 @@ Areas: dev (development and AI control), lan, play (playback and picture), sound
 | 48 | 14 | Built-in test lab | dev | 3 | 5 | 4 | 2 | Calibration cards for IPD, convergence and per-eye alignment; judder tests; bandwidth meter. |
 | 49 | 14 | SMB host discovery | lan | 3 | 5 | 4 | 2 | Find hosts by broadcast so nobody types an address in VR. |
 | 50 | 14 | External subtitle matching | subs | 4 | 5 | 4 | 1 | Find subtitle files next to the video by name and language. |
-| 51 | 14 | Watch party on the LAN | lan | 2 | 4 | 3 | 5 | Two headsets, same file, one clock over UDP, each sees the other's controllers in the next seat. |
+| 51 | 14 | Watch party on the LAN (removed 2026-11-06) | lan | 2 | 4 | 3 | 5 | Two headsets, same file, one clock over UDP, each sees the other's controllers in the next seat. Built, then removed on 2026-11-06: it was never tested on two headsets and nobody used it (`decisions.md` D25). It is in git history. |
 | 52 | 14 | More environments | env | 3 | 4 | 3 | 4 | Drive-in, home theatre, planetarium, dome. |
 | 53 | 14 | Runtime glTF rooms | env | 3 | 4 | 3 | 4 | User environments loaded at runtime that follow the screen-anchor convention. |
 | 54 | 14 | Watch-along answers | dev | 3 | 4 | 3 | 4 | Ask who that is; the answer arrives as a card at the screen's edge, from subtitles and timestamp alone. |

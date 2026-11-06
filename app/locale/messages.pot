@@ -6,112 +6,112 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: scripts/main.gd:1257
+#: scripts/main.gd:1253
 msgid "TALK"
 msgstr ""
 
-#: scripts/main.gd:1300
+#: scripts/main.gd:1296
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
 
-#: scripts/main.gd:137
+#: scripts/main.gd:136
 msgid "PLAY / PAUSE"
 msgstr ""
 
-#: scripts/main.gd:137 scripts/main.gd:153
+#: scripts/main.gd:136 scripts/main.gd:152
 msgid "CLICK"
 msgstr ""
 
-#: scripts/main.gd:139
+#: scripts/main.gd:138
 msgid "SEEK / DIST"
 msgstr ""
 
-#: scripts/main.gd:139
+#: scripts/main.gd:138
 msgid "SCROLL"
 msgstr ""
 
-#: scripts/main.gd:140
+#: scripts/main.gd:139
 msgid "MENU"
 msgstr ""
 
-#: scripts/main.gd:140
+#: scripts/main.gd:139
 msgid "CLOSE"
 msgstr ""
 
-#: scripts/main.gd:141
+#: scripts/main.gd:140
 msgid "INFO"
 msgstr ""
 
-#: scripts/main.gd:142
+#: scripts/main.gd:141
 msgid "NEXT"
 msgstr ""
 
-#: scripts/main.gd:143
+#: scripts/main.gd:142
 msgid "PREV"
 msgstr ""
 
-#: scripts/main.gd:144
+#: scripts/main.gd:143
 msgid "LABELS"
 msgstr ""
 
-#: scripts/main.gd:146
+#: scripts/main.gd:145
 msgid "CHAPTER -"
 msgstr ""
 
-#: scripts/main.gd:147
+#: scripts/main.gd:146
 msgid "CHAPTER +"
 msgstr ""
 
-#: scripts/main.gd:148
+#: scripts/main.gd:147
 msgid "REPLAY"
 msgstr ""
 
-#: scripts/main.gd:154
+#: scripts/main.gd:153
 msgid "R-CLICK"
 msgstr ""
 
-#: scripts/main.gd:155
+#: scripts/main.gd:154
 msgid "SCROLL / KEYS"
 msgstr ""
 
-#: scripts/main.gd:156 scripts/main.gd:168
+#: scripts/main.gd:155 scripts/main.gd:167
 msgid "SPACE"
 msgstr ""
 
-#: scripts/main.gd:157
+#: scripts/main.gd:156
 msgid "BACK"
 msgstr ""
 
-#: scripts/main.gd:165
+#: scripts/main.gd:164
 msgid "ENTER"
 msgstr ""
 
-#: scripts/main.gd:166
+#: scripts/main.gd:165
 msgid "HOLD: SCROLL"
 msgstr ""
 
-#: scripts/main.gd:167
+#: scripts/main.gd:166
 msgid "ARROWS"
 msgstr ""
 
-#: scripts/main.gd:169
+#: scripts/main.gd:168
 msgid "ESC"
 msgstr ""
 
-#: scripts/main.gd:173
+#: scripts/main.gd:172
 msgid "GRAB"
 msgstr ""
 
-#: scripts/main.gd:176
+#: scripts/main.gd:175
 msgid "LET GO: THROW"
 msgstr ""
 
-#: scripts/main.gd:177
+#: scripts/main.gd:176
 msgid "NEAR-FAR / TURN"
 msgstr ""
 
-#: scripts/main.gd:178
+#: scripts/main.gd:177
 msgid "CANCEL"
 msgstr ""
 
@@ -845,7 +845,7 @@ msgstr ""
 msgid "An AI assistant on a computer on this network sees what plays, answers you on a card, and hears you while you hold the bumper. No program to install."
 msgstr ""
 
-#: ui/assistant_row.gd:80 ui/files_tab.gd:850 ui/host_form.gd:60 ui/search_form.gd:43
+#: ui/assistant_row.gd:80 ui/files_tab.gd:850 ui/host_form.gd:60 ui/search_form.gd:42
 #: ui/url_form.gd:59
 msgid "Cancel"
 msgstr ""
@@ -1502,7 +1502,7 @@ msgstr ""
 msgid "The sound plays on a PC, in time with the picture."
 msgstr ""
 
-#: ui/host_form.gd:56 ui/room_tab.gd:611 ui/room_tab.gd:615 ui/sound_tab.gd:324
+#: ui/host_form.gd:56 ui/sound_tab.gd:324
 msgid "Save"
 msgstr ""
 
@@ -1583,12 +1583,12 @@ msgstr ""
 msgid "Specials"
 msgstr ""
 
-#: ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:235
+#: ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:209
 #, c-format
 msgid "%d min"
 msgstr ""
 
-#: ui/library_view.gd:237 ui/library_view.gd:241 ui/pane_ui.gd:51 ui/pane_ui.gd:700
+#: ui/library_view.gd:237 ui/library_view.gd:241 ui/pane_ui.gd:51 ui/pane_ui.gd:697
 msgid "Play"
 msgstr ""
 
@@ -1672,11 +1672,11 @@ msgid "%s deleted"
 msgstr ""
 
 #: ui/mixed_reality_tab.gd:119 ui/object_section.gd:735 ui/system_tab.gd:636 ui/ui_layer.gd:225
-#: ui/ui_layer.gd:386 ui/ui_layer.gd:905 ui/ui_layer.gd:909 ui/ui_layer.gd:937
+#: ui/ui_layer.gd:386 ui/ui_layer.gd:904 ui/ui_layer.gd:908 ui/ui_layer.gd:936
 msgid "Undo"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:873
+#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:872
 msgid "The headset's cameras can't show here."
 msgstr ""
 
@@ -1966,26 +1966,26 @@ msgstr ""
 msgid "Smooth banding"
 msgstr ""
 
-#: ui/pane_ui.gd:618
+#: ui/pane_ui.gd:615
 #, c-format
 msgid "%s, %s"
 msgstr ""
 
-#: ui/pane_ui.gd:621
+#: ui/pane_ui.gd:618
 #, c-format
 msgid "battery %d %%, charging"
 msgstr ""
 
-#: ui/pane_ui.gd:622
+#: ui/pane_ui.gd:619
 #, c-format
 msgid "battery %d %%"
 msgstr ""
 
-#: ui/pane_ui.gd:626 ui/pane_ui.gd:665 ui/ui_layer.gd:452
+#: ui/pane_ui.gd:623 ui/pane_ui.gd:662 ui/ui_layer.gd:452
 msgid "Listening"
 msgstr ""
 
-#: ui/pane_ui.gd:742
+#: ui/pane_ui.gd:739
 #, c-format
 msgid "Chapter %s"
 msgstr ""
@@ -2050,7 +2050,7 @@ msgstr ""
 msgid "Grid"
 msgstr ""
 
-#: ui/pane_ui.gd:700
+#: ui/pane_ui.gd:697
 msgid "Pause"
 msgstr ""
 
@@ -2265,7 +2265,7 @@ msgstr ""
 msgid "Each picture"
 msgstr ""
 
-#: ui/picture_tab.gd:337 ui/room_tab.gd:232 ui/room_tab.gd:244
+#: ui/picture_tab.gd:337 ui/room_tab.gd:206 ui/room_tab.gd:218
 #, c-format
 msgid "%d s"
 msgstr ""
@@ -2422,7 +2422,7 @@ msgstr ""
 msgid "Polynomial"
 msgstr ""
 
-#: ui/picture_tab.gd:31 ui/room_tab.gd:25 ui/system_tab.gd:41
+#: ui/picture_tab.gd:31 ui/room_tab.gd:19 ui/system_tab.gd:41
 msgid "Off"
 msgstr ""
 
@@ -2469,422 +2469,278 @@ msgstr ""
 msgid "%s (the folder's rule)"
 msgstr ""
 
-#: ui/room_tab.gd:112
+#: ui/room_tab.gd:86
 msgid "Environment"
 msgstr ""
 
-#: ui/room_tab.gd:113
+#: ui/room_tab.gd:87
 msgid "Built in"
 msgstr ""
 
-#: ui/room_tab.gd:118
+#: ui/room_tab.gd:92
 msgid "Yours"
 msgstr ""
 
-#: ui/room_tab.gd:121
+#: ui/room_tab.gd:95
 msgid "Use this picture as the room"
 msgstr ""
 
-#: ui/room_tab.gd:125
+#: ui/room_tab.gd:99
 msgid "Showrooms"
 msgstr ""
 
-#: ui/room_tab.gd:133 ui/ui_layer.gd:956
+#: ui/room_tab.gd:107 ui/ui_layer.gd:955
 msgid "Seat"
 msgstr ""
 
-#: ui/room_tab.gd:140
+#: ui/room_tab.gd:114
 msgid "Previous seat"
 msgstr ""
 
-#: ui/room_tab.gd:141
+#: ui/room_tab.gd:115
 msgid "Next seat"
 msgstr ""
 
-#: ui/room_tab.gd:142
+#: ui/room_tab.gd:116
 msgid "Room's own spot"
 msgstr ""
 
-#: ui/room_tab.gd:144
+#: ui/room_tab.gd:118
 msgid "Pick a seat"
 msgstr ""
 
-#: ui/room_tab.gd:155
+#: ui/room_tab.gd:129
 msgid "Floor reflection"
 msgstr ""
 
-#: ui/room_tab.gd:157
+#: ui/room_tab.gd:131
 msgid "Reflection"
 msgstr ""
 
-#: ui/room_tab.gd:163
+#: ui/room_tab.gd:137
 msgid "Effects"
 msgstr ""
 
-#: ui/room_tab.gd:165 ui/room_tab.gd:177
+#: ui/room_tab.gd:139 ui/room_tab.gd:151
 msgid "Bias light"
 msgstr ""
 
-#: ui/room_tab.gd:169
+#: ui/room_tab.gd:143
 msgid "React to the film"
 msgstr ""
 
-#: ui/room_tab.gd:173
+#: ui/room_tab.gd:147
 msgid "Projector beam"
 msgstr ""
 
-#: ui/room_tab.gd:180
+#: ui/room_tab.gd:154
 msgid "Reaction"
 msgstr ""
 
-#: ui/room_tab.gd:194
+#: ui/room_tab.gd:168
 msgid "Time of day"
 msgstr ""
 
-#: ui/room_tab.gd:195
+#: ui/room_tab.gd:169
 msgid "Night"
 msgstr ""
 
-#: ui/room_tab.gd:195
+#: ui/room_tab.gd:169
 msgid "Now"
 msgstr ""
 
-#: ui/room_tab.gd:195
+#: ui/room_tab.gd:169
 msgid "Dusk"
 msgstr ""
 
-#: ui/room_tab.gd:195
+#: ui/room_tab.gd:169
 msgid "Day"
 msgstr ""
 
-#: ui/room_tab.gd:199
+#: ui/room_tab.gd:173
 msgid "Latitude"
 msgstr ""
 
-#: ui/room_tab.gd:202
+#: ui/room_tab.gd:176
 msgid "Room light"
 msgstr ""
 
-#: ui/room_tab.gd:206
+#: ui/room_tab.gd:180
 msgid "Dim while playing"
 msgstr ""
 
-#: ui/room_tab.gd:208
+#: ui/room_tab.gd:182
 msgid "Dimmed to"
 msgstr ""
 
-#: ui/room_tab.gd:212
+#: ui/room_tab.gd:186
 msgid "Placement"
 msgstr ""
 
-#: ui/room_tab.gd:215
+#: ui/room_tab.gd:189
 msgid "Reset room"
 msgstr ""
 
-#: ui/room_tab.gd:216
+#: ui/room_tab.gd:190
 msgid "Reset screen"
 msgstr ""
 
-#: ui/room_tab.gd:217
+#: ui/room_tab.gd:191
 msgid "Reset room: back to the room's own seat, facing the screen, view recentred."
 msgstr ""
 
-#: ui/room_tab.gd:219
+#: ui/room_tab.gd:193
 msgid "The showing"
 msgstr ""
 
-#: ui/room_tab.gd:221
+#: ui/room_tab.gd:195
 msgid "Curtains"
 msgstr ""
 
-#: ui/room_tab.gd:223
+#: ui/room_tab.gd:197
 msgid "Up next countdown"
 msgstr ""
 
-#: ui/room_tab.gd:225 ui/room_tab.gd:234
+#: ui/room_tab.gd:199 ui/room_tab.gd:208
 msgid "Intermission"
 msgstr ""
 
-#: ui/room_tab.gd:231
+#: ui/room_tab.gd:205
 msgid "Up next in"
 msgstr ""
 
-#: ui/room_tab.gd:244
+#: ui/room_tab.gd:218
 msgid "off"
 msgstr ""
 
-#: ui/room_tab.gd:245
+#: ui/room_tab.gd:219
 msgid "Crossfade music"
 msgstr ""
 
-#: ui/room_tab.gd:248
+#: ui/room_tab.gd:222
 msgid "Crossfade films"
 msgstr ""
 
-#: ui/room_tab.gd:252
+#: ui/room_tab.gd:226
 msgid "Sleep timer"
 msgstr ""
 
-#: ui/room_tab.gd:336 ui/room_tab.gd:346
+#: ui/room_tab.gd:303 ui/room_tab.gd:313
 #, c-format
 msgid "%s (photo)"
 msgstr ""
 
-#: ui/room_tab.gd:364
+#: ui/room_tab.gd:326
 msgid "This picture can't be a room (only local pictures)."
 msgstr ""
 
-#: ui/room_tab.gd:382
+#: ui/room_tab.gd:342
 #, c-format
 msgid "%s (moved) (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:382
+#: ui/room_tab.gd:342
 #, c-format
 msgid "%s (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:385
+#: ui/room_tab.gd:345
 #, c-format
 msgid "Where %s was (%d seat)"
 msgid_plural "Where %s was (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:387
+#: ui/room_tab.gd:347
 #, c-format
 msgid "The room's own spot (%d seat)"
 msgid_plural "The room's own spot (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:389
+#: ui/room_tab.gd:349
 #, c-format
 msgid "Go to %s"
 msgstr ""
 
-#: ui/room_tab.gd:402
+#: ui/room_tab.gd:362
 msgid "Flashes only in rooms that react, such as the drive-in; the room pulses with the bass."
 msgstr ""
 
-#: ui/room_tab.gd:416
+#: ui/room_tab.gd:376
 #, c-format
 msgid "Seat %d"
 msgstr ""
 
-#: ui/room_tab.gd:426
+#: ui/room_tab.gd:384
 msgid "Curtains: in the cinema and the home theatre, flat screen."
 msgstr ""
 
-#: ui/room_tab.gd:436
+#: ui/room_tab.gd:394
 #, c-format
 msgid "Intermission: %s left. Play ends it."
 msgstr ""
 
-#: ui/room_tab.gd:439
+#: ui/room_tab.gd:397
 #, c-format
 msgid "This film stops at %s."
 msgstr ""
 
-#: ui/room_tab.gd:440
+#: ui/room_tab.gd:398
 #, c-format
 msgid "Films over %d min with chapters stop once, near the middle."
 msgstr ""
 
-#: ui/room_tab.gd:450
-msgid "Watch party"
-msgstr ""
-
-#: ui/room_tab.gd:455
-msgid "Host"
-msgstr ""
-
-#: ui/room_tab.gd:455
-msgid "Join"
-msgstr ""
-
-#: ui/room_tab.gd:457 ui/room_tab.gd:577
-msgid "Leave"
-msgstr ""
-
-#: ui/room_tab.gd:466
-msgid "Find it"
-msgstr ""
-
-#: ui/room_tab.gd:529
-#, c-format
-msgid "Watch party ended: %s"
-msgstr ""
-
-#: ui/room_tab.gd:538
-#, c-format
-msgid "the host refused: %s"
-msgstr ""
-
-#: ui/room_tab.gd:548
-#, c-format
-msgid "The host plays %s. It isn't open here."
-msgstr ""
-
-#: ui/room_tab.gd:549
-msgid "The host plays a file that isn't open here."
-msgstr ""
-
-#: ui/room_tab.gd:565
-msgid "Host plays one file on every headset on this network, on one clock; Join finds the first host."
-msgstr ""
-
-#: ui/room_tab.gd:567
-#, c-format
-msgid "Ended: %s. %s"
-msgstr ""
-
-#: ui/room_tab.gd:569
-#, c-format
-msgid "Hosting as %s. %s"
-msgstr ""
-
-#: ui/room_tab.gd:569
-msgid "Nobody has joined yet."
-msgstr ""
-
-#: ui/room_tab.gd:570
-#, c-format
-msgid "%d joined."
-msgstr ""
-
-#: ui/room_tab.gd:572
-msgid "Looking for a host..."
-msgstr ""
-
-#: ui/room_tab.gd:574
-#, c-format
-msgid "Joined, seat %d. %s"
-msgstr ""
-
-#: ui/room_tab.gd:583
-#, c-format
-msgid "%s (you)"
-msgstr ""
-
-#: ui/room_tab.gd:587
-#, c-format
-msgid "Seat %d   %s"
-msgstr ""
-
-#: ui/room_tab.gd:591
-#, c-format
-msgid "The host plays %s, which isn't open here."
-msgstr ""
-
-#: ui/room_tab.gd:593
-#, c-format
-msgid "Name: %s"
-msgstr ""
-
-#: ui/room_tab.gd:594
-msgid "PIN: set"
-msgstr ""
-
-#: ui/room_tab.gd:594
-msgid "PIN: none"
-msgstr ""
-
-#: ui/room_tab.gd:603
-msgid "Waiting for the host's file."
-msgstr ""
-
-#: ui/room_tab.gd:604
-#, c-format
-msgid "In step within %d ms."
-msgstr ""
-
-#: ui/room_tab.gd:577
-msgid "End party"
-msgstr ""
-
-#: ui/room_tab.gd:25
+#: ui/room_tab.gd:19
 msgid "15 min"
 msgstr ""
 
-#: ui/room_tab.gd:25
+#: ui/room_tab.gd:19
 msgid "30 min"
 msgstr ""
 
-#: ui/room_tab.gd:25
+#: ui/room_tab.gd:19
 msgid "60 min"
 msgstr ""
 
-#: ui/room_tab.gd:25
+#: ui/room_tab.gd:19
 msgid "90 min"
 msgstr ""
 
-#: ui/room_tab.gd:25
+#: ui/room_tab.gd:19
 msgid "End of file"
 msgstr ""
 
-#: ui/room_tab.gd:29
+#: ui/room_tab.gd:23
 msgid "Void"
 msgstr ""
 
-#: ui/room_tab.gd:29
+#: ui/room_tab.gd:23
 msgid "Dim room"
 msgstr ""
 
-#: ui/room_tab.gd:29
+#: ui/room_tab.gd:23
 msgid "Cinema"
 msgstr ""
 
-#: ui/room_tab.gd:29
+#: ui/room_tab.gd:23
 msgid "Passthrough"
 msgstr ""
 
-#: ui/room_tab.gd:29
+#: ui/room_tab.gd:23
 msgid "Home theatre"
 msgstr ""
 
-#: ui/room_tab.gd:29
+#: ui/room_tab.gd:23
 msgid "Drive-in"
 msgstr ""
 
-#: ui/room_tab.gd:29
+#: ui/room_tab.gd:23
 msgid "Planetarium"
 msgstr ""
 
-#: ui/room_tab.gd:30
+#: ui/room_tab.gd:24
 msgid "Dome"
-msgstr ""
-
-#: ui/room_tab.gd:35
-msgid "you left"
-msgstr ""
-
-#: ui/room_tab.gd:35
-msgid "no host found"
-msgstr ""
-
-#: ui/room_tab.gd:35
-msgid "the host went quiet"
-msgstr ""
-
-#: ui/room_tab.gd:36
-msgid "the host ended the party"
-msgstr ""
-
-#: ui/room_tab.gd:611
-msgid "Your name in the watch party"
-msgstr ""
-
-#: ui/room_tab.gd:611
-msgid "a name"
-msgstr ""
-
-#: ui/room_tab.gd:615
-msgid "The party's PIN (the host sets it, guests give the same; empty for none)"
-msgstr ""
-
-#: ui/room_tab.gd:616
-msgid "digits"
 msgstr ""
 
 #: ui/search_form.gd:14
@@ -3439,7 +3295,7 @@ msgstr ""
 msgid "Allow for an hour"
 msgstr ""
 
-#: ui/system_tab.gd:339 ui/ui_layer.gd:771
+#: ui/system_tab.gd:339 ui/ui_layer.gd:770
 msgid "Revoke"
 msgstr ""
 
@@ -3599,61 +3455,61 @@ msgstr ""
 msgid "Controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:771
+#: ui/ui_layer.gd:770
 msgid "Remote changes allowed for an hour"
 msgstr ""
 
-#: ui/ui_layer.gd:784
+#: ui/ui_layer.gd:783
 msgid "Connecting..."
 msgstr ""
 
-#: ui/ui_layer.gd:794
+#: ui/ui_layer.gd:793
 msgid "Starting the browser..."
 msgstr ""
 
-#: ui/ui_layer.gd:808
+#: ui/ui_layer.gd:807
 msgid "Point at a seat and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:818
+#: ui/ui_layer.gd:817
 msgid "Seat unchanged"
 msgstr ""
 
-#: ui/ui_layer.gd:841
+#: ui/ui_layer.gd:840
 msgid "That object can't be placed here"
 msgstr ""
 
-#: ui/ui_layer.gd:845
+#: ui/ui_layer.gd:844
 msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:874
+#: ui/ui_layer.gd:873
 msgid "That's as many areas as there can be: delete one first."
 msgstr ""
 
-#: ui/ui_layer.gd:891 ui/ui_layer.gd:902
+#: ui/ui_layer.gd:890 ui/ui_layer.gd:901
 msgid "Nothing marked"
 msgstr ""
 
-#: ui/ui_layer.gd:905
+#: ui/ui_layer.gd:904
 #, c-format
 msgid "%s added: the cameras show there"
 msgstr ""
 
-#: ui/ui_layer.gd:909
+#: ui/ui_layer.gd:908
 #, c-format
 msgid "%s changed"
 msgstr ""
 
-#: ui/ui_layer.gd:926
+#: ui/ui_layer.gd:925
 msgid "Nothing placed"
 msgstr ""
 
-#: ui/ui_layer.gd:940
+#: ui/ui_layer.gd:939
 msgid "Not placed"
 msgstr ""
 
-#: ui/ui_layer.gd:954
+#: ui/ui_layer.gd:953
 msgid "No seat there"
 msgstr ""
 

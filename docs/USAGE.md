@@ -82,7 +82,6 @@ talks on the LAN; each is off unless given (or switched on in the pane).
 | `--whisper-dir=DIR`, `--whisper-model=NAME`, `--whisper-threads=N`, `--whisper-backend=cpu\|vulkan` | On-device speech to text for the assistant (started only when the assistant needs it): the folder with `whisper-server` and `models/` (default: `whisper/` next to the engine, one folder up, or next to the app folder), the model (`base.en`, a stem such as `small.en-q5_1`, or a `.bin` path), threads, and the CPU or Vulkan build. Also `[voice]`. | `build/whisper/README.md` |
 | **`--remote`** | The phone remote: a web page on the LAN, address and pairing QR code in the pane. | `docs/remote.md` |
 | **`--share`** | The headset's folders on the LAN: downloads, uploads to Drop, screenshots. | `docs/share.md` |
-| **`--party=host\|join\|join:IP`**, `--party-name=NAME`, `--party-pin=PIN` | Watch party on the LAN (UDP). | `docs/watch-party.md` |
 | **`--pc-audio=HOST[:PORT]`** | Connect out to `tools/audio_sink.py`; the film's sound plays on the PC and the headset is silent. | `docs/pc-audio.md` |
 | **`--pc-audio-mode=MODE`** | With `--pc-audio`: `auto` (the default) takes the sound straight from the engine when it can, else from the player; `pull` or `capture` picks one. | `docs/pc-audio.md` |
 | `--hands`, `--passthrough` | XR spikes, untested on the device: hand tracking (pinch is the trigger, the index finger the laser), and the runtime's camera view behind the scene. | `docs/xr-spikes.md` |
@@ -181,7 +180,6 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 | `[network]` | `hosts` ([]), `live_latency` (0.1 to 2.5 s, 0.5) | Saved file shares (private: holds credentials); the live stream buffer |
 | `[remote]` | `enabled` (false), `port` (47880), `key` | Phone remote. `key` is the pairing code: private, never logged. |
 | `[share]` | `enabled` (false), `folders` ([]), `drop` ("") | Headset file sharing |
-| `[party]` | `name` (""), `pin` ("") | Watch party |
 | `[pc_audio]` | `host` ("") | The PC for PC audio |
 | `[card]` | `place` ("hand": held above the pointer controller; "screen": beside the screen) | Where the card with the conversation and notes shows. A card that offers choices always shows beside the screen, where the laser reaches it. |
 | `[assistant]` | `enabled` (false), `guide_port` (47801, plain HTTP: the guide only), `port` (47802, HTTPS: the API), `allow_control` (false), `allow_room` (false), `voice_to` ("dev": where push-to-talk goes when the dev link is connected too; "assistant" for the assistant) | The assistant service on the headset (`docs/assistant.md`). The paired assistants (token hashes) are not here: they are in `assistant_clients.cfg`; the HTTPS key in `assistant_tls.key` and `.crt` (all owner-only, never logged). Also in System, Assistant. |
@@ -386,7 +384,6 @@ connects to or serves only the LAN. For the dev link the headset connects out to
 | `tools/listener.py` | The dev link's PC end. `serve` waits for the headset; `send`, `describe`, `status`, `events -f`, `wait`, `say` talk to it; `ask` and `answer` are the watch-along answers (`docs/dev/watch-along.md`). | `docs/dev/control-protocol.md` |
 | `tools/cast.py` | Play a PC file (through its file share), a headset path or a web page on the headset; `--watch` a folder; Send to and desktop shortcuts. | `docs/cast.md` |
 | `tools/voice.py` | The voice grammar and the transcriber hook for push-to-talk. `python tools/voice.py "dim the lights"` prints the actions. | `docs/dev/voice.md` |
-| `tools/party_peer.py` | A desktop watch-party peer, `host` or `join`, to test without a second headset. | `docs/watch-party.md` |
 | `tools/audio_sink.py` | The PC end of PC audio: plays the film's sound on the PC, with a jitter buffer. | `docs/pc-audio.md` |
 | `tools/fake_media_server.py` | A small media server (UPnP/DLNA) serving a folder, for tests. | `docs/media-servers.md` |
 | `tools/push-app.sh` | Copy `app/` to the headset; `--watch` for hot-reload. | `docs/dev/hot-reload.md` |
@@ -401,7 +398,6 @@ Ports (all LAN):
 | TCP 47801, 47802 | PC to headset | The assistant service, when switched on: 47801 plain HTTP for the guide only, 47802 HTTPS for the API; open while "Let an assistant find me" runs or once an assistant is paired; private addresses only |
 | TCP 47820 | headset to PC | PC audio (`audio_sink.py`) |
 | TCP 47880 | phone or PC to headset | Phone remote and file sharing, when switched on |
-| UDP 47890 | both ways | Watch party, when switched on |
 
 The dev link's protocol, every command and every event are in `docs/dev/control-protocol.md`. With a listener
 running, `python tools/listener.py describe` prints the live schema.

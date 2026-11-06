@@ -1,4 +1,4 @@
-# Assistant coverage: the Room tab, the System tab, the watch party, eye gaze and the director
+# Assistant coverage: the Room tab, the System tab, eye gaze and the director
 
 Each control a viewer can use here, and the command that does the same for an assistant. A command's consumer level
 is the `"assistant"` key of its registry spec (`app/scripts/dev/dev_commands.gd`); the consumer API reaches only
@@ -7,12 +7,12 @@ tagged commands. The levels:
 | Level | Here |
 |---|---|
 | `read` | the reads: always |
-| `control` | what acts on playback or moves the viewer: the seat, the sleep timer, the watch party, eye gaze, director jumps, test cards, the bandwidth meter |
+| `control` | what acts on playback or moves the viewer: the seat, the sleep timer, eye gaze, director jumps, test cards, the bandwidth meter |
 | `room` | what changes the room around the screen: the room itself, its effects, its light and the showing |
-| `settings` | persistent preferences of the System tab, and the watch party's name and PIN |
+| `settings` | persistent preferences of the System tab |
 
 The commands are in `app/scripts/dev/room_tab_commands.gd` and `app/scripts/dev/system_tab_commands.gd` (registered by
-`command_host.gd`), and in the feature that owns them (`watch_party.gd`, `eye_gaze.gd`, `director.gd`, `test_lab.gd`,
+`command_host.gd`), and in the feature that owns them (`eye_gaze.gd`, `director.gd`, `test_lab.gd`,
 `hw_video.gd`). Each handler calls what the tab's control calls and then syncs the tab. Each change sets a summary and
 an undo. A change command takes only what it changes: a parameter left out stays as it is. Values are kept to the
 slider's range, as the tab keeps them.
@@ -58,13 +58,6 @@ Objects tab calls the same functions (`app/ui/object_section.gd`, `app/ui/object
 | Intermission, its minutes | `intermission` {on, minutes} (room) |
 | Crossfade music, Crossfade films | `crossfade` {music_seconds, video_seconds} (room) |
 | Sleep timer (Off, 15, 30, 60, 90 min, End of file), its countdown | `sleep_timer` {set} (control); the countdown: `room_settings` sleep (read) |
-| Watch party: Host | `party_host` (control) |
-| Watch party: Join | `party_join` (control) |
-| Watch party: Leave, End party | `party_leave` (control) |
-| Watch party: status, who is in it, the sync | `party_status` (read) |
-| Watch party: Name | `party_settings` {name} (settings) |
-| Watch party: PIN | `party_settings` {pin} (settings); reads say only `pin_set` |
-| Watch party: Find it (the host's file isn't open here) | excluded here: a search of the Files tab (the files commands). The file's name is in `party_status` file |
 
 The whole tab in one read: `room_settings` (read).
 
@@ -120,6 +113,4 @@ The whole tab in one read: `system_settings` (read).
 - No tagged command names or takes an `allow`, `pair`, `forget`, `permission` or `token` value, and `set`, `get`,
   `call`, `set_prop` and `run` stay untagged: the `[assistant]` section can't be written by a consumer command. The
   test checks both, and checks that the `[assistant]` section is the same after every command here.
-- The watch party is LAN only: `party_join` refuses a host that is not a private address. Its PIN is saved as the
-  tab saves it and is in no reply, summary or log.
 - `bandwidth_test` reads only a file on the headset or on a share of a host saved in the player.

@@ -158,7 +158,6 @@ names. This table lists the built-in commands; `describe` is always the full and
 | `pc_audio`, `pc_audio_status` | `host`, `port` = 47820, `on`, `test_tone` | control / read | the film's sound on a PC (`tools/audio_sink.py`), the video held back by the measured delay (`../pc-audio.md`) |
 | `share_files` | `on`, `remember` = false | change | shares the headset's folders on the LAN (`../share.md`); the reply has the address, never the pairing code |
 | `media_servers` | `seconds` = 3, `url` | read | media servers (UPnP/DLNA) on the LAN; `list_dir path=upnp://...` browses them (`../media-servers.md`) |
-| `party_host`, `party_join`, `party_leave`, `party_status` | `name`, `pin`, `host` | control / read | watch party on the LAN (`../watch-party.md`) |
 | `chapter`, `subtitles`, `recenter` | `n` or `step`; `on` | control | chapter n (1 = first) or next / previous; subtitles on or off; the screen to the gaze (`voice.md`) |
 | `chapters` | | read | the open file's chapters and the one playing now: `{count, current (1 = first, 0 = none), title, list}` (`watch-along.md`) |
 | `push_to_talk` | `seconds` = 3 | control | records the microphone and sends a `voice_clip`, as holding F8 does (`voice.md`) |
@@ -183,7 +182,7 @@ written over the link. The `dev` section can be read but not written, so the PC 
 
 **Secrets never go over the link,** because the listener logs every reply. `get`, `set`, `get_prop`, `set_prop` and
 `call` refuse a name with a word such as key, pin, password, secret, token or credential in it (`remote/key`, the
-phone remote's pairing code; `party/pin`), and a private member (a name that starts with `_`). `call` also refuses
+phone remote's pairing code), and a private member (a name that starts with `_`). `call` also refuses
 the generic accessors (`get`, `set`, `get_meta`, `call`, ...). `get_prop` with no property leaves these names out. The
 reply is "NAME is private". A masked text field's text (a password being typed, as in the SMB host form) is private
 too: `get_prop`, `set_prop` and `call` (`get_text`, ...) refuse it, `list_tree` and `get_prop` with no property

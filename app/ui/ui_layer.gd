@@ -579,7 +579,6 @@ func _process(delta: float) -> void:
 	if _ptt_check <= 0.0:
 		_ptt_check = 1.0
 		_check_push_to_talk()
-		ui.room.check_party()
 
 	if _hide_on_window:
 		var src = app.player.source

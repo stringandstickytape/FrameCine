@@ -12,8 +12,8 @@ const HotReload := preload("res://scripts/dev/hot_reload.gd")
 const PRIVATE_SECTIONS: Array[String] = ["network"]
 ## Sections `set` may not write: the permission ring's own settings, so the PC can't raise its own permissions.
 const READ_ONLY_SECTIONS: Array[String] = ["dev"]
-## Words that mark a secret in a setting key or a property path: the phone remote's pairing code ([remote] key), the
-## party PIN, saved passwords. The dev link logs every reply, so these never go out (is_private()).
+## Words that mark a secret in a setting key or a property path: the phone remote's pairing code ([remote] key), a
+## PIN, saved passwords. The dev link logs every reply, so these never go out (is_private()).
 const SECRET_WORDS: Array[String] = ["key", "pin", "password", "passwd", "secret", "token", "credential", "credentials"]
 const OPEN_WAIT := 10.0
 const TREE_MAX_NODES := 3000

@@ -1370,7 +1370,7 @@ func _on_folder_results(q: String, results: Array) -> void:
 		_refresh()
 
 
-## Opens the Search place with a query already run (the watch party's "Find it").
+## Opens the Search place with a query already run (the files commands' search).
 func search_for(q: String) -> void:
 	_run_search(q)
 	open_folder(SEARCH_FOLDER)

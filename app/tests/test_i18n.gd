@@ -560,13 +560,8 @@ func _set_c() -> void:
 			showroom >= 0 and _shown(room._env_rows[showroom]) == "物品")
 	_check("the seat line (%s)" % room._seat_label.text, str(room._seat_label.text).contains("座位")
 			or str(room._seat_label.text).contains("房间默认位置"))
-	_check("the party's line (%s)" % room._party_status.text, str(room._party_status.text).begins_with("“主持”"))
-	_check("the party's name and PIN (%s, %s)" % [room._party_name.text, room._party_pin.text],
-			str(room._party_name.text).begins_with("名字：") and str(room._party_pin.text).begins_with("PIN："))
 	_check("the sleep timer's line (%s), an assistant's English (%s)" % [room._sleep_status.text, sleep.status_text()],
 			room._sleep_status.text == "15 分钟后睡眠" and sleep.status_text() == "sleep in 15 min")
-	_check("why a party ended (%s; %s)" % [room.end_reason("left"), room.end_reason("the host refused: wrong PIN")],
-			room.end_reason("left") == "你离开了" and room.end_reason("the host refused: wrong PIN") == "主持方拒绝了：wrong PIN")
 	_check("a numbered seat translates, a named one is content (%s, %s)" % [room.seat_name(["Seat 1", "Seat"], 0),
 			room.seat_name(["Seat 1", "Seat"], 1)], room.seat_name(["Seat 1", "Seat"], 0) == "座位 1"
 			and room.seat_name(["Seat 1", "Seat"], 1) == "Seat")
@@ -588,8 +583,7 @@ func _set_c() -> void:
 	sleep.cancel()
 	I18n.set_language("en")
 	await _frames(2)
-	_check("English again: the room's row and the party's line (%s; %s)" % [_shown(cinema), room._party_status.text],
-			_shown(cinema) == "Cinema" and str(room._party_status.text).begins_with("Host plays"))
+	_check("English again: the room's row (%s)" % _shown(cinema), _shown(cinema) == "Cinema")
 	_check("English: the seat line (%s)" % room._seat_label.text, str(room._seat_label.text).begins_with("The room's own")
 			or str(room._seat_label.text).begins_with("Seat "))
 
@@ -675,8 +669,8 @@ func _plain_content_skipped(n: Node, out: Array[String]) -> void:
 func _is_built(c: Node) -> bool:
 	var room: Node = main.ui.ui.room
 	var section: Node = main.ui.ui.objects.section
-	return c in [room._seat_label, room._party_status, room._sleep_status, room._party_name, room._party_pin,
-			room._react_note, room._curtains_note, room._intermission_note, section._chosen, section._yours_chosen]
+	return c in [room._seat_label, room._sleep_status, room._react_note, room._curtains_note, room._intermission_note,
+			section._chosen, section._yours_chosen]
 
 
 ## The visible Labels and Buttons under `n` (not under `skip`) whose text is plain English in the pseudo-locale.

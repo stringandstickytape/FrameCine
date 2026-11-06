@@ -4,23 +4,17 @@ extends ScrollContainer
 ## the room", and the showrooms in a group of their own, docs/showrooms.md), seat (#19), floor reflection (#62), the
 ## room's effects (bias light #29, reacting to the film #81, the projector beam #92, time of day #84), room light (and
 ## whether it dims while the film plays), screen placement reset, recentre, the showing (curtains #37, up next #34,
-## intermission #39), the sleep timer (#17), and the watch party (#51, scripts/party/watch_party.gd): host, join,
-## leave, who is in it, and "the host plays a file that isn't open here". Each control is also a command
-## (scripts/dev/room_tab_commands.gd), which calls the same code and then sync().
+## intermission #39) and the sleep timer (#17). Each control is also a command (scripts/dev/room_tab_commands.gd),
+## which calls the same code and then sync().
 ##
 ## Languages (docs/i18n.md): the rooms that ship and the showrooms show their names translated (ROOM_NAMES, and the
-## showrooms' index.json); the viewer's own rooms, seat names an assistant gave, the party's names and what was typed
-## are content. The built lines go through tr() in sync(), so they switch with the language.
+## showrooms' index.json); the viewer's own rooms, seat names an assistant gave and what was typed are content. The
+## built lines go through tr() in sync(), so they switch with the language.
 
 const W := preload("res://ui/pane_widgets.gd")
 const EnvLibrary := preload("res://scripts/env/env_library.gd")
 const Recipes := preload("res://scripts/dev/recipes.gd")
 const Showrooms := preload("res://scripts/env/showrooms.gd")
-const SearchForm := preload("res://ui/search_form.gd")
-const WatchParty := preload("res://scripts/party/watch_party.gd")
-
-## Find it: the Files tab searches for the host's file by name.
-signal find_requested(query: String)
 
 const SLEEP_WORDS := ["Off", "15 min", "30 min", "60 min", "90 min", "End of file"] # i18n
 ## The names of the rooms that ship (main.gd ENVIRONMENTS, scripts/env/env_library.gd BUILT_IN), as keys: their rows
@@ -28,12 +22,6 @@ const SLEEP_WORDS := ["Off", "15 min", "30 min", "60 min", "90 min", "End of fil
 # i18n: begin
 const ROOM_NAMES := ["Void", "Dim room", "Cinema", "Passthrough", "Home theatre", "Drive-in", "Planetarium",
 		"Dome"]
-# i18n: end
-## Why a watch party ended (scripts/party/watch_party.gd _end()): the reason, and how the tab says it (a key); a host's
-## own refusal is its text.
-# i18n: begin
-const PARTY_ENDS := {"left": "you left", "no host found": "no host found", "the host went quiet": "the host went quiet",
-		"the host ended the party": "the host ended the party"}
 # i18n: end
 
 var app: Node
@@ -82,20 +70,6 @@ var _follow: Button
 var _play_level: VBoxContainer
 var _sleep: HFlowContainer
 var _sleep_status: Label
-var _party: Node
-var _party_status: Label
-var _party_start: HBoxContainer
-var _party_leave: HBoxContainer
-var _party_people: VBoxContainer
-var _party_file: HBoxContainer
-var _party_file_label: Label
-var _party_name: Button
-var _party_pin: Button
-var _party_form: SearchForm
-## "name" or "pin": what the form is asking.
-var _party_asking := ""
-var _party_ended := ""
-var _needed: Dictionary = {}
 
 
 func _init() -> void:
@@ -265,7 +239,6 @@ func bind(p_app: Node) -> void:
 	W.content(_sleep_status)
 	box.add_child(_sleep_status)
 	sleep.changed.connect(func(_a: bool, _r: float) -> void: _sync_sleep())
-	_build_party()
 	app.environment_changed.connect(func(_id: String, _l: float) -> void: sync())
 	sync()
 
@@ -280,8 +253,6 @@ func sync() -> void:
 	W.set_slider(_play_level, follow.play_level)
 	_play_level.visible = follow.enabled
 	_sync_sleep()
-	check_party()
-	_sync_party()
 
 
 func _sync_sleep() -> void:
@@ -297,21 +268,17 @@ func _sync_sleep() -> void:
 	_sleep_status.text = sleep.status_text(true) if sleep.active else ""
 
 
-## A few times a second while the tab shows: the countdown, and the party's people and sync.
+## A few times a second while the tab shows: the countdowns.
 func tick() -> void:
 	var sleep: Node = app.features.sleep
 	if sleep.active:
 		_sleep_status.text = sleep.status_text(true)
 	_sync_showing()
-	if _party_live() and not _party_form.visible:
-		_sync_party()
 
 
 ## The environment rows: rebuilt when the list changed (a photo room or a glTF room added), else only the mark moves.
 ## The viewer's own rooms go under Yours, the showrooms in their own group (Showrooms); one mark for all.
 func _sync_envs() -> void:
-	if _form_open():
-		return
 	var list: Array = app.get_environment_list()
 	var ids: Array[String] = []
 	for e: Array in list:
@@ -352,11 +319,6 @@ static func is_yours(id: String) -> bool:
 	return id.begins_with(Recipes.PREFIX) or id.begins_with(EnvLibrary.SKY_PREFIX) or id.begins_with(EnvLibrary.ROOM_PREFIX)
 
 
-## The name or PIN form has the tab: the other rows stay hidden until it closes (sync() then shows them right).
-func _form_open() -> bool:
-	return _party_form != null and _party_form.visible
-
-
 ## A photo room from the picture on show (#18): copied into the photo rooms and shown at once.
 func _use_picture_as_room() -> void:
 	var id := EnvLibrary.add_skybox(app.current_path)
@@ -369,8 +331,6 @@ func _use_picture_as_room() -> void:
 
 ## Seats, the floor reflection and the effects: only what this room has.
 func _sync_room_parts() -> void:
-	if _form_open():
-		return
 	var seat: Node = app.features.seat
 	var seats: Array = seat.seats()
 	_seat_box.visible = not seats.is_empty()
@@ -418,8 +378,6 @@ func seat_name(names: Array, i: int) -> String:
 
 ## Curtains, up next and intermission (cheap: also each tick while the tab shows, for the countdowns).
 func _sync_showing() -> void:
-	if _form_open():
-		return
 	var f: Node = app.features
 	W.set_on(_curtains, bool(f.preshow.enabled))
 	_curtains_note.text = "" if f.preshow.available() \
@@ -443,190 +401,3 @@ func _sync_showing() -> void:
 	_intermission_note.visible = note != ""
 	W.set_slider(_crossfade_music, float(f.crossfade.music_seconds))
 	W.set_slider(_crossfade_video, float(f.crossfade.video_seconds))
-
-# --- Watch party (#51) ----------------------------------------------------------------------------------------------
-
-func _build_party() -> void:
-	box.add_child(W.section("Watch party"))
-	_party_status = W.label("", &"MutedLabel")
-	W.content(_party_status)
-	_party_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(_party_status)
-	_party_start = W.hbox([W.button("Host", _host), W.button("Join", _join)])
-	box.add_child(_party_start)
-	_party_leave = W.hbox([W.button("Leave", func() -> void: WatchParty.leave())])
-	box.add_child(_party_leave)
-	_party_people = VBoxContainer.new()
-	_party_people.add_theme_constant_override("separation", 0)
-	box.add_child(_party_people)
-	_party_file_label = W.label("", &"MutedLabel")
-	W.content(_party_file_label)
-	_party_file_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_party_file_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_party_file = W.hbox([_party_file_label, W.button("Find it", func() -> void:
-		find_requested.emit(str(_needed.get("name", "")).get_basename()))])
-	box.add_child(_party_file)
-	_party_name = W.button("", func() -> void: _ask("name"))
-	_party_pin = W.button("", func() -> void: _ask("pin"))
-	W.content(_party_name)
-	W.content(_party_pin)
-	box.add_child(W.hbox([_party_name, _party_pin]))
-	_party_form = SearchForm.new()
-	_party_form.visible = false
-	_party_form.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_party_form.search_requested.connect(_answered)
-	_party_form.cancelled.connect(_hide_form)
-	box.add_child(_party_form)
-	visibility_changed.connect(func() -> void:
-		if not is_visible_in_tree() and _party_form.visible:
-			_hide_form())
-	app.file_opened.connect(func(_p: String) -> void:
-		_needed = {}
-		_sync_party())
-
-
-## The name the others see under this headset's avatar: the saved one, else "Headset" (never the login name: it
-## would show in the others' rooms and in screenshots).
-func party_name() -> String:
-	return WatchParty.saved_name(app)
-
-
-func party_pin() -> String:
-	return WatchParty.saved_pin(app)
-
-
-func _host() -> void:
-	_party_ended = ""
-	_watch(WatchParty.host(app, party_name(), party_pin()))
-
-
-func _join() -> void:
-	_party_ended = ""
-	_watch(WatchParty.join(app, party_name(), "", party_pin()))
-
-
-## Called once a second by the layer (and on sync): a party started elsewhere (command line, PC link, phone) is
-## picked up too, so its prompts show.
-func check_party() -> void:
-	var p := WatchParty.instance()
-	if p != null and p != _party and str(p.get("role")) != "":
-		_watch(p)
-
-
-func _watch(p: Node) -> void:
-	if p == null or p == _party:
-		return
-	_party = p
-	_needed = {}
-	p.peers_changed.connect(func(_l: Array) -> void: _sync_party())
-	p.file_needed.connect(_on_file_needed)
-	p.ended.connect(func(reason: String) -> void:
-		if _party == p:
-			_party = null
-			_party_ended = reason
-			_needed = {}
-			_sync_party()
-			app.ui.notify(tr("Watch party ended: %s") % end_reason(reason)))
-	_sync_party()
-
-
-## Why the party ended, in the menus' language (a host's own refusal stays its text).
-func end_reason(reason: String) -> String:
-	if PARTY_ENDS.has(reason):
-		return tr(str(PARTY_ENDS[reason]))
-	if reason.begins_with("the host refused: "):
-		return tr("the host refused: %s") % reason.trim_prefix("the host refused: ")
-	return reason
-
-
-## The host plays a file that isn't open here (and isn't at the same path): say so once per file, and offer a search.
-func _on_file_needed(f: Dictionary) -> void:
-	if str(f.get("name", "")) == str(_needed.get("name", "")):
-		return
-	_needed = f
-	_sync_party()
-	app.ui.notify(tr("The host plays %s. It isn't open here.") % f["name"] if str(f.get("name", "")) != ""
-			else tr("The host plays a file that isn't open here."))
-
-
-func _party_live() -> bool:
-	return _party != null and is_instance_valid(_party) and str(_party.get("role")) != ""
-
-
-func _sync_party() -> void:
-	if _party_status == null:
-		return
-	var live := _party_live()
-	var st: Dictionary = _party.status() if live else {}
-	var people: Array = []
-	if live:
-		for p: Dictionary in st.get("peers", []):
-			people.append(p)
-	var about := tr("Host plays one file on every headset on this network, on one clock; Join finds the first host.")
-	if not live:
-		_party_status.text = tr("Ended: %s. %s") % [end_reason(_party_ended), about] if _party_ended != "" else about
-	elif str(st.get("role")) == "host":
-		_party_status.text = tr("Hosting as %s. %s") % [st.get("name", ""), tr("Nobody has joined yet.")
-				if people.is_empty() else tr("%d joined.") % people.size()]
-	elif not bool(st.get("joined", false)):
-		_party_status.text = tr("Looking for a host...")
-	else:
-		_party_status.text = tr("Joined, seat %d. %s") % [int(st.get("seat", 0)), _sync_text(st.get("sync", {}))]
-	_party_start.visible = not live
-	_party_leave.visible = live
-	(_party_leave.get_child(0) as Button).text = "End party" if live and str(st.get("role")) == "host" else "Leave"
-	for c in _party_people.get_children():
-		_party_people.remove_child(c)
-		c.queue_free()
-	if live:
-		# The names are the party's (what each headset was called): content.
-		var rows: Array = [{"name": tr("%s (you)") % st.get("name", ""), "seat": int(st.get("seat", 0))}]
-		rows.append_array(people)
-		rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a["seat"]) < int(b["seat"]))
-		for p: Dictionary in rows:
-			var row := W.label(tr("Seat %d   %s") % [int(p["seat"]), p["name"]])
-			W.content(row)
-			_party_people.add_child(row)
-	_party_file.visible = live and not _needed.is_empty()
-	_party_file_label.text = tr("The host plays %s, which isn't open here.") % _needed.get("name", "") \
-			if not _needed.is_empty() else ""
-	_party_name.text = tr("Name: %s") % party_name()
-	_party_pin.text = tr("PIN: set") if party_pin() != "" else tr("PIN: none")
-	_party_name.disabled = live
-	_party_pin.disabled = live
-
-
-static func _sync_text(sync: Dictionary) -> String:
-	if sync.is_empty():
-		return ""
-	if not bool(sync.get("same_file", true)):
-		return TranslationServer.translate("Waiting for the host's file.")
-	return TranslationServer.translate("In step within %d ms.") % roundi(absf(float(sync.get("error_ms", 0.0))))
-
-
-## The name or PIN form takes the tab's place, like the Subtitles tab's Find a line.
-func _ask(what: String) -> void:
-	_party_asking = what
-	if what == "name":
-		_party_form.set_texts("Your name in the watch party", "Save", "a name", false) # i18n
-	else:
-		# The form's title, button and hint translate themselves (a Label, a Button, a placeholder).
-		# i18n: begin
-		_party_form.set_texts("The party's PIN (the host sets it, guests give the same; empty for none)", "Save",
-				"digits", true)
-		# i18n: end
-	W.show_form(box, _party_form, true)
-	scroll_vertical = 0
-	_party_form.edit(party_name() if what == "name" else party_pin())
-	(app.ui.ui as Node).call("set_form_mode", true)
-
-
-func _answered(text: String) -> void:
-	app.settings.set_value("party", _party_asking, text)
-	_hide_form()
-
-
-func _hide_form() -> void:
-	W.show_form(box, _party_form, false)
-	sync()
-	(app.ui.ui as Node).call("set_form_mode", false)

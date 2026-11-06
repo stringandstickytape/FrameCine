@@ -321,8 +321,8 @@ func _build_pc_audio() -> void:
 	box.add_child(_pc_status)
 	_pc_form = SearchForm.new()
 	# The form's title and button translate themselves (keys); the example address is a number.
-	_pc_form.set_texts("The PC running tools/audio_sink.py: its address, or address:port", "Save", "192.168.1.10", # i18n
-			false)
+	_pc_form.set_texts("The PC running tools/audio_sink.py: its address, or address:port", "Save", # i18n
+			"192.168.1.10")
 	_pc_form.visible = false
 	_pc_form.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_pc_form.search_requested.connect(func(text: String) -> void:

@@ -56,7 +56,6 @@ extends Node3D
 ##                          (scripts/dev/benchmark.gd; it also runs once by itself on the first run)
 ##   --tour=FILE            run a tour: a room, a playlist and screen / camera moves from a JSON file (FILE: a path or
 ##                          a name in user://tours; docs/tours.md). --kiosk loops it for ever.
-##   --party=host|join|join:IP  watch party on the LAN (docs/watch-party.md); --party-name=NAME, --party-pin=PIN
 ##   --pc-audio=HOST[:PORT] the film's sound on a PC (tools/audio_sink.py), the PC as the clock (docs/pc-audio.md)
 ##   --pc-audio-mode=auto|pull|capture  how PC audio gets the sound (auto: from the engine when it can)
 ##   --hands / --passthrough  XR spikes, untested on the device: hand tracking (pinch = trigger, index = laser), the
@@ -452,9 +451,6 @@ func _ready() -> void:
 	preload("res://scripts/dev/benchmark.gd").attach(self, _args)
 	# Scripted tour / kiosk (docs/tours.md): only with --tour.
 	preload("res://scripts/dev/tour.gd").attach(self, _args)
-	# Watch party on the LAN (docs/watch-party.md): only with --party.
-	if _args.has("party"):
-		load("res://scripts/party/watch_party.gd").attach(self, _args)
 	# PC audio sync (docs/pc-audio.md): only with --pc-audio.
 	if _args.has("pc-audio"):
 		load("res://scripts/dev/pc_audio.gd").attach(self, _args)
