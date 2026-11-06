@@ -12,8 +12,10 @@ extends "res://scripts/video/test_card.gd"
 ##   av_sync       A/V latency (idea #24): the whole card flashes white for two content frames at each whole second,
 ##                 when the source's audio track beeps (LabVideoSource.beep_stream()); move the A/V offset until the
 ##                 flash and the beep land together.
+##   zoneplate, starfield   sharpness: a zone plate and single-pixel stars, pixel-exact over the whole frame
+##                 (shaders/lab_pattern.gdshader), drawn once: how the picture holds up shrunk or stretched.
 
-## The card: "alignment", "convergence", "judder" or "av_sync".
+## The card: "alignment", "convergence", "judder", "av_sync", "zoneplate" or "starfield".
 var card_id := "alignment"
 ## Content frame rate (judder).
 var fps := 24.0
@@ -21,11 +23,30 @@ var fps := 24.0
 var frame_index := 0
 
 const DISPARITIES: Array[float] = [-64.0, -32.0, -16.0, 0.0, 16.0, 32.0, 64.0]
+const PATTERN_SHADER := preload("res://shaders/lab_pattern.gdshader")
+const PATTERNS := {"zoneplate": 0, "starfield": 1}
 const LEFT_LINE := Color(1.0, 0.45, 0.35)
 const RIGHT_LINE := Color(0.35, 0.85, 1.0)
 
 
+func _ready() -> void:
+	super()
+	if PATTERNS.has(card_id):
+		# The whole frame, pixel for pixel, from the shader (the card draws nothing over it).
+		var rect := ColorRect.new()
+		rect.name = "Pattern"
+		rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+		var mat := ShaderMaterial.new()
+		mat.shader = PATTERN_SHADER
+		mat.set_shader_parameter("px_size", size)
+		mat.set_shader_parameter("kind", PATTERNS[card_id])
+		rect.material = mat
+		add_child(rect)
+
+
 func _draw_eye(r: Rect2, eye: int) -> void:
+	if PATTERNS.has(card_id):
+		return
 	match card_id:
 		"alignment":
 			_draw_alignment(r, eye)

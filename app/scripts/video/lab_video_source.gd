@@ -8,7 +8,8 @@ extends "res://scripts/video/stub_video_source.gd"
 const LabCard := preload("res://scripts/video/lab_card.gd")
 const LAB_SCHEME := "lab://"
 
-## [id, label, card, mode id, width, height, content fps (0: static, redrawn at 10 Hz), description]
+## [id, label, card, mode id, width, height, content fps (0: static, redrawn at 10 Hz; -1: a still, drawn once),
+## description]
 const CARDS: Array = [
 	["alignment", "Per-eye alignment", "alignment", "flat_sbs", 3840, 1080, 0.0,
 			"Nonius lines and grids per eye: the half-lines meet in one cross when the eyes line up."],
@@ -20,6 +21,12 @@ const CARDS: Array = [
 	["judder_60", "Judder 60 fps", "judder", "flat_mono", 1280, 720, 60.0, "Motion at 60 fps."],
 	["av_sync", "A/V sync", "av_sync", "flat_mono", 1280, 720, 60.0,
 			"A flash and a beep each second: move the A/V offset until they land together."],
+	["zoneplate", "Zone plate, flat 4K", "zoneplate", "flat_mono", 3840, 2160, -1.0,
+			"Rings down to the finest the frame holds: false rings show where the picture aliases."],
+	["zoneplate_360", "Zone plate, 360° 8K", "zoneplate", "360_mono", 7680, 3840, -1.0,
+			"The zone plate as an 8K 360° frame: shrunk about 2 times on the display."],
+	["starfield_360", "Starfield, 360° 8K", "starfield", "360_mono", 7680, 3840, -1.0,
+			"Single-pixel stars in an 8K 360° frame: they should stay steady as you turn, not twinkle."],
 ]
 ## The A/V sync card's audio (idea #24): a 30 ms 1 kHz beep at each whole second, silence between. 8-bit at 8 kHz:
 ## 600 s is 4.8 MB, and as the player's audio it is the master clock, so the A/V offset moves the picture against
@@ -74,6 +81,9 @@ func _new_card() -> TestCard:
 
 
 func update(delta: float, master_clock: float) -> void:
+	if _fps < 0.0:
+		_update_still(delta, master_clock)
+		return
 	if _fps <= 0.0:
 		super(delta, master_clock)
 		return
@@ -90,6 +100,28 @@ func update(delta: float, master_clock: float) -> void:
 		_frame_index = index
 		_card.time = _position
 		(_card as LabCard).frame_index = index
+		_card.queue_redraw()
+		_card_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+		_encode_frames = 2
+		_redraws += 1
+	if _encode_frames > 0:
+		_encode_frames -= 1
+		_y_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+		_uv_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+
+## A still card: drawn and encoded once (an 8K frame redrawn ten times a second would cost more than what it is there
+## to measure); the position runs on as a film's would.
+func _update_still(delta: float, master_clock: float) -> void:
+	if _card == null:
+		return
+	_frames += 1
+	if _playing:
+		_position = master_clock if master_clock >= 0.0 else _position + delta
+		if _position >= _duration:
+			_position = fmod(_position, _duration)
+	if _frame_index < 0:
+		_frame_index = 0
 		_card.queue_redraw()
 		_card_vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 		_encode_frames = 2

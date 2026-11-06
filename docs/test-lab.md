@@ -16,6 +16,9 @@ through them.
 | `lab://convergence` | 3840 x 1080, full SBS | Seven rings at -64, -32, -16, 0, +16, +32 and +64 px of disparity, from near to far. Each should fuse into one ring. Far rings that stay double ask the eyes to diverge: the IPD or the screen size is off. |
 | `lab://judder_24`, `_30`, `_60` | 1280 x 720, mono | A bar that crosses once every 4 s, a ball that turns once every 2 s, and a row of cells that lights one per content frame. One picture is presented per content frame, timed from the playback position like a decoder's frames. The bar should glide evenly. A cell held for two refreshes or skipped shows a repeated or dropped frame. |
 | `lab://av_sync` | 1280 x 720, mono, with sound | A/V latency (#24, app-features): the card flashes white for two frames at each whole second while its own audio track beeps (30 ms, 1 kHz). The track is the player's audio and so its clock, as a film's is: move the A/V offset (Sound tab) until flash and beep land together. The offset is then remembered for the display's refresh rate (`scripts/play/av_latency.gd`). |
+| `lab://zoneplate` | 3840 x 2160, mono | Sharpness: a zone plate, rings whose spacing shrinks from the centre out to half a cycle a pixel at the corners, so every frequency the frame can hold is on it. Shrunk on the display, a good filter fades the fine rings to grey; a poor one shows false rings (moiré) and shimmer as the head moves. A still: drawn once (`shaders/lab_pattern.gdshader`). |
+| `lab://zoneplate_360` | 7680 x 3840, 360° mono | The zone plate as an 8K 360° frame, about twice what the display shows per degree: the case the video shader's filter has to handle. |
+| `lab://starfield_360` | 7680 x 3840, 360° mono | Single-pixel stars, a few in a thousand pixels, of random brightness: they should stay steady as you turn the head, not twinkle or drop out. |
 
 Open them from the pane, with `--file=lab://alignment`, or remotely with `open lab://judder_24`. `lab_cards` lists them.
 
