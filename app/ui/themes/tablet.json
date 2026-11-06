@@ -67,6 +67,10 @@
 	"now_playing": {
 		"padding": 0.014,
 		"spacing": 0.008,
+		"status": {
+			"size": 0.0075,
+			"font": "regular"
+		},
 		"title": {
 			"size": 0.0135,
 			"font": "semibold"

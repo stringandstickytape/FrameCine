@@ -3,15 +3,16 @@ extends PanelContainer
 ## The menu on the tablet's main pane (ui/tablet.gd; the user, 2026-11-06: the front panel, the first UI, is gone),
 ## in the pane's SubViewport (ui/pane.gd).
 ##
-## Top to bottom: a header (the chapter on the left; on the right the clock, time left with the end time, the
-## battery, low controllers and "Listening"), the transport (previous, -10 s, play / pause, +10 s, next, hold 4x / 8x
+## Top to bottom: the transport (previous, -10 s, play / pause, +10 s, next, hold 4x / 8x
 ## for trick play; the skips and the trick buttons hide when the source can't seek), then a row: down the left a rail
 ## of the tabs (Source, Picture, Sound, Subtitles, Room, Objects, Mixed reality, System), an icon (ui/icons.gd) and
 ## the name each; beside it Source's places (the files tab's own column) or any other tab's sections (the user,
 ## 2026-11-06: every tab its own list), the section picked as a card the full width (W.card_layout(),
 ## W.refresh_cards()); a section with nothing to show (3D for a flat film) leaves the column. Then a footer line (the
 ## mode and how it was chosen, or a short toast with an action such as Undo; the item count and Source's view
-## selector on the right). The title, the time and the time bar are on the tablet's now playing pane.
+## selector on the right). The title, the time and the time bar are on the tablet's now playing pane, and so is the
+## header (the chapter; the clock, time left with the end time, the battery, low controllers and "Listening": made
+## here, chapter_text() and status_line_text(), and shown there; the user, 2026-11-06: the menu must fit its pane).
 ##
 ## Everything looks the way the theme says (ui/pane_style.gd, the tablet's theme); this file sets no colour and no
 ## font. No backdrop of its own: the tablet's pane shows through. The tabs talk to the app directly; the transport
@@ -43,7 +44,9 @@ const TABLET_TAB_NAMES: Array[String] = ["Source", "Picture", "Sound", "Subtitle
 const TABLET_TAB_ICONS: Array[String] = ["source", "picture", "sound", "subtitles", "room", "objects", "mixed-reality",
 		"system"]
 const TABLET_TABS_WIDTH := 190
-const RAIL_ICON_PX := 30
+const RAIL_ICON_PX := 26
+## The rail's rows, pixels.
+const RAIL_ROW := 38
 const VIEWS: Array[String] = ["details", "list", "grid"]
 const Icons := preload("res://ui/icons.gd")
 
@@ -96,6 +99,9 @@ var view := "details"
 var text_scale := 1.0
 var _tablet_theme: Theme
 var _tablet_row: HBoxContainer
+## The rail's scroll and the rule beside it (hidden while a keyboard form is open).
+var _rail_scroll: ScrollContainer
+var _rail_rule: VSeparator
 var tablet_tab_buttons: Array[Button] = []
 ## The tablet's sections column (any tab but Source): its scroll, buttons and rule, the section picked on each tab
 ## (tab -> section; the first shown when none, or when the one picked has nothing to show), and what it lists.
@@ -146,14 +152,18 @@ func _build_open() -> void:
 	var gap := PaneStyle.constant(&"gap")
 	_open = VBoxContainer.new()
 	_open.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_open.add_theme_constant_override("separation", gap)
+	# Half the gap between the menu's rows: the transport, the rail and the footer fill the tablet's main pane.
+	_open.add_theme_constant_override("separation", gap / 2)
 	_content.add_child(_open)
 
 	_now = W.ellipsis(W.label("", &"MutedLabel"))
 	_now.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_status_line = W.label("", &"MutedLabel")
 	_status_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_open.add_child(W.hbox([_now, _status_line]))
+	# Made here, shown on the tablet's now playing pane (ui_layer.gd): kept out of the menu's height.
+	var header := W.hbox([_now, _status_line])
+	header.visible = false
+	_open.add_child(header)
 
 	_transport = W.hbox()
 	_transport.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -162,9 +172,9 @@ func _build_open() -> void:
 			["−10 s", func() -> void: skip_requested.emit(-10.0)], ["play", Callable()],
 			["+10 s", func() -> void: skip_requested.emit(10.0)], ["Next", func() -> void: next_requested.emit()]]:
 		if spec[0] == "play":
-			var ps := PaneStyle.constant(&"play_size")
+			# A row of the buttons' height: the menu has to fit the tablet's pane.
 			_play_button = W.button("Play", func() -> void: play_pause_pressed.emit(), &"PlayButton")
-			_play_button.custom_minimum_size = Vector2(ps + 24, ps)
+			_play_button.custom_minimum_size = Vector2(bh * 2.2, bh)
 			_transport.add_child(_play_button)
 		else:
 			var b := W.button(spec[0], spec[1], &"TransportButton")
@@ -255,10 +265,14 @@ func bind(p_app: Node) -> void:
 	show_tab(Tab.FILES)
 
 
-## A form with the keyboard is open: the transport makes room for it.
+## A form with the keyboard is open: the transport and the rail make room for it (the form has the pane's width
+## and height; Cancel or Save bring them back).
 func set_form_mode(on: bool) -> void:
 	_form_mode = on
 	_transport.visible = not on
+	if _rail_scroll != null:
+		_rail_scroll.visible = not on
+		_rail_rule.visible = not on
 
 
 ## Trick play from a held 4x / 8x button: start on press, plain playback on release.
@@ -327,19 +341,28 @@ func _build_tablet_row() -> void:
 	var group := ButtonGroup.new()
 	var rail := VBoxContainer.new()
 	rail.name = "Rail"
-	rail.add_theme_constant_override("separation", 2)
+	rail.add_theme_constant_override("separation", 0)
 	rail.custom_minimum_size.x = TABLET_TABS_WIDTH
 	for i in TABLET_TAB_NAMES.size():
 		var b := W.button(TABLET_TAB_NAMES[i], func() -> void: show_tab(i), &"RailButton")
-		b.custom_minimum_size.y = PaneStyle.constant(&"button_height") + 4
+		# Eight rows, the transport and the footer in the main pane's height (ui/tablet.gd panel_pixels()).
+		b.custom_minimum_size.y = RAIL_ROW
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.toggle_mode = true
 		b.button_group = group
 		b.set_meta("icon", TABLET_TAB_ICONS[i])
 		rail.add_child(b)
 		tablet_tab_buttons.append(b)
-	_tablet_row.add_child(rail)
-	_tablet_row.add_child(VSeparator.new())
+	# In its own scroll: with larger text (accessibility) the rail scrolls rather than push the footer off the pane.
+	_rail_scroll = ScrollContainer.new()
+	_rail_scroll.name = "RailScroll"
+	_rail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_rail_scroll.custom_minimum_size.x = TABLET_TABS_WIDTH
+	rail.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_rail_scroll.add_child(rail)
+	_tablet_row.add_child(_rail_scroll)
+	_rail_rule = VSeparator.new()
+	_tablet_row.add_child(_rail_rule)
 	# The sections column: as the files tab's places column, the same width and buttons.
 	_sections_scroll = ScrollContainer.new()
 	_sections_scroll.name = "Sections"
@@ -487,9 +510,14 @@ static func _clear(sb: StyleBox) -> StyleBox:
 	return c
 
 
-## The header's right side, as shown.
+## The header's right side (shown on the tablet).
 func status_line_text() -> String:
 	return _status_line.text
+
+
+## The header's left side, "Chapter 3/12 Title" or "" (shown on the tablet).
+func chapter_text() -> String:
+	return _now.text
 
 
 ## The header's right side: "21:42  ·  1:12 left, ends 22:54  ·  battery 74 %", then low controllers and

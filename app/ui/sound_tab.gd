@@ -346,15 +346,13 @@ func tick() -> void:
 
 ## The address form takes the tab's place, like the Subtitles tab's Find a line.
 func _ask_address() -> void:
-	for c in box.get_children():
-		(c as Control).visible = c == _pc_form
+	W.show_form(box, _pc_form, true)
 	scroll_vertical = 0
 	_pc_form.edit(pc_host())
 	(app.ui.ui as Node).call("set_form_mode", true)
 
 
 func _hide_form() -> void:
-	for c in box.get_children():
-		(c as Control).visible = c != _pc_form
+	W.show_form(box, _pc_form, false)
 	(app.ui.ui as Node).call("set_form_mode", false)
 	sync()

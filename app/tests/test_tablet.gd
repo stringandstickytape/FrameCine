@@ -152,14 +152,17 @@ func _run() -> void:
 	_check("the bar runs along the lower half inside the padding", bar.position.y < 0.0 and bar.size.x > np_rect.size.x * 0.8)
 	var stl := tablet.style()
 	var block: float = Tablet._block_height(stl)
-	var text_h: float = Tablet._text_height(stl)
-	var title_size := float(stl["now_playing"]["title"]["size"])
-	var ff: Font = tablet.title_label.font
-	var box_mid := (ff.get_ascent(Tablet.FONT_PX) - ff.get_descent(Tablet.FONT_PX)) * 0.5 * tablet.title_label.pixel_size
-	var caps_mid := tablet.title_label.position.y + box_mid - title_size * Tablet.CAP_MIDDLE
-	_check("text and bar centred together: the block's top and bottom the same distance from the middle (%.4f, %.4f)"
-			% [caps_mid + text_h * 0.5, bar.position.y], absf((caps_mid + text_h * 0.5) + bar.position.y) < 0.0005
-			and is_equal_approx(bar.position.y, -block * 0.5))
+	# The block's top is the status line's capitals' top, its bottom the bar's.
+	var status_h: float = Tablet._status_height(stl)
+	var status_size := float(stl["now_playing"]["status"]["size"])
+	var ff: Font = tablet.status_label.font
+	var box_mid := (ff.get_ascent(Tablet.FONT_PX) - ff.get_descent(Tablet.FONT_PX)) * 0.5 * tablet.status_label.pixel_size
+	var caps_mid := tablet.status_label.position.y + box_mid - status_size * Tablet.CAP_MIDDLE
+	_check("the lines and the bar centred together: the block's top and bottom the same distance from the middle "
+			+ "(%.4f, %.4f)" % [caps_mid + status_h * 0.5, bar.position.y],
+			absf((caps_mid + status_h * 0.5) + bar.position.y) < 0.0005 and is_equal_approx(bar.position.y, -block * 0.5))
+	_check("the status line above the title", tablet.status_label.position.y > tablet.title_label.position.y
+			and tablet.chapter_label.position.x < 0.0 and tablet.status_label.position.x > 0.0)
 	_check("the title above the bar, on the left; the time on the right", tablet.title_label.position.y > bar.end.y
 			and tablet.title_label.position.x < 0.0 and tablet.time_label.position.x > 0.0)
 	var on_bar := tablet.now_playing.to_global(Vector3(bar.position.x + bar.size.x * 0.25, bar.get_center().y, 0))
@@ -243,8 +246,19 @@ func _run() -> void:
 	_check("the list rows have no borders, the focus no ring (%d px)" % borders, borders == 0)
 	_check("on the main pane, a little in front", panel.global_transform.is_equal_approx(tablet.panel_transform())
 			and (panel.global_transform.origin - tablet.main_pane.global_position).length() < 0.005)
-	_check("the header (the clock and the rest) and the transport, over the rail", pui._status_line.is_visible_in_tree()
-			and pui._status_line.text.contains(":") and pui._transport.is_visible_in_tree()
+	var rail_scroll: Control = pui._tablet_row.get_node("RailScroll")
+	var rail_rows: Control = rail_scroll.get_node("Rail")
+	var footer_end: float = pui._footer_count.get_parent().get_global_rect().end.y
+	_check("the menu fits the main pane: every rail row on show, the footer inside (rail %.0f of %.0f px, footer to %.0f of %d)"
+			% [rail_rows.get_combined_minimum_size().y, rail_scroll.size.y, footer_end, tablet.panel_pixels().y],
+			rail_rows.get_combined_minimum_size().y <= rail_scroll.size.y + 0.5
+			and footer_end <= tablet.panel_pixels().y)
+	layer._refresh()
+	_check("the header on the now playing pane: the clock and the rest (%s)" % tablet.status_label.text,
+			tablet.status_label.text.contains(":") and tablet.status_label.text == pui.status_line_text()
+			and not pui._status_line.is_visible_in_tree()
+			and tablet.status_label.position.y > tablet.title_label.position.y)
+	_check("the transport over the rail", pui._transport.is_visible_in_tree()
 			and pui._play_button.is_visible_in_tree() and pui._trick_buttons.size() == 2
 			and pui._transport.get_global_rect().end.y <= pui._tablet_row.get_global_rect().position.y + 1.0)
 	_check("the tabs as a list down the left, Source first", pui.tablet_tab_buttons.size() == pui.TAB_NAMES.size()

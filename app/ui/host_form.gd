@@ -18,10 +18,13 @@ var _title: Label
 
 func _ready() -> void:
 	add_theme_constant_override("separation", 6)
+	# The title on the buttons' row, the fields three to a row: the form and its keyboard fit the tablet's pane.
 	_title = Label.new()
-	add_child(_title)
+	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_title.clip_text = true
+	_title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	var grid := GridContainer.new()
-	grid.columns = 4
+	grid.columns = 6
 	grid.add_theme_constant_override("h_separation", 8)
 	grid.add_theme_constant_override("v_separation", 4)
 	add_child(grid)
@@ -31,7 +34,8 @@ func _ready() -> void:
 		l.text = spec[1]
 		grid.add_child(l)
 		var e := LineEdit.new()
-		e.custom_minimum_size = Vector2(230, 0)
+		e.custom_minimum_size = Vector2(150, 0)
+		e.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		e.virtual_keyboard_enabled = false
 		e.placeholder_text = {"host": "nas.local or 192.168.1.10", "share": "optional", "domain": "optional"}.get(spec[0], "")
 		if spec[0] == "password":
@@ -41,7 +45,9 @@ func _ready() -> void:
 		_fields[spec[0]] = e
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 10)
+	buttons.add_child(_title)
 	add_child(buttons)
+	move_child(buttons, 0)
 	var save := Button.new()
 	save.text = "Save"
 	save.pressed.connect(_save)

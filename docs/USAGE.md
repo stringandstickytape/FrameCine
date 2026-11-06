@@ -204,11 +204,12 @@ controller close to read them. The menu is on a tablet in front of you and a lit
 towards them (`docs/ui-design.md`). The menu button on either controller opens it, and that controller points at
 it; you can also touch it. One controller is enough.
 
-The tablet has two panes. The top one shows the title, the time (LIVE for a live stream, 4x or 8x while scanning)
-and the time bar with a tick at each chapter: drag the bar with the laser and trigger, or with a controller's tip,
-to skip. With **Seek bar pictures** on (System), the laser on the bar shows a picture of the film there. The main
-pane has the chapter and the clock, time left, end time and battery at the top; then Previous, -10 s, Play or
-Pause, +10 s and Next (hold 4x or 8x to scan); then the tabs down the left.
+The tablet has two panes. The top one shows a small line with the chapter and the clock, time left, end time and
+battery; under it the title and the time (LIVE for a live stream, 4x or 8x while scanning); and the time bar with a
+tick at each chapter: drag the bar with the laser and trigger, or with a controller's tip, to skip. With **Seek bar
+pictures** on (System), the laser on the bar shows a picture of the film there. The main pane has Previous, -10 s,
+Play or Pause, +10 s and Next (hold 4x or 8x to scan) at the top, then the tabs down the left. While a form with
+the keyboard is open, it has the whole pane.
 
 | Control | Panel closed | Panel open (the pointer controller) | Keyboard and mouse |
 |---|---|---|---|

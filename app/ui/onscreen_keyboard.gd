@@ -14,7 +14,8 @@ signal done
 const ROWS_LOWER: Array[String] = ["1234567890-", "qwertyuiop_", "asdfghjkl.@", "zxcvbnm/\\:"]
 const ROWS_UPPER: Array[String] = ["1234567890-", "QWERTYUIOP_", "ASDFGHJKL.@", "ZXCVBNM/\\:"]
 const ROWS_SYMBOLS: Array[String] = ["!#$%&*()+=~", "`^'\"<>[]{}|", ";,?€£§°¬¦·", "        "]
-const KEY_SIZE := Vector2(56, 40)
+## Pixels. 36 tall: six rows and a form over them fit the tablet's main pane at its text size.
+const KEY_SIZE := Vector2(56, 36)
 
 var target: LineEdit
 ## Whole strings on an extra row above the letters; empty for none. Set before the keyboard enters the tree.

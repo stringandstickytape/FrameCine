@@ -4,10 +4,12 @@
 
 Status: current. The menu is on the tablet (`ui/tablet.gd`): a landscape panel below and in front of the eyes,
 tilted up towards them, placed from the head's heading when the menu button opens it and then fixed in the room.
-Its top pane has the title, the time (LIVE, the trick play speed) and the time bar with chapter ticks and the seek
-bar's picture; its main pane has the header (the chapter; the clock, time left and end, battery, low controllers,
-Listening), the transport (previous, -10 s, play / pause, +10 s, next, 4x and 8x held), the tabs as a rail down the
-left with each tab's places or sections beside it, the section picked filling the rest, and the footer. The front
+Its top pane has a small header line (the chapter; the clock, time left and end, battery, low controllers,
+Listening), the title, the time (LIVE, the trick play speed) and the time bar with chapter ticks and the seek bar's
+picture; its main pane has the transport (previous, -10 s, play / pause, +10 s, next, 4x and 8x held), the tabs as a
+rail down the left (in a scroll of its own, for larger text) with each tab's places or sections beside it, the section
+picked filling the rest, and the footer. It all fits the main pane's 961 x 463 layout pixels at the default text
+size (tests/test_tablet.gd); a keyboard form takes the whole pane, the rail and transport hidden meanwhile. The front
 panel below (Revision 2) is gone (the user, 2026-11-06): its size, distance and head follow (`[pane] scale`,
 `distance`, `world_locked`, System's Size, Distance and Follow my head) and the switch between the two (`[pane]
 tablet`, System's Tablet menu) went with it. Revision 2 stays below for its reasons.

@@ -107,8 +107,10 @@ static func _find(node: Node, texts: Dictionary, found: Array) -> void:
 	for c in node.get_children():
 		if c is Control and (c as Control).has_meta("help"):
 			continue
-		if c is HBoxContainer and c.has_meta("slider"):
-			var name_label := c.get_child(0) as Label
+		# A slider row (W.slider_row()): the name over the slider (a VBox since the tablet's cards), or beside it.
+		if c is BoxContainer and c.has_meta("slider"):
+			var first: Node = c.get_child(0)
+			var name_label := (first.get_child(0) if first is HBoxContainer else first) as Label
 			if name_label != null and texts.has(name_label.text):
 				found.append([c, c, str(texts[name_label.text])])
 			continue

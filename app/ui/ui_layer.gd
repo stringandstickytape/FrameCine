@@ -734,6 +734,7 @@ func _refresh() -> void:
 	var player: Node = app.player
 	ui.set_playback(player.get_position(), player.get_duration(), player.is_playing(), player.can_seek())
 	ui.tick()
+	tablet.set_header(ui.chapter_text(), ui.status_line_text())
 	var src = player.source
 	if src == null:
 		ui.set_status("Connecting..." if player.connecting_path != "" else "")
