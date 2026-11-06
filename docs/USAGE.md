@@ -327,7 +327,7 @@ moves them; mark them again then).
   to **Turn**, where left and right turn the box. The menu button keeps it; B puts it back.
 - **Cameras' view when the room dims**: the room light dims the cameras' view too, never below this (40 % at first).
 
-B cancels any of them.
+B cancels any of them. While you mark or edit, a card over the controller says what to do at each step.
 
 ## The Library
 

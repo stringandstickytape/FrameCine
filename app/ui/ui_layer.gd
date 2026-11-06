@@ -41,6 +41,7 @@ const DevHost := preload("res://scripts/dev/dev_host.gd")
 const W := preload("res://ui/pane_widgets.gd")
 const ControllerBattery := preload("res://scripts/xr/controller_battery.gd")
 const WorldToast := preload("res://ui/world_toast.gd")
+const HandHint := preload("res://ui/hand_hint.gd")
 const WatchCard := preload("res://ui/watch_card.gd")
 const Assistant := preload("res://scripts/assistant/assistant.gd")
 ## The header lists the controller batteries at or below this.
@@ -107,6 +108,8 @@ var _title := ""
 ## Controller batteries (#75) and the quiet world toast for warnings while the panel is closed.
 var controller_battery: ControllerBattery
 var world_toast: WorldToast
+## The steps of marking or editing a window to the real room, over the pointer controller (ui/hand_hint.gd).
+var hand_hint: HandHint
 ## The watch-along card beside the screen (#54); the laser and the trigger dismiss it.
 var card: WatchCard
 var _card_pointed := false
@@ -189,6 +192,8 @@ func setup(p_app: Node3D) -> void:
 	card.app = app
 	add_child(card)
 	card.register_commands()
+	hand_hint = HandHint.new()
+	add_child(hand_hint)
 	world_toast = WorldToast.new()
 	world_toast.name = "WorldToast"
 	world_toast.head = app.camera
@@ -619,11 +624,15 @@ func _update_pointer() -> void:
 	var laser_on := _pointed or _card_pointed or not _tablet_hit.is_empty()
 	if not (_seat_pick and not laser_on) and seat_ring_shown():
 		_seat_ring.visible = false
+	if not is_marking_window() and hand_hint != null and hand_hint.visible:
+		hand_hint.hide_hint()
 	if is_marking_window():
-		# Marking: no laser; the controller's tip is what sweeps or touches (scripts/play/real_windows.gd).
+		# Marking: no laser; the controller's tip is what sweeps or touches (scripts/play/real_windows.gd). What to do
+		# now on the card over it.
 		pointer_hand.set_laser(false)
 		if pointer_hand.get_is_active():
 			_real_windows().add_point(pointer_hand.get_ray_origin())
+		hand_hint.show_over(pointer_hand if pointer_hand.get_is_active() else null, app.camera, _real_windows().hint())
 	elif is_placing_object() and not laser_on and pointer_hand.get_is_active():
 		pointer_hand.set_laser(true, _placer.update(pointer_hand), true, PaneStyle.color(&"laser"),
 				PaneStyle.color(&"laser_dot"))
@@ -826,28 +835,23 @@ func _ensure_placer() -> ObjectPlacer:
 ## three corners, the stick for the height, the trigger again (or menu) keeps it. Edit: a face at a time, the stick
 ## moves it, the trigger goes to the next face and then Turn, menu keeps it. B cancels each.
 func start_window_mark() -> bool:
-	return _start_window(_real_windows() != null and _real_windows().start_mark(),
-			"Hold the trigger and sweep the controller over the place. Let go to keep it. B cancels.")
+	return _start_window(_real_windows() != null and _real_windows().start_mark())
 
 
 func start_window_corners() -> bool:
-	return _start_window(_real_windows() != null and _real_windows().start_corners(),
-			"Touch the controller's tip to a corner and pull the trigger; then the next corner along the edge, then one "
-			+ "across. B cancels.")
+	return _start_window(_real_windows() != null and _real_windows().start_corners())
 
 
 func start_window_edit(id: String) -> bool:
-	var rw := _real_windows()
-	var started: bool = rw != null and rw.start_edit(id)
-	return _start_window(started, rw.face_hint() + " B puts it back." if started else "")
+	return _start_window(_real_windows() != null and _real_windows().start_edit(id))
 
 
 func start_window_mark_again(id: String) -> bool:
-	return _start_window(_real_windows() != null and _real_windows().mark_again(id),
-			"Hold the trigger and sweep the controller over the place again. Let go to keep it. B cancels.")
+	return _start_window(_real_windows() != null and _real_windows().mark_again(id))
 
 
-func _start_window(started: bool, hint: String) -> bool:
+## The steps' instructions are on the card over the controller (hand_hint), for as long as the mode lasts.
+func _start_window(started: bool) -> bool:
 	var rw := _real_windows()
 	if not started:
 		notify("The headset's cameras can't show here." if rw == null or not rw.available()
@@ -856,7 +860,6 @@ func _start_window(started: bool, hint: String) -> bool:
 	cancel_seat_pick()
 	cancel_object_place()
 	hide_panel()
-	notify(hint)
 	return true
 
 
@@ -1014,15 +1017,11 @@ func on_trigger(hand: XRHand, pressed: bool) -> bool:
 			"corners":
 				if pressed:
 					hand.pulse()
-					match rw.corner(hand.get_ray_origin()):
-						"height":
-							notify("Stick up and down: how high. Trigger or menu keeps it; B cancels.")
-						"done":
-							_finish_window_mark()
+					if rw.corner(hand.get_ray_origin()) == "done":
+						_finish_window_mark()
 			"edit":
 				if pressed:
 					rw.next_face()
-					notify(rw.face_hint())
 					hand.pulse()
 		return true
 	if is_placing_object() and not _pointed and not _card_pointed:

@@ -888,6 +888,9 @@ the user, 2026-11-06). While making or changing one, the whole view is the camer
   second at full stick, the opposite face kept (`move_face`). The trigger steps through the faces nearest-first and
   then Turn (45 degrees a second). Menu keeps, B puts back. **Mark again**, On, All on, All off, Delete, each with
   Undo. No outlines while the menu is open: an area is seen by turning it on.
+- **The steps' instructions** are on a card over the pointer controller (`ui/hand_hint.gd`, from `hint()`), turned to
+  the head, for as long as the mode lasts: notices placed once where the head looked faded while the viewer looked
+  down at the table.
 
 - **Fixed to the real room:** kept in the runtime's tracking space (the Stage reference space, from the headset's room
   setup), placed each frame by XROrigin3D times XRServer's reference frame. Recentring the screen leaves the windows

@@ -37,6 +37,7 @@ extends Node3D
 ##   sweep(on), add_point(p)          the sweep: trigger held / let go; a point (scene coordinates) while held
 ##   corner(p) -> "more" | "height" | "done"    the corners: one touched (scene coordinates)
 ##   next_face() -> its name, face_name(), face_hint()     edit: the trigger
+##   hint() -> String                 what to do now, for the card over the controller (ui/hand_hint.gd)
 ##   on_stick(stick, delta)           corners: the height; edit: the face, or the turn
 ##   finish() -> window or {}         sweep, corners or edit kept; cancel_mark() puts things back
 ##   set_on(id, on), set_all(on), set_size(id, size), remove(id) -> removed, restore(window), mark_again(id)
@@ -261,17 +262,39 @@ func face_name() -> String:
 	return "front" if n.z > 0.0 else "back"
 
 
-## What the stick does now, for the notice.
+## Edit: the face (or Turn) and what the stick does to it.
 func face_hint() -> String:
 	match face_name():
 		"turn":
-			return "Turn: stick left and right. Trigger: the faces again. Menu keeps it; B puts it back."
+			return "Turn\nStick left / right: turn it\nTrigger: the faces again"
 		"top", "bottom":
-			return "The %s face: stick up and down moves it. Trigger: next face. Menu keeps it." % face_name()
+			return "The %s face\nStick up / down: move it" % face_name() + "\nTrigger: next face"
 		"left", "right":
-			return "The %s face: stick left and right moves it. Trigger: next face. Menu keeps it." % face_name()
+			return "The %s face\nStick left / right: move it" % face_name() + "\nTrigger: next face"
 		_:
-			return "The %s face: stick up moves it away, down nearer. Trigger: next face. Menu keeps it." % face_name()
+			return "The %s face\nStick up: away, down: nearer" % face_name() + "\nTrigger: next face"
+
+
+## What to do now, a few short lines: the card over the controller shows it for as long as the mode lasts.
+func hint() -> String:
+	match mode:
+		"sweep":
+			if sweeping:
+				return "Sweeping\nLet go of the trigger to keep it"
+			return "Hold the trigger and sweep\nthe controller over the place\nB: cancel"
+		"corners":
+			match corners.size():
+				0:
+					return "Tip on a corner, then trigger\n(1 of 3)\nB: cancel"
+				1:
+					return "The next corner along an edge\n(2 of 3)\nB: cancel"
+				2:
+					return "A corner across from that edge\n(3 of 3)\nB: cancel"
+				_:
+					return "Stick up / down: how high\nTrigger or menu: keep it\nB: cancel"
+		"edit":
+			return face_hint() + "\nMenu: keep it  ·  B: put it back"
+	return ""
 
 
 ## Corners: up and down set the height. Edit: the face moves the way the stick is pushed (as the viewer sees it), or,

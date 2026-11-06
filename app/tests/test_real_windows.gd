@@ -32,6 +32,7 @@ func _run() -> void:
 	_test_box()
 	await _test_mark()
 	_test_modes()
+	_test_hints()
 	await _test_kept()
 	_restore_file()
 	print("test_real_windows: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
@@ -229,6 +230,46 @@ func _test_modes() -> void:
 	_check("drawn after the room's effects, before the menu (%d)" % box.material_override.render_priority,
 			box.material_override.render_priority == RealWindows.PRIORITY and RealWindows.PRIORITY > 1
 			and RealWindows.PRIORITY + 1 < tablet_base)
+
+
+## The steps' instructions: what hint() says at each step, and the card over the controller (ui/hand_hint.gd).
+func _test_hints() -> void:
+	var rw: Node = main.features.real_windows
+	var ui: Node = main.ui
+	ui.start_window_mark()
+	var says := [rw.hint()]
+	rw.sweep(true)
+	says.append(rw.hint())
+	ui.on_back(null)
+	_check("sweep: says hold, then let go (%s)" % [says], says[0].contains("Hold the trigger") and says[1].contains("Let go"))
+	ui.start_window_corners()
+	says = [rw.hint()]
+	for p: Vector3 in [Vector3(0, 0.7, -1), Vector3(0.4, 0.7, -1), Vector3(0.4, 0.7, -1.2)]:
+		rw.corner(p)
+		says.append(rw.hint())
+	ui.on_back(null)
+	_check("corners: each step says which (%s)" % [says], says[0].contains("1 of 3") and says[1].contains("2 of 3")
+			and says[2].contains("3 of 3") and says[3].contains("how high"))
+	var id := str(rw.windows[0]["id"])
+	ui.start_window_edit(id)
+	var face: String = rw.hint()
+	while rw.face_name() != "turn":
+		rw.next_face()
+	var turn: String = rw.hint()
+	ui.on_back(null)
+	_check("edit: the face and the turn, with keep and put back (%s | %s)" % [face, turn],
+			face.contains("face") and face.contains("Menu: keep") and face.contains("B: put it back")
+			and turn.begins_with("Turn") and rw.hint() == "")
+	var card: Node3D = ui.hand_hint
+	var hand := Node3D.new()
+	root.add_child(hand)
+	hand.global_position = Vector3(0.2, 0.9, -0.4)
+	card.show_over(hand, main.xr_camera, "Some words")
+	_check("the card over the controller (%s)" % card.global_position, card.visible
+			and card.global_position.y > hand.global_position.y + 0.05 and card.text == "Some words")
+	card.hide_hint()
+	_check("and gone after", not card.visible)
+	hand.queue_free()
 
 
 func _test_kept() -> void:
