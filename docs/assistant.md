@@ -566,6 +566,10 @@ id, "" for none) with `color` its mean colour (the swatch times the tint). A lib
 | `object_place {id, name, at, position, rotation, turn, scale}` | room | into the room |
 | `object_move {name, at, position, rotation, turn, scale}` | room | what is left out stays |
 | `object_delete {id}` | room | a user object out of the library (destructive; built-ins can't go); refused while a kept room places it, the reply naming the rooms (`rooms`): remove it from them first. The Objects tab's Delete says the same |
+| `object_put_back {name}`, `object_tidy_up` | room | object physics (`docs/physics.md`): one object, or every one, picked up, dropped or thrown, back where it was placed (its `home`) |
+| `object_attach {name, to, offset, rotation}` | room | a text or particles area follows an object (`attach`, `offset` in the room document); empty `to` detaches it where it is |
+| `object_throw {name, velocity, spin}` | room | drops or throws an object as a hand would; it rests where it lands and is kept there |
+| `object_physics` | read | what can be picked up, what moves, what moved, the cost |
 | `recolour {match, color, emission, emission_strength, texture, material, tint, tiling, triplanar, reset}` | room | a part as `"<placed>/<part>"`; `material` a library material's id (`materials` lists them) |
 | `remove {name}` | room | a placed object out of the room |
 

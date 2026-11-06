@@ -78,6 +78,7 @@ sections of `user://settings.cfg`; `<environment id>` and `<id>` sections hold o
 | [Gapless playlist](#44-gapless-playlist) | #44 | `[queue] gapless` | off by default (headset check, runbook E7) |
 | [Picture in picture](#87-picture-in-picture) | #87 | `[pip]` | on demand (the pane opens it) |
 | [Seek-bar thumbnails](#40-seek-bar-thumbnails) | #40 | `[thumbnails] enabled` | off by default (memory check) |
+| [Object physics](#object-physics) | none | none (the places are in the kept room) | on in kept rooms with objects |
 | [Crossfade between items](#94-crossfade-between-items) | #94 | `[crossfade] music`, `videos` | off by default |
 | [Hardware 10-bit video](#hardware-10-bit-video) | none | `[hwvideo] hw_vp9` | read-only: P010 when the driver offers it, else Q10C, else software |
 | [Agents on the headset](#agents-on-the-headset) | | `[assistant] voice_to` | on demand, from Files |
@@ -2429,3 +2430,22 @@ documents, made from the libraries by `app/tools/showrooms.gd` (run it again whe
   makes them, each built in the main scene, the Room tab's group, `perf_rooms`). Rendered in WSL with lavapipe.
 
 Untested: on the headset (the GPU cost of each, how the labels read in the lenses).
+
+## Object physics
+
+Any object from the object library can be picked up with a controller (the laser, or the hand in it), held, turned,
+dropped or thrown; it bounces off the room's seats, steps, walls and floor and off the film's screen in every shape,
+comes to rest and stays there, kept with the room. Put back and Tidy up return objects to where they were placed. A
+wall object stays on its wall until pulled off. A text or particles area can follow an object (attach and offset).
+One thud, made in code, plays where an impact happens, through the spatial audio. The design, the controls, the
+numbers and the open questions are in `docs/physics.md`.
+
+- **API:** `main.features.physics` (`app/scripts/play/object_physics.gd`): `available()`, `aim()`, `near()`,
+  `pick_up()`, `hold_to()`, `let_go()`, `cancel()`, `throw()`, `settle_all()`, `state()`, signal `changed`;
+  `main.features.grab` (`object_grab.gd`): the controllers, `holding(hand)`, signal `changed` (the legends).
+- **Commands:** `object_put_back`, `object_tidy_up`, `object_attach`, `object_throw`, `object_physics`.
+- **Engine:** Jolt (`project.godot`); the moving objects interpolated to the frame by the feature itself.
+- **Tested:** `tests/test_physics.gd` (66 checks), on the desktop.
+
+Untested: on the headset (the feel of a throw, the trail of a held object, the thud through the earbuds, the step's
+cost on the Frame's cores with a 4K film decoding).

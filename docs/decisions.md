@@ -451,6 +451,23 @@ settings, the PC peer (`tools/party_peer.py`) and `docs/watch-party.md`.
   still has a `[party]` section loads as before; the section is not read.
 - **Would change if:** users ask for it. Then it comes back from git history and is tested on two headsets.
 
+## D26. Object physics: Jolt, static until picked up, our own interpolation (2026-11-06)
+
+Library objects can be picked up, dropped and thrown (`docs/physics.md`). Jolt is the 3D physics engine (it is in
+the device build). Placed objects are static bodies; only a picked-up object is rigid, and it is static again where it
+rests, its place kept in the room document with its `home` for Put back and Tidy up. The room collides as simple
+shapes (the cinema as boxes, two a seat).
+
+- **Why static until picked up:** the user's choice; it also means physics costs next to nothing at rest (0.035 ms a
+  tick in the cinema with 24 objects), which matters on a CPU that also decodes 4K video.
+- **Why our own interpolation:** 60 ticks a second against a 72 Hz (or other) display judders. The engine's physics
+  interpolation is global and would delay every node the app moves in `_process` (controllers, lasers, tablet,
+  screen) by a tick; a 72 Hz tick rate would not follow other refresh rates or dropped frames. The moving bodies are
+  drawn between their last two ticks by `object_physics.gd` itself.
+- **Would change if:** Jolt's step on the Frame costs too much while things move (on a 30-thread desktop it is mostly
+  the job fan-out over every worker thread: 1.4 ms, against 0.23 ms on one or two threads). Then a fork setting for
+  Jolt's thread count, or a smaller worker pool.
+
 ## Open
 
 - Quad layer for flat video vs. drawing in the projection layer: sharpness and bandwidth comparison (spike 03-layer).

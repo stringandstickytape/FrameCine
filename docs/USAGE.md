@@ -222,6 +222,7 @@ While a form with the keyboard is open, it has the whole main pane.
 | Y (right), the sparkle on its cap, while the right hand points | An agent's terminal on or off. With none running, start the last one used. It keeps working while hidden. | Nothing | |
 | Menu (right) or view (left); right stick click | Open the panel in front; this controller points | Short press: close it. Hold 0.6 s: move it to the front of the head again | M, F3 (hold: recentre); Esc closes |
 | Left stick click | Info overlay on or off | Same | Tab, F1 |
+| Grip, hold, pointing at an object or in one | Pick it up (`docs/physics.md`): stick up or down nearer or farther, left or right turns it, let go to drop it or throw it, B puts it back where it was picked up; the trigger does nothing meanwhile | Same, with the laser off the panel | |
 | Grip, hold and point | Move the flat screen (stick: nearer or farther); in 180 and 360, turn the sphere | Held 2 s with the laser on the panel, in dev mode: allow remote changes for an hour | G held and mouse |
 | Grip, tap | Screen (or the sphere's front) to where you look | Same | R (also recenters) |
 | Pointer hand's bumper, hold | Push to talk, when the dev link is on (`docs/dev/voice.md`), an assistant is paired, or an agent runs on the headset | | F8 held |
@@ -317,6 +318,14 @@ you use it, not share it.
   the surface under it (caustics, rim glow, velvet, ...) keeps the material. The part's line names its material and
   effect. A change that would take the room past its cost limit is refused with a note. **Reset** gives the part its
   own colours back. Each change has Undo in the footer.
+
+**Picking objects up** (`docs/physics.md`): point a controller at an object in the room and hold the grip; it is held
+at the laser's end (with the controller in an object, in the hand). The stick brings it nearer or farther and turns
+it. Let go to drop it; flick the controller as you let go to throw it. It bounces off the seats, the steps, the walls
+and the screen, and stays where it comes to rest, kept with the room. A wall clock, picture or shelf stays on the
+wall until you pull it off. B while holding puts it back where you picked it up. In **In this room**, **Put back**
+returns a moved object to where it was placed and **Tidy up** returns them all. A text or particles area has
+**Attach**: pick the object it follows, and it moves with it; **Detach** leaves it where it is.
 
 **Delete** (imported objects, and the models and pictures an assistant's rooms kept) asks first in the footer. While a
 kept room has the object in it, Delete says which rooms instead: rooms are made of the library's objects, so remove it
