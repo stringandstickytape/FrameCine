@@ -460,58 +460,58 @@ msgstr ""
 msgid "Sat"
 msgstr ""
 
-#: scripts/play/film_layer.gd:143
+#: scripts/play/film_layer.gd:144
 msgid "Off: the film is drawn in the room."
 msgstr ""
 
-#: scripts/play/film_layer.gd:145
+#: scripts/play/film_layer.gd:146
 msgid "This engine has no OpenXR layers."
 msgstr ""
 
-#: scripts/play/film_layer.gd:147
+#: scripts/play/film_layer.gd:148
 msgid "Only in the headset: here the film is drawn in the room."
 msgstr ""
 
-#: scripts/play/film_layer.gd:150
+#: scripts/play/film_layer.gd:151
 msgid "180, 360 and fisheye films are drawn in the room."
 msgstr ""
 
-#: scripts/play/film_layer.gd:153
+#: scripts/play/film_layer.gd:154
 msgid "A curved screen is drawn in the room (curved layers are off)."
 msgstr ""
 
-#: scripts/play/film_layer.gd:154
+#: scripts/play/film_layer.gd:155
 msgid "This headset has no curved layers: a curved screen is drawn in the room."
 msgstr ""
 
-#: scripts/play/film_layer.gd:155
+#: scripts/play/film_layer.gd:156
 msgid "On; nothing to show."
 msgstr ""
 
-#: scripts/play/film_layer.gd:158
-msgid "On; the room draws the film while an object is in front of the screen, so it shows."
+#: scripts/play/film_layer.gd:159
+msgid "On; the room draws the film while something is in front of the screen, so it shows."
 msgstr ""
 
-#: scripts/play/film_layer.gd:160
+#: scripts/play/film_layer.gd:161
 msgid "On; the room draws the film while the menu is open, so the menu shows in front."
-msgstr ""
-
-#: scripts/play/film_layer.gd:162
-#, c-format
-msgid "In use: two cylinder layers, one per eye, %d x %d px each."
 msgstr ""
 
 #: scripts/play/film_layer.gd:163
 #, c-format
-msgid "In use: two quad layers, one per eye, %d x %d px each."
+msgid "In use: two cylinder layers, one per eye, %d x %d px each."
 msgstr ""
 
 #: scripts/play/film_layer.gd:164
 #, c-format
-msgid "In use: one cylinder layer, %d x %d px."
+msgid "In use: two quad layers, one per eye, %d x %d px each."
 msgstr ""
 
 #: scripts/play/film_layer.gd:165
+#, c-format
+msgid "In use: one cylinder layer, %d x %d px."
+msgstr ""
+
+#: scripts/play/film_layer.gd:166
 #, c-format
 msgid "In use: one quad layer, %d x %d px."
 msgstr ""

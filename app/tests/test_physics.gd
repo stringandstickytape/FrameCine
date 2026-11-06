@@ -197,7 +197,7 @@ func _test_screen() -> void:
 		min_z = minf(min_z, z)
 		if min_z < INF:
 			after = z
-		if film.held and film.covered_by == "Ball" and main.screen.get_node("Flat").visible 				and "object" in film.status():
+		if film.held and film.covered_by == "Ball" and main.screen.get_node("Flat").visible 				and "something" in film.status():
 			held_for_ball = true
 		if not ph.is_moving("Ball"):
 			break
@@ -226,6 +226,34 @@ func _test_screen() -> void:
 	probe.queue_free()
 	_check("the bounds test: in front covers, beside / behind the screen / behind the eyes not (%s)" % ", ".join(wrong),
 			wrong.is_empty())
+	# A controller's laser held up between the eyes and the picture: the same (the controller vanished behind the
+	# film, the user, 2026-11-06); put down out of the way: the layer back after a second.
+	var hand: XRController3D = main.hands[0] if main.hands.size() > 0 else null
+	if hand != null:
+		var was_shown: bool = hand.show_when_tracked
+		var was_visible := hand.visible
+		var was_xf := hand.global_transform
+		hand.show_when_tracked = false
+		hand.visible = true
+		var cam: Camera3D = main.get_viewport().get_camera_3d()
+		var toward: Vector3 = (flat_xf.origin - cam.global_position).normalized()
+		hand.global_transform = Transform3D(Basis.looking_at(toward, Vector3.UP), cam.global_position + toward * 0.4)
+		hand.set_laser(true, 2.0)
+		await _frames(3)
+		_check("a controller and its laser in front of the picture: the layer hidden (%s)" % film.covered_by,
+				film.held and film.covered_by.begins_with(str(hand.name)))
+		hand.set_laser(false)
+		hand.global_transform = Transform3D(Basis.looking_at(Vector3.DOWN, Vector3.FORWARD), cam.global_position
+				+ Vector3(0.3, -0.7, 0.2))
+		await _frames(3)
+		var still_held: bool = film.held
+		await create_timer(film.COVER_RELEASE + 0.3).timeout
+		await _frames(2)
+		_check("put down in the lap: held a second more, then the layer back (%s)" % film.covered_by, still_held
+				and not film.held)
+		hand.global_transform = was_xf
+		hand.visible = was_visible
+		hand.show_when_tracked = was_shown
 	film.set_enabled(was_on, false)
 	film.force = was_forced
 	_check("it reached the screen (%.2f, the screen at %.2f)" % [min_z, target.z], min_z < target.z + 0.5)

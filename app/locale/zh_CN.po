@@ -178,8 +178,8 @@ msgstr "开；没有可显示的内容。"
 msgid "On; the room draws the film while the menu is open, so the menu shows in front."
 msgstr "开；菜单打开时由房间绘制影片，菜单因此显示在前面。"
 
-msgid "On; the room draws the film while an object is in front of the screen, so it shows."
-msgstr "已开启；屏幕前有物体时由房间绘制影片，物体才能显示在前面。"
+msgid "On; the room draws the film while something is in front of the screen, so it shows."
+msgstr "已开启；屏幕前有东西时由房间绘制影片，它才能显示在前面。"
 
 msgid "In use: two cylinder layers, one per eye, %d x %d px each."
 msgstr "使用中：两个圆柱图层，每只眼睛一个，各 %d x %d 像素。"

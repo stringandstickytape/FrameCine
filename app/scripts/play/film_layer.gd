@@ -26,10 +26,11 @@ extends Node
 ## always. Switching at run time keeps playback going.
 ## While the menu is open (main.menu_shown) the layers hide and the mesh draws the film: the runtime drew the layer
 ## over the panels (the user, 2026-11-04). They come back when it closes; nothing is remade and the setting is not
-## touched. The same while a room object (object_physics.gd solid_nodes(): placed, held, thrown, attached) is between
-## the viewer and the screen: the runtime drew the layer over a ham lobbed at the screen (the user, 2026-11-06). Its
-## bounds seen from the eyes cover part of the picture -> held at once; clear for COVER_RELEASE seconds -> the layer
-## again (no flicker while one sits at the picture's edge).
+## touched. The same while something is between the viewer and the screen: a room object (object_physics.gd
+## solid_nodes(): placed, held, thrown, attached), a controller, the laser or its dot. The runtime draws a quad layer
+## over everything in front of it, hole punch or not: the panels (2026-11-04), a ham lobbed at the screen and a
+## controller held up in front of the film (the user, 2026-11-06). Its bounds seen from the eyes cover part of the
+## picture -> held at once; clear for COVER_RELEASE seconds -> the layer again (no flicker at the picture's edge).
 ##
 ##   enabled, set_enabled(on, save := true)
 ##   force                  tests: build the layers without an XR session (they don't show then)
@@ -155,7 +156,7 @@ func status() -> String:
 		return tr("On; nothing to show.")
 	var px: Vector2i = viewports[0].size
 	if held and not bool(main.get("menu_shown")) and covered_by != "":
-		return tr("On; the room draws the film while an object is in front of the screen, so it shows.")
+		return tr("On; the room draws the film while something is in front of the screen, so it shows.")
 	if held:
 		return tr("On; the room draws the film while the menu is open, so the menu shows in front.")
 	if layers.size() == 2:
@@ -165,15 +166,26 @@ func status() -> String:
 			else tr("In use: one quad layer, %d x %d px.")) % [px.x, px.y]
 
 
-## The name of a room object whose bounds, seen from the eyes, cover part of the flat picture and lie between the
-## eyes and the screen; "" when none does.
+## The name of a room object, a controller's part ("RightHand Visual") or the laser whose bounds, seen from the eyes,
+## cover part of the flat picture and lie between the eyes and the screen; "" when none does.
 func _covered() -> String:
 	var physics: Node = main.features.get("physics") if main.get("features") != null else null
 	var flat := main.screen.get_node_or_null("Flat") as Node3D if main.screen != null else null
 	var cam := main.get_viewport().get_camera_3d() if main.is_inside_tree() else null
-	if physics == null or flat == null or cam == null or not physics.has_method("solid_nodes"):
+	if flat == null or cam == null:
 		return ""
-	var nodes: Array = physics.solid_nodes()
+	var nodes: Array = physics.solid_nodes() if physics != null and physics.has_method("solid_nodes") else []
+	# The controllers (their models and legends, which load late: not kept), the laser and its dot while they show.
+	var fresh := {}
+	for hand: Node in main.get("hands") if main.get("hands") != null else []:
+		if not (hand is Node3D) or not (hand as Node3D).is_visible_in_tree():
+			continue
+		for part: String in ["Visual", "Laser", "Dot"]:
+			var n := hand.get_node_or_null(part) as Node3D
+			if n != null and n.is_visible_in_tree():
+				nodes.append(n)
+				if part == "Visual":
+					fresh[n.get_instance_id()] = true
 	if nodes.is_empty():
 		return ""
 	var screen := Transform3D(flat.global_transform.basis.orthonormalized(), flat.global_transform.origin)
@@ -182,8 +194,10 @@ func _covered() -> String:
 	if eye.z <= 0.01:
 		return ""
 	for n: Node3D in nodes:
+		if fresh.has(n.get_instance_id()):
+			_local_aabbs.erase(n.get_instance_id())
 		if _covers(screen, eye, half, n):
-			return str(n.name)
+			return str(n.name) if not (n.get_parent() is XRController3D) else "%s %s" % [n.get_parent().name, n.name]
 	return ""
 
 
