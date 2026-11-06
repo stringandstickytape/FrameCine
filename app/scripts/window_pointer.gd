@@ -11,7 +11,9 @@ extends Node
 ##   Normal job, while they look away (the cursor is not drawn: that is the cue): stick up / down scrolls, left / right
 ##   sends the arrow keys (web players seek with them); the trigger and the squeeze do nothing.
 ##   Both: A is Space (play / pause in web players); B browser Back (an Android app's Back, below); menu, view, bumper
-##   unchanged (the bumper: voice into the selected field, browser_dictation.gd, or the assistant).
+##   unchanged (the bumper: voice into the selected field, browser_dictation.gd, or the assistant). The right stick
+##   click (the headset's own controllers) in pointer mode keeps the picture under the cursor
+##   (scripts/pictures/picture_keeper.gd); looking away it is the menu.
 ## The laser: off on a window by default. It was drawn in front of the screen, so the film layer had to hide while it
 ## pointed there (film_layer.gd), and it competed with the cursor for the trigger. [browser] laser brings it back as an
 ## alternative: where it meets the window the cursor follows it, and the trigger clicks there.
@@ -114,8 +116,29 @@ func window_labels() -> Dictionary:
 	if src == null or src.is_terminal():
 		return {}
 	if cursor.mode:
+		# The stick click keeps the picture under the cursor: said only while there is one (picture_keeper.gd).
+		var keeper: Node = main.get("picture_keeper")
+		if keeper != null and bool(keeper.get("over_image")):
+			var t: Dictionary = main.WINDOW_POINTER_LABELS.duplicate()
+			t["stick_click"] = main.KEEP_PICTURE_LABEL
+			return t
 		return main.WINDOW_POINTER_LABELS
 	return main.WINDOW_LABELS if laser else main.WINDOW_AWAY_LABELS
+
+
+## The stick clicked in pointer mode: the cursor back where it was before the click's nudge, and held there a moment
+## (stick_cursor.gd freeze()). Returns that window pixel, or NO_HIT outside pointer mode.
+func freeze_cursor(seconds: float) -> Vector2:
+	if not cursor.mode or not has_cursor():
+		return NO_HIT
+	var at := cursor.freeze(seconds)
+	pointer = at
+	var src := get_source()
+	if src != null:
+		src.send_pointer(at)
+		_last_sent = at
+	_draw_cursor()
+	return at
 
 
 ## Where a ray meets the flat screen's plane: {"uv" (0..1 inside the window, outside values off it), "distance"},

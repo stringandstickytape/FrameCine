@@ -27,6 +27,11 @@ const ENTRIES := [
 	{"id": "text", "name": "Text", "tags": ["text"], "mount": "free", "generator": "text"},
 	{"id": "particles", "name": "Particles", "tags": ["effect"], "mount": "free", "generator": "particles"},
 	{"id": "picture_frame", "name": "Picture frame", "tags": ["wall", "picture"], "mount": "wall"},
+	# The picture library's objects (scripts/pictures/picture_objects.gd makes one per picture, sized to its shape):
+	# a thin sheet, a deep canvas, a standee whose picture's transparent pixels are cut away.
+	{"id": "poster", "name": "Poster", "tags": ["wall", "picture"], "mount": "wall"},
+	{"id": "canvas", "name": "Canvas", "tags": ["wall", "picture"], "mount": "wall"},
+	{"id": "cutout", "name": "Cut-out", "tags": ["floor", "picture"], "mount": "floor"},
 	{"id": "wall_shelf", "name": "Wall shelf", "tags": ["wall", "furniture"], "mount": "wall"},
 	{"id": "pot_plant", "name": "Pot plant", "tags": ["floor", "plant"], "mount": "floor"},
 	# The room's clock widget (room_widget.gd) draws the hands on the face: no background of its own.
@@ -42,6 +47,8 @@ static func build(id: String) -> Node3D:
 			return _primitive(id)
 		"picture_frame":
 			return _picture_frame()
+		"poster", "canvas", "cutout":
+			return build_picture(id, DEFAULT_ASPECT)
 		"wall_shelf":
 			return _shelf()
 		"pot_plant":
@@ -102,13 +109,65 @@ static func shape_mesh(kind: String, size: Vector3) -> PrimitiveMesh:
 	return null
 
 
-## A dark wooden frame (0.5 x 0.4 m), a pale mount, and the picture: a quad that takes a texture whole.
-static func _picture_frame() -> Node3D:
+## The picture objects' shape when no picture is given (4:3), and each one's picture's long side (metres).
+const DEFAULT_ASPECT := 4.0 / 3.0
+const PICTURE_LONG := {"poster": 0.6, "framed": 0.4, "canvas": 0.6, "cutout": 1.5}
+const POSTER_DEPTH := 0.003
+const CANVAS_DEPTH := 0.035
+const CUTOUT_FOOT := Vector3(0.36, 0.03, 0.24)
+
+
+## A picture's width and height for an aspect (width / height) and a long side.
+static func picture_size(aspect: float, long: float) -> Vector2:
+	var a := clampf(aspect, 0.1, 10.0)
+	return Vector2(long, long / a) if a >= 1.0 else Vector2(long * a, long)
+
+
+## A picture object of this kind ("poster", "framed", "canvas", "cutout") for a picture of this aspect, its picture a
+## part named "Picture" (a quad that takes the texture whole; picture_objects.gd puts the picture in). The front faces
+## +Z; a wall one's back at z = 0, the cut-out standing on y = 0.
+static func build_picture(kind: String, aspect: float) -> Node3D:
+	var size := picture_size(aspect, float(PICTURE_LONG.get(kind, 0.6)))
+	var quad := QuadMesh.new()
+	quad.size = size
+	match kind:
+		"framed":
+			return _picture_frame(size)
+		"poster":
+			var root := _root("Poster")
+			_part(root, "Sheet", "#f4f1ea", [[_box(Vector3(size.x, size.y, POSTER_DEPTH)),
+					Transform3D(Basis(), Vector3(0, 0, POSTER_DEPTH / 2.0))]])
+			_part(root, "Picture", "#8fa3b5", [[quad, Transform3D(Basis(), Vector3(0, 0, POSTER_DEPTH + 0.0005))]])
+			return root
+		"canvas":
+			var root := _root("Canvas")
+			_part(root, "Stretcher", "#efe9dc", [[_box(Vector3(size.x, size.y, CANVAS_DEPTH)),
+					Transform3D(Basis(), Vector3(0, 0, CANVAS_DEPTH / 2.0))]])
+			_part(root, "Picture", "#8fa3b5", [[quad, Transform3D(Basis(), Vector3(0, 0, CANVAS_DEPTH + 0.0005))]])
+			return root
+		"cutout":
+			var root := _root("Cutout")
+			var foot := CUTOUT_FOOT
+			_part(root, "Stand", "#2b2b2b", [[_box(foot), Transform3D(Basis(), Vector3(0, foot.y / 2.0, 0))]])
+			var y := foot.y + size.y / 2.0
+			# Two-sided: a quad each way, so it shows from behind too (no cull mode in a .glb's unlit picture).
+			_part(root, "Picture", "#8fa3b5", [[quad, Transform3D(Basis(), Vector3(0, y, 0.002))],
+					[quad, Transform3D(Basis(Vector3.UP, PI), Vector3(0, y, -0.002))]])
+			return root
+	return null
+
+
+## A dark wooden frame (0.5 x 0.4 m), a pale mount, and the picture: a quad that takes a texture whole. With a
+## picture size, the frame is made round a picture of that size.
+static func _picture_frame(picture := Vector2.ZERO) -> Node3D:
 	var root := _root("PictureFrame")
 	var w := 0.5
 	var h := 0.4
 	var bar := 0.045
 	var d := 0.03
+	if picture != Vector2.ZERO:
+		w = picture.x + 2.0 * bar + 0.07
+		h = picture.y + 2.0 * bar + 0.07
 	_part(root, "Frame", "#3b2a1e", [
 		[_box(Vector3(w, bar, d)), Transform3D(Basis(), Vector3(0, (h - bar) / 2.0, d / 2.0))],
 		[_box(Vector3(w, bar, d)), Transform3D(Basis(), Vector3(0, -(h - bar) / 2.0, d / 2.0))],

@@ -12,6 +12,8 @@ extends SceneTree
 ##   thumbstick (vector2)     on the menu: scroll; else left/right seek 10 s, up/down screen distance
 ##   menu (bool)              open / close the menu panel (held: recentre it); on every profile each hand has one, so
 ##                            a single controller is enough (docs/ui-design.md, "Revision 2")
+##   stick_click (bool)       the headset profile's right stick click: the menu, except while the browser's stick
+##                            pointer is on an image, where it keeps the picture (scripts/pictures/picture_keeper.gd)
 ##   overlay (bool)           show / hide the info overlay
 ##   next_file / prev_file    next / previous video in the folder (or test pattern)
 ##   labels (bool)            the bumper: the left half of the snapshot chord (headset profile: either bumper)
@@ -56,6 +58,7 @@ func _build(dpad: bool) -> OpenXRActionMap:
 			["squeeze", "Move screen (grip squeeze)", OpenXRAction.OPENXR_ACTION_FLOAT],
 			["thumbstick", "Scroll / seek / distance", OpenXRAction.OPENXR_ACTION_VECTOR2],
 			["menu", "Show / hide menu", OpenXRAction.OPENXR_ACTION_BOOL],
+			["stick_click", "Menu / keep picture (stick click)", OpenXRAction.OPENXR_ACTION_BOOL],
 			["overlay", "Show / hide info overlay", OpenXRAction.OPENXR_ACTION_BOOL],
 			["next_file", "Next video", OpenXRAction.OPENXR_ACTION_BOOL],
 			["prev_file", "Previous video", OpenXRAction.OPENXR_ACTION_BOOL],
@@ -95,8 +98,8 @@ func _build(dpad: bool) -> OpenXRActionMap:
 	var frame_single: Array = [
 		["menu", RIGHT + "/input/menu/click"],
 		["menu", LEFT + "/input/view/click"],
-		# Fallback in case the runtime keeps menu for itself.
-		["menu", RIGHT + "/input/thumbstick/click"],
+		# Fallback in case the runtime keeps menu for itself; on an image in the browser it keeps the picture.
+		["stick_click", RIGHT + "/input/thumbstick/click"],
 		["overlay", LEFT + "/input/thumbstick/click"],
 		["next_file", RIGHT + "/input/a/click"],
 		["prev_file", RIGHT + "/input/b/click"],

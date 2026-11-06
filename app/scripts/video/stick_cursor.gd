@@ -39,6 +39,29 @@ var moved := false
 var mode_changed := false
 var _on_time := 0.0
 var _off_time := 0.0
+## The clock of step() (seconds), the cursor's recent places [[time, pos], ...] and, while frozen, until when.
+var _time := 0.0
+var _history: Array = []
+var _frozen_until := -1.0
+## How long the recent places are kept (seconds).
+const HISTORY_SECONDS := 0.5
+
+
+## The stick is clicked (the picture keeper, picture_keeper.gd): pressing it nudges the stick, so the cursor goes
+## back to where it was `seconds` ago and stays there for `seconds` more. Returns where it is then.
+func freeze(seconds: float) -> Vector2:
+	var at := pos
+	for h: Array in _history:
+		if float(h[0]) >= _time - seconds:
+			at = h[1]
+			break
+	pos = at
+	_frozen_until = _time + seconds
+	return pos
+
+
+func frozen() -> bool:
+	return _time < _frozen_until
 
 
 func shown() -> bool:
@@ -68,6 +91,10 @@ func _pixel(uv: Vector2) -> Vector2:
 ## and the cursor stays put). held: the trigger is held (a drag keeps the mode). pinned: a window pixel the cursor is
 ## put on and kept at, in pointer mode whatever the gaze (the laser, [browser] laser), or null.
 func step(delta: float, gaze_uv: Variant, stick: Vector2, grip := false, held := false, pinned: Variant = null) -> void:
+	_time += delta
+	_history.append([_time, pos])
+	while not _history.is_empty() and float(_history[0][0]) < _time - HISTORY_SECONDS:
+		_history.pop_front()
 	if pinned is Vector2:
 		_pin(delta, pinned)
 		return
@@ -93,7 +120,7 @@ func step(delta: float, gaze_uv: Variant, stick: Vector2, grip := false, held :=
 			mode_changed = true
 			_on_time = 0.0
 	if mode:
-		if pushed and not grip:
+		if pushed and not grip and not frozen():
 			var dir := stick / maxf(push, 0.0001)
 			var step_px := size.x / CROSS_SECONDS * speed_of(minf(push, 1.0)) * delta
 			# Stick up is up the page; window pixels grow downwards.
