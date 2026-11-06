@@ -1,14 +1,16 @@
 extends Node3D
 
-## Tablet (a prototype for a new UI, [pane] tablet, off by default): a landscape panel where you would hold a tablet
-## in both hands, below and in front of the eyes, tilted up towards them, close enough to lean in to small detail
-## and to touch its controls (the laser stays too). Beside the front panel, which stays for the time being: it shows
-## and hides with the panel (ui_layer.gd show_panel(), hide_panel()), placed from the head when the menu button opens
-## the panel and then fixed in the room, and it fades in and out.
+## Tablet: the app's menu (the user, 2026-11-06: the front panel, the first UI, is gone; this is the one). A landscape
+## panel where you would hold a tablet in both hands, below and in front of the eyes, tilted up towards them, close
+## enough to lean in to small detail and to touch its controls (the laser stays too). It shows and hides with the
+## panel (ui_layer.gd show_panel(), hide_panel()), placed from the head when the menu button opens the panel and then
+## fixed in the room, and it fades in and out.
 ##
 ## Two panes, one above the other with a small gap (the user, 2026-11-04):
-##   now playing   short, on top: the title on the left, "played / total" on the right (as the front panel shows
-##                 them), and the time bar along the bottom. Nothing else. bar_fraction(point) gives the place in the
+##   now playing   short, on top: the title on the left, "played / total" on the right (LIVE before it for a live
+##                 stream, the trick play speed after it), and the time bar along the bottom with a tick at each
+##                 chapter. The seek bar's picture (features.thumbs, System "Seek bar pictures") shows over the bar,
+##                 with its time, where the laser is on the bar (hover_bar()) or where it is dragged. bar_fraction(point) gives the place in the
 ##                 film for a point on or near the bar, for touching it or the laser and trigger (to come).
 ##   main          below it, for everything else, 25 % deeper than at first (the user: the top stays, the bottom
 ##                 comes down). The old menu sits on it (the user, 2026-11-04: moved here, reshaped, its lists
@@ -43,7 +45,7 @@ extends Node3D
 ## away; its face tilted TILT degrees back from vertical (the user, 2026-11-04: a little more upright than 45°, a
 ## little smaller, 5 cm closer).
 ##
-##   enabled, set_enabled(on, save := true), toggle(head), show_at(head), hide_tablet(), is_shown()
+##   toggle(head), show_at(head), hide_tablet(), is_shown(); hover_bar(fraction) (the laser on the bar, -1 off it)
 ##   style() -> Dictionary, set_style(changes, save := true) -> Array (errors), reset_style()
 ##   now_playing, main_pane    the two panes (MeshInstance3D); title_label, time_label (Label3D)
 ##   bar_rect() -> Rect2 (now playing pane's space), bar_fraction(global_point) -> float (-1: not on the bar)
@@ -107,6 +109,12 @@ const LIFT := 0.0008
 const BAR_HIT := Vector2(0.006, 0.012)
 ## Metres between the title and the time.
 const TEXT_GAP := 0.02
+## Metres: the seek bar's picture (16:9; the picture keeps its own shape inside), the gap under it, and a chapter
+## tick (its width, and its height as the bar's times this).
+const THUMB_SIZE := Vector2(0.096, 0.054)
+const THUMB_GAP := 0.006
+const TICK_WIDTH := 0.0012
+const TICK_HEIGHT := 2.5
 ## Seconds between skips while the bar is dragged.
 const SCRUB_SEEK := 0.25
 ## The visual middle of capitals and figures above the baseline, as a share of the font's size (Label3D centres the
@@ -114,7 +122,6 @@ const SCRUB_SEEK := 0.25
 const CAP_MIDDLE := 0.36
 
 var app: Node3D
-var enabled := false
 var now_playing: MeshInstance3D
 var main_pane: MeshInstance3D
 var title_label: Label3D
@@ -137,6 +144,13 @@ var scrubbing := false
 var _scrub := 0.0
 var _scrub_sought := -1.0
 var _scrub_at := 0.0
+## The chapters' places on the bar (0..1) and their ticks.
+var _ticks := PackedFloat32Array()
+var _tick_meshes: Array[MeshInstance3D] = []
+## The laser on the bar (0..1; -1 off it), and the seek bar's picture over the bar and its time.
+var _hover := -1.0
+var thumb: MeshInstance3D
+var thumb_label: Label3D
 
 
 func _ready() -> void:
@@ -148,9 +162,25 @@ func _ready() -> void:
 	time_label = make_label("Time", HORIZONTAL_ALIGNMENT_RIGHT, now_playing)
 	_bar_track = _bar("BarTrack", "track", 1)
 	_bar_played = _bar("BarPlayed", "played", 2)
+	thumb = MeshInstance3D.new()
+	thumb.name = "Thumb"
+	var quad := QuadMesh.new()
+	quad.size = THUMB_SIZE
+	thumb.mesh = quad
+	var tm := StandardMaterial3D.new()
+	tm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	tm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	tm.cull_mode = BaseMaterial3D.CULL_DISABLED
+	tm.no_depth_test = true
+	tm.render_priority = PRIORITY_BASE + 3
+	thumb.material_override = tm
+	thumb.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	thumb.visible = false
+	now_playing.add_child(thumb)
+	thumb_label = make_label("ThumbTime", HORIZONTAL_ALIGNMENT_CENTER, now_playing)
+	thumb_label.visible = false
 	visible = false
 	if app != null:
-		enabled = bool(app.settings.get_value("pane", "tablet", false))
 		var saved: Variant = app.settings.get_value("pane", "tablet_style", {})
 		if saved is Dictionary and validate(saved, true).is_empty():
 			_overrides = (saved as Dictionary).duplicate(true)
@@ -167,19 +197,10 @@ func _process(_delta: float) -> void:
 			_seek(_scrub)
 	if visible and app != null:
 		_update_now_playing()
+		_update_thumb()
 
 
 # --- Showing ------------------------------------------------------------------------------------------------------
-
-## save false: for this run only.
-func set_enabled(on: bool, save := true) -> void:
-	enabled = on
-	if save and app != null:
-		app.settings.set_value("pane", "tablet", true if on else null)
-	if not on:
-		hide_tablet()
-	layout_changed.emit()
-
 
 func toggle(head: Transform3D) -> void:
 	if _shown:
@@ -202,6 +223,7 @@ func hide_tablet() -> void:
 		return
 	release()
 	_shown = false
+	_hover = -1.0
 	_fade_to(0.0, float(_get(style(), "fade/out")))
 
 
@@ -230,6 +252,8 @@ func _set_opacity(v: float) -> void:
 		m.set_shader_parameter("opacity", v)
 	for l in _labels:
 		l.modulate.a = _alpha(l)
+	if thumb != null:
+		(thumb.material_override as StandardMaterial3D).albedo_color.a = v
 
 
 # --- Now playing --------------------------------------------------------------------------------------------------
@@ -246,6 +270,17 @@ func _update_now_playing() -> void:
 	var t := ""
 	if has:
 		t = "%s / %s" % [W.clock(pos), W.clock(dur)] if dur > 0.0 else (W.clock(pos) if pos > 0.0 else "")
+		var f: Node = app.get("features")
+		var live: Node = f.get("live") if f != null else null
+		if live != null and bool(live.live):
+			t = "LIVE" + (("  " + t) if t != "" else "")
+		var trick: Node = f.get("trick") if f != null else null
+		if trick != null and float(trick.speed) > 0.0:
+			t += "  ·  %dx" % roundi(float(trick.speed))
+		var chapters: Node = f.get("chapters") if f != null else null
+		_set_ticks(chapters.tick_positions() if chapters != null else PackedFloat32Array())
+	else:
+		_set_ticks(PackedFloat32Array())
 	if time_label.text != t:
 		time_label.text = t
 		_title_fit = -1.0
@@ -291,6 +326,72 @@ func _set_fraction(f: float) -> void:
 	mesh.size = Vector2(maxf(w, 0.0005), bar.size.y)
 	(_bar_played.material_override as ShaderMaterial).set_shader_parameter("size", mesh.size)
 	_bar_played.position = Vector3(bar.position.x + w * 0.5, bar.get_center().y, LIFT * 2.0)
+
+
+## The chapters' ticks on the bar (fractions 0..1), made again when they change.
+func _set_ticks(ticks: PackedFloat32Array) -> void:
+	if ticks == _ticks:
+		return
+	_ticks = ticks
+	for mi in _tick_meshes:
+		_mats.erase(mi.material_override)
+		mi.queue_free()
+	_tick_meshes.clear()
+	var bar := bar_rect()
+	var colour := _colour(style(), "now_playing/bar/tick", palette()["ink2"])
+	for f in ticks:
+		var mi := _rounded("Tick", Vector2(TICK_WIDTH, bar.size.y * TICK_HEIGHT), "tick", 3)
+		(mi.material_override as ShaderMaterial).set_shader_parameter("fill_color", colour)
+		(mi.material_override as ShaderMaterial).set_shader_parameter("border_width", 0.0)
+		mi.position = Vector3(bar.position.x + bar.size.x * f, bar.get_center().y, LIFT * 3.0)
+		now_playing.add_child(mi)
+		_tick_meshes.append(mi)
+
+
+## The chapter ticks on show (tests).
+func tick_count() -> int:
+	return _tick_meshes.size()
+
+
+## The laser on the time bar (ui_layer.gd, each frame): its place 0..1, -1 off it. The seek bar's picture shows there.
+func hover_bar(fraction: float) -> void:
+	_hover = fraction
+
+
+## The seek bar's picture: where the bar is dragged, else where the laser is on it; only with features.thumbs on and
+## a picture to show (asked for here; the newest asked wins).
+func _update_thumb() -> void:
+	var f := _scrub if scrubbing else _hover
+	var features: Node = app.get("features")
+	var thumbs: Node = features.get("thumbs") if features != null else null
+	var dur: float = app.player.get_duration() if app.player.has_source() else 0.0
+	var tex: Texture2D = null
+	var t := f * dur
+	if f >= 0.0 and thumbs != null and bool(thumbs.enabled) and dur > 0.0:
+		thumbs.request(t)
+		tex = thumbs.thumbnail_for(t)
+	thumb.visible = tex != null
+	thumb_label.visible = tex != null
+	if tex == null:
+		return
+	var tm := thumb.material_override as StandardMaterial3D
+	tm.albedo_texture = tex
+	# The picture's own shape inside THUMB_SIZE.
+	var aspect := float(tex.get_width()) / maxf(float(tex.get_height()), 1.0)
+	var size := Vector2(THUMB_SIZE.y * aspect, THUMB_SIZE.y)
+	if size.x > THUMB_SIZE.x:
+		size = Vector2(THUMB_SIZE.x, THUMB_SIZE.x / aspect)
+	(thumb.mesh as QuadMesh).size = size
+	var bar := bar_rect()
+	var half := NOW_PLAYING_HEIGHT * 0.5
+	var r: Rect2 = pane_rects()["now_playing"]
+	var x := clampf(bar.position.x + bar.size.x * f, -r.size.x * 0.5 + size.x * 0.5, r.size.x * 0.5 - size.x * 0.5)
+	var y := half + THUMB_GAP + size.y * 0.5
+	thumb.position = Vector3(x, y, LIFT * 4.0)
+	var time_style: Dictionary = (_get(style(), "now_playing/time") as Dictionary).duplicate()
+	time_style["color"] = _colour(style(), "now_playing/time/color", palette()["ink"]).to_html()
+	place_text(thumb_label, time_style, Vector2(x, y + size.y * 0.5 + THUMB_GAP + float(time_style["size"]) * 0.5))
+	thumb_label.text = W.clock(t)
 
 
 ## A ray against the panes while shown: the nearer pane it hits, with the bar fraction (-1 off the bar), or {}.
@@ -597,7 +698,7 @@ func _apply_style() -> void:
 			m.set_shader_parameter("corner_radius", float(_get(s, "pane/corner_radius")))
 			m.set_shader_parameter("border_width", float(_get(s, "pane/border_width")))
 		else:
-			var fallback: Color = pal["accent"] if role == "played" else menu["bar_track"]
+			var fallback: Color = pal["accent"] if role == "played" else (pal["ink2"] if role == "tick" else menu["bar_track"])
 			m.set_shader_parameter("fill_color", _colour(s, "now_playing/bar/" + role, fallback))
 			m.set_shader_parameter("corner_radius", float(_get(s, "now_playing/bar/corner_radius")))
 			m.set_shader_parameter("border_width", 0.0)
@@ -617,6 +718,10 @@ func _apply_style() -> void:
 	_bar_track.position = Vector3(bar.get_center().x, bar.get_center().y, LIFT)
 	_fraction = -1.0
 	_title_fit = -1.0
+	# The ticks placed on the bar again (its size may have changed).
+	var ticks := _ticks
+	_ticks = PackedFloat32Array([-1.0])
+	_set_ticks(ticks)
 	if app != null:
 		_update_now_playing()
 	layout_changed.emit()

@@ -13,8 +13,9 @@ const DevCommands := preload("res://scripts/dev/dev_commands.gd")
 const TestLab := preload("res://scripts/dev/test_lab.gd")
 const ControllerLook := preload("res://scripts/xr/controller_look.gd")
 
-## [pane] layout keys the tab's Panel section sets; world_locked is "Follow my head" turned round.
-const LAYOUT_KEYS := ["scale", "distance", "recentre_hold", "world_locked"]
+## [pane] layout keys the tab's Panel section sets (the menu is on the tablet: its place is the tablet's, the user
+## 2026-11-06; the front panel's size, distance and head follow went with it).
+const LAYOUT_KEYS := ["recentre_hold"]
 const EYES := ["left", "right"]
 ## main.gd's FOVEATION_LEVELS.
 const FOVEATION := ["off", "low", "medium", "high"]
@@ -36,19 +37,13 @@ func register_all() -> void:
 				+ "zoom_lens, version}",
 		"assistant": "read"})
 	R.register("panel_layout", _cmd_panel_layout, {
-		"description": "The menu panel's size and distance, how long the menu button is held to recentre it, and "
-				+ "whether it follows the head.",
-		"params": [{"name": "size", "type": "float",
-				"description": "The panel's size, 0.5 to 3 (1 is 24 cm wide)."},
-				{"name": "distance", "type": "float", "description": "How far away it opens, 0.4 to 2 metres."},
-				{"name": "recentre_hold", "type": "float",
-				"description": "How long the menu button is held to recentre the panel, 0.3 to 1.5 seconds."},
-				{"name": "follow_head", "type": "bool",
-				"description": "The panel follows the head (true) or stays where it was put (false)."}],
+		"description": "How long the menu button is held to bring the menu back in front of the head.",
+		"params": [{"name": "recentre_hold", "type": "float",
+				"description": "How long the menu button is held to recentre the panel, 0.3 to 1.5 seconds."}],
 		"level": "change", "returns": "the panel's layout", "assistant": "settings"})
 	R.register("reset_panel_layout", _cmd_reset_layout, {
-		"description": "Puts the panel's layout back as it came: size, distance, hold, fixed in place, right-handed, "
-				+ "normal size; the panel opens in front.",
+		"description": "Puts the panel's layout back as it came: the hold, right-handed, normal text size; the "
+				+ "menu opens in front.",
 		"level": "change", "returns": "the panel's layout", "assistant": "settings"})
 	R.register("accessibility", _cmd_accessibility, {
 		"description": "Accessibility: a larger panel, the left hand as the pointer, one eye's picture for 3D, and "
@@ -153,10 +148,7 @@ static func _layout(m: Node) -> Dictionary:
 	var layer: Node = m.get("ui")
 	if layer == null or not layer.has_method("layout_value"):
 		return {}
-	return {"size": snappedf(float(layer.layout_value("scale")), 0.01),
-			"distance": snappedf(float(layer.layout_value("distance")), 0.01),
-			"recentre_hold": snappedf(float(layer.layout_value("recentre_hold")), 0.01),
-			"follow_head": not bool(layer.layout_value("world_locked"))}
+	return {"recentre_hold": snappedf(float(layer.layout_value("recentre_hold")), 0.01)}
 
 
 static func _access(m: Node) -> Dictionary:
@@ -203,7 +195,7 @@ static func _raw(settings: RefCounted, section: String, key: String) -> Variant:
 # --- The panel -------------------------------------------------------------------------------------------------------
 
 func _cmd_panel_layout(args: Dictionary, ctx: DevCommands.Call) -> Variant:
-	if _none(args, ctx, ["size", "distance", "recentre_hold", "follow_head"]):
+	if _none(args, ctx, ["recentre_hold"]):
 		return null
 	var m := _main()
 	var layer: Node = m.get("ui")
@@ -213,15 +205,8 @@ func _cmd_panel_layout(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 	var was := {}
 	for key: String in LAYOUT_KEYS:
 		was[key] = _raw(settings, "pane", key)
-	# What the tab's Panel sliders and "Follow my head" do: write [pane], then the layer applies it.
-	if args.has("size"):
-		settings.set_value("pane", "scale", clampf(float(args["size"]), 0.5, 3.0))
-	if args.has("distance"):
-		settings.set_value("pane", "distance", clampf(float(args["distance"]), 0.4, 2.0))
-	if args.has("recentre_hold"):
-		settings.set_value("pane", "recentre_hold", clampf(float(args["recentre_hold"]), 0.3, 1.5))
-	if args.has("follow_head"):
-		settings.set_value("pane", "world_locked", not bool(args["follow_head"]))
+	# What the tab's Panel slider does: write [pane], then the layer applies it.
+	settings.set_value("pane", "recentre_hold", clampf(float(args["recentre_hold"]), 0.3, 1.5))
 	layer.apply_layout()
 	_sync_tab()
 	ctx.summary = "panel layout"

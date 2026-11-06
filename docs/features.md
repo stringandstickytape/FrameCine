@@ -595,8 +595,8 @@ The data for a favourites list and a search box; the pane shows them, with the o
 
 Four settings in one place. Two are applied by the features; two are for the pane to read.
 
-- **UI scale** (1 to 2): the pane and its text larger. The pane applies it, because it owns the layout; it listens to
-  `changed("ui_scale", v)`.
+- **UI scale** (1 to 2): the menu's text larger, on the same tablet (the front panel grew instead; it is gone,
+  2026-11-06). The layer applies it (`ui_layer.gd` apply_tablet()); it listens to `changed("ui_scale", v)`.
 - **Left-handed:** the left controller is the panel's pointer at launch (`ui-design.md`, "Revision 2"). Any
   controller's menu button then picks the pointer. The panel applies it. The direct bindings stay.
 - **Monocular:** one eye's picture to both views for every 3D file, through 2D from 3D (#59) with the chosen eye.
@@ -2031,7 +2031,8 @@ sound, and the film that was there goes to the corner. Both play on from where t
 
 ## #40 Seek-bar thumbnails
 
-While the seek bar is hovered or scrubbed, a small picture of the film near that time. Off by default until the
+While the seek bar is hovered or scrubbed, a small picture of the film near that time (on the tablet's time
+bar since the front panel went, 2026-11-06: where the laser is on it, or where it is dragged, `ui/tablet.gd`). Off by default until the
 headset's memory is checked: a second set of decoder buffers is about 150 MB at 2160p.
 
 - **How:** a second decoder session on the open file (fork 347778e84c): its own MediaSource, opened on a worker

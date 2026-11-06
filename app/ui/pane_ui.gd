@@ -1,29 +1,24 @@
 extends PanelContainer
 
-## The pane's contents (docs/ui-design.md, "Inside the pane"), 740 x 600 px in the pane's SubViewport (ui/pane.gd).
+## The menu on the tablet's main pane (ui/tablet.gd; the user, 2026-11-06: the front panel, the first UI, is gone),
+## in the pane's SubViewport (ui/pane.gd).
 ##
-## Top to bottom: header ("Now playing" and, on the right, the clock, time left with the end time, and the battery;
-## then the title and the time in tabular numerals), seek bar with chapter ticks, transport (previous, -10 s, play /
-## pause ringed, +10 s, next), tabs (Files, Picture, Sound, Subtitles, Room, Objects, Mixed reality (MR on the front
-## panel's bar), System), the tab's body, and a footer line (the mode and how it was
-## chosen, or a short toast with an action such as Undo; the item count on the right). The panel has one view: the
-## glance view of the hand-held pane is gone, its lines are in the header (docs/ui-design.md, "Revision 2").
+## Top to bottom: a header (the chapter on the left; on the right the clock, time left with the end time, the
+## battery, low controllers and "Listening"), the transport (previous, -10 s, play / pause, +10 s, next, hold 4x / 8x
+## for trick play; the skips and the trick buttons hide when the source can't seek), then a row: down the left a rail
+## of the tabs (Source, Picture, Sound, Subtitles, Room, Objects, Mixed reality, System), an icon (ui/icons.gd) and
+## the name each; beside it Source's places (the files tab's own column) or any other tab's sections (the user,
+## 2026-11-06: every tab its own list), the section picked as a card the full width (W.card_layout(),
+## W.refresh_cards()); a section with nothing to show (3D for a flat film) leaves the column. Then a footer line (the
+## mode and how it was chosen, or a short toast with an action such as Undo; the item count and Source's view
+## selector on the right). The title, the time and the time bar are on the tablet's now playing pane.
 ##
-## Everything looks the way the theme says (ui/pane_style.gd); this file sets no colour and no font. The tabs talk to
-## the app directly; the transport and seek bar emit signals that ui_layer.gd turns into app calls.
-##
-## The tablet layout (set_tablet_layout(); ui/tablet.gd, the user 2026-11-04: the old menu moved onto the tablet and
-## reshaped): the header, seek bar and transport go (the tablet's now playing pane shows the title, time and bar);
-## down the left a rail of the tabs, an icon (ui/icons.gd) and the name each, Files called Source; the tab in the
-## rest of the width. Source: the places as chips over the files tab (FilesTab.places_in_order(); the tab's own
-## places column goes), with a view selector at the right (details, list, grid: `view`, [browser] view; the views
-## themselves are to come). Any other tab: a column of its sections beside the rail, as Source's places (the user,
-## 2026-11-06: every tab its own list), and the section picked as a card the full width (W.card_layout(),
-## W.refresh_cards()); a section with nothing to show (3D for a flat film) leaves the column. The footer under it all. No backdrop of its own: the tablet's pane shows through. Lists are dragged to scroll (ui/pane.gd).
+## Everything looks the way the theme says (ui/pane_style.gd, the tablet's theme); this file sets no colour and no
+## font. No backdrop of its own: the tablet's pane shows through. The tabs talk to the app directly; the transport
+## emits signals that ui_layer.gd turns into app calls. Lists are dragged to scroll (ui/pane.gd).
 
 const PaneStyle := preload("res://ui/pane_style.gd")
 const W := preload("res://ui/pane_widgets.gd")
-const SeekBar := preload("res://ui/seek_bar.gd")
 const FilesTab := preload("res://ui/files_tab.gd")
 const PictureTab := preload("res://ui/picture_tab.gd")
 const SoundTab := preload("res://ui/sound_tab.gd")
@@ -37,14 +32,12 @@ const EndTime := preload("res://scripts/play/end_time.gd")
 signal play_pause_pressed
 signal previous_requested
 signal next_requested
-signal seek_requested(seconds: float)
 signal skip_requested(delta_seconds: float)
 
 enum Tab { FILES, PICTURE, SOUND, SUBTITLES, ROOM, OBJECTS, MIXED_REALITY, SYSTEM }
 const TAB_NAMES: Array[String] = ["Files", "Picture", "Sound", "Subtitles", "Room", "Objects", "Mixed reality", "System"]
-## The front panel's tab bar shares one row: the long names shortened there.
-const TAB_CAPTIONS := {"Mixed reality": "MR"}
-## The tablet layout's names and icons for the tabs, the rail's width and its icons' size (pixels), and the views.
+## The rail's names and icons for the tabs (Files is called Source there), its width and its icons' size (pixels), and
+## Source's views.
 const TABLET_TAB_NAMES: Array[String] = ["Source", "Picture", "Sound", "Subtitles", "Room", "Objects", "Mixed reality",
 		"System"]
 const TABLET_TAB_ICONS: Array[String] = ["source", "picture", "sound", "subtitles", "room", "objects", "mixed-reality",
@@ -64,28 +57,19 @@ var objects: ObjectsTab
 var mixed_reality: MixedRealityTab
 var system: SystemTab
 var tabs: Array[Control] = []
-var tab_buttons: Array[Button] = []
 var current_tab := 0
 
 var _content: VBoxContainer
 var _open: VBoxContainer
-var _title: Label
-## "Now playing", or "Now playing  ·  chapter 3/12 Title".
+## The header: "Chapter 3/12 Title" (or nothing) on the left; on the right the clock, time left and end, battery (and
+## low controllers, "Listening").
 var _now: Label
-var _time: Label
-## The header's right side: clock, time left and end, battery (and low controllers, "Listening").
 var _status_line: Label
-var seek: SeekBar
 var _transport: HBoxContainer
 var _play_button: Button
 ## Trick play (#46): hold 4x or 8x to scan with pictures; let go and it plays on. The skip buttons and the trick
 ## buttons hide when the source can't seek (live streams, #86).
 var _trick_buttons: Array[Button] = []
-## Seek-bar thumbnails (#40, features.thumbs, off by default): a picture under the bar at the hovered or scrubbed time.
-var _thumb: VBoxContainer
-var _thumb_image: TextureRect
-var _thumb_label: Label
-var _thumb_time := -1.0
 var _skip_buttons: Array[Button] = []
 var _form_mode := false
 var _seekable := true
@@ -105,15 +89,12 @@ var _status := ""
 var header_extra := ""
 ## Push-to-talk is recording: "Listening" in the header and the footer.
 var listening := false
-## The tablet layout: on or not; its row (the rail and the body), the rail's buttons, Source's chips and view
-## selector, and the view chosen.
-var tablet_layout := false
+## Source's view (VIEWS).
 var view := "details"
-## Every font size times this (set_text_scale(): the tablet's, from its style; 1 on the front panel), and the
-## tablet's own theme (set_tablet_theme(); null: the front panel's).
+## Every font size times this (set_text_scale(): the tablet's, from its style), and the tablet's own theme
+## (set_tablet_theme(); null until the layer sets it: the default theme).
 var text_scale := 1.0
 var _tablet_theme: Theme
-var _tabs_box: VBoxContainer
 var _tablet_row: HBoxContainer
 var tablet_tab_buttons: Array[Button] = []
 ## The tablet's sections column (any tab but Source): its scroll, buttons and rule, the section picked on each tab
@@ -144,7 +125,7 @@ func apply_style() -> void:
 	var base: Theme = _tablet_theme if _tablet_theme != null else PaneStyle.theme()
 	theme = base if is_equal_approx(text_scale, 1.0) else PaneStyle.scaled_theme(text_scale, base)
 	if _content != null:
-		# The stick focus: a ring on the front panel; the tablet's theme is flat, its own focus look stays.
+		# The stick focus: the tablet's theme is flat, its own focus look stays (a ring with the default theme).
 		_content.theme = null if _tablet_theme != null else PaneStyle.docked_focus_theme()
 	if _tablet_row != null:
 		_refresh_rail()
@@ -152,6 +133,12 @@ func apply_style() -> void:
 		files.set_places_width(PaneStyle.constant(&"places_width") * text_scale)
 	if _sections_scroll != null:
 		_sections_scroll.custom_minimum_size.x = PaneStyle.constant(&"places_width") * text_scale
+	# No backdrop: the tablet's pane shows through (the theme's margins kept).
+	remove_theme_stylebox_override("panel")
+	add_theme_stylebox_override("panel", _clear(get_theme_stylebox("panel")))
+	if _body != null:
+		_body.remove_theme_stylebox_override("panel")
+		_body.add_theme_stylebox_override("panel", _clear(_body.get_theme_stylebox("panel")))
 	queue_redraw()
 
 
@@ -162,36 +149,11 @@ func _build_open() -> void:
 	_open.add_theme_constant_override("separation", gap)
 	_content.add_child(_open)
 
-	_now = W.ellipsis(W.caps("Now playing"))
+	_now = W.ellipsis(W.label("", &"MutedLabel"))
+	_now.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_status_line = W.label("", &"MutedLabel")
 	_status_line.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_open.add_child(W.hbox([_now, _status_line]))
-	_title = W.ellipsis(W.label("Nothing playing", &"TitleLabel"))
-	_time = W.label("", &"TimeLabel")
-	_open.add_child(W.hbox([_title, _time]))
-
-	seek = SeekBar.new()
-	seek.seek_requested.connect(func(t: float) -> void: seek_requested.emit(t))
-	seek.scrub_changed.connect(func(t: float) -> void:
-		_time.text = _time_text(t, seek.duration)
-		_thumb_at(t))
-	seek.hover_changed.connect(_thumb_at)
-	seek.seek_requested.connect(func(_t: float) -> void: _thumb_at(-1.0))
-	_open.add_child(seek)
-	_thumb = W.vbox()
-	_thumb.top_level = true
-	_thumb.visible = false
-	_thumb.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_thumb_image = TextureRect.new()
-	_thumb_image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_thumb_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_thumb_image.custom_minimum_size = Vector2(192, 108)
-	_thumb_image.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_thumb.add_child(_thumb_image)
-	_thumb_label = W.label("", &"TimeLabel")
-	_thumb_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_thumb.add_child(_thumb_label)
-	add_child(_thumb)
 
 	_transport = W.hbox()
 	_transport.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -218,26 +180,6 @@ func _build_open() -> void:
 		_transport.add_child(b)
 		_trick_buttons.append(b)
 	_open.add_child(_transport)
-
-	var bar := HBoxContainer.new()
-	bar.add_theme_constant_override("separation", 0)
-	var group := ButtonGroup.new()
-	for i in TAB_NAMES.size():
-		# Buttons have no uppercase flag: the caption is the name in capitals (the theme letter-spaces it).
-		var b := W.button(str(TAB_CAPTIONS.get(TAB_NAMES[i], TAB_NAMES[i])).to_upper(), func() -> void: show_tab(i),
-				&"TabButton")
-		b.custom_minimum_size = Vector2(0, PaneStyle.constant(&"tab_height"))
-		b.set_meta("tab", TAB_NAMES[i])
-		b.toggle_mode = true
-		b.button_group = group
-		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		bar.add_child(b)
-		tab_buttons.append(b)
-	_tabs_box = VBoxContainer.new()
-	_tabs_box.add_theme_constant_override("separation", 0)
-	_tabs_box.add_child(bar)
-	_tabs_box.add_child(HSeparator.new())
-	_open.add_child(_tabs_box)
 
 	_body = PanelContainer.new()
 	_body.theme_type_variation = &"BodyPanel"
@@ -275,6 +217,7 @@ func _build_open() -> void:
 	_footer_count = W.label("", &"MutedLabel")
 	footer.add_child(_footer_count)
 	_open.add_child(footer)
+	_build_tablet_row()
 
 
 ## Makes the tabs (they need the app). Called once by ui_layer.gd.
@@ -304,48 +247,18 @@ func bind(p_app: Node) -> void:
 	room.find_requested.connect(func(q: String) -> void:
 		show_tab(Tab.FILES)
 		files.search_for(q))
+	view = str(app.settings.get_value("browser", "view", "details"))
+	if not view in VIEWS:
+		view = "details"
+	files.set_view(view)
+	_refresh_rail()
 	show_tab(Tab.FILES)
 
 
-## The thumbnail for `t` seconds (-1: hide): asks features.thumbs for it (it throttles; the newest wins) and shows
-## the nearest picture it has, centred under that point of the bar.
-func _thumb_at(t: float) -> void:
-	_thumb_time = t
-	var thumbs: Node = app.features.get("thumbs") if app != null and app.get("features") != null else null
-	if t < 0.0 or thumbs == null or not bool(thumbs.enabled) or not seek.is_visible_in_tree():
-		_thumb.visible = false
-		return
-	thumbs.request(t)
-	if not thumbs.thumbnail_ready.is_connected(_on_thumbnail_ready):
-		thumbs.thumbnail_ready.connect(_on_thumbnail_ready)
-	_show_thumb(thumbs.thumbnail_for(t))
-
-
-func _on_thumbnail_ready(_seconds: float, _texture: Texture2D) -> void:
-	if _thumb_time >= 0.0:
-		var thumbs: Node = app.features.get("thumbs")
-		_show_thumb(thumbs.thumbnail_for(_thumb_time))
-
-
-func _show_thumb(tex: Texture2D) -> void:
-	_thumb_image.texture = tex
-	_thumb_label.text = W.clock(_thumb_time)
-	_thumb.visible = true
-	_thumb.reset_size()
-	var x := seek.global_position.x + seek.x_of(_thumb_time) - _thumb.size.x * 0.5
-	x = clampf(x, global_position.x, global_position.x + size.x - _thumb.size.x)
-	_thumb.global_position = Vector2(x, seek.global_position.y + seek.size.y + 4.0)
-
-
-func thumb_shown() -> bool:
-	return _thumb.visible
-
-
-## A form with the keyboard is open: the seek bar and transport make room for it.
+## A form with the keyboard is open: the transport makes room for it.
 func set_form_mode(on: bool) -> void:
 	_form_mode = on
-	seek.visible = not on and _seekable and not tablet_layout
-	_transport.visible = not on and not tablet_layout
+	_transport.visible = not on
 
 
 ## Trick play from a held 4x / 8x button: start on press, plain playback on release.
@@ -363,34 +276,33 @@ func show_tab(index: int) -> void:
 	current_tab = clampi(index, 0, tabs.size() - 1)
 	for i in tabs.size():
 		tabs[i].visible = i == current_tab
-		tab_buttons[i].set_pressed_no_signal(i == current_tab)
 	for i in tablet_tab_buttons.size():
 		tablet_tab_buttons[i].set_pressed_no_signal(i == current_tab)
 	if _views != null:
-		_views.visible = tablet_layout and current_tab == Tab.FILES
+		_views.visible = current_tab == Tab.FILES
 	if _sections_scroll != null:
-		_sections_scroll.visible = tablet_layout and current_tab != Tab.FILES
+		_sections_scroll.visible = current_tab != Tab.FILES
 		_sections_rule.visible = _sections_scroll.visible
-	if tablet_layout:
+	if _tablet_row != null:
 		_refresh_rail()
-		if current_tab != Tab.FILES:
-			W.card_layout(tabs[current_tab].get("box"), true)
-			_pack_cards()
+	if current_tab != Tab.FILES and _body != null:
+		W.card_layout(tabs[current_tab].get("box"), true)
+		_pack_cards()
 	_update_footer()
 
 
-## The control that takes the stick focus first when the panel opens: none on the tablet (it is pointed at or
-## touched; a focused row would look selected beside the selected one), until the stick moves.
+## The control that takes the stick focus first when the panel opens: none (it is pointed at or touched; a focused
+## row would look selected beside the selected one), until the stick moves.
 func default_focus() -> Control:
-	return null if tablet_layout else _play_button
+	return null
 
 
-## Where the stick starts when nothing has the focus: the tab's row on the tablet.
+## Where the stick starts when nothing has the focus: the tab's row on the rail.
 func stick_focus() -> Control:
-	return tablet_tab_buttons[current_tab] if tablet_layout else _play_button
+	return tablet_tab_buttons[current_tab]
 
 
-# --- The tablet layout ----------------------------------------------------------------------------------------------
+# --- Layout ---------------------------------------------------------------------------------------------------------
 
 func set_text_scale(s: float) -> void:
 	if is_equal_approx(s, text_scale):
@@ -399,45 +311,12 @@ func set_text_scale(s: float) -> void:
 	apply_style()
 
 
-## The tablet's theme (PaneStyle.tablet_theme()), or null for the front panel's.
+## The tablet's theme (PaneStyle.tablet_theme(), in the tablet's colours).
 func set_tablet_theme(t: Theme) -> void:
 	if t == _tablet_theme:
 		return
 	_tablet_theme = t
 	apply_style()
-
-
-func set_tablet_layout(on: bool) -> void:
-	if on == tablet_layout or _body == null:
-		return
-	tablet_layout = on
-	if on and _tablet_row == null:
-		_build_tablet_row()
-	for c: Control in [_now.get_parent(), _title.get_parent(), _tabs_box]:
-		c.visible = not on
-	set_form_mode(_form_mode)
-	seek.visible = _seekable and not _form_mode and not on
-	_tablet_row.visible = on
-	var home: Container = _tablet_row.get_node("Content") if on else _open
-	_body.get_parent().remove_child(_body)
-	home.add_child(_body)
-	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	if not on:
-		_open.move_child(_body, _tablet_row.get_index())
-	if _views != null:
-		_views.visible = on and current_tab == Tab.FILES
-	if on:
-		# No backdrop: the tablet's pane shows through (its own margins kept).
-		add_theme_stylebox_override("panel", _clear(get_theme_stylebox("panel")))
-		_body.add_theme_stylebox_override("panel", _clear(_body.get_theme_stylebox("panel")))
-		show_tab(current_tab)
-	else:
-		remove_theme_stylebox_override("panel")
-		_body.remove_theme_stylebox_override("panel")
-		for t in tabs:
-			var box: Variant = t.get("box")
-			if box is VBoxContainer:
-				W.card_layout(box, false)
 
 
 func _build_tablet_row() -> void:
@@ -480,6 +359,9 @@ func _build_tablet_row() -> void:
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_theme_constant_override("separation", PaneStyle.constant(&"gap"))
 	_tablet_row.add_child(content)
+	_body.get_parent().remove_child(_body)
+	content.add_child(_body)
+	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	# The view selector, at the right of the files tab's title row.
 	_views = HBoxContainer.new()
 	_views.add_theme_constant_override("separation", 2)
@@ -496,13 +378,6 @@ func _build_tablet_row() -> void:
 	# In the footer, at the right by the count: the title row has no room for it at the tablet's text size.
 	_footer_count.get_parent().add_child(_views)
 	_footer_count.get_parent().move_child(_views, _footer_count.get_index())
-	if app != null:
-		view = str(app.settings.get_value("browser", "view", "details"))
-		if not view in VIEWS:
-			view = "details"
-		if files != null:
-			files.set_view(view)
-	_refresh_rail()
 
 
 ## The rail's and the view selector's icons in the theme's colours (the chosen one bright or in the accent).
@@ -612,10 +487,6 @@ static func _clear(sb: StyleBox) -> StyleBox:
 	return c
 
 
-func set_title(text: String) -> void:
-	_title.text = text if text != "" else "Nothing playing"
-
-
 ## The header's right side, as shown.
 func status_line_text() -> String:
 	return _status_line.text
@@ -702,19 +573,11 @@ func _update_footer() -> void:
 	_footer_count.text = files.count_text() if files != null and current_tab == Tab.FILES else ""
 
 
-func _time_text(position_s: float, duration: float) -> String:
-	if duration <= 0.0:
-		return W.clock(position_s) if position_s > 0.0 else ""
-	return "%s / %s" % [W.clock(position_s), W.clock(duration)]
-
-
-## The playback state, a few times a second while the pane shows.
-func set_playback(position_s: float, duration: float, playing: bool, can_seek: bool) -> void:
+## The playback state, a few times a second while the pane shows (the time is on the tablet's now playing pane).
+func set_playback(_position_s: float, _duration: float, playing: bool, can_seek: bool) -> void:
 	_play_button.text = "Pause" if playing else "Play"
-	seek.set_state(position_s, duration, can_seek and duration > 0.0)
-	# A live stream (or HTTP without ranges) can't seek: no seek bar or skips, and LIVE by the time.
+	# A live stream (or HTTP without ranges) can't seek: no skips or trick play (LIVE by the tablet's time).
 	_seekable = can_seek
-	seek.visible = can_seek and not _form_mode and not tablet_layout
 	for b in _skip_buttons:
 		b.visible = can_seek
 	var f: Node = app.features if app != null and app.get("features") != null else null
@@ -722,14 +585,6 @@ func set_playback(position_s: float, duration: float, playing: bool, can_seek: b
 	var trick_ok := trick != null and bool(trick.available()) and can_seek
 	for b in _trick_buttons:
 		b.visible = trick_ok
-	if not seek.scrubbing:
-		var t := _time_text(position_s, duration)
-		var live: Node = f.get("live") if f != null else null
-		if live != null and bool(live.live):
-			t = "LIVE" + (("  " + t) if t != "" else "")
-		if trick != null and float(trick.speed) > 0.0:
-			t += "  ·  %dx" % roundi(float(trick.speed))
-		_time.text = t
 
 
 ## Refreshes the header's status line and the per-second parts of the panel.
@@ -744,11 +599,10 @@ func tick() -> void:
 			EndTime.format_remaining(remaining), f.end_text() if remaining > 0.0 else "",
 			int(forecast.get("percent", -1)) if available else -1, available and bool(forecast.get("charging", false)),
 			header_extra, listening)
-	seek.set_ticks(PackedFloat32Array(f.chapters.tick_positions()))
 	var chapter: String = f.chapters.title_text() if int(f.chapters.current) >= 0 else ""
-	_now.text = "Now playing" + (("  ·  chapter " + chapter) if chapter != "" else "")
+	_now.text = ("Chapter " + chapter) if chapter != "" else ""
 	_update_footer()
-	if tablet_layout and current_tab != Tab.FILES:
+	if current_tab != Tab.FILES:
 		_pack_cards()
 	if current_tab == Tab.ROOM:
 		room.tick()

@@ -321,25 +321,24 @@ func _test_party() -> void:
 func _test_system() -> void:
 	var f: Node = main.features
 	if main.ui != null and main.ui.has_method("layout_value"):
-		var scale := float(main.ui.layout_value("scale"))
-		var r := await _run_cmd("panel_layout", {"size": 1.5, "distance": 0.9, "follow_head": true})
-		_check("panel_layout: applied", r["ok"] and is_equal_approx(float(main.ui.layout_value("scale")), 1.5)
-				and is_equal_approx(float(main.ui.layout_value("distance")), 0.9)
-				and not bool(main.ui.layout_value("world_locked")))
+		var hold := float(main.ui.layout_value("recentre_hold"))
+		var r := await _run_cmd("panel_layout", {"recentre_hold": 1.2})
+		_check("panel_layout: applied", r["ok"] and is_equal_approx(float(main.ui.layout_value("recentre_hold")), 1.2)
+				and is_equal_approx(main.ui.menu.hold, 1.2))
 		var st := await _read("system_settings")
-		_check("panel_layout: read back", is_equal_approx(float(st["panel"]["size"]), 1.5) and st["panel"]["follow_head"])
-		var sys_tab: Node = _tab("system")
-		if sys_tab != null:
-			_check("panel_layout: the tab follows", (sys_tab._follow_head as Button).button_pressed)
+		_check("panel_layout: read back", is_equal_approx(float(st["panel"]["recentre_hold"]), 1.2)
+				and not st["panel"].has("size") and not st["panel"].has("follow_head"))
+		var gone := await _run_cmd("panel_layout", {"size": 1.5})
+		_check("panel_layout: no size any more (the menu is the tablet's)", not gone["ok"])
 		(r["call"] as DevCommands.Call).undo.call()
-		_check("panel_layout: undo", is_equal_approx(float(main.ui.layout_value("scale")), scale)
-				and bool(main.ui.layout_value("world_locked")))
-		await _run_cmd("panel_layout", {"size": 2.0})
+		_check("panel_layout: undo", is_equal_approx(float(main.ui.layout_value("recentre_hold")), hold))
+		await _run_cmd("panel_layout", {"recentre_hold": 1.4})
 		r = await _run_cmd("reset_panel_layout", {})
 		_check("reset_panel_layout: back to the defaults", r["ok"]
-				and is_equal_approx(float(main.ui.layout_value("scale")), float(main.ui.LAYOUT_DEFAULTS["scale"])))
+				and is_equal_approx(float(main.ui.layout_value("recentre_hold")),
+				float(main.ui.LAYOUT_DEFAULTS["recentre_hold"])))
 		(r["call"] as DevCommands.Call).undo.call()
-		_check("reset_panel_layout: undo", is_equal_approx(float(main.ui.layout_value("scale")), 2.0))
+		_check("reset_panel_layout: undo", is_equal_approx(float(main.ui.layout_value("recentre_hold")), 1.4))
 		main.ui.reset_layout()
 	else:
 		_check("the main scene has its menu layer", false)

@@ -40,7 +40,7 @@ const REMOTE_WORDS := ["Ask", "Allow", "Deny"]
 const FOVEATION_WORDS := ["Off", "Low", "Medium", "High"]
 const FOVEATION_HELP := "Saves GPU time at the edges of your view. High can look blocky."
 const FOVEATION_UNAVAILABLE := "Foveation isn't available: this build starts without it."
-## A controller look's button: wide enough for the icon and a name, three to a row on the front panel.
+## A controller look's button: wide enough for the icon and a name, three to a row.
 const LOOK_WIDTH := 150
 const LOOK_HELP := "Both controllers. The labels change ink, or get a dark outline, to stay readable."
 
@@ -62,7 +62,6 @@ var _jog_turn: VBoxContainer
 var _zoom_lens: Button
 var _magnification: VBoxContainer
 var _left_handed: Button
-var _tablet_toggle: Button
 var _palette_box: HFlowContainer
 var _palette_buttons := {}
 var _foveation: HFlowContainer
@@ -71,8 +70,7 @@ var _foveation_sharp: Button
 var _film_layer: Button
 var _cylinder_layers: Button
 var _film_layer_help: Label
-## [pane] world_locked off: the panel follows the head lazily.
-var _follow_head: Button
+## The Panel section's sliders, by [pane] key.
 var _layout_rows := {}
 var _ui_scale: VBoxContainer
 var _monocular: Button
@@ -135,26 +133,16 @@ func bind(p_app: Node) -> void:
 	var set_layout := func(key: String, v: Variant) -> void:
 		app.settings.set_value("pane", key, v)
 		layout_changed.emit()
-	_layout_rows["scale"] = W.slider_row("Size", 0.5, 3.0, 0.05,
-			func(v: float) -> String: return "%d cm" % roundi(24.0 * v), func(v: float) -> void: set_layout.call("scale", v))
-	_layout_rows["distance"] = W.slider_row("Distance", 0.4, 2.0, 0.05,
-			func(v: float) -> String: return "%.2f m" % v, func(v: float) -> void: set_layout.call("distance", v))
 	_layout_rows["recentre_hold"] = W.slider_row("Hold menu to recentre", 0.3, 1.5, 0.05,
 			func(v: float) -> String: return "%.2f s" % v, func(v: float) -> void: set_layout.call("recentre_hold", v))
-	for key in ["scale", "distance", "recentre_hold"]:
-		box.add_child(_layout_rows[key])
+	box.add_child(_layout_rows["recentre_hold"])
 	var access: Node = app.features.access
-	_follow_head = W.toggle("Follow my head", func(on: bool) -> void: set_layout.call("world_locked", not on))
 	_left_handed = W.toggle("Left-handed", func(on: bool) -> void: access.set_value("left_handed", on))
-	box.add_child(W.flow([_follow_head, _left_handed, W.button("Reset layout", func() -> void:
+	box.add_child(W.flow([_left_handed, W.button("Reset layout", func() -> void:
 		reset_layout_requested.emit()
 		sync())]))
-	# The tablet (ui/tablet.gd): on or off, and its colours (the palettes of its style document).
-	_tablet_toggle = W.toggle("Tablet menu", func(on: bool) -> void:
-		var t: Node = _tablet()
-		if t != null:
-			t.set_enabled(on))
-	_palette_box = W.flow([_tablet_toggle])
+	# The tablet's colours (ui/tablet.gd: the palettes of its style document).
+	_palette_box = W.flow([])
 	box.add_child(_palette_box)
 
 	box.add_child(W.section("Accessibility"))
@@ -353,7 +341,6 @@ func _sync_tablet() -> void:
 	var t: Node = _tablet()
 	if t == null:
 		return
-	_tablet_toggle.set_pressed_no_signal(bool(t.enabled))
 	if _palette_buttons.is_empty():
 		for p: Dictionary in t.palette_names():
 			var id := str(p["id"])
@@ -389,8 +376,6 @@ func sync() -> void:
 	_magnification.visible = bool(zoom_lens.enabled)
 	var access: Node = app.features.access
 	W.set_on(_left_handed, bool(access.get_value("left_handed")))
-	var locked: bool = app.ui == null or not app.ui.has_method("layout_value") or bool(app.ui.layout_value("world_locked"))
-	W.set_on(_follow_head, not locked)
 	for key: String in _layout_rows:
 		W.set_slider(_layout_rows[key], float(app.ui.layout_value(key)) if app.ui != null and app.ui.has_method("layout_value")
 				else 1.0)

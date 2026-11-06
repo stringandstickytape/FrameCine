@@ -175,7 +175,7 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 | `[sleep]` | `fade_seconds` (60), `last_minutes` (0) | Sleep timer |
 | `[battery]` | `margin_ok_minutes` (15) | Battery forecast |
 | `[display]` | `clock_24h` (true) | |
-| `[pane]` | `distance` (0.6 m, 0.4 to 3.0: how far in front of the eyes the panel opens), `scale` (1.6: 38 cm wide; 1.0 is 24 cm), `recentre_hold` (0.6 s: hold the menu button this long to recentre), `world_locked` (true; false: the panel follows the head with a lazy catch-up), `theme` (`res://ui/themes/default.tres`) | `docs/ui-design.md`, "Revision 2". Also in System, Panel. |
+| `[pane]` | `recentre_hold` (0.6 s: hold the menu button this long to recentre), `tablet_style` (the tablet's look, its palette among it), `theme` (`res://ui/themes/default.tres`) | `docs/ui-design.md`. Also in System, Panel. |
 | `[browser]` | `last_folder`, `last_url`, `pages` ([]) | Files place; web pages |
 | `[network]` | `hosts` ([]), `live_latency` (0.1 to 2.5 s, 0.5) | Saved file shares (private: holds credentials); the live stream buffer |
 | `[remote]` | `enabled` (false), `port` (47880), `key` | Phone remote. `key` is the pairing code: private, never logged. |
@@ -200,8 +200,15 @@ pictures kept rooms place: `<id>/object.glb`, `manifest.json`, `thumb.png`), `sc
 
 The action map binds the headset's own controllers, the generic controller profile, two common third-party
 controller profiles and the simple controller. Labels printed on the controllers say what each input does: bring a
-controller close to read them. The menu is a panel in front of you (`docs/ui-design.md`, "Revision 2"). The menu button on either
-controller opens it, and that controller points at it. One controller is enough.
+controller close to read them. The menu is on a tablet in front of you and a little below the eyes, tilted up
+towards them (`docs/ui-design.md`). The menu button on either controller opens it, and that controller points at
+it; you can also touch it. One controller is enough.
+
+The tablet has two panes. The top one shows the title, the time (LIVE for a live stream, 4x or 8x while scanning)
+and the time bar with a tick at each chapter: drag the bar with the laser and trigger, or with a controller's tip,
+to skip. With **Seek bar pictures** on (System), the laser on the bar shows a picture of the film there. The main
+pane has the chapter and the clock, time left, end time and battery at the top; then Previous, -10 s, Play or
+Pause, +10 s and Next (hold 4x or 8x to scan); then the tabs down the left.
 
 | Control | Panel closed | Panel open (the pointer controller) | Keyboard and mouse |
 |---|---|---|---|
@@ -265,8 +272,7 @@ The same settings are in the dev link and for an assistant: `set_sound` with `sp
 ## The tabs' sections
 
 On the main pane each tab but Source has a column of its sections beside the tabs, as Source has its places. Pick
-one and it fills the rest of the pane. A section with nothing to show now (3D, for a flat film) is not listed. The
-front panel shows each tab's sections one under another.
+one and it fills the rest of the pane. A section with nothing to show now (3D, for a flat film) is not listed.
 
 Source lists its places in groups: your films (Library, Search, Favourites, Queue), the headset's folders (Videos
 and Downloads first, then home and drives), the network (Network, Media servers), apps (Browser, Android apps), the
@@ -317,7 +323,7 @@ there first.
 
 ## The Mixed reality tab
 
-The **Mixed reality** tab (MR on the front panel's tab bar, above System) holds windows to the real room: real
+The **Mixed reality** tab (above System) holds windows to the real room: real
 places, the coffee table or the keyboard say, that show through the headset's cameras in every room. Each is a box
 fixed to the real place: it stays there when you recentre and next time you start (a new room setup on the headset
 moves them; sweep them again then).

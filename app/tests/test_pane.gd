@@ -10,7 +10,6 @@ const PanePose := preload("res://ui/pane_pose.gd")
 const PaneStyle := preload("res://ui/pane_style.gd")
 const FilesTab := preload("res://ui/files_tab.gd")
 const PaneUI := preload("res://ui/pane_ui.gd")
-const UILayer := preload("res://ui/ui_layer.gd")
 const HelpTexts := preload("res://ui/help_texts.gd")
 const VideoMode := preload("res://scripts/video_mode.gd")
 const ControllerBattery := preload("res://scripts/xr/controller_battery.gd")
@@ -20,8 +19,6 @@ var _checks := 0
 
 
 func _initialize() -> void:
-	_front_pose()
-	_follow()
 	_menu_press()
 	_chips()
 	_controller_battery()
@@ -29,71 +26,6 @@ func _initialize() -> void:
 	_help_texts()
 	print("Pane test: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	quit(_failures)
-
-
-## The front pose: 0.6 m along the line of sight, at eye height, facing the head; level (world up, no roll) unless
-## the head looks nearly straight up or down (lying back): then the head's up.
-func _front_pose() -> void:
-	var head := Transform3D(Basis(), Vector3(0, 1.6, 0))
-	var p := PanePose.front(head)
-	_check("front: 0.6 m ahead (%s)" % p.origin, p.origin.is_equal_approx(Vector3(0, 1.6, -0.6)))
-	_check("front: at eye height", is_equal_approx(p.origin.y, head.origin.y))
-	_check("front: faces the head (+Z toward the eyes)", p.basis.z.dot((head.origin - p.origin).normalized()) > 0.999)
-	_check("front: upright", p.basis.y.dot(Vector3.UP) > 0.999)
-	_check("front: [pane] distance 2 m", absf(PanePose.front(head, 2.0).origin.distance_to(head.origin) - 2.0) < 1e-4)
-	var turned := Transform3D(Basis(Vector3.UP, deg_to_rad(90.0)), Vector3(0.3, 1.5, 0.2))
-	var t := PanePose.front(turned)
-	_check("front: follows where the head points (turned 90° left: %s)" % t.origin,
-			t.origin.is_equal_approx(turned.origin + Vector3(-0.6, 0, 0)))
-	_check("front: turned, still faces the head", t.basis.z.dot((turned.origin - t.origin).normalized()) > 0.999)
-	# Head rolled 10°: the panel stays level (world up), it does not tilt with the head.
-	var rolled := Transform3D(Basis(Vector3.FORWARD, deg_to_rad(10.0)), Vector3(0, 1.6, 0))
-	_check("front: a rolled head keeps the panel level", PanePose.front(rolled).basis.x.dot(Vector3.UP) < 1e-3)
-	# Looking 30° down: in front and below, tilted to face the eyes, no roll.
-	var down := Transform3D(Basis(Vector3.RIGHT, deg_to_rad(-30.0)), Vector3(0, 1.6, 0))
-	var dp := PanePose.front(down)
-	_check("front: looking 30° down, 0.3 m below eye level", absf(dp.origin.y - 1.3) < 1e-3)
-	_check("front: looking down, faces the eyes", dp.basis.z.dot((down.origin - dp.origin).normalized()) > 0.999)
-	_check("front: looking down, no roll", absf(dp.basis.x.dot(Vector3.UP)) < 1e-3)
-	# Lying back, looking at the ceiling: the panel is overhead, facing down at the face, with the head's up.
-	var lying := Transform3D(Basis(Vector3.RIGHT, deg_to_rad(90.0)), Vector3(0, 0.5, 0))
-	var lp := PanePose.front(lying)
-	_check("front lying back: overhead (%s)" % lp.origin, lp.origin.is_equal_approx(Vector3(0, 1.1, 0)))
-	_check("front lying back: faces the head", lp.basis.z.dot((lying.origin - lp.origin).normalized()) > 0.999)
-	_check("front lying back: the head's up is the panel's up", lp.basis.y.dot(lying.basis.y) > 0.999)
-	# Looking 60° down with the head rolled 15°: still level (only nearly straight up or down takes the head's up).
-	var steep := Transform3D(Basis(Vector3.RIGHT, deg_to_rad(-60.0)) * Basis(Vector3.FORWARD, deg_to_rad(15.0)),
-			Vector3(0, 1.6, 0))
-	var sp := PanePose.front(steep)
-	_check("front: 60° down and rolled 15°, still level", absf(sp.basis.x.dot(Vector3.UP)) < 1e-3
-			and sp.basis.z.dot((steep.origin - sp.origin).normalized()) > 0.999)
-	var turned_here := Transform3D(turned.basis, head.origin)
-	_check("off axis: 0 in front", PanePose.off_axis(head, p) < 1e-3)
-	_check("off axis: 90° after turning", absf(PanePose.off_axis(turned_here, PanePose.front(head)) - PI / 2.0) < 1e-3)
-
-
-## World-locked off: the lazy head follow.
-func _follow() -> void:
-	var head := Transform3D(Basis(), Vector3(0, 1.6, 0))
-	var pose := PanePose.front(head)
-	var f := PanePose.Follow.new()
-	var small := Transform3D(Basis(Vector3.UP, deg_to_rad(15.0)), head.origin)
-	var out := pose
-	for i in 30:
-		out = f.step(out, small, PanePose.front(small), 0.016)
-	_check("follow: a 15° turn doesn't move it", out.origin.is_equal_approx(pose.origin) and not f.catching)
-	var big := Transform3D(Basis(Vector3.UP, deg_to_rad(40.0)), head.origin)
-	out = f.step(out, big, PanePose.front(big), 0.016)
-	_check("follow: a 40° turn starts the catch-up", f.catching and not out.origin.is_equal_approx(pose.origin))
-	var held := out
-	var g := PanePose.Follow.new()
-	_check("follow: not while the pointer holds a button on it",
-			g.step(pose, big, PanePose.front(big), 0.016, true).origin.is_equal_approx(pose.origin) and not g.catching)
-	for i in 120:
-		out = f.step(out, big, PanePose.front(big), 0.016)
-	_check("follow: in front again within 2 s (%.1f°)" % rad_to_deg(PanePose.off_axis(big, out)),
-			PanePose.off_axis(big, out) < PanePose.FOLLOW_STOP + 1e-3 and not f.catching)
-	_check("follow: it moved smoothly, not in one jump", held.origin.distance_to(PanePose.front(big).origin) > 0.1)
 
 
 ## The menu button: press, short release, hold.
@@ -181,14 +113,6 @@ func _theme() -> void:
 	_check("pane 740 x 600 px at 3080 px/m is 24 x 19.5 cm", PaneStyle.pane_metres().is_equal_approx(Vector2(740, 600) / 3080.0))
 	_check("labels are 11 px, body 15, title 22", PaneStyle.font_size(&"label") == 11 and t.default_font_size == 15
 			and PaneStyle.font_size(&"title") == 22)
-	# Readability (docs/ui-design.md, "Revision 2"): the headset's defaults, scale 1.6 at 0.6 m, make the panel about
-	# 35° wide: about 21 panel pixels per degree, near the display's own, so body text is about 0.7° and rows about 1.9°.
-	var px_per_deg := 740.0 / rad_to_deg(2.0 * atan(PaneStyle.pane_metres(UILayer.DEFAULT_SCALE).x * 0.5
-			/ PanePose.DISTANCE))
-	_check("defaults: about 35° wide, 21 px per degree (%.1f)" % px_per_deg, absf(px_per_deg - 20.8) < 0.5)
-	_check("defaults: body text about 0.7° (%.2f°)" % (15.0 / px_per_deg), absf(15.0 / px_per_deg - 0.72) < 0.05)
-	_check("defaults: rows about 1.9° (%.2f°)" % (PaneStyle.constant(&"row_height") / px_per_deg),
-			PaneStyle.constant(&"row_height") / px_per_deg > 1.8)
 	_check("header status line: clock, time left and end, battery", PaneUI.status_text("21:42", "1:12 left",
 			"ends 22:54", 74, false) == "21:42  ·  1:12 left, ends 22:54  ·  battery 74 %")
 	_check("header status line: nothing playing, no battery, low controller, listening", PaneUI.status_text("21:42", "",

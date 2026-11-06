@@ -1,13 +1,12 @@
 extends SceneTree
 
-## Tests for the tablet prototype (ui/tablet.gd) in the real main scene: where it goes for a head pose (ahead and
-## below, tilted up towards the eyes, by the head's heading only), the setting, and the menu button showing it with
-## the front panel where the head is, keeping it there while the head moves, and hiding it with the panel; the two
-## panes; the style document (its defaults valid, partial changes from outside, bad values refused with their paths,
+## Tests for the tablet (ui/tablet.gd), the app's one menu, in the real main scene: where it goes for a head pose
+## (ahead and below, tilted up towards the eyes, by the head's heading only), the menu button showing it with the
+## panel where the head is, keeping it there while the head moves, and hiding it with the panel; the two panes; the style document (its defaults valid, partial changes from outside, bad values refused with their paths,
 ## only the changes kept, reset); the now playing pane (title, played / total, the bar and its hit area, a long
-## title cut; the text and bar centred as one); the laser's ray, a touch, skipping and dragging the bar; the
-## old menu on the main pane in its tablet layout (lists down the left, one section at a time), dragging its lists;
-## the fades.
+## title cut; the text and bar centred as one; chapter ticks, the seek bar's picture, LIVE); the laser's ray, a touch,
+## skipping and dragging the bar; the menu on the main pane (the header, the transport, lists down the left, one
+## section at a time), dragging its lists; the fades.
 ## Run: godot --headless --xr-mode off --path app --script res://tests/test_tablet.gd
 
 const Tablet := preload("res://ui/tablet.gd")
@@ -44,12 +43,11 @@ func _run() -> void:
 	var q := Tablet.pose(turned)
 	_check("turned 90° left: it goes round with the heading (%s)" % q.origin, q.origin.x < -0.3 and absf(q.origin.z) < 0.001)
 
-	# The setting and the menu button.
+	# The menu button.
 	var layer: Node = main.ui
 	var tablet: Tablet = layer.tablet
-	_check("off by default", not tablet.enabled and not tablet.is_shown())
-	tablet.set_enabled(true)
-	_check("on: saved", main.settings.get_value("pane", "tablet", false) == true)
+	_check("the System tab has no Tablet menu switch: it is the only menu", not _has_text(layer.ui.system, "Tablet menu")
+			and not _has_text(layer.ui.system, "Follow my head") and not _has_text(layer.ui.system, "Distance"))
 	main.camera.global_transform = head
 	layer.hide_panel() # Open at launch.
 	await _frames(1)
@@ -57,7 +55,7 @@ func _run() -> void:
 	layer.on_menu(null, false)
 	await _frames(1)
 	_check("menu: shown in front of the head", tablet.is_shown() and tablet.global_transform.is_equal_approx(p))
-	_check("menu: the front panel opens too", layer.is_open())
+	_check("menu: the panel opens with it", layer.is_open())
 	# The first seconds after launch place it again as the head settles (ui_layer.gd _replace_left): past them.
 	layer._replace_left = 0.0
 	main.camera.global_transform = turned
@@ -66,11 +64,6 @@ func _run() -> void:
 	layer.on_menu(null, true)
 	layer.on_menu(null, false)
 	_check("menu again: hidden with the panel", not tablet.is_shown() and not layer.is_open())
-	tablet.set_enabled(false)
-	_check("off: the key goes", not main.settings.has_value("pane", "tablet"))
-	layer.on_menu(null, true)
-	layer.on_menu(null, false)
-	_check("off: the menu opens only the front panel", layer.is_open() and not tablet.is_shown())
 
 	# Two panes: a short now playing one on top, the main one below, a gap between, filling the tablet.
 	var r: Dictionary = Tablet.pane_rects()
@@ -145,7 +138,6 @@ func _run() -> void:
 			and not main.settings.has_value("pane", "tablet_style"))
 
 	# Now playing: the title, played / total, and the bar.
-	tablet.set_enabled(true, false)
 	main.open_path("stub://flat_mono")
 	await _frames(3)
 	tablet.show_at(head)
@@ -182,6 +174,33 @@ func _run() -> void:
 	tablet.call("_fit_title")
 	_check("a long title is cut with an ellipsis to fit beside the time", tablet.title_label.text.ends_with("…")
 			and tablet.call("_text_width", tablet.title_label, tablet.title_label.text) < np_rect.size.x * 0.8)
+	# What the front panel's seek bar and time had: chapter ticks, LIVE, the trick speed, the seek bar's picture.
+	tablet.call("_set_ticks", PackedFloat32Array([0.25, 0.5]))
+	_check("a tick on the bar at each chapter (%d)" % tablet.tick_count(), tablet.tick_count() == 2)
+	tablet.call("_set_ticks", PackedFloat32Array())
+	_check("no chapters, no ticks", tablet.tick_count() == 0)
+	main.features.live.live = true
+	tablet.call("_update_now_playing")
+	_check("a live stream: LIVE by the time (%s)" % tablet.time_label.text, tablet.time_label.text.begins_with("LIVE"))
+	main.features.live.live = false
+	tablet.call("_update_now_playing")
+	var thumbs: Node = main.features.thumbs
+	var was_thumbs := bool(thumbs.enabled)
+	thumbs.enabled = true
+	var img := Image.create_empty(160, 90, false, Image.FORMAT_RGB8)
+	var tex := ImageTexture.create_from_image(img)
+	(thumbs.get("_cache") as Array).append({"t": dur * 0.5, "asked": dur * 0.5, "tex": tex})
+	tablet.hover_bar(0.5)
+	tablet.call("_update_thumb")
+	_check("the laser half way along the bar: that picture over it, with its time (%s)" % tablet.thumb_label.text,
+			dur <= 0.0 or (tablet.thumb.visible and tablet.thumb_label.text == W.clock(dur * 0.5)
+			and (tablet.thumb.material_override as StandardMaterial3D).albedo_texture == tex
+			and absf(tablet.thumb.position.x - bar.get_center().x) < 0.001
+			and tablet.thumb.position.y > np_rect.size.y * 0.5))
+	tablet.hover_bar(-1.0)
+	tablet.call("_update_thumb")
+	_check("the laser off the bar: no picture", not tablet.thumb.visible and not tablet.thumb_label.visible)
+	thumbs.enabled = was_thumbs
 
 	# Input: the laser's ray, a touch, and skipping.
 	var eye := head.origin
@@ -204,14 +223,15 @@ func _run() -> void:
 	var pr := tablet.panel_rect()
 	_check("on: the panel is the tablet's menu, its size and resolution, no halo (%s m, %s px)"
 			% [panel.size_m, panel.resolution], panel.size_m.is_equal_approx(pr.size)
-			and panel.resolution == tablet.panel_pixels() and not panel.halo_shown and pui.tablet_layout
+			and panel.resolution == tablet.panel_pixels() and not panel.halo_shown
 			and panel.viewport.size == Vector2i((Vector2(panel.resolution) * tablet.panel_render_scale()).round())
 			and panel.viewport.size_2d_override == panel.resolution
 			and pr.size.x > mp.size.x - 0.02 and pr.size.y > mp.size.y - 0.02)
 	var body_size: int = PaneStyle.theme().get_font_size(&"font_size", &"Label")
-	_check("the text times the tablet's text_scale (%d px, the front panel's %d)"
+	_check("the text times the tablet's text_scale (%d px, the theme's %d)"
 			% [pui.tabs[0].get_theme_font_size(&"font_size", &"Label"), body_size],
-			pui.text_scale == tablet.panel_text_scale()
+			is_equal_approx(pui.text_scale, tablet.panel_text_scale()
+				* float(main.features.access.get_value("ui_scale")))
 			and pui.tabs[0].get_theme_font_size(&"font_size", &"Label") == roundi(body_size * tablet.panel_text_scale()))
 	var row_b: Button = pui.tablet_tab_buttons[0]
 	var borders := 0
@@ -223,9 +243,10 @@ func _run() -> void:
 	_check("the list rows have no borders, the focus no ring (%d px)" % borders, borders == 0)
 	_check("on the main pane, a little in front", panel.global_transform.is_equal_approx(tablet.panel_transform())
 			and (panel.global_transform.origin - tablet.main_pane.global_position).length() < 0.005)
-	_check("the header, seek bar, transport and tab bar give way", not pui._title.is_visible_in_tree()
-			and not pui.seek.is_visible_in_tree() and not pui._transport.is_visible_in_tree()
-			and not pui._tabs_box.is_visible_in_tree())
+	_check("the header (the clock and the rest) and the transport, over the rail", pui._status_line.is_visible_in_tree()
+			and pui._status_line.text.contains(":") and pui._transport.is_visible_in_tree()
+			and pui._play_button.is_visible_in_tree() and pui._trick_buttons.size() == 2
+			and pui._transport.get_global_rect().end.y <= pui._tablet_row.get_global_rect().position.y + 1.0)
 	_check("the tabs as a list down the left, Source first", pui.tablet_tab_buttons.size() == pui.TAB_NAMES.size()
 			and pui.tablet_tab_buttons[0].text == "Source" and pui.tablet_tab_buttons[0].is_visible_in_tree()
 			and pui.tablet_tab_buttons[0].get_global_rect().position.x < 60.0)
@@ -312,14 +333,6 @@ func _run() -> void:
 	await _frames(1)
 	_check("no card is wider than the tab (%.0f)" % pui.tabs[1].size.x, cards.all(func(c: Control) -> bool:
 			return c.get_parent() == null or c.get_combined_minimum_size().x <= pui.tabs[1].size.x))
-	tablet.set_enabled(false, false)
-	_check("off: the front panel again, the sections back in their box", not pui.tablet_layout and panel.halo_shown
-			and panel.viewport.size_2d_override == Vector2i.ZERO and panel.viewport.size == panel.resolution
-			and pui._tabs_box.visible and pui.files._places_scroll.visible
-			and not pic_box.has_node("Cards") and pic_box.get_child(0).get_meta("section") == "Mode")
-	tablet.set_enabled(true, false)
-	await _frames(1)
-	_check("on again: the tablet layout", pui.tablet_layout and pui._tablet_row.visible)
 
 	# Dragging a list: a press moved up or down scrolls it instead of clicking; a press that hardly moves clicks.
 	pui.tablet_tab_buttons[0].pressed.emit()
@@ -437,3 +450,13 @@ func _check(what: String, ok: bool) -> void:
 		print("FAIL ", what)
 	else:
 		print("PASS ", what)
+
+
+## Some Label or Button under `n` has exactly this text.
+func _has_text(n: Node, text: String) -> bool:
+	if n == null:
+		return false
+	for c in n.find_children("*", "", true, false):
+		if (c is Label and (c as Label).text == text) or (c is Button and (c as Button).text == text):
+			return true
+	return false

@@ -1,13 +1,14 @@
 extends Node3D
 
-## The UI layer: the panel (docs/ui-design.md, "Revision 2: a front panel"). It talks to the app (scripts/main.gd)
+## The UI layer: the menu, on the tablet (ui/tablet.gd; the user, 2026-11-06: the front panel, the first UI, is
+## gone). It talks to the app (scripts/main.gd)
 ## only through the app's public functions, signals and its features hub, and the app works without it (delete the
 ## UILayer node from main.tscn: direct controller bindings and command-line arguments still drive everything).
 ##
-## The panel is closed or open; nothing else. The menu button on either controller opens it about 0.6 m in front of
-## the head, at eye height, facing the head and level, wherever the head points (lying back works), and
-## it stays there in the world ([pane] world_locked; off: it follows the head lazily). Menu again closes it. Held for
-## [pane] recentre_hold seconds while open, the menu button brings it back in front of the head instead. The
+## The panel is closed or open; nothing else. The menu button on either controller opens it on the tablet, which
+## is placed from the head (below and in front of the eyes, tilted up to them; Tablet.pose()) and then stays there in
+## the room. Menu again closes it. Held for [pane] recentre_hold seconds while open, the menu button brings it back in
+## front of the head instead. The
 ## controller whose menu button opened it is the pointer: its laser aims, its trigger clicks, its stick scrolls the
 ## list or nudges the slider under the laser, and with the laser off the panel its stick moves a focus highlight and
 ## its trigger activates it, so aiming is never needed. One controller is enough; where the other one is never
@@ -27,8 +28,8 @@ extends Node3D
 ## is_open() (the panel used to have a docked state; now that is the only one). `panel` is the quad (ui/pane.gd), `ui`
 ## its controls (ui/pane_ui.gd).
 ##
-## The tablet (ui/tablet.gd, [pane] tablet, a prototype for a new UI): while it is on, it shows and hides with the
-## panel, placed from the head whenever the panel is.
+## The tablet shows and hides with the panel, placed from the head whenever the panel is; the panel (the menu) is on
+## its main pane. The laser on the tablet's time bar shows the seek bar's picture there (Tablet.hover_bar()).
 
 const Pane := preload("res://ui/pane.gd")
 const PaneUI := preload("res://ui/pane_ui.gd")
@@ -47,12 +48,9 @@ const Assistant := preload("res://scripts/assistant/assistant.gd")
 ## The header lists the controller batteries at or below this.
 const CONTROLLER_BATTERY_HEADER := 20
 
-## Layout defaults, tunable in the headset (System, Panel; [pane] scale, distance, recentre_hold, world_locked). The
-## size also follows the accessibility UI scale (features.access, #74).
-## Scale 1 is the theme's 24 cm; 1.6 (38 cm, about 35° wide at 0.6 m) is what read well in the headset.
-const DEFAULT_SCALE := 1.6
-const LAYOUT_DEFAULTS := {"scale": DEFAULT_SCALE, "distance": PanePose.DISTANCE,
-		"recentre_hold": PanePose.RECENTRE_HOLD, "world_locked": true}
+## Layout defaults, tunable in the headset (System, Panel; [pane] recentre_hold). The menu's text also follows the
+## accessibility UI scale (features.access, #74, "Larger panel").
+const LAYOUT_DEFAULTS := {"recentre_hold": PanePose.RECENTRE_HOLD}
 const STICK_SCROLL_RATE := 10.0
 ## The stick's smooth scroll: pixels a second at full stick, past STICK_SCROLL_DEAD, rising as the push's
 ## STICK_SCROLL_CURVE power (a light push creeps, a full one runs).
@@ -82,11 +80,8 @@ var other_hand: XRHand
 var docked: bool:
 	get:
 		return _open
-## Layout, from the settings (apply_layout()).
-var distance := PanePose.DISTANCE
-var world_locked := true
+## The menu button's press and hold (the hold from the settings, apply_layout()).
 var menu := PanePose.MenuPress.new()
-var follow := PanePose.Follow.new()
 var _open := false
 ## The left_handed value the pointer was last set from (a change picks the pointer again).
 var _left_handed_applied: Variant = null
@@ -156,14 +151,16 @@ func setup(p_app: Node3D) -> void:
 	tablet.app = app
 	add_child(tablet)
 	apply_layout()
-	tablet.layout_changed.connect(apply_tablet_mode)
-	apply_tablet_mode()
+	tablet.layout_changed.connect(apply_tablet)
+	apply_tablet()
 	ui.system.layout_changed.connect(apply_layout)
 	ui.system.reset_layout_requested.connect(reset_layout)
 	ui.system.reload_theme_requested.connect(reload_theme)
 	app.features.access.changed.connect(func(key: String, _v: Variant) -> void:
-		if key in ["left_handed", "ui_scale"]:
-			apply_layout())
+		if key == "left_handed":
+			apply_layout()
+		elif key == "ui_scale":
+			apply_tablet())
 
 	# Pane -> app.
 	var files := ui.files
@@ -179,7 +176,6 @@ func setup(p_app: Node3D) -> void:
 	ui.play_pause_pressed.connect(func() -> void: app.player.toggle())
 	ui.previous_requested.connect(func() -> void: app.previous_file())
 	ui.next_requested.connect(func() -> void: app.next_file())
-	ui.seek_requested.connect(func(t: float) -> void: app.player.seek(t))
 	ui.skip_requested.connect(func(d: float) -> void: app.player.seek_relative(d))
 
 	# App -> pane.
@@ -251,7 +247,6 @@ func _on_file_selected(p: String) -> void:
 
 func _on_file_opened(path: String) -> void:
 	_title = app.display_title()
-	ui.set_title(_title)
 	ui.files.set_active(path, _title)
 
 
@@ -277,17 +272,11 @@ func dominant_hand() -> XRHand:
 	return app.left_hand if bool(app.features.access.get_value("left_handed")) else app.right_hand
 
 
-## Applies the layout settings: size ([pane] scale times the accessibility UI scale), distance, recentre hold, world
-## lock, and the default pointer (accessibility left_handed, when it changed).
+## Applies the layout settings: the recentre hold, and the default pointer (accessibility left_handed, when it
+## changed).
 func apply_layout() -> void:
 	var access: Node = app.features.access
-	var scale := float(layout_value("scale")) * float(access.get_value("ui_scale"))
-	if tablet == null or not tablet.enabled:
-		panel.set_size_scale(scale)
-	distance = clampf(float(layout_value("distance")), PanePose.MIN_DISTANCE, PanePose.MAX_DISTANCE)
 	menu.hold = clampf(float(layout_value("recentre_hold")), 0.2, 3.0)
-	world_locked = bool(layout_value("world_locked"))
-	follow.catching = false
 	var left := bool(access.get_value("left_handed"))
 	if pointer_hand == null or left != _left_handed_applied:
 		_left_handed_applied = left
@@ -300,7 +289,7 @@ func layout_value(key: String) -> Variant:
 	return app.settings.get_value("pane", key, LAYOUT_DEFAULTS[key])
 
 
-## Back to the doc's numbers: size, distance, hold, world-locked, right-handed; opens in front.
+## Back to the doc's numbers: the hold, right-handed, the text size; opens in front.
 func reset_layout() -> void:
 	for key: String in LAYOUT_DEFAULTS:
 		app.settings.set_value("pane", key, null)
@@ -451,21 +440,15 @@ func is_open() -> bool:
 	return _open
 
 
-## The tablet on or off (ui/tablet.gd): on, the panel is the menu on its main pane (its size and resolution, the
-## tablet layout, no halo); off, the front panel again.
-func apply_tablet_mode() -> void:
-	var on := tablet.enabled
-	panel.halo_shown = not on
-	if on:
-		panel.configure(tablet.panel_rect().size, tablet.panel_pixels(), tablet.panel_render_scale())
-	else:
-		var scale := float(layout_value("scale")) * float(app.features.access.get_value("ui_scale"))
-		panel.configure(PaneStyle.pane_metres(scale), PaneStyle.pane_pixels())
-	var menu_theme: Theme = PaneStyle.tablet_theme(tablet.menu_colours()) if on else null
+## The panel as the menu on the tablet's main pane (its size and resolution, the tablet's theme and text size times
+## the accessibility UI scale, no halo). Again on a change of the tablet's style.
+func apply_tablet() -> void:
+	panel.halo_shown = false
+	panel.configure(tablet.panel_rect().size, tablet.panel_pixels(), tablet.panel_render_scale())
+	var menu_theme: Theme = PaneStyle.tablet_theme(tablet.menu_colours())
 	ui.set_tablet_theme(menu_theme)
 	PaneStyle.set_active(menu_theme)
-	ui.set_text_scale(tablet.panel_text_scale() if on else 1.0)
-	ui.set_tablet_layout(on)
+	ui.set_text_scale(tablet.panel_text_scale() * float(app.features.access.get_value("ui_scale")))
 	if _open:
 		recentre()
 
@@ -476,8 +459,7 @@ func show_panel(hand: XRHand = null) -> void:
 	set_pointer_hand(hand)
 	var was_open := _open
 	_open = true
-	if tablet.enabled:
-		tablet.show_at(_head())
+	tablet.show_at(_head())
 	recentre()
 	if app.get("_frames") != null and int(app.get("_frames")) < 10:
 		_replace_left = LAUNCH_REPLACE_SECONDS
@@ -514,15 +496,12 @@ func toggle_panel(hand: XRHand = null) -> void:
 		show_panel(hand)
 
 
-## Puts the panel in front of the head again: [pane] distance along the line of sight, at eye height, facing the head.
+## Puts the tablet in front of the head again (its place for the head), and the panel onto it.
 func recentre() -> void:
-	if tablet != null and tablet.enabled:
-		# The menu is on the tablet: the tablet goes in its place for the head, the panel onto it.
-		tablet.place(_head())
-		panel.global_transform = tablet.panel_transform()
-	else:
-		panel.global_transform = PanePose.front(_head(), distance)
-	follow.catching = false
+	if tablet == null:
+		return
+	tablet.place(_head())
+	panel.global_transform = tablet.panel_transform()
 
 
 ## The menu button of `hand` (null: the desktop's M key) pressed or released. A press opens a closed panel at once,
@@ -556,7 +535,6 @@ func _head() -> Transform3D:
 func _process(delta: float) -> void:
 	if app == null:
 		return
-	var head := _head()
 	if menu.step(delta) == "recentre":
 		show_panel(menu.hand as XRHand)
 		if menu.hand != null:
@@ -565,9 +543,6 @@ func _process(delta: float) -> void:
 		_replace_left -= delta
 		if _open:
 			recentre()
-	elif _open and not world_locked and not tablet.enabled:
-		panel.global_transform = follow.step(panel.global_transform, head, PanePose.front(head, distance), delta,
-				panel.is_pressed())
 	_take_over_pointer()
 	_update_pointer()
 	_update_poke()
@@ -623,6 +598,7 @@ func _update_pointer() -> void:
 			tablet.grab_move(at)
 			_tablet_hit = {"point": at, "distance": (at as Vector3).distance_to(pointer_hand.get_ray_origin()),
 					"pane": "grab", "fraction": -1.0}
+	tablet.hover_bar(float(_tablet_hit.get("fraction", -1.0)) if not _tablet_hit.is_empty() else -1.0)
 	if not _tablet_hit.is_empty():
 		card_hit = _tablet_hit
 		_card_pointed = false
@@ -766,7 +742,6 @@ func _refresh() -> void:
 		var title: String = app.display_title()
 		if title != _title:
 			_title = title
-			ui.set_title(title)
 			ui.files.set_active(app.current_path, title)
 		if src.is_ended():
 			ui.set_status(src.last_error)
