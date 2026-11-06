@@ -46,6 +46,9 @@ const AgentTerminal := preload("res://scripts/agents/agent_terminal.gd")
 const Transcriber := preload("res://scripts/voice/transcriber.gd")
 const WhisperBackend := preload("res://scripts/voice/whisper_backend.gd")
 const Uri := preload("res://scripts/net/uri.gd")
+## The problems the panel can show (status_text()), as keys; the values in them stay as they are.
+const PROBLEM_TLS := "Can't make the HTTPS certificate: %s." # i18n
+const PROBLEM_PORT := "Can't listen on port %d: %s." # i18n
 
 ## The API, HTTPS with the headset's own certificate.
 const DEFAULT_PORT := 47802
@@ -120,8 +123,10 @@ var ptt: Node
 var clients: AssistantClients
 var tls: AssistantTls
 var conversation: AssistantConversation
-## The last thing that went wrong, in words for the panel; "" when all is well.
+## The last thing that went wrong, in words for the log (English); "" when all is well.
 var problem := ""
+## The same for the panel: [format, values], translated when status_text() shows it (docs/i18n.md).
+var _problem_parts: Array = []
 var requests := 0
 var refused := 0
 var _server: TCPServer
@@ -431,19 +436,26 @@ func pin_short() -> String:
 	return tls.pin.trim_prefix("sha256//").left(8) if tls != null and tls.pin != "" else ""
 
 
-## One line for the panel.
+## One line for the panel (the System tab's assistant row), in the menus' language; only the panel shows it. The
+## client's name, the addresses and a system error stay as they are.
 func status_text() -> String:
 	if problem != "":
-		return problem
+		return tr(str(_problem_parts[0])) % _problem_parts[1] if _problem_parts.size() == 2 else problem
 	if not _attempt.is_empty():
-		return "%s asks to pair. Tell it this code:" % _attempt["client"]
+		return tr("%s asks to pair. Tell it this code:") % _attempt["client"]
 	if window_open():
-		return "Give an assistant this address: %s (%d min left)." % [guide_address(), ceili(window_left() / 60.0)]
+		return tr("Give an assistant this address: %s (%d min left).") % [guide_address(), ceili(window_left() / 60.0)]
 	if clients.is_empty():
-		return "No assistant yet. Press \"Let an assistant find me\" and give it the address."
+		return tr("No assistant yet. Press \"Let an assistant find me\" and give it the address.")
 	if _connected:
-		return "An assistant is connected."
-	return "Listening for paired assistants at %s." % address()
+		return tr("An assistant is connected.")
+	return tr("Listening for paired assistants at %s.") % address()
+
+
+## A problem for the log (English) and for the panel (translated when shown). The format is a key (PROBLEM_*).
+func _set_problem(format: String, values: Array) -> void:
+	problem = format % values
+	_problem_parts = [format, values]
 
 
 # --- Listening -----------------------------------------------------------------------------------------------------
@@ -471,7 +483,7 @@ func _update_listen() -> void:
 				print("Assistant: making the HTTPS certificate (once)")
 				tls.start_making()
 			else:
-				problem = "Can't make the HTTPS certificate: %s." % (tls.error if tls.error != "" else "unknown")
+				_set_problem(PROBLEM_TLS, [tls.error if tls.error != "" else "unknown"])
 				_listen_retry = _now() + 30.0
 				_tls_tried = false
 				status_changed.emit()
@@ -481,7 +493,7 @@ func _update_listen() -> void:
 	var err := _server.listen(port, bind_address)
 	if err != OK:
 		_server = null
-		problem = "Can't listen on port %d: %s." % [port, error_string(err)]
+		_set_problem(PROBLEM_PORT, [port, error_string(err)])
 		_listen_retry = _now() + 5.0
 		push_warning("Assistant: " + problem)
 		status_changed.emit()

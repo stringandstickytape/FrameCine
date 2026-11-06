@@ -20,7 +20,7 @@ What counts as a key (the English text is the key, gettext style):
   a literal given to text, tooltip_text or placeholder_text: x.text = "...", or "..." if c else "..."
   every literal on a line that ends with the comment `# i18n`, dictionary keys left out
   between `# i18n: begin` and `# i18n: end`: the same; `# i18n: begin name` takes only the values of "name": ...
-  the palettes' names in app/ui/themes/tablet.json
+  the palettes' names in app/ui/themes/tablet.json, the showrooms' names in app/environments/showrooms/index.json
 Text with no letter in it (numbers, "...") is never a key. Not scanned: app/tests and app/tools. In app/scripts/dev
 (the dev link) and app/scripts/assistant (what an assistant reads) only tr() and the markers count, not the builders
 or text = "..." (docs/i18n.md, "Not translated").
@@ -45,7 +45,8 @@ CALLS = {"tr": 1, "atr": 1, "tr_n": 2, "atr_n": 2}
 SERVER_CALLS = {"translate": 1, "translate_plural": 2}
 BUILDERS = {"label", "caps", "section", "button", "toggle", "help", "slider_row"}
 TEXT_PROPS = {"text", "tooltip_text", "placeholder_text"}
-JSON_SOURCES = [(os.path.join("ui", "themes", "tablet.json"), ["palettes", "*", "name"])]
+JSON_SOURCES = [(os.path.join("ui", "themes", "tablet.json"), ["palettes", "*", "name"]),
+                (os.path.join("environments", "showrooms", "index.json"), ["showrooms", "*", "name"])]
 LETTER = re.compile(r"[A-Za-z]")
 
 

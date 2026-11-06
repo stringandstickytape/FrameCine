@@ -13,6 +13,8 @@ extends RefCounted
 ##   ENTRIES: [{id, name, tags, mount, primitive?, generator?, widget?, widget_options?}]
 ##   build(id) -> Node3D (not in a tree) or null (a generator)
 
+## The names are keys (docs/i18n.md): the Objects tab shows them in the menus' language; an assistant reads the English.
+# i18n: begin name
 const ENTRIES := [
 	# The shapes a room document sends (type box, sphere, cylinder, plane) are placements of these: one part each, named
 	# after the shape, grey as an uncoloured part shows.
@@ -31,6 +33,7 @@ const ENTRIES := [
 	{"id": "wall_clock", "name": "Wall clock", "tags": ["wall", "clock"], "mount": "wall", "widget": "clock",
 			"widget_options": {"style": "analog", "color": "#202020", "background": "#00000000"}},
 ]
+# i18n: end
 
 
 static func build(id: String) -> Node3D:

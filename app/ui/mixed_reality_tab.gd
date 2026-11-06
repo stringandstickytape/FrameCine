@@ -6,6 +6,8 @@ extends ScrollContainer
 ## bright, the stick moves it, the trigger goes to the next face and then Turn) and Delete (with Undo). All on, All
 ## off. Settings, a section of its own (the user, 2026-11-06): Passthrough dimming, the least the room light dims the
 ## cameras' view to.
+##
+## Languages (docs/i18n.md): an area's name is the viewer's (content); its size and the toasts go through tr().
 
 const W := preload("res://ui/pane_widgets.gd")
 const PaneStyle := preload("res://ui/pane_style.gd")
@@ -32,10 +34,14 @@ func _init() -> void:
 func bind(p_app: Node) -> void:
 	app = p_app
 	box.add_child(W.section("Areas"))
-	box.add_child(W.label("Mark areas to see through to the cameras.", &"MutedLabel"))
+	var intro := W.label("Mark areas to see through to the cameras.", &"MutedLabel")
+	# Wraps: a longer language fits the card.
+	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(intro)
 	box.add_child(W.hbox([W.button("Sweep an area", func() -> void: app.ui.start_window_mark())]))
 	box.add_child(W.help("Hold the trigger and pass the controller over the place; let go to keep it."))
 	_empty = W.label("None yet.", &"MutedLabel")
+	_empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_empty)
 	_rows = VBoxContainer.new()
 	_rows.add_theme_constant_override("separation", 0)
@@ -67,6 +73,7 @@ func sync() -> void:
 		return
 	W.set_slider(_light, rw.light_min * 100.0)
 	_empty.visible = rw.windows.is_empty()
+	_empty.text = "None yet."
 	if not rw.available():
 		_empty.text = "The headset's cameras can't show here."
 		_empty.visible = true
@@ -89,6 +96,7 @@ func _build_rows(rw: Node) -> void:
 	for w: Dictionary in rw.windows:
 		var id := str(w["id"])
 		var text := W.ellipsis(W.label(_row_text(w)))
+		W.content(text)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var on := W.toggle("On", func(v: bool) -> void: rw.set_on(id, v))
 		W.set_on(on, bool(w.get("on", true)))
@@ -99,7 +107,7 @@ func _build_rows(rw: Node) -> void:
 
 func _row_text(w: Dictionary) -> String:
 	var s: Array = w["size"]
-	return "%s  ·  %d x %d x %d cm" % [w["name"], roundi(float(s[0]) * 100.0), roundi(float(s[1]) * 100.0),
+	return tr("%s  ·  %d x %d x %d cm") % [w["name"], roundi(float(s[0]) * 100.0), roundi(float(s[1]) * 100.0),
 			roundi(float(s[2]) * 100.0)]
 
 
@@ -108,6 +116,6 @@ func _delete(id: String) -> void:
 	var gone: Dictionary = rw.remove(id)
 	if gone.is_empty():
 		return
-	app.ui.ui.show_toast("%s deleted" % gone["name"], "Undo", func() -> void:
+	app.ui.ui.show_toast(tr("%s deleted") % gone["name"], tr("Undo"), func() -> void:
 		rw.restore(gone)
 		app.ui.ui.hide_toast(), 8.0)

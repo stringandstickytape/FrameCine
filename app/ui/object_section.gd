@@ -8,6 +8,11 @@ extends VBoxContainer
 ## library (a picker: each effect's preview and name, filtered by group, its options at their defaults), and Reset;
 ## and Move and Remove (asked first). Everything here calls what the commands call
 ## (scripts/assistant/object_commands.gd), so a change has the same undo, cost limits and checks.
+##
+## Languages (docs/i18n.md): the built-in objects' names are keys (object_builtins.gd) and translate; the viewer's own
+## objects, the names placed in the room, their parts and Fab's assets are content. The material and effect
+## libraries' names (and the effects' descriptions) show as content, in English, for now. The errors the commands
+## return are an assistant's English and show as they are.
 
 const W := preload("res://ui/pane_widgets.gd")
 const PaneStyle := preload("res://ui/pane_style.gd")
@@ -31,9 +36,16 @@ const SWATCH := Vector2(28, 28)
 const PALETTE := ["#f4f1ea", "#c8a27a", "#8b5a3c", "#3b2a1e", "#222222", "#7d7d7d", "#b5653d", "#c0392b",
 		"#e8a33c", "#4f8a3c", "#2f6f8f", "#3366cc", "#6b4c9a", "#d98cb3"]
 const ASSISTANT_ROOM := "res://scripts/assistant/assistant_room.gd"
-## The material picker's kinds: [label, the library's tag ("" all)].
-const MATERIAL_KINDS := [["All", ""], ["Floors", "floor"], ["Walls", "wall"], ["Fabric", "fabric"], ["Wood", "wood"],
-		["Leather", "leather"], ["Metal", "metal"], ["Stone", "stone"]]
+## The material picker's kinds: their labels, and the library's tag of each ("" all).
+const MATERIAL_KIND_NAMES := ["All", "Floors", "Walls", "Fabric", "Wood", "Leather", "Metal", "Stone"] # i18n
+const MATERIAL_KIND_TAGS := ["", "floor", "wall", "fabric", "wood", "leather", "metal", "stone"]
+## The effect library's groups (scripts/effects/catalogue/<group>.gd), as the picker names them.
+# i18n: begin
+const EFFECT_GROUPS := {"classic": "Classic", "energy": "Energy", "nature": "Nature", "reactive": "Reactive",
+		"skies": "Skies", "stylised": "Stylised", "transitions": "Transitions", "materials": "Materials"}
+# i18n: end
+## Where an object goes (its manifest's mount), as the picked object's line says it.
+const MOUNT_WORDS := {"free": "free", "wall": "wall", "floor": "floor"} # i18n
 const MATERIAL_COLUMNS := 3
 ## The swatch on a material's button (its mean colour, from the catalogue: nothing is loaded to show it).
 const MATERIAL_SWATCH := 22
@@ -87,6 +99,7 @@ func bind(p_app: Node) -> void:
 	_grid = _tile_grid()
 	add_child(_grid)
 	_chosen = W.ellipsis(W.label("", &"MutedLabel"))
+	W.content(_chosen)
 	_chosen.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_place = W.button("Place", _start_place)
 	add_child(W.hbox([_chosen, _place]))
@@ -96,18 +109,28 @@ func bind(p_app: Node) -> void:
 	_yours_label = W.label("Imported, or kept from a room.", &"MutedLabel")
 	add_child(_yours_label)
 	_yours_empty = W.label("None yet: add one from Fab below.", &"MutedLabel")
+	# Both wrap: a longer language fits the card.
+	_yours_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_yours_empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	add_child(_yours_empty)
 	_yours_grid = _tile_grid()
 	add_child(_yours_grid)
 	_yours_chosen = W.ellipsis(W.label("", &"MutedLabel"))
+	W.content(_yours_chosen)
 	_yours_chosen.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_yours_place = W.button("Place", _start_place)
 	_delete = W.button("Delete", _ask_delete)
 	add_child(W.hbox([_yours_chosen, _yours_place, _delete]))
 	_fab_box = W.vbox()
-	var fab_label := W.label("In Downloads, from Fab", &"MutedLabel")
-	fab_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_fab_box.add_child(W.hbox([fab_label, W.button("Visit Fab to download objects", _visit_fab)]))
+	# An ellipsis where it is narrow (a longer language): the button keeps its room.
+	var fab_label := W.ellipsis(W.label("In Downloads, from Fab", &"MutedLabel"))
+	_fab_box.add_child(W.hbox([fab_label]))
+	# The card's width, its text cut short where a longer language would not fit.
+	var visit := W.button("Visit Fab to download objects", _visit_fab)
+	visit.clip_text = true
+	visit.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	visit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_fab_box.add_child(W.hbox([visit]))
 	_fab_buttons = W.vbox()
 	_fab_buttons.visible = false
 	_fab_box.add_child(_fab_buttons)
@@ -193,6 +216,9 @@ func _tile(m: Dictionary, group: ButtonGroup) -> void:
 		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		b.add_child(art)
 	var title := W.ellipsis(W.label(str(m["name"])))
+	# A built-in's name is a key (object_builtins.gd); the viewer's own object's is content.
+	if not ObjectLibrary.is_builtin(id):
+		W.content(title)
 	title.position = Vector2(4, THUMB.y + 2)
 	title.size = Vector2(THUMB.x - 8, 20)
 	title.custom_minimum_size = Vector2(THUMB.x - 8, 0)
@@ -210,6 +236,9 @@ func _tile(m: Dictionary, group: ButtonGroup) -> void:
 func _sync_fab(found: Array) -> void:
 	var paths: Array = found.map(func(f: Dictionary) -> String: return str(f["path"]))
 	if paths == _fab_paths:
+		# The same downloads: only their words again (the language may have changed).
+		for b in _fab_buttons.get_children():
+			(b as Button).text = tr("Add %s") % b.get_meta("fab_name", "")
 		return
 	_fab_paths = paths
 	for c in _fab_buttons.get_children():
@@ -217,7 +246,9 @@ func _sync_fab(found: Array) -> void:
 		c.queue_free()
 	for f: Dictionary in found:
 		var path := str(f["path"])
-		var b := W.button("Add %s" % f["name"], func() -> void: _add_fab(path), &"RowButton")
+		var b := W.button(tr("Add %s") % f["name"], func() -> void: _add_fab(path), &"RowButton")
+		W.content(b)
+		b.set_meta("fab_name", str(f["name"]))
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		_fab_buttons.add_child(b)
 	_fab_buttons.visible = not found.is_empty()
@@ -238,7 +269,7 @@ func _add_fab(path: String) -> void:
 	if _adding:
 		return
 	_adding = true
-	app.ui.notify("Adding %s: a moment." % _fab_name(path))
+	app.ui.notify(tr("Adding %s: a moment.") % _fab_name(path))
 	await get_tree().process_frame
 	await get_tree().process_frame
 	if not is_instance_valid(self):
@@ -247,16 +278,17 @@ func _add_fab(path: String) -> void:
 	_adding = false
 	if out.get("ok") == true:
 		_selected = str(out["manifest"]["id"])
-		app.ui.notify("%s is in your objects." % out["manifest"]["name"])
+		app.ui.notify(tr("%s is in your objects.") % out["manifest"]["name"])
 	else:
-		app.ui.notify(str(out.get("error", "That didn't work.")))
+		# The import's own reason (English, as an assistant reads it), else a word of ours.
+		app.ui.notify(str(out["error"]) if str(out.get("error", "")) != "" else tr("That didn't work."))
 	sync_objects()
 
 
 func _fab_name(path: String) -> String:
 	for b in _fab_buttons.get_children():
-		if (b as Button).text.begins_with("Add ") and _fab_paths.find(path) == b.get_index():
-			return (b as Button).text.substr(4)
+		if b.has_meta("fab_name") and _fab_paths.find(path) == b.get_index():
+			return str(b.get_meta("fab_name"))
 	return path.get_file()
 
 
@@ -274,10 +306,14 @@ func _sync_chosen() -> void:
 	var line := ""
 	if not m.is_empty():
 		var n := (m.get("parts", []) as Array).size()
-		line = "%s  ·  %s  ·  %d part%s" % [m["name"], m["mount"], n, "" if n == 1 else "s"]
-	_chosen.text = line if not m.is_empty() and not yours else "Pick an object, then Place."
+		# A built-in's name in the menus' language; the viewer's own as it is.
+		var shown := tr(str(m["name"])) if ObjectLibrary.is_builtin(_selected) else str(m["name"])
+		var mount := str(m["mount"])
+		line = "%s  ·  %s  ·  %s" % [shown, tr(MOUNT_WORDS[mount]) if MOUNT_WORDS.has(mount) else mount,
+				tr_n("%d part", "%d parts", n) % n]
+	_chosen.text = line if not m.is_empty() and not yours else tr("Pick an object, then Place.")
 	_place.disabled = m.is_empty() or yours
-	_yours_chosen.text = line if yours else "Pick one, then Place."
+	_yours_chosen.text = line if yours else tr("Pick one, then Place.")
 	_yours_place.disabled = not yours
 	_delete.visible = yours
 
@@ -307,9 +343,9 @@ func _ask_delete() -> void:
 	# A kept room that places it keeps it in the library (rooms are made of objects): said instead of asked.
 	var using := ObjectLibrary.rooms_using(id)
 	if not using.is_empty():
-		app.ui.notify("%s is in %s: remove it there first." % [m["name"], ", ".join(using)])
+		app.ui.notify(tr("%s is in %s: remove it there first.") % [m["name"], ", ".join(using)])
 		return
-	app.ui.ui.show_choice("Delete %s from the library?" % m["name"], "Delete", func() -> void:
+	app.ui.ui.show_choice(tr("Delete %s from the library?") % m["name"], tr("Delete"), func() -> void:
 		var r := ObjectLibrary.delete(id)
 		if r.get("ok") == true:
 			ObjectLibrary.purge(id)
@@ -317,7 +353,7 @@ func _ask_delete() -> void:
 		else:
 			app.ui.notify(str(r.get("error", "")))
 		sync_objects()
-		app.ui.ui.hide_toast(), "Keep", func() -> void: app.ui.ui.hide_toast(), 15.0)
+		app.ui.ui.hide_toast(), tr("Keep"), func() -> void: app.ui.ui.hide_toast(), 15.0)
 
 
 # --- What this room has --------------------------------------------------------------------------------------------
@@ -340,6 +376,8 @@ func _sync_placed() -> void:
 		var group := ButtonGroup.new()
 		for n: String in names:
 			var b := W.button(n, Callable(), &"RowButton")
+			# What the room calls it (its placement's name): content.
+			W.content(b)
 			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 			b.toggle_mode = true
 			b.button_group = group
@@ -381,9 +419,11 @@ func _sync_parts() -> void:
 		swatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var shows := str(part.get("material", ""))
 		var effect := str(part.get("effect", ""))
+		# The part's name and the libraries' names: content; "changed" in the menus' language.
 		var label := W.ellipsis(W.label(str(part["name"]) + ("  ·  " + _material_name(shows) if shows != "" else "")
 				+ ("  ·  " + _effect_name(effect) if effect != "" else "")
-				+ ("  (changed)" if part.get("recolour") != null else "")))
+				+ ("  " + tr("(changed)") if part.get("recolour") != null else "")))
+		W.content(label)
 		var row: Array = [swatch, label, W.button("Colour", func() -> void:
 			_palette_for = target if _palette_for != target else ""
 			_sync_parts())]
@@ -440,10 +480,10 @@ static func _material_name(id: String) -> String:
 ## one puts it on the part (with Undo in the footer); the stick's focus and the trigger reach every button.
 func _material_picker(target: String, shows: String, materials: Array) -> Control:
 	var box := W.vbox()
-	var kinds := W.choices(MATERIAL_KINDS.map(func(k: Array) -> String: return k[0]), func(i: int) -> void:
-		_material_tag = MATERIAL_KINDS[i][1]
+	var kinds := W.choices(MATERIAL_KIND_NAMES, func(i: int) -> void:
+		_material_tag = MATERIAL_KIND_TAGS[i]
 		_sync_parts())
-	W.set_choice(kinds, MATERIAL_KINDS.map(func(k: Array) -> String: return k[1]).find(_material_tag))
+	W.set_choice(kinds, MATERIAL_KIND_TAGS.find(_material_tag))
 	box.add_child(kinds)
 	var grid := GridContainer.new()
 	grid.columns = MATERIAL_COLUMNS
@@ -455,6 +495,8 @@ func _material_picker(target: String, shows: String, materials: Array) -> Contro
 		var id := str(mat["id"])
 		var b := W.button(str(mat.get("name", id)), func() -> void: _apply(target, {"library_material": id}),
 				&"RowButton")
+		# The library's name, in English for now (content: not a key yet).
+		W.content(b)
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.toggle_mode = true
 		b.set_pressed_no_signal(id == shows)
@@ -491,7 +533,7 @@ func _effect_picker(target: String, shows: String) -> Control:
 	row.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
 	var group := ButtonGroup.new()
 	for g: String in groups:
-		var b := W.button("All" if g == "" else g.capitalize(), Callable())
+		var b := W.button("All" if g == "" else str(EFFECT_GROUPS.get(g, g.capitalize())), Callable())
 		b.toggle_mode = true
 		b.button_group = group
 		b.set_pressed_no_signal(g == _effect_group)
@@ -511,6 +553,8 @@ func _effect_picker(target: String, shows: String) -> Control:
 			continue
 		var b := W.button(str(e.get("name", id)), func() -> void: _apply(target, {"effect": {"name": id}}),
 				&"RowButton")
+		# The library's name and description, in English for now (content: not keys yet).
+		W.content(b)
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.toggle_mode = true
 		b.set_pressed_no_signal(id == shows)
@@ -551,11 +595,11 @@ static func swatch_icon(hex: String) -> Texture2D:
 func _picture(target: String) -> void:
 	var path := str(app.current_path)
 	if not bool(app.features.slideshow.is_picture()) or path.contains("://") or not FileAccess.file_exists(path):
-		app.ui.notify("Open a picture on the headset first (Files); then Picture puts it on the part.")
+		app.ui.notify(tr("Open a picture on the headset first (Files); then Picture puts it on the part."))
 		return
 	var bytes := FileAccess.get_file_as_bytes(path)
 	if bytes.size() > int(RoomSchema.LIMITS["image_bytes"]):
-		app.ui.notify("That picture is too big for a part (at most %d MB)." % (int(RoomSchema.LIMITS["image_bytes"])
+		app.ui.notify(tr("That picture is too big for a part (at most %d MB).") % (int(RoomSchema.LIMITS["image_bytes"])
 				/ (1024 * 1024)))
 		return
 	_apply(target, {"texture": Marshalls.raw_to_base64(bytes)})
@@ -565,7 +609,7 @@ func _picture(target: String) -> void:
 func _apply(target: String, material: Variant) -> void:
 	var r: Dictionary = await ObjectCommands.recolour_part(get_tree(), null, target, material)
 	_palette_for = ""
-	var said := "its own colour" if material == null else "changed"
+	var said := tr("its own colour") if material == null else tr("changed")
 	if material is Dictionary and (material as Dictionary).has("library_material"):
 		said = _material_name(str(material["library_material"]))
 	elif material is Dictionary and (material as Dictionary).get("effect") is Dictionary:
@@ -575,14 +619,15 @@ func _apply(target: String, material: Variant) -> void:
 
 
 func _ask_remove(name: String) -> void:
-	app.ui.ui.show_choice("Remove %s from the room?" % name, "Remove", func() -> void:
+	app.ui.ui.show_choice(tr("Remove %s from the room?") % name, tr("Remove"), func() -> void:
 		app.ui.ui.hide_toast()
 		var r: Dictionary = await ObjectCommands.remove_placed(get_tree(), null, name)
-		_toast(r, "Removed %s" % name), "Keep", func() -> void: app.ui.ui.hide_toast(), 15.0)
+		_toast(r, tr("Removed %s") % name), tr("Keep"), func() -> void: app.ui.ui.hide_toast(), 15.0)
 
 
+## done: in the menus' language already. A command's error is an assistant's English and shows as it is.
 func _toast(r: Dictionary, done: String) -> void:
 	if r.get("ok") == true:
-		app.ui.ui.show_toast(done, "Undo" if r.get("undo") is Callable else "", r.get("undo", Callable()), 8.0)
+		app.ui.ui.show_toast(done, tr("Undo") if r.get("undo") is Callable else "", r.get("undo", Callable()), 8.0)
 	else:
-		app.ui.notify(str(r.get("error", "That didn't work.")))
+		app.ui.notify(str(r["error"]) if str(r.get("error", "")) != "" else tr("That didn't work."))

@@ -30,6 +30,14 @@ const SET_B := ["ui/picture_tab.gd", "ui/sound_tab.gd", "ui/subtitles_tab.gd", "
 const VideoMode := preload("res://scripts/video_mode.gd")
 const ContainerMode := preload("res://scripts/play/container_mode.gd")
 const SoundTab := preload("res://ui/sound_tab.gd")
+## Stage 2, set C: the Room, Objects and Mixed reality tabs, and what they show from elsewhere.
+const SET_C := ["ui/room_tab.gd", "ui/objects_tab.gd", "ui/object_section.gd", "ui/object_placer.gd",
+		"ui/mixed_reality_tab.gd", "ui/agent_pane.gd", "scripts/comfort/sleep_timer.gd",
+		"scripts/assistant/assistant_service.gd", "scripts/assistant/object_builtins.gd",
+		"environments/showrooms/index.json"]
+const EnvLibrary := preload("res://scripts/env/env_library.gd")
+const Showrooms := preload("res://scripts/env/showrooms.gd")
+const ObjectBuiltins := preload("res://scripts/assistant/object_builtins.gd")
 
 var _failures := 0
 var _checks := 0
@@ -56,6 +64,7 @@ func _run() -> void:
 	_fonts()
 	_wrapping()
 	await _set_b()
+	await _set_c()
 	I18n.set_language("en")
 	print("test_i18n: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	quit(_failures)
@@ -405,6 +414,166 @@ func _cards_fit(pui: Node, tab: int) -> bool:
 
 func _cjk(s: String) -> bool:
 	return RegEx.create_from_string("[\\x{4e00}-\\x{9fff}]").search(s) != null
+
+
+## Stage 2, set C: the Room, Objects and Mixed reality tabs. Their keys are all in zh_CN.po, the names of what ships
+## (rooms, showrooms, objects) are keys; their built lines switch to Chinese and back, while what an assistant reads
+## stays English; content stays; the pseudo-locale leaves no plain English on any of their sections; every card fits.
+func _set_c() -> void:
+	var pot := _pot_refs()
+	var po_keys := {}
+	for e: Array in I18n.pot_entries(PO):
+		po_keys[e[0]] = true
+	var missing: Array = []
+	for k: String in pot:
+		if (pot[k] as Array).any(func(ref: String) -> bool: return ref.get_slice(":", 0) in SET_C) and not po_keys.has(k):
+			missing.append(k)
+	_check("set C: every key of its files is in zh_CN.po (%s)" % ", ".join(missing), missing.is_empty())
+	var shipped: Array = []
+	for e: Array in main.ENVIRONMENTS + EnvLibrary.BUILT_IN + Showrooms.environments():
+		shipped.append(str(e[1]))
+	for e: Dictionary in ObjectBuiltins.ENTRIES:
+		shipped.append(str(e["name"]))
+	var no_key: Array = shipped.filter(func(n: String) -> bool: return not po_keys.has(n))
+	_check("set C: each room, showroom and built-in object that ships has its name as a key (%d; %s)" % [shipped.size(),
+			", ".join(no_key)], shipped.size() > 15 and no_key.is_empty())
+
+	var layer: Node = main.ui
+	var pui: Node = layer.ui
+	var room: Node = pui.room
+	var section: Node = pui.objects.section
+	var mr: Node = pui.mixed_reality
+	var sleep: Node = main.features.sleep
+	main.set_environment("cinema")
+	layer.show_panel()
+	pui.show_tab(pui.Tab.OBJECTS)
+	section.sync_objects()
+	for i in 600:
+		await process_frame
+		if not section._ids.is_empty() and not section._loading:
+			break
+	pui.show_tab(pui.Tab.ROOM)
+	await _frames(2)
+	sleep.start(15.0)
+	I18n.set_language("zh_CN")
+	await _frames(2)
+	var cinema: Button = room._env_rows[room._env_ids.find("cinema")]
+	_check("Chinese: a room that ships by its name (%s)" % _shown(cinema), _shown(cinema) == "影院")
+	var showroom: int = room._env_ids.find("showroom:objects")
+	_check("a showroom too (%s)" % (_shown(room._env_rows[showroom]) if showroom >= 0 else "none"),
+			showroom >= 0 and _shown(room._env_rows[showroom]) == "物品")
+	_check("the seat line (%s)" % room._seat_label.text, str(room._seat_label.text).contains("座位")
+			or str(room._seat_label.text).contains("房间默认位置"))
+	_check("the party's line (%s)" % room._party_status.text, str(room._party_status.text).begins_with("“主持”"))
+	_check("the party's name and PIN (%s, %s)" % [room._party_name.text, room._party_pin.text],
+			str(room._party_name.text).begins_with("名字：") and str(room._party_pin.text).begins_with("PIN："))
+	_check("the sleep timer's line (%s), an assistant's English (%s)" % [room._sleep_status.text, sleep.status_text()],
+			room._sleep_status.text == "15 分钟后睡眠" and sleep.status_text() == "sleep in 15 min")
+	_check("why a party ended (%s; %s)" % [room.end_reason("left"), room.end_reason("the host refused: wrong PIN")],
+			room.end_reason("left") == "你离开了" and room.end_reason("the host refused: wrong PIN") == "主持方拒绝了：wrong PIN")
+	_check("a numbered seat translates, a named one is content (%s, %s)" % [room.seat_name(["Seat 1", "Seat"], 0),
+			room.seat_name(["Seat 1", "Seat"], 1)], room.seat_name(["Seat 1", "Seat"], 0) == "座位 1"
+			and room.seat_name(["Seat 1", "Seat"], 1) == "Seat")
+	var slider: Label = room._intermission_minutes.get_meta("value_label")
+	_check("a slider's value in Chinese (%s)" % slider.text, slider.text.ends_with("分钟"))
+	section._selected = "pot_plant"
+	section._sync_chosen()
+	_check("Objects: a built-in's line (%s)" % section._chosen.text, section._chosen.text == "盆栽  ·  地面  ·  %d 个部件"
+			% (_parts_of("pot_plant")))
+	section._selected = ""
+	section._sync_chosen()
+	_check("Objects: the pick line (%s)" % section._chosen.text, section._chosen.text == "选择一个物品，然后放置。")
+	var tile: Button = section._tiles.get("pot_plant")
+	var title: Label = tile.find_children("*", "Label", true, false)[0] if tile != null else null
+	_check("Objects: a built-in tile's name (%s)" % (_shown(title) if title != null else "none"),
+			title != null and _shown(title) == "盆栽")
+	var area: String = mr._row_text({"name": "Room", "size": [1.0, 0.5, 0.2]})
+	_check("Mixed reality: an area's name stays, its size in Chinese (%s)" % area, area == "Room  ·  100 x 50 x 20 厘米")
+	sleep.cancel()
+	I18n.set_language("en")
+	await _frames(2)
+	_check("English again: the room's row and the party's line (%s; %s)" % [_shown(cinema), room._party_status.text],
+			_shown(cinema) == "Cinema" and str(room._party_status.text).begins_with("Host plays"))
+	_check("English: the seat line (%s)" % room._seat_label.text, str(room._seat_label.text).begins_with("The room's own")
+			or str(room._seat_label.text).begins_with("Seat "))
+
+	# The pseudo-locale on every section of the three tabs; content (names) is skipped.
+	I18n.set_language(I18n.PSEUDO)
+	var plain: Array[String] = []
+	var wide: Array[String] = []
+	for tab: int in [pui.Tab.ROOM, pui.Tab.OBJECTS, pui.Tab.MIXED_REALITY]:
+		pui.show_tab(tab)
+		await _frames(2)
+		var sections: Array[String] = W.shown_sections(pui.tabs[tab].box)
+		for s in sections:
+			pui.show_section(s)
+			await _frames(2)
+			_plain_content_skipped(pui.tabs[tab], plain)
+	_check("pseudo: no plain English on the Room, Objects and Mixed reality tabs (%s)" % " | ".join(plain), plain.is_empty())
+	# Every card fits its tab in Chinese and in the pseudo-locale (the longest), or is no wider than in English (the
+	# Objects tab's grid of four thumbnails is wider than the tab in English too).
+	var english := {}
+	for code: String in ["en", "zh_CN", I18n.PSEUDO]:
+		I18n.set_language(code)
+		for tab: int in [pui.Tab.ROOM, pui.Tab.OBJECTS, pui.Tab.MIXED_REALITY]:
+			pui.show_tab(tab)
+			await _frames(2)
+			var width: float = pui.tabs[tab].size.x
+			for s in W.shown_sections(pui.tabs[tab].box):
+				pui.show_section(s)
+				await _frames(2)
+				for c: Control in pui.cards(tab):
+					if c.get_parent() == null or not c.is_visible_in_tree():
+						continue
+					var key := "%d %s" % [tab, W.card_section(c)]
+					var w := c.get_combined_minimum_size().x
+					if code == "en":
+						english[key] = w
+					elif w > maxf(width, float(english.get(key, 0.0))) + 0.5:
+						wide.append("%s %s %.0f of %.0f (English %.0f)" % [code, W.card_section(c), w, width,
+								float(english.get(key, 0.0))])
+	_check("every card of the three tabs fits, in Chinese and pseudo (%s)" % " | ".join(wide), wide.is_empty())
+	I18n.set_language("en")
+	pui.show_tab(pui.Tab.FILES)
+	await _frames(1)
+
+
+func _parts_of(id: String) -> int:
+	return ((load("res://scripts/assistant/object_library.gd") as GDScript).call("get_object", id).get("parts", [])
+			as Array).size()
+
+
+## As _plain_under(), but a control marked content (or inside one) is left out: names, and lines the code built.
+func _plain_content_skipped(n: Node, out: Array[String]) -> void:
+	for c in n.find_children("*", "", true, false):
+		if not (c is Label or c is Button) or not (c as CanvasItem).is_visible_in_tree():
+			continue
+		var p: Node = c
+		var marked := false
+		while p != null and p != n:
+			if p.has_meta("content"):
+				marked = true
+				break
+			p = p.get_parent()
+		var s := _shown(c)
+		if marked and s.contains("["):
+			continue
+		if not RegEx.create_from_string("[A-Za-z]{2,}").search(s) or s.begins_with("["):
+			continue
+		# A content line the code built from parts holds a pseudo part; one that is only a name has none.
+		if marked and not _is_built(c):
+			continue
+		var line := "%s '%s'" % [c.name, s]
+		if not out.has(line):
+			out.append(line)
+
+
+## A control that shows a line the code built (its text should hold a translated part), not a bare name.
+func _is_built(c: Node) -> bool:
+	var room: Node = main.ui.ui.room
+	var section: Node = main.ui.ui.objects.section
+	return c in [room._seat_label, room._party_status, room._sleep_status, room._party_name, room._party_pin,
+			room._react_note, room._curtains_note, room._intermission_note, section._chosen, section._yours_chosen]
 
 
 ## The visible Labels and Buttons under `n` (not under `skip`) whose text is plain English in the pseudo-locale.
