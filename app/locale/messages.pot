@@ -891,7 +891,7 @@ msgstr ""
 msgid "Carbon fibre"
 msgstr ""
 
-#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/system_tab.gd:329 ui/ui_layer.gd:429
+#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/system_tab.gd:325 ui/ui_layer.gd:429
 msgid "Assistant"
 msgstr ""
 
@@ -1414,7 +1414,7 @@ msgstr ""
 msgid "Repeat: all"
 msgstr ""
 
-#: ui/files_tab.gd:392 ui/system_tab.gd:174
+#: ui/files_tab.gd:392 ui/system_tab.gd:173
 msgid "Test patterns"
 msgstr ""
 
@@ -1865,7 +1865,7 @@ msgstr ""
 msgid "%s deleted"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:747 ui/system_tab.gd:651 ui/ui_layer.gd:225
+#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:747 ui/system_tab.gd:646 ui/ui_layer.gd:225
 #: ui/ui_layer.gd:399 ui/ui_layer.gd:917 ui/ui_layer.gd:921 ui/ui_layer.gd:949
 msgid "Undo"
 msgstr ""
@@ -2294,11 +2294,11 @@ msgstr ""
 msgid "3D"
 msgstr ""
 
-#: ui/picture_tab.gd:213 ui/system_tab.gd:167
+#: ui/picture_tab.gd:213 ui/system_tab.gd:166
 msgid "Left eye"
 msgstr ""
 
-#: ui/picture_tab.gd:213 ui/system_tab.gd:167
+#: ui/picture_tab.gd:213 ui/system_tab.gd:166
 msgid "Right eye"
 msgstr ""
 
@@ -2969,7 +2969,7 @@ msgstr ""
 msgid "%.1f s"
 msgstr ""
 
-#: ui/sound_tab.gd:81 ui/system_tab.gd:539
+#: ui/sound_tab.gd:81 ui/system_tab.gd:534
 msgid "Speed"
 msgstr ""
 
@@ -3306,263 +3306,255 @@ msgstr ""
 msgid "Find a line by its words (\"quoted phrases\" too)"
 msgstr ""
 
-#: ui/system_tab.gd:125
+#: ui/system_tab.gd:124
 msgid "Views"
 msgstr ""
 
-#: ui/system_tab.gd:126
+#: ui/system_tab.gd:125
 msgid "Info overlay"
 msgstr ""
 
-#: ui/system_tab.gd:127
+#: ui/system_tab.gd:126
 msgid "Stats"
 msgstr ""
 
-#: ui/system_tab.gd:139
+#: ui/system_tab.gd:138
 msgid "Panel"
 msgstr ""
 
-#: ui/system_tab.gd:143
+#: ui/system_tab.gd:142
 msgid "Hold menu to recentre"
 msgstr ""
 
-#: ui/system_tab.gd:144
+#: ui/system_tab.gd:143
 #, c-format
 msgid "%.2f s"
 msgstr ""
 
-#: ui/system_tab.gd:147
+#: ui/system_tab.gd:146
 msgid "Left-handed"
 msgstr ""
 
-#: ui/system_tab.gd:148
+#: ui/system_tab.gd:147
 msgid "Reset layout"
 msgstr ""
 
-#: ui/system_tab.gd:156
+#: ui/system_tab.gd:155
 msgid "Language"
 msgstr ""
 
-#: ui/system_tab.gd:160
+#: ui/system_tab.gd:159
 msgid "The menus and the controller labels. Names of films and files stay as they are."
 msgstr ""
 
-#: ui/system_tab.gd:162
+#: ui/system_tab.gd:161
 msgid "Accessibility"
 msgstr ""
 
-#: ui/system_tab.gd:163
+#: ui/system_tab.gd:162
 msgid "Larger panel"
 msgstr ""
 
-#: ui/system_tab.gd:166
+#: ui/system_tab.gd:165
 msgid "One eye for 3D"
 msgstr ""
 
-#: ui/system_tab.gd:169
+#: ui/system_tab.gd:168
 msgid "Subtitles always on"
 msgstr ""
 
-#: ui/system_tab.gd:173
+#: ui/system_tab.gd:172
 msgid "Test and setup"
 msgstr ""
 
-#: ui/system_tab.gd:175
+#: ui/system_tab.gd:174
 msgid "Network hosts"
 msgstr ""
 
-#: ui/system_tab.gd:182
+#: ui/system_tab.gd:181
 msgid "Calibration cards"
 msgstr ""
 
-#: ui/system_tab.gd:192
+#: ui/system_tab.gd:191
 msgid "Measure bandwidth"
 msgstr ""
 
-#: ui/system_tab.gd:197
+#: ui/system_tab.gd:196
 msgid "Run benchmark"
 msgstr ""
 
-#: ui/system_tab.gd:208
+#: ui/system_tab.gd:207
 msgid "Stop tour"
 msgstr ""
 
-#: ui/system_tab.gd:216
+#: ui/system_tab.gd:215
 msgid "Hardware video"
 msgstr ""
 
-#: ui/system_tab.gd:222
+#: ui/system_tab.gd:221
 msgid "Rendering"
 msgstr ""
 
-#: ui/system_tab.gd:224
+#: ui/system_tab.gd:223
 msgid "Foveation"
 msgstr ""
 
-#: ui/system_tab.gd:227
+#: ui/system_tab.gd:226
 msgid "Sharp while the panel shows"
 msgstr ""
 
-#: ui/system_tab.gd:232
+#: ui/system_tab.gd:231
 msgid "Film drawn by the headset"
 msgstr ""
 
-#: ui/system_tab.gd:235
+#: ui/system_tab.gd:234
 msgid "Curved screen too"
 msgstr ""
 
-#: ui/system_tab.gd:245
+#: ui/system_tab.gd:244
 msgid "Controllers"
 msgstr ""
 
-#: ui/system_tab.gd:248
+#: ui/system_tab.gd:247
 msgid "Haptic ticks"
 msgstr ""
 
-#: ui/system_tab.gd:250
+#: ui/system_tab.gd:249
 msgid "Tick strength"
 msgstr ""
 
-#: ui/system_tab.gd:255
+#: ui/system_tab.gd:254
 msgid "Jog wheel"
 msgstr ""
 
-#: ui/system_tab.gd:259
+#: ui/system_tab.gd:258
 msgid "One turn"
 msgstr ""
 
-#: ui/system_tab.gd:264
+#: ui/system_tab.gd:263
 msgid "Seek bar pictures"
 msgstr ""
 
-#: ui/system_tab.gd:268
+#: ui/system_tab.gd:267
 msgid "Zoom lens"
 msgstr ""
 
-#: ui/system_tab.gd:273
+#: ui/system_tab.gd:272
 msgid "Magnification"
 msgstr ""
 
-#: ui/system_tab.gd:279
-msgid "Browser cursor jumps to your gaze"
-msgstr ""
-
-#: ui/system_tab.gd:282
+#: ui/system_tab.gd:278
 msgid "Laser on the browser"
 msgstr ""
 
-#: ui/system_tab.gd:286 ui/system_tab.gd:287
+#: ui/system_tab.gd:282 ui/system_tab.gd:283
 msgid "Phone remote"
 msgstr ""
 
-#: ui/system_tab.gd:295
+#: ui/system_tab.gd:291
 msgid "Unpair phones"
 msgstr ""
 
-#: ui/system_tab.gd:308
+#: ui/system_tab.gd:304
 msgid "Share files"
 msgstr ""
 
-#: ui/system_tab.gd:309
+#: ui/system_tab.gd:305
 msgid "Share this headset's files"
 msgstr ""
 
-#: ui/system_tab.gd:318
+#: ui/system_tab.gd:314
 msgid "Phones and computers on this network can download and upload files. Scan the code: it holds the pairing code, which is shown nowhere else."
 msgstr ""
 
-#: ui/system_tab.gd:336
+#: ui/system_tab.gd:332
 msgid "Dev tools"
 msgstr ""
 
-#: ui/system_tab.gd:340
+#: ui/system_tab.gd:336
 msgid "Reload theme"
 msgstr ""
 
-#: ui/system_tab.gd:341
+#: ui/system_tab.gd:337
 msgid "Remote changes"
 msgstr ""
 
-#: ui/system_tab.gd:346
+#: ui/system_tab.gd:342
 msgid "Allow for an hour"
 msgstr ""
 
-#: ui/system_tab.gd:350 ui/ui_layer.gd:783
+#: ui/system_tab.gd:346 ui/ui_layer.gd:783
 msgid "Revoke"
 msgstr ""
 
-#: ui/system_tab.gd:358
+#: ui/system_tab.gd:354
 msgid "About"
 msgstr ""
 
-#: ui/system_tab.gd:363
+#: ui/system_tab.gd:359
 #, c-format
 msgid "Engine %s, %s"
 msgstr ""
 
-#: ui/system_tab.gd:509
+#: ui/system_tab.gd:504
 msgid "Look"
 msgstr ""
 
-#: ui/system_tab.gd:626
+#: ui/system_tab.gd:621
 msgid "hot-reload on"
 msgstr ""
 
-#: ui/system_tab.gd:626
+#: ui/system_tab.gd:621
 msgid "hot-reload off"
 msgstr ""
 
-#: ui/system_tab.gd:628
+#: ui/system_tab.gd:623
 #, c-format
 msgid "%s; remote changes allowed for %d more min"
 msgstr ""
 
-#: ui/system_tab.gd:661
+#: ui/system_tab.gd:656
 #, c-format
 msgid "Measuring %s ..."
 msgstr ""
 
-#: ui/system_tab.gd:665
+#: ui/system_tab.gd:660
 #, c-format
 msgid "Can't measure: %s"
 msgstr ""
 
-#: ui/system_tab.gd:667
+#: ui/system_tab.gd:662
 #, c-format
 msgid "%.0f Mbit/s average, %.0f peak, opened in %d ms, %.0f MB read"
 msgstr ""
 
-#: ui/system_tab.gd:678
+#: ui/system_tab.gd:673
 msgid "This engine build can't run the benchmark."
 msgstr ""
 
-#: ui/system_tab.gd:700
+#: ui/system_tab.gd:695
 #, c-format
 msgid "Tour %s (kiosk): round %d, step %d of %d"
 msgstr ""
 
-#: ui/system_tab.gd:701
+#: ui/system_tab.gd:696
 #, c-format
 msgid "Tour %s: round %d, step %d of %d"
 msgstr ""
 
-#: ui/system_tab.gd:191
+#: ui/system_tab.gd:190
 msgid "a file on a share, e.g. smb://host/share/film.mkv"
 msgstr ""
 
-#: ui/system_tab.gd:238
+#: ui/system_tab.gd:237
 msgid "A curved screen as the headset's cylinder layer; off: drawn in the room, where things in front of it cover it"
 msgstr ""
 
-#: ui/system_tab.gd:271
+#: ui/system_tab.gd:270
 msgid "In 180 and 360: hold the grip and pull the trigger for a magnifier"
 msgstr ""
 
-#: ui/system_tab.gd:281
-msgid "Off: the cursor stays where the stick left it"
-msgstr ""
-
-#: ui/system_tab.gd:283
+#: ui/system_tab.gd:279
 msgid "The laser points and clicks on the page too, as well as the stick"
 msgstr ""
 

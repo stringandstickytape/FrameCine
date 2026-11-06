@@ -530,7 +530,7 @@ are in `docs/window-source.md`, "Controller mapping".
 
 | Control | In the window |
 |---|---|
-| right stick, looking at the screen | moves the cursor (a curve: fine near the centre, the page's width in a second at full tilt); the X pointer follows it. The cursor jumps to the gaze when it appears and when the gaze rests far from it ([browser] pointer_follows_gaze). |
+| right stick, looking at the screen | moves the cursor (a curve: fine near the centre, the page's width in a second at full tilt); the X pointer follows it. The cursor never follows the gaze: the gaze only chooses the mode. |
 | right trigger, looking at the screen | left button at the cursor, held as long as the trigger, so drags work |
 | right grip, tap, looking at the screen | right button at the cursor |
 | right grip held + stick, or the stick while looking away | up / down: scroll wheel, about 12 notches a second at full tilt; left / right: Left / Right arrow keys, repeated every 0.4 s while held. Web players seek with them. |

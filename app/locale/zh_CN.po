@@ -2770,14 +2770,8 @@ msgstr "网页没有响应，所以没有输入任何内容。"
 msgid "The text field lost focus, so nothing was typed."
 msgstr "文本框已失去焦点，所以没有输入任何内容。"
 
-msgid "Browser cursor jumps to your gaze"
-msgstr "浏览器光标跳到你注视的位置"
-
 msgid "Laser on the browser"
 msgstr "在浏览器上使用激光"
-
-msgid "Off: the cursor stays where the stick left it"
-msgstr "关闭时：光标停在摇杆移到的位置"
 
 msgid "The laser points and clicks on the page too, as well as the stick"
 msgstr "除摇杆外，激光也能在网页上指向和点击"

@@ -176,7 +176,7 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 | `[battery]` | `margin_ok_minutes` (15) | Battery forecast |
 | `[display]` | `clock_24h` (true) | |
 | `[pane]` | `recentre_hold` (0.6 s: hold the menu button this long to recentre), `tablet_style` (the tablet's look, its palette among it), `theme` (`res://ui/themes/default.tres`) | `docs/ui-design.md`. Also in System, Panel. |
-| `[browser]` | `last_folder`, `last_url`, `pages` ([]), `pointer_follows_gaze` (true), `laser` (false), `dictation_partials` (true) | Files place; web pages; the stick pointer (the cursor jumps to the gaze; the laser as well on a window) and the live words under a field (`app/docs/window-source.md`). The first two are also in System, Controllers. |
+| `[browser]` | `last_folder`, `last_url`, `pages` ([]), `laser` (false), `dictation_partials` (true) | Files place; web pages; the stick pointer (the laser as well on a window) and the live words under a field (`app/docs/window-source.md`). The first two are also in System, Controllers. |
 | `[network]` | `hosts` ([]), `live_latency` (0.1 to 2.5 s, 0.5) | Saved file shares (private: holds credentials); the live stream buffer |
 | `[remote]` | `enabled` (false), `port` (47880), `key` | Phone remote. `key` is the pairing code: private, never logged. |
 | `[share]` | `enabled` (false), `folders` ([]), `drop` ("") | Headset file sharing |
@@ -255,9 +255,8 @@ where you look. Look away, and the cursor goes. The legends on the controller ch
 
 - **Switching modes.** The cursor appears after a tenth of a second of looking at the screen and goes after
   0.4 s of looking away. While you push the stick or hold the trigger, it stays.
-- **Where the cursor goes.** When the cursor appears, it is where you look. If you then look somewhere else on the
-  page and leave the stick alone, it jumps there; the stick fine-tunes. To stop the jumps, switch off **Browser cursor
-  jumps to your gaze** in System, Controllers.
+- **Where the cursor goes.** Only the stick moves it. It starts in the middle of the page and stays where you left
+  it; looking away and back doesn't move it.
 - **Without eye tracking.** Where your head points stands in for where you look.
 - **The laser.** It is off on the browser. **Laser on the browser** in System, Controllers turns it on as well as the
   stick.

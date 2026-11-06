@@ -88,7 +88,7 @@ sections of `user://settings.cfg`; `<environment id>` and `<id>` sections hold o
 | [Controller look](#controller-look) | | `[controllers] look`, `look_options` | on; black as the controllers come by default |
 | [Showrooms](#showrooms) | | none | in the Room tab's Showrooms group (`docs/showrooms.md`) |
 | [Every format: old and other codecs in software](#every-format-old-and-other-codecs-in-software) | none | none | on (engine branch `frame/codecs`) |
-| [The browser: stick pointer and voice into a field](#the-browser-stick-pointer-and-voice-into-a-field) | none | `[browser] pointer_follows_gaze`, `laser`, `dictation_partials` | on (the laser off by default) |
+| [The browser: stick pointer and voice into a field](#the-browser-stick-pointer-and-voice-into-a-field) | none | `[browser] laser`, `dictation_partials` | on (the laser off by default) |
 
 ## #36 Wall-clock end time
 
@@ -2532,8 +2532,8 @@ open questions are in `app/docs/window-source.md` ("Controller mapping", "Voice 
   - When you look away, the cursor is not drawn, and the stick scrolls and sends the arrow keys as before.
   - Pointer mode starts after 0.1 s of gaze on the screen (with a 5 % margin) and ends after 0.4 s of gaze off it. A
     pushed stick or a held trigger keeps it on.
-  - The cursor appears where you look. It jumps to your gaze when your gaze rests far from it (over 10 % of the width,
-    for 0.15 s, with the stick still): `[browser] pointer_follows_gaze`, on by default.
+  - The gaze only chooses the mode: the cursor never follows it. It starts in the window's middle and stays where
+    the stick leaves it (the user, 2026-11-06).
   - The stick has a curve: small tilts aim finely, and full tilt crosses the page in one second.
   - The cursor is drawn into the picture by the screen's shader (`video_common.gdshaderinc`), so the film layer
     shows it too. It fades in and out in 0.1 s.

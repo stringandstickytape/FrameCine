@@ -4,7 +4,7 @@ extends Node
 ## hidden. main.gd asks it first (after the menu) and skips its own binding when it returns true.
 ## Right controller (docs/window-source.md, "Controller mapping"), in two modes:
 ##   Pointer mode, while the viewer looks at the screen (eye gaze, else the head's direction; stick_cursor.gd has the
-##   hysteresis, the latch and the jump to the gaze): a cursor drawn into the picture (video_common.gdshaderinc,
+##   hysteresis and the latch; the gaze only chooses the mode, the cursor never follows it): a cursor drawn into the picture (video_common.gdshaderinc,
 ##   cursor_px / cursor_alpha: the film layer can't hide it), moved by the stick; the trigger is the left button at
 ##   the cursor (held with the trigger: drags work); a squeeze tap is the right button there; squeeze held + stick:
 ##   the stick's normal job below.
@@ -21,8 +21,8 @@ extends Node
 ## Left controller: trigger and X / Y do nothing on a window; the stick works as for video.
 ## Desktop: the mouse over the screen is the window's mouse; the keyboard types into the window, except F1 (overlay),
 ## F3 (menu) and F12 (screenshot). A keyboard paired to the headset arrives the same way.
-## Settings: [browser] pointer_follows_gaze (default true), laser (default false).
-## Command: browser_pointer (read); settings browser_pointer_follows_gaze and browser_laser (the dev link's set).
+## Settings: [browser] laser (default false).
+## Command: browser_pointer (read); setting browser_laser (the dev link's set).
 
 const XRHand := preload("res://scripts/xr/xr_hand.gd")
 const WindowVideoSource := preload("res://scripts/video/window_video_source.gd")
@@ -72,7 +72,6 @@ var _drawn_px := Vector2(-2, -2)
 
 func _ready() -> void:
 	if main != null and main.get("settings") != null:
-		cursor.follows_gaze = bool(main.settings.get_value(SECTION, "pointer_follows_gaze", true))
 		laser = bool(main.settings.get_value(SECTION, "laser", false))
 	register_commands()
 
@@ -98,12 +97,6 @@ func has_cursor() -> bool:
 ## The UI layer leaves this hand's laser alone: it is the window's pointer ([browser] laser only).
 func owns_laser(hand: XRHand) -> bool:
 	return laser and main.use_xr and hand == main.right_hand and has_cursor()
-
-
-## [browser] pointer_follows_gaze.
-func set_follows_gaze(on: bool) -> void:
-	cursor.follows_gaze = on
-	main.settings.set_value(SECTION, "pointer_follows_gaze", null if on else false)
 
 
 ## [browser] laser.
@@ -433,7 +426,7 @@ func status() -> Dictionary:
 			"cursor_shown": cursor.shown(), "cursor": {"x": roundi(cursor.pos.x), "y": roundi(cursor.pos.y)}
 					if cursor.pos.x >= 0.0 else null,
 			"window": {"width": size.x, "height": size.y}, "gaze": gaze_source if has_cursor() else "",
-			"follows_gaze": cursor.follows_gaze, "laser": laser}
+			"laser": laser}
 
 
 func register_commands() -> void:
@@ -442,13 +435,9 @@ func register_commands() -> void:
 		"description": "The stick pointer on the window on the big screen (the browser): active (a window has the "
 				+ "controllers, menu hidden), pointer_mode (the viewer looks at the screen, so the right stick moves "
 				+ "the cursor and the trigger clicks; else the stick scrolls), cursor_shown, cursor {x, y} in window "
-				+ "pixels (null before it first showed), window {width, height}, gaze (eyes, head or none), "
-				+ "follows_gaze, laser.",
-		"returns": "{active, cursor_window, pointer_mode, cursor_shown, cursor, window, gaze, follows_gaze, laser}"})
-	DevCommands.register_setting("browser_pointer_follows_gaze", func() -> bool: return cursor.follows_gaze,
-			func(v: Variant) -> void: set_follows_gaze(bool(v)), {"type": "bool",
-			"description": "The browser's cursor jumps to where the viewer looks when it appears and when the gaze "
-					+ "rests far from it ([browser] pointer_follows_gaze)."})
+				+ "pixels (null before it first showed; it never follows the gaze, only the stick moves it), window "
+				+ "{width, height}, gaze (eyes, head or none: what chooses the mode), laser.",
+		"returns": "{active, cursor_window, pointer_mode, cursor_shown, cursor, window, gaze, laser}"})
 	DevCommands.register_setting("browser_laser", func() -> bool: return laser,
 			func(v: Variant) -> void: set_laser(bool(v)), {"type": "bool",
 			"description": "The laser on a window as well as the stick pointer ([browser] laser)."})

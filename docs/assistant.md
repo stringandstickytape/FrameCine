@@ -789,7 +789,7 @@ root, `AssistantFetch`):
     - `cursor_shown`, and `cursor {x, y}` in window pixels;
     - `window {width, height}`;
     - `gaze`: eyes or head;
-    - `follows_gaze` and `laser`: the settings.
+    - `laser`: the setting. The cursor never follows the gaze; only the stick moves it.
   - `browser_field` (read): what has the keyboard focus in the page, read fresh over the page's DevTools socket:
     `editable`, `kind` (input, textarea, contenteditable, iframe, a tag, none), `input_type`, `password` and `frame`
     (main, same-origin or cross-origin; a cross-origin frame is asked through its own session). Never the field's

@@ -124,14 +124,8 @@ screen has no cursor and keeps its own mapping (`TERMINAL_LABELS`).
   size round its edges. Pointer mode ends after 0.4 s of gaze off the screen.
 - **Latch.** While the stick is pushed, or the trigger is held for a drag, pointer mode stays on wherever the gaze
   goes.
-- **Jump to gaze.** When the cursor appears, it goes to where you look (the mean of the last 0.1 s of gaze). It also
-  jumps when all of these are true:
-  - the gaze stays more than 10 % of the screen's width from the cursor for 0.15 s;
-  - the stick has been still for 0.6 s.
-
-  The stick then fine-tunes the place. The wait and the stillness stop the cursor from hopping while you read or just
-  after you aim. `[browser] pointer_follows_gaze` (default on; System, Controllers: "Browser cursor jumps to your
-  gaze") turns this off: the cursor then comes back where the stick left it.
+- **The cursor never follows the gaze.** The gaze only chooses the mode. The cursor starts in the window's middle
+  and stays where the stick leaves it, hidden or shown (the user, 2026-11-06).
 - **Speed.** The dead zone is 0.2, as in the app's other stick handling. Past it, the speed is
   `((push - 0.2) / 0.8)²` of full speed, so small tilts move slowly for fine aim. At full tilt the cursor crosses the
   window's width in one second.
@@ -235,7 +229,7 @@ keyboard focus, and says so in its reply.
 - `browser_insert_text {text}` (control): types into the focused field through the app, as the voice does, with the
   same checks.
 
-The dev link's `set` also has `browser_pointer_follows_gaze` and `browser_laser`.
+The dev link's `set` also has `browser_laser`.
 
 **Tests.** `tests/test_browser_pointer.gd` covers the pointer. `tests/test_browser_dictation.gd` covers the dictation
 against a fake DevTools page: a WebSocket server on the loopback, with a pretend focus. That test also runs

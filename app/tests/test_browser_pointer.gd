@@ -3,7 +3,7 @@ extends SceneTree
 ## The stick pointer on a captured window (scripts/window_pointer.gd, scripts/video/stick_cursor.gd), against the real
 ## main scene with a stand-in for the window capture and the gaze: pointer mode on and off with the hysteresis and
 ## the latch, the cursor shown and hidden (the screen's shader uniforms), its movement with the stick and the speed
-## curve, the jump to the gaze and its setting, clicks at the right window pixel, squeeze held + stick scrolling,
+## curve, the cursor staying put (it never follows the gaze), clicks at the right window pixel, squeeze held + stick scrolling,
 ## the normal job while looking away, the laser alternative, the legends for each mode, and browser_pointer.
 ##
 ## godot --headless --xr-mode off --path app --script res://tests/test_browser_pointer.gd
@@ -185,8 +185,8 @@ func _mode_checks() -> void:
 	_check("pointer mode waits for 0.1 s of gaze", not wp.cursor.mode)
 	_step(3)
 	_check("pointer mode after 0.1 s on the screen", wp.cursor.mode)
-	_check("the cursor appears where the viewer looks (%s)" % wp.cursor.pos,
-			wp.cursor.pos.distance_to(Vector2(0.3 * W, 0.4 * H)) < 3.0 and wp.cursor.last_jump == "appear")
+	_check("the cursor appears in the window's middle, not where the viewer looks (%s)" % wp.cursor.pos,
+			wp.cursor.pos.distance_to(Vector2(0.5 * W, 0.5 * H)) < 3.0)
 	_check("it fades in: not at once (%.2f)" % wp.cursor.alpha, wp.cursor.alpha > 0.0 and wp.cursor.alpha < 0.5)
 	_seconds(0.1)
 	_check("shown within 0.1 s, drawn by the screen's shader (%s, %s)" % [mat.get_shader_parameter("cursor_alpha"),
@@ -237,6 +237,8 @@ func _latch_checks() -> void:
 func _movement_checks() -> void:
 	_look(Vector2(0.25, 0.5))
 	_seconds(0.2)
+	# The cursor stays where earlier checks left it (it never follows the gaze): put it a quarter of the way across.
+	wp.cursor.pos = Vector2(0.25 * W, 0.5 * H)
 	var start: Vector2 = wp.cursor.pos
 	_seconds(0.5, Vector2(1.0, 0.0))
 	var moved: Vector2 = wp.cursor.pos - start
@@ -257,40 +259,23 @@ func _movement_checks() -> void:
 	_off()
 
 
+## The cursor never follows the gaze (the user, 2026-11-06): only the stick moves it, and it comes back where it was.
 func _jump_checks() -> void:
 	_look(Vector2(0.2, 0.2))
 	_seconds(0.2)
 	_seconds(0.3, Vector2(0.5, 0.0))
 	var aimed: Vector2 = wp.cursor.pos
 	_look(Vector2(0.8, 0.7))
-	_seconds(0.3)
-	_check("no jump right after the stick moved (it fine-tunes)", wp.cursor.pos == aimed)
-	_seconds(0.6)
-	_check("the gaze rests far away with the stick still: the cursor jumps there (%s)" % wp.cursor.pos,
-			wp.cursor.pos.distance_to(Vector2(0.8 * W, 0.7 * H)) < 3.0)
-	var at: Vector2 = wp.cursor.pos
-	_look(Vector2(0.85, 0.7))
-	_seconds(1.0)
-	_check("a look within 10 %% of the width: no jump", wp.cursor.pos == at)
-	_look(Vector2(0.3, 0.7))
-	_step(5)
-	_check("the jump waits for the gaze to rest (0.15 s)", wp.cursor.pos == at)
-	_seconds(0.2)
-	_check("then jumps", wp.cursor.pos.distance_to(Vector2(0.3 * W, 0.7 * H)) < 3.0)
-	_off()
-	wp.set_follows_gaze(false)
-	_check("the setting is kept ([browser] pointer_follows_gaze false)",
-			main.settings.get_value("browser", "pointer_follows_gaze", true) == false)
-	var kept: Vector2 = wp.cursor.pos
-	_look(Vector2(0.7, 0.2))
-	_seconds(0.3)
-	_check("follows_gaze off: the cursor comes back where it was", wp.cursor.mode and wp.cursor.pos == kept)
-	_look(Vector2(0.1, 0.9))
 	_seconds(1.5)
-	_check("follows_gaze off: no jump to the gaze", wp.cursor.pos == kept)
-	wp.set_follows_gaze(true)
-	_check("on again: the setting goes back to the default", not main.settings.has_value("browser",
-			"pointer_follows_gaze") or main.settings.get_value("browser", "pointer_follows_gaze", true) == true)
+	_check("the gaze rests far away with the stick still: the cursor stays put (%s)" % wp.cursor.pos,
+			wp.cursor.pos == aimed)
+	_off()
+	_look(Vector2(0.1, 0.9))
+	_seconds(0.5)
+	_check("back on the screen elsewhere: the cursor comes back where it was", wp.cursor.mode
+			and wp.cursor.pos == aimed)
+	_check("no gaze-following setting", not ("follows_gaze" in wp.cursor) and not wp.has_method("set_follows_gaze")
+			and not DevCommands.has_setting("browser_pointer_follows_gaze"))
 	_off()
 
 
@@ -395,13 +380,12 @@ func _command_checks() -> void:
 	var res: Dictionary = r.get("result", {})
 	_check("browser_pointer: pointer mode and the cursor (%s)" % [res], r["ok"] and res.get("pointer_mode") == true
 			and res.get("active") == true and res["cursor"]["x"] == roundi(wp.cursor.pos.x)
-			and res["window"]["width"] == 1920 and res.get("follows_gaze") == true)
+			and res["window"]["width"] == 1920 and not res.has("follows_gaze"))
 	_check("browser_pointer: for the assistant", DevCommands.get_spec("browser_pointer").get("assistant") == "read")
 	_off()
 	r = await DevCommands.execute("browser_pointer", {}, true)
 	_check("browser_pointer: looking away", r["ok"] and r["result"]["pointer_mode"] == false)
-	_check("the settings for the dev link", DevCommands.has_setting("browser_pointer_follows_gaze")
-			and DevCommands.has_setting("browser_laser"))
+	_check("the setting for the dev link", DevCommands.has_setting("browser_laser"))
 
 
 func _terminal_and_menu_checks() -> void:
