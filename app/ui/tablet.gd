@@ -7,8 +7,10 @@ extends Node3D
 ## fixed in the room, and it fades in and out.
 ##
 ## Two panes, one above the other with a small gap (the user, 2026-11-04):
-##   now playing   short, on top: the title on the left, "played / total" on the right (LIVE before it for a live
-##                 stream, the trick play speed after it), and the time bar along the bottom with a tick at each
+##   now playing   short, on top: a small line with the chapter on the left and the status on the right (the
+##                 clock, time left and end, battery, low controllers, Listening: set_header(), from the menu; the
+##                 user, 2026-11-06: the menu's own header made it taller than its pane), then the title on the left,
+##                 "played / total" on the right (LIVE before it for a live stream, the trick play speed after it), and the time bar along the bottom with a tick at each
 ##                 chapter. The seek bar's picture (features.thumbs, System "Seek bar pictures") shows over the bar,
 ##                 with its time, where the laser is on the bar (hover_bar()) or where it is dragged. bar_fraction(point) gives the place in the
 ##                 film for a point on or near the bar, for touching it or the laser and trigger (to come).
@@ -30,8 +32,8 @@ extends Node3D
 ##   pane          corner_radius, border_width: metres; fill, border: colours, when given they beat the palette's
 ##                 plate and edge. Each pane is a rounded rectangle (shaders/tablet.gdshader), nothing drawn outside
 ##                 its border. Frosted glass will be another kind of fill here.
-##   now_playing   padding (metres, at the sides); spacing (metres between the text and the bar: the two are
-##                 centred together, top to bottom); title and time: size (the font's size, metres), font (one of
+##   now_playing   padding (metres, at the sides); spacing (metres between the lines and the bar: they are all
+##                 centred together, top to bottom); status (the small line's text), title and time: size (the font's size, metres), font (one of
 ##                 the theme's: FONTS), color (when given, else the palette's ink and ink2); bar: height,
 ##                 corner_radius (metres), track, played (colours, when given, else from the palette)
 ##   panel         inset (metres between the main pane's edge and the menu on it), px_per_m (the menu's layout pixels
@@ -95,6 +97,7 @@ const SCHEMA := {
 	"now_playing": {
 		"padding": [0.0, 0.025],
 		"spacing": [0.0, 0.03],
+		"status": {"color": "color", "size": [0.003, 0.02], "font": "font"},
 		"title": {"color": "color", "size": [0.004, 0.03], "font": "font"},
 		"time": {"color": "color", "size": [0.004, 0.03], "font": "font"},
 		"bar": {"track": "color", "played": "color", "height": [0.001, 0.02], "corner_radius": [0.0, 0.01]},
@@ -126,6 +129,10 @@ var now_playing: MeshInstance3D
 var main_pane: MeshInstance3D
 var title_label: Label3D
 var time_label: Label3D
+## The small line over the title: the chapter (left) and the status (right).
+var chapter_label: Label3D
+var status_label: Label3D
+var _chapter_full := ""
 var _labels: Array[Label3D] = []
 var _bar_track: MeshInstance3D
 var _bar_played: MeshInstance3D
@@ -160,6 +167,8 @@ func _ready() -> void:
 	main_pane = _pane("Main", rects["main"])
 	title_label = make_label("Title", HORIZONTAL_ALIGNMENT_LEFT, now_playing)
 	time_label = make_label("Time", HORIZONTAL_ALIGNMENT_RIGHT, now_playing)
+	chapter_label = make_label("Chapter", HORIZONTAL_ALIGNMENT_LEFT, now_playing)
+	status_label = make_label("Status", HORIZONTAL_ALIGNMENT_RIGHT, now_playing)
 	_bar_track = _bar("BarTrack", "track", 1)
 	_bar_played = _bar("BarPlayed", "played", 2)
 	thumb = MeshInstance3D.new()
@@ -326,6 +335,19 @@ func _set_fraction(f: float) -> void:
 	mesh.size = Vector2(maxf(w, 0.0005), bar.size.y)
 	(_bar_played.material_override as ShaderMaterial).set_shader_parameter("size", mesh.size)
 	_bar_played.position = Vector3(bar.position.x + w * 0.5, bar.get_center().y, LIFT * 2.0)
+
+
+## The small line over the title: the chapter (left, cut to the room the status leaves) and the status (right), from
+## the menu (ui_layer.gd, a few times a second).
+func set_header(chapter: String, status: String) -> void:
+	if chapter == _chapter_full and status == status_label.text:
+		return
+	_chapter_full = chapter
+	status_label.text = status
+	var r: Rect2 = pane_rects()["now_playing"]
+	var pad := float(_get(style(), "now_playing/padding"))
+	var room := maxf(r.size.x - 2.0 * pad - _text_width(status_label, status) - TEXT_GAP, 0.0)
+	chapter_label.text = _cut(chapter_label, chapter, room)
 
 
 ## The chapters' ticks on the bar (fractions 0..1), made again when they change.
@@ -560,9 +582,15 @@ static func _text_height(s: Dictionary) -> float:
 	return maxf(float(_get(s, "now_playing/title/size")), float(_get(s, "now_playing/time/size"))) * CAP_MIDDLE * 2.0
 
 
-## The text row and the bar together, top to bottom: they are centred in the pane as one.
+## The small status line's height (its capitals), metres.
+static func _status_height(s: Dictionary) -> float:
+	return float(_get(s, "now_playing/status/size")) * CAP_MIDDLE * 2.0
+
+
+## The status line, the text row and the bar together, top to bottom: they are centred in the pane as one.
 static func _block_height(s: Dictionary) -> float:
-	return _text_height(s) + float(_get(s, "now_playing/spacing")) + float(_get(s, "now_playing/bar/height"))
+	return _status_height(s) + _text_height(s) + 2.0 * float(_get(s, "now_playing/spacing")) \
+			+ float(_get(s, "now_playing/bar/height"))
 
 
 ## Where in the film a point (global) on or near the time bar is, 0 to 1; -1 when it isn't on the bar (BAR_HIT round
@@ -704,8 +732,14 @@ func _apply_style() -> void:
 			m.set_shader_parameter("border_width", 0.0)
 	var r: Rect2 = pane_rects()["now_playing"]
 	var pad := float(_get(s, "now_playing/padding"))
-	# The middle of the text row: the capitals' middle goes there.
-	var text_mid := _block_height(s) * 0.5 - _text_height(s) * 0.5
+	# The middle of each line: the capitals' middle goes there. The status line on top, then the title and time.
+	var status_mid := _block_height(s) * 0.5 - _status_height(s) * 0.5
+	var text_mid := _block_height(s) * 0.5 - _status_height(s) - float(_get(s, "now_playing/spacing")) \
+			- _text_height(s) * 0.5
+	for row: Array in [[chapter_label, -r.size.x * 0.5 + pad], [status_label, r.size.x * 0.5 - pad]]:
+		var st: Dictionary = (_get(s, "now_playing/status") as Dictionary).duplicate()
+		st["color"] = _colour(s, "now_playing/status/color", pal["ink2"]).to_html()
+		place_text(row[0], st, Vector2(float(row[1]), status_mid))
 	for row: Array in [[title_label, "title", -r.size.x * 0.5 + pad, pal["ink"]],
 			[time_label, "time", r.size.x * 0.5 - pad, pal["ink2"]]]:
 		var key: String = row[1]

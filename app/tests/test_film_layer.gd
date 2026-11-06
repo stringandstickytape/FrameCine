@@ -76,6 +76,8 @@ func _run() -> void:
 		# The layer's picture against the screen's shader drawn the same size (the stereo screenshot's way), paused.
 		main.player.pause()
 		main.screen.material.set_shader_parameter("brightness", 1.0)
+		# The colour conversion compared, not the deband's dither (random per pixel and frame, on each side).
+		main.screen.material.set_shader_parameter("pc_deband", 0.0)
 		await _frames(2)
 		await RenderingServer.frame_post_draw
 		var mine: Image = film.viewports[0].get_texture().get_image()
@@ -88,6 +90,7 @@ func _run() -> void:
 				var b := ref.get_pixel(x, y)
 				worst = maxf(worst, maxf(absf(a.r - b.r), maxf(absf(a.g - b.g), absf(a.b - b.b))))
 		_check("the layer's colours match the screen's shader (worst %.3f)" % worst, worst < 0.02)
+		main.screen.material.set_shader_parameter("pc_deband", main.features.picture.values["deband"])
 		main.player.play()
 
 	# Resize: the layer follows, the viewport keeps the film's pixels.

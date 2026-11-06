@@ -14,5 +14,9 @@ void fragment() {
 	if (brightness != 1.0) {
 		rgb = linear_to_srgb(srgb_to_linear(rgb) * brightness);
 	}
+	// The deband's dither (video_common.gdshaderinc), in the layer's own 8-bit values.
+	if (pc_deband > 0.0 && !p010) {
+		rgb = clamp(rgb + dither(FRAGCOORD.xy, TIME), 0.0, 1.0);
+	}
 	COLOR = vec4(rgb, 1.0);
 }

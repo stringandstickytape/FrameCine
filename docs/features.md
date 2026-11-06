@@ -1201,6 +1201,46 @@ right half, or in front of its centre (1.8 times larger), and low ahead in 180 a
     the headset.
   - Sharpen's look on a real film in the headset.
 
+## Filtering by footprint (a picture shrunk on the display)
+
+Most video is shrunk on the Frame, not stretched: the eye image is about 10.5 pixels a degree at its centre, an 8K
+360 frame about 21, a 4K flat film on a 60° screen about 64. One bilinear sample per screen pixel then skips texels,
+and fine detail shimmers and drops out as the head moves (stars in a still 4K frame aliased on the sphere).
+
+- **How:** `video_pixel_filtered()` in `shaders/video_common.gdshaderinc` takes the screen pixel's footprint in the
+  frame (the mesh UV's derivatives, through the zoom and the eye's rectangle) and averages a grid of bilinear samples
+  across it: as many along each axis as the footprint is texels long, up to `footprint_taps` (3), separately for luma
+  and the half-size chroma. Near 1:1 or stretched it is one sample, as before. No mipmaps: the decoder's frames are
+  imported as they are, and a mip chain per frame would cost the bandwidth this saves; the samples lie close
+  together, so most come from the texture cache. The foveated edge, where the eye image is coarser, is filtered more,
+  as it should be. The derivatives are taken in `video.gdshader` before the dual fisheye seam's branch. The screen
+  and the crossfade use it; the floor reflection, the magnifier and the film layer's copy keep one sample (blurred,
+  or drawn 1:1). Flat films on the film layer are drawn by the compositor, not this shader.
+- **Measured** (`tests/test_footprint.gd`, rendered with lavapipe at 640 x 640): the 8K 360 zone plate where its
+  rings are finer than the screen shows false rings at 0.215 spread off, 0.055 on; where they are coarse, 0.357 and
+  0.355 (kept). The 8K starfield turned in steps of 0.013°: a patch's light varies 0.043 off, 0.007 on.
+- **To do:** time it on the Frame (the `perf` command's `gpu_ms`, with `lab://zoneplate_360` playing), with taps 1
+  and 3.
+
+## Deband (Smooth banding)
+
+8-bit video shows steps in dark gradients (a night sky, a dim wall), worst in a dark room on an LCD. A picture
+control, `deband` (Smooth banding, 0 to 1, on at 0.5, per environment like the others, outside their `pc_enabled`
+block), for 8-bit sources; 10-bit ones rarely band and are left alone.
+
+- **How:** in `video_common.gdshaderinc`, after the planes are read (and filtered by footprint): four samples up to
+  16 texels away for a 1080-line frame (32 for 4K, up to 48), at a turn fixed per texel, two pairs at right angles.
+  Where all four lie within the threshold (up to 3 code values at full strength) the pixel takes their mean, fading
+  back to itself as they part, so a real edge is left alone. Luma and chroma apart. Then a triangular dither of one
+  output code value, new each frame, on the screen (`video.gdshader`) and in the film layer's copy
+  (`video_layer.gdshader`): the dither is what hides the bands, the mean spreads their edges. The floor reflection
+  keeps it off (blurred anyway). `lab://gradient` is the test card: dark grey and blue ramps that band in 8 bits.
+- **Measured** (`tests/test_deband.gd`, the film layer's shader into an 8-bit viewport, lavapipe): the grey ramp's
+  largest step between neighbouring columns 0.0078 off (two code values: the limited range's), 0.0016 on; its level
+  0.0794 and 0.0799.
+- **To do:** the cost on the Frame (eight more samples a pixel), and its look on a real dark film; whether 10-bit
+  sources want it too.
+
 ## Dual fisheye 360
 
 A 360 camera's raw file: two image circles side by side in a 2:1 frame. The left circle is the lens that looks

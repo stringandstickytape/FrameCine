@@ -405,7 +405,7 @@ msgstr ""
 msgid "An AI assistant on a computer on this network sees what plays, answers you on a card, and hears you while you hold the bumper. No program to install."
 msgstr ""
 
-#: ui/assistant_row.gd:80 ui/host_form.gd:50 ui/search_form.gd:42 ui/url_form.gd:59
+#: ui/assistant_row.gd:80 ui/host_form.gd:56 ui/search_form.gd:42 ui/url_form.gd:59
 msgid "Cancel"
 msgstr ""
 
@@ -513,7 +513,7 @@ msgstr ""
 msgid "Clear upcoming"
 msgstr ""
 
-#: ui/help_texts.gd:103
+#: ui/help_texts.gd:104
 #, c-format
 msgid "%s: %s"
 msgstr ""
@@ -644,130 +644,134 @@ msgid "Crisper edges. Too much makes a halo around them."
 msgstr ""
 
 #: ui/help_texts.gd:51
-msgid "Removes comb lines from old TV or DVD video. Auto: when needed."
+msgid "Hides the steps in dark gradients. Too much softens faint detail."
 msgstr ""
 
 #: ui/help_texts.gd:52
-msgid "Adds the fine noise of projected film."
+msgid "Removes comb lines from old TV or DVD video. Auto: when needed."
 msgstr ""
 
 #: ui/help_texts.gd:53
-msgid "Adds the small sideways wobble of film in an old projector."
+msgid "Adds the fine noise of projected film."
 msgstr ""
 
 #: ui/help_texts.gd:54
-msgid "Brightness, contrast and the rest back to normal."
+msgid "Adds the small sideways wobble of film in an old projector."
 msgstr ""
 
 #: ui/help_texts.gd:55
-msgid "Fits bright HDR parts to the headset. Off clips them."
+msgid "Brightness, contrast and the rest back to normal."
 msgstr ""
 
 #: ui/help_texts.gd:56
-msgid "Brighter or darker HDR picture."
+msgid "Fits bright HDR parts to the headset. Off clips them."
 msgstr ""
 
 #: ui/help_texts.gd:57
-msgid "Where the brightest parts start to compress. Higher: more highlight detail."
+msgid "Brighter or darker HDR picture."
 msgstr ""
 
 #: ui/help_texts.gd:58
-msgid "How bright white is. Lower makes the HDR picture brighter."
+msgid "Where the brightest parts start to compress. Higher: more highlight detail."
 msgstr ""
 
 #: ui/help_texts.gd:59
-msgid "How long each photo shows in the slideshow."
+msgid "How bright white is. Lower makes the HDR picture brighter."
 msgstr ""
 
 #: ui/help_texts.gd:60
-msgid "How long one photo fades into the next."
+msgid "How long each photo shows in the slideshow."
 msgstr ""
 
 #: ui/help_texts.gd:61
-msgid "Press at the start and the end of a part to repeat it."
+msgid "How long one photo fades into the next."
 msgstr ""
 
 #: ui/help_texts.gd:62
+msgid "Press at the start and the end of a part to repeat it."
+msgstr ""
+
+#: ui/help_texts.gd:63
 msgid "How big the small film in the corner is."
 msgstr ""
 
-#: ui/help_texts.gd:66
+#: ui/help_texts.gd:67
 msgid "How loud the film is."
 msgstr ""
 
-#: ui/help_texts.gd:67
+#: ui/help_texts.gd:68
 msgid "Moves the sound earlier or later if lips and voices do not match."
 msgstr ""
 
-#: ui/help_texts.gd:68
+#: ui/help_texts.gd:69
 msgid "Opens a test that helps you find the correct offset."
 msgstr ""
 
-#: ui/help_texts.gd:69
+#: ui/help_texts.gd:70
 msgid "Live streams: shorter is nearer to live, longer has fewer gaps."
 msgstr ""
 
-#: ui/help_texts.gd:70
+#: ui/help_texts.gd:71
 msgid "Loud scenes quieter, quiet speech louder: for late at night."
 msgstr ""
 
-#: ui/help_texts.gd:71
+#: ui/help_texts.gd:72
 msgid "How strongly night mode evens out loud and quiet."
 msgstr ""
 
-#: ui/help_texts.gd:72
+#: ui/help_texts.gd:73
 msgid "Makes voices louder. Only for 5.1 sound and more."
 msgstr ""
 
-#: ui/help_texts.gd:73
+#: ui/help_texts.gd:74
 msgid "Sound from speakers around you and above you, not inside your head."
 msgstr ""
 
-#: ui/help_texts.gd:74
+#: ui/help_texts.gd:75
 msgid "Plays the film's separate bass channel (the .1 of 5.1) too."
 msgstr ""
 
-#: ui/help_texts.gd:75
+#: ui/help_texts.gd:76
 msgid "How much echo of the room you hear. More: the speakers seem farther."
 msgstr ""
 
-#: ui/help_texts.gd:76
+#: ui/help_texts.gd:77
 msgid "The headset sees what the sound plays on: its own speakers or headphones."
 msgstr ""
 
-#: ui/help_texts.gd:77
+#: ui/help_texts.gd:78
 msgid "Settings for the headset's own speakers."
 msgstr ""
 
-#: ui/help_texts.gd:78
+#: ui/help_texts.gd:79
 msgid "Settings for earbuds or headphones."
 msgstr ""
 
-#: ui/help_texts.gd:79
+#: ui/help_texts.gd:80
 msgid "Hear a sound two ways, pick the better; it then fits your ears."
 msgstr ""
 
-#: ui/help_texts.gd:80
+#: ui/help_texts.gd:81
 msgid "The sound plays on a PC, in time with the picture."
 msgstr ""
 
-#: ui/host_form.gd:46
+#: ui/host_form.gd:52
 msgid "Save"
 msgstr ""
 
-#: ui/host_form.gd:54
+#: ui/host_form.gd:60
 msgid "Delete host"
 msgstr ""
 
-#: ui/host_form.gd:58
+#: ui/host_form.gd:64
 msgid "Show password"
 msgstr ""
 
-#: ui/host_form.gd:72
+#: ui/host_form.gd:78
 msgid "Add a network host (SMB)"
 msgstr ""
 
-#: ui/host_form.gd:72
+#: ui/host_form.gd:78
 msgid "Edit network host"
 msgstr ""
 
@@ -788,7 +792,7 @@ msgstr ""
 msgid "Films"
 msgstr ""
 
-#: ui/library_view.gd:223 ui/pane_ui.gd:176 ui/pane_ui.gd:600
+#: ui/library_view.gd:223 ui/pane_ui.gd:186 ui/pane_ui.gd:628
 msgid "Play"
 msgstr ""
 
@@ -840,7 +844,7 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:71 ui/ui_layer.gd:854
+#: ui/mixed_reality_tab.gd:71 ui/ui_layer.gd:855
 msgid "The headset's cameras can't show here."
 msgstr ""
 
@@ -896,7 +900,7 @@ msgstr ""
 msgid "Colour"
 msgstr ""
 
-#: ui/object_section.gd:390 ui/pane_ui.gd:46 ui/picture_tab.gd:267
+#: ui/object_section.gd:390 ui/pane_ui.gd:47 ui/picture_tab.gd:268
 msgid "Picture"
 msgstr ""
 
@@ -912,79 +916,79 @@ msgstr ""
 msgid "Reset"
 msgstr ""
 
-#: ui/onscreen_keyboard.gd:61
+#: ui/onscreen_keyboard.gd:62
 msgid "abc"
 msgstr ""
 
-#: ui/pane_ui.gd:518
+#: ui/pane_ui.gd:546
 #, c-format
 msgid "%s, %s"
 msgstr ""
 
-#: ui/pane_ui.gd:521
+#: ui/pane_ui.gd:549
 #, c-format
 msgid "battery %d %%, charging"
 msgstr ""
 
-#: ui/pane_ui.gd:522
+#: ui/pane_ui.gd:550
 #, c-format
 msgid "battery %d %%"
 msgstr ""
 
-#: ui/pane_ui.gd:526 ui/pane_ui.gd:565 ui/ui_layer.gd:452
+#: ui/pane_ui.gd:554 ui/pane_ui.gd:593 ui/ui_layer.gd:452
 msgid "Listening"
 msgstr ""
 
-#: ui/pane_ui.gd:637
+#: ui/pane_ui.gd:665
 #, c-format
 msgid "Chapter %s"
 msgstr ""
 
-#: ui/pane_ui.gd:600
+#: ui/pane_ui.gd:628
 msgid "Pause"
 msgstr ""
 
-#: ui/pane_ui.gd:46
+#: ui/pane_ui.gd:47
 msgid "Source"
 msgstr ""
 
-#: ui/pane_ui.gd:46
+#: ui/pane_ui.gd:47
 msgid "Sound"
 msgstr ""
 
-#: ui/pane_ui.gd:46
+#: ui/pane_ui.gd:47
 msgid "Subtitles"
 msgstr ""
 
-#: ui/pane_ui.gd:46
+#: ui/pane_ui.gd:47
 msgid "Room"
 msgstr ""
 
-#: ui/pane_ui.gd:46
+#: ui/pane_ui.gd:47
 msgid "Objects"
 msgstr ""
 
-#: ui/pane_ui.gd:46
+#: ui/pane_ui.gd:47
 msgid "Mixed reality"
 msgstr ""
 
-#: ui/pane_ui.gd:47
+#: ui/pane_ui.gd:48
 msgid "System"
 msgstr ""
 
-#: ui/pane_ui.gd:171
+#: ui/pane_ui.gd:181
 msgid "Previous"
 msgstr ""
 
-#: ui/pane_ui.gd:172
+#: ui/pane_ui.gd:182
 msgid "−10 s"
 msgstr ""
 
-#: ui/pane_ui.gd:173
+#: ui/pane_ui.gd:183
 msgid "+10 s"
 msgstr ""
 
-#: ui/pane_ui.gd:173
+#: ui/pane_ui.gd:183
 msgid "Next"
 msgstr ""
 
@@ -992,251 +996,251 @@ msgstr ""
 msgid "General"
 msgstr ""
 
-#: ui/picture_tab.gd:126
+#: ui/picture_tab.gd:127
 msgid "Mode"
 msgstr ""
 
-#: ui/picture_tab.gd:150 ui/sound_tab.gd:109
+#: ui/picture_tab.gd:151 ui/sound_tab.gd:109
 msgid "Auto"
 msgstr ""
 
-#: ui/picture_tab.gd:151
+#: ui/picture_tab.gd:152
 msgid "Half"
 msgstr ""
 
-#: ui/picture_tab.gd:152
+#: ui/picture_tab.gd:153
 msgid "Swap eyes"
 msgstr ""
 
-#: ui/picture_tab.gd:156
+#: ui/picture_tab.gd:157
 msgid "Clear folder rule"
 msgstr ""
 
-#: ui/picture_tab.gd:160
+#: ui/picture_tab.gd:161
 msgid "Use for this folder"
 msgstr ""
 
-#: ui/picture_tab.gd:164
+#: ui/picture_tab.gd:165
 msgid "Fisheye field"
 msgstr ""
 
-#: ui/picture_tab.gd:172
+#: ui/picture_tab.gd:173
 msgid "Lens"
 msgstr ""
 
-#: ui/picture_tab.gd:180
+#: ui/picture_tab.gd:181
 msgid "Camera"
 msgstr ""
 
-#: ui/picture_tab.gd:182
+#: ui/picture_tab.gd:183
 msgid "Lens field"
 msgstr ""
 
-#: ui/picture_tab.gd:184
+#: ui/picture_tab.gd:185
 msgid "Seam"
 msgstr ""
 
-#: ui/picture_tab.gd:188
+#: ui/picture_tab.gd:189
 msgid "Reset lens"
 msgstr ""
 
-#: ui/picture_tab.gd:192 ui/picture_tab.gd:193
+#: ui/picture_tab.gd:193 ui/picture_tab.gd:194
 msgid "3D"
 msgstr ""
 
-#: ui/picture_tab.gd:193 ui/system_tab.gd:165
+#: ui/picture_tab.gd:194 ui/system_tab.gd:165
 msgid "Left eye"
 msgstr ""
 
-#: ui/picture_tab.gd:193 ui/system_tab.gd:165
+#: ui/picture_tab.gd:194 ui/system_tab.gd:165
 msgid "Right eye"
 msgstr ""
 
-#: ui/picture_tab.gd:194
+#: ui/picture_tab.gd:195
 msgid "Show"
 msgstr ""
 
-#: ui/picture_tab.gd:196
+#: ui/picture_tab.gd:197
 msgid "Depth"
 msgstr ""
 
-#: ui/picture_tab.gd:200
+#: ui/picture_tab.gd:201
 msgid "This file only"
 msgstr ""
 
-#: ui/picture_tab.gd:206
+#: ui/picture_tab.gd:207
 msgid "Soft edges"
 msgstr ""
 
-#: ui/picture_tab.gd:209
+#: ui/picture_tab.gd:210
 msgid "Screen"
 msgstr ""
 
-#: ui/picture_tab.gd:213 ui/subtitles_tab.gd:64
+#: ui/picture_tab.gd:214 ui/subtitles_tab.gd:64
 msgid "Size"
 msgstr ""
 
-#: ui/picture_tab.gd:214
+#: ui/picture_tab.gd:215
 msgid "Distance"
 msgstr ""
 
-#: ui/picture_tab.gd:215
+#: ui/picture_tab.gd:216
 msgid "Height"
 msgstr ""
 
-#: ui/picture_tab.gd:219
+#: ui/picture_tab.gd:220
 msgid "Curvature"
 msgstr ""
 
-#: ui/picture_tab.gd:223
+#: ui/picture_tab.gd:224
 msgid "Zoom"
 msgstr ""
 
-#: ui/picture_tab.gd:227
+#: ui/picture_tab.gd:228
 msgid "Size in degrees"
 msgstr ""
 
-#: ui/picture_tab.gd:241
+#: ui/picture_tab.gd:242
 msgid "Follow my head"
 msgstr ""
 
-#: ui/picture_tab.gd:242
+#: ui/picture_tab.gd:243
 msgid "Lying down"
 msgstr ""
 
-#: ui/picture_tab.gd:246
+#: ui/picture_tab.gd:247
 msgid "Reset zoom"
 msgstr ""
 
-#: ui/picture_tab.gd:249
+#: ui/picture_tab.gd:250
 msgid "Auto crop bars"
 msgstr ""
 
-#: ui/picture_tab.gd:250
+#: ui/picture_tab.gd:251
 msgid "Grow the screen to keep its height"
 msgstr ""
 
-#: ui/picture_tab.gd:256
+#: ui/picture_tab.gd:257
 msgid "Horizon"
 msgstr ""
 
-#: ui/picture_tab.gd:261
+#: ui/picture_tab.gd:262
 msgid "Pitch"
 msgstr ""
 
-#: ui/picture_tab.gd:262
+#: ui/picture_tab.gd:263
 msgid "Roll"
 msgstr ""
 
-#: ui/picture_tab.gd:265
+#: ui/picture_tab.gd:266
 msgid "Level"
 msgstr ""
 
-#: ui/picture_tab.gd:277
+#: ui/picture_tab.gd:278
 msgid "Deinterlace"
 msgstr ""
 
-#: ui/picture_tab.gd:280
+#: ui/picture_tab.gd:281
 msgid "Film grain"
 msgstr ""
 
-#: ui/picture_tab.gd:282
+#: ui/picture_tab.gd:283
 msgid "Gate weave"
 msgstr ""
 
-#: ui/picture_tab.gd:286
+#: ui/picture_tab.gd:287
 msgid "Reset picture"
 msgstr ""
 
-#: ui/picture_tab.gd:291
+#: ui/picture_tab.gd:292
 msgid "HDR"
 msgstr ""
 
-#: ui/picture_tab.gd:296
+#: ui/picture_tab.gd:297
 msgid "Tone map"
 msgstr ""
 
-#: ui/picture_tab.gd:297
+#: ui/picture_tab.gd:298
 msgid "Reset HDR"
 msgstr ""
 
-#: ui/picture_tab.gd:299
+#: ui/picture_tab.gd:300
 msgid "Exposure"
 msgstr ""
 
-#: ui/picture_tab.gd:301
+#: ui/picture_tab.gd:302
 msgid "Knee"
 msgstr ""
 
-#: ui/picture_tab.gd:303
+#: ui/picture_tab.gd:304
 msgid "HDR brightness"
 msgstr ""
 
-#: ui/picture_tab.gd:310 ui/picture_tab.gd:312
+#: ui/picture_tab.gd:311 ui/picture_tab.gd:313
 msgid "Slideshow"
 msgstr ""
 
-#: ui/picture_tab.gd:314
+#: ui/picture_tab.gd:315
 msgid "Each picture"
 msgstr ""
 
-#: ui/picture_tab.gd:317
+#: ui/picture_tab.gd:318
 msgid "Crossfade"
 msgstr ""
 
-#: ui/picture_tab.gd:323
+#: ui/picture_tab.gd:324
 msgid "Frame"
 msgstr ""
 
-#: ui/picture_tab.gd:325
+#: ui/picture_tab.gd:326
 msgid "Frame back"
 msgstr ""
 
-#: ui/picture_tab.gd:326
+#: ui/picture_tab.gd:327
 msgid "Frame forward"
 msgstr ""
 
-#: ui/picture_tab.gd:327
+#: ui/picture_tab.gd:328
 msgid "Mark A / B"
 msgstr ""
 
-#: ui/picture_tab.gd:328
+#: ui/picture_tab.gd:329
 msgid "Clear loop"
 msgstr ""
 
-#: ui/picture_tab.gd:329
+#: ui/picture_tab.gd:330
 msgid "Screenshot"
 msgstr ""
 
-#: ui/picture_tab.gd:333
+#: ui/picture_tab.gd:334
 msgid "Corner film"
 msgstr ""
 
-#: ui/picture_tab.gd:337
+#: ui/picture_tab.gd:338
 msgid "Swap"
 msgstr ""
 
-#: ui/picture_tab.gd:338
+#: ui/picture_tab.gd:339
 msgid "Close corner"
 msgstr ""
 
-#: ui/picture_tab.gd:339
+#: ui/picture_tab.gd:340
 msgid "Corner size"
 msgstr ""
 
-#: ui/picture_tab.gd:342
+#: ui/picture_tab.gd:343
 msgid "Top right"
 msgstr ""
 
-#: ui/picture_tab.gd:342
+#: ui/picture_tab.gd:343
 msgid "Top left"
 msgstr ""
 
-#: ui/picture_tab.gd:342
+#: ui/picture_tab.gd:343
 msgid "Bottom right"
 msgstr ""
 
-#: ui/picture_tab.gd:342
+#: ui/picture_tab.gd:343
 msgid "Bottom left"
 msgstr ""
 
@@ -1260,7 +1264,7 @@ msgstr ""
 msgid "Showrooms"
 msgstr ""
 
-#: ui/room_tab.gd:117 ui/ui_layer.gd:937
+#: ui/room_tab.gd:117 ui/ui_layer.gd:938
 msgid "Seat"
 msgstr ""
 
@@ -1596,15 +1600,15 @@ msgstr ""
 msgid "This file has no subtitle tracks"
 msgstr ""
 
-#: ui/subtitles_tab.gd:305
+#: ui/subtitles_tab.gd:303
 msgid "A second track needs a subtitle file next to the video"
 msgstr ""
 
-#: ui/subtitles_tab.gd:201
+#: ui/subtitles_tab.gd:199
 msgid "Searching..."
 msgstr ""
 
-#: ui/subtitles_tab.gd:212
+#: ui/subtitles_tab.gd:210
 msgid "Reading the script..."
 msgstr ""
 
@@ -1815,8 +1819,8 @@ msgstr ""
 msgid "%s; remote changes allowed for %d more min"
 msgstr ""
 
-#: ui/system_tab.gd:636 ui/ui_layer.gd:225 ui/ui_layer.gd:386 ui/ui_layer.gd:886
-#: ui/ui_layer.gd:890 ui/ui_layer.gd:918
+#: ui/system_tab.gd:636 ui/ui_layer.gd:225 ui/ui_layer.gd:386 ui/ui_layer.gd:887
+#: ui/ui_layer.gd:891 ui/ui_layer.gd:919
 msgid "Undo"
 msgstr ""
 
@@ -1901,7 +1905,7 @@ msgstr ""
 msgid "Both controllers. The labels change ink, or get a dark outline, to stay readable."
 msgstr ""
 
-#: ui/tablet.gd:276
+#: ui/tablet.gd:285
 msgid "LIVE"
 msgstr ""
 
@@ -1958,57 +1962,57 @@ msgstr ""
 msgid "Remote changes allowed for an hour"
 msgstr ""
 
-#: ui/ui_layer.gd:765
+#: ui/ui_layer.gd:766
 msgid "Connecting..."
 msgstr ""
 
-#: ui/ui_layer.gd:775
+#: ui/ui_layer.gd:776
 msgid "Starting the browser..."
 msgstr ""
 
-#: ui/ui_layer.gd:789
+#: ui/ui_layer.gd:790
 msgid "Point at a seat and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:799
+#: ui/ui_layer.gd:800
 msgid "Seat unchanged"
 msgstr ""
 
-#: ui/ui_layer.gd:822
+#: ui/ui_layer.gd:823
 msgid "That object can't be placed here"
 msgstr ""
 
-#: ui/ui_layer.gd:826
+#: ui/ui_layer.gd:827
 msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:855
+#: ui/ui_layer.gd:856
 msgid "That's as many areas as there can be: delete one first."
 msgstr ""
 
-#: ui/ui_layer.gd:872 ui/ui_layer.gd:883
+#: ui/ui_layer.gd:873 ui/ui_layer.gd:884
 msgid "Nothing marked"
 msgstr ""
 
-#: ui/ui_layer.gd:886
+#: ui/ui_layer.gd:887
 #, c-format
 msgid "%s added: the cameras show there"
 msgstr ""
 
-#: ui/ui_layer.gd:890
+#: ui/ui_layer.gd:891
 #, c-format
 msgid "%s changed"
 msgstr ""
 
-#: ui/ui_layer.gd:907
+#: ui/ui_layer.gd:908
 msgid "Nothing placed"
 msgstr ""
 
-#: ui/ui_layer.gd:921
+#: ui/ui_layer.gd:922
 msgid "Not placed"
 msgstr ""
 
-#: ui/ui_layer.gd:935
+#: ui/ui_layer.gd:936
 msgid "No seat there"
 msgstr ""
 

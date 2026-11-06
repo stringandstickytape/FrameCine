@@ -48,6 +48,7 @@ const PICTURE := {
 	"Gamma": "Lighter or darker mid tones, without changing black and white.",
 	"Dark-scene lift": "Makes dark scenes easier to see by lifting the darkest parts.",
 	"Sharpen": "Crisper edges. Too much makes a halo around them.",
+	"Smooth banding": "Hides the steps in dark gradients. Too much softens faint detail.",
 	"Deinterlace": "Removes comb lines from old TV or DVD video. Auto: when needed.",
 	"Film grain": "Adds the fine noise of projected film.",
 	"Gate weave": "Adds the small sideways wobble of film in an old projector.",
@@ -117,8 +118,10 @@ static func _find(node: Node, texts: Dictionary, found: Array) -> void:
 	for c in node.get_children():
 		if c is Control and (c as Control).has_meta("help"):
 			continue
-		if c is HBoxContainer and c.has_meta("slider"):
-			var name_label := c.get_child(0) as Label
+		# A slider row (W.slider_row()): the name over the slider (a VBox since the tablet's cards), or beside it.
+		if c is BoxContainer and c.has_meta("slider"):
+			var first: Node = c.get_child(0)
+			var name_label := (first.get_child(0) if first is HBoxContainer else first) as Label
 			if name_label != null and texts.has(name_label.text):
 				found.append([c, c, str(texts[name_label.text]), ""])
 			continue

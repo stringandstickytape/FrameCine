@@ -22,9 +22,18 @@ uniform bool dual_fisheye = false;
 void fragment() {
 	int view = int(VIEW_INDEX);
 	float front = dual_fisheye ? COLOR.r : 1.0;
-	vec3 rgb = video_pixel(front > 0.001 ? UV : UV2, view);
+	// The footprints (video_common.gdshaderinc, footprint_taps), taken here in uniform control flow.
+	vec2 dx = dFdx(UV);
+	vec2 dy = dFdy(UV);
+	vec2 dx2 = dFdx(UV2);
+	vec2 dy2 = dFdy(UV2);
+	vec3 rgb = front > 0.001 ? video_pixel_filtered(UV, dx, dy, view) : video_pixel_filtered(UV2, dx2, dy2, view);
 	if (front > 0.001 && front < 0.999) {
-		rgb = mix(video_pixel(UV2, view), rgb, front);
+		rgb = mix(video_pixel_filtered(UV2, dx2, dy2, view), rgb, front);
+	}
+	// The deband's dither, a code value of the eye buffer's, in the gamma-encoded values it quantises.
+	if (pc_deband > 0.0 && !p010) {
+		rgb += dither(FRAGCOORD.xy, TIME);
 	}
 	// The result is gamma-encoded; ALBEDO is linear. The sRGB curve stands in for BT.709/BT.1886 here.
 	ALBEDO = srgb_to_linear(clamp(rgb, 0.0, 1.0)) * brightness;

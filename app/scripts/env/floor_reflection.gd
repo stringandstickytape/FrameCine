@@ -44,8 +44,10 @@ func _ready() -> void:
 	add_child(_quad)
 	for u: Dictionary in REFLECTION_SHADER.get_shader_uniform_list():
 		var n := str(u["name"])
-		if not n in ["screen_inverse", "screen_size", "floor_y", "strength", "fade"]:
+		# The deband stays off: the reflection is blurred, and four more samples a pixel there buy nothing.
+		if not n in ["screen_inverse", "screen_size", "floor_y", "strength", "fade", "pc_deband"]:
 			_names.append(n)
+	_material.set_shader_parameter("pc_deband", 0.0)
 	main.environment_changed.connect(func(_id: String, _l: float) -> void: _on_environment())
 	main.screen_changed.connect(func(_w: float, _d: float, _h: float) -> void: _place())
 	main.mode_changed.connect(func(_m: Variant, _a: String) -> void: _place())

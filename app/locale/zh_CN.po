@@ -522,6 +522,9 @@ msgstr "提亮最暗的部分，让暗场景更容易看清。"
 msgid "Crisper edges. Too much makes a halo around them."
 msgstr "边缘更清晰。过多会在边缘周围产生光晕。"
 
+msgid "Hides the steps in dark gradients. Too much softens faint detail."
+msgstr "隐藏暗部渐变中的色阶。过多会让细微的细节变柔和。"
+
 msgid "Removes comb lines from old TV or DVD video. Auto: when needed."
 msgstr "去掉老电视或 DVD 视频中的梳状线。自动：需要时启用。"
 

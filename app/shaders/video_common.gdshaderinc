@@ -183,6 +183,59 @@ vec3 tone_map(vec3 c) {
 	return c * (mapped / m);
 }
 
+// Filtering by footprint (the picture shrunk on the display: an 8K 360 frame has about twice the texels a degree the
+// eye image has, a 4K flat film on a 60° screen six times): one bilinear sample skips texels then, and fine detail
+// shimmers and drops out (stars in a still 4K frame). video_pixel_filtered() is given the screen pixel's footprint in
+// the eye's picture (its UV's derivatives) and averages a grid of bilinear samples across it, up to footprint_taps
+// along each axis, separately for luma and the half-size chroma; no more than one sample where the picture is near
+// 1:1 or stretched. No mipmaps: the decoder's frames are imported as they are, and building a chain per frame would
+// cost the bandwidth this saves. The samples lie close together, so most come from the texture cache. Where the eye
+// image is coarser (the foveated edge), each pixel covers more texels and is filtered more, as it should be.
+// 1 turns it off (one sample, as video_pixel()).
+uniform int footprint_taps = 3;
+
+// Deband (picture controls' "Smooth banding", pc_deband 0..1; 8-bit sources only): 8-bit video shows steps in dark
+// gradients, worst in a dark room on an LCD. Each pixel is compared with four samples up to DEBAND_RADIUS texels away
+// (for 1080 lines; the bands of a taller frame are as much wider, so the radius grows with it, up to 3 times) at a
+// random turn (two pairs at right angles); where all four lie within the threshold (up to DEBAND_THRESHOLD code
+// values at full strength) it takes their mean, fading back to itself as they part, so a real edge is left alone.
+// Luma and chroma apart. The step that remains is broken up by a dither at the output (dither(), video.gdshader and
+// video_layer.gdshader), which is what hides the bands; the mean only spreads them.
+uniform float pc_deband = 0.5;
+const float DEBAND_RADIUS = 16.0;
+const float DEBAND_THRESHOLD = 3.0 / 255.0;
+
+float hash12(vec2 p) {
+	vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+	p3 += dot(p3, p3.yzx + 33.33);
+	return fract((p3.x + p3.y) * p3.z);
+}
+
+// The deband's offsets for the texel under uv (size: the plane's), fixed per texel.
+vec2 deband_offset(vec2 uv, vec2 size) {
+	vec2 cell = floor(uv * size);
+	float a = hash12(cell) * 6.2831853;
+	float r = (0.5 + 0.5 * hash12(cell + 17.31)) * DEBAND_RADIUS * clamp(size.y / 1080.0, 1.0, 3.0);
+	return vec2(cos(a), sin(a)) * r / size;
+}
+
+// How much of the four samples' mean to take, from how far the furthest is from the pixel.
+float deband_weight(float spread) {
+	float t = DEBAND_THRESHOLD * pc_deband;
+	return 1.0 - smoothstep(0.5 * t, t, spread);
+}
+
+// Triangular noise of one output code value, new each frame: the dither after a deband.
+float dither(vec2 frag, float time) {
+	vec2 seed = floor(frag) + fract(time * 7.123) * 113.0;
+	return (hash12(seed) + hash12(seed + 71.7) - 1.0) / 255.0;
+}
+
+// Taps along one axis for a footprint `texels` long: one up to a quarter past 1:1 (a bilinear sample covers that).
+int footprint_taps_for(float texels) {
+	return clamp(int(ceil(texels - 0.25)), 1, max(footprint_taps, 1));
+}
+
 // The planes' samples on the 8-bit scale, whatever the packing (see p010).
 const float P010_SCALE = 65535.0 / 65280.0;
 float read_y(vec2 uv) {
@@ -234,9 +287,34 @@ vec2 field_chroma(vec2 uv) {
 			+ read_cbcr(vec2(uv.x, (row + 1.5) / size.y)));
 }
 
+// A plane's mean over a screen pixel's footprint (duv_dx, duv_dy: the frame UV's derivatives), each sample kept
+// inside [lo, hi]. which: 0 luma, 1 chroma, 2 the RGB source's.
+vec4 footprint_mean(int which, vec2 uv, vec2 duv_dx, vec2 duv_dy, vec2 lo, vec2 hi) {
+	vec2 size = vec2(which == 0 ? textureSize(y_tex, 0) : (which == 1 ? textureSize(uv_tex, 0) : textureSize(rgb_tex, 0)));
+	int kx = footprint_taps_for(length(duv_dx * size));
+	int ky = footprint_taps_for(length(duv_dy * size));
+	vec4 sum = vec4(0.0);
+	for (int i = 0; i < kx; i++) {
+		for (int j = 0; j < ky; j++) {
+			vec2 o = ((float(i) + 0.5) / float(kx) - 0.5) * duv_dx + ((float(j) + 0.5) / float(ky) - 0.5) * duv_dy;
+			vec2 q = clamp(uv + o, lo, hi);
+			if (which == 0) {
+				sum.r += read_y(q);
+			} else if (which == 1) {
+				sum.rg += read_cbcr(q);
+			} else {
+				sum.rgb += textureLod(rgb_tex, q, 0.0).rgb;
+			}
+		}
+	}
+	return sum / float(kx * ky);
+}
+
 // The picture at mesh_uv (the position inside ONE EYE's picture, 0..1) for view_index (VIEW_INDEX), gamma-encoded,
-// with zoom / pan, depth shift, stereo layout, masks, picture controls and the edge fade applied.
-vec3 video_pixel(vec2 mesh_uv, int view_index) {
+// with zoom / pan, depth shift, stereo layout, masks, picture controls and the edge fade applied, filtered over the
+// screen pixel's footprint: mesh_dx, mesh_dy are mesh_uv's derivatives (dFdx, dFdy), taken by the caller in uniform
+// control flow (the dual fisheye seam picks its UV in a branch). Zero derivatives: one sample.
+vec3 video_pixel_filtered(vec2 mesh_uv, vec2 mesh_dx, vec2 mesh_dy, int view_index) {
 	int view = force_eye >= 0 ? force_eye : view_index;
 	int src_view = mono_eye >= 0 ? mono_eye : view;
 	int eye = swap_eyes ? 1 - src_view : src_view;
@@ -263,11 +341,18 @@ vec3 video_pixel(vec2 mesh_uv, int view_index) {
 	// Keep the bilinear footprint inside the eye's rectangle: half a chroma texel (one luma texel) from its edges, so
 	// neither the padding nor the other eye's half bleeds in.
 	vec2 margin = 0.5 / vec2(rgb_source ? textureSize(rgb_tex, 0) : textureSize(uv_tex, 0));
-	vec2 uv = clamp(rect.xy + p * rect.zw, rect.xy + margin, rect.xy + rect.zw - margin);
+	vec2 lo = rect.xy + margin;
+	vec2 hi = rect.xy + rect.zw - margin;
+	vec2 uv = clamp(rect.xy + p * rect.zw, lo, hi);
+	// The footprint in the frame: the mesh UV's derivatives through the zoom and the eye's rectangle (the wrap of a
+	// 360 frame is taken after, so its seam doesn't look like a huge footprint).
+	vec2 duv_dx = mesh_dx / zoom * rect.zw;
+	vec2 duv_dy = mesh_dy / zoom * rect.zw;
+	bool filtered = footprint_taps > 1 && deinterlace == 0 && (mesh_dx != vec2(0.0) || mesh_dy != vec2(0.0));
 
 	vec3 rgb;
 	if (rgb_source) {
-		rgb = textureLod(rgb_tex, uv, 0.0).rgb;
+		rgb = filtered ? footprint_mean(2, uv, duv_dx, duv_dy, lo, hi).rgb : textureLod(rgb_tex, uv, 0.0).rgb;
 		if (pc_sharpen > 0.0) {
 			vec2 t = 1.0 / vec2(textureSize(rgb_tex, 0));
 			vec3 n = textureLod(rgb_tex, uv + vec2(t.x, 0.0), 0.0).rgb + textureLod(rgb_tex, uv - vec2(t.x, 0.0), 0.0).rgb
@@ -280,9 +365,29 @@ vec3 video_pixel(vec2 mesh_uv, int view_index) {
 		if (deinterlace > 0) {
 			y = field_luma(uv);
 			cbcr = field_chroma(uv);
+		} else if (filtered) {
+			y = footprint_mean(0, uv, duv_dx, duv_dy, lo, hi).r;
+			cbcr = footprint_mean(1, uv, duv_dx, duv_dy, lo, hi).rg;
 		} else {
 			y = read_y(uv);
 			cbcr = read_cbcr(uv);
+		}
+		if (pc_deband > 0.0 && !p010 && deinterlace == 0) {
+			vec2 o = deband_offset(uv, vec2(textureSize(y_tex, 0)));
+			vec2 o2 = vec2(-o.y, o.x);
+			vec4 s = vec4(read_y(clamp(uv + o, lo, hi)), read_y(clamp(uv - o, lo, hi)),
+					read_y(clamp(uv + o2, lo, hi)), read_y(clamp(uv - o2, lo, hi)));
+			vec4 d = abs(s - y);
+			y = mix(y, dot(s, vec4(0.25)), deband_weight(max(max(d.x, d.y), max(d.z, d.w))));
+			// Chroma: the same offsets in the frame (the same UV), on its own half-size plane.
+			vec2 oc = o;
+			vec2 oc2 = vec2(-oc.y, oc.x);
+			vec2 c0 = read_cbcr(clamp(uv + oc, lo, hi));
+			vec2 c1 = read_cbcr(clamp(uv - oc, lo, hi));
+			vec2 c2 = read_cbcr(clamp(uv + oc2, lo, hi));
+			vec2 c3 = read_cbcr(clamp(uv - oc2, lo, hi));
+			vec2 dc = max(max(abs(c0 - cbcr), abs(c1 - cbcr)), max(abs(c2 - cbcr), abs(c3 - cbcr)));
+			cbcr = mix(cbcr, 0.25 * (c0 + c1 + c2 + c3), deband_weight(max(dc.x, dc.y)));
 		}
 		if (pc_sharpen > 0.0) {
 			vec2 t = 1.0 / vec2(textureSize(y_tex, 0));
@@ -363,4 +468,10 @@ vec3 video_pixel(vec2 mesh_uv, int view_index) {
 		rgb *= smoothstep(0.0, edge_fade, e.x) * smoothstep(0.0, edge_fade * 0.5, e.y);
 	}
 	return rgb;
+}
+
+// As video_pixel_filtered() with one bilinear sample: the reflection, the magnifier and the film layer's copy (blurred,
+// or drawn 1:1). The screen and the crossfade use video_pixel_filtered().
+vec3 video_pixel(vec2 mesh_uv, int view_index) {
+	return video_pixel_filtered(mesh_uv, vec2(0.0), vec2(0.0), view_index);
 }

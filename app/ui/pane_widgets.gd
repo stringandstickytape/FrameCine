@@ -242,6 +242,32 @@ static func card_layout(box: VBoxContainer, on: bool) -> void:
 		box.remove_meta("cards")
 
 
+## A keyboard form that takes its tab's place (Find a line, the party's name, the PC's address): on, everything else
+## in the tab's box hidden and the form shown; off, the other way round. Laid out as cards (card_layout()), the form
+## sits inside a card, which would hide with the rest: it is lifted out into the box while it shows and put back in
+## its place after.
+static func show_form(box: VBoxContainer, form: Control, on: bool) -> void:
+	if on:
+		if form.get_parent() != box:
+			form.set_meta("form_home", [form.get_parent(), form.get_index()])
+			form.get_parent().remove_child(form)
+			box.add_child(form)
+		for c in box.get_children():
+			(c as Control).visible = c == form
+		return
+	for c in box.get_children():
+		(c as Control).visible = c != form
+	if form.has_meta("form_home"):
+		var home: Array = form.get_meta("form_home")
+		form.remove_meta("form_home")
+		box.remove_child(form)
+		var parent: Node = home[0]
+		if is_instance_valid(parent):
+			parent.add_child(form)
+			parent.move_child(form, mini(int(home[1]), parent.get_child_count() - 1))
+		form.visible = false
+
+
 ## The cards of a box laid out by card_layout() (PanelContainers, in order), or none.
 static func cards(box: VBoxContainer) -> Array:
 	var holder: VBoxContainer = (box.get_meta("cards") if box.has_meta("cards") else null)

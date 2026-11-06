@@ -181,16 +181,14 @@ func _row(text: String, on_pressed: Callable, group: ButtonGroup) -> Button:
 
 ## The find form takes the tab's place (and the pane hides its seek bar and transport meanwhile).
 func _show_find() -> void:
-	for c in box.get_children():
-		(c as Control).visible = c == _find_form
+	W.show_form(box, _find_form, true)
 	scroll_vertical = 0
 	_find_form.edit(_query)
 	(app.ui.ui as Node).call("set_form_mode", true)
 
 
 func _hide_find() -> void:
-	for c in box.get_children():
-		(c as Control).visible = c != _find_form
+	W.show_form(box, _find_form, false)
 	sync()
 	(app.ui.ui as Node).call("set_form_mode", false)
 

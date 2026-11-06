@@ -551,8 +551,7 @@ func _ask(what: String) -> void:
 	else:
 		_party_form.set_texts("The party's PIN (the host sets it, guests give the same; empty for none)", "Save",
 				"digits", true)
-	for c in box.get_children():
-		(c as Control).visible = c == _party_form
+	W.show_form(box, _party_form, true)
 	scroll_vertical = 0
 	_party_form.edit(party_name() if what == "name" else party_pin())
 	(app.ui.ui as Node).call("set_form_mode", true)
@@ -564,7 +563,6 @@ func _answered(text: String) -> void:
 
 
 func _hide_form() -> void:
-	for c in box.get_children():
-		(c as Control).visible = c != _party_form
+	W.show_form(box, _party_form, false)
 	sync()
 	(app.ui.ui as Node).call("set_form_mode", false)
