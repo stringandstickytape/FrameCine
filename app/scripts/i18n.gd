@@ -139,8 +139,8 @@ const _ACCENTS := {"A": "Å", "C": "Ç", "D": "Ð", "E": "É", "G": "Ĝ", "H": "
 		"N": "Ñ", "O": "Ö", "R": "Ŕ", "S": "Š", "T": "Ţ", "U": "Û", "W": "Ŵ", "Y": "Ý", "Z": "Ž", "a": "å", "c": "ç",
 		"d": "ð", "e": "é", "g": "ĝ", "h": "ĥ", "i": "î", "j": "ĵ", "k": "ķ", "l": "ļ", "n": "ñ", "o": "ö", "p": "þ",
 		"r": "ŕ", "s": "š", "t": "ţ", "u": "û", "w": "ŵ", "y": "ý", "z": "ž"}
-## Share of the length added (translations run longer than English).
-const PSEUDO_GROWTH := 0.35
+## Share of the length added as "~" (with the brackets, a long text comes out about a third longer; at least 3).
+const PSEUDO_GROWTH := 0.3
 static var _placeholder: RegEx
 
 
@@ -156,7 +156,7 @@ static func pseudo_text(s: String) -> String:
 		out += _accented(s.substr(at, m.get_start() - at)) + m.get_string()
 		at = m.get_end()
 	out += _accented(s.substr(at))
-	return "[" + out + " " + "~".repeat(maxi(1, ceili(s.length() * PSEUDO_GROWTH) - 2)) + "]"
+	return "[" + out + " " + "~".repeat(maxi(3, roundi(s.length() * PSEUDO_GROWTH))) + "]"
 
 
 static func _accented(s: String) -> String:
@@ -234,11 +234,10 @@ static func cjk_font() -> FontFile:
 	return _cjk
 
 
-## Puts the CJK font behind each menu font (MENU_FONTS), once. Every FontVariation of the theme and the tablet's
-## Label3Ds (ui/pane_style.gd font()) reads its base font's fallbacks, so this one place covers them all.
+## Puts the CJK font behind each menu font (MENU_FONTS). Every FontVariation of the theme and the tablet's Label3Ds
+## (ui/pane_style.gd font()) reads its base font's fallbacks, so this one place covers them all. Cheap when done:
+## ui/pane_style.gd calls it again after loading a theme (a reload may bring new FontFiles).
 static func add_font_fallbacks() -> void:
-	if not _menu_fonts.is_empty():
-		return
 	var cjk := cjk_font()
 	for path in MENU_FONTS:
 		var f := load(path) as FontFile
@@ -248,4 +247,5 @@ static func add_font_fallbacks() -> void:
 			var fb := f.fallbacks.duplicate()
 			fb.append(cjk)
 			f.fallbacks = fb
-		_menu_fonts.append(f)
+		if not _menu_fonts.has(f):
+			_menu_fonts.append(f)

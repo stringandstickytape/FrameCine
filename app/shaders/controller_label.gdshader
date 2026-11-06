@@ -18,6 +18,8 @@ uniform float field_range = 10.0;
 uniform float depth_lift = 0.0004;
 // Thin strokes lose against a pixel: thicken them by this share of a pixel per side once they are small.
 uniform float stem_gain = 0.2;
+// What the UVs are fractions of, in atlas pixels (label_font.gd ATLAS_SPAN).
+uniform float atlas_span = 2048.0;
 
 float median(vec3 c) {
 	return max(min(c.r, c.g), min(max(c.r, c.g), c.b));
@@ -35,9 +37,11 @@ void vertex() {
 }
 
 void fragment() {
-	vec2 dx = dFdx(UV);
-	vec2 dy = dFdy(UV);
+	// The UVs are fractions of atlas_span: the atlas grows towards it when full, and the glyphs it has stay put.
 	vec2 size = vec2(textureSize(atlas, 0));
+	vec2 uv = UV * (atlas_span / size);
+	vec2 dx = dFdx(uv);
+	vec2 dy = dFdy(uv);
 	float across = length(dx * size);
 	float down = length(dy * size);
 	// Atlas pixels under one screen pixel, along its shorter side: what the text's size really is. The longer side is
@@ -45,14 +49,14 @@ void fragment() {
 	float footprint = min(across, down);
 	// Field units per screen pixel, from the field's own slope: at a grazing angle it is wide across the strokes that
 	// are foreshortened and narrow along the others, so each edge gets the softness it needs and no more.
-	float centre = field(UV);
+	float centre = field(uv);
 	float slope = length(vec2(dFdx(centre), dFdy(centre)));
 	// The slope drops to nothing where the field saturates; the footprint is the bound there.
 	float pixel = max(slope, footprint / field_range * 0.5);
 	float edge = 0.5 - stem_gain * footprint / field_range * smoothstep(1.0, 3.0, footprint);
 	// Rotated grid of four samples in the pixel, each softened over its own share of it.
-	vec4 f = vec4(field(UV + dx * -0.125 + dy * -0.375), field(UV + dx * 0.375 + dy * -0.125),
-			field(UV + dx * 0.125 + dy * 0.375), field(UV + dx * -0.375 + dy * 0.125));
+	vec4 f = vec4(field(uv + dx * -0.125 + dy * -0.375), field(uv + dx * 0.375 + dy * -0.125),
+			field(uv + dx * 0.125 + dy * 0.375), field(uv + dx * -0.375 + dy * 0.125));
 	float cover = dot(clamp((f - edge) / pixel * 2.0 + 0.5, 0.0, 1.0), vec4(0.25));
 	// The backing: the same samples against an edge moved out; the letters over it.
 	float behind = dot(clamp((f - edge + clamp(backing_width, 0.0, 0.4)) / pixel * 2.0 + 0.5, 0.0, 1.0), vec4(0.25));

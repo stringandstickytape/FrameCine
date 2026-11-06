@@ -8,7 +8,8 @@
                                      it no longer has to the end as #~ lines
   tools/i18n.py font --source FONT   the Simplified Chinese subset (app/ui/fonts/NotoSansSC-Medium-subset.woff2) from a
                                      full Noto Sans SC: GB 2312 level 1 (3755 common characters), every character of
-                                     the .po files, CJK punctuation. Needs fontTools (pip install fonttools).
+                                     the .po files, CJK punctuation; the line height of Fira Sans Condensed. Needs
+                                     fontTools and brotli (pip install fonttools brotli).
 
 Run from the repository root or anywhere in it (Python 3.8+, no packages but fontTools for `font`).
 
@@ -512,7 +513,19 @@ def cmd_font(args):
     sub = subset.Subsetter(options)
     sub.populate(unicodes=[ord(c) for c in chars])
     sub.subset(font)
+    # The line height of the menu's own font: Godot sizes a button by the tallest font of the chain, and Noto's
+    # taller line made every row of the menu grow, in English too. The glyphs are not touched.
+    if args.match:
+        from fontTools.ttLib import TTFont
+        ref = TTFont(args.match)
+        k = font["head"].unitsPerEm / ref["head"].unitsPerEm
+        asc, desc = round(ref["hhea"].ascent * k), round(ref["hhea"].descent * k)
+        font["hhea"].ascent, font["hhea"].descent, font["hhea"].lineGap = asc, desc, 0
+        os2 = font["OS/2"]
+        os2.sTypoAscender, os2.sTypoDescender, os2.sTypoLineGap = asc, desc, 0
+        os2.usWinAscent, os2.usWinDescent = asc, -desc
     subset.save_font(font, args.out, options)
+    print("copyright: %s" % font["name"].getDebugName(0))
     print("%s: %d characters, %d bytes" % (os.path.relpath(args.out, REPO), len(chars), os.path.getsize(args.out)))
     return 0
 
@@ -528,6 +541,8 @@ def main():
     fo = sub.add_parser("font")
     fo.add_argument("--source", required=True)
     fo.add_argument("--out", default=FONT_OUT)
+    fo.add_argument("--match", default=os.path.join(APP, "ui", "fonts", "FiraSansCondensed-Regular.ttf"),
+                    help="take the line height (ascent, descent) of this font; \"\" keeps the source's")
     args = p.parse_args()
     return {"extract": cmd_extract, "check": cmd_check, "merge": cmd_merge, "font": cmd_font}[args.cmd](args)
 

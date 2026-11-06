@@ -874,7 +874,7 @@ func _rounded(p_name: String, size: Vector2, role: String, priority: int) -> Mes
 
 
 ## A label of the now playing pane. Its text shows as given (W.content(), docs/i18n.md): the title is the film's own,
-## the times are numbers, and LIVE comes translated.
+## the times are numbers, LIVE and the header (chapter, status: ui/pane_ui.gd) come translated.
 func make_label(p_name: String, align: HorizontalAlignment, parent: Node3D) -> Label3D:
 	var l := Label3D.new()
 	l.name = p_name

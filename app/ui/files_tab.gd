@@ -489,11 +489,12 @@ func count_text() -> String:
 				dirs += 1
 			"file", "page", "window", "queued", "favourite", "result", "android_app":
 				files += 1
+	# In the menus' language (the footer shows it as it is; docs/i18n.md).
 	if dirs > 0 and files > 0:
-		return "%d folders, %d items" % [dirs, files]
+		return tr("%d folders, %d items") % [dirs, files]
 	if dirs > 0:
-		return "%d folder%s" % [dirs, "" if dirs == 1 else "s"]
-	return "%d item%s" % [files, "" if files == 1 else "s"]
+		return tr_n("%d folder", "%d folders", dirs) % dirs
+	return tr_n("%d item", "%d items", files) % files
 
 
 func _refresh() -> void:

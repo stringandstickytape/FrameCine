@@ -513,6 +513,25 @@ msgstr ""
 msgid "Clear upcoming"
 msgstr ""
 
+#: ui/files_tab.gd:494
+#, c-format
+msgid "%d folders, %d items"
+msgstr ""
+
+#: ui/files_tab.gd:496
+#, c-format
+msgid "%d folder"
+msgid_plural "%d folders"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ui/files_tab.gd:497
+#, c-format
+msgid "%d item"
+msgid_plural "%d items"
+msgstr[0] ""
+msgstr[1] ""
+
 #: ui/help_texts.gd:104
 #, c-format
 msgid "%s: %s"

@@ -426,6 +426,17 @@ msgstr "无缝播放"
 msgid "Clear upcoming"
 msgstr "清空待播"
 
+msgid "%d folders, %d items"
+msgstr "%d 个文件夹，%d 个项目"
+
+msgid "%d folder"
+msgid_plural "%d folders"
+msgstr[0] "%d 个文件夹"
+
+msgid "%d item"
+msgid_plural "%d items"
+msgstr[0] "%d 个项目"
+
 msgid "%s: %s"
 msgstr "%s：%s"
 
@@ -790,7 +801,7 @@ msgid "Auto"
 msgstr "自动"
 
 msgid "Half"
-msgstr "半宽"
+msgstr "半幅"
 
 msgid "Swap eyes"
 msgstr "交换左右眼"

@@ -820,6 +820,7 @@ static func _label_material() -> ShaderMaterial:
 		_print_material.shader = LABEL_SHADER
 		_print_material.set_shader_parameter("atlas", LabelFont.texture())
 		_print_material.set_shader_parameter("field_range", float(LabelFont.FIELD_RANGE))
+		_print_material.set_shader_parameter("atlas_span", float(LabelFont.ATLAS_SPAN))
 	return _print_material
 
 

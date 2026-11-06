@@ -99,6 +99,7 @@ talks on the LAN; each is off unless given (or switched on in the pane).
 | `--ui-test` | The pane input test, then quit. | `app/README.md`, "Tests" |
 | `--window-test`, `--browser-command="CMD ARGS"`, `--browser-match=TEXT` | The Browser place test on an X11 desktop. | `app/README.md` |
 | `--no-save` | Do not read or write `settings.cfg`. | |
+| `--pseudo-locale` | The menus in the pseudo-locale for this run (accented, longer, in brackets): a check for text not yet translatable. Not saved. | `docs/i18n.md` |
 
 The engine's own flags go before `--`: `--path app`, `--xr-mode on|off`, `--display-driver x11`, `--headless`,
 `--resolution WxH`, `--script res://...`. Flags such as `--media=`, `--seek-every=`, `--gpu-time` and
@@ -153,7 +154,7 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 | `[dual_fisheye_files]` | one key per file | The dual fisheye 360 profile chosen for a file |
 | `[dual_fisheye_<profile>]` | `front_<key>`, `back_<key>` with key `fov` (150 to 240), `cx`, `cy` (0 to 1), `radius` (fraction of the frame's height), `yaw`, `pitch`, `roll` (-20 to 20 degrees); `blend` (0 to 15 degrees), `model` ("equidistant", "equisolid", "stereographic"); only values off the profile's own are stored | A camera's lens values: the Picture tab's Lens field and Seam, the dev link's `dual_fisheye_*` settings |
 | `[subtitles]` | `enabled` (false), `size` (0.5 to 3, 1.0), `position` ("below" or "inside"), `offset` (-0.5 to 0.5, 0.0), `depth` (0 to 2 m, 0.0), `background` (0 to 1, 0.0), `find_files` (true), `forced_auto` (true), `secondary_language` ("") | `docs/features.md` |
-| `[language]` | `audio`, `subtitles` (lists, most preferred first) | Track language memory |
+| `[language]` | `audio`, `subtitles` (lists, most preferred first); `ui` (none: English; "zh_CN": Simplified Chinese) | Track language memory; the menus' and controller labels' language. Also in System, Language (each language in its own name; applies at once). Film and file names stay as they are. The Chinese is a machine draft (`docs/i18n.md`). |
 | `[queue]` | `repeat` ("off"), `shuffle` (false), `continuous` (false), `gapless` (false) | Gapless: the next file opens behind the current one and takes over at its end, with continuous play only (#44); off until the headset check (runbook E7) |
 | `[crossfade]` | `music` (0 to 12 s), `videos` (0 to 10 s); 0 = off, the default | Items overlap into the next (#94) |
 | `[pip]` | `size` (0.15 to 0.5, 0.3), `corner` ("top_right"; or "top_left", "bottom_right", "bottom_left") | Picture in picture (#87) |

@@ -1,3 +1,7 @@
+Noto Sans SC (app/ui/fonts/NotoSansSC-Medium-subset.woff2, a subset made by tools/i18n.py font):
+Copyright © 2014-2021 Adobe (http://www.adobe.com/).
+Source: https://github.com/notofonts/noto-cjk, Sans/SubsetOTF/SC/NotoSansSC-Medium.otf
+
 This Font Software is licensed under the SIL Open Font License,
 Version 1.1.
 

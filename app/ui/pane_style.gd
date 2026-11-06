@@ -11,6 +11,7 @@ extends RefCounted
 const DEFAULT_PATH := "res://ui/themes/default.tres"
 const TOKENS := &"Tokens"
 const MakeTheme := preload("res://tools/make_pane_theme.gd")
+const I18n := preload("res://scripts/i18n.gd")
 
 static var path := DEFAULT_PATH
 static var _theme: Theme
@@ -92,6 +93,8 @@ static func use(p_path: String) -> void:
 ## Reads the theme file again from disk (hot-reload of a restyle).
 static func reload() -> void:
 	_theme = ResourceLoader.load(path, "Theme", ResourceLoader.CACHE_MODE_REPLACE) as Theme
+	# The fonts read again lose the Chinese fallback (scripts/i18n.gd): it goes back behind them.
+	I18n.add_font_fallbacks()
 	if _theme == null:
 		_theme = Theme.new()
 	else:
