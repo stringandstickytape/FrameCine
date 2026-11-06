@@ -236,6 +236,13 @@ func _run() -> void:
 	_check("Source's places as a list beside the rail, Library first, Test patterns last (%s)" % [names],
 			names[0] == "Library" and names[-1] == "Test patterns" and names.has("Network")
 			and pui.files._places_scroll.is_visible_in_tree())
+	var at_name := func(n: String) -> int: return names.find(n)
+	_check("in groups: the films, the headset's folders, the network, apps, assistants, test patterns (%s)" % [names],
+			names.slice(0, 4) == ["Library", "Search", "Favourites", "Queue"]
+			and at_name.call("Network") < at_name.call("Media servers")
+			and at_name.call("Media servers") < at_name.call("Browser")
+			and at_name.call("Browser") < at_name.call("Android apps")
+			and pui.files._places_box.get_children().any(func(c: Node) -> bool: return not (c is Button)))
 	var patterns_button: Button = place_buttons[-1]
 	patterns_button.pressed.emit()
 	await _frames(2)
@@ -269,25 +276,40 @@ func _run() -> void:
 	await _frames(2)
 	var cards: Array = pui.cards(1)
 	var pic_box: VBoxContainer = pui.tabs[1].box
-	var holder: Node = pic_box.get_node("Cards")
-	var pairs: Array = holder.get_children().filter(func(r: Node) -> bool: return r is HBoxContainer)
-	var both := pairs.any(func(r: Node) -> bool:
-		return r.get_child_count() == 2 and r.get_child(0).get_child_count() > 0 and r.get_child(1).get_child_count() > 0)
-	var shape: Array = holder.get_children().map(func(r: Node) -> String:
-		return "%s:%s" % [r.get_class(), r.get_children().map(func(c: Node) -> int: return c.get_child_count())])
-	_check("Picture's sections as cards in two columns (%d cards, %d runs: %s)" % [cards.size(), pairs.size(), shape],
-			cards.size() >= 6 and both and cards[0] is PanelContainer
-			and cards[0].get_child(0).get_meta("section") == "Mode" and not pui._views.is_visible_in_tree())
+	var names_of := func() -> Array: return pui.section_buttons().map(func(b: Button) -> String: return b.text)
+	var on_show := func() -> Array: return cards.filter(func(c: Control) -> bool:
+		return c.get_parent() != null and c.is_visible_in_tree()).map(func(c: Control) -> String:
+			return W.card_section(c))
+	var secs: Array = names_of.call()
+	_check("Picture: its sections in a column beside the rail (%s)" % [secs], pui._sections_scroll.is_visible_in_tree()
+			and secs.size() >= 6 and secs[0] == "Mode" and not pui.files._places_scroll.is_visible_in_tree()
+			and not pui._views.is_visible_in_tree())
+	_check("one section at a time, the first to begin with (%s)" % [on_show.call()], on_show.call() == ["Mode"]
+			and pui.section_buttons()[0].button_pressed)
+	(pui.section_buttons()[secs.find("Screen")] as Button).pressed.emit()
+	await _frames(2)
+	_check("Screen picked: its card alone, the full width (%s, %.0f of %.0f px)" % [on_show.call(),
+			cards[secs.find("Screen")].size.x if secs.find("Screen") >= 0 else 0.0, pui.tabs[1].size.x],
+			on_show.call() == ["Screen"] and pui.section_buttons()[secs.find("Screen")].button_pressed
+			and not pui.section_buttons()[0].button_pressed)
+	_check("a section with nothing to show is not listed (3D, for a flat film)", not "3D" in secs and cards.any(
+			func(c: Control) -> bool: return W.card_section(c) == "3D" and c.get_parent() == null))
 	pui.tablet_tab_buttons[5].pressed.emit()
 	await _frames(2)
-	var object_cards: Array = pui.cards(5)
-	_check("the Objects tab's one card (its heading inside the section node) is on show (%d)" % object_cards.size(),
-			object_cards.size() == 1 and (object_cards[0] as Control).get_parent() != null
-			and (object_cards[0] as Control).is_visible_in_tree())
+	_check("Objects: Built-in objects, Your objects, In this room (%s)" % [names_of.call()],
+			names_of.call() == ["Built-in objects", "Your objects", "In this room"] and pui.cards(5).size() == 3)
+	pui.tablet_tab_buttons[6].pressed.emit()
+	await _frames(2)
+	_check("Mixed reality: Areas, then Settings (%s)" % [names_of.call()], names_of.call() == ["Areas", "Settings"])
+	pui.tablet_tab_buttons[0].pressed.emit()
+	await _frames(2)
+	_check("Source: its places, no sections column", not pui._sections_scroll.is_visible_in_tree()
+			and pui.files._places_scroll.is_visible_in_tree())
 	pui.tablet_tab_buttons[1].pressed.emit()
 	await _frames(2)
-	_check("a card whose section has nothing to show is left out (3D, for a flat film)", cards.any(
-			func(c: Control) -> bool: return c.get_child(0).get_meta("section") == "3D" and c.get_parent() == null))
+	_check("back on Picture: Screen still picked (%s)" % [on_show.call()], on_show.call() == ["Screen"])
+	pui.show_section("Mode")
+	await _frames(1)
 	_check("no card is wider than the tab (%.0f)" % pui.tabs[1].size.x, cards.all(func(c: Control) -> bool:
 			return c.get_parent() == null or c.get_combined_minimum_size().x <= pui.tabs[1].size.x))
 	tablet.set_enabled(false, false)

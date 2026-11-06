@@ -4,7 +4,8 @@ extends ScrollContainer
 ## cameras (scripts/play/real_windows.gd; docs/USAGE.md "The Mixed reality tab"). Sweep an area: hold the trigger and
 ## pass the controller over the place. Each area on a row with its size, On, Edit (a face at a time: the face shows
 ## bright, the stick moves it, the trigger goes to the next face and then Turn) and Delete (with Undo). All on, All
-## off. Passthrough dimming: the least the room light dims the cameras' view to.
+## off. Settings, a section of its own (the user, 2026-11-06): Passthrough dimming, the least the room light dims the
+## cameras' view to.
 
 const W := preload("res://ui/pane_widgets.gd")
 const PaneStyle := preload("res://ui/pane_style.gd")
@@ -30,6 +31,7 @@ func _init() -> void:
 
 func bind(p_app: Node) -> void:
 	app = p_app
+	box.add_child(W.section("Areas"))
 	box.add_child(W.label("Mark areas to see through to the cameras.", &"MutedLabel"))
 	box.add_child(W.hbox([W.button("Sweep an area", func() -> void: app.ui.start_window_mark())]))
 	box.add_child(W.help("Hold the trigger and pass the controller over the place; let go to keep it."))
@@ -40,6 +42,7 @@ func bind(p_app: Node) -> void:
 	box.add_child(_rows)
 	box.add_child(W.hbox([W.button("All on", func() -> void: _rw().set_all(true)),
 			W.button("All off", func() -> void: _rw().set_all(false))]))
+	box.add_child(W.section("Settings"))
 	_light = W.slider_row("Passthrough dimming", 0.0, 100.0, 5.0,
 			func(v: float) -> String: return "%d %%" % roundi(v),
 			func(v: float) -> void: _rw().set_light_min(v / 100.0))

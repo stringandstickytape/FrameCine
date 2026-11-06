@@ -1,9 +1,9 @@
 extends VBoxContainer
 
-## The Objects tab (ui/objects_tab.gd; docs/assistant.md "Objects", docs/USAGE.md "Objects"): the object library as
-## thumbnails with names, built in and imported; Place, which hands the laser to ui/object_placer.gd; Delete for an
-## imported one (asked first, in the footer, as the panel's other choices are). Under them, what this room has from the
-## library: pick one for its parts, each with its colour, a palette, the picture on show as its picture, a material
+## The Objects tab (ui/objects_tab.gd; docs/assistant.md "Objects", docs/USAGE.md "Objects"), in three sections: Built-in
+## objects and Your objects, the library as thumbnails with names, each with its own Place (which hands the laser to
+## ui/object_placer.gd), Your objects with Delete (asked first, in the footer, as the panel's other choices are) and
+## Fab's downloads; and In this room, what this room has from the library: pick one for its parts, each with its colour, a palette, the picture on show as its picture, a material
 ## from the material library (a picker: each material's swatch and name, filtered by kind), an effect from the effect
 ## library (a picker: each effect's preview and name, filtered by group, its options at their defaults), and Reset;
 ## and Move and Remove (asked first). Everything here calls what the commands call
@@ -51,9 +51,14 @@ var _yours_grid: GridContainer
 var _tiles := {}
 var _ids: Array = []
 var _selected := ""
+## Built-in objects' line and Place; Your objects' line, Place and Delete (one pick across both: the other says
+## to pick).
 var _chosen: Label
 var _place: Button
 var _delete: Button
+var _yours_chosen: Label
+var _yours_place: Button
+var _yours_empty: Label
 var _placed_box: VBoxContainer
 var _placed_names: Array = []
 var _picked := ""
@@ -78,14 +83,27 @@ var _adding := false
 func bind(p_app: Node) -> void:
 	app = p_app
 	add_theme_constant_override("separation", PaneStyle.constant(&"gap"))
-	add_child(W.section("Objects"))
-	add_child(W.label("Built in", &"MutedLabel"))
+	add_child(W.section("Built-in objects"))
 	_grid = _tile_grid()
 	add_child(_grid)
-	_yours_label = W.label("Yours", &"MutedLabel")
+	_chosen = W.ellipsis(W.label("", &"MutedLabel"))
+	_chosen.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_place = W.button("Place", _start_place)
+	add_child(W.hbox([_chosen, _place]))
+	add_child(W.help("Place: point at a wall or the floor, trigger to set it. Stick: turn and size. B cancels."))
+
+	add_child(W.section("Your objects"))
+	_yours_label = W.label("Imported, or kept from a room.", &"MutedLabel")
 	add_child(_yours_label)
+	_yours_empty = W.label("None yet: add one from Fab below.", &"MutedLabel")
+	add_child(_yours_empty)
 	_yours_grid = _tile_grid()
 	add_child(_yours_grid)
+	_yours_chosen = W.ellipsis(W.label("", &"MutedLabel"))
+	_yours_chosen.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_yours_place = W.button("Place", _start_place)
+	_delete = W.button("Delete", _ask_delete)
+	add_child(W.hbox([_yours_chosen, _yours_place, _delete]))
 	_fab_box = W.vbox()
 	var fab_label := W.label("In Downloads, from Fab", &"MutedLabel")
 	fab_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -94,12 +112,8 @@ func bind(p_app: Node) -> void:
 	_fab_buttons.visible = false
 	_fab_box.add_child(_fab_buttons)
 	add_child(_fab_box)
-	_chosen = W.ellipsis(W.label("", &"MutedLabel"))
-	_place = W.button("Place", _start_place)
-	_delete = W.button("Delete", _ask_delete)
-	add_child(W.hbox([_chosen, _place, _delete]))
-	add_child(W.help("Place: point at a wall or the floor, trigger to set it. Stick: turn and size. B cancels."))
-	add_child(W.label("In this room", &"MutedLabel"))
+
+	add_child(W.section("In this room"))
 	_empty = W.label("Nothing from the library yet.", &"MutedLabel")
 	add_child(_empty)
 	_placed_box = VBoxContainer.new()
@@ -150,8 +164,9 @@ func _sync_library() -> void:
 		var group := ButtonGroup.new()
 		for m: Dictionary in list:
 			_tile(m, group)
-		_yours_label.visible = _yours_grid.get_child_count() > 0
-		_yours_grid.visible = _yours_label.visible
+		_yours_grid.visible = _yours_grid.get_child_count() > 0
+		_yours_label.visible = _yours_grid.visible
+		_yours_empty.visible = not _yours_grid.visible
 	if not (_selected in _ids):
 		_selected = ""
 	for id: String in _tiles:
@@ -255,14 +270,16 @@ func _tile_grid() -> GridContainer:
 
 func _sync_chosen() -> void:
 	var m := ObjectLibrary.get_object(_selected) if _selected != "" else {}
-	if m.is_empty():
-		_chosen.text = "Pick an object, then Place."
-	else:
+	var yours: bool = not m.is_empty() and m["source"] == "user"
+	var line := ""
+	if not m.is_empty():
 		var n := (m.get("parts", []) as Array).size()
-		_chosen.text = "%s  ·  %s  ·  %d part%s%s" % [m["name"], m["mount"], n, "" if n == 1 else "s",
-				"  ·  yours" if m["source"] == "user" else "  ·  built in"]
-	_place.disabled = m.is_empty()
-	_delete.visible = not m.is_empty() and m["source"] == "user"
+		line = "%s  ·  %s  ·  %d part%s" % [m["name"], m["mount"], n, "" if n == 1 else "s"]
+	_chosen.text = line if not m.is_empty() and not yours else "Pick an object, then Place."
+	_place.disabled = m.is_empty() or yours
+	_yours_chosen.text = line if yours else "Pick one, then Place."
+	_yours_place.disabled = not yours
+	_delete.visible = yours
 
 
 ## The panel scrolls so that Place shows: it sits under the grid, often below the visible part of the tab.
@@ -271,7 +288,8 @@ func _show_place() -> void:
 	while p != null and not (p is ScrollContainer):
 		p = p.get_parent()
 	if p != null:
-		(p as ScrollContainer).ensure_control_visible(_place)
+		var yours := _selected != "" and str(ObjectLibrary.get_object(_selected).get("source", "")) == "user"
+		(p as ScrollContainer).ensure_control_visible(_yours_place if yours else _place)
 
 
 func _start_place() -> void:

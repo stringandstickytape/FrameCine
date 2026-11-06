@@ -262,16 +262,26 @@ It needs the `PLAYER_BINAURAL` engine or a later one. On older engines the tab s
 The same settings are in the dev link and for an assistant: `set_sound` with `speakers`, `bass_channel`,
 `output_profile`, `hrtf` and `room_reverb`, and `download_hrtf`.
 
+## The tabs' sections
+
+On the main pane each tab but Source has a column of its sections beside the tabs, as Source has its places. Pick
+one and it fills the rest of the pane. A section with nothing to show now (3D, for a flat film) is not listed. The
+front panel shows each tab's sections one under another.
+
+Source lists its places in groups: your films (Library, Search, Favourites, Queue), the headset's folders (Videos
+and Downloads first, then home and drives), the network (Network, Media servers), apps (Browser, Android apps), the
+assistants, and Test patterns last.
+
 ## The Objects tab
 
 The **Objects** tab (after Room) is the object library (`docs/assistant.md`, "Objects"): things to put in the room,
 built in (a picture frame, a wall shelf, a pot plant, a wall clock) and imported (by an assistant, or with
-`object_import` from the dev link: a `.glb`, or an SVG drawing made solid). The built-in ones come first under
-**Built in**; the ones that are this install's own (imported, or kept from a room) under **Yours**, which only shows
-when there are some. One controller does it all.
+`object_import` from the dev link: a `.glb`, or an SVG drawing made solid). It has three sections: **Built-in
+objects**, **Your objects** (this install's own: imported, or kept from a room) and **In this room** (what the room
+has from the library, with its parts). Each list of objects has its own **Place**. One controller does it all.
 
 A scanned object downloaded from the Fab store (the Low or Medium quality zip, into Downloads on the headset) shows
-under **In Downloads, from Fab**: **Add <name>** makes it one of yours. **Visit Fab to download objects**, beside
+in **Your objects** under **In Downloads, from Fab**: **Add <name>** makes it one of yours. **Visit Fab to download objects**, beside
 that heading, opens the store's free scanned objects in the browser. It stays on the headset: the Fab licence lets
 you use it, not share it.
 
@@ -322,7 +332,8 @@ moves them; sweep them again then).
   for a face on your left or right, up (away) and down (nearer) for a face towards or away from you. The opposite
   face stays put, so moving faces both sizes and moves the box. The trigger goes to the next face, and after the six
   to **Turn**, where left and right turn the box. The menu button keeps it; B puts it back.
-- **Passthrough dimming**: the room light dims the cameras' view too, never below this (70 % at first).
+- **Settings**, a section of its own: **Passthrough dimming**. The room light dims the cameras' view too, never below
+  this (70 % at first).
 
 B cancels any of them. While you mark or edit, a card over the controller says what to do at each step.
 

@@ -17,8 +17,9 @@ extends PanelContainer
 ## down the left a rail of the tabs, an icon (ui/icons.gd) and the name each, Files called Source; the tab in the
 ## rest of the width. Source: the places as chips over the files tab (FilesTab.places_in_order(); the tab's own
 ## places column goes), with a view selector at the right (details, list, grid: `view`, [browser] view; the views
-## themselves are to come). Any other tab: its sections as cards, two to a row (W.card_layout()). The footer under
-## it all. No backdrop of its own: the tablet's pane shows through. Lists are dragged to scroll (ui/pane.gd).
+## themselves are to come). Any other tab: a column of its sections beside the rail, as Source's places (the user,
+## 2026-11-06: every tab its own list), and the section picked as a card the full width (W.card_layout(),
+## W.refresh_cards()); a section with nothing to show (3D for a flat film) leaves the column. The footer under it all. No backdrop of its own: the tablet's pane shows through. Lists are dragged to scroll (ui/pane.gd).
 
 const PaneStyle := preload("res://ui/pane_style.gd")
 const W := preload("res://ui/pane_widgets.gd")
@@ -115,6 +116,13 @@ var _tablet_theme: Theme
 var _tabs_box: VBoxContainer
 var _tablet_row: HBoxContainer
 var tablet_tab_buttons: Array[Button] = []
+## The tablet's sections column (any tab but Source): its scroll, buttons and rule, the section picked on each tab
+## (tab -> section; the first shown when none, or when the one picked has nothing to show), and what it lists.
+var _sections_scroll: ScrollContainer
+var _sections_box: VBoxContainer
+var _sections_rule: VSeparator
+var _section_of := {}
+var _sections_key := ""
 ## The browser's view selector (VIEWS), in the footer on the tablet while Source shows.
 var _views: HBoxContainer
 var _view_buttons: Array[Button] = []
@@ -142,6 +150,8 @@ func apply_style() -> void:
 		_refresh_rail()
 	if files != null:
 		files.set_places_width(PaneStyle.constant(&"places_width") * text_scale)
+	if _sections_scroll != null:
+		_sections_scroll.custom_minimum_size.x = PaneStyle.constant(&"places_width") * text_scale
 	queue_redraw()
 
 
@@ -358,6 +368,9 @@ func show_tab(index: int) -> void:
 		tablet_tab_buttons[i].set_pressed_no_signal(i == current_tab)
 	if _views != null:
 		_views.visible = tablet_layout and current_tab == Tab.FILES
+	if _sections_scroll != null:
+		_sections_scroll.visible = tablet_layout and current_tab != Tab.FILES
+		_sections_rule.visible = _sections_scroll.visible
 	if tablet_layout:
 		_refresh_rail()
 		if current_tab != Tab.FILES:
@@ -448,6 +461,20 @@ func _build_tablet_row() -> void:
 		tablet_tab_buttons.append(b)
 	_tablet_row.add_child(rail)
 	_tablet_row.add_child(VSeparator.new())
+	# The sections column: as the files tab's places column, the same width and buttons.
+	_sections_scroll = ScrollContainer.new()
+	_sections_scroll.name = "Sections"
+	_sections_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_sections_scroll.custom_minimum_size.x = PaneStyle.constant(&"places_width") * text_scale
+	_sections_box = VBoxContainer.new()
+	_sections_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_sections_box.add_theme_constant_override("separation", 0)
+	_sections_scroll.add_child(_sections_box)
+	_tablet_row.add_child(_sections_scroll)
+	_sections_rule = VSeparator.new()
+	_tablet_row.add_child(_sections_rule)
+	_sections_scroll.visible = false
+	_sections_rule.visible = false
 	var content := VBoxContainer.new()
 	content.name = "Content"
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -502,10 +529,70 @@ func set_view(v: String) -> void:
 	_refresh_rail()
 
 
-## Packs the tab's cards for the body's width (W.refresh_cards()): the tab fills the body, and the body is always
-## laid out, where a tab just shown still has the size it last had.
+## Packs the tab's card for the body's width (W.refresh_cards()): the section picked in the column alone. The tab
+## fills the body, and the body is always laid out, where a tab just shown still has the size it last had.
 func _pack_cards() -> void:
-	W.refresh_cards(tabs[current_tab].get("box"), _body.size.x - 16.0)
+	var box: VBoxContainer = tabs[current_tab].get("box")
+	var names := W.shown_sections(box)
+	var picked := section_shown()
+	_sync_sections(names, picked)
+	W.refresh_cards(box, _body.size.x - 16.0, picked)
+
+
+## The section on show in the current tab on the tablet: the one picked, while it has something to show, else the
+## first that has.
+func section_shown() -> String:
+	var box: Variant = tabs[current_tab].get("box")
+	if not (box is VBoxContainer):
+		return ""
+	var names := W.shown_sections(box)
+	var picked := str(_section_of.get(current_tab, ""))
+	return picked if picked in names else (names[0] if not names.is_empty() else "")
+
+
+## Picks a section of the current tab (the column's buttons; tests).
+func show_section(section: String) -> void:
+	_section_of[current_tab] = section
+	_pack_cards()
+	# The tab's scroll back to the top: a new card, not the old one's place in it.
+	var t: Control = tabs[current_tab]
+	if t is ScrollContainer:
+		(t as ScrollContainer).scroll_vertical = 0
+
+
+## The column's buttons, built again only when the tab or its sections change.
+func _sync_sections(names: Array[String], picked: String) -> void:
+	if _sections_box == null:
+		return
+	var key := "%d:%s" % [current_tab, "|".join(names)]
+	if key != _sections_key:
+		_sections_key = key
+		for c in _sections_box.get_children():
+			_sections_box.remove_child(c)
+			c.queue_free()
+		for n in names:
+			var s := n
+			var b := W.button(n, func() -> void: show_section(s), &"PlaceButton")
+			b.custom_minimum_size.y = PaneStyle.constant(&"row_height")
+			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			b.clip_text = true
+			b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			b.toggle_mode = true
+			b.set_meta("section", n)
+			_sections_box.add_child(b)
+	for b in _sections_box.get_children():
+		if b is Button:
+			(b as Button).set_pressed_no_signal(str(b.get_meta("section")) == picked)
+
+
+## The sections column's buttons (tests).
+func section_buttons() -> Array[Button]:
+	var out: Array[Button] = []
+	if _sections_box != null:
+		for b in _sections_box.get_children():
+			if b is Button and not b.is_queued_for_deletion():
+				out.append(b)
+	return out
 
 
 ## A tab's cards on the tablet (PanelContainers, W.card_layout()); none for the files tab.

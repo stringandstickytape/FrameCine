@@ -250,8 +250,16 @@ func _ready() -> void:
 func _build_places() -> void:
 	for c in _places_box.get_children():
 		c.queue_free()
+	var group := -1
 	for place in places_in_order():
 		var p: String = place["path"]
+		# A small gap between the groups (place_group()).
+		if group >= 0 and int(place["group"]) != group:
+			var gap := Control.new()
+			gap.custom_minimum_size.y = PaneStyle.constant(&"gap")
+			gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			_places_box.add_child(gap)
+		group = int(place["group"])
 		var b := W.button(place["label"], func() -> void:
 			open_folder(p)
 			# An agent's entry: a running one comes up on the controller; else the list offers how to start it.
@@ -303,28 +311,51 @@ func set_places_width(px: float) -> void:
 	_places_scroll.custom_minimum_size.x = px
 
 
-## The places in order: the library and the lists first, then the network, the folders on the headset, the agents,
-## and the test patterns last.
+## The places in order, in groups (the user, 2026-11-06: in the order they were made, not the obvious one): the
+## viewer's films (Library, Search, Favourites, Queue), the headset's folders (Videos and Downloads first, then home,
+## drives and the rest), the network (shares, media servers), apps (Browser, Android apps), the assistants, and the
+## test patterns last. Each has "group" (place_group()), and the column leaves a gap where the group changes.
 static func places_in_order() -> Array[Dictionary]:
-	var first: Array[String] = [LibraryIndex.root(), FAVOURITES_FOLDER, QUEUE_FOLDER, SEARCH_FOLDER, NETWORK_FOLDER,
-			MEDIA_SERVERS_FOLDER, ANDROID_FOLDER, BROWSER_FOLDER]
-	var top: Array[Dictionary] = []
-	var folders: Array[Dictionary] = []
-	var agents: Array[Dictionary] = []
-	var last: Array[Dictionary] = []
-	for p: Dictionary in get_places():
-		var path := str(p["path"])
-		if path in first:
-			top.append(p)
-		elif path.begins_with(AGENT_PREFIX):
-			agents.append(p)
-		elif path == PATTERNS_FOLDER:
-			last.append(p)
-		else:
-			folders.append(p)
-	top.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		return first.find(str(a["path"])) < first.find(str(b["path"])))
-	return top + folders + agents + last
+	var places := get_places()
+	var keyed: Array = []
+	for i in places.size():
+		var p: Dictionary = places[i].duplicate()
+		p["group"] = place_group(str(p["path"]))
+		keyed.append([p["group"], _place_rank(str(p["path"])), i, p])
+	keyed.sort_custom(func(a: Array, b: Array) -> bool:
+		for k in 3:
+			if a[k] != b[k]:
+				return a[k] < b[k]
+		return false)
+	var out: Array[Dictionary] = []
+	for k: Array in keyed:
+		out.append(k[3])
+	return out
+
+
+## A place's group in the column: 0 the viewer's films, 1 the headset's folders, 2 the network, 3 apps, 4 the
+## assistants, 5 the test patterns.
+static func place_group(path: String) -> int:
+	if path in [LibraryIndex.root(), SEARCH_FOLDER, FAVOURITES_FOLDER, QUEUE_FOLDER]:
+		return 0
+	if path in [NETWORK_FOLDER, MEDIA_SERVERS_FOLDER]:
+		return 2
+	if path in [BROWSER_FOLDER, ANDROID_FOLDER]:
+		return 3
+	if path.begins_with(AGENT_PREFIX):
+		return 4
+	if path == PATTERNS_FOLDER:
+		return 5
+	return 1
+
+
+## Within a group: the named places in this order, the rest after them as get_places() lists them.
+static func _place_rank(path: String) -> int:
+	var named: Array[String] = [LibraryIndex.root(), SEARCH_FOLDER, FAVOURITES_FOLDER, QUEUE_FOLDER,
+			_system_dir(OS.SYSTEM_DIR_MOVIES), _system_dir(OS.SYSTEM_DIR_DOWNLOADS), NETWORK_FOLDER,
+			MEDIA_SERVERS_FOLDER, BROWSER_FOLDER, ANDROID_FOLDER]
+	var i := named.find(path)
+	return i if i >= 0 else named.size()
 
 
 ## [{label, path}] in display order; only places that exist.

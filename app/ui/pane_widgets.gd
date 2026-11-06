@@ -210,32 +210,50 @@ static func cards(box: VBoxContainer) -> Array:
 	return holder.get_meta("all", []) if holder != null else []
 
 
-## Packs the cards for a width (pixels): a card whose section has nothing to show (a tab hides what doesn't apply,
-## such as 3D for a flat film) is left out; a card too wide for half the width takes a row of its own; a run of
-## cards that fit go into two columns, each to the shorter column, so a tall list and a short card don't stretch
-## each other. Packed again only when that changes.
-static func refresh_cards(box: VBoxContainer, width: float) -> void:
+## A card (card_layout()) has something to show past its heading: a tab hides what doesn't apply, such as 3D for a
+## flat film. A group whose heading sits inside its one child has no heading of its own at the front: every child
+## counts then.
+static func card_shows(card: Control) -> bool:
+	var g: Node = card.get_child(0)
+	var first := 1 if g.get_child_count() > 0 and g.get_child(0).has_meta("section") else 0
+	for i in range(first, g.get_child_count()):
+		var c: Node = g.get_child(i)
+		if c is CanvasItem and (c as CanvasItem).visible:
+			return true
+	return false
+
+
+## The card's section (its group's "section" meta).
+static func card_section(card: Control) -> String:
+	return str(card.get_child(0).get_meta("section", ""))
+
+
+## The sections of a box laid out as cards that have something to show, in order (the tablet's sections column,
+## ui/pane_ui.gd).
+static func shown_sections(box: VBoxContainer) -> Array[String]:
+	var out: Array[String] = []
+	for card: Control in cards(box):
+		if card_shows(card):
+			out.append(card_section(card))
+	return out
+
+
+## Packs the cards for a width (pixels): a card whose section has nothing to show (card_shows()) is left out; a card
+## too wide for half the width takes a row of its own; a run of cards that fit go into two columns, each to the
+## shorter column, so a tall list and a short card don't stretch each other. `only`: that section's card alone, the
+## full width (the tablet's sections column picks it). Packed again only when that changes.
+static func refresh_cards(box: VBoxContainer, width: float, only := "") -> void:
 	var holder: VBoxContainer = (box.get_meta("cards") if box.has_meta("cards") else null)
 	if holder == null:
 		return
 	var gap := PaneStyle.constant(&"gap")
 	var half := (width - gap) * 0.5
 	var shown: Array = []
-	var key := ""
+	var key := only + ":"
 	for card: Control in holder.get_meta("all", []):
-		var g: Node = card.get_child(0)
-		# Something past the heading is on show. A group whose heading sits inside its one child (the Objects tab's
-		# section node) has no heading of its own at the front: every child counts then.
-		var first := 1 if g.get_child_count() > 0 and g.get_child(0).has_meta("section") else 0
-		var any := false
-		for i in range(first, g.get_child_count()):
-			var c: Node = g.get_child(i)
-			if c is CanvasItem and (c as CanvasItem).visible:
-				any = true
-				break
-		if any:
+		if card_shows(card) and (only == "" or card_section(card) == only):
 			shown.append(card)
-			key += "1" if card.get_combined_minimum_size().x <= half else "W"
+			key += "W" if only != "" or card.get_combined_minimum_size().x > half else "1"
 		else:
 			key += "0"
 	if key == str(holder.get_meta("packed", "")):
@@ -250,7 +268,7 @@ static func refresh_cards(box: VBoxContainer, width: float) -> void:
 	var columns: Array = []
 	var heights := [0.0, 0.0]
 	for card: Control in shown:
-		if card.get_combined_minimum_size().x > half:
+		if only != "" or card.get_combined_minimum_size().x > half:
 			columns = []
 			holder.add_child(card)
 			continue
