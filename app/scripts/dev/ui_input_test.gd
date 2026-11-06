@@ -1,13 +1,17 @@
 extends Node
 
-## --ui-test: drives the pane (ui/) through the same path the controllers use. For each control: its pixel -> the
-## world point on the pane quad -> a ray from the camera -> Pane.ray_hit() (checked against the pixel) ->
-## pointer_move / pointer_button / pointer_scroll. Then checks the app's state. The stick focus goes through
-## UILayer.on_stick() / on_trigger() as the controllers' would. Prints PASS / FAIL lines and quits with the number of
-## failures as the exit code. Runs headless.
+## --ui-test: drives the menu on the tablet (ui/tablet.gd, the panel ui/pane.gd on its main pane) through the same
+## path the controllers use. For each control: its pixel -> the world point on the pane quad -> a ray from the camera
+## -> Pane.ray_hit() (checked against the pixel) -> pointer_move / pointer_button / pointer_scroll. Then checks the
+## app's state. A tab other than Source shows one section at a time: a control on another section's card is out of
+## the tree, so the finders pick its section first (_find_button(), _reveal()). The tablet's time bar is hit with
+## Tablet.ray_hit() and grabbed through UILayer.on_trigger(). The stick focus goes through UILayer.on_stick() /
+## on_trigger() as the controllers' would. Prints PASS / FAIL lines and quits with the number of failures as the exit
+## code. Runs headless.
 
 const VideoMode := preload("res://scripts/video_mode.gd")
 const PaneUI := preload("res://ui/pane_ui.gd")
+const Tablet := preload("res://ui/tablet.gd")
 const W := preload("res://ui/pane_widgets.gd")
 const NetworkHosts := preload("res://scripts/net/network_hosts.gd")
 const DirectoryLister := preload("res://scripts/net/directory_lister.gd")
@@ -48,8 +52,12 @@ func _run() -> void:
 	await _seconds(0.3)
 	_check("panel: with a file open, the header has the time left and the end (%s)" % ui.status_line_text(),
 			ui.status_line_text().contains(" left, ends "))
-	await _click(ui.tab_buttons[PaneUI.Tab.PICTURE])
-	_check("tab click selects Picture", ui.current_tab == PaneUI.Tab.PICTURE and ui.picture.is_visible_in_tree())
+	await _rail(ui, PaneUI.Tab.PICTURE)
+	_check("rail click selects Picture, a section on show and marked (%s)" % ui.section_shown(),
+			ui.current_tab == PaneUI.Tab.PICTURE and ui.picture.is_visible_in_tree() and ui.section_shown() != ""
+			and ui.tablet_tab_buttons[PaneUI.Tab.PICTURE].button_pressed and ui.section_buttons().any(
+				func(b: Button) -> bool: return b.button_pressed and b.text == ui.section_shown()))
+	await _section_click_checks(ui)
 	await _click(_find_diagram(ui, "SBS"))
 	_check("layout diagram sets side by side", main.mode.layout == VideoMode.Layout.SBS and main.mode_source == "user")
 	await _click(_find_diagram(ui, "360°"))
@@ -58,15 +66,8 @@ func _run() -> void:
 	_check("auto restores the pattern's mode", main.mode.to_id() == "180_mono")
 	_check("footer says how the mode was chosen (%s)" % ui._footer_text.text, ui._footer_text.text != "")
 
-	# Seek bar: a click at a quarter of its length.
-	var seek: Control = ui.seek
-	var r := seek.get_global_rect()
-	var knob := 12.0
-	await _click_pixel(r.position + Vector2(knob * 0.5 + (r.size.x - knob) * 0.25, r.size.y * 0.5))
-	await _frames(2)
+	await _tablet_bar_checks(ui)
 	var pos: float = main.player.get_position()
-	_check("seek bar click seeks to ~25%% (%.1f s of %.0f)" % [pos, main.player.get_duration()],
-			absf(pos - main.player.get_duration() * 0.25) < main.player.get_duration() * 0.05)
 	await _click(_find_button(ui, "+10 s"))
 	_check("+10 s button", absf(main.player.get_position() - pos - 10.0) < 1.0)
 
@@ -75,9 +76,10 @@ func _run() -> void:
 	await _frames(5)
 	main.ui.show_panel()
 	await _seconds(0.3)
-	await _click(ui.tab_buttons[PaneUI.Tab.PICTURE])
+	await _rail(ui, PaneUI.Tab.PICTURE)
 	var width_slider: HSlider = W.slider_of(ui.picture._rows["width"])
-	ui.picture.ensure_control_visible(width_slider)
+	await _reveal(ui, width_slider)
+	await _bring_on_pane(width_slider)
 	await _frames(2)
 	var before: float = main.screen_width
 	var wr := width_slider.get_global_rect()
@@ -86,12 +88,12 @@ func _run() -> void:
 	await _drag(start, start + Vector2(120, 0))
 	_check("dragging the size slider widens the screen (%.2f -> %.2f m)" % [before, main.screen_width],
 			main.screen_width > before + 0.5)
-	await _click(ui.tab_buttons[PaneUI.Tab.ROOM])
+	await _rail(ui, PaneUI.Tab.ROOM)
 	await _click(_find_button(ui, "Cinema"))
 	_check("environment button loads the cinema", main.env_id == "cinema" and main.env.display_name == "Cinema")
 
 	# Files tab: wheel scrolling on the list.
-	await _click(ui.tab_buttons[PaneUI.Tab.FILES])
+	await _rail(ui, PaneUI.Tab.FILES)
 	ui.files.open_folder("stub://")
 	await _frames(3)
 	var scroll: ScrollContainer = ui.files.list_scroll()
@@ -192,49 +194,72 @@ func _run() -> void:
 	main.get_tree().quit(_failures)
 
 
-## The front panel (docs/ui-design.md, "Revision 2"): either controller's menu button opens it with that controller as
-## the pointer, a short press closes it, a hold recentres it; it is world-locked; lying back puts it overhead; head
-## follow when asked; the stick nudges a slider under the laser; the dev link's `menu` command picks the pointer.
+## The tablet, the one menu (ui/tablet.gd, docs/ui-design.md): either controller's menu button opens it with that
+## controller as the pointer, placed from the head (ahead and below, tilted up to the eyes, the panel on its main
+## pane), a short press closes it, a hold recentres it; it stays put in the room when the head turns; looking up
+## doesn't lift it (it goes by the heading only); the stick nudges a slider under the laser; the dev link's `menu`
+## command picks the pointer.
 func _panel_checks(ui: PaneUI) -> void:
 	const DevCommands := preload("res://scripts/dev/dev_commands.gd")
 	var cam: Camera3D = main.camera
-	var d: float = main.ui.panel.global_position.distance_to(cam.global_position)
-	_check("panel: 0.6 m in front of the head (%.3f m, %.1f° off)" % [d, _off_deg()], absf(d - 0.6) < 0.01
-			and _off_deg() < 0.5)
-	_check("panel: at eye height, facing the head", absf(main.ui.panel.global_position.y - cam.global_position.y) < 0.01
-			and main.ui.panel.global_basis.z.dot((cam.global_position - main.ui.panel.global_position).normalized()) > 0.999)
+	var tablet: Tablet = main.ui.tablet
+	# The first moments after launch place it again as the head settles (ui_layer.gd): past them.
+	main.ui._replace_left = 0.0
+	var tp: Vector3 = tablet.global_position
+	var to_eye: Vector3 = (cam.global_position - tp).normalized()
+	var ahead: float = (tp - cam.global_position).dot(-cam.global_basis.z)
+	_check("tablet: shown, placed for the head (%s)" % tp, tablet.is_shown() and _tablet_in_front())
+	_check("tablet: ahead of and below the eyes, its face tilted up to them (%.2f m ahead, %.2f m down, %.1f° off)"
+			% [ahead, cam.global_position.y - tp.y, rad_to_deg(tablet.global_basis.z.angle_to(to_eye))],
+			ahead > 0.25 and tp.y < cam.global_position.y - 0.2
+			and tablet.global_basis.z.angle_to(to_eye) < deg_to_rad(15.0) and absf(tablet.global_basis.x.y) < 0.001)
+	_check("tablet: the panel is the menu on its main pane", _panel_on_tablet())
 	await _seconds(0.2)
 	_check("panel: the header shows the clock (%s)" % ui.status_line_text(), ui.status_line_text().contains(":")
 			and not ui.status_line_text().contains(" left"))
+	_check("panel: the transport over the rail", ui._transport.is_visible_in_tree() and ui._play_button.is_visible_in_tree()
+			and ui._transport.get_global_rect().end.y <= ui._tablet_row.get_global_rect().position.y + 1.0)
+	_check("panel: the rail, a row per tab (%s)" % [ui.tablet_tab_buttons.map(func(b: Button) -> String: return b.text)],
+			ui.tablet_tab_buttons.size() == PaneUI.TAB_NAMES.size()
+			and ui.tablet_tab_buttons.all(func(b: Button) -> bool: return b.is_visible_in_tree()))
+	# All of it on the pane: the rail's last row and the footer too, or the laser can't reach them.
+	var last_row: Rect2 = ui.tablet_tab_buttons[-1].get_global_rect()
+	_check("panel: the menu fits the tablet's main pane (%d of %d px; the rail ends at %d, the footer at %d)"
+			% [ui.get_combined_minimum_size().y, main.ui.panel.resolution.y, last_row.end.y,
+			ui._footer_count.get_global_rect().end.y], ui.get_combined_minimum_size().y <= main.ui.panel.resolution.y
+			and last_row.end.y <= main.ui.panel.resolution.y)
 	main.on_menu(main.right_hand, true)
 	await _frames(2)
 	main.on_menu(main.right_hand, false)
 	await _seconds(0.3)
-	_check("menu (right), a short press: the panel closes", not main.ui.is_open() and not main.ui.panel.visible
-			and not main.menu_shown)
+	_check("menu (right), a short press: the panel and the tablet close", not main.ui.is_open()
+			and not main.ui.panel.visible and not main.menu_shown and not tablet.is_shown())
 	main.on_menu(main.left_hand, true)
 	await _frames(2)
 	main.on_menu(main.left_hand, false)
 	await _seconds(0.3)
 	_check("menu (left): opens with the left controller pointing", main.ui.is_open() and main.ui.panel.visible
-			and main.ui.pointer_hand == main.left_hand and main.ui.other_hand == main.right_hand)
-	var before: Transform3D = main.ui.panel.global_transform
+			and tablet.is_shown() and main.ui.pointer_hand == main.left_hand and main.ui.other_hand == main.right_hand)
+	main.ui._replace_left = 0.0
+	var before: Transform3D = tablet.global_transform
+	var panel_before: Transform3D = main.ui.panel.global_transform
 	main._look = Vector2(60, 0)
 	main._apply_look()
 	await _frames(10)
-	_check("world-locked: a 60° head turn leaves the panel where it was",
-			main.ui.panel.global_transform.is_equal_approx(before) and _off_deg() > 50.0)
+	_check("fixed in the room: a 60° head turn leaves the tablet and the panel where they were",
+			tablet.global_transform.is_equal_approx(before) and main.ui.panel.global_transform.is_equal_approx(panel_before)
+			and not _tablet_in_front())
 	main.on_menu(main.right_hand, true)
 	await _seconds(0.3)
-	_check("menu (right) held 0.3 s: nothing yet", main.ui.panel.global_transform.is_equal_approx(before)
+	_check("menu (right) held 0.3 s: nothing yet", tablet.global_transform.is_equal_approx(before)
 			and main.ui.pointer_hand == main.left_hand)
 	await _seconds(0.45)
-	_check("menu (right) held 0.75 s: recentred in front of the turned head, the right controller pointing (%.1f°)"
-			% _off_deg(), main.ui.is_open() and _off_deg() < 0.5 and main.ui.pointer_hand == main.right_hand)
+	_check("menu (right) held 0.75 s: recentred for the turned head, the right controller pointing", main.ui.is_open()
+			and _tablet_in_front() and _panel_on_tablet() and main.ui.pointer_hand == main.right_hand)
 	main.on_menu(main.right_hand, false)
 	await _frames(2)
-	_check("released after the hold: the panel stays open", main.ui.is_open())
-	# Lying back, looking at the ceiling: M held recentres it overhead, facing the face (the desktop's menu button).
+	_check("released after the hold: the panel stays open", main.ui.is_open() and tablet.is_shown())
+	# Looking up: M held (the desktop's menu button) recentres by the heading only, so the tablet stays below.
 	main._look = Vector2(0, 85)
 	main._apply_look()
 	var key := InputEventKey.new()
@@ -246,37 +271,20 @@ func _panel_checks(ui: PaneUI) -> void:
 	up.keycode = KEY_M
 	Input.parse_input_event(up)
 	await _frames(2)
-	var p: Vector3 = main.ui.panel.global_position
-	_check("lying back: M held recentres it overhead (%s), facing the face" % p, main.ui.is_open()
-			and p.y > cam.global_position.y + 0.55 and _off_deg() < 0.5
-			and main.ui.panel.global_basis.z.dot((cam.global_position - p).normalized()) > 0.999)
-	_check("lying back: the panel's up is the head's up", main.ui.panel.global_basis.y.dot(cam.global_basis.y) > 0.999)
+	var level := Transform3D(Basis(Vector3.UP, cam.global_rotation.y), cam.global_position)
+	_check("looking up: M held recentres it, below the eyes as for a level head (%s)" % tablet.global_position,
+			main.ui.is_open() and _tablet_in_front() and tablet.global_transform.is_equal_approx(Tablet.pose(level))
+			and tablet.global_position.y < cam.global_position.y - 0.2)
 	_check("the M key keeps the pointer it had", main.ui.pointer_hand == main.right_hand)
-	# Head follow, for those who want it: a big turn is caught up with, a small one isn't.
-	main.settings.set_value("pane", "world_locked", false)
-	ui.system.layout_changed.emit()
-	main._look = Vector2.ZERO
-	main._apply_look()
-	main.ui.show_panel()
-	main._look = Vector2(50, 0)
-	main._apply_look()
-	await _seconds(2.0)
-	_check("world_locked off: the panel catches up with a 50° turn (%.1f° off)" % _off_deg(), _off_deg() < 4.0)
-	before = main.ui.panel.global_transform
-	main._look = Vector2(62, 0)
-	main._apply_look()
-	await _seconds(0.5)
-	_check("world_locked off: a 12° turn doesn't move it", main.ui.panel.global_transform.is_equal_approx(before))
-	main.settings.set_value("pane", "world_locked", null)
-	ui.system.layout_changed.emit()
 	main._look = Vector2.ZERO
 	main._apply_look()
 	main.ui.show_panel(main.right_hand)
 	await _seconds(0.3)
 	# The stick on a slider under the laser nudges it (right: more); the list under it scrolls (checked below).
-	await _click(ui.tab_buttons[PaneUI.Tab.PICTURE])
+	await _rail(ui, PaneUI.Tab.PICTURE)
 	var slider: HSlider = W.slider_of(ui.picture._rows["width"])
-	ui.picture.ensure_control_visible(slider)
+	await _reveal(ui, slider)
+	await _bring_on_pane(slider)
 	await _frames(2)
 	var hit := _hit_for_pixel(slider.get_global_rect().get_center())
 	main.ui._pointed = true
@@ -291,7 +299,7 @@ func _panel_checks(ui: PaneUI) -> void:
 	main.ui._hit = {}
 	main.ui.panel.pointer_exit()
 	slider.value = was
-	await _click(ui.tab_buttons[PaneUI.Tab.FILES])
+	await _rail(ui, PaneUI.Tab.FILES)
 	# The dev link's menu command: hand = left makes the left controller the pointer.
 	preload("res://scripts/dev/command_host.gd").ensure(main.get_tree())
 	await _frames(2)
@@ -299,24 +307,132 @@ func _panel_checks(ui: PaneUI) -> void:
 	_check("dev menu command, hand left: open, the left controller pointing (%s)" % r, main.ui.is_open()
 			and main.ui.pointer_hand == main.left_hand)
 	await DevCommands.execute("menu", {"shown": false}, false)
-	_check("dev menu command, shown false: closed", not main.ui.is_open())
+	_check("dev menu command, shown false: closed", not main.ui.is_open() and not tablet.is_shown())
 	main.ui.show_panel(main.right_hand)
 	await _seconds(0.3)
 
 
-## Degrees between the head's line of sight and the direction to the panel's centre.
-func _off_deg() -> float:
-	var cam: Camera3D = main.camera
-	return rad_to_deg((-cam.global_basis.z).angle_to(main.ui.panel.global_position - cam.global_position))
+## The tablet where Tablet.pose() puts it for the head as it is now.
+func _tablet_in_front() -> bool:
+	return main.ui.tablet.global_transform.is_equal_approx(Tablet.pose(main.camera.global_transform))
+
+
+## The panel on the tablet's main pane (Tablet.panel_transform()), its size.
+func _panel_on_tablet() -> bool:
+	var tablet: Tablet = main.ui.tablet
+	return (main.ui.panel.global_transform.is_equal_approx(tablet.panel_transform())
+			and main.ui.panel.size_m.is_equal_approx(tablet.panel_rect().size))
+
+
+## Picture's sections column: a click on a section's button shows that section's card alone; another, that one.
+func _section_click_checks(ui: PaneUI) -> void:
+	var names: Array = ui.section_buttons().map(func(b: Button) -> String: return b.text)
+	_check("Picture: a sections column, Mode first (%s)" % [names], ui._sections_scroll.is_visible_in_tree()
+			and names.size() >= 3 and names[0] == "Mode" and names.has("Screen"))
+	var cards: Array = ui.cards(PaneUI.Tab.PICTURE)
+	var on_show := func() -> Array: return cards.filter(func(c: Control) -> bool:
+		return c.get_parent() != null and c.is_visible_in_tree()).map(func(c: Control) -> String:
+			return W.card_section(c))
+	for want: String in ["Screen", "Mode"]:
+		var b: Button = null
+		for s in ui.section_buttons():
+			if s.text == want:
+				b = s
+		await _click(b)
+		await _frames(2)
+		_check("Picture: clicking %s shows its card alone (%s)" % [want, on_show.call()], ui.section_shown() == want
+				and on_show.call() == [want] and b != null and b.button_pressed)
+	# The other tabs with sections of their own.
+	for spec: Array in [[PaneUI.Tab.OBJECTS, ["Built-in objects", "Your objects", "In this room"]],
+			[PaneUI.Tab.MIXED_REALITY, ["Areas", "Settings"]]]:
+		await _rail(ui, spec[0])
+		await _frames(2)
+		var got: Array = ui.section_buttons().map(func(s: Button) -> String: return s.text)
+		_check("%s: its sections (%s)" % [PaneUI.TAB_NAMES[spec[0]], got], ui.current_tab == spec[0] and got == spec[1])
+	await _rail(ui, PaneUI.Tab.PICTURE)
+
+
+## The tablet's time bar, by the laser and by a grab, through ui_layer.gd's trigger path: a ray from the eyes at a
+## point on the bar finds it there; the trigger there skips to it; held and moved along it, the film goes where it is
+## let go. The chapters' ticks on it and the chapter in the header; the trick speed by the time.
+func _tablet_bar_checks(ui: PaneUI) -> void:
+	var tablet: Tablet = main.ui.tablet
+	var dur: float = main.player.get_duration()
+	var bar: Rect2 = tablet.bar_rect()
+	var eye: Vector3 = main.camera.global_position
+	var at := func(f: float) -> Vector3:
+		return tablet.now_playing.to_global(Vector3(bar.position.x + bar.size.x * f, bar.get_center().y, 0))
+	var hit: Dictionary = tablet.ray_hit(eye, ((at.call(0.25) as Vector3) - eye).normalized())
+	_check("tablet bar: a ray at a quarter along finds it there (%s)" % hit.get("fraction"),
+			hit.get("pane") == "now_playing" and absf(float(hit.get("fraction", -1.0)) - 0.25) < 0.01)
+	var hand = main.ui.pointer_hand
+	main.ui._tablet_hit = hit
+	main.ui.on_trigger(hand, true)
+	_check("tablet bar: the trigger on it grabs the time", tablet.is_grabbing())
+	main.ui.on_trigger(hand, false)
+	main.ui._tablet_hit = {}
+	await _frames(3)
+	var pos: float = main.player.get_position()
+	_check("tablet bar: let go at once, the film is at ~25%% (%.1f s of %.0f)" % [pos, dur], not tablet.is_grabbing()
+			and absf(pos - dur * 0.25) < dur * 0.05)
+	# Grabbed at 20 %, moved to 60 % along the tablet's plane, let go there.
+	var p20: Variant = tablet.plane_point(eye, ((at.call(0.2) as Vector3) - eye).normalized())
+	var p60: Variant = tablet.plane_point(eye, ((at.call(0.6) as Vector3) - eye).normalized())
+	_check("tablet bar: grabbed at 20 %", p20 != null and tablet.grab(p20))
+	tablet.grab_move(p60)
+	_check("tablet bar: the time follows the grab at once (%s)" % tablet.time_label.text,
+			absf(tablet._scrub - 0.6) < 0.01 and tablet.time_label.text.begins_with(W.clock(tablet._scrub * dur)))
+	_check("tablet bar: let go at 60 %", tablet.release())
+	await _frames(3)
+	pos = main.player.get_position()
+	_check("tablet bar: the film is at ~60%% (%.1f s)" % pos, absf(pos - dur * 0.6) < dur * 0.05)
+	# Chapters: a tick on the bar at each start but the first; the header names the one playing.
+	var Chapters := preload("res://scripts/play/chapters.gd")
+	var ch: Node = main.features.chapters
+	ch.chapters = Chapters.normalise([{"start": 0.0, "title": "One"}, {"start": dur * 0.25, "title": "Two"},
+			{"start": dur * 0.5, "title": "Three"}], dur)
+	ch._update_current()
+	await _frames(2)
+	ui.tick()
+	_check("tablet bar: a tick at each chapter (%d)" % tablet.tick_count(), tablet.tick_count() == 2)
+	_check("header: the chapter playing (%s)" % ui._now.text, ui._now.text == "Chapter 3/3 Three")
+	ch.chapters = Chapters.normalise([], dur)
+	ch._update_current()
+	await _frames(2)
+	ui.tick()
+	_check("no chapters: no ticks, no chapter in the header", tablet.tick_count() == 0 and ui._now.text == "")
+	# The test pattern's own five chapters.
+	ch.reload()
+	await _frames(2)
+	ui.tick()
+	_check("the pattern's chapters: four ticks, the chapter in the header (%d, %s)" % [tablet.tick_count(), ui._now.text],
+			tablet.tick_count() == 4 and ui._now.text.begins_with("Chapter ") and ui._now.text.contains("/5 "))
+	# Trick play's speed by the time.
+	var trick: Node = main.features.trick
+	trick.speed = 4.0
+	await _frames(2)
+	_check("tablet time: the trick speed after it (%s)" % tablet.time_label.text, tablet.time_label.text.ends_with("4x"))
+	trick.speed = 0.0
+	await _frames(2)
 
 
 ## Panel open, the pointer controller's stick moves the focus and its trigger activates the focused control, without
 ## aiming.
 func _docked_focus_checks(ui: PaneUI) -> void:
+	main.ui.hide_panel()
+	await _frames(2)
 	main.ui.show_panel()
 	await _seconds(0.3)
 	var hand = main.ui.pointer_hand
-	var play: Control = ui.default_focus()
+	_check("stick focus: nothing has the focus on opening", ui.default_focus() == null
+			and main.ui.panel.focus_owner() == null)
+	# The first push with nothing focused: the tab's row on the rail.
+	main.ui.on_stick(hand, Vector2(0, -1), 0.016)
+	main.ui.on_stick(hand, Vector2.ZERO, 0.016)
+	await _frames(2)
+	_check("stick focus: the first push focuses the tab's row on the rail",
+			main.ui.panel.focus_owner() == ui.tablet_tab_buttons[ui.current_tab])
+	var play: Control = ui._play_button
 	play.grab_focus()
 	await _frames(2)
 	_check("stick focus: the play button has the focus", main.ui.panel.focus_owner() == play)
@@ -348,8 +464,8 @@ func _network_checks(ui: PaneUI) -> void:
 	_check("Network place opens the host list", files.current == "network://" and files.row_button("+ Add host") != null)
 	await _click(files.row_button("+ Add host"))
 	var form = files.get_form()
-	_check("add-host form opens over the list, seek bar and transport", form.visible and not files.list_scroll().is_visible_in_tree()
-			and not ui.seek.visible)
+	_check("add-host form opens over the list and the transport", form.visible and not files.list_scroll().is_visible_in_tree()
+			and not ui._transport.visible)
 	await _frames(2)
 	_check("the host form and keyboard fit the pane (%d of %d px)" % [ui.get_combined_minimum_size().y,
 			main.ui.panel.resolution.y], ui.get_combined_minimum_size().y <= main.ui.panel.resolution.y)
@@ -364,7 +480,7 @@ func _network_checks(ui: PaneUI) -> void:
 	await _click(_find_button(ui, "Save"))
 	var hosts: Array = NetworkHosts.hosts
 	_check("Save stores the host", hosts.size() == 1 and hosts[0]["host"] == "nas.local" and hosts[0]["user"] == "viewer"
-			and files.list_scroll().is_visible_in_tree() and ui.seek.visible)
+			and files.list_scroll().is_visible_in_tree() and ui._transport.visible)
 
 	await _click(files.row_button("smb://nas.local"))
 	_check("host listing runs in the background (busy right after the click)", files.is_busy())
@@ -518,20 +634,63 @@ func _check(what: String, ok: bool) -> void:
 	print("%s %s" % ["PASS" if ok else "FAIL", what])
 
 
+## A visible button with this text; on the pane, failing that, one on another section's card of the tab on show,
+## whose section is then picked (the tablet shows one section at a time; the others' cards are out of the tree).
 func _find_button(root: Node, text: String) -> Button:
-	for c in root.find_children("*", "Button", true, false):
-		if (c as Button).text == text and (c as Button).is_visible_in_tree():
-			return c
-	push_error("No button '%s'" % text)
-	return null
+	var b := _find_where(root, func(c: Button) -> bool: return c.text == text)
+	if b == null:
+		push_error("No button '%s'" % text)
+	return b
 
 
 func _find_diagram(root: Node, word: String) -> Button:
+	var b := _find_where(root, func(c: Button) -> bool: return c.has_meta("word") and str(c.get_meta("word")) == word)
+	if b == null:
+		push_error("No mode diagram '%s'" % word)
+	return b
+
+
+func _find_where(root: Node, pred: Callable) -> Button:
+	# Not the sections column's buttons: a section is often named as its main switch (Slideshow, Spatial sound).
+	var column: Node = (root as PaneUI)._sections_box if root is PaneUI else null
 	for c in root.find_children("*", "Button", true, false):
-		if c.has_meta("word") and str(c.get_meta("word")) == word and (c as Button).is_visible_in_tree():
+		if pred.call(c) and (c as Button).is_visible_in_tree() and not (column != null and column.is_ancestor_of(c)):
 			return c
-	push_error("No mode diagram '%s'" % word)
+	if root is PaneUI:
+		var ui := root as PaneUI
+		for card: Control in ui.cards(ui.current_tab):
+			if card.get_parent() != null and card.is_visible_in_tree():
+				continue
+			for c in card.find_children("*", "Button", true, false):
+				if pred.call(c) and _shown_in(c as Control, card):
+					ui.show_section(W.card_section(card))
+					return c
 	return null
+
+
+## Shown once its card is: itself and everything up to the card visible.
+func _shown_in(c: Control, card: Control) -> bool:
+	var n: Node = c
+	while n != null and n != card:
+		if n is CanvasItem and not (n as CanvasItem).visible:
+			return false
+		n = n.get_parent()
+	return n == card
+
+
+## Picks the tab and the section a control is in (the tablet shows one section of a tab at a time), so it is in the
+## tree and can be seen. Then a couple of frames for the layout.
+func _reveal(ui: PaneUI, c: Control) -> void:
+	for t in ui.tabs.size():
+		if ui.tabs[t].is_ancestor_of(c) and ui.current_tab != t:
+			ui.show_tab(t)
+	for t in ui.tabs.size():
+		for card: Control in ui.cards(t):
+			if card.is_ancestor_of(c):
+				if ui.current_tab != t:
+					ui.show_tab(t)
+				ui.show_section(W.card_section(card))
+	await _frames(3)
 
 
 func _pixel_to_screen(pixel: Vector2) -> Vector2:
@@ -552,17 +711,42 @@ func _click(control: Control) -> void:
 	if control == null:
 		_check("control found", false)
 		return
+	# A section just picked (_find_button()) is laid out over the next frames.
+	await _frames(2)
 	if not control.is_visible_in_tree():
-		_check("control %s visible" % control.name, false)
+		_check("control %s visible" % (control.get("text") if control is Button else control.name), false)
+	await _bring_on_pane(control)
+	await _click_pixel(control.get_global_rect().get_center())
+
+
+## A tab by its row on the rail, clicked as the laser would. A row past the pane's lower edge can't be: the tab is
+## shown directly then, as "the menu fits the tablet's main pane" fails for it once rather than at every click.
+func _rail(ui: PaneUI, tab: int) -> void:
+	var b: Button = ui.tablet_tab_buttons[tab]
+	if b.get_global_rect().end.y <= main.ui.panel.resolution.y:
+		await _click(b)
+	else:
+		ui.show_tab(tab)
+		await _frames(3)
+
+
+## Scrolls the control's list so it is in view, as a drag or the stick would.
+func _bring_on_pane(control: Control) -> void:
 	var p := control.get_parent()
 	while p != null and not (p is ScrollContainer):
 		p = p.get_parent()
-	if p is ScrollContainer:
-		# Twice: a tab just shown may still be settling its height, which limits the first scroll.
-		for i in 2:
-			(p as ScrollContainer).ensure_control_visible(control)
-			await _frames(2)
-	await _click_pixel(control.get_global_rect().get_center())
+	if not (p is ScrollContainer):
+		return
+	# Twice: a tab just shown may still be settling its height, which limits the first scroll.
+	for i in 2:
+		(p as ScrollContainer).ensure_control_visible(control)
+		await _frames(2)
+	# The list may reach past the pane's lower edge (see "the menu fits the tablet's main pane"): scroll on until the
+	# control is on the pane, where it can be.
+	var below: float = control.get_global_rect().end.y - (main.ui.panel.resolution.y - 4.0)
+	if below > 0.0:
+		(p as ScrollContainer).scroll_vertical += ceili(below)
+		await _frames(2)
 
 
 func _click_pixel(pixel: Vector2) -> void:
@@ -575,7 +759,12 @@ func _click_pixel(pixel: Vector2) -> void:
 	await _frames(2)
 
 
+## A press at `from`, moved to `to` and let go there. Both are kept on the pane: past its edge a controller's ray
+## misses it and the pane hears nothing more.
 func _drag(from: Vector2, to: Vector2) -> void:
+	var res := Vector2(main.ui.panel.resolution)
+	from = from.clamp(Vector2.ONE, res - Vector2.ONE * 2.0)
+	to = to.clamp(Vector2.ONE, res - Vector2.ONE * 2.0)
 	main.ui.panel.pointer_move(_hit_for_pixel(from)["pixel"])
 	await _frames(1)
 	main.ui.panel.pointer_button(_hit_for_pixel(from)["pixel"], true)
@@ -625,27 +814,32 @@ func _places_checks(ui: PaneUI) -> void:
 	await _frames(3)
 	_check("search finds the favourite (%s)" % ", ".join(files.row_texts()), files.row_button("stub://flat_mono") != null)
 	main.features.library.remove_favourite(main.current_path)
-	await _click(ui.tab_buttons[PaneUI.Tab.SOUND])
+	await _rail(ui, PaneUI.Tab.SOUND)
 	await _click(_find_button(ui, "1.5x"))
 	_check("Sound: the speed choice sets 1.5x", is_equal_approx(main.features.speed.speed, 1.5))
 	main.features.speed.reset()
 	# Director mode (#8) in the Subtitles tab: the find form, the keyboard, an answer.
-	await _click(ui.tab_buttons[PaneUI.Tab.SUBTITLES])
+	await _rail(ui, PaneUI.Tab.SUBTITLES)
 	await _click(_find_button(ui, "Inside the picture"))
 	_check("Subtitles: Inside the picture moves the band (%s)" % main.features.subtitles.display.position_mode,
 			str(main.features.subtitles.display.position_mode) == "inside")
 	await _click(_find_button(ui, "Below the picture"))
 	await _click(_find_button(ui, "Find a line"))
 	var find = ui.subtitles._find_form
-	_check("Subtitles: Find a line opens the form with the keyboard", find.is_visible_in_tree() and not ui.seek.visible)
-	await _type_on_keyboard(ui, "line")
-	await _click(_find_button(ui, "Search"))
-	for i in 120:
-		if ui.subtitles._script_label.text != "Searching..." and ui.subtitles._script_label.text != "":
-			break
-		await _frames(1)
-	_check("Subtitles: the search answers (%s)" % ui.subtitles._script_label.text, not find.is_visible_in_tree()
-			and ui.seek.visible and ui.subtitles._script_label.text != "")
+	_check("Subtitles: Find a line opens the form with the keyboard", find.is_visible_in_tree() and not ui._transport.visible)
+	if find.is_visible_in_tree():
+		await _type_on_keyboard(ui, "line")
+		await _click(_find_button(ui, "Search"))
+		for i in 120:
+			if ui.subtitles._script_label.text != "Searching..." and ui.subtitles._script_label.text != "":
+				break
+			await _frames(1)
+		_check("Subtitles: the search answers (%s)" % ui.subtitles._script_label.text, not find.is_visible_in_tree()
+				and ui._transport.visible and ui.subtitles._script_label.text != "")
+	else:
+		# Put the tab back as Cancel would, so what follows is not hidden too.
+		ui.subtitles._hide_find()
+		print("SKIP Subtitles search: the find form did not show")
 	# The script's track picker: rows only when there is a choice; a pick searches that track.
 	var st = ui.subtitles
 	st._set_script_tracks([{"id": "t2", "label": "English"}, {"id": "t3", "label": "French"}], "t2")
@@ -669,7 +863,7 @@ func _places_checks(ui: PaneUI) -> void:
 	Director._building.erase(key)
 	st._indexing = false
 	st._script_track = ""
-	await _click(ui.tab_buttons[PaneUI.Tab.PICTURE])
+	await _rail(ui, PaneUI.Tab.PICTURE)
 	var before: float = main.player.get_position()
 	await _click(_find_button(ui, "Frame forward"))
 	await _frames(3)
@@ -711,34 +905,44 @@ func _second_session_checks(ui: PaneUI) -> void:
 	await _frames(2)
 	_check("Files: no In corner for test patterns", not ui.files._in_corner.visible)
 	_check("Picture: no Corner film group without one", not ui.picture._pip_box.visible)
-	# Thumbnails: a seeded picture shows under the bar where the pointer hovers; gone when it leaves.
+	# Thumbnails: a seeded picture shows over the tablet's bar where the laser is on it; gone when it leaves.
+	main.ui.show_panel()
+	await _frames(2)
+	var tablet: Tablet = main.ui.tablet
+	var dur: float = main.player.get_duration()
 	var thumbs: Node = f.thumbs
 	thumbs.enabled = true
 	thumbs.state = "opening"
 	var img := Image.create_empty(16, 9, false, Image.FORMAT_RGB8)
-	thumbs._cache.append({"t": 30.0, "asked": 30.0, "tex": ImageTexture.create_from_image(img)})
-	ui.set_playback(10.0, 600.0, true, true)
-	ui.seek.hover_changed.emit(30.0)
-	_check("Seek bar: a thumbnail under the bar at the hovered time (%s)" % ui._thumb_label.text,
-			ui.thumb_shown() and ui._thumb_image.texture != null and ui._thumb_label.text == W.clock(30.0))
-	ui.seek.hover_changed.emit(-1.0)
-	_check("Seek bar: gone when the pointer leaves", not ui.thumb_shown())
+	var tex := ImageTexture.create_from_image(img)
+	thumbs._cache.append({"t": dur * 0.5, "asked": dur * 0.5, "tex": tex})
+	tablet.hover_bar(0.5)
+	await _frames(2)
+	_check("Tablet bar: a picture over the bar at the laser's time (%s)" % tablet.thumb_label.text, tablet.thumb.visible
+			and tablet.thumb_label.visible and tablet.thumb_label.text == W.clock(dur * 0.5)
+			and (tablet.thumb.material_override as StandardMaterial3D).albedo_texture == tex)
+	tablet.hover_bar(-1.0)
+	await _frames(2)
+	_check("Tablet bar: gone when the laser leaves", not tablet.thumb.visible and not tablet.thumb_label.visible)
 	thumbs._cache.clear()
 	thumbs._pending = -1.0
 	thumbs.enabled = false
 	thumbs.state = "off"
-	ui.seek.hover_changed.emit(30.0)
-	_check("Seek bar: no thumbnail with them off", not ui.thumb_shown())
-	await _click(ui.tab_buttons[PaneUI.Tab.SYSTEM])
+	tablet.hover_bar(0.5)
+	await _frames(2)
+	_check("Tablet bar: no picture with them off", not tablet.thumb.visible)
+	tablet.hover_bar(-1.0)
+	await _rail(ui, PaneUI.Tab.SYSTEM)
 	_check("System: a Seek bar pictures switch, off", _find_button(ui, "Seek bar pictures") != null
 			and not ui.system._thumbs.button_pressed)
-	await _click(ui.tab_buttons[PaneUI.Tab.ROOM])
+	await _rail(ui, PaneUI.Tab.ROOM)
+	await _reveal(ui, ui.room._crossfade_music)
 	_check("Room: crossfade sliders", ui.room._crossfade_music.is_visible_in_tree()
 			and ui.room._crossfade_video.is_visible_in_tree())
 
 
 ## Streams and trick play: the URL form plays media URLs and opens the rest as pages; Play as video plays anything;
-## a source that can't seek hides the seek bar and skips and shows LIVE; 4x / 8x only where trick play works.
+## a source that can't seek hides the skips and shows LIVE by the tablet's time; 4x / 8x only where trick play works.
 func _stream_checks(ui: PaneUI) -> void:
 	var files = ui.files
 	var got: Array = []
@@ -755,15 +959,27 @@ func _stream_checks(ui: PaneUI) -> void:
 	_check("URL form: media URLs play, pages open as pages (%s)" % [got], got.size() == 4
 			and got[0] == "udp://@:1234" and got[1] == "https://example.com/films/clip.ts?x=1"
 			and str(got[2]).begins_with("browser://") and got[3] == "http://cam.local/stream")
-	# Live: no seek bar or skips, LIVE by the time; back when it can seek.
+	# Live: no skips or trick play on the pane, LIVE by the tablet's time; the skips back when it can seek.
+	main.ui.show_panel()
+	var tablet: Tablet = main.ui.tablet
+	var live: Node = main.features.live
+	var live_was := bool(live.live)
+	live.live = true
 	ui.set_playback(12.0, 0.0, true, false)
-	_check("Live: no seek bar or skip buttons", not ui.seek.visible and not ui._skip_buttons[0].visible)
+	tablet._update_now_playing()
+	_check("Live: no skip or 4x / 8x buttons, LIVE by the tablet's time (%s)" % tablet.time_label.text,
+			not ui._skip_buttons[0].visible and not ui._skip_buttons[1].visible and not ui._trick_buttons[0].visible
+			and tablet.time_label.text.begins_with("LIVE"))
+	live.live = live_was
 	ui.set_playback(12.0, 600.0, true, true)
-	_check("Seekable again: the seek bar and skips are back", ui.seek.visible and ui._skip_buttons[0].visible)
+	tablet._update_now_playing()
+	_check("Seekable again: the skips are back, no LIVE (%s)" % tablet.time_label.text, ui._skip_buttons[0].visible
+			and not tablet.time_label.text.begins_with("LIVE"))
 	var trick: Node = main.features.trick
 	_check("Transport: 4x and 8x only where trick play works (%s)" % trick.available(),
 			ui._trick_buttons.size() == 2 and ui._trick_buttons[0].visible == bool(trick.available()))
-	await _click(ui.tab_buttons[PaneUI.Tab.SOUND])
+	await _rail(ui, PaneUI.Tab.SOUND)
+	await _reveal(ui, ui.sound._live_delay)
 	_check("Sound: a Live delay slider", ui.sound._live_delay.is_visible_in_tree())
 
 
@@ -771,7 +987,7 @@ func _stream_checks(ui: PaneUI) -> void:
 ## night mode (#24, #26), the room's effects (#29, #81, #92, #84), the music chip (#64), the zoom lens (#38).
 func _batch3_checks(ui: PaneUI) -> void:
 	var f: Node = main.features
-	await _click(ui.tab_buttons[PaneUI.Tab.PICTURE])
+	await _rail(ui, PaneUI.Tab.PICTURE)
 	var was_mode: VideoMode = main.mode.copy()
 	main.set_video_mode(VideoMode.new(), false)
 	await _frames(1)
@@ -786,11 +1002,11 @@ func _batch3_checks(ui: PaneUI) -> void:
 	main.set_video_mode(was_mode, false)
 	_check("Picture: HDR brightness and film grain sliders", ui.picture._rows.has("hdr_target")
 			and ui.picture._rows.has("grain") and ui.picture._rows.has("weave"))
-	await _click(ui.tab_buttons[PaneUI.Tab.SOUND])
+	await _rail(ui, PaneUI.Tab.SOUND)
 	_check("Sound: Calibrate next to the A/V offset", _find_button(ui, "Calibrate") != null)
 	_check("Sound: night mode only when the engine has it (%s)" % f.night.available(),
 			ui.sound._night_box.visible == bool(f.night.available()))
-	await _click(ui.tab_buttons[PaneUI.Tab.ROOM])
+	await _rail(ui, PaneUI.Tab.ROOM)
 	var bias_was: bool = f.bias.enabled
 	await _click(_find_button(ui, "Bias light"))
 	_check("Room: Bias light switches, with its strength", bool(f.bias.enabled) != bias_was
@@ -818,9 +1034,9 @@ func _batch3_checks(ui: PaneUI) -> void:
 				chip = chip or (l as Label).text == "MUSIC"
 	_check("Files: a music file has a MUSIC chip", chip)
 	ui.files.open_folder("stub://")
-	await _click(ui.tab_buttons[PaneUI.Tab.SYSTEM])
+	await _rail(ui, PaneUI.Tab.SYSTEM)
 	var lens_was: bool = f.zoom_lens.enabled
-	await _click(_find_button(ui, "Zoom lens (grip and trigger in 180 / 360)"))
+	await _click(_find_button(ui, "Zoom lens"))
 	_check("System: the Zoom lens switch", bool(f.zoom_lens.enabled) != lens_was
 			and ui.system._magnification.visible == bool(f.zoom_lens.enabled))
 	f.zoom_lens.set_enabled(lens_was)
@@ -829,19 +1045,19 @@ func _batch3_checks(ui: PaneUI) -> void:
 
 ## Sound, Speakers (#21, #47): the switch and its line; System, Controllers: the jog wheel (#63).
 func _speakers_and_jog_checks(ui: PaneUI) -> void:
-	await _click(ui.tab_buttons[PaneUI.Tab.SOUND])
+	await _rail(ui, PaneUI.Tab.SOUND)
 	var speakers: Node = main.features.speakers
 	var was: bool = speakers.enabled
 	if was:
 		speakers.set_enabled(false)
 	ui.sound.sync()
-	await _click(_find_button(ui, "Speakers in the room"))
+	await _click(_find_button(ui, "Spatial sound"))
 	await _frames(3)
-	_check("Sound: Speakers in the room switches on, with its line (%s)" % ui.sound._speakers_status.text,
+	_check("Sound: Spatial sound switches on, with its line (%s)" % ui.sound._speakers_status.text,
 			bool(speakers.enabled) and ui.sound._lfe.is_visible_in_tree() and ui.sound._speakers_status.text != "")
 	speakers.set_enabled(was)
 	await _frames(3)
-	await _click(ui.tab_buttons[PaneUI.Tab.SYSTEM])
+	await _rail(ui, PaneUI.Tab.SYSTEM)
 	var jog: Node = main.features.jog
 	var jog_was: bool = jog.enabled
 	await _click(_find_button(ui, "Jog wheel"))
@@ -854,13 +1070,19 @@ func _speakers_and_jog_checks(ui: PaneUI) -> void:
 ## Sound, Play on a PC (#9): with no address the switch asks for one; Save starts the stream (no sink here: it keeps
 ## connecting); off stops it.
 func _pc_audio_checks(ui: PaneUI) -> void:
-	await _click(ui.tab_buttons[PaneUI.Tab.SOUND])
+	await _rail(ui, PaneUI.Tab.SOUND)
 	var st = ui.sound
 	main.settings.set_value("pc_audio", "host", "")
 	st.sync()
 	await _click(_find_button(ui, "Play sound on a PC"))
 	_check("PC audio: no address yet, the switch asks for one", st._pc_form.is_visible_in_tree()
-			and not ui.seek.visible)
+			and not ui._transport.visible)
+	if not st._pc_form.is_visible_in_tree():
+		# Put the tab back as Cancel would, so what follows is not hidden too.
+		st._hide_form()
+		main.settings.set_value("pc_audio", "host", "")
+		print("SKIP PC audio's Save and off: the address form did not show")
+		return
 	st._pc_form.get_field().text = "127.0.0.1:47899"
 	await _click(_find_button(ui, "Save"))
 	await _frames(2)
@@ -878,7 +1100,7 @@ func _pc_audio_checks(ui: PaneUI) -> void:
 ## System, Share files (docs/share.md): the switch starts the server for sharing only; its address shows without the
 ## pairing code, the QR code holds it; the phone remote's own address stays hidden; off stops the server.
 func _share_checks(ui: PaneUI) -> void:
-	await _click(ui.tab_buttons[PaneUI.Tab.SYSTEM])
+	await _rail(ui, PaneUI.Tab.SYSTEM)
 	var sys = ui.system
 	if sys._remote_toggle.button_pressed:
 		print("SKIP share checks: the phone remote is on in these settings")
@@ -904,7 +1126,7 @@ func _share_checks(ui: PaneUI) -> void:
 ## Picture tab, app-features' second batch: size in degrees and its presets (#55), head follow (#33), deinterlace
 ## (#95), sharpen (#90); the lens (#73) and HDR (#85) groups only when they apply; the folder rule line (#83).
 func _picture_batch_checks(ui: PaneUI) -> void:
-	await _click(ui.tab_buttons[PaneUI.Tab.PICTURE])
+	await _rail(ui, PaneUI.Tab.PICTURE)
 	var pt = ui.picture
 	var f: Node = main.features
 	# The size presets and head follow are for a flat screen.
@@ -923,6 +1145,8 @@ func _picture_batch_checks(ui: PaneUI) -> void:
 	_check("Picture: Deinterlace Bob", str(f.deinterlace.mode) == "bob")
 	await _click(_find_button(ui, "Off"))
 	_check("Picture: Deinterlace Off", str(f.deinterlace.mode) == "off")
+	if pt._rows.has("pc_sharpen"):
+		await _reveal(ui, pt._rows["pc_sharpen"])
 	_check("Picture: a Sharpen slider", pt._rows.has("pc_sharpen") and (pt._rows["pc_sharpen"] as Control).is_visible_in_tree())
 	_check("Picture: no lens or HDR group for a flat SDR picture", not pt._lens_box.visible and not pt._hdr_box.visible)
 	_check("Picture: Use for this folder is off for a test pattern (%s)" % main.current_path, pt._use_folder.disabled)
@@ -943,16 +1167,18 @@ func _picture_batch_checks(ui: PaneUI) -> void:
 ## Room tab, app-features' second batch: environment rows (every room, photo and glTF rooms included), seats in the
 ## cinema (#19), the floor reflection where there is a floor (#62), up next (#34) and intermission (#39).
 func _room_batch_checks(ui: PaneUI) -> void:
-	await _click(ui.tab_buttons[PaneUI.Tab.ROOM])
+	await _rail(ui, PaneUI.Tab.ROOM)
 	var room = ui.room
 	var f: Node = main.features
 	var was_env := str(main.env_id)
-	_check("Room: one row per environment (%d)" % room._envs.get_child_count(),
-			room._envs.get_child_count() == main.get_environment_list().size())
+	# The rows: the rooms that ship, then the viewer's own and the showrooms under their own headings.
+	_check("Room: one row per environment (%d of %d)" % [room._env_rows.size(), main.get_environment_list().size()],
+			room._env_rows.size() == main.get_environment_list().size() and room._envs.get_child_count() > 0)
 	await _click(_find_button(ui, "Cinema"))
 	await _frames(2)
 	_check("Room: the Cinema row opens the cinema, marked", str(main.env_id) == "cinema"
-			and (room._envs.get_child(room._env_ids.find("cinema")) as Button).button_pressed)
+			and room._env_rows[room._env_ids.find("cinema")].button_pressed)
+	await _reveal(ui, room._seat_box)
 	_check("Room: the cinema has seats (%s)" % room._seat_label.text, room._seat_box.is_visible_in_tree())
 	await _click(_find_button(ui, "Next seat"))
 	_check("Room: Next seat sits in one (%s)" % room._seat_label.text, int(f.seat.seat) >= 0
@@ -985,7 +1211,7 @@ func _room_batch_checks(ui: PaneUI) -> void:
 	f.seat.choose_seat(-1)
 	main.ui.show_panel()
 	await _frames(2)
-	await _click(ui.tab_buttons[PaneUI.Tab.ROOM])
+	await _rail(ui, PaneUI.Tab.ROOM)
 	_check("Room: the reflection shows only where the room has a floor for it",
 			room._reflection_box.visible == bool(f.reflection.available()))
 	var up_was: bool = f.up_next.enabled
@@ -1058,7 +1284,7 @@ func _picture_checks(ui: PaneUI) -> void:
 				chip = chip or (l as Label).text == "PICTURE"
 	_check("Files: a picture is listed with its chip, other files are not (%s)" % ", ".join(texts),
 			texts.has("Beach.png") and not texts.has("notes.txt") and chip)
-	await _click(ui.tab_buttons[PaneUI.Tab.PICTURE])
+	await _rail(ui, PaneUI.Tab.PICTURE)
 	var slideshow: Node = main.features.slideshow
 	var was: bool = slideshow.enabled
 	if was:
@@ -1072,21 +1298,29 @@ func _picture_checks(ui: PaneUI) -> void:
 
 ## Room, Watch party (#51): the name form, Host, the people, the host's file not here and Find it, End party.
 func _party_checks(ui: PaneUI) -> void:
-	await _click(ui.tab_buttons[PaneUI.Tab.ROOM])
+	await _rail(ui, PaneUI.Tab.ROOM)
 	var room = ui.room
 	await _click(_find_button(ui, "Name: %s" % room.party_name()))
-	_check("Room: the name button opens the form", room._party_form.is_visible_in_tree() and not ui.seek.visible)
-	room._party_form.get_field().text = ""
-	await _type_on_keyboard(ui, "sam")
-	await _click(_find_button(ui, "Save"))
-	_check("Room: the name is saved (%s)" % room.party_name(), room.party_name().to_lower() == "sam"
-			and not room._party_form.is_visible_in_tree() and ui.seek.visible)
+	_check("Room: the name button opens the form", room._party_form.is_visible_in_tree() and not ui._transport.visible)
+	if room._party_form.is_visible_in_tree():
+		room._party_form.get_field().text = ""
+		await _type_on_keyboard(ui, "sam")
+		await _click(_find_button(ui, "Save"))
+		_check("Room: the name is saved (%s)" % room.party_name(), room.party_name().to_lower() == "sam"
+				and not room._party_form.is_visible_in_tree() and ui._transport.visible)
+	else:
+		# Put the tab back as Cancel would, so what follows is not hidden too.
+		room._hide_form()
+		print("SKIP Room: the party name: its form did not show")
 	await _click(_find_button(ui, "Host"))
 	await _frames(3)
 	var party: Node = room._party
 	_check("Room: Host starts a party (%s)" % room._party_status.text, party != null
 			and room._party_status.text.begins_with("Hosting") and room._party_leave.is_visible_in_tree()
 			and not room._party_start.is_visible_in_tree())
+	if party == null:
+		main.settings.set_value("party", "name", "")
+		return
 	_check("Room: the people list has this headset", room._party_people.get_child_count() == 1
 			and (room._party_people.get_child(0) as Label).text.contains("(you)"))
 	party.file_needed.emit({"name": "Other.Film.mkv", "path": "/elsewhere/Other.Film.mkv", "duration": 60.0})
@@ -1096,7 +1330,7 @@ func _party_checks(ui: PaneUI) -> void:
 	await _click(_find_button(ui, "Find it"))
 	_check("Room: Find it searches the Files tab (%s, %s)" % [ui.files.current, ui.files._query],
 			ui.current_tab == PaneUI.Tab.FILES and ui.files.current == "search://" and ui.files._query == "Other.Film")
-	await _click(ui.tab_buttons[PaneUI.Tab.ROOM])
+	await _rail(ui, PaneUI.Tab.ROOM)
 	await _click(_find_button(ui, "End party"))
 	await _frames(3)
 	_check("Room: End party ends it (%s)" % room._party_status.text, WatchParty.instance() == null
@@ -1112,24 +1346,26 @@ func _help_and_curve_checks(ui: PaneUI) -> void:
 	await _frames(3)
 	main.ui.show_panel()
 	await _seconds(0.3)
-	await _click(ui.tab_buttons[PaneUI.Tab.PICTURE])
+	await _rail(ui, PaneUI.Tab.PICTURE)
 	var curve_row: Control = ui.picture._rows["curve"]
 	var help := _help_after(curve_row)
 	_check("Picture: a help line under Curvature (%s)" % (help.text if help != null else "none"), help != null
 			and help.text.contains("100 %") and help.visible == curve_row.visible)
 	var weave := _help_after(ui.picture._rows["weave"])
 	_check("Picture: a help line under Gate weave", weave != null and weave.text.contains("wobble"))
-	var helps := ui.picture.find_children("*", "Label", true, false).filter(func(n: Node) -> bool: return n.has_meta("help"))
+	# On every card of the tab, those of the sections not on show too.
+	var helps := _tab_nodes(ui, PaneUI.Tab.PICTURE).filter(func(n: Node) -> bool: return n is Label and n.has_meta("help"))
 	_check("Picture: help lines for most controls (%d)" % helps.size(), helps.size() >= 25)
 	var auto_lines := helps.filter(func(n: Node) -> bool: return (n as Label).text.begins_with("Auto: "))
 	_check("Picture: the Deinterlace choice Auto gets no 3D-mode help", auto_lines.size() <= 1)
-	var sound_helps := ui.sound.find_children("*", "Label", true, false).filter(func(n: Node) -> bool:
-		return n.has_meta("help"))
+	var sound_helps := _tab_nodes(ui, PaneUI.Tab.SOUND).filter(func(n: Node) -> bool:
+		return n is Label and n.has_meta("help"))
 	var boost := sound_helps.filter(func(n: Node) -> bool: return (n as Label).text.contains("5.1 sound"))
 	_check("Sound: help lines, one for dialogue boost (%d lines)" % sound_helps.size(), sound_helps.size() >= 6
 			and boost.size() == 1)
 	var slider: HSlider = W.slider_of(curve_row)
-	ui.picture.ensure_control_visible(slider)
+	await _reveal(ui, slider)
+	await _bring_on_pane(slider)
 	await _frames(2)
 	var r := slider.get_global_rect()
 	# Drag past each end (the pointer keeps the slider while held), so the value is exactly 100 and 0.
@@ -1142,8 +1378,8 @@ func _help_and_curve_checks(ui: PaneUI) -> void:
 	await _drag(mid, Vector2(r.position.x - 60.0, mid.y))
 	await _frames(2)
 	_check("Curvature at 0 %: flat", curve.radius == 0.0 and (ui.picture._rows["curve"].get_meta("value_label") as Label).text == "flat")
-	_check("no Curve to distance button (100 % is that)", ui.picture.find_children("*", "Button", true, false).filter(
-			func(b: Node) -> bool: return (b as Button).text == "Curve to distance").is_empty())
+	_check("no Curve to distance button (100 % is that)",
+			_buttons_or_labels(ui, PaneUI.Tab.PICTURE, ["Curve to distance"]).is_empty())
 	ui.show_tab(PaneUI.Tab.FILES)
 
 
@@ -1156,38 +1392,48 @@ func _help_after(row: Control) -> Label:
 	return null
 
 
-## System, Panel: size, distance, recentre hold and head follow apply at once; left-handed picks the left pointer;
-## reset.
+## System, Panel: the recentre hold applies at once; left-handed picks the left pointer; Larger panel makes the menu's
+## text larger; reset. The front panel's size, distance and head follow are gone with it.
 func _layout_checks(ui: PaneUI) -> void:
-	await _click(ui.tab_buttons[PaneUI.Tab.SYSTEM])
-	var width: float = main.ui.panel.size_m.x
-	_check("Panel size: 38 cm wide at the default scale 1.6 (%.3f m)" % width, absf(width - 0.384) < 1e-3)
-	main.settings.set_value("pane", "scale", 3.2)
-	ui.system.layout_changed.emit()
-	await _frames(2)
-	_check("Panel size 2x doubles the panel (%.3f -> %.3f m)" % [width, main.ui.panel.size_m.x],
-			absf(main.ui.panel.size_m.x - width * 2.0) < 1e-3)
-	main.settings.set_value("pane", "distance", 1.5)
-	ui.system.layout_changed.emit()
-	main.ui.show_panel()
-	await _frames(2)
-	var d: float = main.ui.panel.global_position.distance_to(main.camera.global_position)
-	_check("distance 1.5 m (%.2f)" % d, absf(d - 1.5) < 0.05)
+	await _rail(ui, PaneUI.Tab.SYSTEM)
+	var tablet: Tablet = main.ui.tablet
+	_check("System: no Size, Distance, Follow my head or Tablet menu: the tablet is the only menu",
+			_buttons_or_labels(ui, PaneUI.Tab.SYSTEM, ["Size", "Distance", "Follow my head", "Tablet menu"]).is_empty())
+	_check("Panel: the tablet's menu, its size (%s m)" % main.ui.panel.size_m, _panel_on_tablet())
 	main.settings.set_value("pane", "recentre_hold", 1.0)
 	ui.system.layout_changed.emit()
 	_check("recentre_hold 1 s applies", is_equal_approx(main.ui.menu.hold, 1.0))
-	await _click(_find_button(ui, "Follow my head"))
-	_check("Follow my head: world_locked off", not main.ui.world_locked
-			and main.settings.get_value("pane", "world_locked", true) == false)
 	await _click(_find_button(ui, "Left-handed"))
 	_check("Left-handed: the left hand points", main.ui.pointer_hand == main.left_hand
 			and bool(main.features.access.get_value("left_handed")))
+	var text_was: float = ui.text_scale
+	main.features.access.set_value("ui_scale", 1.5)
+	await _frames(2)
+	_check("Larger panel 1.5x: the menu's text half as big again (%.2f -> %.2f)" % [text_was, ui.text_scale],
+			is_equal_approx(ui.text_scale, tablet.panel_text_scale() * 1.5) and ui.text_scale > text_was)
 	await _click(_find_button(ui, "Reset layout"))
 	await _frames(2)
-	_check("Reset layout: 38 cm, right hand, 0.6 m, 0.6 s, world-locked", absf(main.ui.panel.size_m.x - width) < 1e-3
-			and main.ui.pointer_hand == main.right_hand and absf(main.ui.distance - 0.6) < 1e-3
-			and is_equal_approx(main.ui.menu.hold, 0.6) and main.ui.world_locked)
+	_check("Reset layout: right hand, 0.6 s, the text size, in front of the head", main.ui.pointer_hand == main.right_hand
+			and is_equal_approx(main.ui.menu.hold, 0.6) and is_equal_approx(ui.text_scale, tablet.panel_text_scale())
+			and main.ui.is_open() and _tablet_in_front() and _panel_on_tablet())
 	ui.show_tab(PaneUI.Tab.FILES)
+
+
+## The Buttons and Labels of a tab, its detached cards too, with one of these texts.
+func _buttons_or_labels(ui: PaneUI, tab: int, texts: Array) -> Array:
+	return _tab_nodes(ui, tab).filter(func(c: Node) -> bool:
+		return (c is Button or c is Label) and str(c.get("text")) in texts)
+
+
+## Every node of a tab, those on its cards out of the tree (sections not on show) too.
+func _tab_nodes(ui: PaneUI, tab: int) -> Array:
+	var roots: Array = [ui.tabs[tab]]
+	roots.append_array(ui.cards(tab))
+	var seen := {}
+	for r: Node in roots:
+		for c in r.find_children("*", "", true, false):
+			seen[c] = true
+	return seen.keys()
 
 
 ## The watch-along card (#54) through the dev registry's `card` command, as the PC link would send it.
@@ -1203,10 +1449,15 @@ func _card_checks() -> void:
 			"title": "Who is that", "image": Marshalls.raw_to_base64(png.save_png_to_buffer())}, false)
 	await _frames(3)
 	var card = main.ui.card
-	var screen_xf: Transform3D = (main.screen as Node3D).global_transform
-	var screen_right: float = (screen_xf * Vector3(main.screen.get_flat_size().x * 0.5, 0, 0)).x
-	_check("card command shows a card beside the screen (%s)" % r.get("result"), bool(r.get("ok", false))
-			and card.is_showing() and card.global_position.x > screen_right and card._image.visible)
+	# Beside the picture as seen from the head: the card's left edge right of the screen's top-right corner. (Not in
+	# metres: a far screen's card comes no further than WatchCard.NEAR_DISTANCE.)
+	var head: Vector3 = main.camera.global_position
+	var yaw := func(p: Vector3) -> float: return rad_to_deg(atan2(p.x - head.x, -(p.z - head.z)))
+	var corner_yaw: float = yaw.call(main.screen.top_right_corner())
+	var left_yaw: float = yaw.call(card.global_position - card.global_basis.x * card.size_m.x * 0.5)
+	_check("card command shows a card beside the screen (%s; left edge at %.1f°, the screen's corner at %.1f°)"
+			% [r.get("result"), left_yaw, corner_yaw], bool(r.get("ok", false)) and card.is_showing()
+			and left_yaw > corner_yaw and card._image.visible)
 	var events: Array = []
 	card.dismissed.connect(func(id: String, how: String) -> void: events.append(how))
 	var origin: Vector3 = main.camera.global_position
@@ -1243,10 +1494,14 @@ func _push_to_talk_checks(ui: PaneUI) -> void:
 	main.ui.show_panel()
 	await _seconds(1.2)
 	_check("push-to-talk: the right hand's bumper talks", main.ui.talk_hand() == main.right_hand)
-	_check("push-to-talk: bumper down records, Listening shows", main.ui.on_bumper(main.right_hand, true)
-			and ptt.calls == ["begin"] and ui._toast.visible and ui._toast_label.text == "Listening")
+	var down: bool = main.ui.on_bumper(main.right_hand, true)
+	ui.tick()
+	_check("push-to-talk: bumper down records, Listening in the header (%s)" % ui.status_line_text(), down
+			and ptt.calls == ["begin"] and ui.status_line_text().ends_with("Listening"))
 	main.ui.on_bumper(main.right_hand, false)
-	_check("push-to-talk: bumper up sends", ptt.calls == ["begin", "end"] and not ui._toast.visible)
+	ui.tick()
+	_check("push-to-talk: bumper up sends, Listening goes", ptt.calls == ["begin", "end"]
+			and not ui.status_line_text().contains("Listening"))
 	_check("push-to-talk: the left bumper is not the talk button", not main.ui.on_bumper(main.left_hand, true))
 	main.ui.on_bumper(main.left_hand, false)
 	host.queue_free()
@@ -1272,10 +1527,15 @@ func _hwvideo_checks(ui: PaneUI) -> void:
 			and s["text"] == hw.PATH_TEXTS[s["path"]] and s.has("p010") and s.has("q10c") and s.has("hw_vp9"))
 	_check("hwvideo: P010 first, as the engine takes it", s["path"] != "q10c" or not s["p010"])
 	var row: Node = ui.system.find_child("HwVideoRow", true, false)
+	for card: Control in ui.cards(PaneUI.Tab.SYSTEM):
+		if row == null:
+			row = card.find_child("HwVideoRow", true, false)
+	if row != null:
+		await _reveal(ui, row)
 	_check("hwvideo: the System row says it (%s)" % (row._label.text if row != null else "no row"), row != null
 			and row._label.text == "Hardware 10-bit video: " + s["text"])
-	var setup_buttons := ui.find_children("*", "Button", true, false).filter(func(b: Node) -> bool:
-		return (b as Button).text in ["Set up", "Remove the setup", "Restart headset"])
+	var setup_buttons := _buttons_or_labels(ui, PaneUI.Tab.SYSTEM, ["Set up", "Remove the setup", "Restart headset"]) \
+			.filter(func(b: Node) -> bool: return b is Button)
 	_check("hwvideo: no setup anywhere: no Set up, Remove the setup or password field (%s)" % [setup_buttons],
 			row != null and setup_buttons.is_empty() and ui.find_child("HeadsetPassword", true, false) == null
 			and ui.get("hw_card") == null)
