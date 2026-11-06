@@ -161,3 +161,12 @@ imported object's hulls kept and made again, and the cost with 24 bodies.
 - **A held object** is driven to the hand in one tick and drawn interpolated, so it trails the controller by up to a
   tick. If that shows in the hand, draw a held object at the hand itself.
 - **The thud's voices** share one renderer: when one ends, the others' places are given again, which may click.
+
+## The film layer
+
+On the Steam Frame the runtime draws the film layer (`film_layer.gd`) over everything in front of the screen, hole
+punch or not: a ham lobbed at the screen vanished behind the picture (2026-11-06). While a room object
+(`object_physics.gd solid_nodes()`: placed, held, thrown, or a text or particles area attached to one) is between the
+eyes and the picture, the layer hides and the screen's mesh draws the film, as for the menu. The test is the object's
+bounds, seen from the eyes, against the picture's rectangle; the layer comes back one second after the view is clear.
+An object placed in front of the screen therefore keeps the film on the mesh for as long as it is there.

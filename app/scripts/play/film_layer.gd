@@ -26,7 +26,10 @@ extends Node
 ## always. Switching at run time keeps playback going.
 ## While the menu is open (main.menu_shown) the layers hide and the mesh draws the film: the runtime drew the layer
 ## over the panels (the user, 2026-11-04). They come back when it closes; nothing is remade and the setting is not
-## touched.
+## touched. The same while a room object (object_physics.gd solid_nodes(): placed, held, thrown, attached) is between
+## the viewer and the screen: the runtime drew the layer over a ham lobbed at the screen (the user, 2026-11-06). Its
+## bounds seen from the eyes cover part of the picture -> held at once; clear for COVER_RELEASE seconds -> the layer
+## again (no flicker while one sits at the picture's edge).
 ##
 ##   enabled, set_enabled(on, save := true)
 ##   force                  tests: build the layers without an XR session (they don't show then)
@@ -49,11 +52,18 @@ const MAX_EDGE := 3840
 const SNAP := 8
 ## OpenXRCompositionLayer.EyeVisibility: both, left, right.
 const EYES_BOTH := 0
+## Seconds clear of room objects before the layer comes back.
+const COVER_RELEASE := 1.0
 
 var main: Node3D
 var enabled := false
 ## The layers are hidden for the menu (see the header).
 var held := false
+## The room object that last covered the picture ("" none), and when the view was last covered (ticks, ms).
+var covered_by := ""
+var _covered_ms := -1000000
+## Node -> its bounds in its own frame (from its meshes), worked out once.
+var _local_aabbs := {}
 var force := false
 var layers: Array[Node3D] = []
 var viewports: Array[SubViewport] = []
@@ -144,6 +154,8 @@ func status() -> String:
 			return tr("This headset has no curved layers: a curved screen is drawn in the room.")
 		return tr("On; nothing to show.")
 	var px: Vector2i = viewports[0].size
+	if held and not bool(main.get("menu_shown")) and covered_by != "":
+		return tr("On; the room draws the film while an object is in front of the screen, so it shows.")
 	if held:
 		return tr("On; the room draws the film while the menu is open, so the menu shows in front.")
 	if layers.size() == 2:
@@ -151,6 +163,75 @@ func status() -> String:
 				else tr("In use: two quad layers, one per eye, %d x %d px each.")) % [px.x, px.y]
 	return (tr("In use: one cylinder layer, %d x %d px.") if kind == "cylinder"
 			else tr("In use: one quad layer, %d x %d px.")) % [px.x, px.y]
+
+
+## The name of a room object whose bounds, seen from the eyes, cover part of the flat picture and lie between the
+## eyes and the screen; "" when none does.
+func _covered() -> String:
+	var physics: Node = main.features.get("physics") if main.get("features") != null else null
+	var flat := main.screen.get_node_or_null("Flat") as Node3D if main.screen != null else null
+	var cam := main.get_viewport().get_camera_3d() if main.is_inside_tree() else null
+	if physics == null or flat == null or cam == null or not physics.has_method("solid_nodes"):
+		return ""
+	var nodes: Array = physics.solid_nodes()
+	if nodes.is_empty():
+		return ""
+	var screen := Transform3D(flat.global_transform.basis.orthonormalized(), flat.global_transform.origin)
+	var half: Vector2 = main.screen.get_flat_size() * 0.5
+	var eye := screen.affine_inverse() * cam.global_position
+	if eye.z <= 0.01:
+		return ""
+	for n: Node3D in nodes:
+		if _covers(screen, eye, half, n):
+			return str(n.name)
+	return ""
+
+
+## Whether `n`'s bounds cover part of the picture (half its size, in the screen's frame) seen from `eye` (the same
+## frame, +Z towards the viewer): each corner in front of the screen and behind the eyes, carried along its line from
+## the eye onto the screen's plane; the box of those points meets the picture.
+func _covers(screen: Transform3D, eye: Vector3, half: Vector2, n: Node3D) -> bool:
+	var local: AABB = _local_aabb(n)
+	if local.size == Vector3.ZERO:
+		return false
+	var to_screen := screen.affine_inverse() * n.global_transform
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	var any := false
+	for i in 8:
+		var c := to_screen * local.get_endpoint(i)
+		# Behind the screen's plane, or at or behind the eyes: not between them.
+		if c.z <= 0.0 or c.z >= eye.z - 0.02:
+			continue
+		var k := eye.z / (eye.z - c.z)
+		var on := Vector2(eye.x + (c.x - eye.x) * k, eye.y + (c.y - eye.y) * k)
+		lo = lo.min(on)
+		hi = hi.max(on)
+		any = true
+	return any and lo.x < half.x and hi.x > -half.x and lo.y < half.y and hi.y > -half.y
+
+
+func _local_aabb(n: Node3D) -> AABB:
+	var id := n.get_instance_id()
+	if _local_aabbs.has(id):
+		return _local_aabbs[id]
+	var box := AABB()
+	var first := true
+	var inv := n.global_transform.affine_inverse()
+	for v in [n] + n.find_children("*", "VisualInstance3D", true, false):
+		if not (v is VisualInstance3D) or str(v.name).begins_with("Contact_"):
+			continue
+		var b: AABB = (inv * (v as VisualInstance3D).global_transform) * (v as VisualInstance3D).get_aabb()
+		if b.size == Vector3.ZERO:
+			continue
+		box = b if first else box.merge(b)
+		first = false
+	# Not kept while it has no meshes yet (a model still loading).
+	if box.size != Vector3.ZERO:
+		if _local_aabbs.size() > 256:
+			_local_aabbs.clear()
+		_local_aabbs[id] = box
+	return box
 
 
 func _xr_running() -> bool:
@@ -197,6 +278,12 @@ func _update() -> void:
 	# Marking a window to the real room: the whole view is the cameras, the screen too (real_windows.gd).
 	var rw: Node = main.features.get("real_windows") if main.get("features") != null else null
 	var hold := bool(main.get("menu_shown")) or (rw != null and bool(rw.get("marking")))
+	if not hold and kind == "quad":
+		var by := _covered()
+		if by != "":
+			covered_by = by
+			_covered_ms = Time.get_ticks_msec()
+		hold = Time.get_ticks_msec() - _covered_ms < int(COVER_RELEASE * 1000.0)
 	if hold != held:
 		held = hold
 		for layer in layers:

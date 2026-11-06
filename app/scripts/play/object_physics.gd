@@ -184,6 +184,19 @@ func names() -> Array:
 	return _bodies.keys()
 
 
+## The nodes of the room's objects that show: the bodies' and their followers' (attached texts and particles). The
+## film layer hides while one of them is between the viewer and the screen (film_layer.gd _covered()).
+func solid_nodes() -> Array[Node3D]:
+	var out: Array[Node3D] = []
+	for b: Body in _bodies.values():
+		if is_instance_valid(b.node):
+			out.append(b.node)
+	for f: Dictionary in _followers:
+		if is_instance_valid(f["node"]):
+			out.append(f["node"])
+	return out
+
+
 # --- The room on show -----------------------------------------------------------------------------------------------
 
 ## The room changed: the bodies of its placed objects (a kept room's), the followers; the room's own shapes wait for

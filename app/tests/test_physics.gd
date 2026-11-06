@@ -175,19 +175,59 @@ func _test_screen() -> void:
 	var t := d / speed
 	var flat := Vector3(target.x - start.x, 0.0, target.z - start.z).normalized() * speed
 	var v := Vector3(flat.x, (target.y - start.y + 0.5 * 9.8 * t * t) / t, flat.z)
+	# The film layer (forced, no XR session): the runtime draws it over everything in front of the screen, so it
+	# hides while an object is between the eyes and the picture and the room draws the film (film_layer.gd).
+	var film: Node = main.features.film_layer
+	var was_forced: bool = film.force
+	var was_on: bool = film.enabled
+	film.force = true
+	film.set_enabled(true, false)
+	main.set_menu_shown(false)
+	await _frames(2)
+	_check("the film layer is a quad (%s)" % film.kind, film.kind == "quad")
 	var r := await DevCommands.execute("object_throw", {"name": "Ball", "velocity": [v.x, v.y, v.z]}, false)
 	_check("thrown at the screen (%s)" % r.get("error", ""), r["ok"])
 	_check("the screen collides (%s)" % ph.state()["screen"], str(ph.state()["screen"]) == "flat")
 	var min_z := INF
 	var after := -INF
+	var held_for_ball := false
 	for i in 150:
 		await physics_frame
 		var z := _pos("Ball").z
 		min_z = minf(min_z, z)
 		if min_z < INF:
 			after = z
+		if film.held and film.covered_by == "Ball" and main.screen.get_node("Flat").visible 				and "object" in film.status():
+			held_for_ball = true
 		if not ph.is_moving("Ball"):
 			break
+	_check("in flight in front of the screen: the layer hidden, the room draws the film", held_for_ball)
+	_check("landed out of the picture's way: the layer back after a second", not film.held
+			and not main.screen.get_node("Flat").visible)
+	# The bounds test itself: a box between the eyes and the picture covers it; beside it, behind the screen or
+	# behind the eyes it does not.
+	var probe := MeshInstance3D.new()
+	probe.mesh = BoxMesh.new()
+	probe.name = "Probe"
+	root.add_child(probe)
+	var flat_xf: Transform3D = main.screen.get_node("Flat").global_transform
+	var scr := Transform3D(flat_xf.basis.orthonormalized(), flat_xf.origin)
+	var half: Vector2 = main.screen.get_flat_size() * 0.5
+	var eye := Vector3(0, 0, 10.0)
+	var cases := {"between": [Vector3(0, 0, 5), true], "beside": [Vector3(half.x * 3.0, 0, 5), false],
+			"behind the screen": [Vector3(0, 0, -2), false], "behind the eyes": [Vector3(0, 0, 12), false],
+			"at the picture's edge": [Vector3(half.x * 0.5 + 0.3, 0, 5), true]}
+	var wrong: Array = []
+	for k: String in cases:
+		probe.global_transform = scr * Transform3D(Basis(), cases[k][0])
+		film._local_aabbs.clear()
+		if film._covers(scr, eye, half, probe) != bool(cases[k][1]):
+			wrong.append(k)
+	probe.queue_free()
+	_check("the bounds test: in front covers, beside / behind the screen / behind the eyes not (%s)" % ", ".join(wrong),
+			wrong.is_empty())
+	film.set_enabled(was_on, false)
+	film.force = was_forced
 	_check("it reached the screen (%.2f, the screen at %.2f)" % [min_z, target.z], min_z < target.z + 0.5)
 	_check("and bounced back off it, not off the wall behind (%.2f, back to %.2f)" % [min_z, after],
 			min_z > target.z - 0.15 and after > min_z + 0.3)
