@@ -289,10 +289,11 @@ func _test_svg() -> void:
 
 func _test_commands() -> void:
 	for c: String in ["object_library", "object_info", "object_import", "object_place", "object_move",
-			"object_delete"]:
+			"object_delete", "object_put_back", "object_tidy_up", "object_attach", "object_throw", "object_physics"]:
 		var spec := DevCommands.get_spec(c)
 		_check("%s registered with an assistant level (%s)" % [c, spec.get("assistant")], spec.get("assistant") in
-				["read", "room"] and (spec.get("assistant") == "read") == (c in ["object_library", "object_info"]))
+				["read", "room"] and (spec.get("assistant") == "read") == (c in ["object_library", "object_info",
+				"object_physics"]))
 		for p: Dictionary in spec.get("params", []):
 			_check("%s: %s described" % [c, p["name"]], str(p.get("description", "")) != "")
 	_check("recolour takes material and reset", DevCommands.get_spec("recolour")["params"].any(
