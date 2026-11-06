@@ -505,6 +505,19 @@ given one name; gradients become one flat colour; strokes, text and pictures are
 it (`at`, `position`, `rotation`, `scale`), `remove {name}` takes it out, `object_delete {id}` deletes an imported or
 kept object from the library: refused while a kept room places it (the reply names the rooms; remove it there first).
 
+**Objects from Fab.** The headset can search Fab for Quixel Megascans' free 3D models and import one into the
+library; the headset makes every request, you only ask it. **First the user must accept Fab's licence, in the
+headset's menu: Objects → Your objects → Fab, Accept.** No command can accept it. Until then every Fab command but
+`fab_status` answers `{"ok": false, "error": "eula", "message": "Ask the user to accept Fab's licence in Objects →
+Your objects → Fab first. ..."}`: ask the user to do that, then go on. `fab_status` says `eula_accepted`.
+`fab_search {query}` (English words: rock, chair, cabbage) gives 24 results a page, each with its `uid`, `title`,
+`category`, `tags` and `in_library` (the object's id when it is in the library already); `next` is the cursor of the
+next page (`fab_search {query, cursor: next}`), empty on the last one. Ask for more pages only when the user wants
+more. `fab_import {uid}` starts the download and import in the background (`state: started`, or `state: already` with
+the object when it is in the library); poll `fab_status` until `job.state` is `done`, then `object_place {id:
+job.object.id}`. `fab_cancel` stops it. `error: "backoff"` means Fab asked the headset to wait `wait` seconds: wait
+that long before the next Fab command.
+
 **Part addressing.** A part inside a placed object is `"<placed name>/<part name>"`, a pattern on each side
 (`"Shelf*/Board"`). `recolour {match: "Wall shelf/Board", color: "#c0392b"}` changes that part only and keeps the
 rest of the object; `recolour {match: "Wall shelf", ...}` (a bare name) changes the whole object as before, and its

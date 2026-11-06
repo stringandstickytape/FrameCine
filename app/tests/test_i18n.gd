@@ -34,7 +34,7 @@ const SET_B := ["ui/picture_tab.gd", "ui/sound_tab.gd", "ui/subtitles_tab.gd", "
 const ContainerMode := preload("res://scripts/play/container_mode.gd")
 const SoundTab := preload("res://ui/sound_tab.gd")
 ## Stage 2, set C: the Room, Objects and Mixed reality tabs, and what they show from elsewhere.
-const SET_C := ["ui/room_tab.gd", "ui/objects_tab.gd", "ui/object_section.gd", "ui/object_placer.gd",
+const SET_C := ["ui/room_tab.gd", "ui/objects_tab.gd", "ui/object_section.gd", "ui/object_placer.gd", "ui/fab_panel.gd",
 		"ui/mixed_reality_tab.gd", "ui/agent_pane.gd", "scripts/comfort/sleep_timer.gd",
 		"scripts/assistant/assistant_service.gd", "scripts/assistant/object_builtins.gd",
 		"environments/showrooms/index.json"]
