@@ -151,27 +151,9 @@ func _test_modes() -> void:
 	_check("sweep: a square thing in front stays square to the viewer",
 			absf(RealWindows.fit_yaw(square, 0.0)) < 0.001)
 
-	# Corners: a keyboard 45 x 15 cm at 45 degrees, touched at three corners; the box along its edge.
-	var e := Vector3(cos(PI / 4.0), 0, -sin(PI / 4.0))
-	var across := Vector3(sin(PI / 4.0), 0, cos(PI / 4.0))
-	var c0 := Vector3(0.2, 0.75, -0.6)
-	_check("corners: started", ui.start_window_corners() and rw.mode == "corners")
-	_check("corners: first two say more", rw.corner(c0) == "more" and rw.corner(c0 + e * 0.45) == "more")
-	_check("corners: the third asks the height", rw.corner(c0 + e * 0.45 + across * 0.15) == "height")
-	var h0: float = rw.height
-	rw.on_stick(Vector2(0, 1), 0.2)
-	_check("corners: the stick raises it", rw.height > h0)
-	rw.height = 0.05
-	var cw: Dictionary = rw.finish()
-	var cs: Vector3 = RealWindows._vec(cw.get("size", [0, 0, 0]))
-	_check("corners: kept along the edge (%s, %.1f deg)" % [cs, rad_to_deg(float(cw.get("yaw", 0.0)))],
-			absf(rad_to_deg(float(cw["yaw"])) - 45.0) < 0.5 and absf(cs.x - (0.45 + RealWindows.CORNER_MARGIN * 2.0)) < 0.01
-			and absf(cs.z - (0.15 + RealWindows.CORNER_MARGIN * 2.0)) < 0.01
-			and absf(cs.y - (0.05 + RealWindows.CORNER_MARGIN * 2.0)) < 0.01)
-
 	# Edit, a face at a time. The viewer looks along -Z (the desktop camera), the area square to them.
-	var id := str(cw["id"])
-	rw.restore({"id": id, "name": cw["name"], "center": [0.0, 1.0, -1.0], "size": [0.4, 0.2, 0.3], "yaw": 0.0,
+	var id := "edittest"
+	rw.restore({"id": id, "name": "Area 9", "center": [0.0, 1.0, -1.0], "size": [0.4, 0.2, 0.3], "yaw": 0.0,
 			"on": true})
 	var before: Dictionary = rw.window_by_id(id).duplicate(true)
 	_check("edit: started on the face towards the viewer", ui.start_window_edit(id) and rw.mode == "edit"
@@ -207,16 +189,6 @@ func _test_modes() -> void:
 	var kept: Dictionary = rw.finish()
 	_check("edit: kept (%s, %s)" % [kept["size"], kept["center"]], kept["id"] == id
 			and absf(float(kept["size"][1]) - 0.3) < 0.002 and absf(float(kept["center"][1]) - 1.05) < 0.002)
-	cw = kept
-
-	# Mark again: the box replaced, the name and On kept.
-	_check("mark again: started", ui.start_window_mark_again(id) and rw.mode == "sweep")
-	rw.sweep(true)
-	rw.add_point(Vector3(2, 1, 2))
-	rw.add_point(Vector3(2.2, 1.1, 2.1))
-	var again: Dictionary = rw.finish()
-	_check("mark again: the same area, a new box", again["id"] == id and again["name"] == cw["name"]
-			and RealWindows._vec(again["center"]).distance_to(Vector3(2.1, 1.05, 2.05)) < 0.06)
 
 	rw.set_size(id, Vector3(0.3, 0.2, 0.1))
 	_check("set_size", RealWindows._vec(rw.window_by_id(id)["size"]).is_equal_approx(Vector3(0.3, 0.2, 0.1)))
@@ -242,14 +214,6 @@ func _test_hints() -> void:
 	says.append(rw.hint())
 	ui.on_back(null)
 	_check("sweep: says hold, then let go (%s)" % [says], says[0].contains("Hold the trigger") and says[1].contains("Let go"))
-	ui.start_window_corners()
-	says = [rw.hint()]
-	for p: Vector3 in [Vector3(0, 0.7, -1), Vector3(0.4, 0.7, -1), Vector3(0.4, 0.7, -1.2)]:
-		rw.corner(p)
-		says.append(rw.hint())
-	ui.on_back(null)
-	_check("corners: each step says which (%s)" % [says], says[0].contains("1 of 3") and says[1].contains("2 of 3")
-			and says[2].contains("3 of 3") and says[3].contains("how high"))
 	var id := str(rw.windows[0]["id"])
 	ui.start_window_edit(id)
 	var face: String = rw.hint()
@@ -284,11 +248,18 @@ func _test_kept() -> void:
 	var tab: Node = main.ui.ui.get("mixed_reality")
 	var pui: Node = main.ui.ui
 	_check("the Mixed reality tab, before System", tab != null and _has_text(tab, "Sweep an area")
-			and _has_text(tab, "Touch corners") and pui.tabs.find(tab) == pui.Tab.MIXED_REALITY
+			and _has_text(tab, "Mark areas to see through to the cameras.") and not _has_text(tab, "Touch corners")
+			and not _has_text(tab, "Mark again") and pui.tabs.find(tab) == pui.Tab.MIXED_REALITY
 			and pui.Tab.MIXED_REALITY + 1 == pui.Tab.SYSTEM and pui.TAB_NAMES[pui.Tab.MIXED_REALITY] == "Mixed reality")
 	_check("its icon", load("res://ui/icons.gd").has("mixed-reality")
 			and pui.TABLET_TAB_ICONS[pui.Tab.MIXED_REALITY] == "mixed-reality")
 	_check("not in the Objects tab any more", not _has_text(pui.get("objects"), "Windows to the real room"))
+	tab.sync()
+	_check("each area a row with On, Edit and Delete (%d areas)" % rw.windows.size(), rw.windows.size() > 0
+			and tab._rows.get_child_count() == rw.windows.size() and _has_text(tab._rows.get_child(0), "Edit")
+			and _has_text(tab._rows.get_child(0), "Delete") and _has_text(tab._rows.get_child(0), "On"))
+	_check("Passthrough dimming, 70 %% at first", _has_text(tab, "Passthrough dimming")
+			and is_equal_approx(RealWindows.LIGHT_MIN, 0.7))
 	for w: Dictionary in rw.windows.duplicate():
 		rw.remove(w["id"])
 	await process_frame

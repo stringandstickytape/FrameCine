@@ -880,21 +880,20 @@ the user, 2026-11-06). While making or changing one, the whole view is the camer
   4 cm round, turned to the least floor area within 45 degrees of the way the viewer faced (`fit_yaw`; ties go to the
   facing turn, so a table in front stays square). A monitor at 45 degrees first gave a box across it with the
   monitor diagonal inside.
-- **Corners:** the trigger on three corners of a flat thing; the first edge gives the turn, the third corner the
-  depth, the stick the height; 1.5 cm round.
 - **Edit, a face at a time** (the user, 2026-11-06: one way to move and size instead of two, and a turn): the chosen
   face shows as a bright slab and the stick moves it along its own axis the way the stick is pushed as the viewer
   sees it (`_push`: up for a face up or away, right for a face on the right), squared for fine control, 25 cm a
   second at full stick, the opposite face kept (`move_face`). The trigger steps through the faces nearest-first and
-  then Turn (45 degrees a second). Menu keeps, B puts back. **Mark again**, On, All on, All off, Delete, each with
-  Undo. No outlines while the menu is open: an area is seen by turning it on.
+  then Turn (45 degrees a second). Menu keeps, B puts back. Each area a row in the tab: On, Edit, Delete (with
+  Undo); All on, All off. No outlines while the menu is open: an area is seen by turning it on. (Touch corners and
+  Mark again were tried and dropped: the fitted sweep and Edit cover them.)
 - **The steps' instructions** are on a card over the pointer controller (`ui/hand_hint.gd`, from `hint()`), turned to
   the head, for as long as the mode lasts: notices placed once where the head looked faded while the viewer looked
   down at the table.
 
 - **Fixed to the real room:** kept in the runtime's tracking space (the Stage reference space, from the headset's room
   setup), placed each frame by XROrigin3D times XRServer's reference frame. Recentring the screen leaves the windows
-  on the table; they are there next session (`user://real_windows.json`). A new room setup moves them: mark again.
+  on the table; they are there next session (`user://real_windows.json`). A new room setup moves them: sweep again.
 - **Showing the cameras:** while a window is on, the ALPHA_BLEND blend mode with the viewport's alpha kept (as the
   passthrough room) and a black backstop far out so nothing else lets the cameras through. Each window draws
   back faces with no depth test and multiply blending: colour times 1 - reveal, alpha times 1 - reveal x light. So it
@@ -904,7 +903,7 @@ the user, 2026-11-06). While making or changing one, the whole view is the camer
   film played. Before the tablet (moved up to 4..7), the watch card (4), subtitles and toasts (10) and the panel
   (11, 12), which still draw over a window.
 - **Light:** the room light dims the cameras' view as in the passthrough room, never under `[real_room] light_min`
-  (40 %; the tab's slider): a window is for finding the cup in the dark.
+  (70 %; the tab's Passthrough dimming): a window is for finding the cup in the dark.
 - **While marking** the film layer steps aside (the screen's mesh draws the film, wiped to the cameras' view too).
 - A window over the screen shows the film, not the cameras: the film layer is between them.
 - Each area: On (off: not drawn, and with none on the cameras stop) and Delete, with Undo. At most 16.

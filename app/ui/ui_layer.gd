@@ -530,8 +530,8 @@ func on_menu(hand: XRHand, pressed: bool) -> bool:
 			"cancel":
 				cancel_seat_pick()
 				cancel_object_place()
-				# Corners and edit: the menu button keeps what is shown (B puts it back); the sweep keeps on letting go.
-				if is_marking_window() and _real_windows().mode in ["corners", "edit"]:
+				# Edit: the menu button keeps what is shown (B puts it back); the sweep keeps on letting go.
+				if is_marking_window() and _real_windows().mode == "edit":
 					_finish_window_mark()
 				else:
 					cancel_window_mark()
@@ -831,23 +831,14 @@ func _ensure_placer() -> ObjectPlacer:
 
 
 ## Windows to the real room (the Mixed reality tab; scripts/play/real_windows.gd): the panel goes and the view is the
-## cameras'. Sweep: the trigger held sweeps the controller over the place, letting go keeps it. Corners: the trigger on
-## three corners, the stick for the height, the trigger again (or menu) keeps it. Edit: a face at a time, the stick
-## moves it, the trigger goes to the next face and then Turn, menu keeps it. B cancels each.
+## cameras'. Sweep: the trigger held sweeps the controller over the place, letting go keeps it. Edit: a face at a
+## time, the stick moves it, the trigger goes to the next face and then Turn, menu keeps it. B cancels each.
 func start_window_mark() -> bool:
 	return _start_window(_real_windows() != null and _real_windows().start_mark())
 
 
-func start_window_corners() -> bool:
-	return _start_window(_real_windows() != null and _real_windows().start_corners())
-
-
 func start_window_edit(id: String) -> bool:
 	return _start_window(_real_windows() != null and _real_windows().start_edit(id))
-
-
-func start_window_mark_again(id: String) -> bool:
-	return _start_window(_real_windows() != null and _real_windows().mark_again(id))
 
 
 ## The steps' instructions are on the card over the controller (hand_hint), for as long as the mode lasts.
@@ -885,8 +876,6 @@ func _finish_window_mark() -> void:
 	if w.is_empty():
 		notify("Nothing marked")
 		return
-	rw.selected = str(w["id"])
-	rw.changed.emit()
 	if was.is_empty():
 		ui.show_toast("%s added: the cameras show there" % w["name"], "Undo", func() -> void:
 			rw.remove(str(w["id"]))
@@ -1014,11 +1003,6 @@ func on_trigger(hand: XRHand, pressed: bool) -> bool:
 				elif rw.sweeping:
 					_finish_window_mark()
 					hand.pulse()
-			"corners":
-				if pressed:
-					hand.pulse()
-					if rw.corner(hand.get_ray_origin()) == "done":
-						_finish_window_mark()
 			"edit":
 				if pressed:
 					rw.next_face()

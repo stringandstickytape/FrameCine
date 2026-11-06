@@ -20,9 +20,6 @@ extends Node3D
 ## things can be seen, and the box being made or changed shows tinted.
 ##   sweep    the trigger held sweeps the pointer controller's tip (its ray origin) over the place; letting go keeps an
 ##            upright box round it, turned to the way the viewer faced, MARGIN round
-##   corners  the trigger touched to three corners of a flat thing (a table, a keyboard): the first two give its edge
-##            and so its turn, the third its depth; the stick sets the height above it; the trigger again keeps it,
-##            CORNER_MARGIN round
 ##   edit     an area already kept, a face at a time (the user, 2026-11-06): the chosen face shows bright and the stick
 ##            moves it along its own axis, the way the stick is pushed as the viewer sees it (up: a top face up, a face
 ##            towards the viewer away; right: a face on the right to the right); the trigger goes to the next face,
@@ -30,17 +27,16 @@ extends Node3D
 ##            it back. Moving the box is moving its faces.
 ##
 ## The room light dims the cameras' view as in the passthrough room, but never under `light_min` ([real_room]
-## light_min, 0.4): a window is there to find the cup in the dark.
+## light_min, 0.7): a window is there to find the cup in the dark.
 ##
 ##   windows                          [{id, name, center [x, y, z], size [w, h, d], yaw (radians), on}] (tracking space)
-##   start_mark() / start_corners() / start_edit(id) -> bool   false without the cameras' view, unless `force`
+##   start_mark() / start_edit(id) -> bool   false without the cameras' view, unless `force`
 ##   sweep(on), add_point(p)          the sweep: trigger held / let go; a point (scene coordinates) while held
-##   corner(p) -> "more" | "height" | "done"    the corners: one touched (scene coordinates)
 ##   next_face() -> its name, face_name(), face_hint()     edit: the trigger
 ##   hint() -> String                 what to do now, for the card over the controller (ui/hand_hint.gd)
-##   on_stick(stick, delta)           corners: the height; edit: the face, or the turn
-##   finish() -> window or {}         sweep, corners or edit kept; cancel_mark() puts things back
-##   set_on(id, on), set_all(on), set_size(id, size), remove(id) -> removed, restore(window), mark_again(id)
+##   on_stick(stick, delta)           edit: the face, or the turn
+##   finish() -> window or {}         sweep or edit kept; cancel_mark() puts things back
+##   set_on(id, on), set_all(on), set_size(id, size), remove(id) -> removed, restore(window)
 ##   status() -> String
 ## Kept in user://real_windows.json.
 
@@ -50,17 +46,13 @@ const SHADER := preload("res://shaders/real_window.gdshader")
 const FILE := "user://real_windows.json"
 ## Metres added round what was swept or touched, and the least and most a side can be.
 const MARGIN := 0.04
-const CORNER_MARGIN := 0.015
 const MIN_SIDE := 0.05
 const MAX_SIDE := 4.0
 const MAX_WINDOWS := 16
 ## Samples closer than this to the last one are not kept.
 const STEP := 0.01
-const LIGHT_MIN := 0.4
-## The corners' height to start with, and how fast the stick changes it (metres a second at full stick).
-const CORNER_HEIGHT := 0.1
-const HEIGHT_RATE := 0.3
-## Adjust: degrees a second at full stick, and the size's rate (e-folds a second).
+## The least the room light dims the cameras' view to (the tab's Passthrough dimming; 70 %, the user, 2026-11-06).
+const LIGHT_MIN := 0.7
 ## Edit: metres a second for a face and degrees a second for the turn at full stick (squared: fine near the middle).
 const FACE_RATE := 0.25
 const TURN_RATE := 45.0
@@ -82,24 +74,19 @@ var main: Node3D
 ## Builds and blend-mode handling without an XR session (tests).
 var force := false
 var windows: Array = []
-## "", "sweep", "corners" or "edit".
+## "", "sweep" or "edit".
 var mode := ""
 var marking: bool:
 	get:
 		return mode != ""
 var sweeping := false
-## The area chosen in the tab ("" none): drawn brighter while the menu is open.
-var selected := ""
 var light_min := LIGHT_MIN
-## Corners: the touched points (tracking space) and the height above them.
-var corners := PackedVector3Array()
-var height := CORNER_HEIGHT
 ## Sweep: the points so far.
 var _points := PackedVector3Array()
 var _yaw := 0.0
 ## The sweep: the way the viewer faced when it began.
 var _facing := 0.0
-## Mark again / edit: the area being changed, and how it was.
+## Edit: the area being changed, and how it was.
 var _target := ""
 var _before := {}
 ## Adjust: the box now ({center, size} tracking space, _yaw), the grab's start (hand and box).
@@ -142,17 +129,8 @@ func available() -> bool:
 
 # --- Making ----------------------------------------------------------------------------------------------------------
 
-## The sweep. mark_again(id) does the same for an area already kept (its box replaced, its name and On kept).
 func start_mark() -> bool:
 	return _start("sweep", "")
-
-
-func mark_again(id: String) -> bool:
-	return _find(id) >= 0 and _start("sweep", id)
-
-
-func start_corners() -> bool:
-	return _start("corners", "")
 
 
 func start_edit(id: String) -> bool:
@@ -177,8 +155,6 @@ func _start(m: String, target: String) -> bool:
 	_before = (windows[_find(target)] as Dictionary).duplicate(true) if target != "" else {}
 	sweeping = false
 	_points.clear()
-	corners.clear()
-	height = CORNER_HEIGHT
 	_preview.visible = false
 	_full.visible = true
 	return true
@@ -203,42 +179,6 @@ func add_point(p: Vector3) -> void:
 	_points.append(raw)
 	_yaw = fit_yaw(_points, _facing)
 	_show_preview(box_of(_points, _yaw))
-
-
-## A corner touched (scene coordinates): "more" after the first and second, "height" after the third (the stick sets
-## it; touch again to keep), "done" on the touch after that.
-func corner(p: Vector3) -> String:
-	if mode != "corners":
-		return ""
-	if corners.size() >= 3:
-		return "done"
-	corners.append(global_transform.affine_inverse() * p)
-	_show_preview(corner_box(corners, height))
-	return "height" if corners.size() == 3 else "more"
-
-
-## The box on touched corners: turned along the first edge (first to second), round the corners and the same points
-## `h` higher, CORNER_MARGIN round. With one corner: a small box on it; with two, a thin one along the edge.
-static func corner_box(pts: PackedVector3Array, h: float) -> Dictionary:
-	var yaw := corner_yaw(pts)
-	var all := PackedVector3Array()
-	for p in pts:
-		all.append(p)
-		all.append(p + Vector3.UP * h)
-	var b := box_of(all, yaw, CORNER_MARGIN)
-	b["yaw"] = yaw
-	return b
-
-
-## The turn that puts the box's X axis along the first edge (0 with fewer than two corners).
-static func corner_yaw(pts: PackedVector3Array) -> float:
-	if pts.size() < 2:
-		return 0.0
-	var e := pts[1] - pts[0]
-	e.y = 0.0
-	if e.length_squared() < 1e-6:
-		return 0.0
-	return atan2(-e.z, e.x)
 
 
 ## Edit: the trigger. The next face (or Turn after the last); its name.
@@ -282,28 +222,14 @@ func hint() -> String:
 			if sweeping:
 				return "Sweeping\nLet go of the trigger to keep it"
 			return "Hold the trigger and sweep\nthe controller over the place\nB: cancel"
-		"corners":
-			match corners.size():
-				0:
-					return "Tip on a corner, then trigger\n(1 of 3)\nB: cancel"
-				1:
-					return "The next corner along an edge\n(2 of 3)\nB: cancel"
-				2:
-					return "A corner across from that edge\n(3 of 3)\nB: cancel"
-				_:
-					return "Stick up / down: how high\nTrigger or menu: keep it\nB: cancel"
 		"edit":
 			return face_hint() + "\nMenu: keep it  ·  B: put it back"
 	return ""
 
 
-## Corners: up and down set the height. Edit: the face moves the way the stick is pushed (as the viewer sees it), or,
-## on Turn, left and right turn the box.
+## Edit: the face moves the way the stick is pushed (as the viewer sees it), or, on Turn, left and right turn the box.
 func on_stick(stick: Vector2, delta: float) -> void:
-	if mode == "corners" and corners.size() >= 3 and absf(stick.y) > STICK_DEAD:
-		height = clampf(height + stick.y * HEIGHT_RATE * delta, 0.0, MAX_SIDE)
-		_show_preview(corner_box(corners, height))
-	elif mode == "edit":
+	if mode == "edit":
 		if _face >= FACES.size():
 			if absf(stick.x) > STICK_DEAD:
 				_yaw -= deg_to_rad(stick.x * absf(stick.x) * TURN_RATE * delta)
@@ -358,18 +284,13 @@ func _faces_by_view() -> Array:
 	return order
 
 
-## What the mode made, kept: a new area (sweep, corners), or the area changed (mark again, edit). {} when nothing
-## was made (nothing swept, fewer than three corners).
+## What the mode made, kept: a new area (sweep), or the area changed (edit). {} when nothing was swept.
 func finish() -> Dictionary:
 	var box := {}
 	match mode:
 		"sweep":
 			if not _points.is_empty():
 				box = box_of(_points, _yaw)
-		"corners":
-			if corners.size() >= 3:
-				box = corner_box(corners, height)
-				_yaw = float(box["yaw"])
 		"edit":
 			box = _box
 	var w := {}
@@ -391,7 +312,7 @@ func finish() -> Dictionary:
 	return w
 
 
-## Leaves the mode; an area being edited or marked again keeps what it had.
+## Leaves the mode; an area being edited keeps what it had.
 func cancel_mark() -> void:
 	if _target != "" and not _before.is_empty():
 		var i := _find(_target)
@@ -412,7 +333,6 @@ func _end_mode() -> void:
 	mode = ""
 	sweeping = false
 	_points.clear()
-	corners.clear()
 	_face_order = []
 	if _preview != null:
 		_preview.visible = false
@@ -497,8 +417,6 @@ func remove(id: String) -> Dictionary:
 		return {}
 	var w: Dictionary = windows[i]
 	windows.remove_at(i)
-	if selected == id:
-		selected = ""
 	_save()
 	_rebuild()
 	return w

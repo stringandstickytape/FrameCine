@@ -310,22 +310,19 @@ there first.
 The **Mixed reality** tab (MR on the front panel's tab bar, above System) holds windows to the real room: real
 places, the coffee table or the keyboard say, that show through the headset's cameras in every room. Each is a box
 fixed to the real place: it stays there when you recentre and next time you start (a new room setup on the headset
-moves them; mark them again then).
+moves them; sweep them again then).
 
 - **Sweep an area**: the panel goes and you see the real room. Hold the trigger and pass the controller over the
   place; a tinted box shows what it will keep, turned to fit what you swept (a monitor at an angle gets a box along
   it). Let go to keep it.
-- **Touch corners**: for something flat with edges. Touch the controller's tip to a corner and pull the trigger, then
-  the next corner along an edge, then one across. Stick up and down sets how high the box goes; the trigger (or the
-  menu button) keeps it. The box lines up with the edge you touched.
-- Each area: its name (pick it), its size, **On**. **All on**, **All off**.
-- Pick an area for **Edit**, **Mark again** (a new sweep for it) and **Delete**. Each change has Undo in the footer.
+- Each area is a row: its name and size, **On**, **Edit** and **Delete** (with Undo in the footer). **All on**,
+  **All off**.
 - **Edit** works a face at a time. You see the real room, the box tinted and one face of it bright, starting with the
   face towards you. The stick moves that face the way you push it: up and down for the top and bottom, left and right
   for a face on your left or right, up (away) and down (nearer) for a face towards or away from you. The opposite
   face stays put, so moving faces both sizes and moves the box. The trigger goes to the next face, and after the six
   to **Turn**, where left and right turn the box. The menu button keeps it; B puts it back.
-- **Cameras' view when the room dims**: the room light dims the cameras' view too, never below this (40 % at first).
+- **Passthrough dimming**: the room light dims the cameras' view too, never below this (70 % at first).
 
 B cancels any of them. While you mark or edit, a card over the controller says what to do at each step.
 
