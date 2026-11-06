@@ -170,20 +170,76 @@ the fill again as `Vector3`s on its copies.
 
 ```
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
-MaterialLibrary.list()                       # [{id, name, tags, tiling, swatch, size}], by name
+MaterialLibrary.list()                       # [{id, name, tags, tiling, swatch, size, source, user}], by name
 MaterialLibrary.entry("velvet")              # the catalogue entry
 MaterialLibrary.get_material("velvet", {"colour": Color(0.4, 0.05, 0.08)})   # a shared ShaderMaterial, or null
 MaterialLibrary.apply(mesh_instance, "oak_planks", {"tiling": 1.5})          # material_override
 MaterialLibrary.apply(mesh_instance, "felt", {}, 2)                          # one surface's override
 ```
 
-Options: `colour`, `tint`, `tiling`, `offset`, `uv`, `repeat`, `triplanar`, `roughness_scale`, `normal_strength`,
+Options: `colour`, `tint`, `tiling`, `turn` (degrees), `offset`, `uv`, `repeat`, `triplanar`, `roughness_scale`, `normal_strength`,
 `specular`, `sheen`, `pleats`, `pleat_depth`, `spill`, `floor_darkening`, `emission` (added on top), `lit` (the lit
 form, above). A primitive room has
 `textured(id, colour, spill, floor_darkening, options)`, which falls back to its plain material. The returned
 material is shared: `duplicate()` it before changing it for one surface.
 
 The `materials` command (dev link and assistant, `read`): the list, `tag` to filter.
+
+## User materials
+
+Materials the viewer imports on the headset, in **Objects → Surfaces** or with `material_import`, from Quixel
+Megascans (through Fab), Poly Haven or ambientCG (`docs/features.md`, "Surfaces"; `app/scripts/env/surface_import.gd`).
+None is in the repository or a release.
+
+```
+user://materials/<id>.json                 the entry, as a bundled one, with "user": true
+user://materials/textures/<id>_albedo.jpg  base colour, the ambient occlusion multiplied in
+user://materials/textures/<id>_normal.png  RGBA: X in RGB, Y in alpha (as the shader reads .mtex)
+user://materials/textures/<id>_orm.png     R 1 (no occlusion: it is in the colour), G roughness, B metal; half size
+```
+
+- **The id:** the site's prefix and the asset (`ph_`, `acg_`, `ms_`), so the same asset is imported once.
+- **The entry's `source`:** `site`, `name`, `asset`, `title`, `page`, `author`, `licence` (CC0 1.0, or "Fab Standard
+  License (the viewer's own)" for Megascans), `listing` (Fab's) and `imported` (the date). Also `tiling_from`
+  (`size`: the scan's real size; `default`: 1 m), `format` and `gpu_bytes`.
+- **The library:** `MaterialLibrary.list()` and `entry()` have them beside the bundled ones (`source`: the site, else
+  `bundled`; `user`: true). `get_material()`, `apply()` and the rooms' `library_material` take them as any other.
+  `forget_user()` reads the folder again after an import or a delete.
+- **Loading:** a JPEG or PNG map is decoded, gets its mipmaps and goes to the GPU uncompressed (RGBA8).
+
+### ASTC on the headset: not in the export templates
+
+`surface_import.gd` tries `Image.compress(COMPRESS_ASTC, ..., ASTC_FORMAT_8x8)` once at start. In the export
+templates it fails, so user materials are 1K, uncompressed. Why: in the engine (the fork too)
+`modules/astcenc/SCsub` builds astcenc with `ASTCENC_DECOMPRESS_ONLY` unless `env.editor_build`, and
+`modules/astcenc/register_types.cpp` sets `Image::_image_compress_astc_func` only under `#ifdef TOOLS_ENABLED`. The
+templates can decode ASTC, not encode it.
+
+The fork change that would allow it: build astcenc's encoder in template builds too (drop the
+`ASTCENC_DECOMPRESS_ONLY` define in `SCsub`) and set `_image_compress_astc_func` outside `TOOLS_ENABLED` in
+`register_types.cpp`. The cost: a larger binary (the encoder, some hundreds of KB) and a few seconds of CPU per map
+on the headset, in a worker thread. The import code needs no change: it writes `.mtex` files, and takes 2K maps,
+when the probe succeeds.
+
+### Memory, each material
+
+| | Colour | Normal | Packed | All three |
+|---|---|---|---|---|
+| Bundled, 1K, ASTC 8 x 8 | 0.35 MB | 0.35 MB | 0.35 MB | 1.05 MB |
+| User, 1K, uncompressed (now) | 5.6 MB | 5.6 MB | 1.4 MB (512) | 12.6 MB |
+| User, 2K, ASTC 8 x 8 (with the fork change) | 1.4 MB | 1.4 MB | 0.35 MB (1K) | 3.15 MB |
+
+With mipmaps. A room with five user materials takes about 63 MB of GPU memory against 5 MB for bundled ones.
+`material_status` gives the sum on disk, the sum if all were loaded and what is loaded now
+(`MaterialLibrary.memory()`).
+
+### Making a CC0 import a bundled one
+
+A Poly Haven or ambientCG material (CC0) that should ship goes through the usual path (below, "Adding a
+material"): write `app/materials/<id>.json` with `"source": {"site": ..., "asset": ...}` from the user entry's
+`source`, and `build_materials.py --only <id>` downloads it again, checks the licence and packs it. The user entry's
+`tiling` is a good start. Never copy the files from `user://`, and never a Megascans one: it is under the viewer's
+Fab licence, not CC0.
 
 ## Adding a material
 

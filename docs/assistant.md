@@ -632,6 +632,42 @@ the dev link the error is one string, `"<code>: <message>"`.
 A search page is kept a day, so the same search again costs Fab nothing; there is no way to list the whole catalogue,
 on purpose. Ask for the next page only when the user wants more.
 
+### Pictures
+
+Pictures the user keeps while browsing (`scripts/pictures/`; `docs/features.md` "Pictures"; D29), to put in the room
+as an object or on a part. The app never browses for the user: `pictures_search` only opens the search page, and the
+user keeps what they choose (the right stick click on an image, Copy image, or saving to Downloads). Titles are the
+user's content; source addresses stay on the headset and are never in an answer.
+
+| Command | Level | What |
+|---|---|---|
+| `pictures_search {query}` | control | opens Google Images for the words in the browser on the big screen: `{opened, note}`. Nothing more: tell the user how to keep one |
+| `pictures` | read | `{pictures: [{id, title, aspect, width, height, alpha, date, objects: [{id, as}]}], count, as}`, newest first |
+| `picture_place {picture, as, name, where, position, rotation, turn, scale}` | room | `as`: `poster`, `framed`, `canvas` or `cutout`. The object is made at the picture's shape (once for each kind) and placed as `object_place` places (`where` empty: a wall one on the wall the user looks at, a cut-out on the floor before them). A wall one stays on its wall until the user pulls it off. `{state: kept, placed, name, ...}` |
+| `picture_apply {part, picture}` | room | the picture on one part (`pointed_part`'s part, a room surface's name or `"<placed>/<part>"`), kept like a recolour, with an undo |
+| `picture_delete {picture}` | room, destructive | deletes the picture and the objects made from it: `{deleted}`. Refused while a kept room places one of them: `{error, rooms}` |
+
+### Surfaces
+
+Materials imported on the headset from Quixel Megascans (through Fab, behind the same licence as "Objects from
+Fab"), Poly Haven and ambientCG (`scripts/env/surface_store.gd`, `surface_import.gd`; `docs/features.md`
+"Surfaces"; `docs/materials.md` "User materials"). The app makes every request, one at a time for each site, at least
+1 s apart, and backs off when a site says it is busy. Search in English.
+
+| Command | Level | What |
+|---|---|---|
+| `material_search {query, source, cursor}` | read | `source`: `megascans`, `polyhaven`, `ambientcg`, or empty for all three. `{query, results: [{source, id, title, tags, tiling (metres, 0 unknown), importable, in_library}], next, credits, errors}`. A source that refuses (Fab's licence not accepted, a site busy) is in `errors`, and the others still answer. `next` is the cursor for the next page. Show the `credits` line where you show the results |
+| `material_import {source, id}` | room | starts the import in the background: `{state: started, source, id, title}`, or `{state: already, material: {id, name}}`. Megascans before the user accepts Fab's licence: `error: "eula"` |
+| `material_status` | read | `{job, busy, backoff_s {polyhaven, ambientcg, megascans}, fab_eula_accepted, user_materials, disk_bytes, gpu_bytes_if_all_loaded, gpu_bytes_loaded, astc, resolution}`; poll it after `material_import` until `job.state` is done, already, failed or cancelled |
+| `materials {tag}` | read | the library, the user's materials too (`source`: the site, else `bundled`; `user`) |
+| `material_apply {part, material, tiling, turn, tint}` | room | a library material on one part: a room surface by name or `"<placed>/<part>"`. `tiling` metres a repeat (0: the material's own), `turn` degrees, `tint` `#rrggbb`. Kept like a recolour, with an undo |
+| `pointed_part` | read | what the user's laser is on: `{part, kind: room \| object, placed, name, material, picture, distance, point}`, or `{part: "", message}`. "Make this wall brick": `pointed_part`, then `material_apply` with its `part` |
+| `part_reset {part}` | room | the part as the room built it: the material, picture or colour given to it goes |
+
+Errors, beside `ok: false`: `error` is a code and `message` says it in English: `eula`, `backoff` (`wait` seconds,
+`http`; don't retry sooner), `network`, `http`, `shape` (the site's answer was not as expected), `busy` (one import at
+a time), `no_file`, `too_big`, `query`, `source`, `cursor`, `id`, `import`.
+
 ### Lighting
 
 A room is flat (unlit shaders, `env_unlit*.gdshader`) unless its document has `light.key`, `light.sky`,

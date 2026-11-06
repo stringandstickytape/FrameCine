@@ -2556,3 +2556,137 @@ open questions are in `app/docs/window-source.md` ("Controller mapping", "Voice 
 
 Untested: on the headset (the feel of the gaze switch and the jump, the cursor's size in the lenses), and in a real
 Chromium (the page script, cross-origin frames, `Input.insertText` into the focused frame).
+
+## Pictures
+
+Pictures from the web, kept on the headset and put in the room: as a poster, a framed picture, a canvas or a
+cut-out, or on any part of the room or of an object (decision D29). The viewer does it in **Objects → Pictures**. An
+assistant does it with commands (`app/scripts/pictures/`, `app/ui/picture_panel.gd`).
+
+- **Find pictures.** The keyboard's form takes a few words. The app opens Google's image search for them in the
+  browser on the big screen (`https://www.google.com/search?q=<words>&udm=2`). That is all the app does there: the
+  viewer browses. The app never scrapes a page and never works one by itself.
+- **Three ways to keep one** (`picture_keeper.gd`), all only while the browser is on the big screen:
+  1. **The right stick click**, while the stick pointer is on an image. The legend **KEEP PICTURE** shows on the stick
+     only while the cursor is over an image (the page is asked a few times a second at most). The cursor holds for
+     0.15 s around the click and goes back to where it was before the click's nudge (`stick_cursor.gd` `freeze()`).
+     The page's DevTools session says what is under the cursor: `document.elementsFromPoint()` at the window pixel /
+     `devicePixelRatio` (1.5 on the Frame), the `<img>`'s `currentSrc` (else a CSS background picture), its alt text
+     and its rectangle. The app fetches the full-size source itself, with the page as its Referer. A `data:` URL is
+     read as it is. If the fetch fails, the app cuts the image's rectangle out of the captured window: smaller, but
+     always there.
+  2. **Copy image** in Chromium's menu (a squeeze tap is a right click): a new picture on the clipboard is kept.
+  3. **Save image as** into Downloads: a new JPEG, PNG, WebP or GIF (its first frame) is kept.
+  - Every keep ends in a notice: "Picture kept: <title>" (the alt text, else the page's title), or "Already in your
+    pictures: <title>".
+- **The right stick click is the menu's too.** On the Frame's profile it is its own action, `stick_click`
+  (`tools/make_action_map.gd`). In pointer mode on a window, it keeps a picture. Everywhere else, it opens and closes
+  the menu as before.
+- **The library** (`picture_library.gd`): `user://pictures/<id>/`, the id from a SHA-256 of the pixels, so the same
+  picture is kept once. The picture is at most 2048 px on its long side (JPEG, or PNG with transparency), with a
+  160 px thumbnail and `picture.json` (title, aspect, size, source page, how it was kept, date). The titles are the
+  viewer's content (`W.content`), not translated.
+- **The tiles.** Four to a row, like the object tiles (`object_section.gd` `_size_tile()`). Pick one, then:
+  - **Place as: Poster, Framed, Canvas, Cut-out.** The object is made at the picture's own shape
+    (`object_builtins.gd` `build_picture()`): a poster is a thin sheet, framed is the built-in picture frame, a canvas
+    is a deep frame, and a cut-out is a standee with the transparent pixels cut away, seen from both sides. Then Place
+    with the laser, as any object. A poster, framed picture or canvas stays on its wall until pulled off; then it has
+    physics like any object. A cut-out stands on the floor.
+  - **Apply to a part** (the picture on a wall, a seat, a part of an object: "Apply to a part", below).
+  - **Delete**, asked first. A picture whose object is in a kept room is refused, with the rooms' names.
+- **The objects** (`picture_objects.gd`): made once for each picture and kind, as the viewer's own objects (tags
+  `picture` and the kind; the manifest has `picture_id` and `picture_as`). So placing, Move, physics, the film
+  layer's cover and kept rooms are the object library's own. They show under Pictures, not under Your objects.
+- **Built-ins:** Poster, Canvas and Cut-out are in Built-in objects too, at 4:3 with a plain picture.
+- **Commands:** `pictures_search {query}`, `pictures`, `picture_place {picture, as, position | where ...}`,
+  `picture_apply {part, picture}`, `picture_delete {picture}` (`docs/assistant.md`, "Pictures").
+- **Whose pictures.** Keeping them for personal use on your own headset is your call. The app never uploads or shares
+  them. None go into the repository or a release. The source addresses stay in the viewer's data (`picture.json`),
+  never in a log or the repository.
+- **Tested:** `tests/test_pictures.gd` (72 checks) with a fake DevTools page, a fake fetch, a fake captured window, a
+  fake clipboard and a Downloads folder, all with pictures the test makes (a GIF encoder too): the library, the stick
+  click (hold, fetch, crop, data URL), the legend, the clipboard and Downloads, the objects' sizes and the cut-out's
+  alpha, Place with the laser, pulled off its wall, the commands.
+
+Untested: on the headset (the stick click's binding in the lenses, the clipboard through X11 on the Frame, Google's
+pages in the headset's Chromium, a CSS background picture on a real page).
+
+## Surfaces
+
+Materials found and imported on the headset from three sources, one search: Quixel Megascans (through Fab), Poly
+Haven and ambientCG (decision D29). The viewer does it in **Objects → Surfaces**. An assistant does it with commands
+(`app/scripts/env/surface_store.gd`, `surface_import.gd`, `app/ui/surface_panel.gd`). Only the CC0 materials of
+`app/materials` ship. No Megascans file and no list of ids is in the repository.
+
+- **Search.** **Find surfaces** takes a word or two in English. The results show four to a row, each with its
+  source's badge (MS, PH, aCG), and under them a line of credits: "Powered by Poly Haven", "From ambientCG",
+  "Quixel Megascans, through Fab". **More** loads the next page of each source that has one. A source that fails says
+  so in the line, and the others still show.
+- **Megascans** through `fab_store.gd`: the same licence gate (no Fab request until the viewer accepts, in Your
+  objects), `seller=Quixel Megascans`, `is_free=1`, `listing_types=material`. The file is the texture set at 1K, else
+  2K.
+- **Poly Haven**: no account and no key, ever (its terms, 2.3). The app's own User-Agent (2.4). The credit says where
+  the results come from with no word of endorsement (2.5). The whole list (`/assets?type=textures`) is kept on disk
+  and asked again at most once a day (the old one serves if that fails). The search is done on the headset, in that
+  list. The files from `/files/<id>`.
+- **ambientCG**: `/api/v2/full_json?type=Material&q=...&limit=24&offset=...`, each page kept a day; the zip at 1K-JPG.
+  Any failure is an error line, never a crash.
+- **Go slow, all of them** (`host_gate.gd`, now Fab's too): one request at a time for each site, 1 s between the end of
+  one and the next page, 0.25 s before a thumbnail or a file. A 429 or a 5xx: nothing to that site for Retry-After
+  seconds, else 2 s doubled for each one in a row, at most 300 s. "The site is busy" shows the seconds left.
+- **The import** (`surface_import.gd`): into `user://materials/<id>.json` with its maps in
+  `user://materials/textures/`, so `MaterialLibrary.list()` and `get_material()` have them beside the bundled ones
+  (`source`: the site, `user: true`). The colour map with the ambient occlusion multiplied in; the normal map (X in
+  RGB, Y in alpha, as the shader reads `.mtex`); roughness (or inverted gloss) into the packed map at half size. Height
+  and displacement are dropped. The tiling is the real size of the scan (Poly Haven's `dimensions`, ambientCG's
+  `dimensionX`, Megascans' scan area), else 1 m.
+- **1K, uncompressed.** The export templates can't compress ASTC (`docs/materials.md`, "User materials"), so a user
+  material is a JPEG and two PNGs with mipmaps: about 12.6 MB of GPU memory each, against 1.05 MB for a bundled one.
+  `material_status` says how much the user materials take on disk and in memory.
+- **Your materials.** The materials list under the results (All or Yours) has **Apply to a part** and, for a user
+  material, **Delete**.
+- **Commands:** `material_search {query, source, cursor}`, `material_import {source, id}`, `material_status`,
+  `materials` (the user ones too), `material_apply`, `pointed_part`, `part_reset` (`docs/assistant.md`, "Surfaces").
+- **Tested:** `tests/test_surfaces.gd` (86 checks) with a fake transport and answers written by hand in each site's
+  shape, made-up names, and maps the test makes: parsing, search and pages, the caches, the User-Agent and no key, the
+  spacing and back-off, each site's import, the Fab licence gate, the status, applying and resetting. Checked live
+  from the PC on 2026-11-06: Poly Haven's list and files, one ambientCG search, and Fab's material search, files, link
+  and one 1K zip (in a scratch folder, since deleted).
+
+Untested: on the headset (the downloads, memory with several user materials in a room, how the maps look).
+
+## Apply to a part
+
+One action for a material and a picture alike (`app/scripts/assistant/part_apply.gd`, `app/ui/object_placer.gd`):
+
+1. Pick a material (Surfaces) or a picture (Pictures), then **Apply to a part**. The panel goes.
+2. The laser shows what it points at: a room's wall, floor or seat, or a part of a placed object. That part shows the
+   material or the picture at once.
+3. Stick up or down: the pattern bigger or smaller. Stick left or right: it turns. The legends say **APPLY**,
+   **SIZE / TURN** and **CANCEL**.
+4. The trigger puts it there. B or the menu button cancels ("Nothing changed").
+
+The room keeps it as it keeps any change: a room's part as a `recolour` entry with `library_material` (and `tiling`,
+`turn`, `tint`) or the picture's texture; an object's part as a part-level entry. A stock room becomes a kept room of
+its own, as with Place. Undo is in the footer. `part_reset` gives the part the room's own look back. The film layer's
+cover rules are as before: an object's part follows its object.
+
+The material option `turn` (degrees) is new in the room document and the shader (`room_material.gdshaderinc`
+`uv_turn`).
+
+### Open questions
+
+- **The dim room's walls.** A held object goes through the dim room's walls and falls without end, a wall clock as
+  well as a poster (seen while writing `test_pictures`; the cinema is fine). It is older than this work and left as
+  it is.
+- **ambientCG's dimensionX** is read as centimetres. Their API gives no unit.
+- **Megascans' normal maps** are read as OpenGL (Y up), as the bundled ones. Not checked against a scan with clear
+  relief.
+- **Deleting a user material that a kept room uses.** It is allowed: the room still loads, with a warning, and that part loses the pattern (the rest of its material stays). Pictures
+  are refused while a kept room has their object; materials could be too.
+- **Picture objects are not in Your objects.** They show under Pictures only, so Your objects stays the viewer's
+  imports and keeps. Deleting the picture deletes its objects.
+- **Reset in the panel.** Put back is `part_reset` (the command) and Undo; the In this room list has Reset for an
+  object's part. A room's own wall has no Reset button yet.
+- **The clipboard on the Frame.** `DisplayServer.clipboard_get_image()` on its X11 path is not tried on the headset.
+- **2K user materials.** Only with ASTC (a fork change, `docs/materials.md`): 1K uncompressed is the limit for now.
