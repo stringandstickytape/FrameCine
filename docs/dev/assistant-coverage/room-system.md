@@ -49,6 +49,10 @@ Objects tab calls the same functions (`app/ui/object_section.gd`, `app/ui/object
 | In this room: Remove (asked first) | `remove` {name} (room) |
 | In this room: a part's Colour (palette), Picture, Material | `recolour` {match: "<placed>/<part>", color, texture, material} (room) |
 | In this room: a part's Reset | `recolour` {match: "<placed>/<part>", reset: true} (room) |
+| In this room: Put back (an object moved by hand) | `object_put_back` {name} (room) |
+| In this room: Tidy up | `object_tidy_up` (room) |
+| In this room: a text's or particles area's Attach, Detach | `object_attach` {name, to, offset, rotation} (room; empty `to` detaches) |
+| The controllers: pick up, drop, throw (docs/physics.md; no panel control) | `object_throw` {name, velocity, spin} (room); what moves and the cost: `object_physics` (read) |
 | Curtains | `curtains` {on} (room) |
 | Up next countdown, Up next in | `up_next` {on, seconds} (room) |
 | Intermission, its minutes | `intermission` {on, minutes} (room) |

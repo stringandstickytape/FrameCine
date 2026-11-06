@@ -6,97 +6,113 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: scripts/main.gd:1222
+#: scripts/main.gd:1257
 msgid "TALK"
 msgstr ""
 
-#: scripts/main.gd:1259
+#: scripts/main.gd:1300
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
 
-#: scripts/main.gd:135
+#: scripts/main.gd:137
 msgid "PLAY / PAUSE"
 msgstr ""
 
-#: scripts/main.gd:135 scripts/main.gd:151
+#: scripts/main.gd:137 scripts/main.gd:153
 msgid "CLICK"
 msgstr ""
 
-#: scripts/main.gd:137
+#: scripts/main.gd:139
 msgid "SEEK / DIST"
 msgstr ""
 
-#: scripts/main.gd:137
+#: scripts/main.gd:139
 msgid "SCROLL"
 msgstr ""
 
-#: scripts/main.gd:138
+#: scripts/main.gd:140
 msgid "MENU"
 msgstr ""
 
-#: scripts/main.gd:138
+#: scripts/main.gd:140
 msgid "CLOSE"
 msgstr ""
 
-#: scripts/main.gd:139
+#: scripts/main.gd:141
 msgid "INFO"
 msgstr ""
 
-#: scripts/main.gd:140
+#: scripts/main.gd:142
 msgid "NEXT"
 msgstr ""
 
-#: scripts/main.gd:141
+#: scripts/main.gd:143
 msgid "PREV"
 msgstr ""
 
-#: scripts/main.gd:142
+#: scripts/main.gd:144
 msgid "LABELS"
 msgstr ""
 
-#: scripts/main.gd:144
+#: scripts/main.gd:146
 msgid "CHAPTER -"
 msgstr ""
 
-#: scripts/main.gd:145
+#: scripts/main.gd:147
 msgid "CHAPTER +"
 msgstr ""
 
-#: scripts/main.gd:146
+#: scripts/main.gd:148
 msgid "REPLAY"
 msgstr ""
 
-#: scripts/main.gd:152
+#: scripts/main.gd:154
 msgid "R-CLICK"
 msgstr ""
 
-#: scripts/main.gd:153
+#: scripts/main.gd:155
 msgid "SCROLL / KEYS"
 msgstr ""
 
-#: scripts/main.gd:154 scripts/main.gd:166
+#: scripts/main.gd:156 scripts/main.gd:168
 msgid "SPACE"
 msgstr ""
 
-#: scripts/main.gd:155
+#: scripts/main.gd:157
 msgid "BACK"
 msgstr ""
 
-#: scripts/main.gd:163
+#: scripts/main.gd:165
 msgid "ENTER"
 msgstr ""
 
-#: scripts/main.gd:164
+#: scripts/main.gd:166
 msgid "HOLD: SCROLL"
 msgstr ""
 
-#: scripts/main.gd:165
+#: scripts/main.gd:167
 msgid "ARROWS"
 msgstr ""
 
-#: scripts/main.gd:167
+#: scripts/main.gd:169
 msgid "ESC"
+msgstr ""
+
+#: scripts/main.gd:173
+msgid "GRAB"
+msgstr ""
+
+#: scripts/main.gd:176
+msgid "LET GO: THROW"
+msgstr ""
+
+#: scripts/main.gd:177
+msgid "NEAR-FAR / TURN"
+msgstr ""
+
+#: scripts/main.gd:178
+msgid "CANCEL"
 msgstr ""
 
 #: scripts/video_mode.gd:126
@@ -1641,7 +1657,7 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:104 ui/object_section.gd:122 ui/object_section.gd:348
+#: ui/mixed_reality_tab.gd:104 ui/object_section.gd:128 ui/object_section.gd:374
 msgid "Delete"
 msgstr ""
 
@@ -1655,235 +1671,286 @@ msgstr ""
 msgid "%s deleted"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:631 ui/system_tab.gd:636 ui/ui_layer.gd:225
-#: ui/ui_layer.gd:386 ui/ui_layer.gd:889 ui/ui_layer.gd:893 ui/ui_layer.gd:921
+#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:735 ui/system_tab.gd:636 ui/ui_layer.gd:225
+#: ui/ui_layer.gd:386 ui/ui_layer.gd:905 ui/ui_layer.gd:909 ui/ui_layer.gd:937
 msgid "Undo"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:857
+#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:873
 msgid "The headset's cameras can't show here."
 msgstr ""
 
-#: ui/object_section.gd:98
+#: ui/object_section.gd:104
 msgid "Built-in objects"
 msgstr ""
 
-#: ui/object_section.gd:104 ui/object_section.gd:121
+#: ui/object_section.gd:110 ui/object_section.gd:127
 msgid "Place"
 msgstr ""
 
-#: ui/object_section.gd:106
+#: ui/object_section.gd:112
 msgid "Place: point at a wall or the floor, trigger to set it. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/object_section.gd:108
+#: ui/object_section.gd:114
 msgid "Your objects"
 msgstr ""
 
-#: ui/object_section.gd:109
+#: ui/object_section.gd:115
 msgid "Imported, or kept from a room."
 msgstr ""
 
-#: ui/object_section.gd:111
+#: ui/object_section.gd:117
 msgid "None yet: add one from Fab below."
 msgstr ""
 
-#: ui/object_section.gd:126
+#: ui/object_section.gd:132
 msgid "In Downloads, from Fab"
 msgstr ""
 
-#: ui/object_section.gd:129
+#: ui/object_section.gd:135
 msgid "Visit Fab to download objects"
 msgstr ""
 
-#: ui/object_section.gd:139
+#: ui/object_section.gd:145
 msgid "In this room"
 msgstr ""
 
-#: ui/object_section.gd:140
+#: ui/object_section.gd:146
 msgid "Nothing from the library yet."
 msgstr ""
 
-#: ui/object_section.gd:241 ui/object_section.gd:249
+#: ui/object_section.gd:152
+msgid "Tidy up"
+msgstr ""
+
+#: ui/object_section.gd:154
+msgid "Pick up: point at an object and hold the grip. Let go to drop it, or throw it. Tidy up puts everything back."
+msgstr ""
+
+#: ui/object_section.gd:266 ui/object_section.gd:274
 #, c-format
 msgid "Add %s"
 msgstr ""
 
-#: ui/object_section.gd:272
+#: ui/object_section.gd:297
 #, c-format
 msgid "Adding %s: a moment."
 msgstr ""
 
-#: ui/object_section.gd:281
+#: ui/object_section.gd:306
 #, c-format
 msgid "%s is in your objects."
 msgstr ""
 
-#: ui/object_section.gd:284 ui/object_section.gd:633
+#: ui/object_section.gd:309 ui/object_section.gd:737
 msgid "That didn't work."
 msgstr ""
 
-#: ui/object_section.gd:313
+#: ui/object_section.gd:339
 #, c-format
 msgid "%d part"
 msgid_plural "%d parts"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/object_section.gd:314
+#: ui/object_section.gd:340
 msgid "Pick an object, then Place."
 msgstr ""
 
-#: ui/object_section.gd:316
+#: ui/object_section.gd:342
 msgid "Pick one, then Place."
 msgstr ""
 
-#: ui/object_section.gd:346
+#: ui/object_section.gd:372
 #, c-format
 msgid "%s is in %s: remove it there first."
 msgstr ""
 
-#: ui/object_section.gd:348
+#: ui/object_section.gd:374
 #, c-format
 msgid "Delete %s from the library?"
 msgstr ""
 
-#: ui/object_section.gd:356 ui/object_section.gd:625
+#: ui/object_section.gd:382 ui/object_section.gd:729
 msgid "Keep"
 msgstr ""
 
-#: ui/object_section.gd:411
+#: ui/object_section.gd:438
 msgid "Move"
 msgstr ""
 
-#: ui/object_section.gd:412 ui/object_section.gd:622
+#: ui/object_section.gd:439 ui/object_section.gd:726
 msgid "Remove"
 msgstr ""
 
-#: ui/object_section.gd:425
+#: ui/object_section.gd:444
+msgid "Attach"
+msgstr ""
+
+#: ui/object_section.gd:448
+msgid "Detach"
+msgstr ""
+
+#: ui/object_section.gd:450
+msgid "Put back"
+msgstr ""
+
+#: ui/object_section.gd:455
+#, c-format
+msgid "Follows %s"
+msgstr ""
+
+#: ui/object_section.gd:472
 msgid "(changed)"
 msgstr ""
 
-#: ui/object_section.gd:427
+#: ui/object_section.gd:474
 msgid "Colour"
 msgstr ""
 
-#: ui/object_section.gd:430 ui/pane_ui.gd:52 ui/picture_tab.gd:288
+#: ui/object_section.gd:477 ui/pane_ui.gd:52 ui/picture_tab.gd:288
 msgid "Picture"
 msgstr ""
 
-#: ui/object_section.gd:432
+#: ui/object_section.gd:479
 msgid "Material"
 msgstr ""
 
-#: ui/object_section.gd:435
+#: ui/object_section.gd:482
 msgid "Effect"
 msgstr ""
 
-#: ui/object_section.gd:438
+#: ui/object_section.gd:485
 msgid "Reset"
 msgstr ""
 
-#: ui/object_section.gd:598
+#: ui/object_section.gd:645
 msgid "Open a picture on the headset first (Files); then Picture puts it on the part."
 msgstr ""
 
-#: ui/object_section.gd:602
+#: ui/object_section.gd:649
 #, c-format
 msgid "That picture is too big for a part (at most %d MB)."
 msgstr ""
 
-#: ui/object_section.gd:612
+#: ui/object_section.gd:659
 msgid "its own colour"
 msgstr ""
 
-#: ui/object_section.gd:612
+#: ui/object_section.gd:659
 msgid "changed"
 msgstr ""
 
-#: ui/object_section.gd:622
+#: ui/object_section.gd:683
+msgid "Follows:"
+msgstr ""
+
+#: ui/object_section.gd:708
+#, c-format
+msgid "%s follows %s"
+msgstr ""
+
+#: ui/object_section.gd:708
+#, c-format
+msgid "%s stays where it is"
+msgstr ""
+
+#: ui/object_section.gd:714
+#, c-format
+msgid "%s is back where it was placed"
+msgstr ""
+
+#: ui/object_section.gd:721
+#, c-format
+msgid "Tidied up: %d object back"
+msgid_plural "Tidied up: %d objects back"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ui/object_section.gd:726
 #, c-format
 msgid "Remove %s from the room?"
 msgstr ""
 
-#: ui/object_section.gd:625
+#: ui/object_section.gd:729
 #, c-format
 msgid "Removed %s"
 msgstr ""
 
-#: ui/object_section.gd:40
+#: ui/object_section.gd:44
 msgid "All"
 msgstr ""
 
-#: ui/object_section.gd:40
+#: ui/object_section.gd:44
 msgid "Floors"
 msgstr ""
 
-#: ui/object_section.gd:40
+#: ui/object_section.gd:44
 msgid "Walls"
 msgstr ""
 
-#: ui/object_section.gd:40
+#: ui/object_section.gd:44
 msgid "Fabric"
 msgstr ""
 
-#: ui/object_section.gd:40
+#: ui/object_section.gd:44
 msgid "Wood"
 msgstr ""
 
-#: ui/object_section.gd:40
+#: ui/object_section.gd:44
 msgid "Leather"
 msgstr ""
 
-#: ui/object_section.gd:40
+#: ui/object_section.gd:44
 msgid "Metal"
 msgstr ""
 
-#: ui/object_section.gd:40
+#: ui/object_section.gd:44
 msgid "Stone"
 msgstr ""
 
-#: ui/object_section.gd:44
+#: ui/object_section.gd:48
 msgid "Classic"
 msgstr ""
 
-#: ui/object_section.gd:44
+#: ui/object_section.gd:48
 msgid "Energy"
 msgstr ""
 
-#: ui/object_section.gd:44
+#: ui/object_section.gd:48
 msgid "Nature"
 msgstr ""
 
-#: ui/object_section.gd:44
+#: ui/object_section.gd:48
 msgid "Reactive"
 msgstr ""
 
-#: ui/object_section.gd:45
+#: ui/object_section.gd:49
 msgid "Skies"
 msgstr ""
 
-#: ui/object_section.gd:45
+#: ui/object_section.gd:49
 msgid "Stylised"
 msgstr ""
 
-#: ui/object_section.gd:45
+#: ui/object_section.gd:49
 msgid "Transitions"
 msgstr ""
 
-#: ui/object_section.gd:45
+#: ui/object_section.gd:49
 msgid "Materials"
 msgstr ""
 
-#: ui/object_section.gd:48
+#: ui/object_section.gd:52
 msgid "free"
 msgstr ""
 
-#: ui/object_section.gd:48
+#: ui/object_section.gd:52
 msgid "wall"
 msgstr ""
 
-#: ui/object_section.gd:48
+#: ui/object_section.gd:52
 msgid "floor"
 msgstr ""
 
@@ -2422,7 +2489,7 @@ msgstr ""
 msgid "Showrooms"
 msgstr ""
 
-#: ui/room_tab.gd:133 ui/ui_layer.gd:940
+#: ui/room_tab.gd:133 ui/ui_layer.gd:956
 msgid "Seat"
 msgstr ""
 
@@ -3372,7 +3439,7 @@ msgstr ""
 msgid "Allow for an hour"
 msgstr ""
 
-#: ui/system_tab.gd:339 ui/ui_layer.gd:755
+#: ui/system_tab.gd:339 ui/ui_layer.gd:771
 msgid "Revoke"
 msgstr ""
 
@@ -3532,61 +3599,61 @@ msgstr ""
 msgid "Controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:755
+#: ui/ui_layer.gd:771
 msgid "Remote changes allowed for an hour"
 msgstr ""
 
-#: ui/ui_layer.gd:768
+#: ui/ui_layer.gd:784
 msgid "Connecting..."
 msgstr ""
 
-#: ui/ui_layer.gd:778
+#: ui/ui_layer.gd:794
 msgid "Starting the browser..."
 msgstr ""
 
-#: ui/ui_layer.gd:792
+#: ui/ui_layer.gd:808
 msgid "Point at a seat and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:802
+#: ui/ui_layer.gd:818
 msgid "Seat unchanged"
 msgstr ""
 
-#: ui/ui_layer.gd:825
+#: ui/ui_layer.gd:841
 msgid "That object can't be placed here"
 msgstr ""
 
-#: ui/ui_layer.gd:829
+#: ui/ui_layer.gd:845
 msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:858
+#: ui/ui_layer.gd:874
 msgid "That's as many areas as there can be: delete one first."
 msgstr ""
 
-#: ui/ui_layer.gd:875 ui/ui_layer.gd:886
+#: ui/ui_layer.gd:891 ui/ui_layer.gd:902
 msgid "Nothing marked"
 msgstr ""
 
-#: ui/ui_layer.gd:889
+#: ui/ui_layer.gd:905
 #, c-format
 msgid "%s added: the cameras show there"
 msgstr ""
 
-#: ui/ui_layer.gd:893
+#: ui/ui_layer.gd:909
 #, c-format
 msgid "%s changed"
 msgstr ""
 
-#: ui/ui_layer.gd:910
+#: ui/ui_layer.gd:926
 msgid "Nothing placed"
 msgstr ""
 
-#: ui/ui_layer.gd:924
+#: ui/ui_layer.gd:940
 msgid "Not placed"
 msgstr ""
 
-#: ui/ui_layer.gd:938
+#: ui/ui_layer.gd:954
 msgid "No seat there"
 msgstr ""
 

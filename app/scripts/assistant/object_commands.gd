@@ -5,10 +5,15 @@ extends RefCounted
 ## object_place, object_move and object_delete change the room or the library (level room). A part's colour is
 ## `recolour` with "<placed name>/<part name>" (scripts/assistant/assistant_commands.gd).
 ##
+## Object physics (docs/physics.md, scripts/play/object_physics.gd): object_put_back and object_tidy_up return objects
+## to where they were placed, object_attach makes a text or particles area follow an object (level room),
+## object_throw drops or throws one (the dev link, tests; level room), object_physics reads what is moving and the
+## cost (read).
+##
 ## The Room tab (ui/object_section.gd, ui/object_placer.gd) calls the same functions: place(), move(), remove_placed(),
-## recolour_part(). Each change goes through a room editor (room_editor.gd: an assistant's own, else this app's
-## ObjectLibrary.EDITOR_NODE), shows at once, is kept, and comes back with an undo: the room as it was (a kept room
-## built again from its document, or the stock room shown again).
+## recolour_part(), put_back(), attach(). Each change goes through a room editor (room_editor.gd: an assistant's own, else
+## this app's ObjectLibrary.EDITOR_NODE), shows at once, is kept, and comes back with an undo: the room as it was (a kept
+## room built again from its document, or the stock room shown again).
 
 const DevCommands := preload("res://scripts/dev/dev_commands.gd")
 const ObjectLibrary := preload("res://scripts/assistant/object_library.gd")
@@ -155,6 +160,81 @@ static func register_commands(_host: Node = null) -> void:
 				+ "(object_library source user)."}],
 		"level": "change", "assistant": "room", "destructive": true, "title": "Delete an imported object",
 		"returns": "{deleted, name}; refused: {error, rooms}"})
+	R.register("object_put_back", func(a: Dictionary, ctx: DevCommands.Call) -> Variant:
+		return _give(ctx, await put_back(_tree(), ctx.caller, [str(a["name"])])), {
+		"description": "Puts an object that was picked up, dropped or thrown back where it was placed (a wall object "
+				+ "on its wall again). Object physics keeps where it was placed as its home.",
+		"params": [{"name": "name", "type": "string", "required": true, "description": "Its name in the room "
+				+ "(room_state's objects; object_physics says which have moved)."}],
+		"level": "change", "assistant": "room", "title": "Put an object back",
+		"returns": "{state: kept, put_back: [names], ...}"})
+	R.register("object_tidy_up", func(_a: Dictionary, ctx: DevCommands.Call) -> Variant:
+		return _give(ctx, await put_back(_tree(), ctx.caller, [])), {
+		"description": "Puts every object that was picked up, dropped or thrown back where it was placed.",
+		"params": [], "level": "change", "assistant": "room", "title": "Tidy up the room",
+		"returns": "{state: kept, put_back: [names], ...}"})
+	R.register("object_attach", func(a: Dictionary, ctx: DevCommands.Call) -> Variant:
+		return _give(ctx, await attach(_tree(), ctx.caller, str(a["name"]), str(a["to"]), a["offset"],
+				a["rotation"])), {
+		"description": "Makes a text or a particles area follow another object: it moves with it when that is "
+				+ "picked up or thrown (as a light with attach does). Empty to: it stays where it is now, on its own.",
+		"params": [{"name": "name", "type": "string", "required": true, "description": "The text or particles area "
+				+ "(room_state's objects)."},
+				{"name": "to", "type": "string", "default": "", "description": "The object it follows (not a text or "
+				+ "particles area); empty: detach."},
+				{"name": "offset", "type": "array", "default": [], "description": "[x, y, z] metres in that object's "
+				+ "frame; empty: where it is now."},
+				{"name": "rotation", "type": "array", "default": [], "description": "[x, y, z] degrees relative to "
+				+ "that object, with offset; empty: as it is turned now."}],
+		"level": "change", "assistant": "room", "title": "Attach a text or particles to an object",
+		"returns": "{state: kept, ...}"})
+	R.register("object_throw", func(a: Dictionary, ctx: DevCommands.Call) -> Variant:
+		var main := _main()
+		var ph: Node = _physics(main)
+		var name := str(a["name"])
+		if ph == null or not (name in ph.names()):
+			return ctx.fail("%s can't be picked up (object_physics lists what can: solid objects in a kept room)"
+					% name)
+		var v := _vec(a["velocity"])
+		var to_world: Basis = main.env.global_basis if main.env != null else Basis()
+		if not ph.throw(name, to_world * v, to_world * _vec(a["spin"])):
+			return ctx.fail("%s is held" % name)
+		ctx.summary = "threw %s" % name if v.length() > 0.01 else "dropped %s" % name
+		return {"name": name, "speed": snappedf(v.length(), 0.01)}, {
+		"description": "Drops or throws an object as a hand would: it falls, bounces off the room, the seats and the "
+				+ "screen, comes to rest and is kept where it lands (object_put_back returns it).",
+		"params": [{"name": "name", "type": "string", "required": true, "description": "Its name in the room."},
+				{"name": "velocity", "type": "array", "default": [0, 0, 0], "description": "[x, y, z] m/s in the "
+				+ "room frame (room_state); [0, 0, 0]: dropped."},
+				{"name": "spin", "type": "array", "default": [0, 0, 0], "description": "[x, y, z] radians a second."}],
+		"level": "change", "assistant": "room", "title": "Drop or throw an object",
+		"returns": "{name, speed}"})
+	R.register("object_physics", func(_a: Dictionary, ctx: DevCommands.Call) -> Variant:
+		var main := _main()
+		var ph: Node = _physics(main)
+		if ph == null:
+			return ctx.fail("no object physics in this app")
+		var out: Dictionary = ph.state()
+		var doc: Dictionary = main.env.get("doc") if main.env != null and main.env.get("doc") is Dictionary else {}
+		var objects: Array = []
+		for p: Dictionary in doc.get("parts", []):
+			var n := str(p.get("name", ""))
+			if n in ph.names() or p.has("attach"):
+				objects.append({"name": n, "moving": ph.is_moving(n), "held": ph.is_held(n),
+						"mounted": ph.is_mounted(n), "moved": p.has("home"), "attach": p.get("attach", "")})
+		out["objects"] = objects
+		var last: Dictionary = out.get("last_thud", {})
+		if last.get("position") is Vector3:
+			last = last.duplicate()
+			last["position"] = _arr(last["position"])
+			out["last_thud"] = last
+		return out, {
+		"description": "Object physics now: the objects that can be picked up (moving, held, still on their wall, "
+				+ "moved from where they were placed, attached), the room's collision shapes, and the physics frame's "
+				+ "cost in milliseconds (mean and most over the last two seconds).",
+		"params": [], "assistant": "read", "title": "Object physics",
+		"returns": "{bodies, moving, held, room_shapes, screen, cost_ms {mean, max}, thuds, objects: [{name, moving, "
+				+ "held, mounted, moved, attach}]}"})
 
 
 ## A shared operation's reply ({ok, result | error, summary, undo, ...}) handed to the registry.
@@ -378,6 +458,123 @@ static func entry_material(doc: Dictionary, match: String, change: Dictionary) -
 					or change.has("effect"):
 				return RoomSchema.merge_material(old, change)
 	return change
+
+
+# --- Object physics ---------------------------------------------------------------------------------------------
+
+static func _physics(main: Node) -> Node:
+	var f: Node = main.get("features") if main != null else null
+	return f.get("physics") if f != null else null
+
+
+## Puts objects back where they were placed (their `home`; names: these, [] all that moved). What is still moving
+## comes to rest first. One change, with the room's undo.
+static func put_back(tree: SceneTree, caller: Object, names: Array) -> Dictionary:
+	var main := tree.current_scene
+	var ph: Node = _physics(main)
+	if ph != null:
+		ph.settle_all()
+	var editor := ObjectLibrary.editor_for(tree, caller)
+	var doc: Dictionary = editor.current_doc()
+	var parts: Array = []
+	var known := false
+	for p: Dictionary in doc.get("parts", []):
+		if not names.is_empty() and not (str(p.get("name", "")) in names):
+			continue
+		known = true
+		if not (p.get("home") is Dictionary):
+			continue
+		var q := p.duplicate(true)
+		var home: Dictionary = q["home"]
+		q["position"] = home["position"]
+		q["rotation"] = home["rotation"]
+		if home.has("mounted"):
+			q["mounted"] = home["mounted"]
+		else:
+			q.erase("mounted")
+		q.erase("home")
+		parts.append(q)
+	if not names.is_empty() and not known:
+		return {"ok": false, "error": "nothing in the room is called %s (room_state's objects lists them)" % names[0]}
+	if parts.is_empty():
+		return {"ok": false, "error": ("%s is where it was placed" % names[0]) if not names.is_empty()
+				else "everything is where it was placed"}
+	var undo := undo_for(editor, main)
+	var put: Array = parts.map(func(q: Dictionary) -> String: return str(q["name"]))
+	var said := "put back %s" % ", ".join(put) if names.size() == 1 else "tidied up %d" % put.size()
+	var r: Dictionary = await editor.apply("patch", {"schema": RoomSchema.VERSION, "parts": parts}, said)
+	if r.get("ok") == true:
+		r["undo"] = undo
+		r["result"]["put_back"] = put
+	return r
+
+
+## Whether placement `name` was moved from where it was placed (object physics kept its home).
+static func moved(env: Node, name: String) -> bool:
+	var doc: Dictionary = env.get("doc") if env != null and env.get("doc") is Dictionary else {}
+	for p: Dictionary in doc.get("parts", []):
+		if str(p.get("name", "")) == name:
+			return p.get("home") is Dictionary
+	return false
+
+
+## A text or particles area `name` follows placement `to` (empty: detached, staying where it is now). offset and
+## rotation: its place in that object's frame; empty: where it is now.
+static func attach(tree: SceneTree, caller: Object, name: String, to: String, offset: Variant = [],
+		rotation: Variant = []) -> Dictionary:
+	var main := tree.current_scene
+	var editor := ObjectLibrary.editor_for(tree, caller)
+	var doc: Dictionary = editor.current_doc()
+	var part := {}
+	var target := {}
+	for p: Dictionary in doc.get("parts", []):
+		if p["name"] == name:
+			part = p.duplicate(true)
+		elif to != "" and p["name"] == to:
+			target = p
+	if part.is_empty():
+		return {"ok": false, "error": "nothing in the room is called %s (room_state's objects lists them)" % name}
+	if not (RoomSchema.kind_of(part) in RoomSchema.GENERATORS):
+		return {"ok": false, "error": "only a text or a particles area attaches; %s is a %s" % [name,
+				RoomSchema.kind_of(part)]}
+	if to != "" and target.is_empty():
+		return {"ok": false, "error": "nothing in the room is called %s" % to}
+	if to != "" and RoomSchema.kind_of(target) in RoomSchema.GENERATORS:
+		return {"ok": false, "error": "%s is a text or particles area too: attach to an object" % to}
+	var layer: Node = main.env.get_node_or_null("AssistantLayer") if main.env != null else null
+	var node := layer.get_node_or_null(name) as Node3D if layer != null else null
+	if to == "":
+		if not part.has("attach"):
+			return {"ok": false, "error": "%s isn't attached" % name}
+		if node != null:
+			part["position"] = _arr(node.transform.origin)
+			part["rotation"] = _deg(node.transform.basis)
+		part.erase("attach")
+		part.erase("offset")
+	else:
+		var tnode := layer.get_node_or_null(to) as Node3D if layer != null else null
+		var rel := Transform3D()
+		if tnode != null and node != null:
+			var rigid := Transform3D(tnode.transform.basis.orthonormalized(), tnode.transform.origin)
+			rel = rigid.affine_inverse() * node.transform
+		part["attach"] = to
+		part["offset"] = offset if offset is Array and (offset as Array).size() == 3 else _arr(rel.origin)
+		part["rotation"] = rotation if rotation is Array and (rotation as Array).size() == 3 else _deg(rel.basis)
+	var undo := undo_for(editor, main)
+	var said := "attach %s to %s" % [name, to] if to != "" else "detach %s" % name
+	var r: Dictionary = await editor.apply("patch", {"schema": RoomSchema.VERSION, "parts": [part]}, said)
+	if r.get("ok") == true:
+		r["undo"] = undo
+	return r
+
+
+static func _arr(v: Vector3) -> Array:
+	return [snappedf(v.x, 0.001), snappedf(v.y, 0.001), snappedf(v.z, 0.001)]
+
+
+static func _deg(b: Basis) -> Array:
+	var e := b.orthonormalized().get_euler()
+	return [snappedf(rad_to_deg(e.x), 0.01), snappedf(rad_to_deg(e.y), 0.01), snappedf(rad_to_deg(e.z), 0.01)]
 
 
 # --- Where, names, undo ----------------------------------------------------------------------------------------------

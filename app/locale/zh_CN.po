@@ -2689,3 +2689,49 @@ msgstr "列表"
 
 msgid "Grid"
 msgstr "网格"
+
+msgid "GRAB"
+msgstr "抓取"
+
+msgid "LET GO: THROW"
+msgstr "松开：扔出"
+
+msgid "NEAR-FAR / TURN"
+msgstr "远近 / 转动"
+
+msgid "CANCEL"
+msgstr "取消"
+
+msgid "Tidy up"
+msgstr "整理"
+
+msgid "Pick up: point at an object and hold the grip. Let go to drop it, or throw it. Tidy up puts everything back."
+msgstr "拿起：指向物体并按住握把。松开即放下，也可以把它扔出去。整理会把一切放回原处。"
+
+msgid "Attach"
+msgstr "附着"
+
+msgid "Detach"
+msgstr "分离"
+
+msgid "Put back"
+msgstr "放回"
+
+msgid "Follows %s"
+msgstr "跟随 %s"
+
+msgid "Follows:"
+msgstr "跟随："
+
+msgid "%s follows %s"
+msgstr "%s 跟随 %s"
+
+msgid "%s stays where it is"
+msgstr "%s 留在原处"
+
+msgid "%s is back where it was placed"
+msgstr "%s 已放回原处"
+
+msgid "Tidied up: %d object back"
+msgid_plural "Tidied up: %d objects back"
+msgstr[0] "已整理：%d 个物体放回原处"

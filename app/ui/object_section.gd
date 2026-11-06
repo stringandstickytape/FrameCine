@@ -79,6 +79,8 @@ var _placed_box: VBoxContainer
 var _placed_names: Array = []
 var _picked := ""
 var _parts_box: VBoxContainer
+## Tidy up: every object that was moved by hand back where it was placed (object physics).
+var _tidy: Button
 ## The part whose palette is open, or "" ("material:<part>", "effect:<part>": its material or effect picker).
 var _palette_for := ""
 ## The material picker's kind (a library tag, "" all).
@@ -146,6 +148,11 @@ func bind(p_app: Node) -> void:
 	_placed_box = VBoxContainer.new()
 	_placed_box.add_theme_constant_override("separation", 0)
 	add_child(_placed_box)
+	# Object physics (docs/physics.md): what was picked up, dropped or thrown goes back where it was placed.
+	_tidy = W.button("Tidy up", _tidy_up)
+	add_child(W.hbox([_tidy]))
+	add_child(W.help("Pick up: point at an object and hold the grip. Let go to drop it, or throw it. Tidy up puts "
+			+ "everything back."))
 	_parts_box = W.vbox()
 	add_child(_parts_box)
 	visibility_changed.connect(func() -> void:
@@ -409,6 +416,7 @@ func _sync_placed() -> void:
 	for i in _placed_box.get_child_count():
 		(_placed_box.get_child(i) as Button).set_pressed_no_signal(names[i] == _picked)
 	_empty.visible = names.is_empty()
+	_tidy.disabled = not names.any(func(n: String) -> bool: return ObjectCommands.moved(app.env, n))
 	_sync_parts()
 
 
@@ -427,8 +435,28 @@ func _sync_parts() -> void:
 	if entry.is_empty():
 		return
 	var name := _picked
-	_parts_box.add_child(W.hbox([W.button("Move", func() -> void: app.ui.start_object_move(name)),
-			W.button("Remove", func() -> void: _ask_remove(name))]))
+	var row_buttons: Array = [W.button("Move", func() -> void: app.ui.start_object_move(name)),
+			W.button("Remove", func() -> void: _ask_remove(name))]
+	var generated := RoomSchema.kind_of({"object": str(entry["object"])}) in RoomSchema.GENERATORS
+	var attached := _attached_to(name)
+	if generated:
+		# A text or particles area follows an object (object physics): Attach picks which; Detach leaves it here.
+		row_buttons.append(W.button("Attach", func() -> void:
+			_palette_for = "attach:" + name if _palette_for != "attach:" + name else ""
+			_sync_parts()))
+		if attached != "":
+			row_buttons.append(W.button("Detach", func() -> void: _attach(name, "")))
+	else:
+		var back := W.button("Put back", func() -> void: _put_back(name))
+		back.disabled = not ObjectCommands.moved(app.env, name)
+		row_buttons.append(back)
+	_parts_box.add_child(W.hbox(row_buttons))
+	if attached != "":
+		var follows := W.ellipsis(W.label(tr("Follows %s") % attached, &"MutedLabel"))
+		W.content(follows)
+		_parts_box.add_child(follows)
+	if _palette_for == "attach:" + name:
+		_parts_box.add_child(_attach_picker(name, attached))
 	var materials := _materials()
 	for part: Dictionary in entry["parts"]:
 		var target := "%s/%s" % [name, part["name"]]
@@ -634,6 +662,63 @@ func _apply(target: String, material: Variant) -> void:
 	elif material is Dictionary and (material as Dictionary).get("effect") is Dictionary:
 		said = _effect_name(str(material["effect"].get("name", "")))
 	_toast(r, "%s: %s" % [target.get_slice("/", 1), said])
+	sync_objects()
+
+
+# --- Object physics (docs/physics.md) --------------------------------------------------------------------------
+
+## The placement a text or particles area follows, or "".
+func _attached_to(name: String) -> String:
+	var doc: Dictionary = app.env.get("doc") if app.env != null and app.env.get("doc") is Dictionary else {}
+	for p: Dictionary in doc.get("parts", []):
+		if str(p.get("name", "")) == name:
+			return str(p.get("attach", ""))
+	return ""
+
+
+## The objects a text or particles area can follow (every other placement that isn't one too), a button each; the
+## one it follows is pressed.
+func _attach_picker(name: String, attached: String) -> Control:
+	var box := W.vbox()
+	box.add_child(W.label("Follows:", &"MutedLabel"))
+	var grid := GridContainer.new()
+	grid.columns = MATERIAL_COLUMNS
+	grid.add_theme_constant_override("h_separation", PaneStyle.constant(&"gap"))
+	grid.add_theme_constant_override("v_separation", PaneStyle.constant(&"gap"))
+	for p: Dictionary in _placed():
+		var to := str(p["name"])
+		if to == name or RoomSchema.kind_of({"object": str(p["object"])}) in RoomSchema.GENERATORS:
+			continue
+		var b := W.button(to, func() -> void: _attach(name, to), &"RowButton")
+		# What the room calls it: content.
+		W.content(b)
+		b.toggle_mode = true
+		b.set_pressed_no_signal(to == attached)
+		b.clip_text = true
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(b)
+	box.add_child(grid)
+	return box
+
+
+func _attach(name: String, to: String) -> void:
+	var r: Dictionary = await ObjectCommands.attach(get_tree(), null, name, to)
+	_palette_for = ""
+	_toast(r, tr("%s follows %s") % [name, to] if to != "" else tr("%s stays where it is") % name)
+	sync_objects()
+
+
+func _put_back(name: String) -> void:
+	var r: Dictionary = await ObjectCommands.put_back(get_tree(), null, [name])
+	_toast(r, tr("%s is back where it was placed") % name)
+	sync_objects()
+
+
+func _tidy_up() -> void:
+	var r: Dictionary = await ObjectCommands.put_back(get_tree(), null, [])
+	var n := (r.get("result", {}).get("put_back", []) as Array).size() if r.get("ok") == true else 0
+	_toast(r, tr_n("Tidied up: %d object back", "Tidied up: %d objects back", n) % n)
 	sync_objects()
 
 
