@@ -28,8 +28,11 @@ extends Node
 
 const FabImport := preload("res://scripts/assistant/fab_import.gd")
 const FabHttp := preload("res://scripts/assistant/fab_http.gd")
+const HostGate := preload("res://scripts/assistant/host_gate.gd")
 const ObjectLibrary := preload("res://scripts/assistant/object_library.gd")
 const ObjectCommands := preload("res://scripts/assistant/object_commands.gd")
+const SurfaceImport := preload("res://scripts/env/surface_import.gd")
+const WorkerTask := preload("res://scripts/dev/worker_task.gd")
 const DevCommands := preload("res://scripts/dev/dev_commands.gd")
 
 const NODE_NAME := "FabStore"
@@ -55,6 +58,13 @@ const THUMB_CACHE_BYTES := 16 << 20
 ## and the sizes in the order taken: mid (2K maps) suits the Frame's memory; raw never.
 const FORMAT := "fbx"
 const SIZES: Array[String] = ["mid", "low", "high"]
+## Fab's listing types: 3D models (the object library) and Megascans' surfaces (the material search,
+## scripts/env/surface_store.gd). A surface comes as a texture set: a zip of JPEG maps and the asset's .json, 1K first.
+const MODEL_TYPE := "3d-model"
+const MATERIAL_TYPE := "material"
+const MATERIAL_FORMAT := "texture-set"
+const MATERIAL_SIZES: Array[String] = ["1k", "2k"]
+const SEARCH_BASE := SITE + "/i/listings/search?seller=Quixel%20Megascans&is_free=1&listing_types="
 const QUERY_MAX := 100
 const CURSOR_MAX := 200
 const TAGS_MAX := 8
@@ -64,26 +74,29 @@ const JOB_STATES: Array[String] = ["files", "link", "download", "import"]
 
 ## A request began or ended, the job moved on, a back-off began, the licence was accepted or withdrawn.
 signal changed
-signal _free
 
 ## fetch(url, headers, file) -> {code, headers, body, error} (await), progress() -> [bytes, total], cancel().
 var transport: Object
 ## get_value() and set_value() (app_settings.gd); null: the main scene's.
 var settings: Object
 var root := "user://fab"
-var api_gap := API_GAP
-var thumb_gap := THUMB_GAP
+## The go-slow rules (host_gate.gd): one request at a time, the gaps, the back-off. Its site is "fab".
+var gate := HostGate.new()
+var api_gap := API_GAP:
+	set(v):
+		api_gap = v
+		gate.api_gap = v
+var thumb_gap := THUMB_GAP:
+	set(v):
+		thumb_gap = v
+		gate.thumb_gap = v
 var search_ttl := SEARCH_TTL
 var thumb_cache_bytes := THUMB_CACHE_BYTES
 ## Requests sent (the tests count them).
-var requests := 0
+var requests: int:
+	get:
+		return gate.requests
 
-var _busy := false
-var _waiting_first := 0
-var _last_end := -1.0e9
-var _backoff_until := 0.0
-var _backoff_level := 0
-var _backoff_code := 0
 var _job := {}
 var _known := {}
 var _thumb_bytes := -1
@@ -108,6 +121,8 @@ func _init() -> void:
 	http.name = "Http"
 	add_child(http)
 	transport = http
+	gate.names["fab"] = "Fab"
+	gate.changed.connect(func() -> void: changed.emit())
 
 
 func _ready() -> void:
@@ -193,70 +208,23 @@ static func app_version() -> String:
 
 ## Seconds left of a back-off (0: none).
 func backoff_left() -> float:
-	return maxf(0.0, _backoff_until - _now())
+	return gate.backoff_left("fab")
 
 
 ## How long a back-off lasts: Retry-After when it says (seconds), else BACKOFF_BASE doubled for each in a row.
 static func backoff_seconds(level: int, retry_after: String) -> float:
-	if retry_after.strip_edges().is_valid_int():
-		return clampf(float(retry_after.strip_edges().to_int()), 1.0, 3600.0)
-	return minf(BACKOFF_MAX, BACKOFF_BASE * pow(2.0, level))
+	return HostGate.backoff_seconds(level, retry_after)
 
 
-func _back_off(code: int, retry_after: String) -> void:
-	var s := backoff_seconds(_backoff_level, retry_after)
-	_backoff_level += 1
-	_backoff_until = _now() + s
-	_backoff_code = code
-	changed.emit()
-
-
-func _backoff_error() -> Dictionary:
-	var left := ceili(backoff_left())
-	return _err("backoff", "Fab is busy (HTTP %d): the app asks it nothing for %d s" % [_backoff_code, left],
-			{"wait": left, "http": _backoff_code})
-
-
-## One GET in its turn: one request at a time; Fab's pages ("api") api_gap after the last one ended, thumbnails and
-## the download thumb_gap; a thumbnail waits while a page or the download is waiting. None during a back-off.
-## Returns the transport's {code, headers, body, error}, or an error ({ok: false, ...}). job: its cancel stops it
-## before it is sent.
+## One GET in its turn (host_gate.gd): one request at a time; Fab's pages ("api") api_gap after the last one ended,
+## thumbnails and the download thumb_gap; a thumbnail waits while a page or the download is waiting. None during a
+## back-off. Returns the transport's {code, headers, body, error}, or an error ({ok: false, ...}). job: its cancel
+## stops it before it is sent. kind "file": a download to `file`.
 func _get(url: String, kind: String, file := "", job := {}) -> Dictionary:
-	var first := kind != "thumb"
-	if first:
-		_waiting_first += 1
-	while _busy or (not first and _waiting_first > 0):
-		await _free
-	if first:
-		_waiting_first -= 1
-	_busy = true
-	var out: Dictionary = await _get_now(url, kind, file, job)
-	_busy = false
-	_last_end = _now()
-	_free.emit()
-	return out
-
-
-func _get_now(url: String, kind: String, file: String, job: Dictionary) -> Dictionary:
-	var gap := api_gap if kind == "api" else thumb_gap
-	while _now() - _last_end < gap and backoff_left() <= 0.0:
-		await _tree().create_timer(gap - (_now() - _last_end)).timeout
-	if backoff_left() > 0.0:
-		return _backoff_error()
-	if bool(job.get("cancel", false)):
-		return _err("cancelled", "cancelled")
 	if not is_inside_tree():
 		await _tree().process_frame
-	requests += 1
-	changed.emit()
-	var r: Dictionary = await transport.fetch(url, _headers(kind), file)
-	var code := int(r.get("code", 0))
-	if str(r.get("error", "")) == "" and (code == 429 or code >= 500):
-		_back_off(code, str((r.get("headers", {}) as Dictionary).get("retry-after", "")))
-		return _backoff_error()
-	if str(r.get("error", "")) == "" and code >= 200 and code < 300:
-		_backoff_level = 0
-	return r
+	gate.transport = transport
+	return await gate.request(url, _headers(kind), kind, "fab", file, job)
 
 
 func _headers(kind: String) -> PackedStringArray:
@@ -294,9 +262,10 @@ static func _answer(r: Dictionary, json: bool) -> Dictionary:
 
 # --- Search --------------------------------------------------------------------------------------------------------
 
-## A page of Megascans' free 3D models for `query`: {ok, query, cursor, results: [{uid, title, category, tags,
-## formats, importable, thumb, in_library}], next (the next page's cursor, or ""), cached} or an error.
-func search(query: String, cursor := "") -> Dictionary:
+## A page of Megascans' free 3D models (kind MODEL_TYPE) or surfaces (MATERIAL_TYPE) for `query`: {ok, query,
+## cursor, results: [{uid, title, category, tags, formats, importable, thumb, kind, in_library (the object's or the
+## user material's id)}], next (the next page's cursor, or ""), cached} or an error.
+func search(query: String, cursor := "", kind := MODEL_TYPE) -> Dictionary:
 	var gate := _gate()
 	if not gate.is_empty():
 		return gate
@@ -305,14 +274,14 @@ func search(query: String, cursor := "") -> Dictionary:
 		return _err("query", "give a word or two to search for (in English: rock, chair, cabbage)")
 	if cursor.length() > CURSOR_MAX:
 		return _err("cursor", "that isn't a cursor fab_search gave")
-	var url := search_url(q, cursor)
+	var url := search_url(q, cursor, kind)
 	var page := _cached_search(url)
 	var cached := not page.is_empty()
 	if not cached:
 		var r: Dictionary = await _json(url)
 		if not r["ok"]:
 			return r
-		page = parse_search(r["data"])
+		page = parse_search(r["data"], kind)
 		if page.has("error"):
 			return _err("shape", str(page["error"]))
 		_cache_search(url, page)
@@ -320,24 +289,26 @@ func search(query: String, cursor := "") -> Dictionary:
 	for e: Dictionary in page["results"]:
 		_known[str(e["uid"])] = e
 		var shown := e.duplicate(true)
-		var have := object_for_listing(str(e["uid"]))
+		var have := object_for_listing(str(e["uid"])) if kind == MODEL_TYPE \
+				else SurfaceImport.material_for_listing(str(e["uid"]))
 		shown["in_library"] = str(have["id"]) if not have.is_empty() else ""
 		results.append(shown)
 	return {"ok": true, "query": q, "cursor": cursor, "results": results, "next": str(page["next"]),
 			"cached": cached}
 
 
-static func search_url(q: String, cursor := "") -> String:
-	return SEARCH + q.uri_encode() + ("&cursor=" + cursor.uri_encode() if cursor != "" else "")
+static func search_url(q: String, cursor := "", kind := MODEL_TYPE) -> String:
+	var base := SEARCH if kind == MODEL_TYPE else SEARCH_BASE + kind + "&q="
+	return base + q.uri_encode() + ("&cursor=" + cursor.uri_encode() if cursor != "" else "")
 
 
 ## Fab's search answer read: {results: [...], next} or {error}. What doesn't look right is left out.
-static func parse_search(data: Variant) -> Dictionary:
+static func parse_search(data: Variant, kind := MODEL_TYPE) -> Dictionary:
 	if not (data is Dictionary) or not ((data as Dictionary).get("results") is Array):
 		return {"error": "Fab's search answer has no results list (its site may have changed)"}
 	var out: Array = []
 	for r: Variant in data["results"]:
-		var e := parse_result(r)
+		var e := parse_result(r, kind)
 		if not e.is_empty():
 			out.append(e)
 	var next := ""
@@ -347,7 +318,7 @@ static func parse_search(data: Variant) -> Dictionary:
 	return {"results": out, "next": next}
 
 
-static func parse_result(r: Variant) -> Dictionary:
+static func parse_result(r: Variant, kind := MODEL_TYPE) -> Dictionary:
 	if not (r is Dictionary):
 		return {}
 	var d := r as Dictionary
@@ -369,7 +340,8 @@ static func parse_result(r: Variant) -> Dictionary:
 			if f is Dictionary and (f as Dictionary).get("assetFormatType") is Dictionary:
 				formats.append(str(f["assetFormatType"].get("code", "")))
 	return {"uid": uid, "title": (title as String).strip_edges(), "category": category, "tags": tags,
-			"formats": formats, "importable": formats.is_empty() or FORMAT in formats, "thumb": thumb_of(d)}
+			"formats": formats, "importable": formats.is_empty()
+			or (MATERIAL_FORMAT if kind == MATERIAL_TYPE else FORMAT) in formats, "thumb": thumb_of(d), "kind": kind}
 
 
 ## The first thumbnail's smallest picture at least THUMB_MIN_WIDTH wide (else its largest), or "".
@@ -539,16 +511,25 @@ static func object_for_asset(asset: String) -> Dictionary:
 	return {}
 
 
-## The file to take from a listing's formats: the FBX zip, mid, else low, else high. {format, uid, name, size,
-## quality} or {code, error}.
-static func choose_file(formats: Variant) -> Dictionary:
+## The file to take from a listing's formats: the FBX zip, mid, else low, else high; for a surface (MATERIAL_TYPE)
+## the texture set, 1K, else 2K. {format, uid, name, size, quality} or {code, error}.
+static func choose_file(formats: Variant, kind := MODEL_TYPE) -> Dictionary:
 	if not (formats is Array):
 		return {"code": "shape", "error": "Fab's list of files isn't a list (its site may have changed)"}
+	var format := MATERIAL_FORMAT if kind == MATERIAL_TYPE else FORMAT
 	var files: Array = []
 	for f: Variant in formats:
 		if f is Dictionary and (f as Dictionary).get("assetFormatType") is Dictionary \
-				and str(f["assetFormatType"].get("code", "")) == FORMAT and (f as Dictionary).get("files") is Array:
+				and str(f["assetFormatType"].get("code", "")) == format and (f as Dictionary).get("files") is Array:
 			files = f["files"]
+	if kind == MATERIAL_TYPE:
+		for quality: String in MATERIAL_SIZES:
+			for x: Variant in files:
+				var n := str((x as Dictionary).get("name", "")) if x is Dictionary else ""
+				if n.to_lower().ends_with("_%s.zip" % quality) and uid_ok(str(x.get("uid", ""))):
+					return {"format": format, "uid": str(x["uid"]), "name": n, "size": int(x.get("fileSize", 0)),
+							"quality": quality}
+		return {"code": "no_file", "error": "this surface has no texture set in 1K or 2K"}
 	for quality: String in SIZES:
 		for x: Variant in files:
 			if not (x is Dictionary):
@@ -585,8 +566,9 @@ func job_active() -> bool:
 
 
 ## Starts importing a listing (a search result's uid): its files, the link, the zip, the import, in the
-## background. {ok, state: started, uid, title}, {ok, state: already, object: {id, name}}, or an error.
-func start_import(uid: String, title := "") -> Dictionary:
+## background. {ok, state: started, uid, title}, {ok, state: already, object: {id, name}}, or an error. kind: the
+## listing's (a surface: MATERIAL_TYPE, into the user materials; "": as the search gave it, else a 3D model).
+func start_import(uid: String, title := "", kind := "") -> Dictionary:
 	var gate := _gate()
 	if not gate.is_empty():
 		return gate
@@ -594,13 +576,16 @@ func start_import(uid: String, title := "") -> Dictionary:
 		return _err("uid", "not a Fab listing's uid (fab_search gives them)")
 	if job_active():
 		return _err("busy", "%s is on its way already: fab_status says how far, fab_cancel stops it" % _job["title"])
-	var have := object_for_listing(uid)
+	if kind == "":
+		kind = str(_known.get(uid, {}).get("kind", MODEL_TYPE))
+	var have := object_for_listing(uid) if kind == MODEL_TYPE else SurfaceImport.material_for_listing(uid)
 	if not have.is_empty():
-		return {"ok": true, "state": "already", "uid": uid, "object": {"id": have["id"], "name": have["name"]}}
+		return {"ok": true, "state": "already", "uid": uid, "object": {"id": have["id"], "name": have["name"]},
+				"kind": kind}
 	if title == "":
 		title = str(_known.get(uid, {}).get("title", uid))
 	_job = {"uid": uid, "title": title, "state": "files", "file": "", "quality": "", "bytes": 0, "total": -1,
-			"error": "", "message": "", "object": {}, "cancel": false}
+			"error": "", "message": "", "object": {}, "cancel": false, "kind": kind}
 	changed.emit()
 	_run_job(_job)
 	return {"ok": true, "state": "started", "uid": uid, "title": title}
@@ -611,7 +596,7 @@ func cancel() -> bool:
 	if not job_active():
 		return false
 	_job["cancel"] = true
-	if _job["state"] == "download" and _busy:
+	if _job["state"] == "download" and gate.busy():
 		transport.cancel()
 	changed.emit()
 	return true
@@ -621,14 +606,16 @@ func _run_job(job: Dictionary) -> void:
 	var r: Dictionary = await _json(FILES % job["uid"], job)
 	if _stopped(job, r):
 		return
-	var pick := choose_file(r["data"])
+	var material := str(job.get("kind", MODEL_TYPE)) == MATERIAL_TYPE
+	var pick := choose_file(r["data"], str(job.get("kind", MODEL_TYPE)))
 	if pick.has("error"):
 		_end(job, "failed", str(pick["code"]), str(pick["error"]))
 		return
 	job["file"] = pick["name"]
 	job["quality"] = pick["quality"]
 	job["total"] = pick["size"]
-	var have := object_for_asset(asset_id_of(str(pick["name"])))
+	var have := SurfaceImport.material_for_asset("megascans", asset_id_of(str(pick["name"]))) if material \
+			else object_for_asset(asset_id_of(str(pick["name"])))
 	if not have.is_empty():
 		job["object"] = {"id": have["id"], "name": have["name"]}
 		_end(job, "already")
@@ -656,6 +643,9 @@ func _run_job(job: Dictionary) -> void:
 		DirAccess.remove_absolute(path)
 		return
 	_step(job, "import")
+	if material:
+		await _import_material(job, path)
+		return
 	# On the main thread, behind a notice, as the Objects tab's Add (object_section.gd _add_fab()).
 	var title := str(job["title"])
 	_notify(TranslationServer.translate("Adding %s: a moment.") % title) # i18n
@@ -676,6 +666,33 @@ func _run_job(job: Dictionary) -> void:
 	var obj_name := str(m["name"])
 	if job["state"] == "done":
 		_notify(TranslationServer.translate("%s is in your objects.") % obj_name) # i18n
+	ObjectCommands._sync_tab()
+
+
+## A surface's texture set made a user material (surface_import.gd), on a worker thread: the maps are resized and
+## combined pixel by pixel, a second or two, while the frames go on.
+func _import_material(job: Dictionary, path: String) -> void:
+	var uid := str(job["uid"])
+	var w: Dictionary = await WorkerTask.run(_tree(), func() -> Variant:
+		return SurfaceImport.import_megascans_zip(path, uid), 120.0)
+	DirAccess.remove_absolute(path)
+	var out: Dictionary = w.get("result", {}) if bool(w.get("done", false)) and w.get("result") is Dictionary \
+			else {"ok": false, "error": "the import took too long"}
+	if bool(job["cancel"]):
+		if out.get("ok") == true:
+			SurfaceImport.delete(str(out["entry"]["id"]))
+		_end(job, "cancelled")
+		return
+	if out.get("ok") != true:
+		_end(job, "failed", "import", str(out.get("error", "the import failed")))
+		return
+	SurfaceImport.loaded()
+	var e: Dictionary = out["entry"]
+	job["object"] = {"id": e["id"], "name": e["name"]}
+	_end(job, "already" if out.get("already") == true else "done")
+	var mat_name := str(e["name"])
+	if job["state"] == "done":
+		_notify(TranslationServer.translate("%s is in your materials.") % mat_name) # i18n
 	ObjectCommands._sync_tab()
 
 
@@ -713,7 +730,7 @@ func _notify(text: String) -> void:
 func job_state() -> Dictionary:
 	if _job.is_empty():
 		return {}
-	if _job["state"] == "download" and _busy:
+	if _job["state"] == "download" and gate.busy():
 		var p: Array = transport.progress()
 		_job["bytes"] = int(p[0])
 		if int(p[1]) > 0:
@@ -726,7 +743,7 @@ func job_state() -> Dictionary:
 ## For fab_status and the panel: the licence, a back-off, the import.
 func status() -> Dictionary:
 	var out := {"eula_accepted": eula_accepted(), "eula_date": eula_date(), "where": WHERE,
-			"backoff_s": ceili(backoff_left()), "busy": _busy, "job": job_state()}
+			"backoff_s": ceili(backoff_left()), "busy": gate.busy(), "job": job_state()}
 	if not eula_accepted():
 		out["message"] = EULA_MESSAGE
 	return out
