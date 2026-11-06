@@ -1595,3 +1595,363 @@ msgstr "墨黑配天蓝"
 msgid "Espresso & peach"
 msgstr "咖啡配蜜桃"
 
+# --- stage 2, set C ---
+# The Room, Objects and Mixed reality tabs, the built-in rooms, showrooms and objects, the sleep timer's line and the
+# assistant service's status line.
+
+msgid "%s asks to pair. Tell it this code:"
+msgstr "%s 请求配对。把这个代码告诉它："
+
+msgid "Give an assistant this address: %s (%d min left)."
+msgstr "把这个地址给助手：%s（剩余 %d 分钟）。"
+
+msgid "No assistant yet. Press \"Let an assistant find me\" and give it the address."
+msgstr "还没有助手。按“让助手找到我”，再把地址给它。"
+
+msgid "An assistant is connected."
+msgstr "已连接一个助手。"
+
+msgid "Listening for paired assistants at %s."
+msgstr "正在 %s 等待已配对的助手。"
+
+msgid "Can't make the HTTPS certificate: %s."
+msgstr "无法生成 HTTPS 证书：%s。"
+
+msgid "Can't listen on port %d: %s."
+msgstr "无法监听端口 %d：%s。"
+
+msgid "Box"
+msgstr "立方体"
+
+msgid "Sphere"
+msgstr "球体"
+
+msgid "Cylinder"
+msgstr "圆柱体"
+
+msgid "Plane"
+msgstr "平面"
+
+msgid "Text"
+msgstr "文字"
+
+msgid "Particles"
+msgstr "粒子"
+
+msgid "Picture frame"
+msgstr "相框"
+
+msgid "Wall shelf"
+msgstr "壁架"
+
+msgid "Pot plant"
+msgstr "盆栽"
+
+msgid "Wall clock"
+msgstr "挂钟"
+
+msgid "sleep at end of file"
+msgstr "文件结束时睡眠"
+
+msgid "sleep in %d min"
+msgstr "%d 分钟后睡眠"
+
+msgid "%s  ·  %d x %d x %d cm"
+msgstr "%s  ·  %d x %d x %d 厘米"
+
+msgid "%s deleted"
+msgstr "已删除 %s"
+
+msgid "Add %s"
+msgstr "添加 %s"
+
+msgid "Adding %s: a moment."
+msgstr "正在添加 %s，请稍候。"
+
+msgid "%s is in your objects."
+msgstr "%s 已在你的物品中。"
+
+msgid "That didn't work."
+msgstr "没有成功。"
+
+msgid "%d part"
+msgid_plural "%d parts"
+msgstr[0] "%d 个部件"
+
+msgid "Pick an object, then Place."
+msgstr "选择一个物品，然后放置。"
+
+msgid "Pick one, then Place."
+msgstr "选择一个，然后放置。"
+
+msgid "%s is in %s: remove it there first."
+msgstr "%s 在 %s 中：请先在那里移除它。"
+
+msgid "Delete %s from the library?"
+msgstr "从物品库中删除 %s？"
+
+msgid "Keep"
+msgstr "保留"
+
+msgid "(changed)"
+msgstr "（已更改）"
+
+msgid "Open a picture on the headset first (Files); then Picture puts it on the part."
+msgstr "先在头显上打开一张图片（片源）；然后“画面”会把它放到部件上。"
+
+msgid "That picture is too big for a part (at most %d MB)."
+msgstr "这张图片对部件来说太大了（最多 %d MB）。"
+
+msgid "its own colour"
+msgstr "原来的颜色"
+
+msgid "changed"
+msgstr "已更改"
+
+msgid "Remove %s from the room?"
+msgstr "从房间中移除 %s？"
+
+msgid "Removed %s"
+msgstr "已移除 %s"
+
+msgid "All"
+msgstr "全部"
+
+msgid "Floors"
+msgstr "地面"
+
+msgid "Walls"
+msgstr "墙面"
+
+msgid "Fabric"
+msgstr "织物"
+
+msgid "Wood"
+msgstr "木材"
+
+msgid "Leather"
+msgstr "皮革"
+
+msgid "Metal"
+msgstr "金属"
+
+msgid "Stone"
+msgstr "石材"
+
+msgid "Classic"
+msgstr "经典"
+
+msgid "Energy"
+msgstr "能量"
+
+msgid "Nature"
+msgstr "自然"
+
+msgid "Reactive"
+msgstr "响应"
+
+msgid "Skies"
+msgstr "天空"
+
+msgid "Stylised"
+msgstr "风格化"
+
+msgid "Transitions"
+msgstr "过渡"
+
+msgid "Materials"
+msgstr "材质"
+
+msgid "free"
+msgstr "随处"
+
+msgid "wall"
+msgstr "墙面"
+
+msgid "floor"
+msgstr "地面"
+
+msgid "%d s"
+msgstr "%d 秒"
+
+msgid "%d min"
+msgstr "%d 分钟"
+
+msgid "off"
+msgstr "关"
+
+msgid "%s (photo)"
+msgstr "%s（照片）"
+
+msgid "This picture can't be a room (only local pictures)."
+msgstr "这张图片不能用作房间（只能用本地图片）。"
+
+msgid "%s (moved) (%d of %d)"
+msgstr "%s（已移动）（第 %d 个，共 %d 个）"
+
+msgid "%s (%d of %d)"
+msgstr "%s（第 %d 个，共 %d 个）"
+
+msgid "Where %s was (%d seat)"
+msgid_plural "Where %s was (%d seats)"
+msgstr[0] "%s 原来的位置（%d 个座位）"
+
+msgid "The room's own spot (%d seat)"
+msgid_plural "The room's own spot (%d seats)"
+msgstr[0] "房间默认位置（%d 个座位）"
+
+msgid "Go to %s"
+msgstr "前往 %s"
+
+msgid "Seat %d"
+msgstr "座位 %d"
+
+msgid "Intermission: %s left. Play ends it."
+msgstr "中场休息：剩余 %s。播放即结束。"
+
+msgid "This film stops at %s."
+msgstr "这部影片将在 %s 暂停。"
+
+msgid "Films over %d min with chapters stop once, near the middle."
+msgstr "超过 %d 分钟且有章节的影片会在中间附近暂停一次。"
+
+msgid "Watch party ended: %s"
+msgstr "一起看已结束：%s"
+
+msgid "the host refused: %s"
+msgstr "主持方拒绝了：%s"
+
+msgid "The host plays %s. It isn't open here."
+msgstr "主持方在播放 %s。这里没有打开它。"
+
+msgid "The host plays a file that isn't open here."
+msgstr "主持方在播放一个这里没有打开的文件。"
+
+msgid "Host plays one file on every headset on this network, on one clock; Join finds the first host."
+msgstr "“主持”在此网络中的每台头显上按同一个时钟播放同一个文件；“加入”会找到第一个主持方。"
+
+msgid "Ended: %s. %s"
+msgstr "已结束：%s。%s"
+
+msgid "Hosting as %s. %s"
+msgstr "正以 %s 的名字主持。%s"
+
+msgid "Nobody has joined yet."
+msgstr "还没有人加入。"
+
+msgid "%d joined."
+msgstr "%d 人已加入。"
+
+msgid "Joined, seat %d. %s"
+msgstr "已加入，座位 %d。%s"
+
+msgid "%s (you)"
+msgstr "%s（你）"
+
+msgid "Seat %d   %s"
+msgstr "座位 %d   %s"
+
+msgid "The host plays %s, which isn't open here."
+msgstr "主持方在播放 %s，这里没有打开它。"
+
+msgid "Name: %s"
+msgstr "名字：%s"
+
+msgid "PIN: set"
+msgstr "PIN：已设置"
+
+msgid "PIN: none"
+msgstr "PIN：无"
+
+msgid "Waiting for the host's file."
+msgstr "正在等待主持方的文件。"
+
+msgid "In step within %d ms."
+msgstr "同步误差在 %d 毫秒以内。"
+
+msgid "15 min"
+msgstr "15 分钟"
+
+msgid "30 min"
+msgstr "30 分钟"
+
+msgid "60 min"
+msgstr "60 分钟"
+
+msgid "90 min"
+msgstr "90 分钟"
+
+msgid "End of file"
+msgstr "文件结束时"
+
+msgid "Void"
+msgstr "虚空"
+
+msgid "Dim room"
+msgstr "暗室"
+
+msgid "Cinema"
+msgstr "影院"
+
+msgid "Passthrough"
+msgstr "透视"
+
+msgid "Home theatre"
+msgstr "家庭影院"
+
+msgid "Drive-in"
+msgstr "汽车影院"
+
+msgid "Planetarium"
+msgstr "天文馆"
+
+msgid "Dome"
+msgstr "圆顶"
+
+msgid "you left"
+msgstr "你离开了"
+
+msgid "no host found"
+msgstr "没有找到主持方"
+
+msgid "the host went quiet"
+msgstr "主持方没有回应了"
+
+msgid "the host ended the party"
+msgstr "主持方结束了一起看"
+
+msgid "Your name in the watch party"
+msgstr "你在一起看中的名字"
+
+msgid "a name"
+msgstr "名字"
+
+msgid "The party's PIN (the host sets it, guests give the same; empty for none)"
+msgstr "一起看的 PIN（主持方设置，加入者输入相同的；留空表示没有）"
+
+msgid "digits"
+msgstr "数字"
+
+msgid "Effects gallery"
+msgstr "效果展厅"
+
+msgid "Material wall"
+msgstr "材质墙"
+
+msgid "Lights"
+msgstr "灯光"
+
+msgid "Aurora sky"
+msgstr "极光天空"
+
+msgid "Starfield sky"
+msgstr "星空"
+
+msgid "Nebula sky"
+msgstr "星云天空"
+
+msgid "Sunset sky"
+msgstr "日落天空"
+
+msgid "Cloud layers sky"
+msgstr "云层天空"

@@ -5,7 +5,7 @@ extends VBoxContainer
 ## pairing prompt (the code in large digits, who asks, Cancel); the paired assistants with Forget; what the assistant
 ## may do; and, for developers with the dev link connected too, where the voice goes. Nothing is typed here.
 ## Languages (docs/i18n.md): the fixed words translate themselves; the built lines are made again when the language
-## changes. The service's own status line (scripts/assistant/) stays English.
+## changes. The service's own status line (assistant_service.gd status_text()) comes translated.
 
 const W := preload("res://ui/pane_widgets.gd")
 const Assistant := preload("res://scripts/assistant/assistant.gd")

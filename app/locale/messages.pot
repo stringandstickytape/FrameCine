@@ -99,6 +99,39 @@ msgstr ""
 msgid "ESC"
 msgstr ""
 
+#: scripts/assistant/assistant_service.gd:445
+#, c-format
+msgid "%s asks to pair. Tell it this code:"
+msgstr ""
+
+#: scripts/assistant/assistant_service.gd:447
+#, c-format
+msgid "Give an assistant this address: %s (%d min left)."
+msgstr ""
+
+#: scripts/assistant/assistant_service.gd:449
+msgid "No assistant yet. Press \"Let an assistant find me\" and give it the address."
+msgstr ""
+
+#: scripts/assistant/assistant_service.gd:451
+msgid "An assistant is connected."
+msgstr ""
+
+#: scripts/assistant/assistant_service.gd:452
+#, c-format
+msgid "Listening for paired assistants at %s."
+msgstr ""
+
+#: scripts/assistant/assistant_service.gd:50
+#, c-format
+msgid "Can't make the HTTPS certificate: %s."
+msgstr ""
+
+#: scripts/assistant/assistant_service.gd:51
+#, c-format
+msgid "Can't listen on port %d: %s."
+msgstr ""
+
 #: scripts/assistant/assistant_switches.gd:11
 msgid "Let the assistant control playback"
 msgstr ""
@@ -117,6 +150,55 @@ msgstr ""
 
 #: scripts/assistant/assistant_switches.gd:19
 msgid "Let the assistant run apps"
+msgstr ""
+
+#: scripts/assistant/object_builtins.gd:21
+msgid "Box"
+msgstr ""
+
+#: scripts/assistant/object_builtins.gd:22
+msgid "Sphere"
+msgstr ""
+
+#: scripts/assistant/object_builtins.gd:23
+msgid "Cylinder"
+msgstr ""
+
+#: scripts/assistant/object_builtins.gd:24
+msgid "Plane"
+msgstr ""
+
+#: scripts/assistant/object_builtins.gd:27
+msgid "Text"
+msgstr ""
+
+#: scripts/assistant/object_builtins.gd:28
+msgid "Particles"
+msgstr ""
+
+#: scripts/assistant/object_builtins.gd:29
+msgid "Picture frame"
+msgstr ""
+
+#: scripts/assistant/object_builtins.gd:30
+msgid "Wall shelf"
+msgstr ""
+
+#: scripts/assistant/object_builtins.gd:31
+msgid "Pot plant"
+msgstr ""
+
+#: scripts/assistant/object_builtins.gd:33
+msgid "Wall clock"
+msgstr ""
+
+#: scripts/comfort/sleep_timer.gd:116
+msgid "sleep at end of file"
+msgstr ""
+
+#: scripts/comfort/sleep_timer.gd:117
+#, c-format
+msgid "sleep in %d min"
 msgstr ""
 
 #: scripts/play/auto_crop.gd:79
@@ -774,7 +856,7 @@ msgstr ""
 msgid "The sound plays on a PC, in time with the picture."
 msgstr ""
 
-#: ui/host_form.gd:52
+#: ui/host_form.gd:52 ui/room_tab.gd:611 ui/room_tab.gd:615
 msgid "Save"
 msgstr ""
 
@@ -815,124 +897,294 @@ msgstr ""
 msgid "Play"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:34
+#: ui/mixed_reality_tab.gd:36
 msgid "Areas"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:35
+#: ui/mixed_reality_tab.gd:37
 msgid "Mark areas to see through to the cameras."
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:36
+#: ui/mixed_reality_tab.gd:41
 msgid "Sweep an area"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:37
+#: ui/mixed_reality_tab.gd:42
 msgid "Hold the trigger and pass the controller over the place; let go to keep it."
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:38
+#: ui/mixed_reality_tab.gd:43 ui/mixed_reality_tab.gd:76
 msgid "None yet."
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:43
+#: ui/mixed_reality_tab.gd:49
 msgid "All on"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:44
+#: ui/mixed_reality_tab.gd:50
 msgid "All off"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:45
+#: ui/mixed_reality_tab.gd:51
 msgid "Settings"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:46
+#: ui/mixed_reality_tab.gd:52
 msgid "Passthrough dimming"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:93
+#: ui/mixed_reality_tab.gd:101
 msgid "On"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:95
+#: ui/mixed_reality_tab.gd:103
 msgid "Edit"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:96 ui/object_section.gd:105
+#: ui/mixed_reality_tab.gd:104 ui/object_section.gd:122 ui/object_section.gd:348
 msgid "Delete"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:71 ui/ui_layer.gd:857
+#: ui/mixed_reality_tab.gd:110
+#, c-format
+msgid "%s  ·  %d x %d x %d cm"
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:119
+#, c-format
+msgid "%s deleted"
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:631 ui/system_tab.gd:636 ui/ui_layer.gd:225
+#: ui/ui_layer.gd:386 ui/ui_layer.gd:889 ui/ui_layer.gd:893 ui/ui_layer.gd:921
+msgid "Undo"
+msgstr ""
+
+#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:857
 msgid "The headset's cameras can't show here."
 msgstr ""
 
-#: ui/object_section.gd:86
+#: ui/object_section.gd:98
 msgid "Built-in objects"
 msgstr ""
 
-#: ui/object_section.gd:91 ui/object_section.gd:104
+#: ui/object_section.gd:104 ui/object_section.gd:121
 msgid "Place"
 msgstr ""
 
-#: ui/object_section.gd:93
+#: ui/object_section.gd:106
 msgid "Place: point at a wall or the floor, trigger to set it. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/object_section.gd:95
+#: ui/object_section.gd:108
 msgid "Your objects"
 msgstr ""
 
-#: ui/object_section.gd:96
+#: ui/object_section.gd:109
 msgid "Imported, or kept from a room."
 msgstr ""
 
-#: ui/object_section.gd:98
+#: ui/object_section.gd:111
 msgid "None yet: add one from Fab below."
 msgstr ""
 
-#: ui/object_section.gd:108
+#: ui/object_section.gd:126
 msgid "In Downloads, from Fab"
 msgstr ""
 
-#: ui/object_section.gd:110
+#: ui/object_section.gd:129
 msgid "Visit Fab to download objects"
 msgstr ""
 
-#: ui/object_section.gd:116
+#: ui/object_section.gd:139
 msgid "In this room"
 msgstr ""
 
-#: ui/object_section.gd:117
+#: ui/object_section.gd:140
 msgid "Nothing from the library yet."
 msgstr ""
 
-#: ui/object_section.gd:373
+#: ui/object_section.gd:241 ui/object_section.gd:249
+#, c-format
+msgid "Add %s"
+msgstr ""
+
+#: ui/object_section.gd:272
+#, c-format
+msgid "Adding %s: a moment."
+msgstr ""
+
+#: ui/object_section.gd:281
+#, c-format
+msgid "%s is in your objects."
+msgstr ""
+
+#: ui/object_section.gd:284 ui/object_section.gd:633
+msgid "That didn't work."
+msgstr ""
+
+#: ui/object_section.gd:313
+#, c-format
+msgid "%d part"
+msgid_plural "%d parts"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ui/object_section.gd:314
+msgid "Pick an object, then Place."
+msgstr ""
+
+#: ui/object_section.gd:316
+msgid "Pick one, then Place."
+msgstr ""
+
+#: ui/object_section.gd:346
+#, c-format
+msgid "%s is in %s: remove it there first."
+msgstr ""
+
+#: ui/object_section.gd:348
+#, c-format
+msgid "Delete %s from the library?"
+msgstr ""
+
+#: ui/object_section.gd:356 ui/object_section.gd:625
+msgid "Keep"
+msgstr ""
+
+#: ui/object_section.gd:411
 msgid "Move"
 msgstr ""
 
-#: ui/object_section.gd:374
+#: ui/object_section.gd:412 ui/object_section.gd:622
 msgid "Remove"
 msgstr ""
 
-#: ui/object_section.gd:387
+#: ui/object_section.gd:425
+msgid "(changed)"
+msgstr ""
+
+#: ui/object_section.gd:427
 msgid "Colour"
 msgstr ""
 
-#: ui/object_section.gd:390 ui/pane_ui.gd:52 ui/picture_tab.gd:268
+#: ui/object_section.gd:430 ui/pane_ui.gd:52 ui/picture_tab.gd:268
 msgid "Picture"
 msgstr ""
 
-#: ui/object_section.gd:392
+#: ui/object_section.gd:432
 msgid "Material"
 msgstr ""
 
-#: ui/object_section.gd:395
+#: ui/object_section.gd:435
 msgid "Effect"
 msgstr ""
 
-#: ui/object_section.gd:398
+#: ui/object_section.gd:438
 msgid "Reset"
+msgstr ""
+
+#: ui/object_section.gd:598
+msgid "Open a picture on the headset first (Files); then Picture puts it on the part."
+msgstr ""
+
+#: ui/object_section.gd:602
+#, c-format
+msgid "That picture is too big for a part (at most %d MB)."
+msgstr ""
+
+#: ui/object_section.gd:612
+msgid "its own colour"
+msgstr ""
+
+#: ui/object_section.gd:612
+msgid "changed"
+msgstr ""
+
+#: ui/object_section.gd:622
+#, c-format
+msgid "Remove %s from the room?"
+msgstr ""
+
+#: ui/object_section.gd:625
+#, c-format
+msgid "Removed %s"
+msgstr ""
+
+#: ui/object_section.gd:40
+msgid "All"
+msgstr ""
+
+#: ui/object_section.gd:40
+msgid "Floors"
+msgstr ""
+
+#: ui/object_section.gd:40
+msgid "Walls"
+msgstr ""
+
+#: ui/object_section.gd:40
+msgid "Fabric"
+msgstr ""
+
+#: ui/object_section.gd:40
+msgid "Wood"
+msgstr ""
+
+#: ui/object_section.gd:40
+msgid "Leather"
+msgstr ""
+
+#: ui/object_section.gd:40
+msgid "Metal"
+msgstr ""
+
+#: ui/object_section.gd:40
+msgid "Stone"
+msgstr ""
+
+#: ui/object_section.gd:44
+msgid "Classic"
+msgstr ""
+
+#: ui/object_section.gd:44
+msgid "Energy"
+msgstr ""
+
+#: ui/object_section.gd:44
+msgid "Nature"
+msgstr ""
+
+#: ui/object_section.gd:44
+msgid "Reactive"
+msgstr ""
+
+#: ui/object_section.gd:45
+msgid "Skies"
+msgstr ""
+
+#: ui/object_section.gd:45
+msgid "Stylised"
+msgstr ""
+
+#: ui/object_section.gd:45
+msgid "Transitions"
+msgstr ""
+
+#: ui/object_section.gd:45
+msgid "Materials"
+msgstr ""
+
+#: ui/object_section.gd:48
+msgid "free"
+msgstr ""
+
+#: ui/object_section.gd:48
+msgid "wall"
+msgstr ""
+
+#: ui/object_section.gd:48
+msgid "floor"
 msgstr ""
 
 #: ui/onscreen_keyboard.gd:62
@@ -1011,7 +1263,7 @@ msgstr ""
 msgid "Room"
 msgstr ""
 
-#: ui/pane_ui.gd:52
+#: ui/pane_ui.gd:52 environments/showrooms/index.json
 msgid "Objects"
 msgstr ""
 
@@ -1279,192 +1531,436 @@ msgstr ""
 msgid "Bottom left"
 msgstr ""
 
-#: ui/room_tab.gd:96
+#: ui/room_tab.gd:112
 msgid "Environment"
 msgstr ""
 
-#: ui/room_tab.gd:97
+#: ui/room_tab.gd:113
 msgid "Built in"
 msgstr ""
 
-#: ui/room_tab.gd:102
+#: ui/room_tab.gd:118
 msgid "Yours"
 msgstr ""
 
-#: ui/room_tab.gd:105
+#: ui/room_tab.gd:121
 msgid "Use this picture as the room"
 msgstr ""
 
-#: ui/room_tab.gd:109
+#: ui/room_tab.gd:125
 msgid "Showrooms"
 msgstr ""
 
-#: ui/room_tab.gd:117 ui/ui_layer.gd:940
+#: ui/room_tab.gd:133 ui/ui_layer.gd:940
 msgid "Seat"
 msgstr ""
 
-#: ui/room_tab.gd:121
+#: ui/room_tab.gd:140
 msgid "Previous seat"
 msgstr ""
 
-#: ui/room_tab.gd:122
+#: ui/room_tab.gd:141
 msgid "Next seat"
 msgstr ""
 
-#: ui/room_tab.gd:123
+#: ui/room_tab.gd:142
 msgid "Room's own spot"
 msgstr ""
 
-#: ui/room_tab.gd:125
+#: ui/room_tab.gd:144
 msgid "Pick a seat"
 msgstr ""
 
-#: ui/room_tab.gd:135
+#: ui/room_tab.gd:155
 msgid "Floor reflection"
 msgstr ""
 
-#: ui/room_tab.gd:137
+#: ui/room_tab.gd:157
 msgid "Reflection"
 msgstr ""
 
-#: ui/room_tab.gd:143
+#: ui/room_tab.gd:163
 msgid "Effects"
 msgstr ""
 
-#: ui/room_tab.gd:145 ui/room_tab.gd:157
+#: ui/room_tab.gd:165 ui/room_tab.gd:177
 msgid "Bias light"
 msgstr ""
 
-#: ui/room_tab.gd:149
+#: ui/room_tab.gd:169
 msgid "React to the film"
 msgstr ""
 
-#: ui/room_tab.gd:153
+#: ui/room_tab.gd:173
 msgid "Projector beam"
 msgstr ""
 
-#: ui/room_tab.gd:160
+#: ui/room_tab.gd:180
 msgid "Reaction"
 msgstr ""
 
-#: ui/room_tab.gd:173
+#: ui/room_tab.gd:194
 msgid "Time of day"
 msgstr ""
 
-#: ui/room_tab.gd:174
+#: ui/room_tab.gd:195
 msgid "Night"
 msgstr ""
 
-#: ui/room_tab.gd:174
+#: ui/room_tab.gd:195
 msgid "Now"
 msgstr ""
 
-#: ui/room_tab.gd:174
+#: ui/room_tab.gd:195
 msgid "Dusk"
 msgstr ""
 
-#: ui/room_tab.gd:174
+#: ui/room_tab.gd:195
 msgid "Day"
 msgstr ""
 
-#: ui/room_tab.gd:178
+#: ui/room_tab.gd:199
 msgid "Latitude"
 msgstr ""
 
-#: ui/room_tab.gd:181
+#: ui/room_tab.gd:202
 msgid "Room light"
 msgstr ""
 
-#: ui/room_tab.gd:185
+#: ui/room_tab.gd:206
 msgid "Dim while playing"
 msgstr ""
 
-#: ui/room_tab.gd:187
+#: ui/room_tab.gd:208
 msgid "Dimmed to"
 msgstr ""
 
-#: ui/room_tab.gd:191
+#: ui/room_tab.gd:212
 msgid "Placement"
 msgstr ""
 
-#: ui/room_tab.gd:194
+#: ui/room_tab.gd:215
 msgid "Reset room"
 msgstr ""
 
-#: ui/room_tab.gd:195
+#: ui/room_tab.gd:216
 msgid "Reset screen"
 msgstr ""
 
-#: ui/room_tab.gd:196
+#: ui/room_tab.gd:217
 msgid "Reset room: back to the room's own seat, facing the screen, view recentred."
 msgstr ""
 
-#: ui/room_tab.gd:198
+#: ui/room_tab.gd:219
 msgid "The showing"
 msgstr ""
 
-#: ui/room_tab.gd:200
+#: ui/room_tab.gd:221
 msgid "Curtains"
 msgstr ""
 
-#: ui/room_tab.gd:202
+#: ui/room_tab.gd:223
 msgid "Up next countdown"
 msgstr ""
 
-#: ui/room_tab.gd:204 ui/room_tab.gd:212
+#: ui/room_tab.gd:225 ui/room_tab.gd:234
 msgid "Intermission"
 msgstr ""
 
-#: ui/room_tab.gd:209
+#: ui/room_tab.gd:231
 msgid "Up next in"
 msgstr ""
 
-#: ui/room_tab.gd:221
+#: ui/room_tab.gd:232 ui/room_tab.gd:244
+#, c-format
+msgid "%d s"
+msgstr ""
+
+#: ui/room_tab.gd:235
+#, c-format
+msgid "%d min"
+msgstr ""
+
+#: ui/room_tab.gd:244
+msgid "off"
+msgstr ""
+
+#: ui/room_tab.gd:245
 msgid "Crossfade music"
 msgstr ""
 
-#: ui/room_tab.gd:224
+#: ui/room_tab.gd:248
 msgid "Crossfade films"
 msgstr ""
 
-#: ui/room_tab.gd:228
+#: ui/room_tab.gd:252
 msgid "Sleep timer"
 msgstr ""
 
-#: ui/room_tab.gd:406
-msgid "Watch party"
+#: ui/room_tab.gd:336 ui/room_tab.gd:346
+#, c-format
+msgid "%s (photo)"
 msgstr ""
 
-#: ui/room_tab.gd:410
-msgid "Host"
+#: ui/room_tab.gd:364
+msgid "This picture can't be a room (only local pictures)."
 msgstr ""
 
-#: ui/room_tab.gd:410
-msgid "Join"
+#: ui/room_tab.gd:382
+#, c-format
+msgid "%s (moved) (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:412 ui/room_tab.gd:519
-msgid "Leave"
+#: ui/room_tab.gd:382
+#, c-format
+msgid "%s (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:420
-msgid "Find it"
+#: ui/room_tab.gd:385
+#, c-format
+msgid "Where %s was (%d seat)"
+msgid_plural "Where %s was (%d seats)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ui/room_tab.gd:387
+#, c-format
+msgid "The room's own spot (%d seat)"
+msgid_plural "The room's own spot (%d seats)"
+msgstr[0] ""
+msgstr[1] ""
+
+#: ui/room_tab.gd:389
+#, c-format
+msgid "Go to %s"
 msgstr ""
 
-#: ui/room_tab.gd:367
+#: ui/room_tab.gd:402
 msgid "Flashes only in rooms that react, such as the drive-in; the room pulses with the bass."
 msgstr ""
 
-#: ui/room_tab.gd:383
+#: ui/room_tab.gd:416
+#, c-format
+msgid "Seat %d"
+msgstr ""
+
+#: ui/room_tab.gd:426
 msgid "Curtains: in the cinema and the home theatre, flat screen."
 msgstr ""
 
-#: ui/room_tab.gd:514
+#: ui/room_tab.gd:436
+#, c-format
+msgid "Intermission: %s left. Play ends it."
+msgstr ""
+
+#: ui/room_tab.gd:439
+#, c-format
+msgid "This film stops at %s."
+msgstr ""
+
+#: ui/room_tab.gd:440
+#, c-format
+msgid "Films over %d min with chapters stop once, near the middle."
+msgstr ""
+
+#: ui/room_tab.gd:450
+msgid "Watch party"
+msgstr ""
+
+#: ui/room_tab.gd:455
+msgid "Host"
+msgstr ""
+
+#: ui/room_tab.gd:455
+msgid "Join"
+msgstr ""
+
+#: ui/room_tab.gd:457 ui/room_tab.gd:577
+msgid "Leave"
+msgstr ""
+
+#: ui/room_tab.gd:466
+msgid "Find it"
+msgstr ""
+
+#: ui/room_tab.gd:529
+#, c-format
+msgid "Watch party ended: %s"
+msgstr ""
+
+#: ui/room_tab.gd:538
+#, c-format
+msgid "the host refused: %s"
+msgstr ""
+
+#: ui/room_tab.gd:548
+#, c-format
+msgid "The host plays %s. It isn't open here."
+msgstr ""
+
+#: ui/room_tab.gd:549
+msgid "The host plays a file that isn't open here."
+msgstr ""
+
+#: ui/room_tab.gd:565
+msgid "Host plays one file on every headset on this network, on one clock; Join finds the first host."
+msgstr ""
+
+#: ui/room_tab.gd:567
+#, c-format
+msgid "Ended: %s. %s"
+msgstr ""
+
+#: ui/room_tab.gd:569
+#, c-format
+msgid "Hosting as %s. %s"
+msgstr ""
+
+#: ui/room_tab.gd:569
+msgid "Nobody has joined yet."
+msgstr ""
+
+#: ui/room_tab.gd:570
+#, c-format
+msgid "%d joined."
+msgstr ""
+
+#: ui/room_tab.gd:572
 msgid "Looking for a host..."
 msgstr ""
 
-#: ui/room_tab.gd:519
+#: ui/room_tab.gd:574
+#, c-format
+msgid "Joined, seat %d. %s"
+msgstr ""
+
+#: ui/room_tab.gd:583
+#, c-format
+msgid "%s (you)"
+msgstr ""
+
+#: ui/room_tab.gd:587
+#, c-format
+msgid "Seat %d   %s"
+msgstr ""
+
+#: ui/room_tab.gd:591
+#, c-format
+msgid "The host plays %s, which isn't open here."
+msgstr ""
+
+#: ui/room_tab.gd:593
+#, c-format
+msgid "Name: %s"
+msgstr ""
+
+#: ui/room_tab.gd:594
+msgid "PIN: set"
+msgstr ""
+
+#: ui/room_tab.gd:594
+msgid "PIN: none"
+msgstr ""
+
+#: ui/room_tab.gd:603
+msgid "Waiting for the host's file."
+msgstr ""
+
+#: ui/room_tab.gd:604
+#, c-format
+msgid "In step within %d ms."
+msgstr ""
+
+#: ui/room_tab.gd:577
 msgid "End party"
+msgstr ""
+
+#: ui/room_tab.gd:25 ui/system_tab.gd:41
+msgid "Off"
+msgstr ""
+
+#: ui/room_tab.gd:25
+msgid "15 min"
+msgstr ""
+
+#: ui/room_tab.gd:25
+msgid "30 min"
+msgstr ""
+
+#: ui/room_tab.gd:25
+msgid "60 min"
+msgstr ""
+
+#: ui/room_tab.gd:25
+msgid "90 min"
+msgstr ""
+
+#: ui/room_tab.gd:25
+msgid "End of file"
+msgstr ""
+
+#: ui/room_tab.gd:29
+msgid "Void"
+msgstr ""
+
+#: ui/room_tab.gd:29
+msgid "Dim room"
+msgstr ""
+
+#: ui/room_tab.gd:29
+msgid "Cinema"
+msgstr ""
+
+#: ui/room_tab.gd:29
+msgid "Passthrough"
+msgstr ""
+
+#: ui/room_tab.gd:29
+msgid "Home theatre"
+msgstr ""
+
+#: ui/room_tab.gd:29
+msgid "Drive-in"
+msgstr ""
+
+#: ui/room_tab.gd:29
+msgid "Planetarium"
+msgstr ""
+
+#: ui/room_tab.gd:30
+msgid "Dome"
+msgstr ""
+
+#: ui/room_tab.gd:35
+msgid "you left"
+msgstr ""
+
+#: ui/room_tab.gd:35
+msgid "no host found"
+msgstr ""
+
+#: ui/room_tab.gd:35
+msgid "the host went quiet"
+msgstr ""
+
+#: ui/room_tab.gd:36
+msgid "the host ended the party"
+msgstr ""
+
+#: ui/room_tab.gd:611
+msgid "Your name in the watch party"
+msgstr ""
+
+#: ui/room_tab.gd:611
+msgid "a name"
+msgstr ""
+
+#: ui/room_tab.gd:615
+msgid "The party's PIN (the host sets it, guests give the same; empty for none)"
+msgstr ""
+
+#: ui/room_tab.gd:616
+msgid "digits"
 msgstr ""
 
 #: ui/sound_tab.gd:52
@@ -1854,11 +2350,6 @@ msgstr ""
 msgid "%s; remote changes allowed for %d more min"
 msgstr ""
 
-#: ui/system_tab.gd:636 ui/ui_layer.gd:225 ui/ui_layer.gd:386 ui/ui_layer.gd:889
-#: ui/ui_layer.gd:893 ui/ui_layer.gd:921
-msgid "Undo"
-msgstr ""
-
 #: ui/system_tab.gd:646
 #, c-format
 msgid "Measuring %s ..."
@@ -1910,10 +2401,6 @@ msgstr ""
 
 #: ui/system_tab.gd:39
 msgid "Deny"
-msgstr ""
-
-#: ui/system_tab.gd:41
-msgid "Off"
 msgstr ""
 
 #: ui/system_tab.gd:41
@@ -2101,5 +2588,37 @@ msgstr ""
 
 #: ui/themes/tablet.json
 msgid "Espresso & peach"
+msgstr ""
+
+#: environments/showrooms/index.json
+msgid "Effects gallery"
+msgstr ""
+
+#: environments/showrooms/index.json
+msgid "Material wall"
+msgstr ""
+
+#: environments/showrooms/index.json
+msgid "Lights"
+msgstr ""
+
+#: environments/showrooms/index.json
+msgid "Aurora sky"
+msgstr ""
+
+#: environments/showrooms/index.json
+msgid "Starfield sky"
+msgstr ""
+
+#: environments/showrooms/index.json
+msgid "Nebula sky"
+msgstr ""
+
+#: environments/showrooms/index.json
+msgid "Sunset sky"
+msgstr ""
+
+#: environments/showrooms/index.json
+msgid "Cloud layers sky"
 msgstr ""
 

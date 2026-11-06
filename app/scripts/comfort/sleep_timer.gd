@@ -9,7 +9,7 @@ extends Node
 ##   cancel()             disarm, and undo a fade in progress
 ##   cycle()              off -> 15 -> 30 -> 60 -> 90 -> off (one button)
 ##   active, remaining() (seconds until the pause; at the end of the file for end-of-file), fading
-##   status_text()        "sleep in 23 min", "sleep at end of file", "" when off
+##   status_text(localised := false)   "sleep in 23 min", "sleep at end of file", "" when off
 ##   signals changed(active, remaining), fade_started, slept
 ## Anything the user does during the fade (play/pause, a seek, opening a file) cancels it and puts everything back.
 ## End of file: while armed, a --dir playlist doesn't go on to the next file (main.auto_advance is held off).
@@ -108,12 +108,13 @@ func remaining() -> float:
 	return maxf(_left, 0.0)
 
 
-func status_text() -> String:
+## localised: in the menus' language (the Room tab, docs/i18n.md); else English, as an assistant reads it.
+func status_text(localised := false) -> String:
 	if not active:
 		return ""
 	if end_of_file:
-		return "sleep at end of file"
-	return "sleep in %d min" % ceili(_left / 60.0)
+		return tr("sleep at end of file") if localised else "sleep at end of file"
+	return (tr("sleep in %d min") if localised else "sleep in %d min") % ceili(_left / 60.0)
 
 
 func _process(delta: float) -> void:
