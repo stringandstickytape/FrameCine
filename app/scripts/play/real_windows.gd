@@ -320,9 +320,14 @@ func _rebuild() -> void:
 	changed.emit()
 
 
+## The box's size along its own axes, then turned: Basis.scaled() would stretch along the room's axes instead, which
+## swapped the sides of a box turned 90 degrees (a keyboard came out short side on, the user, 2026-11-06).
+static func box_transform(box: Dictionary, yaw: float) -> Transform3D:
+	return Transform3D(Basis(Vector3.UP, yaw) * Basis.from_scale(box["size"]), box["center"])
+
+
 func _box_transform(box: Dictionary, yaw := NAN) -> Transform3D:
-	var y := _yaw if is_nan(yaw) else yaw
-	return Transform3D(Basis(Vector3.UP, y).scaled(box["size"]), box["center"])
+	return box_transform(box, _yaw if is_nan(yaw) else yaw)
 
 
 ## The way the viewer faces (tracking space), as a turn about up.

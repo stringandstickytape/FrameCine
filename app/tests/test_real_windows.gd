@@ -54,6 +54,13 @@ func _test_box() -> void:
 	var ts: Vector3 = turned["size"]
 	_check("box: turned with the viewer (%s)" % ts, absf(ts.z - (1.0 + RealWindows.MARGIN * 2.0)) < 0.001
 			and ts.x < 0.1)
+	# Drawn: a keyboard 0.45 wide and 0.15 deep, the viewer facing along +X (yaw -90 degrees): its long side runs
+	# across the view (along Z in the room), not towards the viewer.
+	var t := RealWindows.box_transform({"center": Vector3.ZERO, "size": Vector3(0.45, 0.03, 0.15)}, -PI / 2.0)
+	var across := t.basis * Vector3(0.5, 0, 0)
+	var toward := t.basis * Vector3(0, 0, 0.5)
+	_check("drawn: the long side across the view, turned 90 degrees (%s, %s)" % [across, toward],
+			absf(absf(across.z) - 0.225) < 0.001 and absf(across.x) < 0.001 and absf(absf(toward.x) - 0.075) < 0.001)
 
 
 func _test_mark() -> void:
