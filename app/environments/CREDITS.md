@@ -18,3 +18,20 @@ The rooms' sounds are synthesised by `app/scripts/env/env_synth.gd`: ours, no sa
   asset of anyone else's: no image, no texture, no file copied. The faint stars are generated in code
   (`app/scripts/env/systems/sky.gd`, `faint_field()`); the sky's noise, Earth's surface and the vista's shapes are
   made in code too.
+
+## Screening room 1962 (`screening_room_1962`)
+
+No bundled assets. The walnut room, its painting, the club chairs, the pool and the night sky are made in code by the
+systems (`domestic`, `seats`, `sky`, `vista`) on library materials; the painting's abstract picture is generated
+(`procedural.gd`).
+
+## Athens rooftop summer cinema (`rooftop_athens`)
+
+No bundled assets. The terrace, the director's chairs, the bougainvillea, the acropolis on its hill, the sky, the
+planes' lights and the cat are made in code by the systems (`terrace`, `seats`, `kit`, `vista`, `sky`, `life`) on
+library materials.
+
+## Pillow Fort 1993 (`pillow_fort_1993`)
+
+No bundled assets. The bedroom, the fort, the fairy lights, the telly, the cushions and the rain are made in code by
+the systems (`domestic`, `seats`, `weather`, `presentation`) on library materials.

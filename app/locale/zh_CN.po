@@ -2978,3 +2978,52 @@ msgstr "影院"
 #. The Room tab: the group of television rooms (the history of television).
 msgid "Television"
 msgstr "电视"
+
+#. A room's name: a private screening room in a house, 1962.
+msgid "Screening room 1962"
+msgstr "放映室 1962"
+
+msgid "Wall lamps in the film"
+msgstr "影片中的壁灯"
+
+msgid "How bright the brass wall lamps stay once the film has started."
+msgstr "影片开始后黄铜壁灯保持的亮度。"
+
+#. A room's name: an open-air summer cinema on a roof in Athens.
+msgid "Athens rooftop"
+msgstr "雅典屋顶影院"
+
+msgid "Floodlights on the hill"
+msgstr "山上的泛光灯"
+
+msgid "How brightly the ruins on the hill are lit. At the bottom: dark."
+msgstr "山上的古迹被照亮的程度。拉到最低：熄灭。"
+
+#. A room's name: a child's bedroom with a fort of pillows, 1993.
+msgid "Pillow Fort 1993"
+msgstr "枕头城堡 1993"
+
+msgid "Rain on the window"
+msgstr "窗上的雨"
+
+msgid "Rain on the glass and in the street, a drizzle, rain that comes and goes, or a dry night."
+msgstr "玻璃上和街上的雨、毛毛雨、时下时停的雨，或无雨的夜晚。"
+
+#. Rain on the window: the choices.
+msgid "Rain"
+msgstr "雨"
+
+msgid "Drizzle"
+msgstr "毛毛雨"
+
+msgid "Coming and going"
+msgstr "时下时停"
+
+msgid "None"
+msgstr "无"
+
+msgid "The telly's own speaker"
+msgstr "电视机自带的扬声器"
+
+msgid "The film's sound as the telly's small speaker gives it: thin, boxy and in mono."
+msgstr "影片的声音如同电视机的小扬声器播放：单薄、发闷，且为单声道。"

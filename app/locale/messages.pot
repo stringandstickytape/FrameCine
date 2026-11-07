@@ -4053,8 +4053,36 @@ msgstr ""
 msgid "Cloud layers sky"
 msgstr ""
 
+#: environments/pillow_fort_1993.env.json
+msgid "Pillow Fort 1993"
+msgstr ""
+
+#: environments/rooftop_athens.env.json
+msgid "Athens rooftop"
+msgstr ""
+
+#: environments/screening_room_1962.env.json
+msgid "Screening room 1962"
+msgstr ""
+
 #: environments/cinema.env.json
 msgid "House lights in the film"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "Rain on the window"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "The telly's own speaker"
+msgstr ""
+
+#: environments/rooftop_athens.env.json
+msgid "Floodlights on the hill"
+msgstr ""
+
+#: environments/screening_room_1962.env.json
+msgid "Wall lamps in the film"
 msgstr ""
 
 #: environments/void.env.json
@@ -4065,7 +4093,39 @@ msgstr ""
 msgid "How bright the house lamps stay once the film has started."
 msgstr ""
 
+#: environments/pillow_fort_1993.env.json
+msgid "Rain on the glass and in the street, a drizzle, rain that comes and goes, or a dry night."
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "The film's sound as the telly's small speaker gives it: thin, boxy and in mono."
+msgstr ""
+
+#: environments/rooftop_athens.env.json
+msgid "How brightly the ruins on the hill are lit. At the bottom: dark."
+msgstr ""
+
+#: environments/screening_room_1962.env.json
+msgid "How bright the brass wall lamps stay once the film has started."
+msgstr ""
+
 #: environments/void.env.json
 msgid "A faint ring on the floor where you move. At the bottom: none."
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "Rain"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "Drizzle"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "Coming and going"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "None"
 msgstr ""
 
