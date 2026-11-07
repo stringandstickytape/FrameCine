@@ -11,7 +11,7 @@ extends "res://scripts/env/systems/env_system.gd"
 ## the snow are live parameters (a setting or a cue can change them). Nothing moves but the pool's water.
 
 const SHADER := preload("res://shaders/env_vista.gdshader")
-const Sky := preload("res://scripts/env/systems/sky.gd")
+const SkySystem := preload("res://scripts/env/systems/sky.gd")
 const SHAPES: Array[String] = ["hills", "mesas", "acropolis", "birches", "cypresses", "pool"]
 ## The shader's materials (UV2.x).
 const M_ROCK := 0
@@ -35,6 +35,9 @@ const DEFAULTS := {
 			"colour": "#16261a"},
 	"pool": {"azimuth": 0.0, "distance": 14.0, "size": 1.0, "colour": "#16201a"},
 }
+## The grounds (under trees, the pool's lawn) keep this far clear of the room's middle (metres): the room's own floor
+## is there, and two floors at one height would fight.
+const CLEAR := 8.0
 ## The acropolis's stone, in the floodlights.
 const STONE := Color(0.62, 0.55, 0.44)
 
@@ -85,7 +88,7 @@ static func spec() -> Dictionary:
 			"water_motion": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "live": true,
 					"motion": {"max": 1.0}, "description": "how fast the light ripples in the pool"},
 		},
-		"cost": {"draws": 1, "triangles": 12000, "lights": 0, "particles": 0, "texture_mb": 0.4},
+		"cost": {"draws": 1, "triangles": 6000, "lights": 0, "particles": 0, "texture_mb": 0.3},
 		"provides": [],
 	}
 
@@ -97,6 +100,8 @@ var _water_time := 0.0
 ## The first pool: [centre (room frame), axis along, axis across, half size] or [].
 var _pool: Array = []
 var _last_light: Array = []
+## The pool's light placed once the room is in its place (the first frame).
+var _placed_once := false
 ## The items as built, defaults filled (tests).
 var built: Array = []
 
@@ -156,7 +161,7 @@ func setup() -> void:
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	_material = ShaderMaterial.new()
 	_material.shader = SHADER
-	_material.set_shader_parameter("noise_tex", Sky.noise_texture())
+	_material.set_shader_parameter("noise_tex", SkySystem.noise_texture())
 	_mesh = MeshInstance3D.new()
 	_mesh.name = "Vista"
 	_mesh.mesh = mesh
@@ -240,9 +245,6 @@ func tick(delta: float) -> void:
 		if not _placed_once:
 			_placed_once = true
 			_place_pool()
-
-
-var _placed_once := false
 
 
 ## The shader's light on the scenery now: [top, low] (tests).
@@ -556,7 +558,7 @@ func _ground(it: Dictionary, col: Color) -> void:
 	var d := float(it["distance"])
 	var depth := float(it["depth"])
 	var spread := float(it["spread"])
-	var inner := maxf(2.0, d - depth * 0.5 - 6.0)
+	var inner := maxf(CLEAR, d - depth * 0.5 - 6.0)
 	var outer := minf(170.0, d + depth * 0.5 + 30.0)
 	var from := float(it["azimuth"]) - spread * 0.5 - 10.0
 	var to := float(it["azimuth"]) + spread * 0.5 + 10.0
@@ -636,7 +638,8 @@ func _pool_garden(it: Dictionary) -> void:
 	# The coping and the lawn: rings of quads round the water.
 	var stone := Color(0.42, 0.4, 0.36)
 	_ring(centre, along, across, hl, hw, 0.45, y + 0.01, stone, M_POOLSIDE)
-	_ring(centre, along, across, hl + 0.45, hw + 0.45, 14.0, y, _lin(it["colour"]), M_POOLSIDE)
+	var lawn := clampf(d - hw - 0.45 - CLEAR, 1.0, 14.0)
+	_ring(centre, along, across, hl + 0.45, hw + 0.45, lawn, y, _lin(it["colour"]), M_POOLSIDE)
 	# The hedge behind it.
 	var hedge := Color(0.03, 0.07, 0.035)
 	_box(centre + across * (hw + 7.0) + Vector3.UP * 0.9, Vector3(hl + 5.0, 0.9, 0.6),

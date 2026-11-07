@@ -17,7 +17,7 @@ varying float vis;
 void vertex() {
 	vec3 p = star_basis * (VERTEX / model_radius);
 	vec3 d = normalize(p);
-	vec3 world = CAMERA_POSITION_WORLD + sky_room_basis(MODEL_MATRIX) * p * radius;
+	vec3 world = CAMERA_POSITION_WORLD + sky_room_basis(MODEL_MATRIX) * p * model_radius;
 	VERTEX = (VIEW_MATRIX * vec4(world, 1.0)).xyz;
 	across = UV.y * 2.0 - 1.0;
 	float lum = dot(sky_base(d), vec3(0.2126, 0.7152, 0.0722));

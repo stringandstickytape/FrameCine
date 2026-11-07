@@ -37,6 +37,10 @@ const FIELD_SEED := 1928
 const SHOOTING_SECONDS := 0.9
 ## Earth's axial tilt (degrees), so it looks like itself.
 const EARTH_TILT := 23.4
+## The fastest the stars may turn when `hour` changes (a track, a cue, a setting): an hour of sky a minute, 0.25 degrees
+## a second (sixty times the real speed), scaled by the room's Motion setting. A larger change is eased to, never
+## jumped or spun.
+const MAX_HOURS_PER_SECOND := 1.0 / 60.0
 const MODES: Array[String] = ["sky", "space", "black"]
 
 
@@ -58,7 +62,7 @@ static func spec() -> Dictionary:
 					"description": "the day of the year (1 is 1 January; 200 is mid July)"},
 			"hour": {"type": "float", "min": 0.0, "max": 24.0, "default": 22.0, "live": true,
 					"description": "local time in hours (mean solar time, no summer time): the stars turn with it; "
-					+ "a film-time track can turn them over the film"},
+					+ "a film-time track can turn them over the film. They turn at most an hour of sky a minute"},
 			"facing": compass.call(180.0, "the compass bearing the room's front (the screen) faces: 0 north, 90 "
 					+ "east, 180 south"),
 			"dusk": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true, "brightness": true,
@@ -123,7 +127,7 @@ static func spec() -> Dictionary:
 					+ "day; 60: once in 24 minutes)"},
 		},
 		"actions": {"shooting_star": "a shooting star crosses the sky (args: none)"},
-		"cost": {"draws": 4, "triangles": 9000, "lights": 0, "particles": 0, "texture_mb": 0.4},
+		"cost": {"draws": 4, "triangles": 9000, "lights": 0, "particles": 0, "texture_mb": 0.3},
 		"provides": ["sky_light"],
 	}
 
@@ -140,6 +144,8 @@ var _materials: Array[ShaderMaterial] = []
 var _cloud_offset := Vector2.ZERO
 var _aurora_time := 0.0
 var _earth_spin := 0.0
+## The hour the stars show now: it follows `hour` no faster than MAX_HOURS_PER_SECOND.
+var _hour_shown := 0.0
 ## A shooting star in flight: [from, to, age] or [].
 var _meteor: Array = []
 var _rng := RandomNumberGenerator.new()
@@ -287,8 +293,13 @@ static func star_basis_for(latitude: float, lst_hours: float, facing: float) -> 
 
 
 func star_basis() -> Basis:
-	return star_basis_for(float(params["latitude"]), sidereal_hours(float(params["day_of_year"]),
-			float(params["hour"])), float(params["facing"]))
+	return star_basis_for(float(params["latitude"]), sidereal_hours(float(params["day_of_year"]), _hour_shown),
+			float(params["facing"]))
+
+
+## The hour the stars stand at now (it eases towards `hour`).
+func hour_shown() -> float:
+	return _hour_shown
 
 
 ## A catalogue star's direction in the room now (Vector3.ZERO when it isn't in the catalogue).
@@ -318,6 +329,7 @@ func sky_light() -> Dictionary:
 func setup() -> void:
 	_rng.seed = hash(id + "sky")
 	_materials.clear()
+	_hour_shown = float(params["hour"])
 	if str(params["mode"]) == "black":
 		return
 	var noise := noise_texture()
@@ -557,7 +569,7 @@ func _param_changed(param: String, _value: Variant) -> void:
 		return
 	match param:
 		"hour":
-			_set_basis()
+			pass
 		"earth_angle":
 			_set_spin()
 		"lines":
@@ -576,6 +588,7 @@ func _param_changed(param: String, _value: Variant) -> void:
 func tick(delta: float) -> void:
 	if _materials.is_empty():
 		return
+	_turn_stars(delta)
 	var wind := float(params["wind"])
 	if wind > 0.0 and float(params["clouds"]) > 0.0:
 		var to := -_bearing("wind_from")
@@ -601,6 +614,23 @@ func tick(delta: float) -> void:
 			var f: Vector3 = _meteor[0]
 			dm.set_shader_parameter("meteor_from", Vector4(f.x, f.y, f.z, float(_meteor[2])))
 			dm.set_shader_parameter("meteor_to", _meteor[1])
+
+
+## The stars towards `hour`, the short way round, no faster than the comfort limit.
+func _turn_stars(delta: float) -> void:
+	var want := float(params["hour"])
+	var diff := fposmod(want - _hour_shown + 12.0, 24.0) - 12.0
+	if absf(diff) < 1e-6:
+		return
+	var motion := 1.0
+	if host != null and host.setting("motion") != null:
+		motion = clampf(float(host.setting("motion")), 0.0, 1.0)
+	var most := MAX_HOURS_PER_SECOND * motion * delta
+	if absf(diff) <= most:
+		_hour_shown = want
+	else:
+		_hour_shown = fposmod(_hour_shown + signf(diff) * most, 24.0)
+	_set_basis()
 
 
 func act(action: String, _args: Dictionary) -> void:

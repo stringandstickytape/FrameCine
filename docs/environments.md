@@ -150,7 +150,7 @@ parameters only.
 | `shopfront`, `nave`, `dome_hall`, `terrace`, `domestic`, `vehicle` | builder | the other parametric structures (shopfront hall, nave, dome, open-air terrace or lot, domestic room, vehicle interior) | next |
 | `kit` | kit | modular pieces placed along a builder's slots (balcony fronts, niches, columns, façades) | next |
 | objects, materials, pictures | | as now: `parts` placements, library materials, pictures | as now |
-| `sky`, `vista` | sky | a sky dome (gradient, stars with real constellations, clouds lit by the screen, aurora), far scenery cards (mesas, an acropolis, birches) | next |
+| `sky`, `vista` | sky | a sky dome (twilight to night, the real stars and constellations, the Milky Way, clouds lit by the screen, an aurora, Earth from the Moon), far scenery from simple shapes (hills, mesas, a floodlit acropolis, birches in snow, cypresses, a glowing pool); below, "The sky and the vista" | built |
 | `atmosphere`, `weather` | atmosphere | haze, dust and smoke in the beam, ground fog and mist, breath; rain and snow through open roofs and outside windows, rain on a pane, a puddle that reflects the film, a weather cycle (below, "Atmosphere and weather") | built |
 | `life` | life | non-human ambient life: moths, birds, fish, fireflies, a cat, a deer, a whale. Never people | next |
 | `sound_bed`, `acoustics` | sound | looped beds and one-shots from our own synthesiser or CC0 samples, placed in the room, on the Environment bus | next |
@@ -516,6 +516,128 @@ shows over it.
 | Reclaimed | `weather`: `mode` from the Weather setting, an area under the open roof, `puddle` in front of the screen; `atmosphere.fog` bound to `weather.wet` for mist after rain |
 | Ice cinema | `atmosphere`: `breath` 0.6, a little low `fog` |
 | Pillow Fort | `weather`: `pane` on the window, `mode` light or changing, no areas (or one outside the window) |
+
+## The sky and the vista
+
+Two systems of kind `sky`. Both are cheap: unshaded shaders on a few meshes, no live light, no particles, no
+texture from a file. Neither makes a sound. Neither moves the viewer or the horizon.
+
+### `sky`
+
+`scripts/env/systems/sky.gd`. A dome round the viewer: the evening's twilight to full night, the real stars, the Milky
+Way, clouds, an aurora, shooting stars, and Earth as seen from the Moon.
+
+| Parameter | Default | What |
+|---|---|---|
+| `mode` | `sky` | `sky` (air: the gradient), `space` (black, the stars at full: the Moon), `black` (nothing drawn: the Void) |
+| `latitude`, `day_of_year` | 40, 200 | where and when the stars stand (degrees north; day 200 is mid July) |
+| `hour` | 22 | local mean time. Live: a track can turn the stars over the film. They turn at most an hour of sky a minute (0.25 degrees a second), times the Motion setting |
+| `facing` | 180 | the compass bearing the screen faces (180: south). Every other bearing is a compass bearing too |
+| `dusk` | 1 | 0 the last light of the evening, 1 full night. Live, a brightness |
+| `night_zenith`, `night_horizon`, `twilight_zenith`, `twilight_horizon`, `ground` | dark blues, a warm horizon | the gradient's colours |
+| `glow`, `glow_bearing` | orange, 300 | the sunset's glow low over the horizon, where the sun went down; it fades as dusk falls |
+| `stars` | 1 | the stars' brightness. Live, a brightness |
+| `faint_stars` | 1600 | generated faint stars besides the catalogue's bright ones (0..4000) |
+| `twinkle` | 0 | a slow, small twinkle, under 1 Hz; off by default for comfort. Live, a brightness |
+| `lines`, `line_colour` | 0, pale blue | the constellations' lines, faint, as a planetarium shows them. Live |
+| `milky_way`, `milky_colour` | 0.6, warm white | the Milky Way. Live, a brightness |
+| `clouds` | 0 | how much of the sky the clouds cover. Live, a brightness |
+| `cloud_colour` | dark grey | the clouds' own colour. Live (bind it to `film.colour` with a `strength`) |
+| `cloud_screen` | 1 | how much the clouds towards the screen catch its light, in the picture's colour. Live, a brightness |
+| `wind`, `wind_from` | 0.3, 270 | how fast the clouds drift (motion, at most 1), and from where |
+| `aurora` | 0 | an aurora's brightness. Live, a brightness (bind it to `film.quiet`, smoothed) |
+| `aurora_low`, `aurora_high`, `aurora_bearing`, `aurora_speed` | green, violet, 0, 0.4 | its colours low and high, where it hangs, how fast its curtains wave (motion, at most 1) |
+| `meteors` | 0 | shooting stars an hour, at random (0..30) |
+| `earth`, `earth_bearing`, `earth_altitude`, `earth_size`, `earth_phase` | off, 180, 35, 2, 0.65 | Earth in the sky: where, how high, how big (degrees), how much of it is lit |
+| `earth_angle` | 0 | how far Earth has turned on its axis (degrees). Live: a track can turn it over the film |
+| `earth_turn` | 1 | Earth's own turning in times its real speed (motion, at most 60: once in 24 minutes) |
+
+Action: `shooting_star` (no args).
+
+- **The stars** are real. `app/environments/sky/bright_stars.json` holds 395 bright stars (their positions, magnitudes
+  and colours) and the stick figures of 49 constellations, from the public-domain catalogue (`app/environments/CREDITS.md`).
+  The faint stars are generated, more of them along the Milky Way, the same each time. The local sidereal time comes
+  from the day and the hour; the stars stand where they would for the latitude. The test checks Polaris at the
+  latitude's height in the north, Betelgeuse high in the south on a January midnight, Vega near the zenith on a July
+  night.
+- **Each star** is a small soft disc, its brightness by magnitude, its colour by its colour index. The twilight, the
+  clouds and the air near the horizon hide the faint ones first.
+- **The Milky Way** lies where the galaxy really is (the galactic frame), brighter towards the centre, with the dark
+  rift through Cygnus and Aquila. To show it as the lights dim: `{"bind": "playback.playing", "range": [0.2, 0.9],
+  "smooth": 3}`.
+- **Clouds** drift with the wind. Their own colour can follow the film (`film.colour` with a `strength`). The clouds
+  towards the screen also catch its spill in the picture's colour (the bias light), as the room's surfaces do.
+- **The aurora** hangs over its bearing: curtains with rays, green low and violet high. `{"bind": "film.quiet",
+  "range": [0, 1], "smooth": 2}` makes it swell in quiet scenes and fade slowly after.
+- **Dusk to stars over the film:** a film-time track, `{"target": "sky.dusk", "by": "film.minutes", "keys": [[0, 0],
+  [10, 1]], "smooth": 0.5}`. Away from the sunset the horizon is duller and cooler, as the Earth's shadow rises there.
+- **Earth** (from the Moon: `mode` `space`) is lit from the side by its phase. Oceans, land, ice and clouds come from
+  the sky's noise: an Earth-like world, not a map. Only its surface turns; it stays where it hangs.
+- **Where it is drawn:** every layer round the camera, at 175 to 190 m (the camera's far plane is 200), so walls, the
+  screen and the vista always stand in front of it. Its meshes have their vertices there too, so the sight-line check
+  never sees them near the seats. They are out of the lightmap bake.
+- **Comfort:** the horizon never moves. Clouds, the aurora's curtains and Earth's turning are `motion` parameters (the
+  Motion setting scales them). A change of `hour` turns the stars slowly, never in a jump: an hour of sky a minute at
+  most.
+- **For the vista:** `sky_light()` gives the sky's colours overhead and at the horizon now.
+
+Measured (`test_env_sky.gd`): the dome, the stars (395 and 1600 faint) and the lines: 3 draws, 7 842 triangles, 0.3
+MB (the shared noise, 256 x 256). With Earth: 4 draws, under 9 000 triangles.
+
+### `vista`
+
+`scripts/env/systems/vista.gd`. Far scenery round the room, made from simple shapes in code, never from a file.
+
+| Parameter | Default | What |
+|---|---|---|
+| `items` | `[{"shape": "hills"}]` | up to 12 pieces of scenery: `{shape, azimuth, spread, distance, depth, size, count, seed, floor_y, colour}`; a shape's own defaults fill what an item leaves out |
+| `sky_light` | true | lit by the room's `sky` system (its colours overhead and at the horizon, each frame) |
+| `light` | dark blue | the light on the scenery without a sky system. Live |
+| `spill` | 1 | how much the near scenery catches the screen's light |
+| `floodlight`, `flood_colour` | 1, warm | the floodlights on the acropolis's stone. Live, a brightness |
+| `town_lights` | 0.6 | the lamps of the town under the acropolis. Live, a brightness |
+| `pool_glow`, `pool_colour` | 1, cyan | the pool's underwater lights. Live, a brightness |
+| `snow` | 1 | snow on the ground under the trees. Live, a brightness |
+| `water_motion` | 0.5 | how fast the light ripples in the pool (motion, at most 1) |
+
+| Shape | Default | What |
+|---|---|---|
+| `hills` | all round, 160 m | a low dark ridge on the horizon |
+| `mesas` | 140 degrees, 165 m, 6 | flat-topped rocks with steep sides |
+| `acropolis` | 18 degrees, 150 m, 160 lamps | a hill with a flat top and a wall, a ruined temple of columns and a smaller one, floodlit from below; a town's lamps at its foot |
+| `birches` | 120 degrees, 40 m, 40 trees | white trunks with dark marks and bare branches, on snow |
+| `cypresses` | 90 degrees, 30 m, 14 trees | tall, narrow, flame-shaped dark trees |
+| `pool` | 14 m | a pool glowing from below, its coping, a lawn that takes its glow, a hedge behind |
+
+- **Placing:** `azimuth` is degrees from the room's front (positive to the right), `distance` metres from the room's
+  middle (at most 170), `spread` the degrees of the horizon it covers, `depth` how deep a grove is.
+- **One draw** for all the scenery: one mesh, each vertex naming its material. Unshaded: lit by the sky's light by
+  the way a face looks (up or out), the screen's spill where it is near, the floodlights, the lamps and the pool.
+- **The grounds** (under the trees, the pool's lawn) keep 8 m clear of the room's middle: the room's own floor is
+  there.
+- **Nothing moves** but the light in the pool.
+
+Measured (`test_env_vista.gd`), each shape at its defaults: hills 720 triangles, mesas 934, the acropolis 1 112,
+birches 1 828 (about 45 a tree), cypresses 1 176 (84 a tree), the pool 36. All six: 1 draw, 5 806 triangles.
+
+### The film layer
+
+The sky and the vista are far behind the screen and round the room. Nothing of theirs is between the eyes and the
+picture, so the film layer (`scripts/play/film_layer.gd`) needs no change for them: where the picture is, the layer
+covers them, as the screen would.
+
+### For the rooms
+
+| Room | Use |
+|---|---|
+| Atmospheric 1928 | `auditorium` with `ceiling_cover` 0; `sky` at twilight (`dusk` 0.4..0.6), `lines` off, `clouds` 0.3 with `cloud_colour` bound to `film.colour`; `vista` cypresses over the walls (as `test_env_vista.gd`'s courtyard) |
+| Drive-in 1958 | `sky` with a dusk track by `film.minutes`, `milky_way` bound to `playback.playing`; `vista` mesas all round |
+| Rooftop, Athens | `sky` (`latitude` 38, a summer night); `vista` acropolis ahead, a little to one side |
+| Palace of Culture | `vista` birches in snow outside the windows; `snow` bound to the room's snow setting |
+| Reclaimed | `sky` through the open roof: stars, `clouds` bound to `weather.wet` |
+| Ice cinema | `sky` with `aurora` bound to `film.quiet` (smooth 2), `aurora_bearing` where the room opens to the sky |
+| Crater | `sky` `mode` `space`, `earth` on, `earth_turn` from the Earth's speed setting, `milky_way` bound to `playback.playing` |
+| Screening room 1962 | `vista` pool behind the window, `pool_glow` 1 |
 
 ## The converted cinema
 

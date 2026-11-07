@@ -12,7 +12,8 @@ render_mode unshaded, blend_mix, depth_draw_never, cull_disabled, shadows_disabl
 uniform mat3 star_basis = mat3(1.0);
 uniform float stars = 1.0;
 uniform float twinkle = 0.0;
-// The mesh's own radius (its vertices are there, so the room's checks see them far away).
+// The layer's distance (its mesh's vertices are there too, so the checks see them far away): nearer than the
+// dome, whose flat facets come up to a metre inside its radius, so the dome never hides a star.
 uniform float model_radius = 185.0;
 
 varying vec2 corner;
@@ -22,7 +23,7 @@ varying vec4 tint;
 void vertex() {
 	vec3 p = star_basis * (VERTEX / model_radius);
 	vec3 d = normalize(p);
-	vec3 world = CAMERA_POSITION_WORLD + sky_room_basis(MODEL_MATRIX) * p * radius;
+	vec3 world = CAMERA_POSITION_WORLD + sky_room_basis(MODEL_MATRIX) * p * model_radius;
 	VERTEX = (VIEW_MATRIX * vec4(world, 1.0)).xyz;
 	corner = UV * 2.0 - 1.0;
 	float lum = dot(sky_base(d), vec3(0.2126, 0.7152, 0.0722));

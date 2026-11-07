@@ -21,7 +21,8 @@ uniform sampler2D sky_noise : filter_linear_mipmap, repeat_enable;
 uniform float clouds = 0.0;
 uniform vec2 cloud_offset = vec2(0.0);
 
-// The layers' distance from the camera (metres; the camera's far plane is 200).
+// The dome's distance from the camera (metres; the camera's far plane is 200). The other layers have their own,
+// nearer.
 uniform float radius = 190.0;
 
 const float SKY_PI = 3.14159265;
@@ -36,9 +37,13 @@ vec3 sky_base(vec3 d) {
 	float up = clamp(d.y, 0.0, 1.0);
 	float h = pow(up, 0.45);
 	vec3 night = mix(night_horizon, night_zenith, h);
-	vec3 twilight = mix(twilight_horizon, twilight_zenith, pow(up, 0.6));
-	float g = max(dot(normalize(vec3(d.x, 0.0, d.z) + vec3(1e-5)), glow_dir), 0.0);
-	twilight += glow_colour * pow(g, 6.0) * exp(-up * 9.0) * 0.9;
+	vec3 level = normalize(vec3(d.x, 0.0, d.z) + vec3(1e-5));
+	float g = dot(level, glow_dir);
+	// Away from the sunset the horizon is duller and cooler (the Earth's shadow rising there).
+	vec3 horizon = mix(mix(twilight_zenith, twilight_horizon, 0.4) * 0.7, twilight_horizon,
+			smoothstep(-1.0, 1.0, g));
+	vec3 twilight = mix(horizon, twilight_zenith, pow(up, 0.6));
+	twilight += glow_colour * pow(max(g, 0.0), 6.0) * exp(-up * 9.0) * 0.9;
 	vec3 c = mix(twilight, night, smoothstep(0.0, 1.0, dusk));
 	c *= 1.0 - space;
 	// Below the horizon: the ground, quickly.
