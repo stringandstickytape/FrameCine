@@ -10,7 +10,7 @@ extends RefCounted
 ##   tea_set       a tray with a teapot (`colour`: its glaze), a milk jug, a sugar bowl, four cups on saucers
 ##   sandwiches    a plate with a pile of triangular sandwiches (`colour`: the filling)
 ##   stool         a round wooden seat on four splayed legs (`wood`)
-##   channel_dial  a rotary channel dial (twelve stops) and two small knobs on a set's front: it hangs on a face
+##   channel_dial  a rotary channel dial (twelve stops), two small knobs under it, on a set's front: it hangs on a face
 ##   soundbar      a long low bar: a dark case (`iron`), a cloth front (`fabric` in `accent`, or a dark grey)
 ##   floor_lamp    a flat round base, a slim pole, a tall column shade that glows (house group)
 ##   glass_table   a low table: a glass top (the kit's glass, see-through), a steel frame (`tin`)
@@ -264,7 +264,8 @@ static func _stool(c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> 
 # --- A set's front and a lounge ---------------------------------------------------------------------------------
 
 ## A rotary channel dial: a round plate with twelve stops marked round it, a big knob with a pointer, and two small
-## knobs (the volume, the brightness) beside it. It hangs on a face (local z 0 is the face; the knobs stand out to +z).
+## knobs (the volume, the brightness) under it in a column, so it fits a set's side strip beside the picture. It
+## hangs on a face (local z 0 is the face; the knobs stand out to +z).
 static func _channel_dial(c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
 	var r := size.x * 0.5
 	var b: RoomMesh = c.s
@@ -282,8 +283,8 @@ static func _channel_dial(c: Object, xf: Transform3D, size: Vector3, e: Dictiona
 	Shapes.cylinder(b, xf * Vector3(0, 0, 0.004), r * 0.6 * xf.basis.get_scale().x, size.z * xf.basis.get_scale().x,
 			12, xf.basis.orthonormalized() * turn)
 	_box(b, xf, Vector3(0, r * 0.3, 0.004 + size.z + 0.002), Vector3(0.006, r * 0.6, 0.004))
-	for s: float in [-1.0, 1.0]:
-		Shapes.cylinder(b, xf * Vector3(s * r * 1.75, -r * 0.35, 0.0), r * 0.3 * xf.basis.get_scale().x,
+	for k in 2:
+		Shapes.cylinder(b, xf * Vector3(0, -r * (1.9 + k * 1.3), 0.0), r * 0.42 * xf.basis.get_scale().x,
 				size.z * 0.7 * xf.basis.get_scale().x, 10, xf.basis.orthonormalized() * turn)
 
 

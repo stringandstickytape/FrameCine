@@ -378,51 +378,51 @@ msgstr ""
 msgid "sleep in %d min"
 msgstr ""
 
-#: scripts/env/env_doc.gd:68
+#: scripts/env/env_doc.gd:69
 msgid "Dim during the film"
 msgstr ""
 
-#: scripts/env/env_doc.gd:68
+#: scripts/env/env_doc.gd:69
 msgid "The room's light goes down while the film plays."
 msgstr ""
 
-#: scripts/env/env_doc.gd:68
+#: scripts/env/env_doc.gd:69
 msgid "Ambience"
 msgstr ""
 
-#: scripts/env/env_doc.gd:69
+#: scripts/env/env_doc.gd:70
 msgid "This room's sound against the Environment sound slider. At the bottom: off."
 msgstr ""
 
-#: scripts/env/env_doc.gd:69
+#: scripts/env/env_doc.gd:70
 msgid "Ambient life"
 msgstr ""
 
-#: scripts/env/env_doc.gd:70
+#: scripts/env/env_doc.gd:71
 msgid "Animals and other life in the room."
 msgstr ""
 
-#: scripts/env/env_doc.gd:70
+#: scripts/env/env_doc.gd:71
 msgid "Pre-show"
 msgstr ""
 
-#: scripts/env/env_doc.gd:70
+#: scripts/env/env_doc.gd:71
 msgid "Curtains before the film, and the room's start of the show."
 msgstr ""
 
-#: scripts/env/env_doc.gd:71
+#: scripts/env/env_doc.gd:72
 msgid "Flickering lights"
 msgstr ""
 
-#: scripts/env/env_doc.gd:71
+#: scripts/env/env_doc.gd:72
 msgid "Off: lights that flicker stay steady."
 msgstr ""
 
-#: scripts/env/env_doc.gd:71
+#: scripts/env/env_doc.gd:72
 msgid "Motion"
 msgstr ""
 
-#: scripts/env/env_doc.gd:72
+#: scripts/env/env_doc.gd:73
 msgid "How much things in the room move: sways, tilts, weave."
 msgstr ""
 
@@ -4205,6 +4205,10 @@ msgstr ""
 msgid "TV 2005 - flat screen"
 msgstr ""
 
+#: environments/tv_future.env.json
+msgid "TV tomorrow - the wall"
+msgstr ""
+
 #: environments/tv_today.env.json
 msgid "TV today - the present"
 msgstr ""
@@ -4317,6 +4321,10 @@ msgstr ""
 msgid "The first flat screen, 2005: a wide picture on a stand, the sofa further back."
 msgstr ""
 
+#: environments/tv_future.env.json
+msgid "A calm bare room some day to come: no set at all, a part of the wall wakes and becomes the picture."
+msgstr ""
+
 #: environments/tv_today.env.json
 msgid "A living room today: a thin panel on a dark wall, a soundbar under it, a floor lamp by the sofa. The film at its best."
 msgstr ""
@@ -4406,6 +4414,10 @@ msgstr ""
 msgid "Snow from the aerial"
 msgstr ""
 
+#: environments/tv_1937.env.json
+msgid "Wrong way round"
+msgstr ""
+
 #: environments/tv_1983.env.json
 msgid "Aerial lead noise"
 msgstr ""
@@ -4432,6 +4444,10 @@ msgstr ""
 
 #: environments/tv_2005.env.json
 msgid "Backlight bleed"
+msgstr ""
+
+#: environments/tv_future.env.json
+msgid "Stars in the window"
 msgstr ""
 
 #: environments/tv_today.env.json
@@ -4523,6 +4539,10 @@ msgid "Snow on the picture from a weak signal on the roof aerial. At the bottom:
 msgstr ""
 
 #: environments/tv_1937.env.json
+msgid "The picture as the mirror shows it, left and right swapped. Off: the set turns it round."
+msgstr ""
+
+#: environments/tv_1937.env.json
 msgid "A coal fire burns in the grate."
 msgstr ""
 
@@ -4568,6 +4588,10 @@ msgstr ""
 
 #: environments/tv_2005.env.json
 msgid "The early panel's backlight glowing through the dark scenes, most at the corners."
+msgstr ""
+
+#: environments/tv_future.env.json
+msgid "How many stars the night shows through the long window."
 msgstr ""
 
 #: environments/tv_today.env.json

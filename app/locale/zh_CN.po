@@ -3468,3 +3468,21 @@ msgstr "影片中的落地灯"
 
 msgid "How bright the floor lamp by the sofa stays once the film has started."
 msgstr "影片开始后沙发旁落地灯保持的亮度。"
+
+msgid "TV tomorrow - the wall"
+msgstr "电视 明天 - 那面墙"
+
+msgid "A calm bare room some day to come: no set at all, a part of the wall wakes and becomes the picture."
+msgstr "未来某一天一间安静空旷的房间：根本没有电视机，墙的一部分醒来，变成画面。"
+
+msgid "Stars in the window"
+msgstr "窗外的星星"
+
+msgid "How many stars the night shows through the long window."
+msgstr "长窗外的夜空里有多少星星。"
+
+msgid "Wrong way round"
+msgstr "左右颠倒"
+
+msgid "The picture as the mirror shows it, left and right swapped. Off: the set turns it round."
+msgstr "画面如镜中所见，左右互换。关闭：由电视机把它转回来。"
