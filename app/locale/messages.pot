@@ -957,7 +957,7 @@ msgstr ""
 msgid "Red"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:55
+#: scripts/xr/controller_look.gd:55 environments/streamline_1937.env.json
 msgid "Blue"
 msgstr ""
 
@@ -2770,7 +2770,7 @@ msgstr ""
 msgid "Polynomial"
 msgstr ""
 
-#: ui/picture_tab.gd:31 ui/room_tab.gd:19 ui/system_tab.gd:41
+#: ui/picture_tab.gd:31 ui/room_tab.gd:19 ui/system_tab.gd:41 environments/ice_cinema.env.json
 msgid "Off"
 msgstr ""
 
@@ -4057,24 +4057,128 @@ msgstr ""
 msgid "Atmospheric 1928"
 msgstr ""
 
+#: environments/bathysphere.env.json
+msgid "Bathysphere"
+msgstr ""
+
+#: environments/crater.env.json
+msgid "Crater"
+msgstr ""
+
+#: environments/drive_in_1958.env.json
+msgid "Drive-in - 1958"
+msgstr ""
+
 #: environments/flagship.env.json
 msgid "Flagship"
+msgstr ""
+
+#: environments/ice_cinema.env.json
+msgid "Ice cinema"
+msgstr ""
+
+#: environments/nave.env.json
+msgid "Nave"
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
 msgid "Palace of Culture 1974"
 msgstr ""
 
+#: environments/pillow_fort_1993.env.json
+msgid "Pillow Fort 1993"
+msgstr ""
+
+#: environments/pink_palace.env.json
+msgid "Pink Palace"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Reclaimed"
+msgstr ""
+
+#: environments/rooftop_athens.env.json
+msgid "Athens rooftop"
+msgstr ""
+
+#: environments/screen_3_1983.env.json
+msgid "Screen 3 - 1983"
+msgstr ""
+
+#: environments/screening_room_1962.env.json
+msgid "Screening room 1962"
+msgstr ""
+
+#: environments/shopfront_1906.env.json
+msgid "Shopfront 1906"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Streamline 1937"
+msgstr ""
+
 #: environments/atmospheric_1928.env.json
 msgid "Clouds"
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Whale"
 msgstr ""
 
 #: environments/cinema.env.json
 msgid "House lights in the film"
 msgstr ""
 
+#: environments/crater.env.json
+msgid "Earth's speed"
+msgstr ""
+
+#: environments/drive_in_1958.env.json
+msgid "Window speaker"
+msgstr ""
+
+#: environments/ice_cinema.env.json
+msgid "Aurora"
+msgstr ""
+
+#: environments/nave.env.json
+msgid "Candles"
+msgstr ""
+
 #: environments/palace_of_culture_1974.env.json
 msgid "Snow"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "Rain on the window"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "The telly's own speaker"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Weather"
+msgstr ""
+
+#: environments/rooftop_athens.env.json
+msgid "Floodlights on the hill"
+msgstr ""
+
+#: environments/screen_3_1983.env.json
+msgid "Weave and tilt"
+msgstr ""
+
+#: environments/screening_room_1962.env.json
+msgid "Wall lamps in the film"
+msgstr ""
+
+#: environments/shopfront_1906.env.json
+msgid "Player piano"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Cove colours"
 msgstr ""
 
 #: environments/void.env.json
@@ -4085,16 +4189,100 @@ msgstr ""
 msgid "How much of the open sky the clouds cover. They catch the film's light."
 msgstr ""
 
+#: environments/bathysphere.env.json
+msgid "How often a whale swims past behind the screen in a quiet scene."
+msgstr ""
+
 #: environments/cinema.env.json
 msgid "How bright the house lamps stay once the film has started."
+msgstr ""
+
+#: environments/crater.env.json
+msgid "How fast Earth turns in the sky. At 1 x it turns once in two hours, about once a film."
+msgstr ""
+
+#: environments/drive_in_1958.env.json
+msgid "The film's sound from the little speaker hung on the car's window: tinny, mono, a little rattle."
+msgstr ""
+
+#: environments/ice_cinema.env.json
+msgid "The northern lights in the window: they swell in quiet scenes, glow all the time, or stay away."
+msgstr ""
+
+#: environments/nave.env.json
+msgid "Candle stands either side of the screen: none, two on each side, or four."
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
 msgid "Snow through the open back of the roof, over the birches outside."
 msgstr ""
 
+#: environments/pillow_fort_1993.env.json
+msgid "Rain on the glass and in the street, a drizzle, rain that comes and goes, or a dry night."
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "The film's sound as the telly's small speaker gives it: thin, boxy and in mono."
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Rain through the broken roof, a misty drizzle, a clear night, or each in turn."
+msgstr ""
+
+#: environments/rooftop_athens.env.json
+msgid "How brightly the ruins on the hill are lit. At the bottom: dark."
+msgstr ""
+
+#: environments/screen_3_1983.env.json
+msgid "How much the worn print drifts in the gate, and how crooked the projector stands. At the bottom: steady and straight."
+msgstr ""
+
+#: environments/screening_room_1962.env.json
+msgid "How bright the brass wall lamps stay once the film has started."
+msgstr ""
+
+#: environments/shopfront_1906.env.json
+msgid "A player piano by the screen plays along with the film. Off: no piano."
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "The cove lights' colour before the film. Changing: they move through the colours. In the film they take the film's colour."
+msgstr ""
+
 #: environments/void.env.json
 msgid "A faint ring on the floor where you move. At the bottom: none."
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Never"
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Rarely"
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Sometimes"
+msgstr ""
+
+#: environments/ice_cinema.env.json
+msgid "In quiet scenes"
+msgstr ""
+
+#: environments/ice_cinema.env.json
+msgid "Always"
+msgstr ""
+
+#: environments/nave.env.json environments/pillow_fort_1993.env.json
+msgid "None"
+msgstr ""
+
+#: environments/nave.env.json
+msgid "A few"
+msgstr ""
+
+#: environments/nave.env.json
+msgid "Many"
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
@@ -4107,5 +4295,41 @@ msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
 msgid "Heavy snow"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json environments/reclaimed.env.json
+msgid "Rain"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "Drizzle"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "Coming and going"
+msgstr ""
+
+#: environments/reclaimed.env.json environments/streamline_1937.env.json
+msgid "Changing"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Mist"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Clear"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Gold"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Rose"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Jade"
 msgstr ""
 

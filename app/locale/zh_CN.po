@@ -3142,12 +3142,6 @@ msgstr "天气"
 msgid "Rain through the broken roof, a misty drizzle, a clear night, or each in turn."
 msgstr "雨从破屋顶落下、带雾的细雨、晴朗的夜晚，或依次轮换。"
 
-msgid "Changing"
-msgstr "变化"
-
-msgid "Rain"
-msgstr "雨"
-
 msgid "Mist"
 msgstr "薄雾"
 
