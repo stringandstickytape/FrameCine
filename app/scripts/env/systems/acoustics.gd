@@ -19,10 +19,11 @@ extends "res://scripts/env/systems/env_system.gd"
 const EnvAudio := preload("res://scripts/env/env_audio.gd")
 
 const BUS := "Environment room"
-## Freeverb's comb feedback (the engine's reverb_filter.cpp): offset + size x scale; its combs' mean delay (s).
-const ROOM_OFFSET := 0.7
-const ROOM_SCALE := 0.28
-const COMB_SECONDS := 0.0314
+## The engine's reverb measured (test_env_acoustics.gd's tail, T30 of a tick, wet only, damping 0.5): the tail's
+## rt60 in seconds at room size 0, 0.1 .. 1. It can't be shorter than about 0.5 s or longer than about 6 s.
+const TAIL_SECONDS: Array[float] = [0.52, 0.59, 0.65, 0.74, 0.87, 0.99, 1.17, 1.43, 1.89, 2.81, 6.07]
+## Damping lengthens the measured tail a little (the highs go first, so the peak is lower): x (1 + this x (d - 0.5)).
+const DAMPING_TAIL := 0.32
 ## The engine's predelay is at least this (ms).
 const PREDELAY_MIN := 20.0
 ## The presets: rt60 (s), damping, wet (the room's sounds), predelay (ms), echo (the predelay's feedback), reflect
@@ -67,8 +68,9 @@ static func spec() -> Dictionary:
 		"params": {
 			"preset": {"type": "enum", "values": PRESETS.keys(), "default": "neutral",
 					"description": "the room's character; the numbers below at -1 take the preset's"},
-			"rt60": {"type": "float", "min": -1.0, "max": 10.0, "default": -1.0, "live": true,
-					"description": "seconds the reverb takes to die away by 60 dB; -1: the preset's"},
+			"rt60": {"type": "float", "min": -1.0, "max": 6.0, "default": -1.0, "live": true,
+					"description": "seconds the reverb takes to die away by 60 dB (the engine's reverb: 0.5 to 6); -1: "
+					+ "the preset's"},
 			"damping": {"type": "float", "min": -1.0, "max": 1.0, "default": -1.0, "live": true,
 					"description": "how much the walls soak up the highs (0 bright stone or ice, 1 soft); -1: the "
 					+ "preset's"},
@@ -116,10 +118,17 @@ static func _bus_reverb() -> AudioEffectReverb:
 	return AudioServer.get_bus_effect(i, 0) as AudioEffectReverb
 
 
-## The engine's room size for a reverb time: the combs' feedback that falls 60 dB in rt60.
-static func room_size_for(rt60: float) -> float:
-	var g := pow(10.0, -3.0 * COMB_SECONDS / maxf(rt60, 0.01))
-	return clampf((g - ROOM_OFFSET) / ROOM_SCALE, 0.0, 1.0)
+## The engine's room size for a reverb time at this damping, from the measured tails (between two, on a log scale).
+static func room_size_for(rt60: float, damping := 0.5) -> float:
+	var t := maxf(rt60, 0.01) / (1.0 + DAMPING_TAIL * (clampf(damping, 0.0, 1.0) - 0.5))
+	if t <= TAIL_SECONDS[0]:
+		return 0.0
+	var n := TAIL_SECONDS.size()
+	for i in range(1, n):
+		if t <= TAIL_SECONDS[i]:
+			var f := log(t / TAIL_SECONDS[i - 1]) / log(TAIL_SECONDS[i] / TAIL_SECONDS[i - 1])
+			return (i - 1 + f) / float(n - 1)
+	return 1.0
 
 
 func setup() -> void:
@@ -149,8 +158,8 @@ func _apply() -> void:
 	if r == null:
 		return
 	var v := values()
-	r.room_size = room_size_for(float(v["rt60"]))
 	r.damping = clampf(float(v["damping"]), 0.0, 1.0)
+	r.room_size = room_size_for(float(v["rt60"]), r.damping)
 	r.wet = clampf(float(v["wet"]), 0.0, 1.0)
 	r.dry = 1.0
 	r.spread = 1.0

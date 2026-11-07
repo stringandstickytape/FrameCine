@@ -14,7 +14,8 @@ extends "res://scripts/env/systems/env_system.gd"
 ##
 ## It plays on the room's bus (acoustics.gd BUS, under Environment) at its designed level (LEVELS, 12 dB or more under
 ## the level check's target), film_db lower while the film plays, ducked under the film.
-##   sounding() -> bool, notes_played, voices_sounding() -> int, piece() -> {key, mode, progressions}
+##   sounding() -> bool, resting() -> bool, notes_played, voices_sounding() -> int, bar_kind,
+##   piece() -> {key, mode, form, progressions}
 
 const EnvSynth := preload("res://scripts/env/env_synth.gd")
 const EnvAudio := preload("res://scripts/env/env_audio.gd")
@@ -24,8 +25,8 @@ const Acoustics := preload("res://scripts/env/systems/acoustics.gd")
 const INSTRUMENTS: Array[String] = ["piano", "organ"]
 ## Designed level: dBFS RMS on Environment at the slider's default, full level, no film (measured over its playing).
 const LEVELS := {"piano": -51.0, "organ": -52.0}
-## A note's player volume against its designed level: the notes overlap (a measured offset).
-const NOTE_DB := {"piano": -6.0, "organ": -11.0}
+## A note's player volume against its designed level: the notes overlap (measured, test_env_music.gd).
+const NOTE_DB := {"piano": -0.9, "organ": -3.9}
 const OWN_STATES := {"piano": ["starting", "playing", "credits"], "organ": ["preshow", "intermission", "ended"]}
 const OWN_TEMPO := {"piano": 104.0, "organ": 56.0}
 const FILM_STATES: Array[String] = ["starting", "playing", "credits"]
@@ -111,6 +112,10 @@ var _last_top := 72
 var _organ_voices := [43, 55, 64, 72]
 var _organ_held := {}
 var _flourish := false
+## The beat the flourish ends on: then it rests (-1: none).
+var _rest_at := -1.0
+## The last bar written: "oompah", "quiet", "agitato", "chorale" or "flourish" (tests).
+var bar_kind := ""
 var _state_db := 0.0
 var _state_target := 0.0
 ## 0..1: the instrument faded in (it plays) or out.
@@ -290,11 +295,15 @@ func _write_bar() -> void:
 	if _flourish:
 		_write_flourish(start)
 		_flourish = false
+		_rest_at = start + 12.0
 		_bar += 3
+		bar_kind = "flourish"
 		return
 	if _instrument() == "organ":
 		_write_organ(start, pcs)
+		bar_kind = "chorale"
 	elif drive > AGITATO:
+		bar_kind = "agitato"
 		# Agitato: the left hand's octaves on every eighth, a diminished chord trembling in the right.
 		var root := 36 + (int(pcs[0]) % 12)
 		var dim: Array = [int(pcs[0]) % 12, (int(pcs[0]) + 3) % 12, (int(pcs[0]) + 6) % 12, (int(pcs[0]) + 9) % 12]
@@ -305,6 +314,7 @@ func _write_bar() -> void:
 		for s in 16:
 			_events.append([start + s * 0.25, low if s % 2 == 0 else high, 0.8, 0.22])
 	else:
+		bar_kind = "oompah" if drive >= QUIET else "quiet"
 		var bass := 36 + (int(pcs[0]) % 12)
 		var fifth := 36 + ((int(pcs[0]) + 7) % 12)
 		_events.append([start, bass, 0.75, 0.9])
@@ -348,8 +358,8 @@ func _write_flourish(start: float) -> void:
 		m = _nearest(home, m + 3, m + 1, m + 8)
 		_events.append([start + k * 0.5, m, 0.8, 4.0 - k * 0.5, -1])
 	for pc: int in dom:
-		_events.append([start + 4.0, _nearest([pc], 62, 55, 70), 0.85, 3.5, -1])
-	_events.append([start + 4.0, 43, 0.85, 3.5, -1])
+		_events.append([start + 4.0, _nearest([pc], 62, 55, 70), 0.85, 4.0, -1])
+	_events.append([start + 4.0, 43, 0.85, 4.0, -1])
 	for pc: int in home:
 		_events.append([start + 8.0, _nearest([pc], 64, 57, 72), 0.9, 4.0, -1])
 	_events.append([start + 8.0, 36 + _key, 0.9, 4.0, -1])
@@ -405,6 +415,11 @@ func act(action: String, args: Dictionary) -> void:
 			_events = _events.filter(func(e: Array) -> bool: return float(e[0]) < float(next_bar * 4))
 			_bar = next_bar
 			_flourish = true
+			# It plays whatever the state, then rests.
+			_forced_on = true
+			_forced = 0.0
+			_stopped = false
+			_fade_seconds = 0.5
 
 
 func _tempo() -> float:
@@ -436,6 +451,10 @@ func tick(delta: float) -> void:
 		if _forced <= 0.0:
 			_forced_on = false
 	var want := _wants() and _loaded
+	if want and _fade <= 0.0 and _voices.is_empty():
+		# From silence: its next bar starts now, not at the next bar line.
+		_events.clear()
+		_beat = float(_bar * 4)
 	_fade = move_toward(_fade, 1.0 if want else 0.0, delta / _fade_seconds)
 	if not want and _fade <= 0.0:
 		_release_all(0.3)
@@ -452,6 +471,12 @@ func tick(delta: float) -> void:
 			if float(e[0]) >= _beat - 1.0 and want:
 				_note_on(int(e[1]), float(e[2]), float(e[3]) * 60.0 / _tempo(), int(e[4]) if e.size() > 4 else -1)
 		_beat = end
+		if _rest_at >= 0.0 and _beat >= _rest_at:
+			# The cadence is over: it rests until it is played again or the state changes.
+			_rest_at = -1.0
+			_forced_on = false
+			_stopped = true
+			_fade_seconds = 1.5
 	_update_voices(delta)
 
 
@@ -543,6 +568,11 @@ func _update_voices(delta: float) -> void:
 
 func sounding() -> bool:
 	return not _voices.is_empty()
+
+
+## After a flourish or a stop: silent until it is played again or the state changes.
+func resting() -> bool:
+	return _stopped and _voices.is_empty()
 
 
 func voices_sounding() -> int:

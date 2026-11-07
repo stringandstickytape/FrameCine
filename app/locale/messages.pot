@@ -378,51 +378,51 @@ msgstr ""
 msgid "sleep in %d min"
 msgstr ""
 
-#: scripts/env/env_doc.gd:67
+#: scripts/env/env_doc.gd:68
 msgid "Dim during the film"
 msgstr ""
 
-#: scripts/env/env_doc.gd:67
+#: scripts/env/env_doc.gd:68
 msgid "The room's light goes down while the film plays."
 msgstr ""
 
-#: scripts/env/env_doc.gd:67
+#: scripts/env/env_doc.gd:68
 msgid "Ambience"
 msgstr ""
 
-#: scripts/env/env_doc.gd:68
+#: scripts/env/env_doc.gd:69
 msgid "This room's sound against the Environment sound slider. At the bottom: off."
 msgstr ""
 
-#: scripts/env/env_doc.gd:68
+#: scripts/env/env_doc.gd:69
 msgid "Ambient life"
 msgstr ""
 
-#: scripts/env/env_doc.gd:69
+#: scripts/env/env_doc.gd:70
 msgid "Animals and other life in the room."
 msgstr ""
 
-#: scripts/env/env_doc.gd:69
+#: scripts/env/env_doc.gd:70
 msgid "Pre-show"
 msgstr ""
 
-#: scripts/env/env_doc.gd:69
+#: scripts/env/env_doc.gd:70
 msgid "Curtains before the film, and the room's start of the show."
 msgstr ""
 
-#: scripts/env/env_doc.gd:70
+#: scripts/env/env_doc.gd:71
 msgid "Flickering lights"
 msgstr ""
 
-#: scripts/env/env_doc.gd:70
+#: scripts/env/env_doc.gd:71
 msgid "Off: lights that flicker stay steady."
 msgstr ""
 
-#: scripts/env/env_doc.gd:70
+#: scripts/env/env_doc.gd:71
 msgid "Motion"
 msgstr ""
 
-#: scripts/env/env_doc.gd:71
+#: scripts/env/env_doc.gd:72
 msgid "How much things in the room move: sways, tilts, weave."
 msgstr ""
 

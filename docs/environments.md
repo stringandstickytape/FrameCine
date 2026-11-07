@@ -153,8 +153,8 @@ parameters only.
 | `sky`, `vista` | sky | a sky dome (gradient, stars with real constellations, clouds lit by the screen, aurora), far scenery cards (mesas, an acropolis, birches) | next |
 | `atmosphere`, `weather` | atmosphere | haze, dust and smoke in the beam, ground fog and mist, breath; rain and snow through open roofs and outside windows, rain on a pane, a puddle that reflects the film, a weather cycle (below, "Atmosphere and weather") | built |
 | `life` | life | non-human ambient life: moths, birds, fish, fireflies, a cat, a deer, a whale. Never people | next |
-| `sound_bed`, `acoustics` | sound | looped beds and one-shots from our own synthesiser or CC0 samples, placed in the room, on the Environment bus | next |
-| `music` | music | instruments that play themselves (a player piano, an organ), from our own synthesiser | next |
+| `sound_bed`, `acoustics` | sound | looped beds and one-shots from our own synthesiser, placed in the room, on the Environment bus; the room's reverb (below, "Sound and music") | built |
+| `music` | music | instruments that play themselves (a player piano, an organ), from our own synthesiser | built |
 | timeline and cues | | below; part of the host, not a registered system | built |
 | film signals | | below; part of the host | built |
 | `presentation` | screen | the chain of stages from source to display: source (film, tape, broadcast), transmission (aerial noise, ghosting), display (CRT, mask, curvature, a telly's glass). TV-era presets | next |
@@ -324,7 +324,8 @@ through cues' `requires`. Examples from the set:
 ```
  Master (the Volume slider)
    Film          the player's sound: the stereo stream and the binaural renderer's mix (spatial_audio.gd)
-   Environment   the room: the thud, cue sounds, sound beds; ducked under Film; the Environment sound slider
+   Environment   the room: the thud, cue sounds; ducked under Film; the Environment sound slider
+     Environment room   sound beds and music, through the room's reverb (acoustics.gd)
    Interface     the pane's and the tools' sounds (the spatial tuning's tones)
 ```
 
@@ -517,6 +518,142 @@ shows over it.
 | Ice cinema | `atmosphere`: `breath` 0.6, a little low `fog` |
 | Pillow Fort | `weather`: `pane` on the window, `mode` light or changing, no areas (or one outside the window) |
 
+## Sound and music
+
+Three systems: `sound_bed` and `acoustics` (kind `sound`) and `music`. Every sound is our own, made by
+`scripts/env/env_synth.gd` from noise, oscillators and filters. No samples are bundled. Nothing is drawn, so the
+film layer does not matter here. The film must always win: every sound plays on the Environment bus, sits at a
+designed level far under the film, sits lower again while the film plays, and is ducked under the film.
+
+### The room's bus
+
+`sound_bed` and `music` play on the bus "Environment room". It sends to Environment, so the ducking, the Environment
+sound slider and the room's Ambience all act on it. `acoustics` puts a reverb on it. Without `acoustics` it is dry.
+Cue sounds (`env_audio.play`, the chime) and the thud still go straight to Environment, dry, as before.
+
+### `sound_bed`
+
+`scripts/env/systems/sound_bed.gd`. One sound per system, each with its own id. A room has as many as it needs.
+
+| Param | Default | What |
+|---|---|---|
+| `sound` | `silence` | `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise` (loops); `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong` (one-shots); `silence` plays nothing |
+| `gain_db` | 0 | dB from the designed level (-30 to +6) |
+| `level` | 1 | 0 to 1, live. Bind it: `film.bass` for a rumble through the wall, `weather.rain` or `weather.wet` for rain, a setting |
+| `film_db` | -8 | dB lower in `starting`, `playing` and `credits`. Up again in the pre-show, paused, the intermission and the end |
+| `fade` | 3 | seconds a change of state takes |
+| `place` | `everywhere` | `everywhere` (no direction), `at` (one place), `around` (`voices` places on a circle of `radius` round `at`, each at another point in the loop) |
+| `at`, `to`, `reach` | | where; a one-shot with `to` travels there over its length (a moped passing); metres at full level |
+| `every`, `jitter` | 0, 0.3 | a one-shot comes back every so many seconds (a far train); 0: only when a cue plays it |
+| `pitch`, `vary` | 1, 0.05 | playback pitch; a one-shot's pitch varies each time |
+
+Actions: `play` (a one-shot now), `stop` and `start` (fade the bed out and in). Rain reads the weather only through
+the `weather.rain` and `weather.wet` channels, by a binding.
+
+Streams are made on a worker thread the first time, then cached (0.03 to 0.5 s each on a desktop; the train 1.1 s).
+A cue that plays a new one-shot with `env_audio.play` makes it on the main thread: use a `sound_bed` with `every`
+or its `play` action for the long one-shots.
+
+### `acoustics`
+
+`scripts/env/systems/acoustics.gd`. The room's sound character, a reverb on the room's bus.
+
+| Preset | rt60 (s) | damping | wet | predelay (ms) | echo |
+|---|---|---|---|---|---|
+| `neutral` | 0.3 | 0.6 | 0 (dry) | 20 | 0 |
+| `small_room` | 0.35 | 0.7 | 0.12 | 20 | 0 |
+| `cinema` | 0.7 | 0.6 | 0.18 | 25 | 0 |
+| `shopfront` (pressed tin) | 0.9 | 0.3 | 0.25 | 20 | 0 |
+| `concrete_hall` | 2.4 | 0.25 | 0.32 | 60 | 0.35 |
+| `stone_nave` | 5.0 | 0.45 | 0.4 | 80 | 0.1 |
+| `ice` | 1.1 | 0.1 | 0.25 | 20 | 0 |
+| `hull` | 1.4 | 0.2 | 0.3 | 20 | 0.15 |
+| `vehicle` | 0.15 | 0.85 | 0.06 | 20 | 0 |
+| `outdoors` | 0.2 | 0.5 | 0.04 | 90 | 0 |
+| `vacuum` | 0.05 | 1 | 0 (dry) | 20 | 0 |
+
+`rt60`, `damping`, `wet`, `predelay_ms` and `echo` are live; -1 takes the preset's. The engine's reverb is
+measured: `TAIL_SECONDS` holds its tail at each room size, and `room_size_for()` picks the size for an rt60. Its
+tail is never shorter than about 0.5 s or longer than about 6 s. The short presets use its smallest room with a
+little wet.
+
+**The film keeps its own mix.** `film` is off by default. Only with `film` on does `sound_room()` give spatial audio
+(`scripts/play/spatial_audio.gd`) the room's rt60, its `film_wet` and its walls' `reflect`, so the film's speakers
+ring in the room too. The binaural renderer's code is not changed. The document's own `acoustics` section still goes
+over it.
+
+### `music`
+
+`scripts/env/systems/music.gd`. An instrument that plays itself. No player is shown: the keys move by themselves.
+It writes its own music as it goes, from the room's seed: a key, two common chord progressions, the form A A2 B A,
+and a tune of its own from short rhythms. Never a melody we don't own.
+
+- **`piano`**: a player piano for silent films. The left hand plays oom-pah, the right hand the tune. Each note is two
+  slightly detuned strings (`detune_cents`, an upright's honky-tonk). It plays in `starting`, `playing` and
+  `credits`, and starts its piece again when the film starts from its start. `drive` (bind it to `film.transient`
+  with a `range` such as [0.3, 1]) makes it faster; over 0.65 it plays an agitato (tremolo on a diminished chord)
+  until the film calms; under 0.12 it plays sparse.
+- **`organ`**: slow chords in four voices, held across bars, with passing notes and a tremulant. Its stops are
+  `flute`, `principal`, `full` and `theatre`. It plays in the pre-show, the intermission and the end. `flourish`
+  plays a closing cadence and then rests.
+
+Params: `instrument`, `on` (live; bind it to a setting), `gain_db`, `level`, `drive`, `plays_in` (empty: its own
+states), `film_db` (-6), `tempo` (0: piano 104, organ 56), `seed`, `mode` (major or minor), `stop`, `tremulant`,
+`detune_cents`, `at`, `reach`. Actions: `play` (args: seconds), `stop` (args: seconds to fade), `flourish`. Twelve
+voices. The notes are made on a worker thread (the piano's 17 in 0.8 s, the organ's 66 in about 0.4 s on a desktop).
+
+### Levels
+
+Measured (`test_env_sound_bed.gd`, `test_env_music.gd`, 2026-11-07, desktop, headless) on Environment at the
+slider's default, in dBFS RMS. The film's reference is -20; the level check's target is -38. "In film" is with
+`film_db`; "under a film" adds a 1 kHz tone on Film at the reference level (the duck). A one-shot is its loudest
+second.
+
+| Sound | Designed | Alone | In film | Under a film | Peak |
+|---|---|---|---|---|---|
+| `projector` | -51 | -51.0 | -59.0 | -66.1 | -29.7 |
+| `wall_rumble` | -50 | -50.0 | -58.0 | -65.1 | -36.9 |
+| `cicadas` | -54 | -53.9 | -62.0 | -69.1 | -33.0 |
+| `radiator` | -55 | -55.0 | -63.0 | -70.1 | -21.4 |
+| `rain_glass` | -52 | -52.0 | -60.0 | -67.1 | -26.2 |
+| `rain_leaves` | -52 | -52.0 | -60.0 | -67.1 | -31.0 |
+| `gas_hiss` | -58 | -58.0 | -66.0 | -73.1 | -48.5 |
+| `noise` | -54 | -54.0 | -62.0 | -69.1 | -41.2 |
+| `moped` | -52 | -52.0 | -60.0 | | -42.9 |
+| `train` | -52 | -52.0 | -60.0 | | -40.6 |
+| `huskies` | -54 | -54.0 | -62.0 | | -46.0 |
+| `hull_creak` | -52 | -52.0 | -60.0 | | -39.3 |
+| `rumble`, `gong`, `whale` | -52 | -52.0 | -60.0 | | -41.6, -41.4, -48.4 |
+| `tick`, `creak` | -55, -54 | -55.0, -54.0 | -63.0, -62.0 | | -25.4, -35.4 |
+| `chime` | -50 | -50.0 | -58.0 | | -40.1 |
+| `piano` | -51 | -51.0 | -57.0 | -63.9 | -37.6 |
+| `organ` | -52 | -52.0 | -56.6 | -62.8 | -35.3 |
+
+Every bed and instrument sits 29 dB or more under the film's reference on its own, and 42 dB or more under it with a
+film playing. The test room with its beds at once (the projector, rain on glass, the wall's rumble, ticks, a moped and
+a train) measures -47.1 in the pre-show, 9 dB under the target. The peaks that look high (the radiator's ticks, the
+rain's drops) are short clicks; their RMS is low.
+
+Measured tails (`test_env_acoustics.gd`, a tick through the room's bus, wet only, T30): cinema 0.71 s (set 0.7),
+shopfront 0.88 (0.9), concrete hall 2.41 (2.4), stone nave 4.66 (5.0), ice 1.09 (1.1), hull 1.40 (1.4); the
+short presets 0.52 to 0.56 (the engine's shortest).
+
+### For the rooms
+
+| Room | Use |
+|---|---|
+| Shopfront 1906 | `acoustics` `shopfront`; `sound_bed` `projector` behind, `gas_hiss`; `music` `piano`, `drive` on `film.transient`, `on` on a setting |
+| Streamline 1937 | `acoustics` `cinema`; `music` `organ`, `flourish` in the ritual |
+| Screen 3, 1983 | `sound_bed` `wall_rumble`, `level` on `film.bass`, `film_db` 0 |
+| Drive-in | `acoustics` `outdoors`; `sound_bed` `train` far off, `every` 900, `reach` 300 |
+| Rooftop, Athens | `acoustics` `outdoors`; `sound_bed` `cicadas` around, `moped` with `to` and `every` |
+| Palace of Culture | `acoustics` `concrete_hall` |
+| Nave | `acoustics` `stone_nave`; `music` `organ` (`principal`) |
+| Ice cinema | `acoustics` `ice`; `sound_bed` `huskies`, `every` |
+| Bathysphere | `acoustics` `hull`; `sound_bed` `hull_creak`, `every` |
+| Pillow Fort | `acoustics` `small_room`; `sound_bed` `radiator`, `rain_glass` on `weather.rain` |
+| Crater | `sound_bed` `silence`; `acoustics` `vacuum` |
+
 ## The converted cinema
 
 `app/environments/cinema.env.json` with `cinema.tscn` and a thin `cinema.gd`. It looks the same: the render test
@@ -628,3 +765,11 @@ document. Each room agent owns its documents, its CC0 assets under `app/environm
 - **The Void's reflection** is now on by default (it was off): the Void's design is a mirror floor. It costs a
   quad that samples the video.
 - **One seat model.** `seat_model` has only `stadium`; the seats system brings the others.
+- **Room sound levels by ear.** Every bed and instrument is measured on the desktop, not heard in the headset. The
+  designed levels are 12 dB or more under the level check's target, so a room can lift one with `gain_db` after a
+  listen.
+- **A cue's long one-shot.** `env_audio.play` makes a sound it has not made before on the main thread (the train:
+  about 1 s on a desktop). Rooms play long one-shots through a `sound_bed` (`every` or its `play` action), which makes
+  them on a worker thread.
+- **The shortest reverb.** The engine's reverb has no tail under about 0.5 s. `small_room`, `vehicle` and `outdoors`
+  use its smallest room with a little wet; a shorter tail would need another effect.
