@@ -4053,19 +4053,59 @@ msgstr ""
 msgid "Cloud layers sky"
 msgstr ""
 
+#: environments/atmospheric_1928.env.json
+msgid "Atmospheric 1928"
+msgstr ""
+
+#: environments/flagship.env.json
+msgid "Flagship"
+msgstr ""
+
+#: environments/palace_of_culture_1974.env.json
+msgid "Palace of Culture 1974"
+msgstr ""
+
+#: environments/atmospheric_1928.env.json
+msgid "Clouds"
+msgstr ""
+
 #: environments/cinema.env.json
 msgid "House lights in the film"
+msgstr ""
+
+#: environments/palace_of_culture_1974.env.json
+msgid "Snow"
 msgstr ""
 
 #: environments/void.env.json
 msgid "Ripple"
 msgstr ""
 
+#: environments/atmospheric_1928.env.json
+msgid "How much of the open sky the clouds cover. They catch the film's light."
+msgstr ""
+
 #: environments/cinema.env.json
 msgid "How bright the house lamps stay once the film has started."
 msgstr ""
 
+#: environments/palace_of_culture_1974.env.json
+msgid "Snow through the open back of the roof, over the birches outside."
+msgstr ""
+
 #: environments/void.env.json
 msgid "A faint ring on the floor where you move. At the bottom: none."
+msgstr ""
+
+#: environments/palace_of_culture_1974.env.json
+msgid "No snow"
+msgstr ""
+
+#: environments/palace_of_culture_1974.env.json
+msgid "Light snow"
+msgstr ""
+
+#: environments/palace_of_culture_1974.env.json
+msgid "Heavy snow"
 msgstr ""
 

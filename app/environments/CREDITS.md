@@ -18,3 +18,18 @@ The rooms' sounds are synthesised by `app/scripts/env/env_synth.gd`: ours, no sa
   asset of anyone else's: no image, no texture, no file copied. The faint stars are generated in code
   (`app/scripts/env/systems/sky.gd`, `faint_field()`); the sky's noise, Earth's surface and the vista's shapes are
   made in code too.
+
+## Atmospheric 1928
+
+`atmospheric_1928.env.json` bundles nothing of its own: the hall, the kit's pieces, the sky (the bright stars above)
+and the cypresses are made in code; its surfaces are library materials (`app/materials/CREDITS.md`).
+
+## Palace of Culture 1974
+
+`palace_of_culture_1974.env.json` bundles nothing of its own: the hall, the sky, the birches and the snow are made in
+code; its surfaces, the mosaic among them, are library materials (`app/materials/CREDITS.md`).
+
+## Flagship
+
+`flagship.env.json` bundles nothing of its own: the hall is made in code; its surfaces are library materials
+(`app/materials/CREDITS.md`).
