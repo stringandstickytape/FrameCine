@@ -6,7 +6,10 @@ extends "res://tests/env_builder_harness.gd"
 ## the screen when down; the fire flickers slowly and holds steady with Flickering lights off); the 1993 bedroom (the
 ## pillow fort round the viewer's cushion, fairy lights, the telly on a chest; with opening_screen the telly fills the
 ## fort's opening); the ice room (the ice-block pattern on the walls, a vault, hides, candles, an open doorway); every
-## telly (cabinet, portable, flat panel) on every stand (chest, radiogram, desk, tv unit, wall), its picture on its glass.
+## telly (cabinet, portable, flat panel) on every stand (chest, radiogram, desk, tv unit, wall), its picture on its glass;
+## the eras' sets: an OLED panel (16:9, thin, on a stand or the wall), a 1960s console on legs (with and without its
+## doors), a big rear projection (4:3 and 16:9, about 50 inches, deep, on the floor), each picture on its glass; the
+## 1937 mirror-lid set, whose picture is the tube's reflection in its lid and is seen inside the mirror from every seat.
 ## godot --headless --xr-mode off --path app --script res://tests/test_env_domestic.gd
 
 const Procedural := preload("res://scripts/env/systems/kit/procedural.gd")
@@ -95,6 +98,7 @@ func run_tests() -> void:
 	await done(room)
 
 	await _tellies()
+	await _era_sets()
 
 	# Auto: a parameter the document gives wins over the style's.
 	var p := Domestic.resolved({"style": "ice", "half_width": 4.0, "rows_front": 0, "walls": {}, "screen": "auto"})
@@ -169,3 +173,141 @@ func _tellies() -> void:
 	var shelf: Array = t["shelf"]
 	check("a desk with room beside the set: the shelf on its top (%s)" % [shelf], is_equal_approx((shelf[0] as Vector3).y,
 			float(t["top"])) and (shelf[0] as Vector3).x < -0.3)
+
+
+## The eras' sets: an OLED on three stands, a console with and without doors, a rear projection 4:3 and 16:9, and the
+## mirror-lid set. A small room like the TV rooms' (the set 1.5 m from the viewer).
+func _era_sets() -> void:
+	var cases: Array = [
+		["oled", {"telly_stand": "tv_unit"}], ["oled", {"telly_stand": "chest"}], ["oled", {"telly_stand": "wall"}],
+		["console", {}], ["console", {"telly_doors": true}],
+		["rear_projection", {}], ["rear_projection", {"telly_aspect": "wide"}],
+		["mirror_lid", {}],
+	]
+	for cs: Array in cases:
+		var form: String = cs[0]
+		var given := {"style": "plain", "screen": "telly", "telly": form, "lamps": 0, "half_width": 2.4,
+				"front_z": -2.2 if form == "rear_projection" else -1.6, "back_z": 2.8, "rows_back": 0}
+		given.merge(cs[1], true)
+		var label := "telly %s" % form
+		for v: Variant in (cs[1] as Dictionary).values():
+			label += " %s" % (str(v) if not v is bool else "doors")
+		var doc := room_doc(label, [{"system": "domestic", "id": "room", "params": given}], screen_of("domestic", given))
+		var room := await check_room(label, doc, "room")
+		var r: Node = room.host.system("room")
+		var sc: Dictionary = r.screen()
+		var size := Vector2(float(sc["size"][0]), float(sc["size"][1]))
+		var t: Dictionary = Domestic._telly(Domestic.resolved(r.params))
+		var body: Array = t["body"]
+		var depth := float((body[1] as Vector3).z)
+		var slots: Dictionary = r.slots()
+		check("%s: telly_stand and telly_shelf slots" % label, slots.has("telly_stand") and slots.has("telly_shelf"))
+		if form != "mirror_lid":
+			var why := telly_glass(room, sc)
+			check("%s: the screen on the set's glass %s" % [label, why], why == "")
+		match form:
+			"oled":
+				check("%s: 16:9 and very thin (%s, %.3f m deep)" % [label, size, depth],
+						absf(size.aspect() - 16.0 / 9.0) < 0.001 and depth <= 0.03 and size.x > 1.1)
+				if given["telly_stand"] != "wall":
+					check("%s: on a slim pedestal (foot %.3f, the stand's top %.3f)" % [label, t["foot"], t["top"]],
+							absf(float(t["foot"]) - float(t["top"]) - Domestic.PEDESTAL) < 0.001)
+			"console":
+				check("%s: 4:3, on legs (%.2f m under the body)" % [label, t["foot"]],
+						absf(size.aspect() - 4.0 / 3.0) < 0.001 and float(t["foot"]) > 0.2 and t.has("legs"))
+				check("%s: no stand of its own" % label, (t["stand_box"] as Array).is_empty())
+			"rear_projection":
+				var wide := str(given.get("telly_aspect", "auto")) == "wide"
+				var diag := size.length() / 0.0254
+				check("%s: %s, about 50 inches (%.0f)" % [label, "16:9" if wide else "4:3", diag],
+						absf(size.aspect() - (16.0 / 9.0 if wide else 4.0 / 3.0)) < 0.002 and diag > 47.0 and diag < 53.0)
+				var bottom := (body[0] as Vector3).y - (body[1] as Vector3).y * 0.5
+				check("%s: deep and on the floor (%.2f m, its bottom %.3f)" % [label, depth, bottom], depth > 0.5
+						and absf(bottom) < 0.001)
+			"mirror_lid":
+				var why := _on_the_mirror(room, sc, t)
+				check("%s: the picture is the tube's reflection, seen in the mirror from every seat %s" % [label, why],
+						why == "")
+				var lid := room.get_node_or_null("Lid")
+				check("%s: the lid in front of the picture for the film layer, see-through for the sight line" % label,
+						lid != null and lid.is_in_group("env_in_front") and lid.is_in_group("env_see_through")
+						and room.get_node_or_null("Mirror") != null)
+				check("%s: 5:4 by default (%s)" % [label, size], absf(size.aspect() - 1.25) < 0.001)
+		if DisplayServer.get_name() != "headless":
+			await _picture_of(room, sc, label.replace(" ", "_"))
+		await done(room)
+
+
+## With a renderer: the set from the viewer's eyes, a stand-in picture (a test card's bars) on the room's screen.
+## user://env_domestic/<label>.png, to look at.
+func _picture_of(room: Node3D, sc: Dictionary, label: String) -> void:
+	var c := Vector3(float(sc["center"][0]), float(sc["center"][1]), float(sc["center"][2]))
+	var s := Vector2(float(sc["size"][0]), float(sc["size"][1]))
+	var card := Image.create_empty(64, 48, false, Image.FORMAT_RGB8)
+	var bars: Array[Color] = [Color(0.75, 0.75, 0.75), Color(0.75, 0.75, 0), Color(0, 0.75, 0.75), Color(0, 0.75, 0),
+			Color(0.75, 0, 0.75), Color(0.75, 0, 0), Color(0, 0, 0.75)]
+	for j in 48:
+		for i in 64:
+			card.set_pixel(i, j, bars[mini(i * 7 / 64, 6)] if j < 32 else Color(i / 64.0, i / 64.0, i / 64.0))
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_texture = ImageTexture.create_from_image(card)
+	var quad := MeshInstance3D.new()
+	var qm := QuadMesh.new()
+	qm.size = s
+	quad.mesh = qm
+	quad.material_override = m
+	quad.position = c
+	room.add_child(quad)
+	var cam := Camera3D.new()
+	cam.fov = 50.0
+	room.add_child(cam)
+	cam.look_at_from_position(Vector3(0.0, EnvChecks.EYE_HEIGHT, 0.0), c)
+	cam.current = true
+	root.size = Vector2i(640, 400)
+	for i in 4:
+		await process_frame
+	await RenderingServer.frame_post_draw
+	var img := root.get_texture().get_image()
+	DirAccess.make_dir_recursive_absolute("user://env_domestic")
+	img.save_png("user://env_domestic/%s.png" % label)
+	cam.queue_free()
+	quad.queue_free()
+
+
+## Whether the mirror-lid set's picture is the tube's face reflected in the lid's mirror, and from every seat's eyes
+## each corner of the picture is seen through the mirror (the line to it crosses the lid's plane inside the mirror's
+## frame, before the picture). "" when it is.
+func _on_the_mirror(room: Node3D, sc: Dictionary, t: Dictionary) -> String:
+	var lid: Dictionary = t["lid"]
+	var hinge: Vector3 = lid["hinge"]
+	var length := float(lid["length"])
+	var half := float(lid["width"]) * 0.5
+	var along := Vector3(0.0, sqrt(0.5), sqrt(0.5))
+	var under := Vector3(0.0, -sqrt(0.5), sqrt(0.5))
+	var c := Vector3(float(sc["center"][0]), float(sc["center"][1]), float(sc["center"][2]))
+	var s := Vector2(float(sc["size"][0]), float(sc["size"][1]))
+	var tube: Vector3 = (t["tube"] as Array)[0]
+	var seen := tube - 2.0 * (tube - hinge).dot(under) * under
+	if seen.distance_to(c) > 0.002:
+		return "(the tube's face %s in the mirror is at %s, the picture at %s)" % [tube, seen, c]
+	var fw := Domestic.LID_FRAME
+	var eyes: Array[Vector3] = []
+	for st: Transform3D in room.room_seat_transforms():
+		eyes.append(st.origin + Vector3.UP * EnvChecks.EYE_HEIGHT)
+	if eyes.is_empty():
+		eyes.append(Vector3(0.0, EnvChecks.EYE_HEIGHT, 0.0))
+	for eye in eyes:
+		for sx: float in [-0.98, 0.98]:
+			for sy: float in [-0.98, 0.98]:
+				var p := c + Vector3(sx * s.x * 0.5, sy * s.y * 0.5, 0.0)
+				var d := p - eye
+				var k := (hinge - eye).dot(under) / d.dot(under)
+				if k <= 0.0 or k >= 1.0:
+					return "(from %s the corner %s is not behind the mirror)" % [eye, p]
+				var x := eye + d * k
+				var l := (x - hinge).dot(along)
+				if absf(x.x - hinge.x) > half - fw or l < fw or l > length - fw:
+					return "(from %s the corner %s is seen outside the mirror: across %.3f, along %.3f of %.3f)" % [eye,
+							p, x.x - hinge.x, l, length]
+	return ""
