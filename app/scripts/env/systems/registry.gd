@@ -17,6 +17,8 @@ const SYSTEMS := {
 	"screen_frame": "res://scripts/env/systems/screen_frame.gd",
 	"showing": "res://scripts/env/systems/showing.gd",
 	"mirror_floor": "res://scripts/env/systems/mirror_floor.gd",
+	"atmosphere": "res://scripts/env/systems/atmosphere.gd",
+	"weather": "res://scripts/env/systems/weather.gd",
 	"sound_bed": "res://scripts/env/systems/sound_bed.gd",
 	"acoustics": "res://scripts/env/systems/acoustics.gd",
 	"music": "res://scripts/env/systems/music.gd",
