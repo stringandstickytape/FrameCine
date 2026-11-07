@@ -35,6 +35,7 @@ const ContainerMode := preload("res://scripts/play/container_mode.gd")
 const SoundTab := preload("res://ui/sound_tab.gd")
 ## Stage 2, set C: the Room, Objects and Mixed reality tabs, and what they show from elsewhere.
 const SET_C := ["ui/room_tab.gd", "ui/objects_tab.gd", "ui/object_section.gd", "ui/object_placer.gd", "ui/fab_panel.gd",
+		"ui/picture_panel.gd", "ui/surface_panel.gd", "scripts/pictures/picture_keeper.gd",
 		"ui/mixed_reality_tab.gd", "ui/agent_pane.gd", "scripts/comfort/sleep_timer.gd",
 		"scripts/assistant/assistant_service.gd", "scripts/assistant/object_builtins.gd",
 		"environments/showrooms/index.json"]
@@ -627,9 +628,13 @@ func _set_c() -> void:
 	var obj_gap := float(obj_grid.get_theme_constant("h_separation"))
 	var first_tile := obj_grid.get_child(0) as Control if obj_grid.get_child_count() > 0 else null
 	var tile_side := first_tile.size.x if first_tile != null else 0.0
-	_check("Objects: four square tiles fill the grid (%.0f px each, grid %.0f)" % [tile_side, obj_grid.size.x], first_tile != null
-			and 4.0 * tile_side + 3.0 * obj_gap <= obj_grid.size.x + 0.5 and 4.0 * (tile_side + 1.0) + 3.0 * obj_gap > obj_grid.size.x - 0.5
-			and absf(first_tile.size.y - tile_side - 26.0) < 1.0)
+	# The grid shares out whole pixels: a row's tiles can differ by one, and together with the gaps they fill it.
+	var row_width := 3.0 * obj_gap
+	for i in mini(4, obj_grid.get_child_count()):
+		row_width += (obj_grid.get_child(i) as Control).size.x
+	_check("Objects: four square tiles fill the grid (%.0f px each, a row %.0f, grid %.0f)" % [tile_side, row_width,
+			obj_grid.size.x], first_tile != null and obj_grid.get_child_count() >= 4
+			and absf(row_width - obj_grid.size.x) <= 0.5 and absf(first_tile.size.y - tile_side - 26.0) < 1.0)
 	I18n.set_language("en")
 	pui.show_tab(pui.Tab.FILES)
 	await _frames(1)

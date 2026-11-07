@@ -17,6 +17,9 @@ signal grip_changed(hand: XRController3D, pressed: bool)
 signal menu_pressed(hand: XRController3D)
 ## The menu button let go (a hold of it recentres the panel, ui/ui_layer.gd).
 signal menu_released(hand: XRController3D)
+## The stick click (headset profile: the right one) pressed or let go: main.gd lets the picture keeper have it on an
+## image in the browser (scripts/pictures/picture_keeper.gd), else it is the menu.
+signal stick_clicked(hand: XRController3D, pressed: bool)
 signal overlay_pressed(hand: XRController3D)
 signal next_pressed(hand: XRController3D)
 signal prev_pressed(hand: XRController3D)
@@ -79,7 +82,9 @@ func _ready() -> void:
 		if action == "labels":
 			labels_held.emit(self, false)
 		elif action == "menu":
-			menu_released.emit(self))
+			menu_released.emit(self)
+		elif action == "stick_click":
+			stick_clicked.emit(self, false))
 	_laser_mat = StandardMaterial3D.new()
 	_laser_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_laser_mat.albedo_color = STUB_COLOR
@@ -230,6 +235,8 @@ func _on_button_pressed(action: String) -> void:
 			labels_held.emit(self, true)
 		"menu":
 			menu_pressed.emit(self)
+		"stick_click":
+			stick_clicked.emit(self, true)
 		"overlay":
 			overlay_pressed.emit(self)
 		"next_file":

@@ -847,30 +847,103 @@
 			"name": "Picture frame",
 			"object": "picture_frame",
 			"position": [
-				-2.321,
+				-2.314,
 				1.7,
-				0.659
+				0.682
 			],
 			"rotation": [
 				0.0,
-				105.857,
+				106.414,
 				0.0
 			],
 			"scale": 0.85,
 			"type": "model"
 		},
 		{
+			"model_file": "poster.glb",
+			"name": "Poster",
+			"object": "poster",
+			"position": [
+				-2.304,
+				1.315,
+				0.679
+			],
+			"rotation": [
+				0.0,
+				106.414,
+				0.0
+			],
+			"scale": 0.756,
+			"type": "model"
+		},
+		{
+			"model_file": "canvas.glb",
+			"name": "Canvas",
+			"object": "canvas",
+			"position": [
+				-2.315,
+				0.93,
+				0.682
+			],
+			"rotation": [
+				0.0,
+				106.414,
+				0.0
+			],
+			"scale": 0.756,
+			"type": "model"
+		},
+		{
+			"model_file": "cutout.glb",
+			"name": "Cut-out",
+			"object": "cutout",
+			"position": [
+				-2.302,
+				0.375,
+				0.678
+			],
+			"rotation": [
+				0.0,
+				106.414,
+				0.0
+			],
+			"scale": 0.294,
+			"type": "model"
+		},
+		{
+			"name": "Labels 9",
+			"position": [
+				-2.367,
+				1.315,
+				0.399
+			],
+			"rotation": [
+				0.0,
+				99.57,
+				0.0
+			],
+			"size": [
+				0.055
+			],
+			"text": "LIBRARY OBJECTS\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPicture frame\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPoster\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nCanvas\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nCut-out",
+			"text_options": {
+				"align": "left",
+				"color": "#e6e6e6"
+			},
+			"type": "text"
+		},
+		{
 			"model_file": "wall_shelf.glb",
 			"name": "Wall shelf",
 			"object": "wall_shelf",
 			"position": [
-				-2.375,
-				1.365,
-				0.675
+				-2.438,
+				1.75,
+				-0.388
 			],
 			"rotation": [
 				0.0,
-				105.857,
+				80.949,
 				0.0
 			],
 			"scale": 0.625,
@@ -881,13 +954,13 @@
 			"name": "Pot plant",
 			"object": "pot_plant",
 			"position": [
-				-2.304,
-				0.76,
-				0.654
+				-2.365,
+				1.145,
+				-0.377
 			],
 			"rotation": [
 				0.0,
-				105.857,
+				80.949,
 				0.0
 			],
 			"scale": 0.462,
@@ -898,13 +971,13 @@
 			"name": "Wall clock",
 			"object": "wall_clock",
 			"position": [
-				-2.329,
-				0.545,
-				0.662
+				-2.391,
+				0.93,
+				-0.381
 			],
 			"rotation": [
 				0.0,
-				105.857,
+				80.949,
 				0.0
 			],
 			"scale": 1.0,
@@ -917,21 +990,21 @@
 			}
 		},
 		{
-			"name": "Labels 9",
+			"name": "Labels 10",
 			"position": [
-				-2.374,
+				-2.302,
 				1.315,
-				0.353
+				-0.68
 			],
 			"rotation": [
 				0.0,
-				98.456,
+				73.549,
 				0.0
 			],
 			"size": [
 				0.055
 			],
-			"text": "LIBRARY OBJECTS\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPicture frame\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWall shelf\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPot plant\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWall clock",
+			"text": "Wall shelf\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nPot plant\n⁠\n⁠\n⁠\n⁠\n⁠\n⁠\nWall clock",
 			"text_options": {
 				"align": "left",
 				"color": "#e6e6e6"

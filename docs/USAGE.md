@@ -220,7 +220,7 @@ While a form with the keyboard is open, it has the whole main pane.
 | A (right) | Next video | Same | N |
 | B (right) | Previous video, or the start of this one after 3 s | Same | P |
 | Y (right), the sparkle on its cap, while the right hand points | An agent's terminal on or off. With none running, start the last one used. It keeps working while hidden. | Nothing | |
-| Menu (right) or view (left); right stick click | Open the panel in front; this controller points | Short press: close it. Hold 0.6 s: move it to the front of the head again | M, F3 (hold: recentre); Esc closes |
+| Menu (right) or view (left); right stick click | Open the panel in front; this controller points. With the browser's cursor on an image: keep the picture (below) | Short press: close it. Hold 0.6 s: move it to the front of the head again | M, F3 (hold: recentre); Esc closes |
 | Left stick click | Info overlay on or off | Same | Tab, F1 |
 | Grip, hold, pointing at an object or in one | Pick it up (`docs/physics.md`): stick up or down nearer or farther, left or right turns it, let go to drop it or throw it, B puts it back where it was picked up; the trigger does nothing meanwhile | Same, with the laser off the panel | |
 | Grip, hold and point | Move the flat screen (stick: nearer or farther); in 180 and 360, turn the sphere | Held 2 s with the laser on the panel, in dev mode: allow remote changes for an hour | G held and mouse |
@@ -250,6 +250,7 @@ where you look. Look away, and the cursor goes. The legends on the controller ch
 | Grip held + stick | Scroll and arrow keys; the cursor stays put | The same |
 | Trigger | Click at the cursor; hold it to drag | Nothing |
 | Grip, tap | Right click at the cursor | Nothing |
+| Right stick click | On an image (the legend says KEEP PICTURE): keep the picture. Elsewhere: the menu | The menu |
 | A, B | Space (play or pause), the browser's Back | The same |
 | Pointer hand's bumper, hold | With a text field selected: speak into it | The same |
 
@@ -268,6 +269,10 @@ where you look. Look away, and the cursor goes. The legends on the controller ch
   - If speech to text isn't working on the headset, a notice says so and nothing is typed.
   - A browser the player didn't open (one that was already running) can't say which field is selected, so the bumper
     stays the assistant's there.
+- **Keeping a picture.** Put the cursor on an image and click the right stick. The cursor holds still for the click,
+  and a notice says "Picture kept" with its name. The app downloads the full-size picture, or, if it can't, takes it
+  from the screen. **Copy image** in the page's menu (a grip tap) and saving an image to Downloads keep it too. The
+  pictures are in **Objects → Pictures**.
 
 While the panel is open, the other controller keeps the "Panel closed" functions. On the generic controller profile:
 right primary is next, right secondary is previous, left primary or right stick click is the menu, left secondary or
@@ -315,9 +320,10 @@ assistants, and Test patterns last.
 
 The **Objects** tab (after Room) is the object library (`docs/assistant.md`, "Objects"): things to put in the room,
 built in (a picture frame, a wall shelf, a pot plant, a wall clock) and imported (by an assistant, or with
-`object_import` from the dev link: a `.glb`, or an SVG drawing made solid). It has three sections: **Built-in
-objects**, **Your objects** (this install's own: imported, or kept from a room) and **In this room** (what the room
-has from the library, with its parts). Each list of objects has its own **Place**. One controller does it all.
+`object_import` from the dev link: a `.glb`, or an SVG drawing made solid). It has five sections: **Built-in
+objects**, **Your objects** (this install's own: imported, or kept from a room), **Pictures** (pictures you kept from
+the browser), **Surfaces** (materials to find, import and apply) and **In this room** (what the room has from the
+library, with its parts). Each list of objects has its own **Place**. One controller does it all.
 
 **Fab, in the app.** Under **Your objects**, **Fab** searches Quixel Megascans' free 3D objects on the Fab store and
 imports them, with no browser and no sign-in:
@@ -363,6 +369,38 @@ the Fab licence lets you use it, not share it.
   the surface under it (caustics, rim glow, velvet, ...) keeps the material. The part's line names its material and
   effect. A change that would take the room past its cost limit is refused with a note. **Reset** gives the part its
   own colours back. Each change has Undo in the footer.
+
+**Pictures** (`docs/features.md`, "Pictures"):
+
+1. **Find pictures**, type a few words and **Search**. The browser opens on the big screen with an image search. Browse
+   as you like.
+2. Keep a picture: the cursor on it and the right stick click (the legend says KEEP PICTURE), or **Copy image**, or
+   save it to Downloads. A notice says "Picture kept".
+3. In **Pictures**, pick its tile. **Place as:** **Poster**, **Framed**, **Canvas** or **Cut-out** makes it at the
+   picture's shape and starts Place (as above). **Apply to a part** puts it on a wall, a seat or an object's part
+   (below). **Delete** asks first.
+
+Kept pictures stay on this headset, for your own use: the app never uploads or shares them.
+
+**Surfaces** (`docs/features.md`, "Surfaces"; `docs/materials.md`, "User materials"):
+
+1. **Find surfaces**, type a word or two in English (brick, oak floor, marble) and **Search**. The results come from
+   Quixel Megascans (through Fab: accept Fab's licence in Your objects first), Poly Haven and ambientCG, each with
+   its badge (MS, PH, aCG). **More** loads the next page.
+2. Pick one, then **Import**. The line under it says how far it is. It comes in as one of your materials.
+3. Under the results, the materials (**All** or **Yours**): pick one, then **Apply to a part**. **Delete** removes
+   one of yours.
+
+**Apply to a part** (a material or a picture): the panel goes, and the part the laser points at shows it at once.
+
+| Control | Apply to a part |
+|---|---|
+| Trigger | Put it there |
+| Stick up or down | The pattern bigger or smaller |
+| Stick left or right | Turn the pattern |
+| B, menu button | Cancel: nothing changes |
+
+The room keeps it, with Undo in the footer. A stock room becomes a kept room of its own, as with Place.
 
 **Picking objects up** (`docs/physics.md`): point a controller at an object in the room and hold the grip; it is held
 at the laser's end (with the controller in an object, in the hand). The stick brings it nearer or farther and turns

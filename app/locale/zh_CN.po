@@ -2772,3 +2772,135 @@ msgstr "在浏览器上使用激光"
 
 msgid "The laser points and clicks on the page too, as well as the stick"
 msgstr "除摇杆外，激光也能在网页上指向和点击"
+
+msgid "KEEP PICTURE"
+msgstr "保存图片"
+
+msgid "APPLY"
+msgstr "应用"
+
+msgid "SIZE / TURN"
+msgstr "大小 / 旋转"
+
+msgid "%s is in your materials."
+msgstr "%s 已加入你的材质。"
+
+msgid "Poster"
+msgstr "海报"
+
+msgid "Canvas"
+msgstr "画布"
+
+msgid "Cut-out"
+msgstr "立牌"
+
+msgid "No picture under the pointer"
+msgstr "指针下没有图片"
+
+msgid "That picture could not be kept"
+msgstr "无法保存这张图片"
+
+msgid "Picture kept: %s"
+msgstr "已保存图片：%s"
+
+msgid "Already in your pictures: %s"
+msgstr "已在你的图片中：%s"
+
+msgid "Point at a part first"
+msgstr "请先指向一个部件"
+
+msgid "Pictures"
+msgstr "图片"
+
+msgid "Surfaces"
+msgstr "表面"
+
+msgid "Find pictures"
+msgstr "查找图片"
+
+msgid "Browse yourself. On an image, the right stick click keeps it; Copy image and saving to Downloads keep it too."
+msgstr "请自行浏览。在图片上按下右摇杆即可保存；“复制图片”和保存到“下载”也能保存。"
+
+msgid "Place as:"
+msgstr "放置为："
+
+msgid "Framed"
+msgstr "装框"
+
+msgid "Apply to a part"
+msgstr "应用到部件"
+
+msgid "Kept pictures stay on this headset, for your own use: the app never uploads or shares them."
+msgstr "保存的图片只留在这台头显上，供你自己使用：应用从不上传或共享它们。"
+
+msgid "Pick a picture, then place it or apply it."
+msgstr "选择一张图片，然后放置或应用它。"
+
+msgid "On an image, the right stick click keeps it."
+msgstr "在图片上按下右摇杆即可保存。"
+
+msgid "Delete %s from your pictures?"
+msgstr "从你的图片中删除 %s？"
+
+msgid "words to search for, such as autumn forest"
+msgstr "要搜索的词，例如 autumn forest"
+
+msgid "Find surfaces"
+msgstr "查找表面"
+
+msgid "Apply: point at a wall, the floor, a seat or an object's part; the trigger puts it there. Stick: size and turn the pattern."
+msgstr "应用：指向墙、地面、座位或物品的部件，扳机即可放上。摇杆：调整图案大小和旋转。"
+
+msgid "Search for a surface by its name, in English."
+msgstr "用英文名称搜索表面。"
+
+msgid "It is in your materials already."
+msgstr "它已在你的材质中。"
+
+msgid "Asking for %s..."
+msgstr "正在请求 %s……"
+
+msgid "Accept Fab's licence in Your objects first."
+msgstr "请先在“你的物品”中接受 Fab 的许可。"
+
+msgid "The site is busy: the app waits %d s before it asks again."
+msgstr "该网站繁忙：应用将等待 %d 秒后再请求。"
+
+msgid "The site can't be reached. Is the headset online?"
+msgstr "无法连接该网站。头显是否已联网？"
+
+msgid "The site answered with an error (HTTP %d). Try again later."
+msgstr "该网站返回错误（HTTP %d）。请稍后再试。"
+
+msgid "The site's answer was not as expected. Try again later."
+msgstr "该网站的回复不符合预期。请稍后再试。"
+
+msgid "This surface has no download the app can use."
+msgstr "这个表面没有应用可用的下载。"
+
+msgid "This surface's download is too big for the headset."
+msgstr "这个表面的下载对头显来说太大。"
+
+msgid "Pick a material, then Apply to a part."
+msgstr "选择一种材质，然后点“应用到部件”。"
+
+msgid "%.1f m a repeat"
+msgstr "每 %.1f 米重复一次"
+
+msgid "Delete %s from your materials?"
+msgstr "从你的材质中删除 %s？"
+
+msgid "words in English, such as brick or oak floor"
+msgstr "英文词语，例如 brick 或 oak floor"
+
+msgid "That can't be applied here"
+msgstr "无法应用到这里"
+
+msgid "Point at a part and pull the trigger. Stick: size and turn the pattern. B cancels."
+msgstr "指向一个部件并扣动扳机。摇杆：调整图案大小和旋转。B 键取消。"
+
+msgid "Point at a part and pull the trigger. B cancels."
+msgstr "指向一个部件并扣动扳机。B 键取消。"
+
+msgid "Nothing changed"
+msgstr "没有任何更改"

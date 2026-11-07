@@ -848,6 +848,26 @@ func start_object_move(placed_name: String) -> bool:
 	return _start_placer(_ensure_placer().start_move(placed_name))
 
 
+## Apply to a part (the Objects tab's Apply, ui/object_placer.gd start_apply()): what = {"material": id} or
+## {"picture": id}. The laser shows it on the part it points at; the trigger applies it there.
+func start_part_apply(what: Dictionary) -> bool:
+	var started := _ensure_placer().start_apply(what)
+	if not started:
+		notify(tr("That can't be applied here"))
+		return false
+	cancel_seat_pick()
+	hide_panel()
+	notify(tr("Point at a part and pull the trigger. Stick: size and turn the pattern. B cancels.")
+			if what.has("material") else tr("Point at a part and pull the trigger. B cancels."))
+	update_labels()
+	return true
+
+
+## Applying to a part now (the legends say APPLY).
+func is_applying() -> bool:
+	return _placer != null and not _placer.applying.is_empty()
+
+
 func _start_placer(started: bool) -> bool:
 	if not started:
 		notify(tr("That object can't be placed here"))
@@ -856,6 +876,11 @@ func _start_placer(started: bool) -> bool:
 	hide_panel()
 	notify(tr("Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."))
 	return true
+
+
+func update_labels() -> void:
+	if app != null and app.has_method("update_controller_labels"):
+		app.update_controller_labels()
 
 
 func _ensure_placer() -> ObjectPlacer:
@@ -933,16 +958,22 @@ func is_placing_object() -> bool:
 
 ## B or menu while placing: nothing changes. True when it was placing (the button is used up).
 func cancel_object_place() -> bool:
+	var was_applying := is_applying()
 	if _placer == null or not _placer.cancel():
 		return false
-	notify(tr("Nothing placed"))
+	notify(tr("Nothing changed") if was_applying else tr("Nothing placed"))
+	if was_applying:
+		update_labels()
 	return true
 
 
 ## The trigger while placing: sets the object where it shows. The panel comes back (the object's parts are there) and
 ## its footer says so, with Undo.
 func _commit_object() -> void:
+	var was_applying := is_applying()
 	var r: Dictionary = await _placer.commit()
+	if was_applying:
+		update_labels()
 	if r.get("ok") == true:
 		var said := str(r.get("summary", "placed"))
 		show_panel()

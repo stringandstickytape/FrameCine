@@ -135,12 +135,12 @@
 		},
 		{
 			"budget": {
-				"cost": 41.7,
-				"draws": 56,
+				"cost": 49.3,
+				"draws": 63,
 				"lights": 0,
-				"parts": 40,
-				"texts": 11,
-				"triangles": 34958,
+				"parts": 44,
+				"texts": 12,
+				"triangles": 35040,
 				"widgets": 8
 			},
 			"description": "The parts a room document places: shapes, text, surfaces, widgets, motion, objects",
@@ -150,11 +150,14 @@
 			"shows": {
 				"objects": [
 					"picture_frame",
+					"poster",
+					"canvas",
+					"cutout",
 					"wall_shelf",
 					"pot_plant",
 					"wall_clock"
 				],
-				"parts": 40,
+				"parts": 44,
 				"types": [
 					"box",
 					"sphere",

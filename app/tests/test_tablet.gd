@@ -349,8 +349,9 @@ func _run() -> void:
 			func(c: Control) -> bool: return W.card_section(c) == "3D" and c.get_parent() == null))
 	pui.tablet_tab_buttons[5].pressed.emit()
 	await _frames(2)
-	_check("Objects: Built-in objects, Your objects, In this room (%s)" % [names_of.call()],
-			names_of.call() == ["Built-in objects", "Your objects", "In this room"] and pui.cards(5).size() == 3)
+	_check("Objects: Built-in objects, Your objects, Pictures, Surfaces, In this room (%s)" % [names_of.call()],
+			names_of.call() == ["Built-in objects", "Your objects", "Pictures", "Surfaces", "In this room"]
+			and pui.cards(5).size() == 5)
 	pui.tablet_tab_buttons[6].pressed.emit()
 	await _frames(2)
 	_check("Mixed reality: Areas, then Settings (%s)" % [names_of.call()], names_of.call() == ["Areas", "Settings"])

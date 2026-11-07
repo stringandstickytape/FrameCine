@@ -516,6 +516,42 @@ otherwise talks to the assistant as before (`app/docs/window-source.md`).
 - **Would change if:** the gaze switch feels wrong in the headset (then a button to hold for the cursor), or
   Chromium refuses flatten auto-attach on a page socket (then the browser-level socket, `/json/version`).
 
+## D29. Pictures kept from the browser, surfaces from three sites, one way to apply them (2026-11-06)
+
+The viewer keeps pictures while browsing and finds materials on Megascans (through Fab), Poly Haven and ambientCG,
+all on the headset, and puts either on any part of the room with the laser (`docs/features.md` "Pictures",
+"Surfaces", "Apply to a part").
+
+- **The viewer browses, the app keeps.** `pictures_search` and Find pictures only open Google's image search in the
+  browser. The app never scrapes a page or works one by itself: the user chooses each picture. Keeping them for
+  personal use on your own headset is your call; the app never uploads or shares them, none go into the repository
+  or a release, and their source addresses stay in the user's data, never in a log.
+- **Three ways to keep one:** the right stick click on an image (DevTools says what is there; the full-size source,
+  else a crop of the captured window), Chromium's Copy image (the clipboard) and Save image (Downloads). The first is
+  the quick one. The other two need nothing of the app's own and work where DevTools doesn't.
+- **The right stick click:** on the Frame's profile it was a second menu button. It is now its own action, which
+  falls back to the menu everywhere but over the browser in pointer mode. The other profiles are as they were.
+- **Pictures become objects of the library**, made at the picture's shape once for each kind (poster, framed,
+  canvas, cut-out). So Place, Move, physics, the film layer's cover and kept rooms need nothing new.
+- **Surfaces: only CC0 ships.** The bundled materials stay CC0. Imports are the user's, in `user://materials`, and
+  read by the same library. No Megascans file or id list is in the repository; a Megascans import is under the
+  viewer's own Fab licence, behind the same acceptance as Fab's objects (D27).
+- **Poly Haven's terms:** no key, ever; an honest User-Agent; a credit with no endorsement. Its whole texture list is
+  one request a day at most, searched on the headset: kinder to its API than a search request for each word.
+- **Go slow, the same for all:** one shared gate (`host_gate.gd`): one request at a time for each site, 1 s apart,
+  back-off on 429 and 5xx, caches.
+- **1K uncompressed for user materials:** the export templates decode ASTC but can't encode it
+  (`docs/materials.md`, "User materials"). 12.6 MB of GPU memory a material is acceptable for the few a room uses.
+  2K with ASTC needs a fork change; the import code is ready for it.
+- **One apply mode** for a material and a picture: the laser picks the part (a ray against the room's and the placed
+  objects' triangles), the part shows it before the trigger, the stick sizes and turns the pattern. It is kept
+  through the paths a room already has: `recolour` with `library_material` (and the new `turn`) for a room's part,
+  a part-level entry for an object's.
+- **Rejected:** fetching search results for the user (scraping); bundling Megascans or a list of them; compressing
+  on a PC and copying back (the headset must do it all); a separate apply mode for each kind.
+- **Would change if:** the fork's templates get the ASTC encoder (then 2K, compressed), Poly Haven asks for a different
+  use of its API, or Chromium's DevTools stops answering on the page socket (then only Copy image and Downloads).
+
 ## Open
 
 - Quad layer for flat video vs. drawing in the projection layer: sharpness and bandwidth comparison (spike 03-layer).

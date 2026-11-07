@@ -29,6 +29,8 @@ uniform vec3 tint : source_color = vec3(1.0);
 // Metres per repeat of the maps (box and triplanar), and a shift in metres.
 uniform float tiling = 1.0;
 uniform vec2 uv_offset = vec2(0.0);
+// The pattern turned on the surface (radians; the Objects tab's apply mode turns it with the stick).
+uniform float uv_turn = 0.0;
 // The mesh's UVs instead of its axes, repeated this often across the UV square.
 uniform bool use_mesh_uv = false;
 uniform vec2 uv_repeat = vec2(1.0);
@@ -138,6 +140,23 @@ vec3 to_world(mat3 model, vec3 v) {
 	return normalize(model * v);
 }
 
+// The pattern's coordinates turned by uv_turn, and the frame its normals are read in turned with them (u: where uv.x
+// grows, v: where uv.y falls).
+vec2 turn_uv(vec2 uv) {
+	float c = cos(uv_turn);
+	float s = sin(uv_turn);
+	return vec2(c * uv.x - s * uv.y, s * uv.x + c * uv.y);
+}
+
+void turn_frame(inout vec3 u, inout vec3 v) {
+	float c = cos(uv_turn);
+	float s = sin(uv_turn);
+	vec3 a = c * u + s * v;
+	vec3 b = c * v - s * u;
+	u = a;
+	v = b;
+}
+
 void fragment() {
 	mat3 model = mat3(MODEL_MATRIX);
 	vec3 geo_n = normalize(world_normal);
@@ -157,7 +176,8 @@ void fragment() {
 		vec3 u_axis;
 		vec3 v_axis;
 		face_frame(axis, on[axis] < 0.0 ? -1.0 : 1.0, u_axis, v_axis);
-		vec2 uv = vec2(dot(obj_pos, u_axis), -dot(obj_pos, v_axis)) / tiling + uv_offset;
+		vec2 uv = turn_uv(vec2(dot(obj_pos, u_axis), -dot(obj_pos, v_axis)) / tiling) + uv_offset;
+		turn_frame(u_axis, v_axis);
 		Texel s = sample_maps(uv);
 		t.albedo += s.albedo * w[axis];
 		t.orm += s.orm * w[axis];
@@ -170,9 +190,10 @@ void fragment() {
 	vec3 tan_u;
 	vec3 tan_v;
 	if (use_mesh_uv) {
-		uv = UV * uv_repeat + uv_offset;
+		uv = turn_uv(UV * uv_repeat) + uv_offset;
 		tan_u = normalize(world_tangent);
 		tan_v = normalize(world_binormal);
+		turn_frame(tan_u, tan_v);
 		across = UV.x * uv_repeat.x;
 	} else {
 		vec3 on = abs(obj_normal);
@@ -181,9 +202,10 @@ void fragment() {
 		vec3 v_axis;
 		face_frame(axis, obj_normal[axis] < 0.0 ? -1.0 : 1.0, u_axis, v_axis);
 		across = dot(obj_pos, u_axis);
-		uv = vec2(across, -dot(obj_pos, v_axis)) / tiling + uv_offset;
+		uv = turn_uv(vec2(across, -dot(obj_pos, v_axis)) / tiling) + uv_offset;
 		tan_u = to_world(model, u_axis);
 		tan_v = to_world(model, v_axis);
+		turn_frame(tan_u, tan_v);
 	}
 	t = sample_maps(uv);
 	n = normalize(tan_u * t.normal.x + tan_v * t.normal.y + geo_n * t.normal.z);

@@ -91,6 +91,7 @@ const WindowVideoSource := preload("res://scripts/video/window_video_source.gd")
 const LibraryIndex := preload("res://scripts/library/library_index.gd")
 const WindowPointer := preload("res://scripts/window_pointer.gd")
 const BrowserDictation := preload("res://scripts/video/browser_dictation.gd")
+const PictureKeeper := preload("res://scripts/pictures/picture_keeper.gd")
 const LocalAgents := preload("res://scripts/agents/local_agents.gd")
 const AndroidApps := preload("res://scripts/android/android_apps.gd")
 const VREnvironment := preload("res://environments/vr_environment.gd")
@@ -138,6 +139,8 @@ const CONTROL_LABELS := {
 	"squeeze": ["", ""],
 	"thumbstick": ["SEEK / DIST", "SCROLL"],
 	"menu": ["MENU", "CLOSE"],
+	# The right stick click on the headset's own controllers: the menu, except on an image in the browser (below).
+	"stick_click": ["MENU", "CLOSE"],
 	"overlay": ["INFO", "INFO"],
 	"next_file": ["NEXT", "NEXT"],
 	"prev_file": ["PREV", "PREV"],
@@ -165,6 +168,16 @@ const WINDOW_POINTER_LABELS := {
 	"thumbstick": "POINTER",
 	"next_file": "SPACE",
 	"prev_file": "BACK",
+	# The stick click keeps the picture under the cursor (scripts/pictures/picture_keeper.gd): its legend only while
+	# the cursor is over an image (window_pointer.gd window_labels()).
+	"stick_click": "",
+}
+const KEEP_PICTURE_LABEL := "KEEP PICTURE"
+## Applying a material or a picture to a part (the Objects tab's Apply, ui/object_placer.gd), the pointer controller.
+const APPLY_LABELS := {
+	"trigger": "APPLY",
+	"thumbstick": "SIZE / TURN",
+	"prev_file": "CANCEL",
 }
 ## Looking away: no cursor, the stick does its normal job; the trigger and the squeeze do nothing ("" hides them).
 const WINDOW_AWAY_LABELS := {
@@ -294,6 +307,9 @@ static var _binding_cache := {}
 var window_pointer: WindowPointer
 ## Voice into the browser's selected field (scripts/video/browser_dictation.gd): the talk button asks the page first.
 var browser_dictation: BrowserDictation
+## Keeping pictures from the browser on the big screen (scripts/pictures/picture_keeper.gd): the right stick click on
+## an image, Chromium's Copy image, a save to Downloads.
+var picture_keeper: PictureKeeper
 ## The agents on the headset, in their terminals (scripts/agents/local_agents.gd).
 var local_agents: LocalAgents
 ## Android apps on the big screen (scripts/android/android_apps.gd).
@@ -327,6 +343,10 @@ func _ready() -> void:
 	browser_dictation.name = "BrowserDictation"
 	browser_dictation.main = self
 	add_child(browser_dictation)
+	picture_keeper = PictureKeeper.new()
+	picture_keeper.name = "PictureKeeper"
+	picture_keeper.main = self
+	add_child(picture_keeper)
 	local_agents = LocalAgents.new()
 	local_agents.name = "LocalAgents"
 	local_agents.main = self
@@ -353,6 +373,11 @@ func _ready() -> void:
 		hand.grip_changed.connect(_on_grip)
 		hand.menu_pressed.connect(func(h: XRController3D) -> void: on_menu(h as XRHand, true))
 		hand.menu_released.connect(func(h: XRController3D) -> void: on_menu(h as XRHand, false))
+		# The right stick click: keeps the picture under the browser's cursor (pointer mode), else the menu.
+		hand.stick_clicked.connect(func(h: XRController3D, pressed: bool) -> void:
+			if picture_keeper != null and picture_keeper.on_stick_click(h as XRHand, pressed):
+				return
+			on_menu(h as XRHand, pressed))
 		hand.overlay_pressed.connect(func(_h: XRController3D) -> void: set_overlay(not overlay_on))
 		hand.next_pressed.connect(func(h: XRController3D) -> void:
 			# Left bumper held + A: a snapshot (--snapshot-dir).
@@ -1274,8 +1299,9 @@ func update_controller_labels() -> void:
 	for hand in hands:
 		var side := "left" if hand == left_hand else "right"
 		var holding := features != null and features.grab.holding(hand) != ""
+		var applying: bool = ui != null and ui.is_applying() and hand == ui.pointer_hand
 		var texts := controller_labels(hand.profile if use_xr else PREVIEW_PROFILE, side, menu_shown, on_window,
-				terminal, _grab_labelled, holding, window_texts)
+				terminal, _grab_labelled, holding, window_texts, applying)
 		if ui != null and ui.talk_hand() == hand and texts.has("bumper"):
 			texts["bumper"] = tr("TALK")
 		hand.visual.set_texts(texts)
@@ -1298,7 +1324,7 @@ func set_labels_held(holder: Variant, held: bool) -> void:
 ## one, HOLD_LABELS apply (over everything else). window_texts: the window's legends for its mode now
 ## (WINDOW_POINTER_LABELS or WINDOW_AWAY_LABELS, window_pointer.gd's window_labels()); {}: WINDOW_LABELS.
 static func controller_labels(profile: String, side: String, p_menu_shown: bool, on_window := false,
-		terminal := false, grab := false, holding := false, window_texts := {}) -> Dictionary:
+		terminal := false, grab := false, holding := false, window_texts := {}, applying := false) -> Dictionary:
 	var out := {}
 	var window_map: Dictionary = window_texts if not window_texts.is_empty() else WINDOW_LABELS
 	for b: Array in _profile_bindings(profile, side):
@@ -1317,6 +1343,8 @@ static func controller_labels(profile: String, side: String, p_menu_shown: bool,
 			legend = GRAB_LABEL
 		if holding and HOLD_LABELS.has(b[1]):
 			legend = HOLD_LABELS[b[1]]
+		if applying and APPLY_LABELS.has(b[1]):
+			legend = APPLY_LABELS[b[1]]
 		# Last: an action with no legend of its own can have one on a window or a terminal.
 		if legend == "":
 			continue
