@@ -9,17 +9,20 @@ extends RefCounted
 ## lamp shades), mat(key, colour) -> material (made once a key and colour), shade(colour) -> a lamp shade's glow,
 ## shapes (physics boxes), glows (lamp quads by key), lamps ([at, colour, strength]: stand-in lamps), screen (the
 ## room's screen: {xf, size}), room (the environment node), rng. The furniture (desk, computer, video_recorder,
-## sideboard, standard_lamp, rug, coffee_table) is furniture.gd's.
+## sideboard, standard_lamp, rug, coffee_table) is furniture.gd's; the TV rooms' dressing (bunting, tea_set, sandwiches,
+## stool, channel_dial, soundbar, floor_lamp, glass_table, media_unit) is dressing.gd's.
 
 const RoomMesh := preload("res://scripts/env/room_mesh.gd")
 const Shapes := preload("res://scripts/env/systems/kit/shapes.gd")
 const Procedural := preload("res://scripts/env/systems/kit/procedural.gd")
 const PhysicsShapes := preload("res://scripts/play/physics_shapes.gd")
 const Furniture := preload("res://scripts/env/systems/kit/furniture.gd")
+const Dressing := preload("res://scripts/env/systems/kit/dressing.gd")
 
 const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk", "column", "facade", "castle_gate",
 		"booth", "snack_bar", "screen_tower", "bougainvillea", "ivy", "ferns", "carpet", "partition", "curves",
-		"desk", "computer", "video_recorder", "sideboard", "standard_lamp", "rug", "coffee_table"]
+		"desk", "computer", "video_recorder", "sideboard", "standard_lamp", "rug", "coffee_table", "bunting", "tea_set",
+		"sandwiches", "stool", "channel_dial", "soundbar", "floor_lamp", "glass_table", "media_unit"]
 ## Each piece's size when neither the entry nor its slot gives one: [width, height, depth].
 const SIZES := {
 	"balcony_front": [6.0, 1.0, 0.25], "niche": [1.3, 2.6, 0.4], "urn": [0.5, 1.0, 0.5], "lion": [0.55, 0.9, 1.0],
@@ -30,10 +33,14 @@ const SIZES := {
 	"desk": [1.2, 0.74, 0.65], "computer": [0.44, 0.42, 0.56], "video_recorder": [0.43, 0.09, 0.3],
 	"sideboard": [1.6, 0.8, 0.45], "standard_lamp": [0.36, 1.55, 0.36], "rug": [2.0, 0.012, 1.4],
 	"coffee_table": [1.0, 0.42, 0.55],
+	"bunting": [4.0, 0.25, 0.0], "tea_set": [0.5, 0.2, 0.34], "sandwiches": [0.26, 0.09, 0.26],
+	"stool": [0.36, 0.46, 0.36], "channel_dial": [0.07, 0.07, 0.025], "soundbar": [0.9, 0.065, 0.09],
+	"floor_lamp": [0.3, 1.5, 0.3], "glass_table": [1.1, 0.4, 0.6], "media_unit": [1.8, 0.4, 0.42],
 }
 ## The pieces that stand on a floor (their slot's origin is a floor point); the others hang on a wall.
 const STANDING: Array[String] = ["urn", "lion", "obelisk", "column", "booth", "snack_bar", "ferns", "partition",
-		"desk", "computer", "video_recorder", "sideboard", "standard_lamp", "rug", "coffee_table"]
+		"desk", "computer", "video_recorder", "sideboard", "standard_lamp", "rug", "coffee_table", "tea_set",
+		"sandwiches", "stool", "soundbar", "floor_lamp", "glass_table", "media_unit"]
 ## What a video recorder's clock shows (kit.gd flashes it).
 const CLOCK := "12:00"
 
@@ -89,6 +96,9 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			var accent: Variant = e.get("accent")
 			Furniture.rug(c.s, xf, size, {"body": c.mat("fabric", field),
 					"detail": c.mat("fabric", _to_color(accent) if accent != null else field * 0.55)})
+		"bunting", "tea_set", "sandwiches", "stool", "channel_dial", "soundbar", "floor_lamp", "glass_table", \
+				"media_unit":
+			Dressing.build(piece, c, xf, size, e)
 
 
 # --- Furniture (furniture.gd draws it) -----------------------------------------------------------------------------

@@ -4169,8 +4169,16 @@ msgstr ""
 msgid "TV 1930 - glowing box"
 msgstr ""
 
+#: environments/tv_1937.env.json
+msgid "TV 1937 - mirror lid"
+msgstr ""
+
 #: environments/tv_1953.env.json
-msgid "TV 1953 - by the fire"
+msgid "TV 1953 - coronation day"
+msgstr ""
+
+#: environments/tv_1966.env.json
+msgid "TV 1966 - rented set"
 msgstr ""
 
 #: environments/tv_1972.env.json
@@ -4189,8 +4197,16 @@ msgstr ""
 msgid "TV 1993 - bedroom telly"
 msgstr ""
 
+#: environments/tv_2002.env.json
+msgid "TV 2002 - rear projection"
+msgstr ""
+
 #: environments/tv_2005.env.json
 msgid "TV 2005 - flat screen"
+msgstr ""
+
+#: environments/tv_today.env.json
+msgid "TV today - the present"
 msgstr ""
 
 #: environments/atmospheric_1928.env.json
@@ -4265,8 +4281,16 @@ msgstr ""
 msgid "The first television, 1930: a small glowing picture in a cabinet, the chair pulled up close."
 msgstr ""
 
+#: environments/tv_1937.env.json
+msgid "A drawing room in 1937: a tall cabinet whose lid holds a mirror, the picture seen in the mirror, a marble fireplace and a tea tray."
+msgstr ""
+
 #: environments/tv_1953.env.json
-msgid "A front room in 1953: a big set for its day, armchairs gathered round, and a fire in the grate."
+msgid "Coronation day, June 1953: every chair in the house round one small set, bunting across the ceiling, sandwiches and tea, rain at the window."
+msgstr ""
+
+#: environments/tv_1966.env.json
+msgid "A living room in 1966: the rented set on splayed legs with its channel dial, a teak sideboard, an orange settee."
 msgstr ""
 
 #: environments/tv_1972.env.json
@@ -4285,8 +4309,16 @@ msgstr ""
 msgid "A bedroom telly in 1993, seen from a bean bag on the floor."
 msgstr ""
 
+#: environments/tv_2002.env.json
+msgid "A lounge in 2002: a big deep rear projection set filling the end of the room, a leather sofa, a glass coffee table."
+msgstr ""
+
 #: environments/tv_2005.env.json
 msgid "The first flat screen, 2005: a wide picture on a stand, the sofa further back."
+msgstr ""
+
+#: environments/tv_today.env.json
+msgid "A living room today: a thin panel on a dark wall, a soundbar under it, a floor lamp by the sofa. The film at its best."
 msgstr ""
 
 #: environments/void.env.json
@@ -4349,7 +4381,8 @@ msgstr ""
 msgid "Weave and tilt"
 msgstr ""
 
-#: environments/screening_room_1962.env.json environments/tv_1987.env.json environments/tv_2005.env.json
+#: environments/screening_room_1962.env.json environments/tv_1966.env.json environments/tv_1987.env.json environments/tv_2002.env.json
+#: environments/tv_2005.env.json
 msgid "Wall lamps in the film"
 msgstr ""
 
@@ -4365,11 +4398,11 @@ msgstr ""
 msgid "Lines in the picture"
 msgstr ""
 
-#: environments/tv_1930.env.json environments/tv_1953.env.json
+#: environments/tv_1930.env.json environments/tv_1937.env.json environments/tv_1953.env.json
 msgid "Fire in the grate"
 msgstr ""
 
-#: environments/tv_1953.env.json environments/tv_1972.env.json
+#: environments/tv_1937.env.json environments/tv_1953.env.json environments/tv_1966.env.json environments/tv_1972.env.json
 msgid "Snow from the aerial"
 msgstr ""
 
@@ -4393,8 +4426,16 @@ msgstr ""
 msgid "Fairy lights over the telly"
 msgstr ""
 
+#: environments/tv_2002.env.json
+msgid "Lamp in the set"
+msgstr ""
+
 #: environments/tv_2005.env.json
 msgid "Backlight bleed"
+msgstr ""
+
+#: environments/tv_today.env.json
+msgid "Floor lamp in the film"
 msgstr ""
 
 #: environments/void.env.json
@@ -4477,12 +4518,20 @@ msgstr ""
 msgid "A coal fire burns in the grate. Off: the grate is cold and the set's glow lights the room."
 msgstr ""
 
-#: environments/tv_1953.env.json
+#: environments/tv_1937.env.json environments/tv_1953.env.json environments/tv_1966.env.json
 msgid "Snow on the picture from a weak signal on the roof aerial. At the bottom: a clean picture."
+msgstr ""
+
+#: environments/tv_1937.env.json
+msgid "A coal fire burns in the grate."
 msgstr ""
 
 #: environments/tv_1953.env.json
 msgid "A coal fire burns in the grate, and the cat likes the hearth."
+msgstr ""
+
+#: environments/tv_1966.env.json environments/tv_1987.env.json environments/tv_2002.env.json environments/tv_2005.env.json
+msgid "How bright the wall lamps stay once the film has started."
 msgstr ""
 
 #: environments/tv_1972.env.json
@@ -4505,10 +4554,6 @@ msgstr ""
 msgid "How many times the tape has been played: noise, smeared colour and the tear at the bottom."
 msgstr ""
 
-#: environments/tv_1987.env.json environments/tv_2005.env.json
-msgid "How bright the wall lamps stay once the film has started."
-msgstr ""
-
 #: environments/tv_1993.env.json
 msgid "Rain on the window, a clear night, or each in turn."
 msgstr ""
@@ -4517,8 +4562,16 @@ msgstr ""
 msgid "How bright the fairy lights over the telly are. At the bottom: off."
 msgstr ""
 
+#: environments/tv_2002.env.json
+msgid "The projection lamp inside the set: an old lamp makes a dimmer picture."
+msgstr ""
+
 #: environments/tv_2005.env.json
 msgid "The early panel's backlight glowing through the dark scenes, most at the corners."
+msgstr ""
+
+#: environments/tv_today.env.json
+msgid "How bright the floor lamp by the sofa stays once the film has started."
 msgstr ""
 
 #: environments/void.env.json

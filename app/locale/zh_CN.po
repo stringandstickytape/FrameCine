@@ -3199,9 +3199,6 @@ msgstr "地球在天空中转动的速度。1 倍时两小时转一圈，大约�
 msgid "TV 1930 - glowing box"
 msgstr "电视 1930 - 发光的盒子"
 
-msgid "TV 1953 - by the fire"
-msgstr "电视 1953 - 炉火旁"
-
 msgid "TV 1972 - first colour"
 msgstr "电视 1972 - 第一台彩电"
 
@@ -3372,9 +3369,6 @@ msgstr "1937年的流线型影院：奶油色釉面砖带、变色的灯槽、�
 msgid "The first television, 1930: a small glowing picture in a cabinet, the chair pulled up close."
 msgstr "1930年最早的电视：柜子里一块发光的小画面，椅子拉得很近。"
 
-msgid "A front room in 1953: a big set for its day, armchairs gathered round, and a fire in the grate."
-msgstr "1953年的客厅：在当时算大的电视机、围拢的扶手椅，壁炉里生着火。"
-
 msgid "The first colour set, 1972: the television in the corner and the chairs in a row."
 msgstr "1972年第一台彩电：电视放在角落，椅子排成一排。"
 
@@ -3428,3 +3422,49 @@ msgstr "每15分钟"
 
 msgid "One film, and the room moves forward through the history of television, an era at a time while it plays."
 msgstr "一部影片，播放时房间沿着电视的历史向前推进，一次一个年代。"
+
+#. The rest of the TV-era rooms (app/environments/tv_*.env.json): names, descriptions and settings.
+msgid "TV 1937 - mirror lid"
+msgstr "电视 1937 - 镜面翻盖"
+
+msgid "TV 1953 - coronation day"
+msgstr "电视 1953 - 加冕日"
+
+msgid "TV 1966 - rented set"
+msgstr "电视 1966 - 租来的电视机"
+
+msgid "TV 2002 - rear projection"
+msgstr "电视 2002 - 背投电视"
+
+msgid "TV today - the present"
+msgstr "电视 今天 - 当下"
+
+msgid "A drawing room in 1937: a tall cabinet whose lid holds a mirror, the picture seen in the mirror, a marble fireplace and a tea tray."
+msgstr "1937年的客厅：一个高高的柜子，盖子里装着镜子，画面在镜子里看，还有大理石壁炉和茶盘。"
+
+msgid "Coronation day, June 1953: every chair in the house round one small set, bunting across the ceiling, sandwiches and tea, rain at the window."
+msgstr "1953年6月的加冕日：家里所有的椅子都围着一台小电视，天花板下挂着彩旗，有三明治和茶，窗外下着雨。"
+
+msgid "A living room in 1966: the rented set on splayed legs with its channel dial, a teak sideboard, an orange settee."
+msgstr "1966年的起居室：租来的电视机立在外撇的腿上，带着换台旋钮，木质餐边柜，橙色沙发。"
+
+msgid "A lounge in 2002: a big deep rear projection set filling the end of the room, a leather sofa, a glass coffee table."
+msgstr "2002年的客厅：一台又大又深的背投电视占满房间的一头，皮沙发，玻璃茶几。"
+
+msgid "A living room today: a thin panel on a dark wall, a soundbar under it, a floor lamp by the sofa. The film at its best."
+msgstr "今天的起居室：深色墙上一块薄薄的屏幕，下面是条形音箱，沙发旁一盏落地灯。影片在这里最好看。"
+
+msgid "A coal fire burns in the grate."
+msgstr "壁炉里燃着煤火。"
+
+msgid "Lamp in the set"
+msgstr "机内投影灯"
+
+msgid "The projection lamp inside the set: an old lamp makes a dimmer picture."
+msgstr "电视机里的投影灯：灯用旧了，画面就更暗。"
+
+msgid "Floor lamp in the film"
+msgstr "影片中的落地灯"
+
+msgid "How bright the floor lamp by the sofa stays once the film has started."
+msgstr "影片开始后沙发旁落地灯保持的亮度。"
