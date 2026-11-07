@@ -251,10 +251,13 @@ the stars coming out.
 
 ### The ritual in the converted cinema
 
-`ritual` (a cue of `cinema.env.json`): when the film starts from its start, the house lamps come down to half over
-2 s, the curtains part over 5 s, a soft chime from the synthesiser plays on the Environment bus, and the house lamps
-go out over 6 s. The house light settles at the room's "House lights in the film" setting. When the film ends the
-lamps come back up over 4 s. The common "Pre-show" setting turns it off with the curtains.
+`ritual` (a cue of `cinema.env.json`): when the film starts from its start, a soft chime from the synthesiser plays
+on the Environment bus near the stage, the house lamps come down to half over 1.5 s, the curtains part over 3.5 s,
+and after 2 s the lamps go down to the room's "House lights in the film" setting (20 % by default) over 5 s. The
+room light dims as before (light follows playback). In the pre-show and after the end (`lights_up`) the lamps come
+back up over 4 s. With the common "Pre-show" setting off there are no curtains and `dim` takes the lamps down over
+3 s instead. A change to the House lights setting during the film moves the lamps at once (a cue held at a setting's
+value follows it).
 
 ## Room settings
 
@@ -337,15 +340,19 @@ through cues' `requires`. Examples from the set:
   at the slider's default and measures the bus's RMS (`AudioEffectCapture`). `test_env_audio.gd` holds every room under
   `LEVEL_TARGET_DB` (-38 dBFS, the film's reference minus 18 dB) with 2 dB to spare.
 
-Measured (`test_env_audio.gd`, a 220 Hz tone at -20 dBFS RMS on Environment, a 1 kHz tone on Film):
+Measured (`test_env_audio.gd`, 2026-11-07, desktop: a 220 Hz tone at -20 dBFS RMS on Environment with the bus at
+0 dB, a 1 kHz tone on Film; the compressor's threshold -26 dB, ratio 1.75, attack 20 ms, release 300 ms):
 
 | Film | Environment out | Ducked by |
 |---|---|---|
-| silent | (see the test's line) | 0 dB |
-| -20 dBFS RMS (reference) | | about 8 dB |
-| -6 dBFS RMS (loud) | | about 15 dB |
+| silent | -20.0 dBFS | 0 dB |
+| -20 dBFS RMS (the reference) | -27.1 dBFS | 7.1 dB |
+| -6 dBFS RMS (loud) | -39.3 dBFS | 19.3 dB |
+| stopped again (after 1 s) | -20.1 dBFS | 0 dB |
 
-(The figures the test prints are in the report of the run; the test holds the reference duck between 5 and 12 dB.)
+The engine's compressor reduces by about 2.08 x (the sidechain's peak over the threshold) x (1 - 1 / ratio), much
+more than its ratio suggests; the settings were chosen from these tones. The test holds the reference duck between 5
+and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider's default, under the -38 dBFS target.
 
 ## The checks
 
@@ -356,13 +363,16 @@ Measured (`test_env_audio.gd`, a 220 Hz tone at -20 dBFS RMS on Environment, a 1
 2. **Headset budget:** the room is built headless and measured: draw calls (one a mesh surface), triangles, live
    lights (the bake's hidden lights do not count), particles, and texture memory (the images' bytes with mip levels).
 
-   | Budget | Per room |
-   |---|---|
-   | draw calls | 40 |
-   | triangles | 400 000 |
-   | live lights | 2 |
-   | particles | 4 000 |
-   | texture memory | 96 MB |
+   | Budget | Per room | The cinema | The Void |
+   |---|---|---|---|
+   | draw calls | 40 | 19 | 1 |
+   | triangles | 400 000 | 194 856 | 2 |
+   | live lights | 2 | 0 | 0 |
+   | particles | 4 000 | 0 | 0 |
+   | texture memory | 96 MB | 9.0 MB | 0 |
+
+   The budget leaves room for a sky, weather and life on top of a hall like the cinema. Measured headless
+   (`test_environments.gd`); the GPU time on the Frame is the showrooms' measure (`docs/showrooms.md`).
 
 3. **Clear sight line:** from every seat's eyes (1.2 m over its floor point) to nine points of the default screen
    (its corners, edges and centre, 5 % in), nothing static is hit: the room's meshes and seats as physics shapes, ray
@@ -464,12 +474,40 @@ real mark (the names check).
 | `app/scripts/env/env_audio.gd`, `env_synth.gd` | the buses, the slider, ducking, the level check; synthesised sounds |
 | `app/scripts/env/env_checks.gd` | the checks |
 | `app/environments/*.env.json` | the rooms as documents |
+| `app/scripts/env/env_library.gd` | lists a document with no scene of its own as a room (`document_rooms()`) |
 | `app/ui/room_tab.gd` | "This room" |
 
 ## The next phase
 
-Systems first (in parallel, each in its own files), then rooms. See the foundation's report for the split; each
-agent adds its system to `registry.gd` (one line) and its tests.
+Systems first, in parallel, then rooms. Each agent owns its files below, adds one line per system to `registry.gd`
+(and the kind to `KINDS` if new), and its own `app/tests/test_env_<system>.gd`. Nobody else edits a file another
+agent owns; the shared files take additive changes only (`registry.gd`, `env_doc.gd` constants such as `SOUNDS`,
+`zh_CN.po` appended). Each system passes the checks through a small test room in its test, not a shipped room.
+
+**Phase 1: systems** (seven agents at once)
+
+| Agent | Systems | Owns |
+|---|---|---|
+| A sky and vista | `sky`, `vista` | `systems/sky.gd`, `systems/vista.gd`, `app/shaders/env_sky*.gdshader`, star catalogue data (public domain) |
+| B atmosphere and weather | `atmosphere`, `weather` | `systems/atmosphere.gd`, `systems/weather.gd`, `app/shaders/env_haze*`, `env_rain*` |
+| C ambient life | `life` | `systems/life.gd`, `systems/life/*.gd` (one creature each), `app/shaders/env_life*` |
+| D sound and music | `sound_bed`, `acoustics`, `music` | `systems/sound_bed.gd`, `systems/acoustics.gd`, `systems/music.gd`; takes over `env_synth.gd` |
+| E presentation | `presentation` | `systems/presentation.gd`, `app/shaders/env_presentation*`; TV-era presets |
+| F builders | `shopfront`, `nave`, `dome_hall`, `terrace`, `domestic`, `vehicle`, `kit` | `systems/<name>.gd` each, `systems/kit/*` |
+| G seats and motion | `seats`, `motion` | `systems/seats.gd`, `systems/motion.gd`, the seat model slot of `auditorium.gd` (`seat_model`, `seat_mesh()` only) |
+
+The foundation's own files (`env_host.gd`, `env_timeline.gd`, `env_signals.gd`, `env_audio.gd`, `env_checks.gd`,
+`room_settings.gd`, `env_room.gd`, `auditorium.gd` apart from G's slot) stay with one agent, if any change is
+needed at all: a system that needs a new host hook asks for it rather than editing the host.
+
+**Phase 2: rooms** (after phase 1 is merged; as many agents as rooms, two or three rooms each)
+
+A room is its document alone: `app/environments/<id>.env.json`, with no scene. `scripts/env/env_library.gd`
+lists every document without a `.tscn` beside it, so a room agent touches no list in `main.gd`,
+`env_library.gd` or `room_tab.gd`; `tools/i18n.py extract` takes the room's name and settings' words from the
+document. Each room agent owns its documents, its CC0 assets under `app/environments/<id>/`, its rows in
+`app/environments/CREDITS.md` (one block per room, appended) and its Chinese entries appended to `zh_CN.po`.
+`test_environments.gd` checks every document without change.
 
 ## Open questions
 

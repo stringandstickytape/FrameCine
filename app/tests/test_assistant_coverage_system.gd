@@ -182,11 +182,15 @@ func _test_seat() -> void:
 
 func _test_effects() -> void:
 	var f: Node = main.features
+	# The Void's reflection is on by default (its mirror floor, docs/environments.md): undo puts back what was.
+	var was_on: bool = f.reflection.enabled
+	var was_strength: float = f.reflection.strength
 	var r := await _run_cmd("floor_reflection", {"on": true, "strength": 0.4})
 	_check("floor_reflection: on at 40 %", r["ok"] and f.reflection.enabled and is_equal_approx(f.reflection.strength, 0.4))
 	_check("floor_reflection: read back", (await _read("room_settings"))["reflection"]["on"] == true)
 	(r["call"] as DevCommands.Call).undo.call()
-	_check("floor_reflection: undo", not f.reflection.enabled)
+	_check("floor_reflection: undo", f.reflection.enabled == was_on and is_equal_approx(f.reflection.strength,
+			was_strength))
 	r = await _run_cmd("floor_reflection", {})
 	_check("floor_reflection: nothing to change refused", not r["ok"])
 

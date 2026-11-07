@@ -52,7 +52,7 @@ const COMMON_SETTINGS := [
 		"label": "Dim during the film", "description": "The room's light goes down while the film plays."},
 	{"name": "ambience_db", "type": "range", "min": -25.0, "max": 6.0, "step": 1.0, "default": 0.0, "format": "db",
 		"off_at_min": true, "applies": "always",
-		"label": "Room sound", "description": "This room's sound against the Environment sound slider. At the bottom: off."},
+		"label": "Ambience", "description": "This room's sound against the Environment sound slider. At the bottom: off."},
 	{"name": "life", "type": "bool", "default": true, "applies": "life",
 		"label": "Ambient life", "description": "Animals and other life in the room."},
 	{"name": "ritual", "type": "bool", "default": true, "applies": "ritual",
@@ -64,7 +64,7 @@ const COMMON_SETTINGS := [
 		"label": "Motion", "description": "How much things in the room move: sways, tilts, weave."},
 ]
 # i18n: begin
-const COMMON_TEXTS := ["Dim during the film", "The room's light goes down while the film plays.", "Room sound",
+const COMMON_TEXTS := ["Dim during the film", "The room's light goes down while the film plays.", "Ambience",
 		"This room's sound against the Environment sound slider. At the bottom: off.", "Ambient life",
 		"Animals and other life in the room.", "Pre-show", "Curtains before the film, and the room's start of the show.",
 		"Flickering lights", "Off: lights that flicker stay steady.", "Motion",

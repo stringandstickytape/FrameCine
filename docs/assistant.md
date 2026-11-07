@@ -419,6 +419,40 @@ The headset checks the whole document and returns every problem with its JSON pa
             {"path": "$.parts[2].widget", "error": "unknown widget weather; supported: clock, film_progress, ..."}]}
 ```
 
+### Rooms from systems (schema 4)
+
+A room can also be built from the environments engine's systems (`docs/environments.md`): a whole hall from a
+builder, its light, cues that run with the film, settings of its own. Version 4 is version 3 with these sections:
+`room`, `acoustics`, `systems`, `settings`, `cues`, `timeline`, `audio`, `credits`. Every version 3 key still works
+in it (parts, recolour, sky, seats).
+
+1. **`room_systems`** (read): every system in the registry with its kind, description, parameters (type, range,
+   default, whether it is live), actions and cost; the channels a live parameter can follow; the timeline's states;
+   the cue steps; the setting types; the common room settings; the synthesised sounds; the headset budget.
+2. **`new_room`** with `"schema": 4` and `systems`, on a base (the Void when none is given):
+
+```json
+{"schema": 4, "name": "Small hall", "base": "void",
+ "systems": [{"system": "light", "params": {"house_lamps": {"bind": "setting.lamps", "range": [0, 1]}}},
+             {"system": "auditorium", "id": "hall", "params": {"rows_front": 4, "rows_back": 1,
+              "seats_per_row": 11, "row_radius": 0, "proscenium": "none"}}],
+ "settings": [{"name": "lamps", "type": "range", "min": 0, "max": 1, "default": 1,
+               "label": "Lamps", "description": "How bright the lamps are."}],
+ "cues": [{"name": "dim", "when": {"state": "starting"},
+           "steps": [{"set": "light.house_lamps", "to": 0.2, "seconds": 5}]}]}
+```
+
+3. **`room_apply`** with `"schema": 4` changes it: each section it names replaces the room's (`null` takes it out);
+   parts merge by name as before. The kept room is version 4.
+
+- Bindings and cues are data: a binding names a channel and how to map it; a cue names a state or a signal, the
+  settings it needs, and steps that fade a live parameter, wait, release, run a system's action or play a
+  synthesised sound. No expressions, no code. A parameter that is not live is built once: only a setting may change
+  it (the room builds again).
+- The same checks as every room that ships: a problem comes back with its path, as `$.systems[1].params.rows_front`.
+- **The room's own settings** show in the Room tab's This room and in `room_settings`' `this_room` (each with a JSON
+  Schema, its value and its default). `room_setting` changes one (`name`, `value`) or puts all back (`reset`).
+
 ### Widgets
 
 A part can carry a behaviour the app provides: `"widget": "clock"`. The assistant sends the name and options; the app

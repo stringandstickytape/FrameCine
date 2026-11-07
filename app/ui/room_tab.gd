@@ -17,7 +17,8 @@ const Recipes := preload("res://scripts/dev/recipes.gd")
 const Showrooms := preload("res://scripts/env/showrooms.gd")
 
 const SLEEP_WORDS := ["Off", "15 min", "30 min", "60 min", "90 min", "End of file"] # i18n
-## The names of the rooms that ship (main.gd ENVIRONMENTS, scripts/env/env_library.gd BUILT_IN), as keys: their rows
+## The names of the rooms that ship (main.gd ENVIRONMENTS, scripts/env/env_library.gd BUILT_IN; a room that ships as a
+## document alone has its name extracted from its .env.json by tools/i18n.py), as keys: their rows
 ## translate them. test_i18n.gd checks that each built-in room's name is here.
 # i18n: begin
 const ROOM_NAMES := ["Void", "Dim room", "Cinema", "Passthrough", "Home theatre", "Drive-in", "Planetarium",

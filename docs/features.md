@@ -89,6 +89,7 @@ sections of `user://settings.cfg`; `<environment id>` and `<id>` sections hold o
 | [Showrooms](#showrooms) | | none | in the Room tab's Showrooms group (`docs/showrooms.md`) |
 | [Every format: old and other codecs in software](#every-format-old-and-other-codecs-in-software) | none | none | on (engine branch `frame/codecs`) |
 | [The browser: stick pointer and voice into a field](#the-browser-stick-pointer-and-voice-into-a-field) | none | `[browser] laser`, `dictation_partials` | on (the laser off by default) |
+| [The environments engine](#the-environments-engine) | none | `[audio] environment_db`, `[room:<env>]` | on: the cinema and the Void are documents (`docs/environments.md`) |
 
 ## #36 Wall-clock end time
 
@@ -2560,3 +2561,39 @@ open questions are in `app/docs/window-source.md` ("Controller mapping", "Voice 
 
 Untested: on the headset (the feel of the gaze switch and the jump, the cursor's size in the lenses), and in a real
 Chromium (the page script, cross-origin frames, `Input.insertText` into the focused frame).
+
+## The environments engine
+
+Rooms are data over trusted systems (`docs/environments.md`, D30). A room is a version 4 room document: it names
+systems from a registry and gives them parameters. The cinema and the Void ship as documents
+(`app/environments/cinema.env.json`, `void.env.json`). The planned set of 17 cinemas and the TV-era rooms are mapped
+to systems in `docs/environments.md`. A new room is its document alone: a `.env.json` with no scene beside it is in
+the Environment list by itself, and `tools/i18n.py` takes its words.
+
+- **Systems:** `light` (house materials, lamps by group, the bake's lights and hooks), `auditorium` (a parametric
+  stadium hall: rake, rows, seats, aisles, panels, proscenium, ceiling, balcony, boxes, open ceiling, partition),
+  `screen_frame` (masking, the beam), `showing` (the curtains in a cue), `mirror_floor` (the Void's floor and ripple).
+- **Film signals:** `film.colour`, `film.brightness`, `film.bass`, `film.transient`, `film.quiet`, `film.progress`,
+  `film.minutes`, `time.of_day`, `playback.state`. A live parameter follows one through a binding
+  (`{bind, range | keys | map, smooth}`), never an expression.
+- **Timeline and cues:** states (pre-show, starting, playing, paused, intermission, credits, ended); cues on a state,
+  on a signal held long enough or on a period, with the settings they require, a chance and a cooldown; film-time
+  tracks. The cinema's ritual: a chime, the lamps down to half, the curtains part, the lamps to the room's setting.
+- **Room settings:** every room has its own (Room, This room): the common ones and the document's. Kept as
+  `[room:<env>]`. Commands: `room_settings` (`this_room`) and `room_setting`.
+- **Audio buses:** Film, Environment, Interface. The Environment sound slider (Sound tab, default -18 dB), the room's
+  offset, the duck under the film (measured: 7 dB at the film's reference level, 19 dB under a loud scene), the pause
+  rise, the level check. The film's analysis (`film_react.gd`, the music bars, an assistant room's loudness glow)
+  listens to Film only.
+- **Checks:** schema, the headset budget measured, a clear sight line from every seat, comfort, licences, names (no
+  real marks), no people.
+- **The assistant:** `room_systems`, and version 4 documents through `new_room` and `room_apply`.
+- **Changed:** the Void's floor reflection is on by default (its mirror floor). The thud plays on Environment, 6 dB
+  under where it was at the slider's default.
+- **Tested:** `test_env_registry.gd`, `test_env_signals.gd`, `test_env_timeline.gd`, `test_env_audio.gd`,
+  `test_environments.gd`, `test_env_checks.gd`, `test_env_cinema_render.gd` (lavapipe: the old and the new cinema,
+  pixel for pixel), `test_env_void.gd`, `test_room_settings.gd`, `test_env_assistant.gd`, on the desktop.
+
+Untested: on the headset (the ritual's timing, the duck through the earbuds, the colour read-back's cost, the
+ripple in the lenses, the kept lightmap after the conversion: the room's meshes are the same, so its stamp should
+still match).

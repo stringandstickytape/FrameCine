@@ -20,6 +20,10 @@ const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
 
 var doc := {}
 var host: Node
+## The old cinema's flag, kept for what reads it (test_room_lightmaps.gd): the light system's is_baked().
+var _baked: bool:
+	get:
+		return is_baked()
 var has_curtains := false
 var curtains_by_cue := false
 var reflection_floor_y := NAN
@@ -200,6 +204,11 @@ func collision_shapes() -> Array:
 
 func _light() -> Node:
 	return host.system_of_kind("light") if host != null else null
+
+
+## Whether a lightmap bake has anything to do here: only a room with a light system (the Void has none).
+func bakeable() -> bool:
+	return _light() != null
 
 
 func bake_lights() -> Node3D:

@@ -35,7 +35,9 @@ func set_enabled(on: bool) -> void:
 ## Whether the room on show is built for a lightmap.
 func room_bakeable() -> bool:
 	var room: Node = main.env
-	return room != null and room.has_method("static_meshes") and room.has_method("bake_lights")
+	# A room built from a document has the hooks whatever its systems; it says whether it has a light to bake.
+	return room != null and room.has_method("static_meshes") and room.has_method("bake_lights") \
+			and (not room.has_method("bakeable") or bool(room.call("bakeable")))
 
 
 ## Bakes the room on show again, now, and keeps the result; {} when there is nothing to bake.

@@ -516,6 +516,30 @@ otherwise talks to the assistant as before (`app/docs/window-source.md`).
 - **Would change if:** the gaze switch feels wrong in the headset (then a button to hold for the cursor), or
   Chromium refuses flatten auto-attach on a page socket (then the browser-level socket, `/json/version`).
 
+## D30. Environments are data over trusted systems (2026-11-07)
+
+A room is a version 4 room document that names systems from a registry and gives them parameters
+(`docs/environments.md`). The systems (builders, light, the screen's frame, the showing, the mirror floor; later sky,
+weather, life, sound beds, music, presentation, seats, motion) are GDScript in the app. A document never holds code:
+a parameter can follow a film signal or a setting only through a binding (`{bind, range | keys | map, smooth}`), and a
+cue only names what the systems already have. The cinema, 1000 lines of code, is now a document over the auditorium
+builder and renders the same, pixel for pixel; the Void is the second.
+
+- **Why:** 17 cinemas and the TV-era rooms written as code would be 17 copies of the same lighting, seats, ritual and
+  sound with their own bugs; as documents they share tested systems, and an assistant can build one too. Every
+  document passes the same checks (schema, the headset's budget, sight lines, comfort, licences, names, no people).
+- **Versions 1 to 3 read as before.** Version 4 is version 3 with sections; `room_schema.gd` hands them to
+  `env_doc.gd`. A kept room is written as 4 only when it uses them.
+- **Room settings per room**, declared in the document, built into the Room tab and the assistant's commands from the
+  same declarations, kept as `[room:<id>]` only where they differ from the default.
+- **Three buses.** The film on Film, the room on Environment (ducked under Film by a sidechain compressor, its own
+  slider, 18 dB under by default), tools on Interface. The rain never drowns the film. The film's analysis listens
+  to Film only.
+- **Rejected:** a scripting language or expressions in documents (an assistant's room would be code again); one
+  scene file per room (no checks, no assistant); one bus with gains per sound (no duck, no slider).
+- **Would change if:** a room needs behaviour no system can express (then a new system in the app, never code in the
+  document), or the compressor's duck sounds wrong in the headset (then a duck of our own on the bus's volume).
+
 ## Open
 
 - Quad layer for flat video vs. drawing in the projection layer: sharpness and bandwidth comparison (spike 03-layer).

@@ -128,7 +128,8 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 | Section | Keys (default) | What |
 |---|---|---|
 | `[view]` | `environment` ("void"), `overlay` (false), `foveation` ("low"; or "off", "medium", "high"), `foveation_sharp_panel` (true) | Start environment; info overlay; foveated rendering (D22): the level, and off while the panel or the agent pane shows. Also in System, Rendering: Foveation (Off / Low / Medium / High; applies at once; High can look blocky at the edges) and Sharp while the panel shows. A build whose project.godot has `xr/openxr/foveation_level` 0 starts without foveation; the row then says it isn't available. |
-| `[audio]` | `volume` (1.0), `av_offset` (0.0 s), `av_offset_<rate>` (s, per display refresh rate; `av_offset` is the fallback) | A/V offset per refresh rate (#24) |
+| `[audio]` | `volume` (1.0), `av_offset` (0.0 s), `av_offset_<rate>` (s, per display refresh rate; `av_offset` is the fallback), `environment_db` (-60 off to 0 dB, -18) | A/V offset per refresh rate (#24); the Environment sound slider (the room's own sound, always ducked under the film; `docs/environments.md`) |
+| `[room:<env>]` | one key per room setting changed from its default: `dim` (true), `ambience_db` (-25 off to 6 dB, 0), `life` (true), `ritual` (true), `flicker` (true), `motion` (0 to 1, 1), and the room's own (the cinema's `house_level` 0 to 1, 0.2; the Void's `ripple` 0 to 1, 0.5) | The Room tab's This room (below) |
 | `[sound]` | `night_mode` (false), `night_strength` (1.0), `dialogue_boost_db` (0) | Night mode and dialogue boost (#26) |
 | `[player]` | `last_file` | |
 | `[screen_<env>]` | `width`, `distance`, `height_offset` (per environment), `yaw` (0.0), `curve_radius` (0 = flat) | The screen in each room |
@@ -301,6 +302,23 @@ It needs the `PLAYER_BINAURAL` engine or a later one. On older engines the tab s
 
 The same settings are in the dev link and for an assistant: `set_sound` with `speakers`, `bass_channel`,
 `output_profile`, `hrtf` and `room_reverb`, and `download_hrtf`.
+
+## Room sound and this room's settings
+
+- **Sound, Environment sound:** the room's own sound (rain, birds, the projector, a thrown object's thud), from off
+  to full. The default is 18 dB under the film. It always ducks under the film: about 7 dB under a film at its usual
+  level, about 19 dB under a loud scene. It rises a little (3 dB) in the pre-show, while paused and after the end.
+- **Room, This room:** each room's own settings. Every room has **Dim during the film** and **Ambience** (this room's
+  sound against the Environment sound slider; at the bottom the room is silent). Where they do something, also
+  **Ambient life**, **Pre-show** (the curtains and the room's start of the show), **Flickering lights** (off holds them
+  steady) and **Motion** (how much things in the room move). A room adds its own: the cinema's **House lights in the
+  film**, the Void's **Ripple**. **Back to defaults** puts this room's settings back, and its own seat.
+- Kept per room as `[room:<env>]` in `settings.cfg`, only what you changed.
+- The cinema's start of the show: when a film starts from its beginning, a chime sounds, the house lamps come down
+  to half, the curtains part, and the lamps go down to the House lights setting. At the end they come back up.
+- The Void: a black floor that reflects the film, and a faint ring on it where you move your head.
+- An assistant reads them with `room_settings` (`this_room`) and changes them with `room_setting`; the slider is
+  `set_sound`'s `environment_sound_db`.
 
 ## The tabs' sections
 

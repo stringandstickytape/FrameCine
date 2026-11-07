@@ -8,6 +8,7 @@ extends SceneTree
 const EnvChecks := preload("res://scripts/env/env_checks.gd")
 const EnvDoc := preload("res://scripts/env/env_doc.gd")
 const EnvRoom := preload("res://scripts/env/env_room.gd")
+const EnvLibrary := preload("res://scripts/env/env_library.gd")
 
 var _failures := 0
 var _checks := 0
@@ -45,6 +46,19 @@ func _run() -> void:
 				blocked], blocked.is_empty())
 		room.queue_free()
 		await process_frame
+	# A room that ships as its document alone is listed and built from it; the cinema and the Void have scenes.
+	var listed: Array = EnvLibrary.document_rooms().map(func(e: Array) -> String: return str(e[0]))
+	_check("document rooms: listed without the rooms that have scenes %s" % [listed],
+			not listed.has("cinema") and not listed.has("void"))
+	var ids: Array = EnvLibrary.environments().map(func(e: Array) -> String: return str(e[0]))
+	_check("document rooms: in the environment list", listed.all(func(i: String) -> bool: return ids.has(i)))
+	var built: Node3D = EnvLibrary.instantiate(["void_doc", "Void", "res://environments/void.env.json", []])
+	root.add_child(built)
+	await process_frame
+	_check("document rooms: an entry's document builds an env_room with its systems",
+			built.get_script() == EnvRoom and built.get_node_or_null("Systems") != null)
+	built.queue_free()
+	await process_frame
 	print("test_environments: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	quit(_failures)
 
