@@ -1254,6 +1254,64 @@ noise, ghosting, a weak signal), display (a mechanical-scan set's orange glow, 1
 shadow mask; a flat panel). Each era is a preset of the chain plus a `domestic` room. Names are pastiche, never the
 real mark (the names check).
 
+### Room: Bathysphere
+
+`app/environments/bathysphere.env.json`. A round hall under a glass dome in deep water. Fish and glowing creatures
+gather round the screen outside the glass; now and then, in a quiet scene, a whale swims past above it.
+
+- **The hall** (`dome_hall`): radius 9 m, a 1.3 m drum of dark metal with 12 warm lamps (group `house`), a glass
+  dome 7.5 m high on 12 brass ribs, an oak floor, a low stage. The screen (6.4 x 3.6 m, its bottom 1.45 m up) stands
+  8.3 m ahead, inside the glass. Plush seats in teal velvet on arcs round it (six rows, 100 degrees); the room's own seat is at the
+  origin, in the third row. Seat picking is the builder's (`ring` seats; the chosen one folds away).
+- **The water** (`outside` water): blue-black, lit faintly from above. `outside_glow` follows `playback.playing`
+  (0.7 before the film, 0.45 in it, over 3 s). The glass is tinted almost black, so it adds little haze and the water
+  stays dark.
+- **The light** (`light`): a cool blue-green fill from above, warm lamps.
+- **Life** (`life`, four systems, all outside the glass): `fish`, 40 silver fish to the left; `shoal`, 28 smaller
+  grey-green ones to the right; `glow`, 16 glowing bells behind and round the picture (`size` 2, their colour half
+  the film's); `whale`, its way high behind the screen (13 m up, 17 to 19 m out). The fish's and the bells'
+  `attraction` follows `film.brightness`: they come nearer the screen in a bright scene. The regions are boxes outside
+  the dome's ellipsoid and inside the water's sphere, to the sides of the picture, so no school hides behind it.
+- **Settings:** Whale (`whale`): never, rarely (the default), sometimes. Two cues on `film.quiet` (above 0.9 for 4 s,
+  while playing) call `whale.pass`, one per choice: rarely has a chance of 0.3 and a cooldown of 30 minutes,
+  sometimes 0.7 and 15 minutes; never fires neither. The whale sings as it passes.
+- **Cues:** `dim` (with the film: the house lamps to 12 % over 4 s), `lights_up` (pre-show and the end).
+- **Measured** (`test_room_bathysphere.gd`, headless): 12 draws, 79 078 triangles, no lights, no particles, 6 MB.
+- **The render** (lavapipe, from the seat): a dark blue dome on brass ribs over rows of teal seats, a school to each
+  side of the picture, faint bells at its edges, the whale's shape crossing above it.
+- **Sound (later):** hull creaks now and then (a one-shot, low, behind and to the sides), a faint low hum of the
+  deep, the whale's song (the life system sings it already). Acoustics: a small hard metal and glass room
+  (`acoustics` rt60 0.9).
+- **Gap:** caustics. The light system has no moving light pattern; the room has a cool fill from above instead.
+
+### Room: Crater
+
+`app/environments/crater.env.json`. A lunar amphitheatre of stone tiers under a glass dome, Earth over the screen
+in a black sky full of stars. Silent: the room has no sound bed and makes no sound at all; only the film is heard.
+
+- **The amphitheatre** (`terrace`, style `amphitheatre`): seven tiers on arcs of 120 degrees round the screen
+  (rows 2 in front, 5 behind, 0.95 m deep, 0.42 m rise), the pit 1.26 m under the room's own seat, the screen (8 x
+  4.5 m) on a dark frame 11.4 m ahead, 18 rocks on a grey plain that runs 150 m out. The room's own seat is in the
+  third tier at the origin; seat picking uses the tiers' places (`tier`).
+- **The dome** (`dome_hall` as a cover: `has_floor` and `seating` off, `outside` none): glass, radius 18 m centred
+  9 m ahead, on a 0.8 m drum with 16 cool lamps (group `house`), 12 m high, 16 ribs of brushed steel. Every seat's
+  eyes and the screen are under it with a metre to spare. The glass is tinted almost black, so space shows black
+  through it.
+- **Why both:** the two combine cleanly. The terrace gives the tiers, the plain and the screen; the dome adds only its
+  drum, panes, ribs and lamps over them (no floor, no seats, no water). The screen is the terrace's.
+- **The sky** (`sky`, mode `space`): latitude -30, a July night, so the Milky Way's bright middle stands high.
+  `milky_way` follows `playback.playing` (0.35 before the film, 1 in it, over 3 s): the Milky Way comes out as the
+  lights dim. Earth 4 degrees across, 30 degrees up, a little to the right of the screen, 70 % lit.
+- **The rim** (`vista`): low grey hills 160 m out all round, the crater's wall.
+- **Setting:** Earth's speed (`earth_speed`, 0.5 to 4 times, default 1): bound to `sky.earth_turn` by `range`
+  [6, 48], so 1 x is twelve times Earth's real speed, a turn in two hours (about one a film), and 4 x a turn in 30
+  minutes. The Motion setting scales it (half Motion, half the speed).
+- **Cues:** `dim` (the dome's lamps out over 5 s with the film), `lights_up`. `pause_rise_db` 0.
+- **Measured** (`test_room_crater.gd`, headless): 12 draws, 15 836 triangles, no lights, no particles, 4.3 MB.
+- **The render** (lavapipe, from the seat): the framed screen on the pit floor, pale tiers either side, the dome's
+  ribs meeting overhead, stars and the Milky Way through the glass, Earth up and to the right of the picture.
+- **Sound:** none, by design. Acoustics (for the film's spatial sound): a large glass dome, rt60 1.1, wet 0.35.
+
 ## Files
 
 | File | What |

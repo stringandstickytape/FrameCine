@@ -2978,3 +2978,35 @@ msgstr "影院"
 #. The Room tab: the group of television rooms (the history of television).
 msgid "Television"
 msgstr "电视"
+
+#. The Room tab: a room, a glass dome hall in deep water.
+msgid "Bathysphere"
+msgstr "深海球舱"
+
+#. The Bathysphere's setting: how often the whale comes.
+msgid "Whale"
+msgstr "鲸鱼"
+
+msgid "How often a whale swims past behind the screen in a quiet scene."
+msgstr "安静的场景中，鲸鱼从屏幕后方游过的频率。"
+
+#. The Whale setting's choices.
+msgid "Never"
+msgstr "从不"
+
+msgid "Rarely"
+msgstr "很少"
+
+msgid "Sometimes"
+msgstr "有时"
+
+#. The Room tab: a room, a lunar amphitheatre under a glass dome.
+msgid "Crater"
+msgstr "环形山"
+
+#. The Crater's setting: how fast Earth turns in the sky.
+msgid "Earth's speed"
+msgstr "地球转速"
+
+msgid "How fast Earth turns in the sky. At 1 x it turns once in two hours, about once a film."
+msgstr "地球在天空中转动的速度。1 倍时两小时转一圈，大约一部影片转一圈。"

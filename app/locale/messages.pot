@@ -4053,19 +4053,55 @@ msgstr ""
 msgid "Cloud layers sky"
 msgstr ""
 
+#: environments/bathysphere.env.json
+msgid "Bathysphere"
+msgstr ""
+
+#: environments/crater.env.json
+msgid "Crater"
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Whale"
+msgstr ""
+
 #: environments/cinema.env.json
 msgid "House lights in the film"
+msgstr ""
+
+#: environments/crater.env.json
+msgid "Earth's speed"
 msgstr ""
 
 #: environments/void.env.json
 msgid "Ripple"
 msgstr ""
 
+#: environments/bathysphere.env.json
+msgid "How often a whale swims past behind the screen in a quiet scene."
+msgstr ""
+
 #: environments/cinema.env.json
 msgid "How bright the house lamps stay once the film has started."
 msgstr ""
 
+#: environments/crater.env.json
+msgid "How fast Earth turns in the sky. At 1 x it turns once in two hours, about once a film."
+msgstr ""
+
 #: environments/void.env.json
 msgid "A faint ring on the floor where you move. At the bottom: none."
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Never"
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Rarely"
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Sometimes"
 msgstr ""
 
