@@ -2970,3 +2970,11 @@ msgstr "你移动时地面上出现的淡淡波纹。拉到最低：无。"
 
 msgid "On; this room draws the film itself, for the look of its screen."
 msgstr "开；此房间自己绘制影片，以呈现它的屏幕效果。"
+
+#. The Room tab: the group of cinema rooms.
+msgid "Cinemas"
+msgstr "影院"
+
+#. The Room tab: the group of television rooms (the history of television).
+msgid "Television"
+msgstr "电视"

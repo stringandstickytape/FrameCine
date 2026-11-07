@@ -111,7 +111,7 @@ func _test_room() -> void:
 			if room_tab._env_ids[i] == "home_theatre":
 				row = i
 		_check("set_environment: the tab marks the room", row >= 0
-				and (room_tab._envs.get_child(row) as Button).button_pressed)
+				and (room_tab._env_rows[row] as Button).button_pressed)
 	(r["call"] as DevCommands.Call).undo.call()
 	await _frames(2)
 	_check("set_environment: undo", main.env_id == "void")

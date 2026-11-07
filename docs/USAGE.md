@@ -310,6 +310,10 @@ The same settings are in the dev link and for an assistant: `set_sound` with `sp
 
 ## Room sound and this room's settings
 
+- **Room, Environment:** the rooms in groups: **Cinemas** (the cinema and the cinema set), **Television** (the
+  history of television, one room an era), **Built in** (the other rooms), **Yours** and **Showrooms**. A group with
+  no rooms is not shown.
+
 - **Sound, Environment sound:** the room's own sound (rain, birds, the projector, a thrown object's thud), from off
   to full. The default is 18 dB under the film. It always ducks under the film: about 7 dB under a film at its usual
   level, about 19 dB under a loud scene. It rises a little (3 dB) in the pre-show, while paused and after the end.

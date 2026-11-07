@@ -34,6 +34,13 @@ var _envs: HFlowContainer
 var _yours_box: VBoxContainer
 var _yours: HFlowContainer
 var _env_ids: Array[String] = []
+## The cinemas and the television rooms (a room document's room.category, EnvLibrary.category_of()): their own
+## groups above the other rooms.
+var _cinema_box: VBoxContainer
+var _cinemas: HFlowContainer
+var _tv_box: VBoxContainer
+var _tvs: HFlowContainer
+var _built_in_label: Label
 ## The showrooms (scripts/env/showrooms.gd), the list's last rows: their own group under the rooms, one row each.
 var _showroom_box: VBoxContainer
 var _showrooms: HFlowContainer
@@ -90,7 +97,18 @@ func _init() -> void:
 func bind(p_app: Node) -> void:
 	app = p_app
 	box.add_child(W.section("Environment"))
-	box.add_child(W.label("Built in", &"MutedLabel"))
+	_cinema_box = W.vbox()
+	box.add_child(_cinema_box)
+	_cinema_box.add_child(W.label("Cinemas", &"MutedLabel"))
+	_cinemas = W.flow()
+	_cinema_box.add_child(_cinemas)
+	_tv_box = W.vbox()
+	box.add_child(_tv_box)
+	_tv_box.add_child(W.label("Television", &"MutedLabel"))
+	_tvs = W.flow()
+	_tv_box.add_child(_tvs)
+	_built_in_label = W.label("Built in", &"MutedLabel")
+	box.add_child(_built_in_label)
 	_envs = W.flow()
 	box.add_child(_envs)
 	_yours_box = W.vbox()
@@ -296,7 +314,8 @@ func tick() -> void:
 
 
 ## The environment rows: rebuilt when the list changed (a photo room or a glTF room added), else only the mark moves.
-## The viewer's own rooms go under Yours, the showrooms in their own group (Showrooms); one mark for all.
+## The viewer's own rooms go under Yours, the showrooms in their own group (Showrooms), the cinemas and the
+## television rooms under Cinemas and Television (EnvLibrary.category_of()); one mark for all.
 func _sync_envs() -> void:
 	var list: Array = app.get_environment_list()
 	var ids: Array[String] = []
@@ -305,7 +324,7 @@ func _sync_envs() -> void:
 	if ids != _env_ids:
 		_env_ids = ids
 		_env_rows.clear()
-		for holder: HFlowContainer in [_envs, _yours, _showrooms]:
+		for holder: HFlowContainer in [_cinemas, _tvs, _envs, _yours, _showrooms]:
 			for c in holder.get_children():
 				holder.remove_child(c)
 				c.queue_free()
@@ -322,10 +341,16 @@ func _sync_envs() -> void:
 					b.text = tr("%s (photo)") % id.trim_prefix(EnvLibrary.SKY_PREFIX).get_basename()
 					b.set_meta("photo", id.trim_prefix(EnvLibrary.SKY_PREFIX).get_basename())
 			var holder := _showrooms if Showrooms.is_showroom(id) else (_yours if is_yours(id) else _envs)
+			if holder == _envs:
+				var category := EnvLibrary.category_of(id)
+				holder = _cinemas if category == "cinema" else (_tvs if category == "tv" else _envs)
 			holder.add_child(b)
 			_env_rows.append(b)
 		_yours_box.visible = _yours.get_child_count() > 0
 		_showroom_box.visible = _showrooms.get_child_count() > 0
+		_cinema_box.visible = _cinemas.get_child_count() > 0
+		_tv_box.visible = _tvs.get_child_count() > 0
+		_built_in_label.visible = _envs.get_child_count() > 0
 	for i in _env_rows.size():
 		_env_rows[i].set_pressed_no_signal(_env_ids[i] == str(app.env_id))
 		if _env_rows[i].has_meta("photo"):

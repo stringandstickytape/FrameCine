@@ -71,6 +71,8 @@ const COMMON_TEXTS := ["Dim during the film", "The room's light goes down while 
 		"How much things in the room move: sways, tilts, weave."]
 # i18n: end
 
+## The Room tab's groups a room document may choose (room.category), in the tab's order.
+const ROOM_CATEGORIES: Array[String] = ["cinema", "tv", "other"]
 const ROOM_OPTIONS := {
 	"ambient": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
 	"screen_glow": {"type": "float", "min": 0.0, "max": 2.0, "default": 0.0},
@@ -78,6 +80,8 @@ const ROOM_OPTIONS := {
 	"reacts_to_film": {"type": "bool", "default": false},
 	"reflection": {"type": "bool", "default": false},
 	"reflection_floor": {"type": "float", "min": -20.0, "max": 20.0, "default": null, "nullable": true},
+	# Where the Room tab lists it (ui/room_tab.gd): under Cinemas, under Television, or with the other rooms.
+	"category": {"type": "enum", "values": ROOM_CATEGORIES, "default": "other"},
 }
 const ACOUSTICS_OPTIONS := {
 	"box": {"type": "object", "fields": {"min": {"type": "vec3"}, "max": {"type": "vec3"}}},
