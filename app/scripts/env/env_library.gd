@@ -60,21 +60,45 @@ static func document_rooms() -> Array:
 ## A room's group in the Room tab: its document's `room.category` (cinema, tv or other; EnvDoc.ROOM_CATEGORIES),
 ## "other" for a room with no document. Read once per id.
 static func category_of(id: String) -> String:
-	if _categories.has(id):
-		return _categories[id]
-	var c := "other"
+	var v := str(_room_section(id).get("category", "other"))
+	return v if v in ["cinema", "tv", "other"] else "other"
+
+
+## A shipped room's line about itself (its document's room.description, a key; the scene rooms' own below; "" when
+## it has none).
+static func description_of(id: String) -> String:
+	if SCENE_DESCRIPTIONS.has(id):
+		return SCENE_DESCRIPTIONS[id]
+	var v: Variant = _room_section(id).get("description", "")
+	return v if v is String else ""
+
+
+## The rooms that are scenes, not documents (main.gd ENVIRONMENTS, BUILT_IN above).
+const SCENE_DESCRIPTIONS := {
+	"dim_room": "A small dark room with nothing in it to look at but the film.", # i18n
+	"passthrough": "Your own room through the headset's cameras, with the film in front of you.", # i18n
+	"home_theatre": "A small home theatre: a sofa in a dark room, the screen above a low cabinet, tower speakers either side.", # i18n
+	"drive_in": "A drive-in at night, seen from a car in the middle of the lot: other cars, speaker posts and stars.", # i18n
+	"planetarium": "A planetarium: reclined seats under a dark dome full of stars, a skyline round its foot.", # i18n
+	"dome": "An open geodesic dome on a wide plain at dusk, the first stars coming out overhead.", # i18n
+}
+
+
+## A shipped room document's "room" section, read once ({} for a room that isn't a document).
+static func _room_section(id: String) -> Dictionary:
+	if _rooms.has(id):
+		return _rooms[id]
+	var r := {}
 	var path := DOC_DIR.path_join(id + DOC_SUFFIX)
 	if FileAccess.file_exists(path):
 		var j: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
 		if j is Dictionary and (j as Dictionary).get("room") is Dictionary:
-			var v := str(j["room"].get("category", "other"))
-			if v in ["cinema", "tv", "other"]:
-				c = v
-	_categories[id] = c
-	return c
+			r = j["room"]
+	_rooms[id] = r
+	return r
 
 
-static var _categories := {}
+static var _rooms := {}
 
 
 static func _files(dir: String, extensions: Array) -> Array[String]:

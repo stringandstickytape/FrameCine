@@ -82,6 +82,8 @@ const ROOM_OPTIONS := {
 	"reflection_floor": {"type": "float", "min": -20.0, "max": 20.0, "default": null, "nullable": true},
 	# Where the Room tab lists it (ui/room_tab.gd): under Cinemas, under Television, or with the other rooms.
 	"category": {"type": "enum", "values": ROOM_CATEGORIES, "default": "other"},
+	# A line about the room under "This room" (a key: a room that ships translates it; env_library.gd description_of()).
+	"description": {"type": "string", "max": 200},
 }
 const ACOUSTICS_OPTIONS := {
 	"box": {"type": "object", "fields": {"min": {"type": "vec3"}, "max": {"type": "vec3"}}},

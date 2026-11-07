@@ -49,9 +49,10 @@ TEXT_PROPS = {"text", "tooltip_text", "placeholder_text"}
 JSON_SOURCES = [(os.path.join("ui", "themes", "tablet.json"), ["palettes", "*", "name"]),
                 (os.path.join("environments", "showrooms", "index.json"), ["showrooms", "*", "name"])]
 ## The rooms that ship as documents (app/environments/*.env.json, docs/environments.md): their settings' labels,
-## descriptions and choices' labels are keys (the Room tab's "This room").
+## descriptions and choices' labels and the room's description are keys (the Room tab's "This room").
 JSON_GLOBS = [(os.path.join("environments"), ".env.json", walk) for walk in (
-    ["name"], ["settings", "*", "label"], ["settings", "*", "description"], ["settings", "*", "labels", "*"])]
+    ["name"], ["room", "description"], ["settings", "*", "label"], ["settings", "*", "description"],
+    ["settings", "*", "labels", "*"])]
 LETTER = re.compile(r"[A-Za-z]")
 
 

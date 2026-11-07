@@ -49,6 +49,8 @@ var _env_rows: Array[Button] = []
 var _use_picture: Button
 ## This room's settings: the controls built from the declarations (name -> control), rebuilt when they change.
 var _this_room_box: VBoxContainer
+## The room's line about itself, under This room (EnvLibrary.description_of()).
+var _about: Label
 var _this_room: VBoxContainer
 var _this_room_controls := {}
 var _this_room_key := ""
@@ -130,6 +132,8 @@ func bind(p_app: Node) -> void:
 	_this_room_box = W.vbox()
 	box.add_child(_this_room_box)
 	_this_room_box.add_child(W.section("This room"))
+	_about = W.help("")
+	_this_room_box.add_child(_about)
 	_this_room = W.vbox()
 	_this_room_box.add_child(_this_room)
 	_this_room_box.add_child(W.flow([W.button("Back to defaults", func() -> void:
@@ -383,7 +387,10 @@ func _sync_this_room() -> void:
 				W.set_slider(c, float(v))
 			"choice":
 				W.set_choice(c.get_meta("choices") as Container, (d["choices"] as Array).find(v))
-	_this_room_box.visible = not decls.is_empty()
+	var about := EnvLibrary.description_of(str(app.env_id))
+	_about.text = tr(about) if about != "" else ""
+	_about.visible = about != ""
+	_this_room_box.visible = not decls.is_empty() or about != ""
 
 
 func _setting_control(d: Dictionary) -> Control:
