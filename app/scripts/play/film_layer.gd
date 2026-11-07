@@ -31,9 +31,13 @@ extends Node
 ## over everything in front of it, hole punch or not: the panels (2026-11-04), a ham lobbed at the screen and a
 ## controller held up in front of the film (the user, 2026-11-06). Its bounds seen from the eyes cover part of the
 ## picture -> held at once; clear for COVER_RELEASE seconds -> the layer again (no flicker at the picture's edge).
+## A room that draws the film itself (its presentation: a telly's glass, a worn print; scripts/env/systems/
+## presentation.gd) asks with request_scene(who, true): while any asks, no layer is made (wanted_kind() ""), so the
+## screen's mesh draws the film with the room's material; the setting is not touched.
 ##
 ##   enabled, set_enabled(on, save := true)
 ##   force                  tests: build the layers without an XR session (they don't show then)
+##   request_scene(who, on), scene_requests   the film drawn in the scene for a room (see above)
 ##   layers, viewports      while in use ([] otherwise)
 ##   kind                   "quad", "cylinder" or "" (the mesh)
 ##   updates                viewport draws so far (one per new picture or changed uniform)
@@ -83,6 +87,8 @@ var _cylinder := -1
 ## room (an icicle in front of the screen, the user, 2026-11-04): the hole punch that keeps a quad layer behind the
 ## scene did not hold for them. The mesh draws a curved screen in the right place; this is for trying the layers.
 var cylinder_layers := false
+## Who asks for the film in the scene (request_scene): {who: true}.
+var scene_requests := {}
 
 
 func _ready() -> void:
@@ -107,6 +113,16 @@ func set_enabled(on: bool, save := true) -> void:
 	_update()
 
 
+## The film drawn in the scene while `who` asks (a room's presentation); not kept.
+func request_scene(who: String, on: bool) -> void:
+	if on:
+		scene_requests[who] = true
+	else:
+		scene_requests.erase(who)
+	if main != null and is_inside_tree():
+		_update()
+
+
 ## Curved screens as cylinder layers (see cylinder_layers), kept in the settings.
 func set_cylinder_layers(on: bool) -> void:
 	cylinder_layers = on
@@ -128,7 +144,7 @@ static func eye_pixels(frame_px: Vector2, flat_size: Vector2, mode: VideoMode) -
 
 ## The layer type for what is on screen now; "" for the mesh.
 func wanted_kind() -> String:
-	if not enabled or not available() or not _xr_running():
+	if not enabled or not available() or not _xr_running() or not scene_requests.is_empty():
 		return ""
 	var screen: Node3D = main.screen
 	if not main.player.has_source() or not screen.is_shown() or screen.mode.projection != VideoMode.Proj.FLAT:
@@ -147,6 +163,8 @@ func status() -> String:
 	if not _xr_running():
 		return tr("Only in the headset: here the film is drawn in the room.")
 	if kind == "":
+		if not scene_requests.is_empty():
+			return tr("On; this room draws the film itself, for the look of its screen.")
 		if main.player.has_source() and main.screen.mode.projection != VideoMode.Proj.FLAT:
 			return tr("180, 360 and fisheye films are drawn in the room.")
 		if main.player.has_source() and float(main.screen.curve_radius) > 0.0:

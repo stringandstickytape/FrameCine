@@ -157,7 +157,7 @@ parameters only.
 | `music` | music | instruments that play themselves (a player piano, an organ), from our own synthesiser | next |
 | timeline and cues | | below; part of the host, not a registered system | built |
 | film signals | | below; part of the host | built |
-| `presentation` | screen | the chain of stages from source to display: source (film, tape, broadcast), transmission (aerial noise, ghosting), display (CRT, mask, curvature, a telly's glass). TV-era presets | next |
+| `presentation` | screen | the chain of stages from source to display: source (film, tape, broadcast), transmission (aerial noise, ghosting), display (CRT, mask, curvature, a telly's glass), the sound through a small speaker. TV-era presets | built |
 | `seats` | seats | seat models and kits outside the builders (a bench seat, pews, cushions, club chairs) | next |
 | `motion` | motion | slow moves of the room's things (a curtain's sway, an organ rising, Earth turning), held to the comfort limits. Never the viewer | next |
 
@@ -658,6 +658,84 @@ as before. Settings: the pre-show ritual (common), the house lights in the film.
 (on by default), and a small ripple where the viewer's head moves more than 15 cm a second over the floor. Setting:
 the ripple's strength.
 
+## The presentation system
+
+`scripts/env/systems/presentation.gd`, with `shaders/env_presentation.gdshader` and its stages in
+`env_presentation.gdshaderinc`. The stages between the film and the eyes, each optional. One per room.
+
+| Stage | Parameters | What |
+|---|---|---|
+| source | `source`: `none`, `film`, `tape`, `broadcast` | where the picture comes from |
+| film | `weave`, `tilt` (degrees), `flicker`, `dust`, `scratches`, `hotspot` | gate weave, a crooked projector (the picture is overscanned a little, so no corner shows), the lamp's flicker, dust specks, scratches that run for a few seconds, the lamp's bright middle |
+| tape | `tracking`, `head_switch`, `chroma_bleed`, `tape_noise` | the lines' slow sway, the torn last lines at the bottom, the colour late and smeared, noise and paler colour |
+| broadcast | `interlace`, `lines` | the two fields' lines, one after the other |
+| transmission | `snow`, `ghost`, `ghost_shift`, `weak` | aerial noise, a faint second picture to the right, a weak signal (paler, flatter, more snow) |
+| display | `display`: `none`, `mechanical`, `crt`, `panel` | the set |
+| crt | `curvature`, `corner`, `mask` (`none`, `shadow`, `grille`, `slot`), `mask_pitch`, `mask_strength`, `scanlines`, `glass` | the bulging face, round corners, the phosphors' mask, the gaps between lines, the glass's reflection (a soft light behind the viewer that moves as the head moves) |
+| mechanical | `mech_lines` | a 1930 mechanical-scan set: a few lines across, a neon's orange glow, dark edges |
+| panel | `panel_grid`, `panel_pixels`, `panel_bleed` | the gaps between the pixels, the backlight through the dark scenes |
+| colour | `colour`, `tint`, `gain` | saturation (0: black and white), the tube's tint, brightness |
+| speaker | `speaker`: `none`, `window`, `telly`, `cabinet`, `panel` | the film's sound through a small speaker |
+
+Every parameter is live. `weave`, `tilt` and `tracking` are motion parameters (the room's Motion setting scales
+them). `flicker` is a brightness that flickers: it wavers by at most 3.5 %, more slowly than 3 times a second, and
+stays steady with Flickering lights off. Action: `glitch` (a moment's trouble: a tape's tracking tears, a broadcast's
+snow swells, a print jumps in the gate; `seconds`, default 0.6).
+
+**Presets.** `preset` fills every parameter the document leaves out. The document's own values and bindings win. To
+move a preset's value by a cue, give it in the document. The names are pastiche.
+
+| Preset | For | Chain |
+|---|---|---|
+| `worn_print` | Screen 3, 1983 | film: weave, a 0.35 degree tilt, flicker, dust, scratches, a hotspot |
+| `starlight_lot_1958` | Drive-in | film: a little weave and dust, a strong hotspot; the window speaker |
+| `glowbox_1930` | TV era | a mechanical-scan set: 30 orange lines, a little noise; a radio cabinet's speaker |
+| `fireside_1953` | TV era | broadcast, 405 lines, snow and a ghost; a small black and white tube with round corners |
+| `colourstar_1972` | TV era | broadcast, interlace, a faint ghost; an early colour tube with a shadow mask, warm and rich |
+| `sirclive_1983` | TV era | a home computer's aerial lead: 240 bold lines, a little noise; a portable telly's shadow mask |
+| `rewinder_1987` | TV era | a rented tape: wobble, bleed, the bottom's tear; a slot mask |
+| `nightowl_1993` | Pillow Fort | a tape watched a few times; a flatter tube with an aperture grille |
+| `freedtv_2005` | TV era | a free digital broadcast on an early flat panel: a faint pixel grid, backlight bleed |
+
+**How the film is drawn.** On the Frame the film is an OpenXR layer, and a layer skips the scene's shaders. So while a
+picture stage is on, the screen's flat mesh draws the film with the presentation's material, and the film layer
+steps aside: the system asks with `film_layer.gd request_scene()`; no layer is made while any room asks, and the
+System tab says why. The material is the screen's own picture (`video_common.gdshaderinc`, its uniforms copied from
+the screen's material when they change), then the stages. With every picture stage off (the Drive-in with only its
+speaker) nothing changes, and the film layer stays. Leaving the room puts the screen's material back. Flat screens
+only: 180, 360 and fisheye films keep the screen's own picture. The floor reflection and the bias light read the
+video planes, so they show the film without the stages.
+
+**The sound.** A bus of its own, "Film speaker", made once just before Film (a bus can send only to one before it).
+While a speaker is on, Film sends to it and it sends to Master: a high-pass and a low-pass filter, an EQ, a little
+drive for the window speaker, and mono. The binaural renderer's code is not touched; it mixes into Film as before,
+and the speaker filters what Film sends on. Effects on the Film bus itself were rejected: adding one makes the engine
+make every effect on that bus again, so the film's analysis (`film_react.gd`, the music card) would lose its analyser.
+The film's analysis and the duck's key stay on Film, so they hear the film as it is. Measured
+(`test_env_presentation.gd`, a tone at -20 dBFS RMS on Film): the window speaker takes an 80 Hz tone to -107 dBFS
+and leaves 1 kHz at -18.4 dBFS.
+
+**Cost.** The system draws nothing of its own (0 draws). Its cost is the film drawn in the room instead of the
+layer: on the Frame the layer saved 1.1 ms of GPU time with a 4K film (`docs/features.md`, "Film layer"), and the
+mesh path is resampled twice (softer fine detail). The stages add little: no loop and no texture read of their own,
+except one cheap sample each for the ghost and the chroma bleed (and the screen's deband is turned off under noise,
+which saves eight). Every pattern (a mask, scanlines, a pixel grid) fades out as its period nears two eye-buffer
+pixels, so it never shimmers; a telly's mask shows only when you lean in. Measured under lavapipe (CPU, so ALU counts
+more than on a GPU), the screen's quad filling 1920 x 1080, frame time against the screen's own shader (18.8 ms;
+the figures move by about 10 % from run to run):
+
+| Preset | x |
+|---|---|
+| `glowbox_1930` | 0.75 |
+| `fireside_1953`, `colourstar_1972`, `sirclive_1983`, `rewinder_1987`, `nightowl_1993` | 0.88 to 0.97 |
+| `worn_print`, `starlight_lot_1958` | 1.0 to 1.05 |
+| `freedtv_2005` | 1.14 |
+
+The noisy chains cost less than the screen's own shader because its deband (eight reads) is off under them; with the
+deband left on they measured 1.45 to 2.2 times. On the Adreno the screen's shader is bound by its texture reads (the footprint filter, the deband); the stages are
+ALU of a few dozen operations and at most two more bilinear reads, and a telly covers a small part of the view (a
+0.6 m set at 1.5 m is about 6 % of an eye's pixels). Not measured on the headset yet.
+
 ## The cinema set
 
 Every room keeps the cross-cutting rules: a "dim during the film" setting, seat picking by pointing, its own
@@ -755,6 +833,12 @@ document. Each room agent owns its documents, its CC0 assets under `app/environm
 - **The Void's reflection** is now on by default (it was off): the Void's design is a mirror floor. It costs a
   quad that samples the video.
 - **One seat model.** `seat_model` has only `stadium`; the seats system brings the others.
+- **A telly's shape.** The presentation draws on the screen's own mesh, which has the film's aspect: a CRT's round
+  corners and bulge are those of a 16:9 picture for a 16:9 film. A 4:3 tube with the film letterboxed in it needs a
+  screen of the tube's shape (the room's builder, or a later screen parameter).
+- **The presentation in the layer.** A source-only chain (weave and grain) could stay in the film layer, as the
+  projector feature's weave does; the presentation draws in the room for every picture stage, for one path. Its cost
+  on the Frame is not measured yet.
 - **Ambient life on the Frame.** The creatures' ticks are measured on the desktop only (under 1 ms for all nine). A
   room with many fliers should be timed on the headset.
 - **Calls without a sound.** Birds' calls and the cat's purr are events until the synthesiser has a `bird` and a
