@@ -2978,3 +2978,121 @@ msgstr "影院"
 #. The Room tab: the group of television rooms (the history of television).
 msgid "Television"
 msgstr "电视"
+
+#. The TV-era rooms (app/environments/tv_*.env.json): names and settings.
+msgid "TV 1930 - glowing box"
+msgstr "电视 1930 - 发光的盒子"
+
+msgid "TV 1953 - by the fire"
+msgstr "电视 1953 - 炉火旁"
+
+msgid "TV 1972 - first colour"
+msgstr "电视 1972 - 第一台彩电"
+
+msgid "TV 1983 - desk portable"
+msgstr "电视 1983 - 书桌上的便携电视"
+
+msgid "TV 1987 - rented tape"
+msgstr "电视 1987 - 租来的录像带"
+
+msgid "TV 1993 - bedroom telly"
+msgstr "电视 1993 - 卧室里的电视"
+
+msgid "TV 2005 - flat screen"
+msgstr "电视 2005 - 平板电视"
+
+msgid "Lines in the picture"
+msgstr "画面线数"
+
+msgid "Fire in the grate"
+msgstr "壁炉里的火"
+
+msgid "Snow from the aerial"
+msgstr "天线雪花噪点"
+
+msgid "Aerial lead noise"
+msgstr "天线连接线噪点"
+
+msgid "Bold lines"
+msgstr "粗扫描线"
+
+msgid "The tape"
+msgstr "录像带"
+
+msgid "Wall lamps in the film"
+msgstr "放映时的壁灯"
+
+msgid "Weather at the window"
+msgstr "窗外天气"
+
+msgid "Fairy lights over the telly"
+msgstr "电视上方的彩灯"
+
+msgid "Backlight bleed"
+msgstr "背光漏光"
+
+msgid "The set drew its picture in 30 glowing lines. More lines show the film more clearly than it ever could."
+msgstr "这台电视用 30 条发光的线绘出画面。线数越多，影片就越清晰，远胜当年。"
+
+msgid "A coal fire burns in the grate. Off: the grate is cold and the set's glow lights the room."
+msgstr "壁炉里燃着煤火。关：壁炉是冷的，只有电视的光照亮房间。"
+
+msgid "Snow on the picture from a weak signal on the roof aerial. At the bottom: a clean picture."
+msgstr "屋顶天线信号弱，画面上出现雪花。拉到最低：画面干净。"
+
+msgid "A coal fire burns in the grate, and the cat likes the hearth."
+msgstr "壁炉里燃着煤火，猫喜欢待在炉前。"
+
+msgid "A little snow from the aerial. At the bottom: a clean picture."
+msgstr "天线带来一点雪花。拉到最低：画面干净。"
+
+msgid "The set's colour knob. New colour sets were often turned up rich and warm."
+msgstr "电视的色彩旋钮。新的彩色电视常被调得浓郁温暖。"
+
+msgid "The computer and the telly share the aerial lead, and a little noise comes with it."
+msgstr "电脑和电视共用天线连接线，因此带来一点噪点。"
+
+msgid "The dark gaps between the picture's lines, as a small portable showed them close up."
+msgstr "画面扫描线之间的暗缝，就像近看小型便携电视时那样。"
+
+msgid "How many times the tape has been played: noise, smeared colour and the tear at the bottom."
+msgstr "录像带被播放过多少次：噪点、模糊的色彩和底部的撕裂。"
+
+msgid "How bright the wall lamps stay once the film has started."
+msgstr "影片开始后壁灯保持的亮度。"
+
+msgid "Rain on the window, a clear night, or each in turn."
+msgstr "雨打窗户、晴朗的夜晚，或两者轮流。"
+
+msgid "How bright the fairy lights over the telly are. At the bottom: off."
+msgstr "电视上方彩灯的亮度。拉到最低：关。"
+
+msgid "The early panel's backlight glowing through the dark scenes, most at the corners."
+msgstr "早期平板电视的背光在暗场景中透出，角落最明显。"
+
+msgid "30 lines"
+msgstr "30 线"
+
+msgid "60 lines"
+msgstr "60 线"
+
+msgid "120 lines"
+msgstr "120 线"
+
+msgid "Fresh"
+msgstr "全新"
+
+msgid "Rented"
+msgstr "租来的"
+
+msgid "Worn out"
+msgstr "磨损的"
+
+msgid "Raining"
+msgstr "下雨"
+
+msgid "A dry night"
+msgstr "无雨的夜晚"
+
+msgid "Showers"
+msgstr "阵雨"
