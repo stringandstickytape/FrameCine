@@ -137,6 +137,31 @@ func get_home_curve() -> float:
 func on_screen_changed(screen_transform: Transform3D, size: Vector2) -> void:
 	if _base != null and _base.has_method("on_screen_changed"):
 		_base.on_screen_changed(screen_transform, size)
+	var systems := get_node_or_null("Systems")
+	if systems != null and is_inside_tree():
+		# The screen in this room's frame, for the systems (the masking, the beam). The app's main node is this
+		# room's ancestor; its transform takes the screen to the world.
+		var world := screen_transform
+		var n := get_parent()
+		while n != null:
+			if n.get("player") != null and n.get("screen") != null and n is Node3D:
+				world = (n as Node3D).global_transform * screen_transform
+				break
+			n = n.get_parent()
+		systems.call("on_screen_changed", global_transform.affine_inverse() * world, size)
+
+
+## A version 4 room's own settings (docs/environments.md, "Room settings"): its document's declarations, and the
+## values (scripts/env/room_settings.gd) handed to its systems.
+func declared_settings() -> Array:
+	return doc.get("settings", []) if doc.get("settings") is Array and has_node("Systems") else []
+
+
+func apply_room_settings(values: Dictionary) -> void:
+	var systems := get_node_or_null("Systems")
+	if systems != null:
+		for k: String in values:
+			systems.call("set_setting", k, values[k])
 
 
 ## The room's own parts (the base's meshes) and the assistant's, for room_state: each stock surface's colour, and its
@@ -294,6 +319,10 @@ static func build(p_doc: Dictionary, base: Node3D, assets: Dictionary, p_base_id
 	if bool((p_doc.get("light", {}) if p_doc.get("light") is Dictionary else {}).get("contact_shadows", true)):
 		_add_contact_shadows(layer, p_doc)
 	_lighting = {}
+	if p_doc.get("systems") is Array and not (p_doc["systems"] as Array).is_empty():
+		# Version 4: the environments engine's systems built into this room too (docs/environments.md), the child
+		# "Systems" (scripts/env/env_host.gd).
+		(load("res://scripts/env/env_host.gd") as GDScript).call("attach", room, p_doc)
 	return room
 
 

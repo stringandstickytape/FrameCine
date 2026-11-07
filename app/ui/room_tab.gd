@@ -17,7 +17,8 @@ const Recipes := preload("res://scripts/dev/recipes.gd")
 const Showrooms := preload("res://scripts/env/showrooms.gd")
 
 const SLEEP_WORDS := ["Off", "15 min", "30 min", "60 min", "90 min", "End of file"] # i18n
-## The names of the rooms that ship (main.gd ENVIRONMENTS, scripts/env/env_library.gd BUILT_IN), as keys: their rows
+## The names of the rooms that ship (main.gd ENVIRONMENTS, scripts/env/env_library.gd BUILT_IN; a room that ships as a
+## document alone has its name extracted from its .env.json by tools/i18n.py), as keys: their rows
 ## translate them. test_i18n.gd checks that each built-in room's name is here.
 # i18n: begin
 const ROOM_NAMES := ["Void", "Dim room", "Cinema", "Passthrough", "Home theatre", "Drive-in", "Planetarium",
@@ -39,6 +40,11 @@ var _showrooms: HFlowContainer
 ## Every environment row, the rooms' then the showrooms', in _env_ids' order.
 var _env_rows: Array[Button] = []
 var _use_picture: Button
+## This room's settings: the controls built from the declarations (name -> control), rebuilt when they change.
+var _this_room_box: VBoxContainer
+var _this_room: VBoxContainer
+var _this_room_controls := {}
+var _this_room_key := ""
 var _seat_box: VBoxContainer
 var _seat_label: Label
 var _point_seat: Button
@@ -100,6 +106,18 @@ func bind(p_app: Node) -> void:
 	_showrooms = W.flow()
 	_showrooms.add_theme_constant_override("separation", 0)
 	_showroom_box.add_child(_showrooms)
+
+	# This room (docs/environments.md, "Room settings"): built from the room's declarations, the common ones and the
+	# room's own; their labels and descriptions are keys (env_doc.gd COMMON_TEXTS, the documents' settings).
+	_this_room_box = W.vbox()
+	box.add_child(_this_room_box)
+	_this_room_box.add_child(W.section("This room"))
+	_this_room = W.vbox()
+	_this_room_box.add_child(_this_room)
+	_this_room_box.add_child(W.flow([W.button("Back to defaults", func() -> void:
+		app.features.room_settings.reset()
+		_sync_this_room())]))
+	app.features.room_settings.changed.connect(_sync_this_room)
 
 	# Seats (#19): rooms that have them.
 	_seat_box = W.vbox()
@@ -245,6 +263,7 @@ func bind(p_app: Node) -> void:
 
 func sync() -> void:
 	_sync_envs()
+	_sync_this_room()
 	_sync_room_parts()
 	_sync_showing()
 	W.set_slider(_light, app.room_light)
@@ -312,6 +331,59 @@ func _sync_envs() -> void:
 		if _env_rows[i].has_meta("photo"):
 			_env_rows[i].text = tr("%s (photo)") % _env_rows[i].get_meta("photo")
 	_use_picture.visible = bool(app.features.slideshow.is_picture()) and not str(app.current_path).begins_with("smb://")
+
+
+## "This room": a toggle for a bool, a slider for a range, a row of choices for a choice, each with its description
+## under it; rebuilt when the room's declarations change, else only the values move.
+func _sync_this_room() -> void:
+	var rs: Node = app.features.room_settings
+	var decls: Array = rs.declarations()
+	var key := str(app.env_id) + ":" + ",".join(decls.map(func(d: Dictionary) -> String: return str(d["name"])))
+	if key != _this_room_key:
+		_this_room_key = key
+		_this_room_controls.clear()
+		for c in _this_room.get_children():
+			_this_room.remove_child(c)
+			c.queue_free()
+		for d: Dictionary in decls:
+			_this_room.add_child(_setting_control(d))
+			_this_room.add_child(W.help(str(d["description"])))
+	for d: Dictionary in decls:
+		var c: Control = _this_room_controls.get(d["name"])
+		var v: Variant = rs.value(str(d["name"]))
+		match str(d["type"]):
+			"bool":
+				W.set_on(c as Button, bool(v))
+			"range":
+				W.set_slider(c, float(v))
+			"choice":
+				W.set_choice(c.get_meta("choices") as Container, (d["choices"] as Array).find(v))
+	_this_room_box.visible = not decls.is_empty()
+
+
+func _setting_control(d: Dictionary) -> Control:
+	var rs: Node = app.features.room_settings
+	var n := str(d["name"])
+	var c: Control
+	match str(d["type"]):
+		"bool":
+			var t := W.toggle(str(d["label"]), func(on: bool) -> void: rs.set_value(n, on))
+			_this_room_controls[n] = t
+			c = W.hbox([t])
+		"range":
+			var RoomSettings: GDScript = rs.get_script()
+			c = W.slider_row(str(d["label"]), float(d["min"]), float(d["max"]), float(d.get("step", 0.05)),
+					func(v: float) -> String: return RoomSettings.format(d, v), func(v: float) -> void: rs.set_value(n, v))
+			_this_room_controls[n] = c
+		_:
+			c = W.vbox()
+			c.add_child(W.label(str(d["label"])))
+			var choices: Array = d["choices"]
+			var row := W.choices(d["labels"], func(i: int) -> void: rs.set_value(n, choices[i]))
+			c.add_child(row)
+			c.set_meta("choices", row)
+			_this_room_controls[n] = c
+	return c
 
 
 ## A room of the viewer's own: a kept room, a glTF room or a photo room (user data), not one that ships.

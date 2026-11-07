@@ -29,8 +29,21 @@ func register_all() -> void:
 		"description": "Everything the Room tab shows: the room and the rooms to pick from, the seat, the floor "
 				+ "reflection, the effects, the time of day, the room light, the showing and the sleep timer.",
 		"returns": "{environment, environments, seat, reflection, bias_light, react, projector_beam, time_of_day, "
-				+ "room_light, dim_while_playing, showing, sleep}",
+				+ "room_light, dim_while_playing, showing, sleep, this_room: [{name, type, label, description, common, "
+				+ "schema (JSON Schema of its value), default, value}]}",
 		"assistant": "read"})
+	R.register("room_setting", _cmd_room_setting, {
+		"description": "One of this room's own settings (room_settings' this_room lists them, each with a JSON Schema "
+				+ "of its value: every room has dim, ambience_db and, where they have an effect, life, ritual, "
+				+ "flicker and motion; a room's document adds its own), or every one of them back to its default "
+				+ "with reset (the room's own seat too). Kept per room.",
+		"params": [{"name": "name", "type": "string", "default": "",
+				"description": "The setting's name, from room_settings' this_room."},
+				{"name": "value", "type": "any", "default": null,
+				"description": "Its new value, as its schema says: true or false, a number in its range, or a choice."},
+				{"name": "reset", "type": "bool", "default": false,
+				"description": "Every setting of this room back to its default (name and value left out)."}],
+		"level": "change", "returns": "{this_room}", "assistant": "room"})
 	R.register("set_environment", _cmd_set_environment, {
 		"description": "Changes the room around the screen (as a row of the Room tab's Environment list).",
 		"params": [{"name": "id", "type": "string", "required": true,
@@ -120,6 +133,29 @@ func _cmd_room_settings(_args: Dictionary, _ctx: DevCommands.Call) -> Variant:
 	return room_settings(_main())
 
 
+func _cmd_room_setting(args: Dictionary, ctx: DevCommands.Call) -> Variant:
+	var m := _main()
+	var rs: Node = m.features.room_settings
+	var before: Dictionary = rs.values()
+	if bool(args.get("reset", false)):
+		rs.reset()
+		ctx.summary = "this room's settings back to their defaults"
+	else:
+		var n := str(args.get("name", ""))
+		if n == "":
+			return ctx.fail("give name and value, or reset: true")
+		var why: String = rs.set_value(n, args.get("value"))
+		if why != "":
+			return ctx.fail(why)
+		ctx.summary = "%s: %s" % [n.replace("_", " "), str(rs.value(n))]
+	_sync_tab()
+	ctx.undo = func() -> void:
+		for k: String in before:
+			rs.set_value(k, before[k])
+		_sync_tab()
+	return {"this_room": rs.schema()}
+
+
 static func room_settings(m: Node) -> Dictionary:
 	var f: Node = m.features
 	var envs: Array = []
@@ -147,6 +183,7 @@ static func room_settings(m: Node) -> Dictionary:
 		"dim_while_playing": {"on": bool(f.light_follow.enabled), "level": snappedf(float(f.light_follow.play_level), 0.01)},
 		"showing": showing,
 		"sleep": _sleep_state(m),
+		"this_room": f.room_settings.schema(),
 	}
 
 

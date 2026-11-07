@@ -527,7 +527,7 @@ func _set_c() -> void:
 			missing.append(k)
 	_check("set C: every key of its files is in zh_CN.po (%s)" % ", ".join(missing), missing.is_empty())
 	var shipped: Array = []
-	for e: Array in main.ENVIRONMENTS + EnvLibrary.BUILT_IN + Showrooms.environments():
+	for e: Array in main.ENVIRONMENTS + EnvLibrary.BUILT_IN + EnvLibrary.document_rooms() + Showrooms.environments():
 		shipped.append(str(e[1]))
 	for e: Dictionary in ObjectBuiltins.ENTRIES:
 		shipped.append(str(e["name"]))

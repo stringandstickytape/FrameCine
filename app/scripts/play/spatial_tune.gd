@@ -261,6 +261,8 @@ func start() -> void:
 	gen.buffer_length = BUFFER_SECONDS
 	_player = AudioStreamPlayer.new()
 	_player.name = "TuneSound"
+	# A tool's sound (scripts/env/env_audio.gd): never ducked, never driving the film's analysis.
+	_player.bus = &"Interface" if AudioServer.get_bus_index("Interface") >= 0 else &"Master"
 	_player.stream = gen
 	add_child(_player)
 	_player.play()

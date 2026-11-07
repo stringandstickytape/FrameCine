@@ -17,6 +17,8 @@ const ImageSource := preload("res://scripts/play/image_source.gd")
 
 const SKY_DIR := "user://skyboxes"
 const ROOM_DIR := "user://rooms"
+const DOC_DIR := "res://environments"
+const DOC_SUFFIX := ".env.json"
 const SKY_PREFIX := "sky:"
 const ROOM_PREFIX := "room:"
 
@@ -30,10 +32,28 @@ const BUILT_IN: Array = [
 
 static func environments() -> Array:
 	var out: Array = BUILT_IN.duplicate()
+	out.append_array(document_rooms())
 	for f in _files(SKY_DIR, ImageSource.EXTENSIONS):
 		out.append([SKY_PREFIX + f, f.get_basename() + " (photo)", SKY_DIR.path_join(f), []])
 	for f in _files(ROOM_DIR, ["glb", "gltf"]):
 		out.append([ROOM_PREFIX + f, f.get_basename(), ROOM_DIR.path_join(f), []])
+	return out
+
+
+## Rooms that ship as version 4 documents with no scene of their own (docs/environments.md): every
+## res://environments/<id>.env.json without a <id>.tscn beside it (the cinema and the Void have scenes and are main.gd's
+## rows) is a room "<id>", named by its document (a translation key). A new room is its document alone.
+static func document_rooms() -> Array:
+	var out: Array = []
+	for f in DirAccess.get_files_at(DOC_DIR):
+		if not f.ends_with(DOC_SUFFIX):
+			continue
+		var id := f.trim_suffix(DOC_SUFFIX)
+		if FileAccess.file_exists(DOC_DIR.path_join(id + ".tscn")) or ResourceLoader.exists(DOC_DIR.path_join(id + ".tscn")):
+			continue
+		var j: Variant = JSON.parse_string(FileAccess.get_file_as_string(DOC_DIR.path_join(f)))
+		var name := str(j.get("name", id)) if j is Dictionary else id
+		out.append([id, name, DOC_DIR.path_join(f), []])
 	return out
 
 
@@ -63,6 +83,12 @@ static func instantiate(entry: Array) -> Node3D:
 			return room
 		push_warning("glTF room: %s; showing the void instead" % GltfRoom.last_error)
 		path = "res://environments/void.tscn"
+	if path.ends_with(DOC_SUFFIX):
+		# A room that ships as a document (docs/environments.md), built by its systems.
+		var room: Node3D = (load("res://scripts/env/env_room.gd") as GDScript).new()
+		room.set("document", path)
+		room.name = id.capitalize().replace(" ", "")
+		return room
 	if path.ends_with(".room.json"):
 		# A room an assistant made and the viewer kept: data, built by scripts/assistant/assistant_room.gd.
 		var made: Node3D = (load("res://scripts/assistant/assistant_room.gd") as GDScript).call("load_saved", path)

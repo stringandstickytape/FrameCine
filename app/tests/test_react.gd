@@ -20,7 +20,8 @@ func _init() -> void:
 
 
 func _effects() -> int:
-	return AudioServer.get_bus_effect_count(AudioServer.get_bus_index("Master"))
+	# The film's bus (scripts/env/env_audio.gd): the room's own sounds never drive the reaction.
+	return AudioServer.get_bus_effect_count(AudioServer.get_bus_index(FilmReact.bus_name()))
 
 
 func _run() -> void:
@@ -29,7 +30,7 @@ func _run() -> void:
 	var before := _effects()
 	_check("off by default, no analyzer", not r.enabled and r._analyzer == null)
 	r.set_enabled(true)
-	_check("on: an analyzer on Master", _effects() == before + 1 and r._analyzer != null)
+	_check("on: an analyzer on the Film bus", _effects() == before + 1 and r._analyzer != null)
 	main.open_path("stub://flat_mono")
 	await _frames(3)
 
@@ -79,6 +80,7 @@ func _run() -> void:
 	if DisplayServer.get_name() != "headless":
 		var p := AudioStreamPlayer.new()
 		p.stream = _sine(50.0, 0.5)
+		p.bus = FilmReact.bus_name()
 		root.add_child(p)
 		p.play()
 		await create_timer(0.6).timeout

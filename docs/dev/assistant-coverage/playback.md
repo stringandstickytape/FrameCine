@@ -111,6 +111,7 @@ Read: `sound` (read); `pc_audio_status` (read).
 |---|---|
 | Audio track rows | `audio_track` (control, core); `tracks` (read, core) lists them |
 | Volume | `volume` (control, core) |
+| Environment sound | `set_sound` `environment_sound_db` (settings) |
 | A/V offset | `set_sound` `av_offset_ms` (settings) |
 | Calibrate | `av_calibrate` (control) |
 | Live delay | `set_sound` `live_delay` (settings) |

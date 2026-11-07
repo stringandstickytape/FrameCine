@@ -20,7 +20,8 @@ What counts as a key (the English text is the key, gettext style):
   a literal given to text, tooltip_text or placeholder_text: x.text = "...", or "..." if c else "..."
   every literal on a line that ends with the comment `# i18n`, dictionary keys left out
   between `# i18n: begin` and `# i18n: end`: the same; `# i18n: begin name` takes only the values of "name": ...
-  the palettes' names in app/ui/themes/tablet.json, the showrooms' names in app/environments/showrooms/index.json
+  the palettes' names in app/ui/themes/tablet.json, the showrooms' names in app/environments/showrooms/index.json,
+  the rooms' settings (label, description, choices' labels) in app/environments/*.env.json
 Text with no letter in it (numbers, "...") is never a key. Not scanned: app/tests and app/tools. In app/scripts/dev
 (the dev link) and app/scripts/assistant (what an assistant reads) only tr() and the markers count, not the builders
 or text = "..." (docs/i18n.md, "Not translated").
@@ -47,6 +48,10 @@ BUILDERS = {"label", "caps", "section", "button", "toggle", "help", "slider_row"
 TEXT_PROPS = {"text", "tooltip_text", "placeholder_text"}
 JSON_SOURCES = [(os.path.join("ui", "themes", "tablet.json"), ["palettes", "*", "name"]),
                 (os.path.join("environments", "showrooms", "index.json"), ["showrooms", "*", "name"])]
+## The rooms that ship as documents (app/environments/*.env.json, docs/environments.md): their settings' labels,
+## descriptions and choices' labels are keys (the Room tab's "This room").
+JSON_GLOBS = [(os.path.join("environments"), ".env.json", walk) for walk in (
+    ["name"], ["settings", "*", "label"], ["settings", "*", "description"], ["settings", "*", "labels", "*"])]
 LETTER = re.compile(r"[A-Za-z]")
 
 
@@ -277,6 +282,11 @@ def collect():
         found += keys_of_gd(path, rel, implicit)
     for rel, walk in JSON_SOURCES:
         found += keys_of_json(os.path.join(APP, rel), rel.replace(os.sep, "/"), walk)
+    for folder, suffix, walk in JSON_GLOBS:
+        for name in sorted(os.listdir(os.path.join(APP, folder))):
+            if name.endswith(suffix):
+                rel = os.path.join(folder, name)
+                found += keys_of_json(os.path.join(APP, rel), rel.replace(os.sep, "/"), walk)
     for msgid, plural, ref in found:
         e = keys.setdefault(msgid, {"plural": None, "refs": []})
         if plural:

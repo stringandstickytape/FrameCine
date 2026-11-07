@@ -134,7 +134,8 @@ static func describe(switch_on := Callable()) -> Dictionary:
 		if switch_on.is_valid():
 			e["allowed"] = ALWAYS.has(l) or bool(switch_on.call(l))
 		levels[l] = e
-	return {"commands": out, "levels": levels, "room_schema": RoomSchema.VERSION, "room_limits": RoomSchema.LIMITS,
+	return {"commands": out, "levels": levels, "room_schema": RoomSchema.VERSION,
+			"room_systems_schema": RoomSchema.SYSTEMS_VERSION, "room_limits": RoomSchema.LIMITS,
 			"supported_widgets": RoomSchema.supported_widgets()}
 
 
@@ -313,6 +314,17 @@ static func register_commands() -> void:
 			+ "document, the base room's own parts and colours, light, the screen (centre, size, facing), the viewer "
 			+ "(seat, eyes, head), the seats, the bases a new room can start from, limits and supported_widgets.",
 			"returns": "{doc, stock_parts, screen, viewer, seats, bases, limits, supported_widgets, allowed, ...}"})
+	R.register("room_systems", func(_a: Dictionary, _ctx: DevCommands.Call) -> Variant: return room_systems(), {
+			"assistant": "read",
+			"description": "The environments engine (docs/environments.md) for building a room from systems: a version 4 "
+			+ "room document (schema 4) is version 3 with sections: room, acoustics, systems [{system, id, params}], "
+			+ "settings, cues, timeline, audio, credits. Gives every system in the registry (its kind, description, "
+			+ "parameters with type, range, default and whether it is live, its actions and its cost), the channels a "
+			+ "live parameter can follow ({bind, range | keys | map, smooth}: data, never an expression), the "
+			+ "timeline's states, the cue steps, the setting types, the common room settings, the synthesised "
+			+ "sounds and the headset budget. Send the document with new_room or room_apply.",
+			"returns": "{schema, sections, systems, channels, states, steps, eases, setting_types, formats, "
+			+ "common_settings, sounds, budget}"})
 	var doc := "a room document (schema 2, 1 still read; its JSON Schema is RoomDocument in GET /openapi.json)"
 	R.register("room_apply", _handler("room_apply"), {"assistant": "room", "level": "change",
 			"description": "Changes the room on show with a room document (schema 2): parts added or replaced by "
@@ -409,6 +421,24 @@ static func register_commands() -> void:
 			"description": "Removes a part the assistant added (never the screen, the panel or the player).",
 			"params": [{"name": "name", "type": "string", "required": true, "description": "the part's name"}],
 			"returns": "{state: kept, name, warnings, perf, ...}"})
+
+
+## The environments engine's registry and vocabulary for an assistant (room_systems).
+static func room_systems() -> Dictionary:
+	var env_doc := load("res://scripts/env/env_doc.gd") as GDScript
+	var registry := load("res://scripts/env/systems/registry.gd") as GDScript
+	var checks := load("res://scripts/env/env_checks.gd") as GDScript
+	var common: Array = []
+	for d: Dictionary in env_doc.get("COMMON_SETTINGS"):
+		var c := d.duplicate()
+		c.erase("applies")
+		common.append(c)
+	return {"schema": RoomSchema.SYSTEMS_VERSION, "sections": env_doc.get("SECTIONS"),
+			"systems": registry.call("describe"), "channels": env_doc.get("CHANNELS"),
+			"setting_channel": "setting.<name>", "states": env_doc.get("STATES"), "steps": env_doc.get("STEP_KINDS"),
+			"eases": env_doc.get("EASES"), "setting_types": env_doc.get("SETTING_TYPES"),
+			"formats": env_doc.get("FORMATS"), "common_settings": common, "sounds": env_doc.get("SOUNDS"),
+			"budget": checks.get("BUDGET"), "limits": env_doc.get("LIMITS")}
 
 
 static func _handler(cmd: String) -> Callable:

@@ -325,7 +325,8 @@ func apply(mode: String, patch: Dictionary, summary: String) -> Dictionary:
 				return {"ok": false, "error": "remove: no part %s (only parts the assistant added can go: %s)"
 						% [n, ", ".join(names) if not names.is_empty() else "none yet"]}
 		doc = RoomSchema.merge(cur, patch)
-	doc["schema"] = RoomSchema.VERSION
+	# Version 4 when the room uses the environments engine's systems (docs/environments.md), else 3.
+	doc["schema"] = RoomSchema.version_for(doc)
 	if doc.has("base"):
 		var ids: Array = bases().map(func(e: Array) -> String: return e[0])
 		if not (str(doc["base"]) in ids):

@@ -75,7 +75,7 @@ func _test_schema() -> void:
 			"#ff0000"}}]}, "patch")
 	_check("schema 1 with a part-level match: needs schema 2 (%s)" % [v1_new["errors"]], not v1_new["ok"]
 			and str(v1_new["errors"]).contains("schema"))
-	_check("schema 4 refused", not RoomSchema.validate({"schema": 4}, "patch")["ok"])
+	_check("schema 5 refused", not RoomSchema.validate({"schema": 5}, "patch")["ok"])
 	var v2 := RoomSchema.validate({"schema": 2, "recolour": [{"match": "Shelf/Board", "material": {"color": "#ff0000",
 			"library_material": "oak"}}, {"match": "Lamp/Shade", "material": null}]}, "patch")
 	_check("schema 2: a part-level match, a library material, null to take one out (%s)" % [v2["errors"]], v2["ok"])

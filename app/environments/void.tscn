@@ -1,9 +1,10 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://environments/vr_environment.gd" id="1_env"]
+[ext_resource type="Script" path="res://scripts/env/env_room.gd" id="1_env"]
 
 [node name="Void" type="Node3D" node_paths=PackedStringArray("screen_anchor")]
 script = ExtResource("1_env")
+document = "res://environments/void.env.json"
 display_name = "Void"
 default_screen_width = 3.0
 screen_anchor = NodePath("ScreenAnchor")

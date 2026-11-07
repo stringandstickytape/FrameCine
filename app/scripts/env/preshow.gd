@@ -23,6 +23,8 @@ const CLOSE_SECONDS := 3.0
 const GATHERED := 0.1
 const MARGIN := 0.35
 const FACTOR := "preshow"
+## A room whose cue parts the curtains: the pre-show parts them itself if the cue has not within this long of play.
+const CUE_GRACE := 4.0
 
 var main: Node3D
 var enabled := true
@@ -32,6 +34,7 @@ var _rate := 0.0
 var _left: MeshInstance3D
 var _right: MeshInstance3D
 var _dimmed := false
+var _playing_for := 0.0
 
 
 func _ready() -> void:
@@ -67,6 +70,10 @@ func _panel(node_name: String, m: Material) -> MeshInstance3D:
 
 func available() -> bool:
 	if main.mode.is_spherical() or main.env == null:
+		return false
+	# The room's own Pre-show setting (scripts/env/room_settings.gd).
+	var rs: Node = main.features.get("room_settings")
+	if rs != null and rs.value("ritual") == false:
 		return false
 	if "has_curtains" in main.env:
 		return bool(main.env.get("has_curtains"))
@@ -119,8 +126,14 @@ func _on_file_opened(_path: String) -> void:
 
 
 func _process(delta: float) -> void:
-	# On play: the curtains part as the film starts (autoplay included; paused or ended, they wait).
-	if _target < 1.0 and main.player.is_playing() and available() and not _held():
+	# On play: the curtains part as the film starts (autoplay included; paused or ended, they wait). In a room whose
+	# ritual parts them (its env's curtains_by_cue: scripts/env/systems/showing.gd), the cue does, and this waits for
+	# it CUE_GRACE seconds.
+	_playing_for = _playing_for + delta if main.player.is_playing() else 0.0
+	var by_cue: bool = bool(main.env.get("curtains_by_cue")) if main.env != null and "curtains_by_cue" in main.env \
+			else false
+	if _target < 1.0 and main.player.is_playing() and available() and not _held() \
+			and (not by_cue or _playing_for > CUE_GRACE):
 		open_curtains()
 	if not is_equal_approx(openness, _target):
 		openness = move_toward(openness, _target, _rate * delta)

@@ -72,7 +72,11 @@ extends RefCounted
 const VERSION := 3
 ## The versions read: 1 is 2 without objects ("object"), part addressing ("Shelf/Board") and library materials; 2 is 3
 ## without placements (a part without type).
-const VERSIONS: Array[int] = [1, 2, 3]
+const VERSIONS: Array[int] = [1, 2, 3, 4]
+## Version 4: version 3 with the environments engine's sections (docs/environments.md; scripts/env/env_doc.gd checks
+## them): room, acoustics, systems, settings, cues, timeline, audio, credits. Kept rooms are still written as VERSION.
+const SYSTEMS_VERSION := 4
+const ENV_DOC := "res://scripts/env/env_doc.gd"
 ## The built-in primitive objects (object_builtins.gd): a placement's scale is their size.
 const PRIMITIVES: Array[String] = ["box", "sphere", "cylinder", "plane"]
 ## The built-in objects made per placement from its options (object_builtins.gd GENERATORS): their node is generated
@@ -311,6 +315,9 @@ static func validate(doc: Variant, mode: String) -> Dictionary:
 			"screen", "parts", "recolour", "remove", "lights"]
 	if mode == "saved":
 		known.append("base_model_file")
+	var v4 := is_finite(_num(d.get("schema", 0))) and int(_num(d.get("schema", 0))) == SYSTEMS_VERSION
+	if v4:
+		known.append_array((load(ENV_DOC) as GDScript).get("SECTIONS"))
 	for k: Variant in d:
 		if not (str(k) in known):
 			errors.append(_e("$.%s" % k, "unknown key (known: %s)" % ", ".join(known)))
@@ -324,6 +331,8 @@ static func validate(doc: Variant, mode: String) -> Dictionary:
 		if version < 3:
 			for p: String in _schema3_paths(d):
 				errors.append(_e(p, "needs \"schema\": 3 (a part placed as an object: object without type)"))
+	if v4:
+		(load(ENV_DOC) as GDScript).call("validate_sections", d, errors)
 	if d.has("name") and not _name_ok(d["name"]):
 		errors.append(_e("$.name", "letters, digits, space, - and _, at most %d" % NAME_MAX))
 	if mode == "patch" and (d.has("base") or d.has("base_model")):
@@ -1346,10 +1355,24 @@ static func _layers(fx: Variant) -> bool:
 	return EffectLibrary.has(fx_name) and bool(EffectLibrary.entry(fx_name)["layers"])
 
 
+## The version a room is kept as: SYSTEMS_VERSION when it has any of the environments engine's sections, else VERSION.
+static func version_for(doc: Dictionary) -> int:
+	for k: String in (load(ENV_DOC) as GDScript).get("SECTIONS"):
+		if doc.has(k):
+			return SYSTEMS_VERSION
+	return VERSION
+
+
 ## The room after a patch: parts replaced or added by name, removed ones gone, light / sky / recolour merged.
 static func merge(current: Dictionary, patch: Dictionary) -> Dictionary:
 	var out := current.duplicate(true)
-	out["schema"] = VERSION
+	# The environments engine's sections (version 4): a patch replaces each one it names; null takes it out.
+	for k: String in (load(ENV_DOC) as GDScript).get("SECTIONS"):
+		if patch.has(k) and patch[k] == null:
+			out.erase(k)
+		elif patch.has(k):
+			out[k] = patch[k].duplicate(true) if patch[k] is Dictionary or patch[k] is Array else patch[k]
+	out["schema"] = version_for(out)
 	for k in ["name", "light", "sky", "atmosphere", "seats", "default_seat", "screen", "lights"]:
 		if patch.has(k) and patch[k] == null:
 			out.erase(k)

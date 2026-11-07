@@ -2904,3 +2904,66 @@ msgstr "指向一个部件并扣动扳机。B 键取消。"
 
 msgid "Nothing changed"
 msgstr "没有任何更改"
+
+msgid "Dim during the film"
+msgstr "放映时调暗"
+
+msgid "The room's light goes down while the film plays."
+msgstr "影片播放时，房间的灯光变暗。"
+
+msgid "Ambience"
+msgstr "环境声"
+
+msgid "This room's sound against the Environment sound slider. At the bottom: off."
+msgstr "本房间的声音，相对于“环境声音”滑块。拉到最低：关闭。"
+
+msgid "Ambient life"
+msgstr "环境中的生物"
+
+msgid "Animals and other life in the room."
+msgstr "房间里的动物和其他生物。"
+
+msgid "Pre-show"
+msgstr "开场仪式"
+
+msgid "Curtains before the film, and the room's start of the show."
+msgstr "影片开始前的幕布，以及本房间的开场仪式。"
+
+msgid "Flickering lights"
+msgstr "闪烁的灯光"
+
+msgid "Off: lights that flicker stay steady."
+msgstr "关闭：闪烁的灯光保持稳定。"
+
+msgid "Motion"
+msgstr "动态"
+
+msgid "How much things in the room move: sways, tilts, weave."
+msgstr "房间里物体的运动幅度：摇摆、倾斜、抖动。"
+
+msgid "%+d dB"
+msgstr "%+d dB"
+
+msgid "This room"
+msgstr "本房间"
+
+msgid "Back to defaults"
+msgstr "恢复默认"
+
+msgid "Environment sound"
+msgstr "环境声音"
+
+msgid "The room's own sound: rain, birds, the projector. It always stays under the film."
+msgstr "房间自身的声音：雨声、鸟叫、放映机。它始终低于影片的声音。"
+
+msgid "House lights in the film"
+msgstr "放映中的场灯"
+
+msgid "Ripple"
+msgstr "波纹"
+
+msgid "How bright the house lamps stay once the film has started."
+msgstr "影片开始后场灯保持的亮度。"
+
+msgid "A faint ring on the floor where you move. At the bottom: none."
+msgstr "你移动时地面上出现的淡淡波纹。拉到最低：无。"

@@ -113,7 +113,10 @@ func _build_card() -> void:
 
 
 func _attach_analyzer(on: bool) -> void:
-	var bus := AudioServer.get_bus_index("Master")
+	# The film's bus (scripts/env/env_audio.gd; Master without it): the room's own sounds never move the bars.
+	var bus := AudioServer.get_bus_index("Film")
+	if bus < 0:
+		bus = AudioServer.get_bus_index("Master")
 	if on and _effect_index < 0:
 		var fx := AudioEffectSpectrumAnalyzer.new()
 		fx.buffer_length = 0.1

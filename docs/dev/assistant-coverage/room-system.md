@@ -27,6 +27,8 @@ Objects tab calls the same functions (`app/ui/object_section.gd`, `app/ui/object
 |---|---|
 | Environment: a row of the list | `set_environment` {id} (room). The list: `room_settings` environments (read) |
 | Use this picture as the room | `use_picture_as_room` (room) |
+| This room: each setting (a toggle, a slider, a row of choices, built from the room's declarations) | `room_setting` {name, value} (room). The declarations, their JSON Schemas and values: `room_settings` this_room (read) |
+| This room: Back to defaults | `room_setting` {reset: true} (room) |
 | Seat: the label | `room_settings` seat (read) |
 | Previous seat, Next seat, Room's own spot | `seat` {to: previous, next or own} (control) |
 | Pick a seat (the laser) | `seat` {to: the seat's name} (control) |

@@ -25,6 +25,7 @@ var app: Node
 var box: VBoxContainer
 var _tracks: VBoxContainer
 var _volume: VBoxContainer
+var _env_sound: VBoxContainer
 var _offset: VBoxContainer
 var _speed: HFlowContainer
 var _live_delay: VBoxContainer
@@ -68,6 +69,14 @@ func bind(p_app: Node) -> void:
 	_volume = W.slider_row("Volume", 0.0, 100.0, 1.0, func(v: float) -> String: return "%d %%" % roundi(v),
 			func(v: float) -> void: app.set_volume(v / 100.0))
 	box.add_child(_volume)
+	# The room's own sound (scripts/env/env_audio.gd): off to full, 18 dB under the film by default, and always ducked
+	# under it.
+	var env_audio: Node = app.features.env_audio
+	_env_sound = W.slider_row("Environment sound", env_audio.MIN_DB, 0.0, 1.0,
+			func(v: float) -> String: return tr("off") if v <= env_audio.MIN_DB + 0.01 else tr("%+d dB") % roundi(v),
+			func(v: float) -> void: env_audio.set_environment_db(v))
+	box.add_child(_env_sound)
+	box.add_child(W.help("The room's own sound: rain, birds, the projector. It always stays under the film."))
 	_offset = W.slider_row("A/V offset", -300.0, 300.0, 5.0, func(v: float) -> String: return tr("%+d ms") % roundi(v),
 			func(v: float) -> void: app.set_av_offset(v / 1000.0))
 	box.add_child(_offset)
@@ -162,6 +171,7 @@ func bind(p_app: Node) -> void:
 
 func sync() -> void:
 	W.set_slider(_volume, app.volume * 100.0)
+	W.set_slider(_env_sound, float(app.features.env_audio.environment_db))
 	W.set_slider(_offset, app.player.av_offset * 1000.0)
 	var speed: Node = app.features.speed
 	W.set_choice(_speed, (speed.STEPS as Array).find(speed.speed))
