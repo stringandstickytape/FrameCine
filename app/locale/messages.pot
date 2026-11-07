@@ -2770,7 +2770,7 @@ msgstr ""
 msgid "Polynomial"
 msgstr ""
 
-#: ui/picture_tab.gd:31 ui/room_tab.gd:19 ui/system_tab.gd:41
+#: ui/picture_tab.gd:31 ui/room_tab.gd:19 ui/system_tab.gd:41 environments/ice_cinema.env.json
 msgid "Off"
 msgstr ""
 
@@ -4053,8 +4053,32 @@ msgstr ""
 msgid "Cloud layers sky"
 msgstr ""
 
+#: environments/ice_cinema.env.json
+msgid "Ice cinema"
+msgstr ""
+
+#: environments/nave.env.json
+msgid "Nave"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Reclaimed"
+msgstr ""
+
 #: environments/cinema.env.json
 msgid "House lights in the film"
+msgstr ""
+
+#: environments/ice_cinema.env.json
+msgid "Aurora"
+msgstr ""
+
+#: environments/nave.env.json
+msgid "Candles"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Weather"
 msgstr ""
 
 #: environments/void.env.json
@@ -4065,7 +4089,55 @@ msgstr ""
 msgid "How bright the house lamps stay once the film has started."
 msgstr ""
 
+#: environments/ice_cinema.env.json
+msgid "The northern lights in the window: they swell in quiet scenes, glow all the time, or stay away."
+msgstr ""
+
+#: environments/nave.env.json
+msgid "Candle stands either side of the screen: none, two on each side, or four."
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Rain through the broken roof, a misty drizzle, a clear night, or each in turn."
+msgstr ""
+
 #: environments/void.env.json
 msgid "A faint ring on the floor where you move. At the bottom: none."
+msgstr ""
+
+#: environments/ice_cinema.env.json
+msgid "In quiet scenes"
+msgstr ""
+
+#: environments/ice_cinema.env.json
+msgid "Always"
+msgstr ""
+
+#: environments/nave.env.json
+msgid "None"
+msgstr ""
+
+#: environments/nave.env.json
+msgid "A few"
+msgstr ""
+
+#: environments/nave.env.json
+msgid "Many"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Changing"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Rain"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Mist"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Clear"
 msgstr ""
 

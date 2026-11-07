@@ -1247,6 +1247,76 @@ people.
 | 16 | Void | `mirror_floor` | black | | | | ripple |
 | 17 | Pillow Fort, 1993 | `domestic` (cushions, a bedsheet), a tree, a tin of sweets (objects) | fairy lights (`light`, flicker), rain on the window (`weather`) | a ticking radiator (`sound_bed`) | the VCR flashes 12:00 (object widget) | a CRT telly (`presentation`, TV-era display) | the telly fills the opening |
 
+### Room: Nave
+
+`app/environments/nave.env.json`. *A stone nave at night: pews, candles either side of the screen in the chancel, a
+dim rose window, and the film's light on the columns.*
+
+- **Systems:** `light` (spill 4.5, so the stone and the columns take the film's light; a low warm fill), `nave`
+  (the chancel at z -6.5, 4 m deep; 4 pews in front of the viewer's and 5 behind, 9 places each; the screen 6.4 x 3.6
+  m under the chancel arch, its bottom 1.6 m over the nave's floor; rose glow 0.25; darker stone and columns),
+  `seats` (the pews in the nave's slots), `screen_frame` (masking, no beam).
+- **The viewer:** the middle place of the fifth pew, at the origin; four pews' backs in front, under the picture.
+- **Setting:** Candles (`candles`: none, a few, many) maps onto `nave.candles` (0, 2 or 4 stands a side; the nave
+  builds again). The candles flicker (common Flickering lights).
+- **Cues:** `rose_dims` (starting: the rose window to 0.15 over 6 s), `rose_up` (pre-show and end: back over 5 s).
+- **Measured** (`tests/test_room_set5.gd`, headless): 14 draws, 8 290 triangles, no live light, 7.0 MB.
+- **Sound wanted** (with the sound systems): a long stone reverb on the room's own sounds (`acoustics`, about 3 s);
+  a faint wind in the clerestory and now and then a candle's gutter (`sound_bed`, very low); no organ, no bells. The
+  film's own `acoustics` section stays modest (rt60 1.6, wet 0.4) so speech in the film stays clear.
+
+### Room: Reclaimed
+
+`app/environments/reclaimed.env.json`. *An old picture house taken back by nature: half its roof gone to the stars,
+ivy on the walls, ferns in the corners, rain into a puddle that gives back the film, birds on the broken roof,
+fireflies and now and then a deer.*
+
+- **Systems:** `light` (a cold moonlit fill; the house lamps, step lights and signs dead; no bake: its lamps are
+  dead), `auditorium` (16 x 15.6 m, `ceiling_cover` 0.5: the roof open from z -2.2 back, over the viewer; the viewer
+  in the front row, 3 rows behind, 21 plush seats a row, faded and uneven; plain painted brick walls; no sconces, no
+  acoustic clouds; a low stage with dark drapes), `screen_frame` (no masking; the projector's beam from the booth),
+  `kit` (ivy on six places of the side walls, ferns in the pit's corners, by the stage and in the side aisles),
+  `seats` (8 broken seats over the hall's own), `sky` (a September night at 52 degrees north; clouds bound to
+  `weather.wet`), `weather` (the mode from the Weather setting; rain through the open roof and a few leaks over the
+  pit; a puddle in the pit in front of the viewer, its reflection bound to `weather.wet`), `atmosphere` (a little
+  haze in the beam; mist bound to `weather.wet`), `life` `birds` (8, perched on the broken roof's edge and the
+  walls' tops), `fireflies` (30, low; they dim while the film is bright and hide in the rain), `deer` (down the left
+  side aisle from the back, about every 8 minutes).
+- **The puddle:** the viewer sits in the front row so nothing hides the pit; the eye mirrored in the puddle's plane
+  sees the picture's middle 3.6 m ahead, in the puddle (the test works it out).
+- **Setting:** Weather (`weather`: changing, rain, mist, clear) maps onto `weather.mode` (changing, heavy, light,
+  clear); mist is a drizzle, and the mist rises with the wet.
+- **Cues:** `birds_start` (a loud bang while playing: the birds scatter; chance 0.6, at most every 3 minutes),
+  `deer_in_quiet` (6 s of a quiet scene: the deer comes; chance 0.5, at most every 15 minutes).
+- **Measured** (`tests/test_room_set5.gd`, headless): 30 draws, 116 858 triangles (the ivy and the plush seats),
+  no live light, 1 600 particles, 10.4 MB. Its update: about 0.2 ms a frame on the desktop.
+- **Sound wanted** (with the sound systems): rain on leaves and on the boards, bound to `weather.rain`; drips after
+  it, bound to `weather.wet`; birds' calls (the birds' events), a soft night wind; all well under the film.
+- **Gaps:** the auditorium has no screen surface of its own, so there is no patched sheet: the picture hangs on the
+  black front wall with no masking (a sheet like the shopfront's `sheet_frame` would need a parameter on the
+  auditorium). Its walls have no damp or stain parameter.
+
+### Room: Ice cinema
+
+`app/environments/ice_cinema.env.json`. *A small room of ice blocks under a low vault: hides on ice benches,
+candles in the walls, the film's colours in the ice, and the northern lights in the window in quiet scenes.*
+
+- **Systems:** `light` (spill 4.5, so the ice glows in the film's colours; a cold low fill), `domestic` (style
+  `ice`: 6 x 9 m, the picture 3.2 x 1.8 m on a smoothed panel of the front wall; a 2 m window in the left wall and
+  the open doorway behind, both to the night sky), `seats` (`hide` on every place: 5 a row, a row in front, two
+  behind), `sky` (68 degrees north, a January night, the aurora over the east, where the window looks out),
+  `atmosphere` (breath 0.6, a thin ground fog).
+- **Setting:** Aurora (`aurora`: in quiet scenes, always, off) maps onto `sky.aurora` (0.15, 0.8, 0).
+- **Cues:** `aurora_swells` (2 s of a quiet scene, the setting on "in quiet scenes": the aurora to full over 8 s),
+  `aurora_settles` (the quiet ends: back to the setting's level over 12 s). The swell is a cue rather than a binding
+  on `film.quiet`, so the setting can still give the aurora's level.
+- **Measured** (`tests/test_room_set5.gd`, headless): 17 draws, 15 976 triangles, no live light, 16 particles, 6.5
+  MB.
+- **Sound wanted** (with the sound systems): far huskies now and then (`sound_bed`, `every`), a soft wind past the
+  doorway, the ice's creak now and then; very low.
+- **Gaps:** the ice room opens only to the sides and behind, so the aurora shows in the window and the doorway,
+  not over the screen; a skylight or an opening in the vault would need a parameter on `domestic`.
+
 ### TV-era rooms
 
 The same `presentation` chain makes the TV-era rooms: source (a broadcast, a tape, a disc), transmission (aerial
