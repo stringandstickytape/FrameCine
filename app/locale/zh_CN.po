@@ -3109,6 +3109,15 @@ msgstr "毛毛雨"
 msgid "Coming and going"
 msgstr "时下时停"
 
+msgid "Nave"
+msgstr "中殿"
+
+msgid "Candles"
+msgstr "蜡烛"
+
+msgid "Candle stands either side of the screen: none, two on each side, or four."
+msgstr "银幕两侧的烛台：没有、每侧两座或每侧四座。"
+
 msgid "None"
 msgstr "无"
 
@@ -3117,3 +3126,45 @@ msgstr "电视机自带的扬声器"
 
 msgid "The film's sound as the telly's small speaker gives it: thin, boxy and in mono."
 msgstr "影片的声音如同电视机的小扬声器播放：单薄、发闷，且为单声道。"
+
+msgid "A few"
+msgstr "少量"
+
+msgid "Many"
+msgstr "大量"
+
+msgid "Reclaimed"
+msgstr "荒野影院"
+
+msgid "Weather"
+msgstr "天气"
+
+msgid "Rain through the broken roof, a misty drizzle, a clear night, or each in turn."
+msgstr "雨从破屋顶落下、带雾的细雨、晴朗的夜晚，或依次轮换。"
+
+msgid "Changing"
+msgstr "变化"
+
+msgid "Rain"
+msgstr "雨"
+
+msgid "Mist"
+msgstr "薄雾"
+
+msgid "Clear"
+msgstr "晴朗"
+
+msgid "Ice cinema"
+msgstr "冰雪影院"
+
+msgid "Aurora"
+msgstr "极光"
+
+msgid "The northern lights in the window: they swell in quiet scenes, glow all the time, or stay away."
+msgstr "窗外的北极光：在安静的场景中增强、一直发光，或不出现。"
+
+msgid "In quiet scenes"
+msgstr "安静场景中"
+
+msgid "Always"
+msgstr "始终"

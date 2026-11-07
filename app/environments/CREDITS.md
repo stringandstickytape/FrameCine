@@ -63,3 +63,22 @@ library materials.
 
 No bundled assets. The bedroom, the fort, the fairy lights, the telly, the cushions and the rain are made in code by
 the systems (`domestic`, `seats`, `weather`, `presentation`) on library materials.
+
+## Nave (`nave.env.json`)
+
+No bundled asset. The nave, its pews, candle stands and rose window are built in code (`nave.gd`, `seats.gd`,
+`procedural.gd`) on library materials (`rough_plaster`, `white_marble`, `checker_marble_tiles`, `velvet`, `brass`, the
+pews' `oak_veneer` and `walnut_veneer`, all CC0).
+
+## Reclaimed (`reclaimed.env.json`)
+
+No bundled asset. The hall, the ivy and ferns, the sky, the rain, the puddle, the mist, the birds, fireflies and the
+deer are built in code (`auditorium.gd`, `kit.gd`, `sky.gd`, `weather.gd`, `atmosphere.gd`, `life.gd`) on library
+materials (`painted_brick`, `rough_plaster`, `rustic_planks`, `velvet`, and the auditorium's defaults, all CC0). The
+stars are the sky's public-domain data above.
+
+## Ice cinema (`ice_cinema.env.json`)
+
+No bundled asset. The ice room, the hides, the aurora, the stars and the breath are built in code (`domestic.gd`,
+`seats.gd`, `sky.gd`, `atmosphere.gd`) on library materials (the ice style's `white_marble`, `rough_plaster`,
+`smooth_plaster`, `felt`, the hide's `plush_carpet`, all CC0), with the ice-block pattern drawn in `procedural.gd`.
