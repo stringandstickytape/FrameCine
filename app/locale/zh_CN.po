@@ -2967,3 +2967,345 @@ msgstr "影片开始后场灯保持的亮度。"
 
 msgid "A faint ring on the floor where you move. At the bottom: none."
 msgstr "你移动时地面上出现的淡淡波纹。拉到最低：无。"
+
+msgid "On; this room draws the film itself, for the look of its screen."
+msgstr "开；此房间自己绘制影片，以呈现它的屏幕效果。"
+
+#. The Room tab: the group of cinema rooms.
+msgid "Cinemas"
+msgstr "影院"
+
+#. The Room tab: the group of television rooms (the history of television).
+msgid "Television"
+msgstr "电视"
+
+#. A room: an atmospheric picture palace of 1928, a courtyard open to the twilight sky.
+msgid "Atmospheric 1928"
+msgstr "星空庭院影院 1928"
+
+#. A room: a large modern cinema with a steep rake and a huge curved screen.
+msgid "Flagship"
+msgstr "旗舰影院"
+
+#. A room: the cinema hall of a 1970s palace of culture (a civic arts centre).
+msgid "Palace of Culture 1974"
+msgstr "文化宫 1974"
+
+msgid "Clouds"
+msgstr "云"
+
+msgid "How much of the open sky the clouds cover. They catch the film's light."
+msgstr "露天天空中云的多少。云会映出影片的光。"
+
+msgid "Snow"
+msgstr "雪"
+
+msgid "Snow through the open back of the roof, over the birches outside."
+msgstr "雪从屋顶敞开的后部飘进来，也落在外面的树林里。"
+
+msgid "No snow"
+msgstr "无雪"
+
+msgid "Light snow"
+msgstr "小雪"
+
+msgid "Heavy snow"
+msgstr "大雪"
+
+#. A room: a narrow picture house of 1906 in a shop.
+msgid "Shopfront 1906"
+msgstr "1906 年店面影院"
+
+#. A room: a 1937 cinema in the streamline style.
+msgid "Streamline 1937"
+msgstr "1937 年流线型影院"
+
+#. A room: a pink and blue picture palace.
+msgid "Pink Palace"
+msgstr "粉色宫殿"
+
+msgid "Player piano"
+msgstr "自动钢琴"
+
+msgid "A player piano by the screen plays along with the film. Off: no piano."
+msgstr "银幕旁的自动钢琴随影片弹奏。关：没有钢琴。"
+
+msgid "Cove colours"
+msgstr "灯槽颜色"
+
+msgid "The cove lights' colour before the film. Changing: they move through the colours. In the film they take the film's colour."
+msgstr "影片开始前灯槽灯光的颜色。变换：在各种颜色之间轮换。影片放映时它们取影片的颜色。"
+
+#. A colour choice: the colours change in turn.
+msgid "Changing"
+msgstr "变换"
+
+msgid "Gold"
+msgstr "金色"
+
+msgid "Rose"
+msgstr "玫瑰色"
+
+msgid "Jade"
+msgstr "玉绿色"
+
+#. A room: a small multiplex screen of 1983 (the room list).
+msgid "Screen 3 - 1983"
+msgstr "3 号厅 - 1983"
+
+msgid "Weave and tilt"
+msgstr "画面抖动与倾斜"
+
+msgid "How much the worn print drifts in the gate, and how crooked the projector stands. At the bottom: steady and straight."
+msgstr "旧拷贝在片门中漂移的程度，以及放映机歪斜的程度。拉到最低：稳定且端正。"
+
+#. A room: a drive-in cinema of 1958, seen from a car (the room list).
+msgid "Drive-in - 1958"
+msgstr "汽车影院 - 1958"
+
+msgid "Window speaker"
+msgstr "车窗扬声器"
+
+msgid "The film's sound from the little speaker hung on the car's window: tinny, mono, a little rattle."
+msgstr "影片声音来自挂在车窗上的小扬声器：单薄、单声道，略带杂音。"
+
+#. A room's name: a private screening room in a house, 1962.
+msgid "Screening room 1962"
+msgstr "放映室 1962"
+
+msgid "Wall lamps in the film"
+msgstr "影片中的壁灯"
+
+msgid "How bright the brass wall lamps stay once the film has started."
+msgstr "影片开始后黄铜壁灯保持的亮度。"
+
+#. A room's name: an open-air summer cinema on a roof in Athens.
+msgid "Athens rooftop"
+msgstr "雅典屋顶影院"
+
+msgid "Floodlights on the hill"
+msgstr "山上的泛光灯"
+
+msgid "How brightly the ruins on the hill are lit. At the bottom: dark."
+msgstr "山上的古迹被照亮的程度。拉到最低：熄灭。"
+
+#. A room's name: a child's bedroom with a fort of pillows, 1993.
+msgid "Pillow Fort 1993"
+msgstr "枕头城堡 1993"
+
+msgid "Rain on the window"
+msgstr "窗上的雨"
+
+msgid "Rain on the glass and in the street, a drizzle, rain that comes and goes, or a dry night."
+msgstr "玻璃上和街上的雨、毛毛雨、时下时停的雨，或无雨的夜晚。"
+
+#. Rain on the window: the choices.
+msgid "Rain"
+msgstr "雨"
+
+msgid "Drizzle"
+msgstr "毛毛雨"
+
+msgid "Coming and going"
+msgstr "时下时停"
+
+msgid "Nave"
+msgstr "中殿"
+
+msgid "Candles"
+msgstr "蜡烛"
+
+msgid "Candle stands either side of the screen: none, two on each side, or four."
+msgstr "银幕两侧的烛台：没有、每侧两座或每侧四座。"
+
+msgid "None"
+msgstr "无"
+
+msgid "The telly's own speaker"
+msgstr "电视机自带的扬声器"
+
+msgid "The film's sound as the telly's small speaker gives it: thin, boxy and in mono."
+msgstr "影片的声音如同电视机的小扬声器播放：单薄、发闷，且为单声道。"
+
+msgid "A few"
+msgstr "少量"
+
+msgid "Many"
+msgstr "大量"
+
+msgid "Reclaimed"
+msgstr "荒野影院"
+
+msgid "Weather"
+msgstr "天气"
+
+msgid "Rain through the broken roof, a misty drizzle, a clear night, or each in turn."
+msgstr "雨从破屋顶落下、带雾的细雨、晴朗的夜晚，或依次轮换。"
+
+msgid "Mist"
+msgstr "薄雾"
+
+msgid "Clear"
+msgstr "晴朗"
+
+msgid "Ice cinema"
+msgstr "冰雪影院"
+
+msgid "Aurora"
+msgstr "极光"
+
+msgid "The northern lights in the window: they swell in quiet scenes, glow all the time, or stay away."
+msgstr "窗外的北极光：在安静的场景中增强、一直发光，或不出现。"
+
+msgid "In quiet scenes"
+msgstr "安静场景中"
+
+msgid "Always"
+msgstr "始终"
+
+#. The Room tab: a room, a glass dome hall in deep water.
+msgid "Bathysphere"
+msgstr "深海球舱"
+
+#. The Bathysphere's setting: how often the whale comes.
+msgid "Whale"
+msgstr "鲸鱼"
+
+msgid "How often a whale swims past behind the screen in a quiet scene."
+msgstr "安静的场景中，鲸鱼从屏幕后方游过的频率。"
+
+#. The Whale setting's choices.
+msgid "Never"
+msgstr "从不"
+
+msgid "Rarely"
+msgstr "很少"
+
+msgid "Sometimes"
+msgstr "有时"
+
+#. The Room tab: a room, a lunar amphitheatre under a glass dome.
+msgid "Crater"
+msgstr "环形山"
+
+#. The Crater's setting: how fast Earth turns in the sky.
+msgid "Earth's speed"
+msgstr "地球转速"
+
+msgid "How fast Earth turns in the sky. At 1 x it turns once in two hours, about once a film."
+msgstr "地球在天空中转动的速度。1 倍时两小时转一圈，大约一部影片转一圈。"
+
+#. The TV-era rooms (app/environments/tv_*.env.json): names and settings.
+msgid "TV 1930 - glowing box"
+msgstr "电视 1930 - 发光的盒子"
+
+msgid "TV 1953 - by the fire"
+msgstr "电视 1953 - 炉火旁"
+
+msgid "TV 1972 - first colour"
+msgstr "电视 1972 - 第一台彩电"
+
+msgid "TV 1983 - desk portable"
+msgstr "电视 1983 - 书桌上的便携电视"
+
+msgid "TV 1987 - rented tape"
+msgstr "电视 1987 - 租来的录像带"
+
+msgid "TV 1993 - bedroom telly"
+msgstr "电视 1993 - 卧室里的电视"
+
+msgid "TV 2005 - flat screen"
+msgstr "电视 2005 - 平板电视"
+
+msgid "Lines in the picture"
+msgstr "画面线数"
+
+msgid "Fire in the grate"
+msgstr "壁炉里的火"
+
+msgid "Snow from the aerial"
+msgstr "天线雪花噪点"
+
+msgid "Aerial lead noise"
+msgstr "天线连接线噪点"
+
+msgid "Bold lines"
+msgstr "粗扫描线"
+
+msgid "The tape"
+msgstr "录像带"
+
+msgid "Weather at the window"
+msgstr "窗外天气"
+
+msgid "Fairy lights over the telly"
+msgstr "电视上方的彩灯"
+
+msgid "Backlight bleed"
+msgstr "背光漏光"
+
+msgid "The set drew its picture in 30 glowing lines. More lines show the film more clearly than it ever could."
+msgstr "这台电视用 30 条发光的线绘出画面。线数越多，影片就越清晰，远胜当年。"
+
+msgid "A coal fire burns in the grate. Off: the grate is cold and the set's glow lights the room."
+msgstr "壁炉里燃着煤火。关：壁炉是冷的，只有电视的光照亮房间。"
+
+msgid "Snow on the picture from a weak signal on the roof aerial. At the bottom: a clean picture."
+msgstr "屋顶天线信号弱，画面上出现雪花。拉到最低：画面干净。"
+
+msgid "A coal fire burns in the grate, and the cat likes the hearth."
+msgstr "壁炉里燃着煤火，猫喜欢待在炉前。"
+
+msgid "A little snow from the aerial. At the bottom: a clean picture."
+msgstr "天线带来一点雪花。拉到最低：画面干净。"
+
+msgid "The set's colour knob. New colour sets were often turned up rich and warm."
+msgstr "电视的色彩旋钮。新的彩色电视常被调得浓郁温暖。"
+
+msgid "The computer and the telly share the aerial lead, and a little noise comes with it."
+msgstr "电脑和电视共用天线连接线，因此带来一点噪点。"
+
+msgid "The dark gaps between the picture's lines, as a small portable showed them close up."
+msgstr "画面扫描线之间的暗缝，就像近看小型便携电视时那样。"
+
+msgid "How many times the tape has been played: noise, smeared colour and the tear at the bottom."
+msgstr "录像带被播放过多少次：噪点、模糊的色彩和底部的撕裂。"
+
+msgid "How bright the wall lamps stay once the film has started."
+msgstr "影片开始后壁灯保持的亮度。"
+
+msgid "Rain on the window, a clear night, or each in turn."
+msgstr "雨打窗户、晴朗的夜晚，或两者轮流。"
+
+msgid "How bright the fairy lights over the telly are. At the bottom: off."
+msgstr "电视上方彩灯的亮度。拉到最低：关。"
+
+msgid "The early panel's backlight glowing through the dark scenes, most at the corners."
+msgstr "早期平板电视的背光在暗场景中透出，角落最明显。"
+
+msgid "30 lines"
+msgstr "30 线"
+
+msgid "60 lines"
+msgstr "60 线"
+
+msgid "120 lines"
+msgstr "120 线"
+
+msgid "Fresh"
+msgstr "全新"
+
+msgid "Rented"
+msgstr "租来的"
+
+msgid "Worn out"
+msgstr "磨损的"
+
+msgid "Raining"
+msgstr "下雨"
+
+msgid "A dry night"
+msgstr "无雨的夜晚"
+
+msgid "Showers"
+msgstr "阵雨"

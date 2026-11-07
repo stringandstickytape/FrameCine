@@ -48,6 +48,8 @@ const MAPS: Array[String] = ["albedo", "normal", "orm"]
 ## .mtex: "MTEX", version, block size (x | y << 16), width, height, mip levels, flags, data size; then the data.
 const MTEX_MAGIC := "MTEX"
 const MTEX_HEADER := 32
+## The meta on a map's texture with its bytes on the headset (ASTC as loaded from the .mtex), for the rooms' budget.
+const FRAME_BYTES_META := "frame_bytes"
 const FLAG_SRGB := 1
 const FLAG_NORMAL := 2
 ## Options passed to the shader as they are (the catalogue's tunables are the defaults).
@@ -288,6 +290,9 @@ static func load_texture(path: String) -> Texture2D:
 		# A PC's GPU: the engine would decompress it anyway, with a warning per texture.
 		image.decompress()
 	var tex := ImageTexture.create_from_image(image)
+	# What it takes on the headset (ASTC blocks as they are), whatever this GPU made of it: the rooms' budget
+	# (env_checks.gd measure()) counts this.
+	tex.set_meta(FRAME_BYTES_META, bytes.size() - MTEX_HEADER)
 	_textures[path] = tex
 	return tex
 

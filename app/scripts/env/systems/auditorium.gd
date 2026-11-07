@@ -37,7 +37,11 @@ const SEAT_BACK_CENTRE := Vector3(0.0, 0.35, 0.03)
 const SEAT_BACK_SIZE := Vector3(0.52, 0.72, 0.14)
 ## Straight rows: arcs this large.
 const STRAIGHT_RADIUS := 100000.0
-const SEAT_MODELS: Array[String] = ["stadium"]
+## The seat models a hall of rows takes (scripts/env/systems/seats.gd SINGLE_MODELS): the stadium seat is drawn here
+## (seat_mesh()), the others by the seats system's models.
+const SEAT_MODELS: Array[String] = ["stadium", "folding_chair", "plush", "multiplex", "club_chair", "director",
+		"cushion", "bean_bag"]
+const SEATS := "res://scripts/env/systems/seats.gd"
 
 
 static func spec() -> Dictionary:
@@ -72,7 +76,8 @@ const PARAMS := {
 	"block_x": {"type": "float", "min": 0.5, "max": 100.0, "default": 8.1,
 			"description": "the seats' block reaches this far either side; the side aisles go on to the walls"},
 	"row_segments": {"type": "int", "min": 2, "max": 64, "default": 24, "description": "the tiers' arcs, in pieces"},
-	"seat_model": {"type": "enum", "values": ["stadium"], "default": "stadium", "description": "the seat"},
+	"seat_model": {"type": "enum", "values": SEAT_MODELS, "default": "stadium",
+			"description": "the seat: stadium, or a model of the seats system (plush, multiplex, folding_chair, ...)"},
 	"seat_upholstery": {"type": "material", "default": {"library": "velvet", "color": [0.376, 0.092, 0.11],
 			"tiling": 0.22}, "description": "the seats' cushion and back"},
 	"seat_shell": {"type": "material", "default": {"library": "black_leather", "color": [0.08, 0.075, 0.078]},
@@ -337,7 +342,13 @@ static func collision_shapes_for(p: Dictionary) -> Array:
 	var back_xf := Transform3D(tilt.basis, tilt * SEAT_BACK_CENTRE)
 	var all := l.seat_transforms()
 	all.append_array(_balcony_seats_for(p, l))
+	# Another seat model's own boxes (seats.gd model_boxes(): a club chair or a bean bag is wider than the stadium seat).
+	var model := str(p.get("seat_model", "stadium"))
+	var seats_script: GDScript = load(SEATS) if model != "stadium" else null
 	for st in all:
+		if seats_script != null:
+			out.append_array(seats_script.call("model_boxes", model, st))
+			continue
 		out.append([cushion, st * Transform3D(Basis(), SEAT_BOX_CENTRE)])
 		out.append([back, st * back_xf])
 	for b: Array in _balcony_boxes(p, l):
@@ -708,7 +719,7 @@ func _build_seats() -> void:
 	var velvet := _mat("seat_upholstery", true)
 	velvet.set_shader_parameter("instance_tint", true)
 	var shell := _mat("seat_shell", true)
-	var mesh := seat_mesh(velvet, shell, float(params["seat_pitch"]))
+	var mesh := seat_mesh(velvet, shell, float(params["seat_pitch"]), str(params["seat_model"]))
 	_seat_xforms = _all_seats()
 	var mm := MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
@@ -737,8 +748,11 @@ func _build_seats() -> void:
 
 ## One seat, its floor point under the seated eyes at the origin, facing -Z: a velvet cushion and back (the back
 ## curved in plan and tilted) with an outer cover behind it, half an arm rest and half a standard either side (the
-## neighbour's halves complete them: a joined row), and a pedestal under the cushion.
-static func seat_mesh(upholstery: Material, frame: Material, pitch := 0.58) -> ArrayMesh:
+## neighbour's halves complete them: a joined row), and a pedestal under the cushion. Another model: the seats
+## system's (seats.gd model_mesh()), `pitch` wide.
+static func seat_mesh(upholstery: Material, frame: Material, pitch := 0.58, model := "stadium") -> ArrayMesh:
+	if model != "stadium":
+		return (load(SEATS) as GDScript).call("model_mesh", model, upholstery, frame, pitch, "")
 	var b := RoomMesh.new()
 	var half := pitch * 0.5
 	var tilt := Transform3D(Basis(Vector3.RIGHT, deg_to_rad(13.0)), Vector3(0.0, 0.42, 0.2))

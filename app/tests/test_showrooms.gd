@@ -17,6 +17,8 @@ const EffectLibrary := preload("res://scripts/effects/effect_library.gd")
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const ObjectBuiltins := preload("res://scripts/assistant/object_builtins.gd")
 const DevCommands := preload("res://scripts/dev/dev_commands.gd")
+const EnvLibrary := preload("res://scripts/env/env_library.gd")
+const EnvDoc := preload("res://scripts/env/env_doc.gd")
 const CommandHost := preload("res://scripts/dev/command_host.gd")
 
 var _failures := 0
@@ -255,8 +257,18 @@ func _test_room_tab() -> void:
 			func(r: Dictionary) -> String: return str(r["name"])))
 	_check("no showroom among the rooms' own rows", (tab._envs.get_children() as Array).all(func(b: Button) -> bool:
 			return not str(b.text) in rooms.map(func(r: Dictionary) -> String: return str(r["name"]))))
-	_check("the rooms' rows come first", tab._envs.get_child_count() + tab._yours.get_child_count() + rows.size()
-			== tab._env_ids.size())
+	_check("the rooms' rows come first", tab._cinemas.get_child_count() + tab._tvs.get_child_count()
+			+ tab._envs.get_child_count() + tab._yours.get_child_count() + rows.size() == tab._env_ids.size())
+	# The cinemas and the television rooms (a document's room.category) in their own groups.
+	var cinema_rows: Array = (tab._cinemas.get_children() as Array).map(func(b: Button) -> String: return b.text)
+	_check("the cinema under Cinemas (%s)" % [cinema_rows], tab._cinema_box.visible and EnvLibrary.category_of("cinema")
+			== "cinema" and cinema_rows.has(tr("Cinema")) and not (tab._envs.get_children() as Array).any(
+			func(b: Button) -> bool: return b.text == tr("Cinema")))
+	_check("the Void stays with the other rooms", EnvLibrary.category_of("void") == "other"
+			and EnvLibrary.category_of("no_such_room") == "other")
+	_check("Television shows only with a TV room", tab._tv_box.visible == (tab._tvs.get_child_count() > 0))
+	_check("a category the rooms don't know is refused", not EnvDoc.validate({"schema": 4, "name": "x",
+			"room": {"category": "radio"}})["ok"])
 	_check("the viewer's own rooms apart (%d)" % tab._yours.get_child_count(), (tab._yours.get_children() as Array).size()
 			== tab._env_ids.filter(func(id: String) -> bool: return tab.is_yours(id)).size()
 			and tab._yours_box.visible == (tab._yours.get_child_count() > 0))

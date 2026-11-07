@@ -60,7 +60,7 @@ still read, without change. Every key of version 3 keeps its meaning.
 |---|---|
 | `schema` | 4 |
 | `name` | the room's name; a room that ships has its name as a translation key |
-| `room` | the room as a whole: `ambient` (0..1, its surfaces' light with a dark screen), `screen_glow` (0..2), `curtains` (the pre-show's curtains may close here), `reacts_to_film` (the film's transients may flash the light), `reflection` (the floor reflection's default here) and `reflection_floor` (its height; null: none) |
+| `room` | the room as a whole: `ambient` (0..1, its surfaces' light with a dark screen), `screen_glow` (0..2), `curtains` (the pre-show's curtains may close here), `reacts_to_film` (the film's transients may flash the light), `reflection` (the floor reflection's default here), `reflection_floor` (its height; null: none) and `category` (where the Room tab lists it: `cinema` under Cinemas, `tv` under Television, `other` with the other rooms, the default; `env_library.gd category_of()`) |
 | `screen` | as version 3: the default screen's `center` and `size` |
 | `acoustics` | the room's sound for spatial audio (`get_sound_room()`, `scripts/play/spatial_audio.gd`): `box` ({min, max}; default: the builder's walls), `reflect`, `rt60`, `wet`, `surround_height`, `array`, `array_spacing`, `ring`, `distance` |
 | `systems` | the systems, in build order: `{system, id, params}`. `id` defaults to the system's name; two of one system need their own ids. Cues and bindings address a parameter as `<id>.<param>` |
@@ -147,19 +147,19 @@ parameters only.
 | `screen_frame` | screen | the black masking round the screen, the projector's beam from a lens | built |
 | `showing` | showing | the curtains' part in the ritual: actions `open_curtains`, `close_curtains` (the pre-show's curtains, `scripts/env/preshow.gd`) | built |
 | `mirror_floor` | builder | a black floor that takes the film's reflection, a ripple where the viewer moves | built |
-| `shopfront`, `nave`, `dome_hall`, `terrace`, `domestic`, `vehicle` | builder | the other parametric structures (shopfront hall, nave, dome, open-air terrace or lot, domestic room, vehicle interior) | next |
-| `kit` | kit | modular pieces placed along a builder's slots (balcony fronts, niches, columns, façades) | next |
+| `shopfront`, `nave`, `dome_hall`, `terrace`, `domestic`, `vehicle` | builder | the other parametric structures (shopfront hall, nave, dome, open-air terrace or lot, domestic room, vehicle interior; below, "The builders") | built |
+| `kit` | kit | modular pieces placed along a builder's slots (balcony fronts, niches, columns, façades; below, "The kit") | built |
 | objects, materials, pictures | | as now: `parts` placements, library materials, pictures | as now |
-| `sky`, `vista` | sky | a sky dome (gradient, stars with real constellations, clouds lit by the screen, aurora), far scenery cards (mesas, an acropolis, birches) | next |
+| `sky`, `vista` | sky | a sky dome (twilight to night, the real stars and constellations, the Milky Way, clouds lit by the screen, an aurora, Earth from the Moon), far scenery from simple shapes (hills, mesas, a floodlit acropolis, birches in snow, cypresses, a glowing pool); below, "The sky and the vista" | built |
 | `atmosphere`, `weather` | atmosphere | haze, dust and smoke in the beam, ground fog and mist, breath; rain and snow through open roofs and outside windows, rain on a pane, a puddle that reflects the film, a weather cycle (below, "Atmosphere and weather") | built |
-| `life` | life | non-human ambient life: moths, birds, fish, fireflies, a cat, a deer, a whale. Never people | next |
+| `life` | life | non-human ambient life: moths, birds, fish, fireflies, a cat, a deer, glowing deep-sea creatures, a whale, plane lights. Never people (below, "Ambient life") | built |
 | `sound_bed`, `acoustics` | sound | looped beds and one-shots from our own synthesiser, placed in the room, on the Environment bus; the room's reverb (below, "Sound and music") | built |
 | `music` | music | instruments that play themselves (a player piano, an organ), from our own synthesiser | built |
 | timeline and cues | | below; part of the host, not a registered system | built |
 | film signals | | below; part of the host | built |
-| `presentation` | screen | the chain of stages from source to display: source (film, tape, broadcast), transmission (aerial noise, ghosting), display (CRT, mask, curvature, a telly's glass). TV-era presets | next |
-| `seats` | seats | seat models and kits outside the builders (a bench seat, pews, cushions, club chairs) | next |
-| `motion` | motion | slow moves of the room's things (a curtain's sway, an organ rising, Earth turning), held to the comfort limits. Never the viewer | next |
+| `presentation` | screen | the chain of stages from source to display: source (film, tape, broadcast), transmission (aerial noise, ghosting), display (CRT, mask, curvature, a telly's glass), the sound through a small speaker. TV-era presets | built |
+| `seats` | seats | seat models outside the builders (folding chairs, plush tip-up seats, multiplex seats and a broken one, pews, club chairs, director's chairs, a bench seat, cushions, hides, a bean bag), drawn in the builders' seat slots, in rows of its own, or as broken seats over a builder's own | built |
+| `motion` | motion | slow moves of the room's things (a curtain's sway, an organ rising, a painting sliding up, a festoon rising in swags, Earth turning), held to the comfort limits. Never the viewer | built |
 
 ## Bindings and film signals
 
@@ -225,8 +225,11 @@ pre-show waits up to 4 s for the cue before it opens them itself.
 ```json
 {"name": "whale", "when": {"signal": "film.quiet", "above": 0.9, "for": 4},
  "states": ["playing"], "chance": 0.5, "cooldown": 900,
- "steps": [{"do": "life.whale", "args": {"side": "left"}}, {"sound": "whale", "gain_db": -6}]}
+ "steps": [{"do": "whale.pass", "args": {"side": "left"}}]}
 ```
+
+`whale.pass` is the action `pass` of the system with the id `whale` (a `life` system whose creature is the whale). The
+whale sings as it passes, so the cue needs no `sound` step.
 
 | Key | What |
 |---|---|
@@ -365,6 +368,10 @@ and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider'
 1. **Schema:** `RoomSchema.validate(doc, "new")`, with the version 4 sections.
 2. **Headset budget:** the room is built headless and measured: draw calls (one a mesh surface), triangles, live
    lights (the bake's hidden lights do not count), particles, and texture memory (the images' bytes with mip levels).
+   Texture memory is the headset's: a library map counts its ASTC blocks as loaded from its `.mtex`
+   (`MaterialLibrary.FRAME_BYTES_META`), so the figure is the same headless, under lavapipe and on the Frame. Before
+   2026-11-07 a rendered measure counted the maps as a GPU without ASTC holds them, decompressed (the cinema read
+   144 MB under lavapipe against 9 MB on the Frame).
 
    | Budget | Per room | The cinema | The Void |
    |---|---|---|---|
@@ -402,7 +409,7 @@ and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider'
 | `seats_per_row`, `seat_pitch` | 27, 0.58 | seats along a row, centre to centre |
 | `row_radius` | 45 | rows curve round a point this far ahead; 0 is straight rows |
 | `block_x` | 8.1 | the seats reach this far either side; the side aisles go from there to the walls |
-| `seat_model` | `stadium` | the seat (slot; more come with the seats system) |
+| `seat_model` | `stadium` | the seat: `stadium` (drawn by the auditorium), or a single seat of the seats system: `plush`, `multiplex`, `folding_chair`, `club_chair`, `director`, `cushion`, `bean_bag` (set `seat_pitch` to fit) |
 | `seat_upholstery`, `seat_shell` | velvet, black leather | materials |
 | `seat_tint_spread` | 0.12 | how much the seats differ, one from the next |
 | `wall_treatment` | `panels` | `panels` (fabric panels with wooden rails) or `plain` |
@@ -415,6 +422,365 @@ and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider'
 | `booth` | true | the projection booth's windows in the rear wall; `lens` is its lens |
 | `doors` | true | the four exits with signs |
 | materials | the cinema's | `floor`, `walls`, `front_wall`, `ceiling`, `panel_fabric`, `panel_wood`, `stage`, `curtains`, `door_leaf`, `door_metal`, `brass` |
+
+## The seats system
+
+`scripts/env/systems/seats.gd`. Seat models outside the builders, and the seats a room draws with them.
+
+### The models
+
+Each model is low-poly (boxes and rounded boxes) in its own frame: the floor point under the seated eyes at the
+origin, facing -Z. Each has two library materials (CC0), `upholstery` and `frame`, with its own defaults.
+
+| Model | Triangles | Forms | Folds away | Use |
+|---|---|---|---|---|
+| `stadium` | 646 | up, broken | yes | the cinema's seat (the auditorium draws it itself) |
+| `folding_chair` | 148 | | yes | slatted wooden chair, 1906 |
+| `plush` | 644 | up, broken | yes | velvet tip-up seat on cast standards, palaces |
+| `multiplex` | 656 | up, broken | yes | moulded shell, fabric insert, cup holder, 1980s |
+| `pew` | 48 a place | | no | a segment a place wide; the ends are drawn apart |
+| `club_chair` | 556 | | yes | deep leather armchair |
+| `director` | 188 | | yes | crossed legs, canvas seat and back |
+| `bench_seat` | 384 a place | | no | a convertible's tuck-and-roll bench; side trim drawn apart |
+| `cushion` | 322 | | no | a buttoned floor cushion |
+| `hide` | 462 | | no | a pelt over a low block (of ice) |
+| `bean_bag` | 196 | | no | a squat sack with a dent |
+
+Forms: `up` is a tip-up seat tipped up (the hall is empty). `broken` is a seat with its back slumped and its cushion
+hanging.
+
+### Three ways in
+
+- **The builders' seat slots.** A builder with `seat_slots()` (shopfront, nave, terrace, domestic, vehicle,
+  dome_hall) draws no seats of its own when the room has a seats system. The seats system draws a seat in every slot.
+  With `model` "auto" the slot's style chooses: chair: folding_chair, pew: pew, bench: bench_seat, cushion and tier:
+  cushion, club: club_chair, ring: plush. The builder lists these seats (its `seats()`), so they are listed once.
+  A slot is `{transform, row, style, width, builder}`. Slots of one row run left to right; a gap of more than 1.5
+  widths starts a new pew. The pews' ends and the benches' trim go into one static mesh, `SeatEnds`.
+- **Its own seats.** Rows round `origin` (`per_row`, `rows_front`, `rows_back`, `pitch`, `row_depth`, `row_rise`,
+  `aisle`, `facing`), and single `places` (`{at, turn, model}`). These are its `seats()`: seat choice, seat
+  picking and the sight-line check use them.
+- **Broken seats over a builder's own.** `broken` names room seats by their index in the room's seat list. Over a
+  builder that draws its own seats (the auditorium, Screen 3), the seats system folds that seat away in the builder's
+  MultiMesh "Seats" and draws a broken one of the builder's `seat_model` in its place. It does this again after every
+  room move, so the seat stays away when the viewer has sat there and moved on. The broken seat takes the builder's
+  seat materials (unless `upholstery` or `frame` is set). So it matches the seats next to it and adds no textures.
+
+A builder can also draw any model itself: `seats.gd model_mesh(model, upholstery, frame, width, form)`. The
+auditorium's `seat_mesh()` does, for every `seat_model` but the stadium seat.
+
+### Drawing
+
+- One MultiMesh a model and form: `Seats`, `SeatsUp`, `SeatsBroken`. The upholstery takes a slight tint seat by
+  seat (`variation`, `seed`), as in the cinema.
+- The viewer's own seat folds away (`fold_own`): chairs only. A pew, a bench, a cushion, a hide or a bean bag stays.
+- `tipped`: the share of tip-up seats left tipped up.
+- `collision_shapes()`: each seat's model boxes (one or two), for object physics.
+
+Measured headless (`test_env_seats.gd`): 15 plush seats are 2 draws and 9 660 triangles. A tipped or broken form
+adds two draws. Pews' ends add one or two. Texture memory is the headset's, rendered or not ("The checks").
+
+| Parameter | Default | What |
+|---|---|---|
+| `model` | auto | the seat; auto: by each slot's style (its own rows: folding chairs) |
+| `from_builders` | true | a seat in every seat slot of the room's builders |
+| `per_row`, `rows_front`, `rows_back` | 0, 0, 0 | its own rows |
+| `pitch`, `row_depth`, `row_rise`, `aisle` | 0 (the model's width), 1.1, 0, 0 | their spacing |
+| `origin`, `facing` | [0, 0, 0], 0 | the middle of the row at origin; the rows' turn |
+| `places` | [] | single seats: `{at, turn, model}` |
+| `upholstery`, `frame` | null (the model's own) | library materials |
+| `variation`, `seed` | 1, 1906 | the tint seat by seat |
+| `tipped` | 0 | the share of tip-up seats tipped up |
+| `broken` | [] | room seats drawn broken (at most 8) |
+| `fold_own` | true | the viewer's own chair folded away |
+
+## The motion system
+
+`scripts/env/systems/motion.gd`. Slow moves of the room's things. It never moves the viewer or their horizon
+(`moves_viewer` false in its spec).
+
+One motion system moves one thing. Give each its own id: the id names its actions (`organ.rise`). The thing is:
+
+- a node the document names: `node` (its name), among the nodes of the system `system` (an id), or anywhere in the
+  room when `system` is empty;
+- or a festoon curtain it builds itself: `build` "festoon". It hangs over the screen (`festoon_size` 0: the
+  screen's size with a margin) in `festoon_swags` swags, `festoon_depth` in front, in the `curtain` material.
+
+### Modes
+
+| Mode | What | Parameters |
+|---|---|---|
+| `travel` | along `path` (offsets from where it stands, in its parent's frame) and to `turn_to` (degrees, about `pivot` in its own frame). `at` 0 is where it stands, 1 the path's end | `path`, `turn_to`, `pivot`, `at` (live), `speed`, `accel`, `turn_speed` |
+| `sway` | to and fro about `sway_axis` and along `shift_dir`, one swing every `sway_period` seconds | `sway_angle` (live), `sway_shift` (live), `sway_period`, `pivot` |
+| `turn` | round `turn_axis` | `turn_rate` (live) |
+
+A festoon travels too: `at` 1 is fully up. The hem rises, the cloth above it gathers into tiers of folds, and
+between the lift cords it falls in swags that deepen as it rises.
+
+Actions: `rise` (to at 1), `lower` (to at 0), `go` (args `at`), each with `seconds` as a wish; `snap` (at once,
+args `at`); `start` and `stop` (a sway or a turn eases in or out). A cue can also `set` `<id>.at`.
+
+### Comfort
+
+| Limit | Value |
+|---|---|
+| speed | 0.5 m/s |
+| acceleration | 0.3 m/s² |
+| turning speed (travel) | 20 degrees/s, speeding up at 8 degrees/s² |
+| sway | 5 degrees, 0.1 m, a swing at least every 3 s |
+| turn | 15 degrees/s, speeding up at 8 degrees/s² |
+
+- Each limit is a `motion` flag in the spec, and the parameter's range ends there. The comfort check and the
+  schema refuse more.
+- Whatever drives `at` (an action, a cue's fade, a binding), the thing follows it no faster than its limits. It
+  speeds up and slows down smoothly. An action's `seconds` is a wish: when it asks for more than the limits, the
+  move takes longer. A sway or a turn starts from still and eases in.
+- **The Motion setting** (common) scales every motion parameter: half Motion is half the sway, half the speed.
+  Under 25 % a travel does not move at all: it snaps to the end it heads for, or (`reduced` "fade") fades out,
+  jumps and fades back in. A cue's fade on `at` then snaps to its end too.
+- **In front of the screen.** A thing that stands between the viewer and the screen until it moves (`in_front`: a
+  painting over the screen; the festoon always) does not count against the sight-line check. It is in the group
+  `env_in_front`. It never stays in the way through the film: 4 s after the film starts (no cue took it away), it
+  goes to its end by itself. A room whose Pre-show is off needs no cue for it.
+
+Measured (`test_env_motion.gd`): an organ console rising 2.8 m at 0.3 m/s and 0.15 m/s² takes 11.3 s and never goes
+faster. A festoon of 5 swags is 1 draw and 840 triangles; the mesh is made again only while it moves.
+
+### Examples
+
+```json
+{"system": "motion", "id": "organ", "params": {"system": "kit", "node": "OrganConsole",
+ "path": [[0, 2.8, 0]], "speed": 0.3, "accel": 0.15}}
+{"system": "motion", "id": "painting", "params": {"node": "Painting", "path": [[0, 3.0, 0]], "in_front": true,
+ "reduced": "fade"}}
+{"system": "motion", "id": "festoon", "params": {"build": "festoon", "festoon_swags": 6}}
+{"system": "motion", "id": "earth", "params": {"system": "sky", "node": "Earth", "mode": "turn",
+ "turn_rate": {"bind": "setting.earth_speed", "range": [0.5, 4.0]}}}
+```
+
+The ritual raises them: `{"do": "organ.rise", "args": {"seconds": 12}}`, `{"do": "festoon.rise", "args":
+{"seconds": 8}}`.
+
+## The builders
+
+Six more builders of kind `builder`, and the `kit`. They keep the auditorium's conventions. They extend
+`scripts/env/systems/kit/builder.gd`, and they share the helpers in `scripts/env/systems/kit/` (`build_util.gd`,
+`shapes.gd`, `procedural.gd`, `seat_models.gd`, `pieces.gd`, the glass and glow shaders).
+
+- **The viewer's seat** is at the origin, facing -Z. The floor under it is at y 0 (a lot's ground and an
+  amphitheatre's pit can be lower).
+- **Static parts** are meshes with their own UV2, baked by the light system's hooks. Rounded parts (seats, statues,
+  leaves) are not baked.
+- **Materials** are library materials on the house shader, from the light system. Patterns (pressed tin, ice blocks,
+  a swirling carpet, corrugated tin, plasterboard) are our own maps, drawn in `procedural.gd` and put on a library
+  material. The library material is CC0, so the licence check still holds.
+- **Lamps** use the light system's groups: `house` (the ritual takes them down), `accent`, `signs`, `booth`. A flame
+  or a candle flickers with the builder's `flicker` parameter. Every frequency is under 3 Hz. The room's Flickering
+  lights setting holds it steady.
+- **Glass** (a window, a dome's panes, a windscreen) is in the group `env_see_through`. The sight-line check looks
+  through it. It blends; it never multiplies.
+- **The sight line:** a flat-floored builder keeps the picture's bottom at 1.1 m or more over the floor, so chair
+  backs never block it.
+- **Physics:** `collision_shapes()` gives cheap boxes. Seat boxes come only when the builder draws its own seats.
+- **The screen:** each builder's static `screen_for(params)` gives the default screen ({center, size}). A room
+  document's `screen` should match it.
+
+### Seat slots (the interface with `seats`)
+
+Each builder's static `seat_slots_for(params)` gives its seats as slots, from the parameters alone. A slot is
+`{transform, row, style, width, builder}`.
+
+- `transform`: the floor point under the seated eyes, facing -Z in its own frame.
+- `row`: 0 is the viewer's row. Rows in front count up. Rows behind are negative.
+- `style`: `chair`, `pew`, `bench`, `cushion`, `club`, `ring` or `tier`.
+- `width`: metres along the row. A row's slots go left to right. A pew's or a bench's slots are `width` apart. An
+  aisle leaves a gap wider than 1.5 widths.
+
+With a `seats` system in the room, the builder draws no seats and gives no seat boxes; the seats system draws them in
+the slots. Without one, the builder draws plain default seats (`seat_models.gd`). Single seats (chair, club, ring)
+are one MultiMesh, with the viewer's own seat folded away. Pews, benches and cushions are one static mesh.
+
+### Slots for the kit
+
+Each builder's `slots()` gives named places for kit pieces: `{name: [{transform, size}]}`. A piece's front faces its
+local +Z (into the room). Common names: `side_walls`, `screen`, `proscenium`, `rear_wall`, `floor`, `ceiling`,
+`corners`. Each builder adds its own (below).
+
+### `shopfront`
+
+A narrow picture house of about 1906 in a shop. A wooden dado, pressed tin above it and on the ceiling, a small
+raised end with a framed sheet, the shop window and door behind the seats with the street's glow, gas lamps that
+flicker, folding chairs in rows.
+
+- Size: `width`, `height`, `screen_wall_z`, `front_z`. Rows: `rows_front`, `rows_back`, `row_pitch`,
+  `chairs_per_row`, `chair_pitch`, `seat_model`.
+- The end: `stage_depth`, `stage_height`, `screen_size`, `screen_bottom`, `sheet_frame`.
+- Walls: `dado_height`, `tin_pattern` (`pressed_tin` or `plain`), `tin_walls`.
+- Live: `street_glow`, `flicker`. Lamps: `lamps_per_side`, `lamp_height`, `lamp_colour`.
+- Slots: `booth` (the back corner's floor), `side_walls`, `screen`, `proscenium`, `rear_wall`, `ceiling`, `floor`.
+- Measured: 13 draws, 12k triangles, 7 MB.
+
+### `nave`
+
+A church-like nave. Two arcades of round columns, side aisles, clerestory walls with dim windows, a barrel vault, a
+chancel up three steps with the screen under the chancel arch, a rose window over it, candle stands that flicker,
+pews.
+
+- Size: `nave_width`, `aisle_width`, `rear_z`, `chancel_z`, `chancel_depth`, `chancel_rise`, `bay`,
+  `column_height`, `column_radius`, `wall_height`, `vault`.
+- Pews: `rows_front`, `rows_back`, `row_pitch`, `places_per_pew`, `place_width` (one slot a place, style `pew`).
+- Live: `rose_glow`, `flicker`. Also `rose_window`, `rose_radius`, `clerestory_windows`, `candles`.
+- Slots: `niches` (the aisles' walls), `columns`, `screen`, `proscenium` (the chancel arch), `rear_wall`, `floor`.
+- Measured: 11 draws, 4.4k triangles, 8 MB.
+
+### `dome_hall`
+
+A round hall under a dome, glass or solid. A low drum wall, lamps round it, a low stage, seats on arcs round the
+screen (style `ring`). Beyond glass: nothing (a sky system's sky), deep water, or a dark night. With `has_floor` and
+`seating` off, it covers another builder (the crater: an amphitheatre under a glass dome).
+
+- `radius`, `centre_z`, `floor_y`, `drum_height`, `dome_height`, `dome` (`glass` or `solid`), `ribs`, `rings`.
+- `outside` (`none`, `water`, `night`), `water_top`, `water_deep`; live: `outside_glow`.
+- Seats: `rows_front`, `rows_back`, `row_depth`, `seat_pitch`, `arc_deg`, `seat_model`.
+- Slots: `drum`, `screen`, `proscenium`, `floor`, `ceiling`.
+- Measured (glass, about 120 seats): 8 draws, 88k triangles, 4 MB.
+
+### `terrace`
+
+Open air, under a sky system's sky. Three styles. `terrace.gd STYLES` holds the parameters each style needs; a room
+document sets them.
+
+| Style | What | Its parameters |
+|---|---|---|
+| `rooftop` (default) | a tiled roof terrace, a low parapet, the screen painted on the next building's blind wall, strings of bulbs, chairs in rows | the defaults |
+| `lot` | a drive-in's lot: low humps across each row of bays, speaker posts beside the cars' front seats, the screen on a frame (or `screen` `none` and the kit's tower). No seats of its own: the car's | `half_width` 20, `front_z` -50, `back_z` 12, `ground_y` -0.5, `ground_extent` 120, `parapet` false, `screen` frame, `screen_size` [24, 10], `screen_bottom` 4, `seating` false, `string_lights` false |
+| `amphitheatre` | stone tiers on arcs round the screen, rising behind the viewer (style `tier`), rocks on a dusty plain: a lunar amphitheatre | `half_width` 14, `front_z` -14, `back_z` 10, `ground_extent` 150, `parapet` false, `screen` frame, `screen_size` [8, 4.5], `screen_bottom` 1.6, `rows_front` 3, `rows_back` 6, `row_pitch` 0.95, `seat_pitch` 0.6, `string_lights` false |
+
+- The ground beyond the terrace (`ground_extent`, up to 400 m) is not baked, so the lightmap stays small.
+- Other parameters: `parapet_height`, `wall_height`, `tier_rise`, `arc_deg`, `rocks`, `bays`, `bay_pitch`,
+  `bulb_colour`, materials.
+- Slots: `parapet` (along the parapets' tops), `screen`, `proscenium`, `floor`, `corners`.
+- Measured: rooftop 8 draws, 12k triangles, 7 MB; lot 5 draws, 3k triangles; amphitheatre 4 draws, 2k triangles.
+
+### `domestic`
+
+A room in a house: walls, a window, a door, a fireplace or a radiator, wall lamps, and a screen. Four styles. Every
+parameter left on "auto" takes the style's value (`domestic.gd STYLE_DEFAULTS`): an enum's `auto`, 0 for a size, -1
+for a count that can be 0, `{}` for a material, `[0, 0]` for the screen's size. A document sets only what it changes.
+
+| Style | What |
+|---|---|
+| `plain` | a sitting room: club chairs, a pull-down screen, a radiator under the window |
+| `walnut_1962` | a private screening room: walnut panelling, a deep carpet, two rows of club chairs, a picture window (a pool beyond it: a vista), a brick fireplace, brass wall lamps, a painting over the screen |
+| `bedroom_1993` | a child's bedroom: a pillow fort of cushions and a bedsheet on broom handles round the viewer's cushion, fairy lights along its front, a telly on a chest of drawers, a bed, a radiator under the window |
+| `ice` | a room of ice blocks under a low vault, hides on the floor, candles in the walls, the picture on a smoothed panel of ice, the doorway open to the night |
+
+- Size: `half_width`, `front_z`, `back_z`, `height`, `vault_rise`.
+- The screen (`screen`): `projected` (a pull-down screen), `wall` (a panel on the wall), `painting` (a framed
+  painting covers the screen and rises into a slot in the ceiling), `telly` (on a chest of drawers). Also
+  `screen_size`, `screen_bottom`.
+- `painting_open` (live, 0 to 1): 1 is risen (the screen shows), 0 is down over the screen. A cue fades it for the
+  ritual (the `motion` system can move the `Painting` node too).
+- `opening_screen` (not live: the room builds again): the telly fills the pillow fort's opening. The picture is as
+  big as fits in the opening, just beyond it.
+- `window` (`none`, `left`, `right`, `back`), `window_width`; `outside` (`glow` or `none`: a vista's or a sky's view
+  shows through), `outside_top`, `outside_bottom`; live: `outside_glow`.
+- `door` (`none`, `left`, `right`, `back`). In ice it is an open doorway with the night's glow beyond.
+- `heater` (`none`, `fireplace`, `radiator`). The fireplace is on the wall across from the window. The radiator is
+  under the window. Live: `fire`, `flicker`.
+- `lamps` (on each side wall), `lamp_colour`; `fort`, `fairy_lights` (`auto`, `on`, `off`), `fairy_colour`.
+- Seats: `seat_model` (`club`, `cushion`, `plush`, `director`, `folding`), `rows_front`, `rows_back`,
+  `seats_per_row`, `seat_pitch`, `row_pitch`. Cushions are style `cushion`.
+- `wall_pattern` (`plain`, `ice_blocks`, `plasterboard`) and materials: `walls`, `floor`, `ceiling`, `trim`,
+  `surround`, `radiator_material`, `screen_surface`, `telly_material`, `cushions`, `sheet`, `seat_cover`,
+  `seat_frame`.
+- Slots: `side_walls`, `screen`, `proscenium`, `floor`, `ceiling`, `corners`, `window` (the pane: a weather system's
+  `pane_center`, `pane_size`, `pane_yaw`), `vista` (beyond the window, facing in), `mantel`, `fort_opening`.
+- Measured: plain 13 draws, 4k triangles; walnut 16 draws; bedroom 18 draws, 6k triangles; ice 11 draws, 12k
+  triangles. 4 to 10 MB.
+
+### `vehicle`
+
+The inside of a generic 1950s convertible with its top down, facing the screen (on the terrace's lot). No mirror, no
+badge, no maker's shape.
+
+- A front bench and a rear bench, three places each (style `bench`). The viewer is in the middle of the front bench,
+  at the origin. The left place has the steering wheel in front of it; the wheel's top is under 1.05 m.
+- The wraparound windscreen's top is under the eyes (1.12 m), so the view of a screen up on a lot's frame or tower
+  goes over it. Its glass is see-through.
+- Parameters: `ground_y` (the ground under the car; the wheels show when it is under the body), `rear_seat`, `top`
+  (`folded` or `none`), `fins`; live: `headlamps`, `dial_glow`; `dial_colour`; materials `body`, `chrome`,
+  `upholstery`, `piping`, `carpet`, `tyres`, `hood_cover`.
+- It brings no screen. `screen_for()` gives the lot's, so a test room has one.
+- Slots: `dash`, `bonnet`, `rear_shelf`, `floor`.
+- Measured: 16 draws, 6k triangles. The car's parts share one baked and one unbaked mesh.
+
+### The film layer and the builders
+
+On the Frame the film is a layer drawn over everything between the eyes and the picture
+(`scripts/play/film_layer.gd`). The builders keep everything solid out of that space (the sight-line check holds
+it). Glass in front of the picture (a windscreen) would simply not show over the picture there. Two parts can come
+in front of the picture on purpose: the domestic painting when it is down (`painting_open` under 1), and the pillow
+fort's hem and fairy lights if a seat's eyes are lower than the check's 1.2 m. The film layer hides them while a film
+plays unless it steps aside. It steps aside today only for physics objects, the controllers and the laser
+(`_covered()`). The painting's ritual happens before the film, so the picture under the painting is usually black,
+but the layer still draws there. This needs a hook from the film layer (a room's parts that cover the screen); it is
+an open question below.
+
+## The kit
+
+`scripts/env/systems/kit.gd`, kind `kit`, with the pieces in `scripts/env/systems/kit/pieces.gd`. A document lists
+the pieces. The kit must come after its builder in the document.
+
+```json
+{"system": "kit", "params": {"pieces": [
+  {"piece": "niche", "slot": "side_walls", "index": 4, "holds": "lion", "at": [0, 1, 0]},
+  {"piece": "bougainvillea", "slot": "parapet", "index": -1},
+  {"piece": "snack_bar", "at": [0, -0.5, 16], "yaw": 180, "text": "SNACKS"}]}}
+```
+
+| Key | What |
+|---|---|
+| `piece` | which piece (below) |
+| `slot`, `index` | a slot of the builder and which of its places; `index` -1 is every place. No slot: `at` is in the room's frame |
+| `at`, `yaw`, `scale` | an offset in the slot's frame, a turn about the vertical (degrees), a scale |
+| `size` | width, height, depth; 0 takes the slot's size (for façades, curves, ivy, bougainvillea, balcony fronts, partitions) or the piece's own |
+| `holds` | what a niche holds: `urn`, `lion`, `obelisk` or `none` |
+| `colour`, `accent` | the piece's main colour, and a second one |
+| `text` | a neon sign's words in our own letters: A B C D E F I K L N O P R S T U W and the space |
+| `target` | the node the carpet goes on (the builder's `Floor` by default) |
+
+Other parameters: `builder` (the builder's id; empty: the room's first builder); materials `stone`, `plaster`,
+`wood`, `tin`, `roof`, `iron`; colours `leaves`, `flowers`, `neon`, `window_colour`; live: `glow` (lit windows, the
+booth's window, neon).
+
+| Piece | What |
+|---|---|
+| `balcony_front` | a moulded parapet panel with a rail, bands and round bosses |
+| `niche` | pilasters, an arch, a shell hood, a darker back and a shelf, holding an urn, a lion or an obelisk. Never a figure or a torso |
+| `urn`, `lion`, `obelisk`, `column` | on the floor; the lion lies on a plinth, its head up |
+| `facade` | a courtyard's plastered wall with a cornice, a tiled eave, two arched windows lit from inside, shutters, an iron balcony |
+| `castle_gate` | towers with battlements and arrow slits either side of the screen, a wall over it, a raised portcullis whose teeth hang just above the picture. Sized to the room's screen |
+| `booth` | a projection booth of corrugated tin, its window lit towards the screen (`booth` group) |
+| `snack_bar` | a counter, shelves, a canopy, a neon sign (`signs` group) |
+| `screen_tower` | a drive-in's tower behind the room's screen: the face, posts and braces |
+| `bougainvillea`, `ivy`, `ferns` | leaves (unbaked): bougainvillea over a parapet's top and down its face, ivy up a wall, ferns in a clump on the floor |
+| `carpet` | the builder's floor takes the swirling carpet pattern |
+| `partition` | a plasterboard wall with taped joints and a skirting |
+| `curves` | two bands in waves along a wall (pink and blue by default) |
+
+- **Cost by material:** all the pieces share a baked mesh (`PieceStatic`) and an unbaked one (`PieceSoft`), one
+  surface a material, plus one draw for the lit windows, one for booth windows and one a neon sign. Thirteen pieces in
+  the atmospheric test take 10 draws.
+- **The auditorium's slots:** the auditorium has no `slots()`, so the kit works them out from its parameters:
+  `side_walls` (every 2.5 m on both walls, at the side aisle's floor), `proscenium` (the stage's top), `rear_wall`,
+  `corners` (the pit's front corners), `floor`, `ceiling`, and `balcony` when it has one.
+- **Physics:** the pieces' boxes follow the builder's slots, so they exist once the room is built
+  (`collision_shapes()`); there is no static form.
+- **Problems:** a slot the builder lacks, or an index past its places, is reported by `problems()` and the piece is
+  not placed.
+- Measured: bougainvillea along the rooftop's 14 parapet places: 2 draws, 23k triangles. The atmospheric hall's
+  pieces: 11 draws.
 
 ## Atmosphere and weather
 
@@ -654,6 +1020,252 @@ short presets 0.52 to 0.56 (the engine's shortest).
 | Pillow Fort | `acoustics` `small_room`; `sound_bed` `radiator`, `rain_glass` on `weather.rain` |
 | Crater | `sound_bed` `silence`; `acoustics` `vacuum` |
 
+## Ambient life
+
+`scripts/env/systems/life.gd`, kind `life`. Animals only, never people. One system is one kind of creature. A room
+with moths and a cat has two `life` systems, each with its own id (for example `moths` and `cat`). A cue calls a
+creature by that id: `whale.pass`, `cat.settle`.
+
+Each creature is a script in `scripts/env/systems/life/` (the base is `creature.gd`). All are procedural low-poly
+meshes on two shaders: `shaders/env_life.gdshader` (unlit with the room's spill; wings, legs, the body's wave and the
+head move in the vertex shader) and `shaders/env_life_glow.gdshader` (additive: glowing points and bells). There are
+no textures, no live lights and no particles.
+
+| Parameter | Default | What |
+|---|---|---|
+| `creature` | `moth` | `moth`, `bird`, `firefly`, `cat`, `deer`, `fish`, `jelly` (glowing deep-sea creatures), `whale`, `plane` (a plane's lights). Built once |
+| `count` | 0 | how many; 0: the creature's own (below). The cat, the deer and the whale are one at most |
+| `region` | null | the box `{min, max}` they keep to, in the room's frame; null: the creature's own |
+| `path` | [] | points in the room's frame: the cat's wall top, the deer's and the whale's way (first to last), the birds' perches |
+| `size` | 1 | times the creature's own size |
+| `speed` | 1 | times its own speed. Live |
+| `colour` | null | the body's colour, or the glow's (fireflies, jellies); null: its own. Live, a brightness (it can follow `film.colour`) |
+| `glow` | 1 | how bright the lights are (fireflies, jellies, planes). Live, a brightness |
+| `attraction` | 0.5 | how strongly they go to the light: moths to the beam, fish and jellies to the screen. Live |
+| `activity` | 1 | the share out and about; the rest fade away. For birds: how often they flit. Live |
+| `every` | null | seconds between visits on average (the deer, planes, a bird across the roof); 0: only on a cue; null: its own |
+| `keep_out` | 0.4 m | how far they keep from the sight line to the picture |
+| `personal` | 1.5 m | how far they keep from the viewer's eyes |
+| `blink` | true | fireflies flash and a plane's strobe blinks; off: a steady glow. Live. A `flicker` parameter: the common "Flickering lights" setting holds it steady |
+| `voice`, `voice_db` | true, -12 dB | a call where the synthesiser has one (now only the whale's song), on the Environment bus |
+
+Actions (each creature does what fits it; args in brackets):
+
+| Action | What |
+|---|---|
+| `pass` | one goes by now: the whale or the deer crosses, a plane flies over, a bird flies the length of the roof, the cat walks its wall, the school sweeps past (`side`: left or right; `seconds`) |
+| `scatter` | they start away and settle again: birds take off and circle, fish dart, moths and fireflies spread, the cat trots off (`from`: [x, y, z]) |
+| `settle` | they rest now: birds to their perches, the cat sits, fish and moths slow |
+| `call` | one call: a bird's, the cat's purr, the whale's song |
+
+### The creatures
+
+| Creature | Own count | What it does |
+|---|---|---|
+| `moth` | 40 | pale, 7 cm. They flutter in the projector's beam, between a tenth and three fifths of the way from the lens, lit by the beam. `attraction` is the share that keep to the beam. Without a beam they wander the region |
+| `bird` | 6 (40 at most) | dark, 32 cm across the wings. They roost on perches (the path, or the region's top edges), turn now and then, and one at a time flit to another perch on an arc through the open air |
+| `firefly` | 60 | yellow-green points low in the region. Each flashes every 1.5 to 6 s (a 0.6 s swell and fall), faint between |
+| `cat` | 1 | dark, 42 cm. It walks its wall, sits a while, walks on and turns at the ends. Sitting down it purrs |
+| `deer` | 1 | every 300 s on average it comes out of the dark at one end of its path, grazes once or twice, and fades at the far end. By default its way runs past the viewer's left |
+| `fish` | 48 | a silver school, 28 cm each. The school's centre wanders the region; `attraction` pulls it to the region's point nearest the screen. They take the screen's light on their flanks |
+| `jelly` | 18 | bells of 35 cm that glow at the rim and pulse every 2 to 3 s. Each has a place on a ring round the picture, just clear of the sight line, in front of the screen or behind it |
+| `whale` | 1 | 14 m, dark, slow. It comes only when called (`every` 0 by default): a cue on `film.quiet` with a long cooldown. By default its way runs high behind the screen. A third of the way along it sings |
+| `plane` | 2 at once | a red, a green and a white light and a soft white strobe every 1.5 s, on a great circle 160 m out, 17 to 52 degrees up. A crossing takes a minute or two. One every 75 s on average |
+
+The flashes and the strobe are slow swells, far under the photosensitivity limit. With `blink` off or the room's
+"Flickering lights" setting off, they glow steady.
+
+### Out of the viewer's face and the sight line
+
+- **The sight line** is the pyramid from the viewer's eyes to the picture's edges, widened by `keep_out`, from the
+  eyes to the screen's plane. The eyes are the camera's; without a camera, the room's seat nearest the origin, 1.2 m
+  up. It follows the screen when the viewer moves or resizes it.
+- **Fliers and swimmers** (moths, birds, fireflies, fish, jellies) are pushed out of the pyramid every frame, and out
+  of a `personal` sphere round the eyes.
+- **Walkers** (the cat, the deer, the whale) follow their path. In the sight line they never stop, and go 2.5 times
+  faster. The test holds each walker's longest time in the sight line under 4 s.
+- **Moths in the beam** use the part of the beam over the viewer's head, outside the pyramid.
+- **The Ambient life setting** (common, `life`): off, every creature fades away over 1.5 s; on, they fade back.
+
+### Film reactions
+
+The system reads no film signal itself. A room binds the live parameters in its document, so the host computes only
+the channels a room uses. Suggested bindings:
+
+| Creature | Binding |
+|---|---|
+| fireflies | `glow`: `{"bind": "film.brightness", "range": [1.0, 0.2], "smooth": 1}`: they dim while the film is bright |
+| fish, jellies | `attraction`: `{"bind": "film.brightness", "smooth": 2}`: they come closer in a bright scene |
+| jellies | `colour`: `{"bind": "film.colour", "strength": 0.5, "base": "#59bfff", "smooth": 1}` |
+| birds | `activity`: `{"bind": "time.of_day"}`: they roost at night |
+| planes | `activity`: `{"bind": "time.of_day", "invert": true}`: lights at night only |
+| the whale | a cue: `{"when": {"signal": "film.quiet", "above": 0.9, "for": 4}, "states": ["playing"], "cooldown": 900, "steps": [{"do": "whale.pass"}]}` |
+
+### Sounds
+
+Only the whale makes a sound: the synthesiser's `whale`, from where the whale is, on the Environment bus. At the
+default `voice_db` (-12) it measures -53.8 dBFS RMS, under the -38 dBFS target. A bird's call and the cat's purr are
+events (the signal `creature_event(what, at)` and the list `events`). They become sounds when the synthesiser gets a
+`bird` and a `purr` (`EnvDoc.SOUNDS`); the system then plays them with no other change.
+
+### The film layer
+
+On the Frame the film layer is drawn over anything between the eyes and the picture. Ambient life does not make the
+layer step aside. Instead, no creature goes into the sight line, so nothing of it is hidden and the film stays sharp.
+Only a walker whose path crosses the sight line can be in it, and only while it trots through; on the Frame it is
+hidden there for that moment. Rooms should give walkers paths clear of the sight line.
+
+### Cost
+
+Each creature is one draw: a MultiMesh for the many, one mesh for the cat, the deer and the whale (the sight-line check
+puts a MultiMesh's base mesh at every seat). Measured at the own counts (`test_env_life.gd`):
+
+| Creature | Triangles | Ticks (desktop, ms a frame) |
+|---|---|---|
+| moths | 240 | 0.37 |
+| birds | 186 | 0.01 |
+| fireflies | 120 | 0.24 |
+| fish | 1632 | 0.22 |
+| jellies | 1080 | 0.11 |
+| planes | 16 | 0.01 |
+| the cat | 86 | 0.01 |
+| the deer | 98 | 0.01 |
+| the whale | 102 | 0.00 |
+
+All nine at once: 9 draws, about 3600 triangles, under 1 ms a frame on the desktop. The spec declares the largest (fish,
+1700 triangles); 200 fish would be 6800. The time on the Frame is not measured yet.
+
+### For the rooms
+
+| Room | Use |
+|---|---|
+| Drive-in | `moth` in the beam; `plane` with `activity` bound to `time.of_day` inverted |
+| Rooftop Athens | `cat` with a `path` along the wall top, clear of the sight line; `plane` |
+| Reclaimed | `bird` with perches on the broken roof's edge; `firefly` low over the floor, `glow` bound to `film.brightness`; `deer` with a path along a side aisle |
+| Bathysphere | `fish` and `jelly` outside the glass, `attraction` bound to `film.brightness`; `whale` on the quiet-scene cue, its `chance` set by the room's whale setting |
+
+## The sky and the vista
+
+Two systems of kind `sky`. Both are cheap: unshaded shaders on a few meshes, no live light, no particles, no
+texture from a file. Neither makes a sound. Neither moves the viewer or the horizon.
+
+### `sky`
+
+`scripts/env/systems/sky.gd`. A dome round the viewer: the evening's twilight to full night, the real stars, the Milky
+Way, clouds, an aurora, shooting stars, and Earth as seen from the Moon.
+
+| Parameter | Default | What |
+|---|---|---|
+| `mode` | `sky` | `sky` (air: the gradient), `space` (black, the stars at full: the Moon), `black` (nothing drawn: the Void) |
+| `latitude`, `day_of_year` | 40, 200 | where and when the stars stand (degrees north; day 200 is mid July) |
+| `hour` | 22 | local mean time. Live: a track can turn the stars over the film. They turn at most an hour of sky a minute (0.25 degrees a second), times the Motion setting |
+| `facing` | 180 | the compass bearing the screen faces (180: south). Every other bearing is a compass bearing too |
+| `dusk` | 1 | 0 the last light of the evening, 1 full night. Live, a brightness |
+| `night_zenith`, `night_horizon`, `twilight_zenith`, `twilight_horizon`, `ground` | dark blues, a warm horizon | the gradient's colours |
+| `glow`, `glow_bearing` | orange, 300 | the sunset's glow low over the horizon, where the sun went down; it fades as dusk falls |
+| `stars` | 1 | the stars' brightness. Live, a brightness |
+| `faint_stars` | 1600 | generated faint stars besides the catalogue's bright ones (0..4000) |
+| `twinkle` | 0 | a slow, small twinkle, under 1 Hz; off by default for comfort. Live, a brightness |
+| `lines`, `line_colour` | 0, pale blue | the constellations' lines, faint, as a planetarium shows them. Live |
+| `milky_way`, `milky_colour` | 0.6, warm white | the Milky Way. Live, a brightness |
+| `clouds` | 0 | how much of the sky the clouds cover. Live, a brightness |
+| `cloud_colour` | dark grey | the clouds' own colour. Live (bind it to `film.colour` with a `strength`) |
+| `cloud_screen` | 1 | how much the clouds towards the screen catch its light, in the picture's colour. Live, a brightness |
+| `wind`, `wind_from` | 0.3, 270 | how fast the clouds drift (motion, at most 1), and from where |
+| `aurora` | 0 | an aurora's brightness. Live, a brightness (bind it to `film.quiet`, smoothed) |
+| `aurora_low`, `aurora_high`, `aurora_bearing`, `aurora_speed` | green, violet, 0, 0.4 | its colours low and high, where it hangs, how fast its curtains wave (motion, at most 1) |
+| `meteors` | 0 | shooting stars an hour, at random (0..30) |
+| `earth`, `earth_bearing`, `earth_altitude`, `earth_size`, `earth_phase` | off, 180, 35, 2, 0.65 | Earth in the sky: where, how high, how big (degrees), how much of it is lit |
+| `earth_angle` | 0 | how far Earth has turned on its axis (degrees). Live: a track can turn it over the film |
+| `earth_turn` | 1 | Earth's own turning in times its real speed (motion, at most 60: once in 24 minutes) |
+
+Action: `shooting_star` (no args).
+
+- **The stars** are real. `app/environments/sky/bright_stars.json` holds 395 bright stars (their positions, magnitudes
+  and colours) and the stick figures of 49 constellations, from the public-domain catalogue (`app/environments/CREDITS.md`).
+  The faint stars are generated, more of them along the Milky Way, the same each time. The local sidereal time comes
+  from the day and the hour; the stars stand where they would for the latitude. The test checks Polaris at the
+  latitude's height in the north, Betelgeuse high in the south on a January midnight, Vega near the zenith on a July
+  night.
+- **Each star** is a small soft disc, its brightness by magnitude, its colour by its colour index. The twilight, the
+  clouds and the air near the horizon hide the faint ones first.
+- **The Milky Way** lies where the galaxy really is (the galactic frame), brighter towards the centre, with the dark
+  rift through Cygnus and Aquila. To show it as the lights dim: `{"bind": "playback.playing", "range": [0.2, 0.9],
+  "smooth": 3}`.
+- **Clouds** drift with the wind. Their own colour can follow the film (`film.colour` with a `strength`). The clouds
+  towards the screen also catch its spill in the picture's colour (the bias light), as the room's surfaces do.
+- **The aurora** hangs over its bearing: curtains with rays, green low and violet high. `{"bind": "film.quiet",
+  "range": [0, 1], "smooth": 2}` makes it swell in quiet scenes and fade slowly after.
+- **Dusk to stars over the film:** a film-time track, `{"target": "sky.dusk", "by": "film.minutes", "keys": [[0, 0],
+  [10, 1]], "smooth": 0.5}`. Away from the sunset the horizon is duller and cooler, as the Earth's shadow rises there.
+- **Earth** (from the Moon: `mode` `space`) is lit from the side by its phase. Oceans, land, ice and clouds come from
+  the sky's noise: an Earth-like world, not a map. Only its surface turns; it stays where it hangs.
+- **Where it is drawn:** every layer round the camera, at 175 to 190 m (the camera's far plane is 200), so walls, the
+  screen and the vista always stand in front of it. Its meshes have their vertices there too, so the sight-line check
+  never sees them near the seats. They are out of the lightmap bake.
+- **Comfort:** the horizon never moves. Clouds, the aurora's curtains and Earth's turning are `motion` parameters (the
+  Motion setting scales them). A change of `hour` turns the stars slowly, never in a jump: an hour of sky a minute at
+  most.
+- **For the vista:** `sky_light()` gives the sky's colours overhead and at the horizon now.
+
+Measured (`test_env_sky.gd`): the dome, the stars (395 and 1600 faint) and the lines: 3 draws, 7 842 triangles, 0.3
+MB (the shared noise, 256 x 256). With Earth: 4 draws, under 9 000 triangles.
+
+### `vista`
+
+`scripts/env/systems/vista.gd`. Far scenery round the room, made from simple shapes in code, never from a file.
+
+| Parameter | Default | What |
+|---|---|---|
+| `items` | `[{"shape": "hills"}]` | up to 12 pieces of scenery: `{shape, azimuth, spread, distance, depth, size, count, seed, floor_y, colour}`; a shape's own defaults fill what an item leaves out |
+| `sky_light` | true | lit by the room's `sky` system (its colours overhead and at the horizon, each frame) |
+| `light` | dark blue | the light on the scenery without a sky system. Live |
+| `spill` | 1 | how much the near scenery catches the screen's light |
+| `floodlight`, `flood_colour` | 1, warm | the floodlights on the acropolis's stone. Live, a brightness |
+| `town_lights` | 0.6 | the lamps of the town under the acropolis. Live, a brightness |
+| `pool_glow`, `pool_colour` | 1, cyan | the pool's underwater lights. Live, a brightness |
+| `snow` | 1 | snow on the ground under the trees. Live, a brightness |
+| `water_motion` | 0.5 | how fast the light ripples in the pool (motion, at most 1) |
+
+| Shape | Default | What |
+|---|---|---|
+| `hills` | all round, 160 m | a low dark ridge on the horizon |
+| `mesas` | 140 degrees, 165 m, 6 | flat-topped rocks with steep sides |
+| `acropolis` | 18 degrees, 150 m, 160 lamps | a hill with a flat top and a wall, a ruined temple of columns and a smaller one, floodlit from below; a town's lamps at its foot |
+| `birches` | 120 degrees, 40 m, 40 trees | white trunks with dark marks and bare branches, on snow |
+| `cypresses` | 90 degrees, 30 m, 14 trees | tall, narrow, flame-shaped dark trees |
+| `pool` | 14 m | a pool glowing from below, its coping, a lawn that takes its glow, a hedge behind |
+
+- **Placing:** `azimuth` is degrees from the room's front (positive to the right), `distance` metres from the room's
+  middle (at most 170), `spread` the degrees of the horizon it covers, `depth` how deep a grove is.
+- **One draw** for all the scenery: one mesh, each vertex naming its material. Unshaded: lit by the sky's light by
+  the way a face looks (up or out), the screen's spill where it is near, the floodlights, the lamps and the pool.
+- **The grounds** (under the trees, the pool's lawn) keep 8 m clear of the room's middle: the room's own floor is
+  there.
+- **Nothing moves** but the light in the pool.
+
+Measured (`test_env_vista.gd`), each shape at its defaults: hills 720 triangles, mesas 934, the acropolis 1 112,
+birches 1 828 (about 45 a tree), cypresses 1 176 (84 a tree), the pool 36. All six: 1 draw, 5 806 triangles.
+
+### The film layer
+
+The sky and the vista are far behind the screen and round the room. Nothing of theirs is between the eyes and the
+picture, so the film layer (`scripts/play/film_layer.gd`) needs no change for them: where the picture is, the layer
+covers them, as the screen would.
+
+### For the rooms
+
+| Room | Use |
+|---|---|
+| Atmospheric 1928 | `auditorium` with `ceiling_cover` 0; `sky` at twilight (`dusk` 0.4..0.6), `lines` off, `clouds` 0.3 with `cloud_colour` bound to `film.colour`; `vista` cypresses over the walls (as `test_env_vista.gd`'s courtyard) |
+| Drive-in 1958 | `sky` with a dusk track by `film.minutes`, `milky_way` bound to `playback.playing`; `vista` mesas all round |
+| Rooftop, Athens | `sky` (`latitude` 38, a summer night); `vista` acropolis ahead, a little to one side |
+| Palace of Culture | `vista` birches in snow outside the windows; `snow` bound to the room's snow setting |
+| Reclaimed | `sky` through the open roof: stars, `clouds` bound to `weather.wet` |
+| Ice cinema | `sky` with `aurora` bound to `film.quiet` (smooth 2), `aurora_bearing` where the room opens to the sky |
+| Crater | `sky` `mode` `space`, `earth` on, `earth_turn` from the Earth's speed setting, `milky_way` bound to `playback.playing` |
+| Screening room 1962 | `vista` pool behind the window, `pool_glow` 1 |
+
 ## The converted cinema
 
 `app/environments/cinema.env.json` with `cinema.tscn` and a thin `cinema.gd`. It looks the same: the render test
@@ -667,6 +1279,84 @@ as before. Settings: the pre-show ritual (common), the house lights in the film.
 `app/environments/void.env.json`: a black sky (nothing drawn), a mirror-black floor that takes the film's reflection
 (on by default), and a small ripple where the viewer's head moves more than 15 cm a second over the floor. Setting:
 the ripple's strength.
+
+## The presentation system
+
+`scripts/env/systems/presentation.gd`, with `shaders/env_presentation.gdshader` and its stages in
+`env_presentation.gdshaderinc`. The stages between the film and the eyes, each optional. One per room.
+
+| Stage | Parameters | What |
+|---|---|---|
+| source | `source`: `none`, `film`, `tape`, `broadcast` | where the picture comes from |
+| film | `weave`, `tilt` (degrees), `flicker`, `dust`, `scratches`, `hotspot` | gate weave, a crooked projector (the picture is overscanned a little, so no corner shows), the lamp's flicker, dust specks, scratches that run for a few seconds, the lamp's bright middle |
+| tape | `tracking`, `head_switch`, `chroma_bleed`, `tape_noise` | the lines' slow sway, the torn last lines at the bottom, the colour late and smeared, noise and paler colour |
+| broadcast | `interlace`, `lines` | the two fields' lines, one after the other |
+| transmission | `snow`, `ghost`, `ghost_shift`, `weak` | aerial noise, a faint second picture to the right, a weak signal (paler, flatter, more snow) |
+| display | `display`: `none`, `mechanical`, `crt`, `panel` | the set |
+| crt | `curvature`, `corner`, `mask` (`none`, `shadow`, `grille`, `slot`), `mask_pitch`, `mask_strength`, `scanlines`, `glass` | the bulging face, round corners, the phosphors' mask, the gaps between lines, the glass's reflection (a soft light behind the viewer that moves as the head moves) |
+| mechanical | `mech_lines` | a 1930 mechanical-scan set: a few lines across, a neon's orange glow, dark edges |
+| panel | `panel_grid`, `panel_pixels`, `panel_bleed` | the gaps between the pixels, the backlight through the dark scenes |
+| colour | `colour`, `tint`, `gain` | saturation (0: black and white), the tube's tint, brightness |
+| speaker | `speaker`: `none`, `window`, `telly`, `cabinet`, `panel` | the film's sound through a small speaker |
+
+Every parameter is live. `weave`, `tilt` and `tracking` are motion parameters (the room's Motion setting scales
+them). `flicker` is a brightness that flickers: it wavers by at most 3.5 %, more slowly than 3 times a second, and
+stays steady with Flickering lights off. Action: `glitch` (a moment's trouble: a tape's tracking tears, a broadcast's
+snow swells, a print jumps in the gate; `seconds`, default 0.6).
+
+**Presets.** `preset` fills every parameter the document leaves out. The document's own values and bindings win. To
+move a preset's value by a cue, give it in the document. The names are pastiche.
+
+| Preset | For | Chain |
+|---|---|---|
+| `worn_print` | Screen 3, 1983 | film: weave, a 0.35 degree tilt, flicker, dust, scratches, a hotspot |
+| `starlight_lot_1958` | Drive-in | film: a little weave and dust, a strong hotspot; the window speaker |
+| `glowbox_1930` | TV era | a mechanical-scan set: 30 orange lines, a little noise; a radio cabinet's speaker |
+| `fireside_1953` | TV era | broadcast, 405 lines, snow and a ghost; a small black and white tube with round corners |
+| `colourstar_1972` | TV era | broadcast, interlace, a faint ghost; an early colour tube with a shadow mask, warm and rich |
+| `sirclive_1983` | TV era | a home computer's aerial lead: 240 bold lines, a little noise; a portable telly's shadow mask |
+| `rewinder_1987` | TV era | a rented tape: wobble, bleed, the bottom's tear; a slot mask |
+| `nightowl_1993` | Pillow Fort | a tape watched a few times; a flatter tube with an aperture grille |
+| `freedtv_2005` | TV era | a free digital broadcast on an early flat panel: a faint pixel grid, backlight bleed |
+
+**How the film is drawn.** On the Frame the film is an OpenXR layer, and a layer skips the scene's shaders. So while a
+picture stage is on, the screen's flat mesh draws the film with the presentation's material, and the film layer
+steps aside: the system asks with `film_layer.gd request_scene()`; no layer is made while any room asks, and the
+System tab says why. The material is the screen's own picture (`video_common.gdshaderinc`, its uniforms copied from
+the screen's material when they change), then the stages. With every picture stage off (the Drive-in with only its
+speaker) nothing changes, and the film layer stays. Leaving the room puts the screen's material back. Flat screens
+only: 180, 360 and fisheye films keep the screen's own picture. The floor reflection and the bias light read the
+video planes, so they show the film without the stages.
+
+**The sound.** A bus of its own, "Film speaker", made once just before Film (a bus can send only to one before it).
+While a speaker is on, Film sends to it and it sends to Master: a high-pass and a low-pass filter, an EQ, a little
+drive for the window speaker, and mono. The binaural renderer's code is not touched; it mixes into Film as before,
+and the speaker filters what Film sends on. Effects on the Film bus itself were rejected: adding one makes the engine
+make every effect on that bus again, so the film's analysis (`film_react.gd`, the music card) would lose its analyser.
+The film's analysis and the duck's key stay on Film, so they hear the film as it is. Measured
+(`test_env_presentation.gd`, a tone at -20 dBFS RMS on Film): the window speaker takes an 80 Hz tone to -107 dBFS
+and leaves 1 kHz at -18.4 dBFS.
+
+**Cost.** The system draws nothing of its own (0 draws). Its cost is the film drawn in the room instead of the
+layer: on the Frame the layer saved 1.1 ms of GPU time with a 4K film (`docs/features.md`, "Film layer"), and the
+mesh path is resampled twice (softer fine detail). The stages add little: no loop and no texture read of their own,
+except one cheap sample each for the ghost and the chroma bleed (and the screen's deband is turned off under noise,
+which saves eight). Every pattern (a mask, scanlines, a pixel grid) fades out as its period nears two eye-buffer
+pixels, so it never shimmers; a telly's mask shows only when you lean in. Measured under lavapipe (CPU, so ALU counts
+more than on a GPU), the screen's quad filling 1920 x 1080, frame time against the screen's own shader (18.8 ms;
+the figures move by about 10 % from run to run):
+
+| Preset | x |
+|---|---|
+| `glowbox_1930` | 0.75 |
+| `fireside_1953`, `colourstar_1972`, `sirclive_1983`, `rewinder_1987`, `nightowl_1993` | 0.88 to 0.97 |
+| `worn_print`, `starlight_lot_1958` | 1.0 to 1.05 |
+| `freedtv_2005` | 1.14 |
+
+The noisy chains cost less than the screen's own shader because its deband (eight reads) is off under them; with the
+deband left on they measured 1.45 to 2.2 times. On the Adreno the screen's shader is bound by its texture reads (the footprint filter, the deband); the stages are
+ALU of a few dozen operations and at most two more bilinear reads, and a telly covers a small part of the view (a
+0.6 m set at 1.5 m is about 6 % of an eye's pixels). Not measured on the headset yet.
 
 ## The cinema set
 
@@ -694,12 +1384,521 @@ people.
 | 16 | Void | `mirror_floor` | black | | | | ripple |
 | 17 | Pillow Fort, 1993 | `domestic` (cushions, a bedsheet), a tree, a tin of sweets (objects) | fairy lights (`light`, flicker), rain on the window (`weather`) | a ticking radiator (`sound_bed`) | the VCR flashes 12:00 (object widget) | a CRT telly (`presentation`, TV-era display) | the telly fills the opening |
 
+### Room: Atmospheric 1928
+
+`app/environments/atmospheric_1928.env.json`. A picture palace built as a courtyard under a twilight sky: plaster
+houses with lit windows and iron balconies along both walls, niches with lions, urns and obelisks between them, a
+castle gate round the screen, cypresses over the walls.
+
+- **Systems:** `light`; `auditorium` (`ceiling_cover` 0, walls 7.5 m, `proscenium` none, plain plaster walls, plush
+  seats 0.6 m apart, 25 a row); `screen_frame`; `showing`; `kit` (the castle gate, columns in the front corners, and
+  on the 14 side-wall places, in turn: niches with lions, façades the walls' full height, niches with urns,
+  façades, niches with obelisks, façades, niches with urns); `sky` (latitude 37, mid July, 21:30, `dusk` 0.4, no
+  constellation lines, the Milky Way at 0.5); `vista` (cypresses 15 m out at the front corners and behind, hills).
+- **Setting:** Clouds (0 to 100 %, 40 % by default): `sky.clouds` by `range` [0, 0.8]. The clouds' own colour
+  follows `film.colour` (strength 0.4, smooth 1 s), and `cloud_screen` 1.2 lets the ones towards the screen catch
+  its light.
+- **Cues:** `ritual` (starting, Pre-show on): the house lamps to half over 1.5 s, the curtains part over 4 s, the
+  dusk deepens from 0.4 to 0.8 over 10 s, then the lamps to 12 % and the steps to half over 5 s. `dim` (Pre-show
+  off): the same without the curtains. `lights_up` (pre-show, ended): the lamps, the steps and the twilight back.
+- **Default seat:** the middle of row 0 (7 rows in front, 3 behind).
+- **Measured** (`test_room_set2.gd`): 26 draws, 199 724 triangles, no live light, no particles, 9.4 MB.
+
+### Room: Palace of Culture 1974
+
+`app/environments/palace_of_culture_1974.env.json`. The cinema hall of a civic palace of culture: board-marked
+concrete, mosaic panels on the side walls that take the screen's light, ochre curtains, straight rows on a parquet
+rake, and the back of the roof open to a winter night with birches and falling snow.
+
+- **Systems:** `light`; `auditorium` (22 x 22.6 m, 10 m high, 8 rows in front and 4 behind, straight, 29 seats a
+  row in woven red with oak arms; `concrete_panels` walls and ceiling; six panels a side of `terrazzo` in muted gold
+  with `spill` 5 (the concrete's is the light's 3), steel rails; ochre velvet drapes; `ceiling_cover` 0.76: open
+  from just behind the viewer's row); `screen_frame`; `showing`; `sky` (latitude 56, mid January, full night,
+  grey clouds); `vista` (birches 14 to 18 m out behind and to both sides, hills); `weather` (`falls` snow, 1400
+  flakes, one area under the open roof, from z 2.2 to the rear wall).
+- **Setting:** Snow (no snow, light, heavy; light by default): `weather.mode` (clear, light, heavy), `sky.clouds`
+  (0.2, 0.55, 0.85) and `vista.snow` (0.8, 1, 1), each by `map`.
+- **Cues:** `ritual`: the lamps to half over 2 s, the curtains part over 5 s, then the lamps to 10 % and the steps
+  to half over 6 s. `dim` and `lights_up` as in the Atmospheric.
+- **The mosaic:** no library material or shader option sparkles yet; the mosaic is terrazzo that takes more of
+  the film's light (its colours) than the walls round it.
+- **The snow and the picture:** the snow falls only under the open roof, behind the default seat, so nothing falls
+  between the viewer and the picture from there; from the back rows it falls round them.
+- **Default seat:** the middle of row 0.
+- **Measured:** 23 draws, 256 688 triangles, 1400 particles, 12.4 MB.
+
+### Room: Flagship
+
+`app/environments/flagship.env.json`. A large modern cinema: black walls and ceiling, a steep stadium rake, blue
+step lights, deep red seats, and a 20 m curved screen.
+
+- **Systems:** `light` (a cool fill); `auditorium` (26 x 27 m; 7 rows in front and 6 behind, 1.25 m deep and
+  0.55 m higher each: a 24 degree rake; rows curving round a point 30 m ahead; 25 seats a row, 0.62 m apart; black
+  felt walls and stage, black foam ceiling, black drapes, dark metal rails; `step_colour` blue; no sconces);
+  `screen_frame`; `showing`.
+- **Screen:** 20 x 8.4 m, its middle at the seated eyes' height, 18.2 m from the default seat (0.9 of its width),
+  `curve` 0.3.
+- **Cues:** `ritual`: the lamps to 40 % over 2 s, the curtains part over 6 s, then the lamps out and the steps to
+  35 % over 5 s. `dim` and `lights_up` as above.
+- **Seat choice:** the default seat is the middle (row 0, with 7 rows in front and 6 behind). The front-middle
+  and the back are the other good seats; the viewer picks them by pointing.
+- **Not yet:** `env_room.gd` has no `get_default_seat()`, `get_seat_names()`, `has_home_screen()` or
+  `get_home_curve()`, so a document room always starts at its origin seat and its `screen.curve` is not applied (an
+  assistant's room has both). A setting cannot choose the default seat, and the curve waits for that hook.
+- **Measured:** 17 draws, 228 806 triangles, 6.0 MB.
+
+### Room: Shopfront 1906
+
+`app/environments/shopfront_1906.env.json`. A narrow picture house in a shop: pressed tin, folding chairs and gas
+lamps, the film on a framed sheet. Its test: `tests/test_room_picture_houses.gd`.
+
+- **Systems:** `light`; `shopfront` (id `hall`): a 5.6 m hall 4.2 m high, the sheet 4.4 x 2.5 m at 7.4 m, 5 rows in
+  front of the viewer's and 3 behind, the tin an aged cream, gas lamps with `flicker` 0.6; `seats` (folding chairs
+  in the builder's slots); `kit` (a tin booth in the back corner's `booth` slot); `screen_frame` (no black masking:
+  the sheet's frame; the beam from the booth's window); `atmosphere` (`beam_haze` 0.4, `beam_dust` 0.7).
+- **Setting:** `piano` (Player piano, on). Declared now; it binds to the `music` system's player piano when sound is
+  merged.
+- **Cues:** `ritual` (starting, Pre-show on): the gas down to half over 2 s, then to 18 % over 5 s, the street's glow
+  through the shop window down with it. `dim` (Pre-show off): the gas to 18 % over 3 s. `lights_up` (pre-show, end):
+  the gas up over 4 s, the street's glow back.
+- **Measured** (headless): 17 draws, 10 168 triangles, no lights, no particles, 8.4 MB; 63 seats.
+- **Sound to come:** the projector's clatter from the booth behind (a bed, low); a player piano by the screen that
+  starts in `starting` and plays along, answering `film.transient`, under the film.
+
+### Room: Streamline 1937
+
+`app/environments/streamline_1937.env.json`. A streamline cinema: warm plaster with cream faience bands, jade drapes,
+a gold festoon curtain, an organ console that rises from the pit, and cove lights that change colour. Its test:
+`tests/test_room_picture_houses.gd`.
+
+- **Systems:** `light`; `auditorium` (id `hall`): the cinema's hall with plain walls, plush seats (25 a row, 0.6 m),
+  a jade-green carpet, jade drapes, a black marble stage, the house lamps and the step and stage lights in the cove
+  colour; `kit` (id `console`): three moulded panels below the pit's floor, the organ console; `kit` (id `bands`):
+  three `curves` pieces a wall, flattened into long bands of cream with jade and gold, 3 to 4.4 m up; `motion` (id
+  `organ`): the console 2.15 m up out of the pit (0.25 m/s); `motion` (id `festoon`): a gold festoon of 6 swags over
+  the screen, at the motion limits (0.5 m/s, 0.3 m/s²); `screen_frame`; `atmosphere` (id `cove`): `beam_haze` 0.2 and
+  two thin fog layers under the ceiling, the cove's glow in the setting's colour, shown out of the film; `atmosphere`
+  (id `cove_film`): the same layers in the film's colour (`film.colour`, strength 0.85), shown in the film.
+- **The console** is the `console` kit's mesh, so this kit comes before `bands` in the document: the kit's mesh is
+  named `PieceStatic`, and a second kit's mesh of that name is renamed when it is added. The console's top stays
+  under the sight line to the picture's bottom from the front row when it is up (the test checks the sight line with
+  it up).
+- **Setting:** `cove` (Cove colours: Changing, Gold, Rose, Jade, Blue). It sets the house lamps' and the step lights'
+  colour (the room builds again) and the cove's glow. With Changing, the glow goes gold, rose, jade, blue in turn
+  (`cove_cycle`, every 20 s in the pre-show, paused, at the end and in the intermission).
+- **Cues:** `ritual` (starting): the lamps to half, the console rises over 10 s, the festoon rises, the lamps to 15 %
+  over 5 s. `organ_down` (playing): 30 s on, the console goes back into the pit. `dim` (Pre-show off). `lights_up`
+  (pre-show, end): lamps up, the festoon and the console down. With Pre-show off the festoon rises by itself 4 s into
+  the film (the motion system's in-front rule).
+- **Measured** (headless): 27 draws, 182 676 triangles, no lights, no particles, 8.0 MB; 275 seats.
+- **Sound to come:** an organ (`music`) that plays as the console rises and stops as it sinks, under the film.
+
+### Room: Pink Palace
+
+`app/environments/pink_palace.env.json`. A picture palace in pink: pink and blue waves on the walls and across the
+ceiling, a plush balcony, lamps that swell and fall before the film, and a ceremonial curtain. Its test:
+`tests/test_room_picture_houses.gd`.
+
+- **Systems:** `light`; `auditorium` (id `hall`): plain dusty-pink walls, a pale pink ceiling with its panels, a rose
+  carpet, pink drapes, plush seats in rose velvet (25 a row), rows 0.85 m deep, a balcony of 3 rows; `kit`: a long
+  `curves` piece on each side wall (pink and blue), four across the ceiling between its panels, a pink `balcony_front`
+  on the balcony; `screen_frame`; `showing` (the pre-show's curtains).
+- **The screen** is 0.3 m higher than the cinema's (centre 1.9 m) and the rows 0.85 m deep: the balcony's front row
+  then sees the bottom of the picture over the balcony's parapet. The `balcony_front` piece is 0.8 m high for the
+  same reason.
+- **Cues:** `sunburst` (every 10 s in the pre-show): the ceiling's lamps fall to 55 % over 4 s and rise again over 4 s.
+  `ritual` (starting): the chime, the lamps to half, the curtains part over 5 s, then after 6.5 s (after any `sunburst`
+  still running) the lamps to 15 % over 5 s. `dim` (Pre-show off): the same wait, then 15 % over 3 s. `lights_up`.
+- **Settings:** none of its own (the common ones).
+- **Measured** (headless): 22 draws, 234 504 triangles, no lights, no particles, 9.0 MB; 356 seats.
+
+### Room: Nave
+
+`app/environments/nave.env.json`. *A stone nave at night: pews, candles either side of the screen in the chancel, a
+dim rose window, and the film's light on the columns.*
+
+- **Systems:** `light` (spill 4.5, so the stone and the columns take the film's light; a low warm fill), `nave`
+  (the chancel at z -6.5, 4 m deep; 4 pews in front of the viewer's and 5 behind, 9 places each; the screen 6.4 x 3.6
+  m under the chancel arch, its bottom 1.6 m over the nave's floor; rose glow 0.25; darker stone and columns),
+  `seats` (the pews in the nave's slots), `screen_frame` (masking, no beam).
+- **The viewer:** the middle place of the fifth pew, at the origin; four pews' backs in front, under the picture.
+- **Setting:** Candles (`candles`: none, a few, many) maps onto `nave.candles` (0, 2 or 4 stands a side; the nave
+  builds again). The candles flicker (common Flickering lights).
+- **Cues:** `rose_dims` (starting: the rose window to 0.15 over 6 s), `rose_up` (pre-show and end: back over 5 s).
+- **Measured** (`tests/test_room_set5.gd`, headless): 14 draws, 8 290 triangles, no live light, 7.0 MB.
+- **Sound wanted** (with the sound systems): a long stone reverb on the room's own sounds (`acoustics`, about 3 s);
+  a faint wind in the clerestory and now and then a candle's gutter (`sound_bed`, very low); no organ, no bells. The
+  film's own `acoustics` section stays modest (rt60 1.6, wet 0.4) so speech in the film stays clear.
+
+### Room: Reclaimed
+
+`app/environments/reclaimed.env.json`. *An old picture house taken back by nature: half its roof gone to the stars,
+ivy on the walls, ferns in the corners, rain into a puddle that gives back the film, birds on the broken roof,
+fireflies and now and then a deer.*
+
+- **Systems:** `light` (a cold moonlit fill; the house lamps, step lights and signs dead; no bake: its lamps are
+  dead), `auditorium` (16 x 15.6 m, `ceiling_cover` 0.5: the roof open from z -2.2 back, over the viewer; the viewer
+  in the front row, 3 rows behind, 21 plush seats a row, faded and uneven; plain painted brick walls; no sconces, no
+  acoustic clouds; a low stage with dark drapes), `screen_frame` (no masking; the projector's beam from the booth),
+  `kit` (ivy on six places of the side walls, ferns in the pit's corners, by the stage and in the side aisles),
+  `seats` (8 broken seats over the hall's own), `sky` (a September night at 52 degrees north; clouds bound to
+  `weather.wet`), `weather` (the mode from the Weather setting; rain through the open roof and a few leaks over the
+  pit; a puddle in the pit in front of the viewer, its reflection bound to `weather.wet`), `atmosphere` (a little
+  haze in the beam; mist bound to `weather.wet`), `life` `birds` (8, perched on the broken roof's edge and the
+  walls' tops), `fireflies` (30, low; they dim while the film is bright and hide in the rain), `deer` (down the left
+  side aisle from the back, about every 8 minutes).
+- **The puddle:** the viewer sits in the front row so nothing hides the pit; the eye mirrored in the puddle's plane
+  sees the picture's middle 3.6 m ahead, in the puddle (the test works it out).
+- **Setting:** Weather (`weather`: changing, rain, mist, clear) maps onto `weather.mode` (changing, heavy, light,
+  clear); mist is a drizzle, and the mist rises with the wet.
+- **Cues:** `birds_start` (a loud bang while playing: the birds scatter; chance 0.6, at most every 3 minutes),
+  `deer_in_quiet` (6 s of a quiet scene: the deer comes; chance 0.5, at most every 15 minutes).
+- **Measured** (`tests/test_room_set5.gd`, headless): 30 draws, 116 858 triangles (the ivy and the plush seats),
+  no live light, 1 600 particles, 10.4 MB. Its update: about 0.2 ms a frame on the desktop.
+- **Sound wanted** (with the sound systems): rain on leaves and on the boards, bound to `weather.rain`; drips after
+  it, bound to `weather.wet`; birds' calls (the birds' events), a soft night wind; all well under the film.
+- **Gaps:** the auditorium has no screen surface of its own, so there is no patched sheet: the picture hangs on the
+  black front wall with no masking (a sheet like the shopfront's `sheet_frame` would need a parameter on the
+  auditorium). Its walls have no damp or stain parameter.
+
+### Room: Ice cinema
+
+`app/environments/ice_cinema.env.json`. *A small room of ice blocks under a low vault: hides on ice benches,
+candles in the walls, the film's colours in the ice, and the northern lights in the window in quiet scenes.*
+
+- **Systems:** `light` (spill 4.5, so the ice glows in the film's colours; a cold low fill), `domestic` (style
+  `ice`: 6 x 9 m, the picture 3.2 x 1.8 m on a smoothed panel of the front wall; a 2 m window in the left wall and
+  the open doorway behind, both to the night sky), `seats` (`hide` on every place: 5 a row, a row in front, two
+  behind), `sky` (68 degrees north, a January night, the aurora over the east, where the window looks out),
+  `atmosphere` (breath 0.6, a thin ground fog).
+- **Setting:** Aurora (`aurora`: in quiet scenes, always, off) maps onto `sky.aurora` (0.15, 0.8, 0).
+- **Cues:** `aurora_swells` (2 s of a quiet scene, the setting on "in quiet scenes": the aurora to full over 8 s),
+  `aurora_settles` (the quiet ends: back to the setting's level over 12 s). The swell is a cue rather than a binding
+  on `film.quiet`, so the setting can still give the aurora's level.
+- **Measured** (`tests/test_room_set5.gd`, headless): 17 draws, 15 976 triangles, no live light, 16 particles, 6.5
+  MB.
+- **Sound wanted** (with the sound systems): far huskies now and then (`sound_bed`, `every`), a soft wind past the
+  doorway, the ice's creak now and then; very low.
+- **Gaps:** the ice room opens only to the sides and behind, so the aurora shows in the window and the doorway,
+  not over the screen; a skylight or an opening in the vault would need a parameter on `domestic`.
+
 ### TV-era rooms
 
 The same `presentation` chain makes the TV-era rooms: source (a broadcast, a tape, a disc), transmission (aerial
 noise, ghosting, a weak signal), display (a mechanical-scan set's orange glow, 1930; a round-cornered CRT; a
 shadow mask; a flat panel). Each era is a preset of the chain plus a `domestic` room. Names are pastiche, never the
 real mark (the names check).
+
+### Room: Screen 3 - 1983
+
+`app/environments/screen_3_1983.env.json`. The old circle of a picture palace, walled off in 1983 into a small
+multiplex screen: a steep rake of multiplex seats, a plasterboard wall with the screen on it, a swirly carpet and a
+worn print.
+
+- **The hall** (`auditorium`, id `hall`): 11.2 m wide, 9 rows of 13 multiplex seats on a steep rake (0.42 m a row),
+  straight rows, the viewer in the middle of the fifth row from the front (the room's own seat, at the origin). The
+  old fabric panels and sconces run on along the side walls and stop at the partition (`partition_z` -7.4), so the
+  hall reads as cut in two. No drapes, no acoustic clouds; four exits with signs, the booth's windows in the rear
+  wall.
+- **The kit:** the swirling carpet on the floor; a plasterboard partition (taped joints, a skirting) over the
+  hall's own; a water stain where the roof leaks down the new wall, in its top left corner (three patches of
+  stained board, the dark tide line at their feet).
+- **Seats** (`seats`): seat 69, in the row in front a little to the left, is broken (its back slumped).
+- **Light:** the house lamps go down to 8 % over 4 s when the film starts or plays (cue `dim`, with the common Dim
+  during the film on) and come back up in the pre-show and after the end (`lights_up`). The exit sign stutters now
+  and then (cue `exit_sign`: every 20 s, a chance of 0.4, two dips of `light.signs` with fades of 0.2 s, under
+  2 Hz); it needs the common Flickering lights on.
+- **Screen:** 7 x 3.94 m on the partition, its masking (`screen_frame`) and the beam from the booth; smoke and haze
+  in the beam (`atmosphere`: `beam_haze` 0.6, `beam_smoke` 0.8); the worn print (`presentation` preset
+  `worn_print`: weave, tilt, flicker, dust, scratches, a hotspot). The film is drawn in the room (a picture stage).
+- **Setting:** Weave and tilt (`weave`, 0..1, default 0.7): `presentation.weave` by range [0, 1] and
+  `presentation.tilt` by range [0, 0.5] degrees. The common Motion setting scales both; Flickering lights holds the
+  lamp's flicker and the exit sign steady.
+- **Measured** (`tests/test_room_screen_3_1983.gd`, headless): 25 draws, 79 946 triangles, no live light, no
+  particles, 10.4 MB of textures; a clear sight line from all 117 seats.
+- **Sound to come:** the next screen's film rumbling through the wall (a low bed following `film.bass`, well under
+  the film); a small hall's acoustics.
+
+### Room: Drive-in - 1958
+
+`app/environments/drive_in_1958.env.json`, apart from the older drive-in scene (`drive_in.tscn`). The front bench of
+a convertible on a drive-in's lot in the desert, dusk falling to a starry night as the film runs.
+
+- **The lot** (`terrace`, id `lot`, style `lot`): humps and speaker posts in rows of bays, the ground out to 120 m;
+  the screen (24 x 10 m, 4 m up, 50 m ahead) on the kit's tower; a neon snack bar 16 m behind the car ("SNACK BAR").
+- **The car** (`vehicle`, id `car`): the viewer in the middle of the front bench (the room's own seat), a rear bench
+  behind; six places to pick.
+- **The sky** (`sky`): latitude 35, mid July, the screen facing west-south-west with the sunset's glow to its right.
+  Tracks by `film.minutes`: `dusk` from the last light (0) to night (0.75 at 12 minutes, 1 at 25), and `hour` from
+  20:45 on, so the stars turn through the film. `milky_way` follows `playback.playing` (0.25 to 0.85, smoothed 3 s).
+  Mesas round the horizon (`vista`).
+- **Life:** 30 moths in the projector's beam (the beam from the snack bar's roof, `screen_frame` without masking);
+  a plane's lights about every 5 minutes.
+- **Cues:** the headlamps off and the dials dimmed as the film starts or plays (`lamps_off`); in the pre-show the
+  dials lit, the headlamps off (`arrive`); 3 s after the end the headlamps come on (`time_to_go`).
+- **Setting:** Window speaker (`tinny`, bool, default off): `presentation.speaker` by map (`window` or `none`). It
+  is off by default: a whole film through a band-limited mono speaker is a big loss of the film's sound, which the
+  room must never spoil; the viewer turns it on for the effect. No picture stage, so the film layer stays.
+- **Measured** (`tests/test_room_drive_in_1958.gd`, headless): 30 draws, 17 288 triangles, no live light, no
+  particles, 11.3 MB of textures; a clear sight line from all 6 places.
+- **Sound to come:** crickets (a soft bed), a far freight train now and then (a one-shot, its horn far off), the
+  open air's acoustics (little reverb).
+
+### Room: Screening room 1962
+
+`app/environments/screening_room_1962.env.json` (Cinemas). A private screening room in a house: walnut panelling, a
+deep carpet, a brick fireplace with a slow fire, brass wall lamps, six club chairs in two rows, and a pool glowing in
+the garden beyond the picture window. Before the film a painting hangs over the screen; it slides up into the ceiling
+as the film starts.
+
+- **Systems:** `light`; `domestic` (`walnut_1962`, `outside` none so the vista shows through the window); `seats`
+  (`club_chair` in the builder's six slots, brown leather on walnut); `sky` (a clear night, latitude 34, `dusk` 0.9);
+  `vista` (the pool 11 m out at -58 degrees, seen through the window from the viewer's seat; hills on the horizon).
+- **The ritual** (cues on `room.painting_open` and `light.house_lamps`): in the pre-show and after the end the lamps
+  come up over 4 s and the painting comes down over 6 s (`painting_down`, with the Pre-show on). As the film starts
+  from its start (`ritual`), the lamps go to half over 1.5 s, the painting rises over 7 s (1.84 m, at most about 0.4 m/s,
+  under the motion limit), and the lamps go down to the setting over 4 s. A film resumed later (`painting_away`, on
+  playing, intermission, credits) takes the painting up over 4 s whatever the Pre-show. With the Pre-show off the
+  painting stays up and `dim` takes the lamps down over 3 s.
+- **Settings:** `house_level`, "Wall lamps in the film" (0..1, 15 %).
+- **Default seat:** the middle of the front row (the origin), 5.1 m from a 2.6 m picture.
+- **Measured:** 18 draws, 9 600 triangles, 0 lights, 0 particles, 10.4 MB.
+- **Not yet:** a bar cart (the object library has none, and a room that ships as a document places no objects).
+  Sound wanted: a crackle from the fire, a faint pool filter's hum through the glass, a soft chime before the
+  ritual; a small, dry room (rt60 0.45).
+
+### Room: Athens rooftop
+
+`app/environments/rooftop_athens.env.json` (Cinemas). An open-air summer cinema on a roof in Athens (the name is short:
+a longer one, "Athens rooftop summer cinema", made its button wider than the Room tab in the pseudo-locale): director's
+chairs in rows on the tiles, a low whitewashed wall with bougainvillea over it, strings of bulbs, the screen painted on
+the next building's blind wall. Beside the wall the acropolis stands floodlit on its hill under a summer night's
+stars; planes cross now and then, and a cat walks along the wall top.
+
+- **Systems:** `light`; `terrace` (`rooftop`, a wall 8 m high, seven rows of nine); `seats` (`director`); `kit`
+  (bougainvillea on four of the right wall's places, clear of the cat's way); `sky` (latitude 38, day 200, 21:30, the
+  screen facing 200 degrees, the sunset's glow at 300); `vista` (the acropolis at 52 degrees, 150 m, size 2: clear
+  of the screen wall's edge and over the low wall from the seat; hills); `life` `planes` (plane lights) and `cat`
+  (its way along the left wall's top, 6.65 m out: never in the sight line, measured over 4 minutes).
+- **Film-time track:** `sky.dusk` from 0.75 to full night over the first 20 minutes of the film.
+- **Settings:** `floodlights`, "Floodlights on the hill" (0..1, full): `vista.floodlight`.
+- **Default seat:** the middle of the third row from the back (the origin), 11.9 m from a 6.4 m picture.
+- **Measured:** 15 draws, 29 086 triangles, 0 lights, 0 particles, 9.3 MB.
+- **Sound wanted:** cicadas (a bed, fading as the film starts), mopeds far off now and then, the cat's purr when it
+  sits; open air (rt60 0.25, wet 0.15).
+
+### Room: Pillow Fort 1993
+
+`app/environments/pillow_fort_1993.env.json` (Television). A child's bedroom on a rainy night: a pillow fort of
+cushions and a bedsheet on broom handles round three floor cushions, fairy lights along its front, rain on the
+window, and the telly filling the fort's opening, showing the film as a tube shows a tape watched a few times.
+
+- **Systems:** `light`; `domestic` (`bedroom_1993`, `opening_screen` on: a 1.33 x 1.0 m picture just beyond the
+  opening); `seats` (`cushion` in the fort's three slots); `weather` (the pane on the window, facing in; 300 drops
+  outside it; the Rain setting on `mode`); `presentation` (`nightowl_1993`: a tape, a CRT with an aperture grille;
+  the speaker by the setting).
+- **Settings:** `rain`, "Rain on the window" (rain, drizzle, coming and going, none; rain): `weather.mode` by `map`;
+  `telly_sound`, "The telly's own speaker" (off): `presentation.speaker` `telly` or `none`, so the film keeps its
+  own sound unless asked.
+- **Flicker:** the fairy lights waver slowly (the builder's `flicker`); Flickering lights holds them.
+- **Default seat:** the middle cushion (the origin), 1.25 m from the picture.
+- **Measured:** 20 draws, 5 290 triangles, 0 lights, 300 particles, 6.0 MB.
+- **Not as the table:** `telly_fills` is not a setting. The app's screen comes from the document once
+  (`env_room.gd` `_apply_room()`); a setting on `domestic.opening_screen` rebuilds the telly in its other place but
+  leaves the film where it was, so the room keeps the telly in the opening. No VCR flashing 12:00 (no object widget
+  for it, and a document room places no objects); no tree or tin of sweets.
+- **Sound wanted:** a ticking radiator, rain on the glass following `weather.rain`; a small, soft room (rt60 0.3).
+
+### Room: Bathysphere
+
+`app/environments/bathysphere.env.json`. A round hall under a glass dome in deep water. Fish and glowing creatures
+gather round the screen outside the glass; now and then, in a quiet scene, a whale swims past above it.
+
+- **The hall** (`dome_hall`): radius 9 m, a 1.3 m drum of dark metal with 12 warm lamps (group `house`), a glass
+  dome 7.5 m high on 12 brass ribs, an oak floor, a low stage. The screen (6.4 x 3.6 m, its bottom 1.45 m up) stands
+  8.3 m ahead, inside the glass. Plush seats in teal velvet on arcs round it (six rows, 100 degrees); the room's own seat is at the
+  origin, in the third row. Seat picking is the builder's (`ring` seats; the chosen one folds away).
+- **The water** (`outside` water): blue-black, lit faintly from above. `outside_glow` follows `playback.playing`
+  (0.7 before the film, 0.45 in it, over 3 s). The glass is tinted almost black, so it adds little haze and the water
+  stays dark.
+- **The light** (`light`): a cool blue-green fill from above, warm lamps.
+- **Life** (`life`, four systems, all outside the glass): `fish`, 40 silver fish to the left; `shoal`, 28 smaller
+  grey-green ones to the right; `glow`, 16 glowing bells behind and round the picture (`size` 2, their colour half
+  the film's); `whale`, its way high behind the screen (13 m up, 17 to 19 m out). The fish's and the bells'
+  `attraction` follows `film.brightness`: they come nearer the screen in a bright scene. The regions are boxes outside
+  the dome's ellipsoid and inside the water's sphere, to the sides of the picture, so no school hides behind it.
+- **Settings:** Whale (`whale`): never, rarely (the default), sometimes. Two cues on `film.quiet` (above 0.9 for 4 s,
+  while playing) call `whale.pass`, one per choice: rarely has a chance of 0.3 and a cooldown of 30 minutes,
+  sometimes 0.7 and 15 minutes; never fires neither. The whale sings as it passes.
+- **Cues:** `dim` (with the film: the house lamps to 12 % over 4 s), `lights_up` (pre-show and the end).
+- **Measured** (`test_room_bathysphere.gd`, headless): 12 draws, 79 078 triangles, no lights, no particles, 6 MB.
+- **The render** (lavapipe, from the seat): a dark blue dome on brass ribs over rows of teal seats, a school to each
+  side of the picture, faint bells at its edges, the whale's shape crossing above it.
+- **Sound (later):** hull creaks now and then (a one-shot, low, behind and to the sides), a faint low hum of the
+  deep, the whale's song (the life system sings it already). Acoustics: a small hard metal and glass room
+  (`acoustics` rt60 0.9).
+- **Gap:** caustics. The light system has no moving light pattern; the room has a cool fill from above instead.
+
+### Room: Crater
+
+`app/environments/crater.env.json`. A lunar amphitheatre of stone tiers under a glass dome, Earth over the screen
+in a black sky full of stars. Silent: the room has no sound bed and makes no sound at all; only the film is heard.
+
+- **The amphitheatre** (`terrace`, style `amphitheatre`): seven tiers on arcs of 120 degrees round the screen
+  (rows 2 in front, 5 behind, 0.95 m deep, 0.42 m rise), the pit 1.26 m under the room's own seat, the screen (8 x
+  4.5 m) on a dark frame 11.4 m ahead, 18 rocks on a grey plain that runs 150 m out. The room's own seat is in the
+  third tier at the origin; seat picking uses the tiers' places (`tier`).
+- **The dome** (`dome_hall` as a cover: `has_floor` and `seating` off, `outside` none): glass, radius 18 m centred
+  9 m ahead, on a 0.8 m drum with 16 cool lamps (group `house`), 12 m high, 16 ribs of brushed steel. Every seat's
+  eyes and the screen are under it with a metre to spare. The glass is tinted almost black, so space shows black
+  through it.
+- **Why both:** the two combine cleanly. The terrace gives the tiers, the plain and the screen; the dome adds only its
+  drum, panes, ribs and lamps over them (no floor, no seats, no water). The screen is the terrace's.
+- **The sky** (`sky`, mode `space`): latitude -30, a July night, so the Milky Way's bright middle stands high.
+  `milky_way` follows `playback.playing` (0.35 before the film, 1 in it, over 3 s): the Milky Way comes out as the
+  lights dim. Earth 4 degrees across, 30 degrees up, a little to the right of the screen, 70 % lit.
+- **The rim** (`vista`): low grey hills 160 m out all round, the crater's wall.
+- **Setting:** Earth's speed (`earth_speed`, 0.5 to 4 times, default 1): bound to `sky.earth_turn` by `range`
+  [6, 48], so 1 x is twelve times Earth's real speed, a turn in two hours (about one a film), and 4 x a turn in 30
+  minutes. The Motion setting scales it (half Motion, half the speed).
+- **Cues:** `dim` (the dome's lamps out over 5 s with the film), `lights_up`. `pause_rise_db` 0.
+- **Measured** (`test_room_crater.gd`, headless): 12 draws, 15 836 triangles, no lights, no particles, 4.3 MB.
+- **The render** (lavapipe, from the seat): the framed screen on the pit floor, pale tiers either side, the dome's
+  ribs meeting overhead, stars and the Milky Way through the glass, Earth up and to the right of the picture.
+- **Sound:** none, by design. Acoustics (for the film's spatial sound): a large glass dome, rt60 1.1, wet 0.35.
+
+Seven rooms, one for each TV preset, are the history of television: `app/environments/tv_<year>.env.json`, in the
+Room tab's Television group (`room.category` "tv"). Their names start "TV <year> - ", so the group reads as a
+timeline. (A room's name takes letters, digits, space, - and _ only. "Television, 1930: ..." is refused, and the
+longer "Television 1930 - ..." names made the Room tab's card too wide in the pseudo-locale.) Each is a `domestic`
+room (style `plain`, or `bedroom_1993`) with `screen` "telly" and the era's preset on it, the `seats` system for the
+chairs, and cues for the lamps: down when the film starts or plays (`lamps_down`), up in the pre-show and after the
+end (`lamps_up`). Tested by `tests/test_room_tv.gd` (headless: every check of `test_environments.gd`, the preset,
+the telly's shape and size, each setting and what it does, the cues).
+
+**The telly's shape.** The film is drawn on the screen's own mesh, which is the document's width at the film's
+aspect (`video_screen.gd get_flat_size()`); a document cannot give it another shape. So the domestic telly's tube (the
+cabinet's opening and the dark glass behind the picture) is 4:3 for the sets before 2000, and a 16:9 film sits in it
+letterboxed, as a wide film did on a 4:3 set. A 4:3 film fills the tube. The CRT's bulge and round corners are those
+of the film's own rectangle, not the tube's (the open question "A telly's shape" stays open).
+
+**The telly's size.** The headset shows about 20 pixels a degree, so a set as small as it really was, across a room,
+would be a postage stamp. The viewer's chair is pulled up to the set instead: every picture is 17 to 23 degrees across
+from the viewer's own seat (the test holds it), its centre 0.25 to 0.3 m under the eyes. The smallest width a document
+screen may have is 0.3 m.
+
+| Room | The tube (w x h) | From the viewer's eyes | Across | Why |
+|---|---|---|---|---|
+| 1930 | 0.30 x 0.225 m | 0.9 m | 19 degrees | the smallest screen a document may give; the set's own window was smaller, so the chair is close, as a family huddled round one |
+| 1953 | 0.36 x 0.27 m (a 17 inch tube) | 1.1 m | 19 degrees | a big set for its day; the armchairs gathered round |
+| 1972 | 0.46 x 0.345 m (22 inch) | 1.4 m | 19 degrees | the colour set in the corner, the chairs in a row |
+| 1983 | 0.30 x 0.225 m (14 inch portable) | 0.8 m | 21 degrees | at a desk: the portable is near, as a screen for a home computer was |
+| 1987 | 0.54 x 0.405 m (26 inch) | 1.5 m | 20 degrees | the family set, the settee across from it |
+| 1993 | 0.40 x 0.30 m (20 inch) | 1.1 m | 21 degrees | a bedroom set seen from a bean bag on the floor |
+| 2005 | 0.72 x 0.405 m (32 inch, 16:9) | 1.9 m | 21 degrees | the first flat panel: wider, and the sofa further back |
+
+### Room: TV 1930 - glowing box
+
+1 of 7. A small dark parlour with a coal fire. A mechanical-scan set in a walnut cabinet on a walnut chest glows
+orange with thirty lines (`glowbox_1930`, its sound through the radio cabinet's speaker). Three club chairs in
+velvet, two angled in beside the viewer's. A wall lamp, a night window.
+
+- Systems: `light` (a low, warm fill), `domestic` (2 x 1.4 m in front, 2.6 m behind; fireplace on the right, the
+  window on the left with a dark night glow), `seats` (two club chairs as places), `presentation`.
+- Settings: Lines in the picture (30 as it was, 60, 120: `presentation.mech_lines` by `map`); Fire in the grate
+  (`domestic.fire`).
+- Cues: `tuning_in` (Pre-show): the signal weak at the start, the picture coming in over 6 s. The lamp down to 15 %
+  in the film.
+- Measured: 18 draws, 2 216 triangles, 10 MB, no particles.
+
+### Room: TV 1953 - by the fire
+
+2 of 7. A sitting room with a lit coal fire and a cat on the hearth. A small black and white set in a walnut cabinet
+on a chest (`fireside_1953`: 405 lines, snow and a ghost). Four empty armchairs gathered round it. Rain on the window
+from time to time; through it, an evening sky over hills. A potted fern in the corner.
+
+- Systems: `light`, `domestic`, `kit` (ferns), `seats` (three armchairs as places), `sky` (dusk 0.85, clouds 0.7),
+  `vista` (hills to the left), `weather` (changing, 500 drops outside the window, the pane), `life` (`cat`, its path
+  along the hearth), `presentation`.
+- Settings: Snow from the aerial (0 to 60 %: `presentation.snow`); Fire in the grate.
+- Cues: `warm_up` (Pre-show): the valves warm up, the picture dim at first and full over 6 s. The lamps down to 25 %.
+- Measured: 24 draws, 10 168 triangles, 10.3 MB, 500 particles.
+
+### Room: TV 1972 - first colour
+
+3 of 7. Mustard walls with orange and brown bands sweeping behind the set, a swirling carpet, three club chairs in
+orange velour and a bean bag. An early colour set in a teak-look cabinet (`colourstar_1972`: a shadow mask, warm
+rich colour). A summer dusk in the window.
+
+- Systems: `light`, `domestic` (a radiator under the window), `kit` (carpet, curves on the front wall), `seats` (a
+  bean bag as a place), `sky` (dusk 0.45), `vista` (hills), `presentation`.
+- Settings: Snow from the aerial (0 to 40 %); Colour (the set's colour knob, 0.5 to 1.5 times: `presentation.colour`).
+- Cues: `warm_up` (Pre-show), the lamps down to 30 %.
+- Measured: 19 draws, 9 252 triangles, 7.5 MB.
+
+### Room: TV 1983 - desk portable
+
+4 of 7. A small room at night: a portable telly on a desk, a beige home computer on the desk in front of it, a wooden
+chair. Drizzle on the window, the street lamp's orange glow beyond it. `sirclive_1983`: the computer's aerial lead,
+240 bold lines. A bean bag at the back for a second seat.
+
+- Systems: `light`, `domestic` (no lamps; the outside glow sodium orange), `kit` (two `partition` pieces: the desk,
+  0.75 m high, level with the telly's foot, and the computer, a beige box), `seats` (the bean bag), `weather` (light
+  rain on the pane only), `presentation`.
+- Settings: Aerial lead noise (`presentation.snow`); Bold lines (`presentation.scanlines` 0.65 or 0.2).
+- Cues: `tuning_in` (Pre-show): a `glitch` as the set finds the computer's channel.
+- Measured: 17 draws, 952 triangles, 8.2 MB.
+
+### Room: TV 1987 - rented tape
+
+5 of 7. The family living room on a wet night: a black telly on a wooden cabinet with a video recorder in its top
+shelf, a settee of three chairs and an armchair, a white-painted brick fireplace, a fern. `rewinder_1987`: a rented
+tape, tracking wobble, smeared colour, the tear at the bottom.
+
+- Systems: `light`, `domestic`, `kit` (a `partition` as the video recorder, ferns), `seats` (the armchair), `sky`
+  (night, clouds), `vista` (hills), `weather` (changing, 500 drops, the pane), `presentation`.
+- Settings: The tape (fresh, rented, worn out: `tape_noise`, `chroma_bleed` and `head_switch` by `map`); Wall lamps in
+  the film (0 to 100 %, default 30 %).
+- Cues: `tape_start` (Pre-show): the tape tears for a moment as it starts (`glitch`, 1.5 s). The lamps follow the
+  setting.
+- Measured: 25 draws, 10 108 triangles, 9.5 MB, 500 particles.
+
+### Room: TV 1993 - bedroom telly
+
+6 of 7. A teenager's bedroom (not the pillow fort): blue walls, fairy lights along the wall over the telly, the bed,
+a radiator under the window, rain in the night outside. A bean bag on the floor; a second place sitting on the bed.
+`nightowl_1993`: a tape watched a few times on a flatter tube with an aperture grille.
+
+- Systems: `light` (`accent` bound to the fairy lights' setting), `domestic` (`bedroom_1993`, `fort` off,
+  `fairy_lights` on), `seats` (bean bags; a cushion on the bed), `sky` (night), `weather` (by the setting, 400 drops,
+  the pane), `presentation`.
+- Settings: Weather at the window (raining, a dry night, showers: `weather.mode`); Fairy lights over the telly (0 to
+  100 %: `light.accent`, which also scales the window's glow group).
+- Measured: 20 draws, 8 470 triangles, 6.3 MB, 400 particles.
+
+### Room: TV 2005 - flat screen
+
+7 of 7. A pale living room with a laminate floor, a grey settee of three chairs and an armchair, a plant, a wide
+window on a sunset. A 32 inch flat panel on a low wooden stand (`freedtv_2005`: a free digital broadcast, a faint
+pixel grid, the backlight through the dark scenes).
+
+- Systems: `light`, `domestic`, `kit` (ferns), `seats` (the armchair), `sky` (dusk 0.6), `vista` (hills),
+  `presentation`.
+- Settings: Wall lamps in the film; Backlight bleed (`presentation.panel_bleed`).
+- Measured: 19 draws, 10 232 triangles, 10.3 MB.
+
+**What the systems lack for these rooms** (each room took the closest thing there is):
+
+- A tube's own shape for the CRT (above). The domestic telly is always a deep box (its depth 0.75 of its width), so
+  the 2005 flat panel is a deep box from the side.
+- Furniture: there is no desk, computer, video recorder, sideboard, standard lamp, rug or settee. The desk, the
+  computer and the video recorder are the kit's `partition` (a plasterboard box with a skirting) in laminate and
+  plastic colours; the settee is three club chairs in a row. The radio-style cabinet of 1930 is the telly on a walnut
+  chest.
+- The seats system's own places are not listed before the room is built (no static layout), so the seat list before
+  the build is the builder's alone.
+- Sound: none yet; the rooms get theirs when the sound systems are merged (each room's own sound comes from its
+  presentation's speaker meanwhile).
 
 ## Files
 
@@ -708,6 +1907,7 @@ real mark (the names check).
 | `app/scripts/env/env_doc.gd` | the version 4 sections' validation, bindings, settings declarations |
 | `app/scripts/env/systems/registry.gd`, `env_system.gd` | the registry and the system base |
 | `app/scripts/env/systems/*.gd` | the systems |
+| `app/scripts/env/systems/kit/` | the builders' common base (`builder.gd`) and helpers, the kit's pieces (`pieces.gd`), the glass and glow shaders |
 | `app/scripts/env/env_host.gd` | the host: builds the systems, runs the signals, bindings, timeline and cues |
 | `app/scripts/env/env_room.gd` | the environment node of a room that ships as a document |
 | `app/scripts/env/env_signals.gd`, `env_timeline.gd` | film signals; states and cues |
@@ -773,3 +1973,18 @@ document. Each room agent owns its documents, its CC0 assets under `app/environm
   them on a worker thread.
 - **The shortest reverb.** The engine's reverb has no tail under about 0.5 s. `small_room`, `vehicle` and `outdoors`
   use its smallest room with a little wet; a shorter tail would need another effect.
+- **A telly's shape.** The presentation draws on the screen's own mesh, which has the film's aspect: a CRT's round
+  corners and bulge are those of a 16:9 picture for a 16:9 film. A 4:3 tube with the film letterboxed in it needs a
+  screen of the tube's shape (the room's builder, or a later screen parameter).
+- **The presentation in the layer.** A source-only chain (weave and grain) could stay in the film layer, as the
+  projector feature's weave does; the presentation draws in the room for every picture stage, for one path. Its cost
+  on the Frame is not measured yet.
+- **Ambient life on the Frame.** The creatures' ticks are measured on the desktop only (under 1 ms for all nine). A
+  room with many fliers should be timed on the headset.
+- **Parts of a room in front of the picture (settled 2026-11-07).** The domestic painting (while down) and the
+  pillow fort's hem are in the group `env_in_front`, as motion's in-front things are, so on the Frame the film
+  layer steps aside while they cover the picture and the film draws in the room behind them. A fort hem over the
+  picture keeps the film in the room for the whole showing (the layer's sharpness is lost there).
+- **Auto parameters in `domestic`.** Its parameters left on auto take the style's values, so the licences check
+  reads only the materials a document names. Every style's material is a bundled CC0 library material, so the check
+  still holds, but it does not see them.

@@ -426,7 +426,7 @@ msgstr ""
 msgid "How much things in the room move: sways, tilts, weave."
 msgstr ""
 
-#: scripts/env/room_settings.gd:204 ui/room_tab.gd:236 ui/sound_tab.gd:76
+#: scripts/env/room_settings.gd:204 ui/room_tab.gd:254 ui/sound_tab.gd:76
 msgid "off"
 msgstr ""
 
@@ -440,7 +440,7 @@ msgstr ""
 msgid "%.1f s"
 msgstr ""
 
-#: scripts/env/room_settings.gd:213 ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:227
+#: scripts/env/room_settings.gd:213 ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:245
 #, c-format
 msgid "%d min"
 msgstr ""
@@ -592,58 +592,62 @@ msgstr ""
 msgid "Sat"
 msgstr ""
 
-#: scripts/play/film_layer.gd:144
+#: scripts/play/film_layer.gd:160
 msgid "Off: the film is drawn in the room."
 msgstr ""
 
-#: scripts/play/film_layer.gd:146
+#: scripts/play/film_layer.gd:162
 msgid "This engine has no OpenXR layers."
 msgstr ""
 
-#: scripts/play/film_layer.gd:148
+#: scripts/play/film_layer.gd:164
 msgid "Only in the headset: here the film is drawn in the room."
 msgstr ""
 
-#: scripts/play/film_layer.gd:151
+#: scripts/play/film_layer.gd:167
+msgid "On; this room draws the film itself, for the look of its screen."
+msgstr ""
+
+#: scripts/play/film_layer.gd:169
 msgid "180, 360 and fisheye films are drawn in the room."
 msgstr ""
 
-#: scripts/play/film_layer.gd:154
+#: scripts/play/film_layer.gd:172
 msgid "A curved screen is drawn in the room (curved layers are off)."
 msgstr ""
 
-#: scripts/play/film_layer.gd:155
+#: scripts/play/film_layer.gd:173
 msgid "This headset has no curved layers: a curved screen is drawn in the room."
 msgstr ""
 
-#: scripts/play/film_layer.gd:156
+#: scripts/play/film_layer.gd:174
 msgid "On; nothing to show."
 msgstr ""
 
-#: scripts/play/film_layer.gd:159
+#: scripts/play/film_layer.gd:177
 msgid "On; the room draws the film while something is in front of the screen, so it shows."
 msgstr ""
 
-#: scripts/play/film_layer.gd:161
+#: scripts/play/film_layer.gd:179
 msgid "On; the room draws the film while the menu is open, so the menu shows in front."
 msgstr ""
 
-#: scripts/play/film_layer.gd:163
+#: scripts/play/film_layer.gd:181
 #, c-format
 msgid "In use: two cylinder layers, one per eye, %d x %d px each."
 msgstr ""
 
-#: scripts/play/film_layer.gd:164
+#: scripts/play/film_layer.gd:182
 #, c-format
 msgid "In use: two quad layers, one per eye, %d x %d px each."
 msgstr ""
 
-#: scripts/play/film_layer.gd:165
+#: scripts/play/film_layer.gd:183
 #, c-format
 msgid "In use: one cylinder layer, %d x %d px."
 msgstr ""
 
-#: scripts/play/film_layer.gd:166
+#: scripts/play/film_layer.gd:184
 #, c-format
 msgid "In use: one quad layer, %d x %d px."
 msgstr ""
@@ -953,7 +957,7 @@ msgstr ""
 msgid "Red"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:55
+#: scripts/xr/controller_look.gd:55 environments/streamline_1937.env.json
 msgid "Blue"
 msgstr ""
 
@@ -2112,7 +2116,7 @@ msgstr ""
 msgid "(changed)"
 msgstr ""
 
-#: ui/object_section.gd:496
+#: ui/object_section.gd:496 environments/tv_1972.env.json
 msgid "Colour"
 msgstr ""
 
@@ -2609,7 +2613,7 @@ msgstr ""
 msgid "Each picture"
 msgstr ""
 
-#: ui/picture_tab.gd:337 ui/room_tab.gd:224 ui/room_tab.gd:236
+#: ui/picture_tab.gd:337 ui/room_tab.gd:242 ui/room_tab.gd:254
 #, c-format
 msgid "%d s"
 msgstr ""
@@ -2766,7 +2770,7 @@ msgstr ""
 msgid "Polynomial"
 msgstr ""
 
-#: ui/picture_tab.gd:31 ui/room_tab.gd:19 ui/system_tab.gd:41
+#: ui/picture_tab.gd:31 ui/room_tab.gd:19 ui/system_tab.gd:41 environments/ice_cinema.env.json
 msgid "Off"
 msgstr ""
 
@@ -2813,228 +2817,236 @@ msgstr ""
 msgid "%s (the folder's rule)"
 msgstr ""
 
-#: ui/room_tab.gd:92
+#: ui/room_tab.gd:99
 msgid "Environment"
 msgstr ""
 
-#: ui/room_tab.gd:93
+#: ui/room_tab.gd:102
+msgid "Cinemas"
+msgstr ""
+
+#: ui/room_tab.gd:107
+msgid "Television"
+msgstr ""
+
+#: ui/room_tab.gd:110
 msgid "Built in"
 msgstr ""
 
-#: ui/room_tab.gd:98 ui/surface_panel.gd:27
+#: ui/room_tab.gd:116 ui/surface_panel.gd:27
 msgid "Yours"
 msgstr ""
 
-#: ui/room_tab.gd:101
+#: ui/room_tab.gd:119
 msgid "Use this picture as the room"
 msgstr ""
 
-#: ui/room_tab.gd:105
+#: ui/room_tab.gd:123
 msgid "Showrooms"
 msgstr ""
 
-#: ui/room_tab.gd:114
+#: ui/room_tab.gd:132
 msgid "This room"
 msgstr ""
 
-#: ui/room_tab.gd:117
+#: ui/room_tab.gd:135
 msgid "Back to defaults"
 msgstr ""
 
-#: ui/room_tab.gd:125 ui/ui_layer.gd:999
+#: ui/room_tab.gd:143 ui/ui_layer.gd:999
 msgid "Seat"
 msgstr ""
 
-#: ui/room_tab.gd:132
+#: ui/room_tab.gd:150
 msgid "Previous seat"
 msgstr ""
 
-#: ui/room_tab.gd:133
+#: ui/room_tab.gd:151
 msgid "Next seat"
 msgstr ""
 
-#: ui/room_tab.gd:134
+#: ui/room_tab.gd:152
 msgid "Room's own spot"
 msgstr ""
 
-#: ui/room_tab.gd:136
+#: ui/room_tab.gd:154
 msgid "Pick a seat"
 msgstr ""
 
-#: ui/room_tab.gd:147
+#: ui/room_tab.gd:165
 msgid "Floor reflection"
 msgstr ""
 
-#: ui/room_tab.gd:149
+#: ui/room_tab.gd:167
 msgid "Reflection"
 msgstr ""
 
-#: ui/room_tab.gd:155
+#: ui/room_tab.gd:173
 msgid "Effects"
 msgstr ""
 
-#: ui/room_tab.gd:157 ui/room_tab.gd:169
+#: ui/room_tab.gd:175 ui/room_tab.gd:187
 msgid "Bias light"
 msgstr ""
 
-#: ui/room_tab.gd:161
+#: ui/room_tab.gd:179
 msgid "React to the film"
 msgstr ""
 
-#: ui/room_tab.gd:165
+#: ui/room_tab.gd:183
 msgid "Projector beam"
 msgstr ""
 
-#: ui/room_tab.gd:172
+#: ui/room_tab.gd:190
 msgid "Reaction"
 msgstr ""
 
-#: ui/room_tab.gd:186
+#: ui/room_tab.gd:204
 msgid "Time of day"
 msgstr ""
 
-#: ui/room_tab.gd:187
+#: ui/room_tab.gd:205
 msgid "Night"
 msgstr ""
 
-#: ui/room_tab.gd:187
+#: ui/room_tab.gd:205
 msgid "Now"
 msgstr ""
 
-#: ui/room_tab.gd:187
+#: ui/room_tab.gd:205
 msgid "Dusk"
 msgstr ""
 
-#: ui/room_tab.gd:187
+#: ui/room_tab.gd:205
 msgid "Day"
 msgstr ""
 
-#: ui/room_tab.gd:191
+#: ui/room_tab.gd:209
 msgid "Latitude"
 msgstr ""
 
-#: ui/room_tab.gd:194
+#: ui/room_tab.gd:212
 msgid "Room light"
 msgstr ""
 
-#: ui/room_tab.gd:198
+#: ui/room_tab.gd:216
 msgid "Dim while playing"
 msgstr ""
 
-#: ui/room_tab.gd:200
+#: ui/room_tab.gd:218
 msgid "Dimmed to"
 msgstr ""
 
-#: ui/room_tab.gd:204
+#: ui/room_tab.gd:222
 msgid "Placement"
 msgstr ""
 
-#: ui/room_tab.gd:207
+#: ui/room_tab.gd:225
 msgid "Reset room"
 msgstr ""
 
-#: ui/room_tab.gd:208
+#: ui/room_tab.gd:226
 msgid "Reset screen"
 msgstr ""
 
-#: ui/room_tab.gd:209
+#: ui/room_tab.gd:227
 msgid "Reset room: back to the room's own seat, facing the screen, view recentred."
 msgstr ""
 
-#: ui/room_tab.gd:211
+#: ui/room_tab.gd:229
 msgid "The showing"
 msgstr ""
 
-#: ui/room_tab.gd:213
+#: ui/room_tab.gd:231
 msgid "Curtains"
 msgstr ""
 
-#: ui/room_tab.gd:215
+#: ui/room_tab.gd:233
 msgid "Up next countdown"
 msgstr ""
 
-#: ui/room_tab.gd:217 ui/room_tab.gd:226
+#: ui/room_tab.gd:235 ui/room_tab.gd:244
 msgid "Intermission"
 msgstr ""
 
-#: ui/room_tab.gd:223
+#: ui/room_tab.gd:241
 msgid "Up next in"
 msgstr ""
 
-#: ui/room_tab.gd:237
+#: ui/room_tab.gd:255
 msgid "Crossfade music"
 msgstr ""
 
-#: ui/room_tab.gd:240
+#: ui/room_tab.gd:258
 msgid "Crossfade films"
 msgstr ""
 
-#: ui/room_tab.gd:244
+#: ui/room_tab.gd:262
 msgid "Sleep timer"
 msgstr ""
 
-#: ui/room_tab.gd:322 ui/room_tab.gd:332
+#: ui/room_tab.gd:341 ui/room_tab.gd:357
 #, c-format
 msgid "%s (photo)"
 msgstr ""
 
-#: ui/room_tab.gd:398
+#: ui/room_tab.gd:423
 msgid "This picture can't be a room (only local pictures)."
 msgstr ""
 
-#: ui/room_tab.gd:414
+#: ui/room_tab.gd:439
 #, c-format
 msgid "%s (moved) (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:414
+#: ui/room_tab.gd:439
 #, c-format
 msgid "%s (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:417
+#: ui/room_tab.gd:442
 #, c-format
 msgid "Where %s was (%d seat)"
 msgid_plural "Where %s was (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:419
+#: ui/room_tab.gd:444
 #, c-format
 msgid "The room's own spot (%d seat)"
 msgid_plural "The room's own spot (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:421
+#: ui/room_tab.gd:446
 #, c-format
 msgid "Go to %s"
 msgstr ""
 
-#: ui/room_tab.gd:434
+#: ui/room_tab.gd:459
 msgid "Flashes only in rooms that react, such as the drive-in; the room pulses with the bass."
 msgstr ""
 
-#: ui/room_tab.gd:448
+#: ui/room_tab.gd:473
 #, c-format
 msgid "Seat %d"
 msgstr ""
 
-#: ui/room_tab.gd:456
+#: ui/room_tab.gd:481
 msgid "Curtains: in the cinema and the home theatre, flat screen."
 msgstr ""
 
-#: ui/room_tab.gd:466
+#: ui/room_tab.gd:491
 #, c-format
 msgid "Intermission: %s left. Play ends it."
 msgstr ""
 
-#: ui/room_tab.gd:469
+#: ui/room_tab.gd:494
 #, c-format
 msgid "This film stops at %s."
 msgstr ""
 
-#: ui/room_tab.gd:470
+#: ui/room_tab.gd:495
 #, c-format
 msgid "Films over %d min with chapters stop once, near the middle."
 msgstr ""
@@ -4041,19 +4053,435 @@ msgstr ""
 msgid "Cloud layers sky"
 msgstr ""
 
+#: environments/atmospheric_1928.env.json
+msgid "Atmospheric 1928"
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Bathysphere"
+msgstr ""
+
+#: environments/crater.env.json
+msgid "Crater"
+msgstr ""
+
+#: environments/drive_in_1958.env.json
+msgid "Drive-in - 1958"
+msgstr ""
+
+#: environments/flagship.env.json
+msgid "Flagship"
+msgstr ""
+
+#: environments/ice_cinema.env.json
+msgid "Ice cinema"
+msgstr ""
+
+#: environments/nave.env.json
+msgid "Nave"
+msgstr ""
+
+#: environments/palace_of_culture_1974.env.json
+msgid "Palace of Culture 1974"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "Pillow Fort 1993"
+msgstr ""
+
+#: environments/pink_palace.env.json
+msgid "Pink Palace"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Reclaimed"
+msgstr ""
+
+#: environments/rooftop_athens.env.json
+msgid "Athens rooftop"
+msgstr ""
+
+#: environments/screen_3_1983.env.json
+msgid "Screen 3 - 1983"
+msgstr ""
+
+#: environments/screening_room_1962.env.json
+msgid "Screening room 1962"
+msgstr ""
+
+#: environments/shopfront_1906.env.json
+msgid "Shopfront 1906"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Streamline 1937"
+msgstr ""
+
+#: environments/tv_1930.env.json
+msgid "TV 1930 - glowing box"
+msgstr ""
+
+#: environments/tv_1953.env.json
+msgid "TV 1953 - by the fire"
+msgstr ""
+
+#: environments/tv_1972.env.json
+msgid "TV 1972 - first colour"
+msgstr ""
+
+#: environments/tv_1983.env.json
+msgid "TV 1983 - desk portable"
+msgstr ""
+
+#: environments/tv_1987.env.json
+msgid "TV 1987 - rented tape"
+msgstr ""
+
+#: environments/tv_1993.env.json
+msgid "TV 1993 - bedroom telly"
+msgstr ""
+
+#: environments/tv_2005.env.json
+msgid "TV 2005 - flat screen"
+msgstr ""
+
+#: environments/atmospheric_1928.env.json
+msgid "Clouds"
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Whale"
+msgstr ""
+
 #: environments/cinema.env.json
 msgid "House lights in the film"
+msgstr ""
+
+#: environments/crater.env.json
+msgid "Earth's speed"
+msgstr ""
+
+#: environments/drive_in_1958.env.json
+msgid "Window speaker"
+msgstr ""
+
+#: environments/ice_cinema.env.json
+msgid "Aurora"
+msgstr ""
+
+#: environments/nave.env.json
+msgid "Candles"
+msgstr ""
+
+#: environments/palace_of_culture_1974.env.json
+msgid "Snow"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "Rain on the window"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "The telly's own speaker"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Weather"
+msgstr ""
+
+#: environments/rooftop_athens.env.json
+msgid "Floodlights on the hill"
+msgstr ""
+
+#: environments/screen_3_1983.env.json
+msgid "Weave and tilt"
+msgstr ""
+
+#: environments/screening_room_1962.env.json environments/tv_1987.env.json environments/tv_2005.env.json
+msgid "Wall lamps in the film"
+msgstr ""
+
+#: environments/shopfront_1906.env.json
+msgid "Player piano"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Cove colours"
+msgstr ""
+
+#: environments/tv_1930.env.json
+msgid "Lines in the picture"
+msgstr ""
+
+#: environments/tv_1930.env.json environments/tv_1953.env.json
+msgid "Fire in the grate"
+msgstr ""
+
+#: environments/tv_1953.env.json environments/tv_1972.env.json
+msgid "Snow from the aerial"
+msgstr ""
+
+#: environments/tv_1983.env.json
+msgid "Aerial lead noise"
+msgstr ""
+
+#: environments/tv_1983.env.json
+msgid "Bold lines"
+msgstr ""
+
+#: environments/tv_1987.env.json
+msgid "The tape"
+msgstr ""
+
+#: environments/tv_1993.env.json
+msgid "Weather at the window"
+msgstr ""
+
+#: environments/tv_1993.env.json
+msgid "Fairy lights over the telly"
+msgstr ""
+
+#: environments/tv_2005.env.json
+msgid "Backlight bleed"
 msgstr ""
 
 #: environments/void.env.json
 msgid "Ripple"
 msgstr ""
 
+#: environments/atmospheric_1928.env.json
+msgid "How much of the open sky the clouds cover. They catch the film's light."
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "How often a whale swims past behind the screen in a quiet scene."
+msgstr ""
+
 #: environments/cinema.env.json
 msgid "How bright the house lamps stay once the film has started."
 msgstr ""
 
+#: environments/crater.env.json
+msgid "How fast Earth turns in the sky. At 1 x it turns once in two hours, about once a film."
+msgstr ""
+
+#: environments/drive_in_1958.env.json
+msgid "The film's sound from the little speaker hung on the car's window: tinny, mono, a little rattle."
+msgstr ""
+
+#: environments/ice_cinema.env.json
+msgid "The northern lights in the window: they swell in quiet scenes, glow all the time, or stay away."
+msgstr ""
+
+#: environments/nave.env.json
+msgid "Candle stands either side of the screen: none, two on each side, or four."
+msgstr ""
+
+#: environments/palace_of_culture_1974.env.json
+msgid "Snow through the open back of the roof, over the birches outside."
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "Rain on the glass and in the street, a drizzle, rain that comes and goes, or a dry night."
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "The film's sound as the telly's small speaker gives it: thin, boxy and in mono."
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Rain through the broken roof, a misty drizzle, a clear night, or each in turn."
+msgstr ""
+
+#: environments/rooftop_athens.env.json
+msgid "How brightly the ruins on the hill are lit. At the bottom: dark."
+msgstr ""
+
+#: environments/screen_3_1983.env.json
+msgid "How much the worn print drifts in the gate, and how crooked the projector stands. At the bottom: steady and straight."
+msgstr ""
+
+#: environments/screening_room_1962.env.json
+msgid "How bright the brass wall lamps stay once the film has started."
+msgstr ""
+
+#: environments/shopfront_1906.env.json
+msgid "A player piano by the screen plays along with the film. Off: no piano."
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "The cove lights' colour before the film. Changing: they move through the colours. In the film they take the film's colour."
+msgstr ""
+
+#: environments/tv_1930.env.json
+msgid "The set drew its picture in 30 glowing lines. More lines show the film more clearly than it ever could."
+msgstr ""
+
+#: environments/tv_1930.env.json
+msgid "A coal fire burns in the grate. Off: the grate is cold and the set's glow lights the room."
+msgstr ""
+
+#: environments/tv_1953.env.json
+msgid "Snow on the picture from a weak signal on the roof aerial. At the bottom: a clean picture."
+msgstr ""
+
+#: environments/tv_1953.env.json
+msgid "A coal fire burns in the grate, and the cat likes the hearth."
+msgstr ""
+
+#: environments/tv_1972.env.json
+msgid "A little snow from the aerial. At the bottom: a clean picture."
+msgstr ""
+
+#: environments/tv_1972.env.json
+msgid "The set's colour knob. New colour sets were often turned up rich and warm."
+msgstr ""
+
+#: environments/tv_1983.env.json
+msgid "The computer and the telly share the aerial lead, and a little noise comes with it."
+msgstr ""
+
+#: environments/tv_1983.env.json
+msgid "The dark gaps between the picture's lines, as a small portable showed them close up."
+msgstr ""
+
+#: environments/tv_1987.env.json
+msgid "How many times the tape has been played: noise, smeared colour and the tear at the bottom."
+msgstr ""
+
+#: environments/tv_1987.env.json environments/tv_2005.env.json
+msgid "How bright the wall lamps stay once the film has started."
+msgstr ""
+
+#: environments/tv_1993.env.json
+msgid "Rain on the window, a clear night, or each in turn."
+msgstr ""
+
+#: environments/tv_1993.env.json
+msgid "How bright the fairy lights over the telly are. At the bottom: off."
+msgstr ""
+
+#: environments/tv_2005.env.json
+msgid "The early panel's backlight glowing through the dark scenes, most at the corners."
+msgstr ""
+
 #: environments/void.env.json
 msgid "A faint ring on the floor where you move. At the bottom: none."
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Never"
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Rarely"
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Sometimes"
+msgstr ""
+
+#: environments/ice_cinema.env.json
+msgid "In quiet scenes"
+msgstr ""
+
+#: environments/ice_cinema.env.json
+msgid "Always"
+msgstr ""
+
+#: environments/nave.env.json environments/pillow_fort_1993.env.json
+msgid "None"
+msgstr ""
+
+#: environments/nave.env.json
+msgid "A few"
+msgstr ""
+
+#: environments/nave.env.json
+msgid "Many"
+msgstr ""
+
+#: environments/palace_of_culture_1974.env.json
+msgid "No snow"
+msgstr ""
+
+#: environments/palace_of_culture_1974.env.json
+msgid "Light snow"
+msgstr ""
+
+#: environments/palace_of_culture_1974.env.json
+msgid "Heavy snow"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json environments/reclaimed.env.json
+msgid "Rain"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "Drizzle"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "Coming and going"
+msgstr ""
+
+#: environments/reclaimed.env.json environments/streamline_1937.env.json
+msgid "Changing"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Mist"
+msgstr ""
+
+#: environments/reclaimed.env.json
+msgid "Clear"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Gold"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Rose"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Jade"
+msgstr ""
+
+#: environments/tv_1930.env.json
+msgid "30 lines"
+msgstr ""
+
+#: environments/tv_1930.env.json
+msgid "60 lines"
+msgstr ""
+
+#: environments/tv_1930.env.json
+msgid "120 lines"
+msgstr ""
+
+#: environments/tv_1987.env.json
+msgid "Fresh"
+msgstr ""
+
+#: environments/tv_1987.env.json
+msgid "Rented"
+msgstr ""
+
+#: environments/tv_1987.env.json
+msgid "Worn out"
+msgstr ""
+
+#: environments/tv_1993.env.json
+msgid "Raining"
+msgstr ""
+
+#: environments/tv_1993.env.json
+msgid "A dry night"
+msgstr ""
+
+#: environments/tv_1993.env.json
+msgid "Showers"
 msgstr ""
 

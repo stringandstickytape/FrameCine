@@ -57,6 +57,26 @@ static func document_rooms() -> Array:
 	return out
 
 
+## A room's group in the Room tab: its document's `room.category` (cinema, tv or other; EnvDoc.ROOM_CATEGORIES),
+## "other" for a room with no document. Read once per id.
+static func category_of(id: String) -> String:
+	if _categories.has(id):
+		return _categories[id]
+	var c := "other"
+	var path := DOC_DIR.path_join(id + DOC_SUFFIX)
+	if FileAccess.file_exists(path):
+		var j: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+		if j is Dictionary and (j as Dictionary).get("room") is Dictionary:
+			var v := str(j["room"].get("category", "other"))
+			if v in ["cinema", "tv", "other"]:
+				c = v
+	_categories[id] = c
+	return c
+
+
+static var _categories := {}
+
+
 static func _files(dir: String, extensions: Array) -> Array[String]:
 	var out: Array[String] = []
 	if not DirAccess.dir_exists_absolute(dir):
