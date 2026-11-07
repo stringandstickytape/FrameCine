@@ -293,7 +293,8 @@ func build() -> void:
 		var l: Array = _ctx.lamps[k]
 		var strength := float(l[2]) if l.size() > 2 else 1.0
 		_light.add_lamp(l[0], (l[1] as Color) * float(_light.params["lamp_energy"]) * 0.5 * strength, -1.0)
-		_bake_omni("KitLamp%d" % k, l[0], 5.0 * sqrt(strength), 0.6 * strength, l[1])
+		_bake_omni("KitLamp%d" % k if id == "kit" else "KitLamp%d_%s" % [k, id], l[0], 5.0 * sqrt(strength),
+				0.6 * strength, l[1])
 
 
 ## The clocks flash 12:00: lit half a second, dark half a second, each change eased (no hard cut); held lit while

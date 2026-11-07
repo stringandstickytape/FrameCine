@@ -138,6 +138,11 @@ func static_meshes(), bake_lights(), set_baking(on), set_baked(on)   # the light
 A system never reads a file a document names, never loads a script and never evaluates text. It reads its own
 parameters only.
 
+`own(node)` keeps node names steady when a room has two systems of one kind (two kits, two builders): a name the room
+already has takes the system's id after it (the second kit's `PieceStatic` is `PieceStatic_furniture`), never the
+engine's `@...@` name, and the node keeps its plain name in the meta `env_name`. A motion system's `node` finds a
+system's node by either name. Tested in `test_env_kit.gd` (two kits in one room).
+
 ### The systems
 
 | System | Kind | Role | State |
@@ -505,8 +510,8 @@ adds two draws. Pews' ends add one or two. Texture memory is the headset's, rend
 
 One motion system moves one thing. Give each its own id: the id names its actions (`organ.rise`). The thing is:
 
-- a node the document names: `node` (its name), among the nodes of the system `system` (an id), or anywhere in the
-  room when `system` is empty;
+- a node the document names: `node` (its name, or the plain name it had before `own()` gave it its system's id),
+  among the nodes of the system `system` (an id), or anywhere in the room when `system` is empty;
 - or a festoon curtain it builds itself: `build` "festoon". It hangs over the screen (`festoon_size` 0: the
   screen's size with a margin) in `festoon_swags` swags, `festoon_depth` in front, in the `curtain` material.
 
@@ -715,7 +720,8 @@ for a count that can be 0, `{}` for a material, `[0, 0]` for the screen's size. 
 - `door` (`none`, `left`, `right`, `back`). In ice it is an open doorway with the night's glow beyond.
 - `heater` (`none`, `fireplace`, `radiator`). The fireplace is on the wall across from the window. The radiator is
   under the window. Live: `fire`, `flicker`.
-- `lamps` (on each side wall), `lamp_colour`; `fort`, `fairy_lights` (`auto`, `on`, `off`), `fairy_colour`.
+- `lamps` (on each side wall), `lamp_colour`; `fort`, `fairy_lights` (`auto`, `on`, `off`), `fairy_colour`; live:
+  `fairy_glow` (0 to 1.5: the fairy lights' bulbs and the light they give, and nothing else).
 - Seats: `seat_model` (`club`, `cushion`, `plush`, `director`, `folding`), `rows_front`, `rows_back`,
   `seats_per_row`, `seat_pitch`, `row_pitch`. Cushions are style `cushion`.
 - `wall_pattern` (`plain`, `ice_blocks`, `plasterboard`) and materials: `walls`, `floor`, `ceiling`, `trim`,
@@ -761,7 +767,8 @@ an open question below.
 ## The kit
 
 `scripts/env/systems/kit.gd`, kind `kit`, with the pieces in `scripts/env/systems/kit/pieces.gd`. A document lists
-the pieces. The kit must come after its builder in the document.
+the pieces. The kit must come after its builder in the document. A room may have two kits, each with its own id
+(their nodes keep apart: see `own()` above).
 
 ```json
 {"system": "kit", "params": {"pieces": [
@@ -1808,11 +1815,11 @@ its clock flashing 12:00, a three-seat settee and an armchair, a white-painted b
 a radiator under the window, rain in the night outside. A bean bag on the floor; a second place sitting on the bed.
 `nightowl_1993`: a tape watched a few times on a flatter tube with an aperture grille.
 
-- Systems: `light` (`accent` bound to the fairy lights' setting), `domestic` (`bedroom_1993`, `fort` off,
-  `fairy_lights` on), `seats` (bean bags; a cushion on the bed), `sky` (night), `weather` (by the setting, 400 drops,
+- Systems: `light`, `domestic` (`bedroom_1993`, `fort` off, `fairy_lights` on, `fairy_glow` bound to the fairy
+  lights' setting), `seats` (bean bags; a cushion on the bed), `sky` (night), `weather` (by the setting, 400 drops,
   the pane), `presentation`.
 - Settings: Weather at the window (raining, a dry night, showers: `weather.mode`); Fairy lights over the telly (0 to
-  100 %: `light.accent`, which also scales the window's glow group).
+  100 %: `domestic.fairy_glow`, 0 to 1.5; the accent group, the window's glow with it, stays as it is).
 - Measured: 20 draws, 8 470 triangles, 6.3 MB, 400 particles.
 
 ### Room: TV 2005 - flat screen

@@ -168,10 +168,20 @@ func _group_level(group: String) -> float:
 	return float(params.get(GROUPS.get(group, "accent"), 1.0))
 
 
-## A stand-in lamp until a lightmap is baked (the shader's soft point lights; MAX_LAMPS at most).
-func add_lamp(at: Vector3, colour_energy: Color, cone_cos: float) -> void:
+## A stand-in lamp until a lightmap is baked (the shader's soft point lights; MAX_LAMPS at most). Returns its index
+## (-1: no room for it), for set_lamp().
+func add_lamp(at: Vector3, colour_energy: Color, cone_cos: float) -> int:
 	if _lamps.size() < MAX_LAMPS:
 		_lamps.append([at, colour_energy, cone_cos])
+		return _lamps.size() - 1
+	return -1
+
+
+## A stand-in lamp's colour and energy changed (a live brightness: the domestic fairy lights' glow).
+func set_lamp(i: int, colour_energy: Color) -> void:
+	if i >= 0 and i < _lamps.size():
+		_lamps[i][1] = colour_energy
+		place_lamps()
 
 
 func lamp_colour() -> Color:

@@ -314,11 +314,19 @@ func _tv_1993(room: Node3D) -> void:
 	await _play(room, 0.5, STOPPED)
 	check("1993: Weather rain (%s)" % w.params["mode"], str(w.params["mode"]) == "heavy")
 	room.host.set_setting("weather", "changing")
+	var bulbs := (room.get_node("FairyLights") as MeshInstance3D).mesh.surface_get_material(0) as ShaderMaterial
+	var lit := float(bulbs.get_shader_parameter("energy"))
 	room.host.set_setting("fairy", 0.0)
 	await _play(room, 4.0, STOPPED)
-	check("1993: Fairy lights at the bottom: off (%.3f)" % float(room.host.param("light.accent")),
-			float(room.host.param("light.accent")) < 0.02)
+	var off := float(bulbs.get_shader_parameter("energy"))
+	check("1993: Fairy lights at the bottom: off (glow %.3f, the bulbs %.3f from %.3f)" % [
+			float(b.params["fairy_glow"]), off, lit], float(b.params["fairy_glow"]) < 0.02 and off < 0.02 and lit > 0.5)
+	check("1993: and nothing else dims with them (the accent group %.2f)" % float(room.host.param("light.accent")),
+			float(room.host.param("light.accent")) > 0.99)
 	room.host.set_setting("fairy", 0.7)
+	await _play(room, 4.0, STOPPED)
+	check("1993: Fairy lights back (glow %.2f)" % float(b.params["fairy_glow"]),
+			absf(float(b.params["fairy_glow"]) - 1.05) < 0.02)
 	check("1993: no lamps of its own to dim", int(b.params["lamps"]) <= 0)
 
 

@@ -99,6 +99,8 @@ const PARAMS := {
 	"fairy_lights": {"type": "enum", "values": ["auto", "on", "off"], "default": "auto",
 			"description": "fairy lights along the fort's front (or the front wall's top without a fort)"},
 	"fairy_colour": {"type": "color", "default": [1.0, 0.82, 0.55], "description": "the fairy lights' glow"},
+	"fairy_glow": {"type": "float", "min": 0.0, "max": 1.5, "default": 1.0, "live": true, "brightness": true,
+			"description": "how bright the fairy lights are, and the light they give (0: off); nothing else follows it"},
 	"seat_model": {"type": "enum", "values": ["auto", "club", "cushion", "plush", "director", "folding"],
 			"default": "auto", "description": "the seat drawn when the room has no seats system"},
 	"rows_front": {"type": "int", "min": -1, "max": 6, "default": -1, "description": "rows in front of the viewer's"},
@@ -617,6 +619,10 @@ var _painting: MeshInstance3D
 var _painting_travel := 0.0
 var _wall_m: ShaderMaterial
 var _trim_m: ShaderMaterial
+## The fairy lights: their flicker entry (builder.gd _flickering) and their stand-in lamp, for fairy_glow.
+var _fairy_flicker: Array = []
+var _fairy_lamp := -1
+const FAIRY_ENERGY := 1.3
 
 
 func _m(key: String, instanced := false) -> ShaderMaterial:
@@ -1163,7 +1169,9 @@ func _build_fairy_lights() -> void:
 	wire.surface(_light.library("dark_metal", Color(0.08, 0.1, 0.08)))
 	var bulbs := RoomMesh.new()
 	var colour := color_param("fairy_colour")
-	bulbs.surface(_lamp(colour, 1.3, 0.0, "accent", true))
+	var glow := float(_p["fairy_glow"])
+	bulbs.surface(_lamp(colour, FAIRY_ENERGY * glow, 0.0, "accent", true))
+	_fairy_flicker = _flickering[-1]
 	var from: Vector3
 	var to: Vector3
 	var sag := 0.08
@@ -1187,7 +1195,7 @@ func _build_fairy_lights() -> void:
 		prev = pt
 	_add_unbaked("FairyWire", wire)
 	_add_lamps("FairyLights", bulbs)
-	_light.add_lamp((from + to) * 0.5 + Vector3.DOWN * 0.2, colour * 0.6, -1.0)
+	_fairy_lamp = _light.add_lamp((from + to) * 0.5 + Vector3.DOWN * 0.2, colour * 0.6 * glow, -1.0)
 	_bake_omni("Fairy", (from + to) * 0.5 + Vector3(0, -0.2, 0.3), 2.5, 0.3, colour)
 
 
@@ -1291,3 +1299,9 @@ func _param_changed(param: String, value: Variant) -> void:
 			for e: Array in _flickering:
 				if e[0] in _fire_m:
 					e[1] = 1.4 * float(value)
+		"fairy_glow":
+			if not _fairy_flicker.is_empty():
+				_fairy_flicker[1] = FAIRY_ENERGY * float(value)
+				(_fairy_flicker[0] as ShaderMaterial).set_shader_parameter("energy", FAIRY_ENERGY * float(value)
+						* _group_level("accent"))
+				_light.set_lamp(_fairy_lamp, color_param("fairy_colour") * 0.6 * float(value))

@@ -129,3 +129,28 @@ func run_tests() -> void:
 			float(lamp_m.get_shader_parameter("energy")) < 0.5)
 	await clock_flashes("furniture", room)
 	await done(room)
+
+	# Two kits in one room: each keeps its own nodes, the second's named after its id (never the engine's "@" names),
+	# and a motion system finds the second's node by its plain name.
+	doc = room_doc("Two kits test", [{"system": "domestic", "id": "room", "params": sitting},
+			{"system": "kit", "id": "kit", "params": {"pieces": [{"piece": "ferns", "at": [2.0, 0.0, -2.5]},
+					{"piece": "video_recorder", "slot": "telly_shelf"}]}},
+			{"system": "kit", "id": "furniture", "params": {"pieces": [{"piece": "sideboard", "at": [2.35, 0.0, 0.2],
+					"yaw": -90.0}, {"piece": "video_recorder", "at": [-1.5, 0.0, -2.0]}]}},
+			{"system": "motion", "id": "slide", "params": {"system": "furniture", "node": "PieceStatic",
+					"path": [[0.0, 0.0, 0.1]]}}], screen_of("domestic", sitting))
+	room = await check_room("kit two kits", doc, "room")
+	var first: Node = room.host.system("kit")
+	var second: Node = room.host.system("furniture")
+	var names := room.get_children().map(func(n: Node) -> String: return String(n.name))
+	check("two kits: no engine-made names %s" % [names], not names.any(func(s: String) -> bool: return s.contains("@")))
+	check("two kits: the first's PieceStatic, the second's PieceStatic_furniture",
+			room.get_node_or_null("PieceStatic") in first.owned()
+			and room.get_node_or_null("PieceStatic_furniture") in second.owned()
+			and room.get_node_or_null("PieceDisplay_furniture") in second.owned())
+	check("two kits: both placed everything", (first.problems() as Array).is_empty()
+			and (second.problems() as Array).is_empty())
+	var slide: Node = room.host.system("slide")
+	check("two kits: a motion finds the second kit's PieceStatic by its plain name",
+			slide.call("target") == room.get_node_or_null("PieceStatic_furniture"))
+	await done(room)
