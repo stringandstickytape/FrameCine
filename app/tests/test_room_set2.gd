@@ -188,11 +188,26 @@ func _atmospheric() -> void:
 	c = h.param("sky.cloud_colour")
 	check("%s: and follow it (%s)" % [id, c], c.b > c.r + 0.1)
 	h.signals.clear_fakes()
+	# The courtyard's fountain in a niche on the left wall, through the hall's acoustics.
+	var RoomSound: GDScript = load("res://tests/room_sound_checks.gd")
+	var bus: Array = RoomSound.on_room_bus(room, ["fountain"])
+	check("%s: the fountain on the room's bus, under Environment (the slider, the duck, Ambience) %s" % [id, bus],
+			bus.is_empty())
+	var ac: Array = RoomSound.acoustics(room, "cinema", 0.7)
+	check("%s: the acoustics cinema %s" % [id, ac], ac.is_empty())
+	var fountain: Node = h.system("fountain")
+	var spouts: Array = fountain.players()
+	check("%s: the fountain plays in a niche on the left wall, 4 dB under its level" % id, fountain.is_loop()
+			and fountain.playing() and spouts.size() == 1 and (spouts[0] as Node3D).position.x < -9.0
+			and is_equal_approx(float(fountain.params["gain_db"]), -4.0))
 	await _ritual(id, room, 0.12, 0.5, {"sky.dusk": 0.8})
 	_steps(h, 1.0)
 	check("%s: the pre-show: the dusk back to twilight (%.2f)" % [id, h.param("sky.dusk")],
 			absf(float(h.param("sky.dusk")) - 0.4) < 0.02)
 	await _seat_picking(id, room)
+	var r: Dictionary = await RoomSound.levels(self, room, id)
+	for v: Array in RoomSound.verdicts(id, r):
+		check(v[0], v[1])
 	await done(room)
 
 

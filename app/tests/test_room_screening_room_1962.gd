@@ -5,9 +5,11 @@ extends "res://tests/room_doc_harness.gd"
 ## chairs, the pool glowing through the picture window from the viewer's seat, and the ritual: the painting comes down
 ## over the screen before the film, rises as the film starts (never faster than the motion system's limit) while the
 ## wall lamps go down to the room's setting, rises by itself on a film resumed later, and stays up with the Pre-show
-## off. Rendered (with a renderer): user://room_render/screening_room_1962_*.png.
+## off. Its sound: the fire at the hearth, the pool's pump through the glass, the house bells as the ritual starts, a
+## small dry room, the level measured. Rendered (with a renderer): user://room_render/screening_room_1962_*.png.
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_screening_room_1962.gd
 
+const RoomSound := preload("res://tests/room_sound_checks.gd")
 const PATH := "res://environments/screening_room_1962.env.json"
 ## The motion system's speed limit (docs/environments.md, "The motion system").
 const MAX_SPEED := 0.5
@@ -42,14 +44,42 @@ func run_tests() -> void:
 		check("the pool through the window from the seat (%s in %s)" % [hit, size], t > 0.0 and t < 1.0
 				and absf(hit.x) < float(size[0]) * 0.5 and absf(hit.y) < float(size[1]) * 0.5)
 	await _ritual(room, b)
+	await _sound(room)
 	if rendering():
 		await _render(room)
 	await done(room)
 
 
+## The sound: the fire's crackle at the hearth, the pool's filter pump humming through the window, a small dry room,
+## and the level measured (the ritual's bells in it).
+func _sound(room: Node3D) -> void:
+	var host: Node = room.host
+	var fire: Node = host.system("fire")
+	var pump: Node = host.system("pump")
+	var hearth := (room.find_child("Fire", true, false) as Node3D).global_position
+	var flames: Array = fire.players()
+	check("the fire crackles at the hearth %s (%s)" % [hearth, flames.map(func(p: Node) -> Variant:
+			return (p as Node3D).position)], fire.is_loop() and fire.playing() and flames.size() == 1
+			and (flames[0] as Node3D).position.distance_to(hearth) < 0.2)
+	var hum: Array = pump.players()
+	var win: Dictionary = (host.system("room").slots()["window"] as Array)[0]
+	check("the pool's pump hums beyond the window, faint", pump.is_loop() and pump.playing()
+			and str(pump.params["sound"]) == "hum" and hum.size() == 1
+			and (hum[0] as Node3D).position.x < (win["transform"] as Transform3D).origin.x)
+	var r: Dictionary = await RoomSound.levels(self, room, "screening_room_1962")
+	for v: Array in RoomSound.verdicts("screening_room_1962", r):
+		check(v[0], v[1])
+
+
 func _ritual(room: Node3D, b: Node) -> void:
 	var host: Node = room.host
 	host.auto = false
+	var bus := RoomSound.on_room_bus(room, ["fire", "pump", "bells"])
+	check("the fire, the pump and the bells on the room's bus, under Environment (the slider, the duck, Ambience) %s"
+			% [bus], bus.is_empty())
+	var ac := RoomSound.acoustics(room, "small_room", 0.45)
+	check("a small, dry room (rt60 0.45) %s" % [ac], ac.is_empty())
+	var bells: Node = host.system("bells")
 	var painting := room.get_node("Painting") as Node3D
 	check("the painting is in front of the screen on purpose (env_in_front)", painting.is_in_group("env_in_front"))
 	host.snapshot_override = {"open": false}
@@ -67,6 +97,8 @@ func _ritual(room: Node3D, b: Node) -> void:
 		fastest = maxf(fastest, absf(painting.position.y - y) * 30.0)
 		y = painting.position.y
 	check("starting: the ritual fired", host.timeline.fired.any(func(f: Array) -> bool: return f[0] == "ritual"))
+	check("the ritual rings the house bells once, through their bed (%d)" % bells.plays, bells.plays == 1
+			and host.sounds.is_empty())
 	check("the painting has risen (%.2f, %.2f m up)" % [b.params["painting_open"], y],
 			float(b.params["painting_open"]) > 0.99 and y > 1.5)
 	check("never faster than the motion limit (%.2f m/s)" % fastest, fastest > 0.05 and fastest <= MAX_SPEED)

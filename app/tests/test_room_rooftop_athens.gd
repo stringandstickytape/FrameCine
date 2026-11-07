@@ -5,10 +5,12 @@ extends "res://tests/room_doc_harness.gd"
 ## director's chairs in rows, bougainvillea over the wall, the screen painted on the next building's wall; the
 ## floodlit acropolis on its hill beside the screen wall and over the low wall from the seat; a summer night's sky at
 ## latitude 38 that darkens over the first minutes of the film; plane lights; a cat that walks the wall top and never
-## enters the sight line to the picture; the Floodlights setting.
+## enters the sight line to the picture; the Floodlights setting. Its sound: cicadas that fade as the film starts, a
+## moped passing below now and then, the cat's purr kept low, the open air, the level measured.
 ## Rendered (with a renderer): user://room_render/rooftop_athens_*.png.
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_rooftop_athens.gd
 
+const RoomSound := preload("res://tests/room_sound_checks.gd")
 const PATH := "res://environments/rooftop_athens.env.json"
 const Vista := preload("res://scripts/env/systems/vista.gd")
 
@@ -82,10 +84,50 @@ func run_tests() -> void:
 			seen += 1
 	check("the cat walked the wall (%d metres of it)" % spots.size(), spots.size() >= 5)
 	check("never in the sight line in 4 minutes (%d frames)" % seen, seen == 0)
+	await _sound(room)
 	host.snapshot_override = null
 	if rendering():
 		await _render(room)
 	await done(room)
+
+
+## The sound: cicadas round the roof that fade as the film starts, a moped passing in the street below now and then,
+## the cat's purr kept low, the open air; the level measured.
+func _sound(room: Node3D) -> void:
+	var host: Node = room.host
+	var bus := RoomSound.on_room_bus(room, ["cicadas", "moped"])
+	check("the cicadas and the moped on the room's bus, under Environment (the slider, the duck, Ambience) %s" % [bus],
+			bus.is_empty())
+	var ac := RoomSound.acoustics(room, "outdoors", 0.25)
+	check("open air (rt60 0.25) %s" % [ac], ac.is_empty() and is_equal_approx(float(host.system("acoustics").values()
+			["wet"]), 0.15))
+	var cicadas: Node = host.system("cicadas")
+	var round_ok: bool = cicadas.players().size() == 4
+	for q: Node3D in cicadas.players():
+		round_ok = round_ok and absf(Vector2(q.position.x, q.position.z + 4.0).length() - 9.0) < 0.01
+	check("cicadas round the roof: four voices 9 m out", cicadas.is_loop() and round_ok)
+	host.snapshot_override = {"open": false}
+	steps(host, 4.0)
+	var before := float(cicadas.designed_db())
+	host.snapshot_override = {"open": true, "playing": true, "position": 0.5, "duration": 7200.0}
+	steps(host, 4.0)
+	check("the cicadas fade as the film starts (%.1f to %.1f dB)" % [before, cicadas.designed_db()],
+			is_equal_approx(before, -54.0) and absf(float(cicadas.designed_db()) - (-68.0)) < 0.2)
+	var moped: Node = host.system("moped")
+	check("a moped every few minutes, a one-shot that travels", not moped.is_loop()
+			and float(moped.params["every"]) >= 120.0 and moped.params.get("to") != null)
+	host.do_action("moped.play", {})
+	steps(host, 0.1)
+	var m3: Node3D = moped.players()[-1]
+	var x0 := m3.position.x
+	steps(host, 2.0)
+	check("it passes in the street below (%.1f -> %.1f, %.1f m down)" % [x0, m3.position.x, m3.position.y],
+			m3.position.x > x0 + 15.0 and m3.position.y < -5.0)
+	check("the cat's purr kept low, under the seat's ear (voice_db %.0f)" % host.system("cat").params["voice_db"],
+			float(host.system("cat").params["voice_db"]) <= -15.0)
+	var r: Dictionary = await RoomSound.levels(self, room, "rooftop_athens")
+	for v: Array in RoomSound.verdicts("rooftop_athens", r):
+		check(v[0], v[1])
 
 
 func _render(room: Node3D) -> void:
