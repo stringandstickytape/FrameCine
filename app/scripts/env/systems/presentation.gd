@@ -52,6 +52,9 @@ const SWITCH := {
 	"projection": {"on": 3.0, "off": 0.6, "on_sounds": ["switch_clunk"], "off_sounds": ["switch_clunk"],
 			"channel": "channel_clunk"},
 }
+## A tube's switching off: seconds to collapse to the dot, and the dot's own seconds when off_dot is -1.
+const OFF_COLLAPSE := {"crt": 0.5, "valve": 0.7}
+const OFF_DOT := {"crt": 0.6, "valve": 1.7}
 ## The shortest switching on for each way (the dot's fade-in stays slower than the comfort ceiling's fade).
 const SWITCH_MIN_ON := {"crt": 1.5, "valve": 2.0, "panel": 0.6, "projection": 1.0}
 ## The set's face when it is dark (gamma-encoded): a tube's grey glass, a rear projection's grey-black screen, a
@@ -103,30 +106,31 @@ const PRESETS := {
 			"params": {"source": "broadcast", "interlace": 0.6, "lines": 377, "snow": 0.22, "ghost": 0.25,
 					"ghost_shift": 0.035, "display": "crt", "tube": 1.3333, "curvature": 0.9, "corner": 0.6, "mask": "none",
 					"scanlines": 0.45, "glass": 0.7, "colour": 0.0, "tint": [0.92, 0.96, 1.0], "speaker": "telly",
-					"switching": "valve"}},
+					"switching": "valve", "off_dot": 6.0}},
 	"colourstar_1972": {"title": "Colourstar, 1972", "description": "an early colour set: a curved tube with a "
 			+ "shadow mask, warm and rich colours, interlace, a faint ghost",
 			"params": {"source": "broadcast", "interlace": 0.5, "lines": 576, "snow": 0.06, "ghost": 0.12,
 					"display": "crt", "tube": 1.3333, "curvature": 0.7, "corner": 0.45, "mask": "shadow", "mask_pitch": 380.0,
 					"mask_strength": 0.35, "scanlines": 0.3, "glass": 0.6, "colour": 1.15, "tint": [1.0, 0.97, 0.9],
-					"speaker": "telly", "switching": "valve", "warm_up": 5.0}},
+					"speaker": "telly", "switching": "valve", "warm_up": 5.0, "off_dot": 1.5}},
 	"sirclive_1983": {"title": "Sirclive, 1983", "description": "a portable telly on a home computer's aerial "
 			+ "lead: 240 bold lines, a little RF noise, bright colours on a shadow mask",
 			"params": {"source": "broadcast", "interlace": 0.0, "lines": 240, "snow": 0.05, "ghost": 0.06,
 					"ghost_shift": 0.012, "display": "crt", "tube": 1.3333, "curvature": 0.8, "corner": 0.5, "mask": "shadow",
 					"mask_pitch": 300.0, "mask_strength": 0.4, "scanlines": 0.65, "glass": 0.6, "colour": 1.2,
-					"speaker": "telly"}},
+					"speaker": "telly", "off_dot": 0.8}},
 	"rewinder_1987": {"title": "Rewinder, 1987", "description": "a rented tape on the family telly: tracking "
 			+ "wobble, chroma bleed, the head-switch tear at the bottom, a slot mask",
 			"params": {"source": "tape", "tracking": 0.5, "head_switch": 0.7, "chroma_bleed": 0.6, "tape_noise": 0.4,
 					"lines": 576, "display": "crt", "tube": 1.3333, "curvature": 0.55, "corner": 0.35, "mask": "slot",
-					"mask_pitch": 420.0, "mask_strength": 0.3, "scanlines": 0.3, "glass": 0.5, "speaker": "telly"}},
+					"mask_pitch": 420.0, "mask_strength": 0.3, "scanlines": 0.3, "glass": 0.5, "speaker": "telly",
+					"off_dot": 0.5}},
 	"nightowl_1993": {"title": "Nightowl, 1993", "description": "a bedroom telly with a flatter tube and an "
 			+ "aperture grille, playing a tape that has been watched a few times",
 			"params": {"source": "tape", "tracking": 0.25, "head_switch": 0.5, "chroma_bleed": 0.4,
 					"tape_noise": 0.25, "lines": 576, "display": "crt", "tube": 1.3333, "curvature": 0.35, "corner": 0.25,
 					"mask": "grille", "mask_pitch": 480.0, "mask_strength": 0.3, "scanlines": 0.25, "glass": 0.45,
-					"speaker": "telly"}},
+					"speaker": "telly", "off_dot": 0.25}},
 	"freedtv_2005": {"title": "FreeDTV, 2005", "description": "a free digital broadcast on an early flat panel: a "
 			+ "clean picture, a faint pixel grid, the backlight glowing through the dark scenes",
 			"params": {"display": "panel", "panel_grid": 0.4, "panel_pixels": 1366, "panel_bleed": 0.5,
@@ -137,13 +141,13 @@ const PRESETS := {
 			"params": {"source": "broadcast", "interlace": 0.6, "lines": 377, "snow": 0.16, "ghost": 0.18,
 					"ghost_shift": 0.03, "display": "crt", "tube": 1.25, "curvature": 1.0, "corner": 0.75, "mask": "none",
 					"scanlines": 0.5, "glass": 0.55, "colour": 0.0, "tint": [0.9, 0.98, 0.9], "aspect_mode": "pan_and_scan",
-					"off_axis": 0.2, "switching": "valve", "warm_up": 10.0, "speaker": "cabinet"}},
+					"off_axis": 0.2, "switching": "valve", "warm_up": 10.0, "speaker": "cabinet", "off_dot": 8.0}},
 	"rental_1966": {"title": "Tellyhire, 1966", "description": "a rented black and white set in a console on "
 			+ "splayed legs: 405 lines, a film panned and scanned to fill the 4:3 tube, a valve set's warm-up",
 			"params": {"source": "broadcast", "interlace": 0.5, "lines": 377, "snow": 0.08, "ghost": 0.1,
 					"display": "crt", "tube": 1.3333, "curvature": 0.6, "corner": 0.4, "mask": "none", "scanlines": 0.4,
 					"glass": 0.6, "colour": 0.0, "tint": [0.94, 0.97, 1.0], "aspect_mode": "pan_and_scan",
-					"off_axis": 0.15, "switching": "valve", "warm_up": 9.0, "speaker": "telly"}},
+					"off_axis": 0.15, "switching": "valve", "warm_up": 9.0, "speaker": "telly", "off_dot": 3.0}},
 	"projection_2002": {"title": "Bigview, 2002", "description": "a big rear projection set playing a disc: soft "
 			+ "focus, faint colour fringes, a hotspot that follows the eye, fine lines on the screen, and a picture "
 			+ "that dims when seen from above or below",
@@ -254,6 +258,9 @@ static func spec() -> Dictionary:
 			"starts_off": {"type": "bool", "default": false,
 					"description": "the set is off (dark) until a cue switches it on; it comes on by itself when the "
 					+ "film plays"},
+			"off_dot": {"type": "float", "min": -1.0, "max": 12.0, "default": -1.0, "live": true,
+					"description": "crt, valve: seconds the dot lingers once the picture has collapsed (-1: the way's "
+					+ "own, 0: none). Sets before spot suppression burned one for seconds; later ones barely showed it"},
 			"switch_sounds": {"type": "bool", "default": true, "live": true,
 					"description": "the set's own sounds as it switches (a power switch's clunk, the valves' hum "
 					+ "rising, the tube's faint tick as it collapses, a channel knob's clunk)"},
@@ -327,6 +334,10 @@ var _film_send_was := &"Master"
 var power := "on"
 var _power_t := 0.0
 var _power_len := 1.0
+## A tube's collapse in seconds while it switches off (0: no collapse, the light just fades).
+var _off_collapse := 0.0
+## True: the set stays off even while the film plays (time travel switches a set off before it moves on).
+var stay_off := false
 ## A channel change: seconds left and its length.
 var _channel := 0.0
 var _channel_len := 1.0
@@ -643,7 +654,13 @@ func switch_off() -> void:
 	if power in ["off", "switching_off"]:
 		return
 	var style := switch_style()
+	_off_collapse = 0.0
 	_power_len = float(SWITCH[style]["off"])
+	if style in OFF_COLLAPSE and str(value("display")) != "mechanical":
+		# A tube: the collapse, then its era's dot (a mechanical set has no tube: its glow just dies).
+		_off_collapse = float(OFF_COLLAPSE[style])
+		var dot := _f("off_dot")
+		_power_len = _off_collapse + (float(OFF_DOT[style]) if dot < 0.0 else dot)
 	_power_t = 0.0
 	power = "switching_off"
 	_channel = 0.0
@@ -674,7 +691,7 @@ func _channel_dip() -> float:
 
 
 func _step_power(delta: float) -> void:
-	if power == "off" and host != null and host.get("timeline") != null and str(host.timeline.state) == "playing":
+	if power == "off" and not stay_off and host != null and host.get("timeline") != null and str(host.timeline.state) == "playing":
 		# Never a dark set over a playing film: it comes on by itself.
 		switch_on()
 	if power in ["switching_on", "switching_off"]:
@@ -712,13 +729,18 @@ func power_now() -> Array:
 					return [Vector2.ONE, pow(smoothstep(0.1, 1.0, u), 1.3), 0.0]
 			return [Vector2.ONE, smoothstep(0.3, 1.0, u), 0.0]
 		"switching_off":
-			if style in ["crt", "valve"]:
-				# Down to a line, across to a dot, and the dot's afterglow fading (longer on a valve set).
-				var ry := lerpf(1.0, 0.01, smoothstep(0.0, 0.2, u))
-				var rx := lerpf(1.0, 0.012, smoothstep(0.2, 0.36, u))
-				var fade := smoothstep(0.4, 1.0, u)
-				var spot := 0.75 * smoothstep(0.0, 0.3, u) * (1.0 - fade)
-				return [Vector2(rx, ry), 1.0 - smoothstep(0.2, 0.5, u), spot]
+			if _off_collapse > 0.0:
+				# Down to a line, across to a dot, and the dot held a while then fading: its era's seconds.
+				var t := _power_t
+				var k := _off_collapse
+				var ry := lerpf(1.0, 0.01, smoothstep(0.0, 0.55 * k, t))
+				var rx := lerpf(1.0, 0.012, smoothstep(0.55 * k, k, t))
+				var dot := maxf(_power_len - k, 0.0)
+				# Its fade takes at least 0.35 s (comfort: never a quick change), so a brief dot fades as the collapse ends.
+				var span := maxf(0.7 * dot, 0.35)
+				var fade := smoothstep(_power_len - span, _power_len, t)
+				var spot := 0.75 * smoothstep(0.0, k, t) * (1.0 - fade)
+				return [Vector2(rx, ry), 1.0 - smoothstep(0.2 * k, k, t), spot]
 			return [Vector2.ONE, 1.0 - smoothstep(0.0, 1.0, u), 0.0]
 	if _channel > 0.0:
 		var depth := 1.0 if _panel_like() else 0.55

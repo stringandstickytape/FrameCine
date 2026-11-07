@@ -64,6 +64,7 @@ func _run() -> void:
 	await _room_checks()
 	await _in_main()
 	await _switching()
+	await _era_dots()
 	if DisplayServer.get_name() != "headless":
 		await _render()
 	else:
@@ -306,7 +307,7 @@ func _switching() -> void:
 	p.call("_finish_sounds")
 	p.sounds_played.clear()
 	p.act("switch_off", {})
-	var tr := _trace(room, p, float(Presentation.SWITCH["valve"]["off"]) + 0.2)
+	var tr := _trace(room, p, float(p.get("_power_len")) + 0.2)
 	_check("valve, off: dark at the end (%s)" % p.power, p.power == "off" and _last(tr, 2) == 0.0)
 	_collapse("valve, off", tr)
 	_calm("valve, off", tr)
@@ -329,7 +330,7 @@ func _switching() -> void:
 	room.host.step(STEP)
 	p.call("_finish_sounds")
 	p.act("switch_off", {})
-	tr = _trace(room, p, float(Presentation.SWITCH["crt"]["off"]) + 0.2)
+	tr = _trace(room, p, float(p.get("_power_len")) + 0.2)
 	_collapse("crt, off", tr)
 	_calm("crt, off", tr)
 	p.sounds_played.clear()
@@ -411,6 +412,48 @@ func _switching() -> void:
 
 
 ## [time, raster, light, glow, power] every step for `seconds`.
+## Each era's tube going off: the collapse, then its dot for the era's seconds, longest before spot suppression (1937)
+## and barely there by 1993; a mechanical set (1930) has no tube and no dot.
+func _era_dots() -> void:
+	var room: Node3D = EnvRoom.new()
+	room.doc = SWITCH_DOC.duplicate(true)
+	root.add_child(room)
+	await process_frame
+	room.host.auto = false
+	var p: Node = room.host.system("set")
+	var eras := ["mirrorlid_1937", "fireside_1953", "rental_1966", "colourstar_1972", "sirclive_1983", "rewinder_1987",
+			"nightowl_1993"]
+	var lingers: Array[float] = []
+	for preset: String in eras:
+		p.set_param("preset", preset)
+		room.host.step(STEP)
+		p.set("power", "on")
+		p.act("switch_off", {})
+		var k := float(p.get("_off_collapse"))
+		var tr := _trace(room, p, float(p.get("_power_len")) + 0.2)
+		var lit := 0.0
+		for e: Array in tr:
+			if float(e[0]) > k and float(e[3]) > 0.05:
+				lit += STEP
+		lingers.append(lit)
+		_check("%s: dark at the end (%s)" % [preset, p.power], p.power == "off" and _last(tr, 3) < 0.01)
+		_collapse(preset + ", off", tr)
+		_calm(preset + ", off", tr)
+	var ordered := true
+	for i in range(1, lingers.size()):
+		ordered = ordered and lingers[i] <= lingers[i - 1]
+	_check("each era's dot (%s s): the oldest longest, shorter as the sets got spot suppression" % [lingers.map(
+			func(x: float) -> String: return "%.1f" % x)], ordered and lingers[0] > 5.0 and lingers[-1] < 0.6)
+	p.set_param("preset", "glowbox_1930")
+	room.host.step(STEP)
+	p.set("power", "on")
+	p.act("switch_off", {})
+	var tr := _trace(room, p, float(p.get("_power_len")) + 0.2)
+	_check("a mechanical set (1930): its glow dies, no dot", tr.all(func(e: Array) -> bool: return float(e[3]) == 0.0)
+			and p.power == "off")
+	room.queue_free()
+
+
 func _trace(room: Node3D, p: Node, seconds: float) -> Array:
 	var out: Array = []
 	var t := 0.0

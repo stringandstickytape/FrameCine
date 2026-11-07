@@ -1521,7 +1521,7 @@ the ripple's strength. Sound: none but the film's, and it says so (`sound_bed` `
 | oled | | true blacks (no backlight, no lift), a little punch in the colour and the middle tones (black stays black, white white: the film's levels are kept), a sheen only at a glance |
 | the window | `tube`, `aspect_mode`, `mirror` | below |
 | off axis | `off_axis` | below |
-| switching | `switching`, `warm_up`, `starts_off`, `switch_sounds`, `sound_db` | below |
+| switching | `switching`, `warm_up`, `off_dot`, `starts_off`, `switch_sounds`, `sound_db` | below |
 | colour | `colour`, `tint`, `gain` | saturation (0: black and white), the tube's tint, brightness |
 | speaker | `speaker`: `none`, `window`, `telly`, `cabinet`, `panel` | the film's sound through a small speaker |
 
@@ -1562,6 +1562,13 @@ colour shifting (most from above and below), an OLED's colour a touch cooler.
 | `projection` (auto for `rear_projection`) | 3 s: a slow fade up | 0.6 s: a fade down |
 
 - `warm_up` gives the seconds to come on (0: the way's own). `switch_on` takes `seconds` too.
+- `off_dot` (since 2026-11-07): the seconds a tube's dot lingers after the collapse (-1: the way's own, 0.6 s for a
+  `crt` and 1.7 s for a `valve` set; 0: none). Each era has its own: sets before spot suppression burned a dot for
+  seconds, later sets barely showed one. `mirrorlid_1937` 8 s, `fireside_1953` 6, `rental_1966` 3, `colourstar_1972`
+  1.5, `sirclive_1983` 0.8, `rewinder_1987` 0.5, `nightowl_1993` 0.25. The dot holds, then fades over at least 0.35 s.
+  A mechanical set (`glowbox_1930`) has no tube: its glow dies with no dot. The TV rooms switch their set off at the
+  end of the film and when the film is closed (the `switch_off` cue in `ended` and `preshow`), and time travel
+  switches each era's set off and waits for its dot before it moves on (`stay_off` keeps the set dark meanwhile).
 - `starts_off`: the set is dark (its face drawn: a tube's grey glass, a rear projection's grey-black, an OLED's black)
   until a cue switches it on. It comes on by itself when the film plays, so a film never plays on a dark set.
 - `channel` (action, `seconds`, default 1, at least 0.9): a channel change. The knob's clunk, the picture dips to about

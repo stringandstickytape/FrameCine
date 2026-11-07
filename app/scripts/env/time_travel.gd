@@ -13,7 +13,8 @@ extends Node
 ##   signal changed(active)
 ## The countdown runs only while the film plays; a pause holds it. It turns itself off on a new file, at the end of
 ## the film and when the viewer picks a room that is not an era. The film plays on through each change: only the room
-## changes. Setting: [time_travel] minutes (the last choice).
+## changes. Before it moves on, the era's set switches off its own way (a tube collapses to its era's dot), and the
+## next room's set switches on its own way. Setting: [time_travel] minutes (the last choice).
 
 signal changed(active: bool)
 
@@ -31,6 +32,10 @@ var minutes := 0
 var _left := 0.0
 ## Set while this changes the room, so its own change doesn't turn it off.
 var _moving := false
+## The era it moves to once the set here is off ("" when not leaving), and the most it waits for that.
+var _leaving := ""
+var _leave_wait := 0.0
+const LEAVE_MAX := 15.0
 
 
 func _ready() -> void:
@@ -85,6 +90,7 @@ func start(p_minutes: int) -> void:
 
 
 func stop() -> void:
+	_leaving = ""
 	if not active:
 		return
 	active = false
@@ -92,19 +98,44 @@ func stop() -> void:
 	changed.emit(false)
 
 
-## The next era now; the last era turns time travel off (the room stays).
+## The next era: the set here switches off first (its era's dot), then the room moves on. The last era turns time
+## travel off (the room stays).
 func advance() -> void:
 	var list := eras()
 	var i := list.find(str(main.env_id))
 	if i < 0 or i + 1 >= list.size():
 		stop()
 		return
-	_go(list[i + 1])
-	if i + 2 >= list.size():
+	var set_here := _set_here()
+	if set_here != null and str(set_here.get("power")) in ["on", "switching_on"]:
+		set_here.set("stay_off", true)
+		set_here.call("switch_off")
+		_leaving = list[i + 1]
+		_leave_wait = LEAVE_MAX
+		return
+	_arrive(list[i + 1])
+
+
+func _arrive(id: String) -> void:
+	_leaving = ""
+	_go(id)
+	var list := eras()
+	if list.find(id) + 1 >= list.size():
 		# The newest era: time travel has arrived.
 		stop()
 	else:
 		_left = _interval()
+
+
+## The room's set (its presentation system), or null.
+func _set_here() -> Node:
+	var host: Variant = main.env.get("host") if main.env != null else null
+	if host == null:
+		return null
+	for s: Node in host.get("order"):
+		if s.has_method("switch_off") and s.has_method("power_now"):
+			return s
+	return null
 
 
 func remaining() -> float:
@@ -136,6 +167,13 @@ func _on_environment_changed(_id: String, _light_scale: float) -> void:
 
 
 func _process(delta: float) -> void:
+	if active and _leaving != "":
+		# Waiting for the set here to go dark (its dot gone).
+		_leave_wait -= delta
+		var set_here := _set_here()
+		if set_here == null or str(set_here.get("power")) == "off" or _leave_wait <= 0.0:
+			_arrive(_leaving)
+		return
 	if not active or not bool(main.player.is_playing()):
 		return
 	_left -= delta

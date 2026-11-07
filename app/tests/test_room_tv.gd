@@ -172,7 +172,7 @@ func switches(id: String, room: Node3D, channel := false) -> void:
 	check("%s: fully on (%s)" % [id, p.power], p.power == "on")
 	await _play(room, 0.5, ended)
 	check("%s: the film ends: the set switches off (%s)" % [id, p.power], p.power in ["switching_off", "off"])
-	await _play(room, 4.0, ended)
+	await _play(room, float(p.get("_power_len")) + 0.5, ended)
 	check("%s: and is dark (%s)" % [id, p.power], p.power == "off")
 	await _play(room, 1.0, STOPPED)
 	p.sounds_played.clear()
