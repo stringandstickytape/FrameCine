@@ -144,6 +144,9 @@ func play(sound: String, gain_db := 0.0, at: Variant = null) -> Node:
 	if at is Vector3 and main.env != null:
 		var p3 := AudioStreamPlayer3D.new()
 		p3.unit_size = 3.0
+		# No distance filter (as sound_bed and music have): it takes about 10 dB off a high call, so a bird on a roof
+		# edge 8 m off was lost; the level falls with distance as before.
+		p3.attenuation_filter_db = 0.0
 		p3.max_db = 0.0
 		p3.volume_db = gain_db
 		p3.bus = ENVIRONMENT
