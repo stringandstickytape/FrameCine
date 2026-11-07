@@ -7,7 +7,8 @@ extends "res://scripts/env/systems/kit/builder.gd"
 ## façades, a castle gate round the screen, a tin booth, a neon snack bar, a drive-in's screen tower, bougainvillea,
 ## ivy, ferns, a swirling carpet over the builder's floor, a plasterboard partition, curved bands on a wall; and
 ## furniture (kit/furniture.gd): a desk, a computer, a video recorder whose clock flashes 12:00, a sideboard, a
-## standard lamp, a rug, a coffee table.
+## standard lamp, a rug, a coffee table; and the TV rooms' dressing (kit/dressing.gd): bunting, a tea set, sandwiches,
+## a stool, a channel dial, a soundbar, a floor lamp, a glass table (its top in PieceGlass, see-through), a media unit.
 ## All the pieces share a few meshes, one surface a material: a baked one (PieceStatic), an unbaked one for rounded
 ## shapes and leaves (PieceSoft), the lamp shades (PieceLamps), the glows (windows, a booth's window, the video
 ## recorders' clocks: PieceDisplay) and each neon sign. The builder's slots come
@@ -25,7 +26,8 @@ static func spec() -> Dictionary:
 				+ "obelisk, columns, courtyard façades, a castle gate round the screen, a tin booth, a neon snack bar, "
 				+ "a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
 				+ "furniture: a desk, a computer, a video recorder flashing 12:00, a sideboard, a standard lamp, a rug, "
-				+ "a coffee table.",
+				+ "a coffee table; dressing: bunting, a tea set, sandwiches, a stool, a channel dial, a soundbar, a "
+				+ "floor lamp, a glass table, a media unit.",
 		"params": PARAMS,
 		"requires": ["light"],
 		"provides": ["collision", "bake"],
@@ -70,7 +72,12 @@ const PARAMS := {
 	"plastic": {"type": "material", "default": {"library": "pale_laminate", "color": [0.78, 0.74, 0.64]},
 			"description": "a computer's case, monitor and keyboard"},
 	"fabric": {"type": "material", "default": {"library": "woven_carpet", "color": [0.5, 0.22, 0.14]},
-			"description": "a rug"},
+			"description": "a rug, a soundbar's cloth front"},
+	"china": {"type": "material", "default": {"library": "white_marble", "color": [0.94, 0.92, 0.88]},
+			"description": "a tea set, plates (each part coloured on it)"},
+	"cloth": {"type": "material", "default": {"library": "linen", "color": [1.0, 1.0, 1.0]},
+			"description": "bunting, sandwiches (each pennant, the bread and the filling coloured on it)"},
+	"glass_colour": {"type": "color", "default": [0.62, 0.74, 0.74], "description": "a glass table's top"},
 	"lamp_colour": {"type": "color", "default": [1.0, 0.76, 0.48], "description": "a standard lamp's shade, lit"},
 	"display_colour": {"type": "color", "default": [0.35, 1.0, 0.78],
 			"description": "a video recorder's clock (it flashes 12:00; Flickering lights off holds it lit)"},
@@ -93,6 +100,8 @@ class Ctx:
 	var s: RefCounted
 	var u: RefCounted
 	var lit: RefCounted
+	## Glass (a glass table's top): see-through, unbaked.
+	var glass: RefCounted
 	var shapes: Array = []
 	var glows := {}
 	var signs: Array = []
@@ -253,6 +262,7 @@ func build() -> void:
 	_ctx.s = RoomMesh.new()
 	_ctx.u = RoomMesh.new()
 	_ctx.lit = RoomMesh.new()
+	_ctx.glass = RoomMesh.new()
 	_ctx.room = room
 	_ctx.rng.seed = 1928
 	var slots := builder_slots()
@@ -268,6 +278,7 @@ func build() -> void:
 	_add_static("PieceStatic", _ctx.s)
 	_add_unbaked("PieceSoft", _ctx.u)
 	_add_lamps("PieceLamps", _ctx.lit)
+	_add_glass("PieceGlass", _ctx.glass, color_param("glass_colour"), 0.22)
 	var glow := float(params["glow"])
 	if _ctx.glows.has("display"):
 		var c := color_param("display_colour")

@@ -6,7 +6,8 @@ extends "res://tests/env_builder_harness.gd"
 ## budget, a clear sight line from every seat; the Television group; the era's preset on a telly; the telly's shape
 ## (4:3 before 2000, 16:9 for the flat panel) and its size from the viewer's own seat (small, but 17 to 23 degrees
 ## across); the room's own settings and what each does to its system; the cues (the set warming up, tuning in, a tape
-## starting; the lamps down in the film and up after it); the era's own things (a fire, the cat; a radiogram, a
+## starting; the lamps down in the film and up after it); the era's own things (a fire, the cat; coronation day's
+## chairs, cushions, bunting, tea and sandwiches; a radiogram, a
 ## sideboard, a rug and a standard lamp; a portable on a desk beside a computer; a video recorder under the set
 ## flashing 12:00 and a settee; a bed and fairy lights; a flat panel on a tv unit, a coffee table; rain on the pane);
 ## the picture on the set's glass in every room. The 1930, 1953 and 1993 rooms' sound (tests/room_sound.gd): their
@@ -16,6 +17,7 @@ extends "res://tests/env_builder_harness.gd"
 const Presentation := preload("res://scripts/env/systems/presentation.gd")
 const Domestic := preload("res://scripts/env/systems/domestic.gd")
 const Furniture := preload("res://scripts/env/systems/kit/furniture.gd")
+const Dressing := preload("res://scripts/env/systems/kit/dressing.gd")
 
 ## id -> [year, preset, aspect of the tube]
 const ROOMS := {
@@ -42,6 +44,11 @@ const SOUND := {
 
 const PLAYING := {"open": true, "playing": true, "position": 0.0, "duration": 5400.0}
 const STOPPED := {"open": false}
+
+
+## A room's [year, preset, aspect] (test_room_tv2.gd gives its own rooms').
+func era(id: String) -> Array:
+	return ROOMS[id]
 
 
 func run_tests() -> void:
@@ -117,7 +124,7 @@ func _common(id: String, room: Node3D, doc: Dictionary) -> void:
 	if b == null or p == null:
 		return
 	check("%s: the telly" % id, str(b.params["screen"]) == "telly" and room.get_node_or_null("Telly") != null)
-	check("%s: the era's preset (%s)" % [id, p.params["preset"]], str(p.params["preset"]) == ROOMS[id][1])
+	check("%s: the era's preset (%s)" % [id, p.params["preset"]], str(p.params["preset"]) == era(id)[1])
 	check("%s: a picture stage on (the film drawn on the telly)" % id, p.picture_on())
 	var sc: Dictionary = b.screen()
 	var size := Vector2(float(sc["size"][0]), float(sc["size"][1]))
@@ -126,7 +133,7 @@ func _common(id: String, room: Node3D, doc: Dictionary) -> void:
 	check("%s: the document's screen is the telly's (%s, %s)" % [id, ds, sc], c.is_equal_approx(Vector3(
 			float(ds["center"][0]), float(ds["center"][1]), float(ds["center"][2]))) and size.is_equal_approx(
 			Vector2(float(ds["size"][0]), float(ds["size"][1]))))
-	check("%s: the tube's shape (%.3f)" % [id, size.aspect()], absf(size.aspect() - float(ROOMS[id][2])) < 0.01)
+	check("%s: the tube's shape (%.3f)" % [id, size.aspect()], absf(size.aspect() - float(era(id)[2])) < 0.01)
 	var why := telly_glass(room, sc)
 	check("%s: the picture on the set's glass %s" % [id, why], why == "")
 	var deg := rad_to_deg(2.0 * atan(size.x * 0.5 / -c.z))
@@ -204,7 +211,9 @@ func _tv_1930(room: Node3D) -> void:
 	check("1930: three club chairs", room.room_seat_transforms().size() == 3)
 
 
-## 1953: a black and white set by the fire, the family's armchairs round it, the cat on the hearth, rain at the window.
+## 1953, coronation day: a black and white set by the fire in a front room crammed for the day (every chair pulled
+## round, cushions on the rug, nobody in them), bunting across the ceiling, a tea set and plates of sandwiches, the cat
+## on the hearth, rain at the window on a grey day.
 func _tv_1953(room: Node3D) -> void:
 	var p := _p(room)
 	check("1953: black and white, 405-line broadcast", is_equal_approx(float(p.value("colour")), 0.0)
@@ -214,14 +223,49 @@ func _tv_1953(room: Node3D) -> void:
 	await _play(room, 0.5, STOPPED)
 	check("1953: Aerial noise at the bottom: a clean picture (%.2f)" % float(p.value("snow")), float(p.value("snow")) < 0.001)
 	room.host.set_setting("aerial", 0.22)
-	check("1953: four armchairs round the set", room.room_seat_transforms().size() == 4)
+	var drawn: Array = room.host.system("seats").drawn()
+	var models := {}
+	for d: Dictionary in drawn:
+		models[d["model"]] = int(models.get(d["model"], 0)) + 1
+	check("1953: every chair in the house pulled round: armchairs, kitchen chairs, cushions on the rug %s" % [models],
+			int(models.get("club_chair", 0)) == 3 and int(models.get("folding_chair", 0)) >= 6
+			and int(models.get("cushion", 0)) == 2 and room.room_seat_transforms().size() == drawn.size())
+	var c: Vector3 = Vector3(0.0, 1.015, -1.1)
+	var chairs := drawn.filter(func(d: Dictionary) -> bool: return d["model"] != "cushion")
+	var own := chairs.filter(func(d: Dictionary) -> bool: return (d["xf"] as Transform3D).origin.length() < 0.05)
+	var nearest := chairs.all(func(d: Dictionary) -> bool: return (d["xf"] as Transform3D).origin.distance_to(
+			Vector3(c.x, 0, c.z)) >= 1.09)
+	check("1953: the viewer's own an armchair straight in front of the set, no chair nearer it", own.size() == 1
+			and own[0]["model"] == "club_chair" and nearest)
+	var kit: Node = room.host.system("kit")
+	var pieces: Array = kit.params["pieces"]
+	var count := func(n: String) -> int: return pieces.filter(func(e: Dictionary) -> bool:
+			return str(e["piece"]) == n).size()
+	check("1953: bunting across the room, three strings, a tea set, three plates of sandwiches, three stools",
+			count.call("bunting") == 3 and count.call("tea_set") == 1 and count.call("sandwiches") == 3
+			and count.call("stool") == 3 and (kit.problems() as Array).is_empty())
+	var low := INF
+	for e: Dictionary in pieces:
+		if str(e["piece"]) == "bunting":
+			low = minf(low, float(e["at"][1]) - float(e["size"][1]) - Dressing.PENNANT.y)
+			check("1953: the bunting red, white and blue (its own colours)", not e.has("colour") and not e.has("accent"))
+	check("1953: the bunting high over the seated heads (its lowest pennant %.2f m)" % low, low > 1.85)
+	var rug: Dictionary = pieces.filter(func(e: Dictionary) -> bool: return str(e["piece"]) == "rug")[0]
+	var on_rug := true
+	for d: Dictionary in drawn:
+		var o: Vector3 = (d["xf"] as Transform3D).origin
+		if d["model"] == "cushion" and (absf(o.x - float(rug["at"][0])) > float(rug["size"][0]) * 0.5
+				or absf(o.z - float(rug["at"][2])) > float(rug["size"][2]) * 0.5):
+			on_rug = false
+	check("1953: the cushions on the rug in front of the set", on_rug)
 	var cat: Node = room.host.system("cat")
 	check("1953: the cat", cat != null and str(cat.params["creature"]) == "cat")
 	var w: Node = room.host.system("weather")
 	check("1953: rain on the pane, falling outside the window", w != null and bool(w.params["pane"])
 			and not (w.params["areas"] as Array).is_empty())
-	check("1953: an evening sky and hills beyond the window", room.host.system("sky") != null
-			and room.host.system("vista") != null and room.get_node_or_null("Window") != null)
+	var b: Node = room.host.system("room")
+	check("1953: a grey day beyond the window", room.get_node_or_null("Window") != null
+			and str(b.params["outside"]) == "glow" and room.host.system("sky") == null)
 	room.host.snapshot_override = PLAYING
 	var least := _extreme(room, "gain", false)
 	check("1953: the set warms up: dim at first (%.2f)" % least, least < 0.6)

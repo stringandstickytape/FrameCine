@@ -1,0 +1,227 @@
+extends "res://tests/test_room_tv.gd"
+
+## The rest of the history of television (docs/environments.md, "Room: TV 1937", "TV 1966", "TV 2002", "TV today"):
+## four more living rooms over the domestic builder with a telly, checked as test_room_tv.gd checks the first seven
+## (its _built and _common: the schema, comfort, licences, names, no people, the headset's budget, a clear sight line
+## from every seat, the Television group, the era's preset, the telly's shape and its size from the viewer's own seat,
+## 17 to 23 degrees across, the picture on the set's glass) and each for its own things: the 1937 drawing room's
+## walnut set, marble fireplace and tea tray; the 1966 rented set on splayed legs with its channel dial, the teak
+## sideboard and the orange settee; the 2002 lounge's big deep set, the leather sofa and the glass table (see-through,
+## under the sight line); the present's thin panel on a dark wall over a media unit and a soundbar, the floor lamp, a
+## clean picture. Each room's settings and what they do, its cues, its sound (tests/room_sound.gd: the beds on the
+## room's bus, a bound bed on its setting or channel, the level under the film). And the whole TV group's names sort
+## as a timeline, the present last.
+## godot --headless --xr-mode off --path app --script res://tests/test_room_tv2.gd
+
+const Kit := preload("res://scripts/env/systems/kit.gd")
+
+## id -> [year (a word for the present), preset, aspect of the picture]
+const ROOMS2 := {
+	"tv_1937": ["1937", "fireside_1953", 4.0 / 3.0],
+	"tv_1966": ["1966", "fireside_1953", 4.0 / 3.0],
+	"tv_2002": ["2002", "freedtv_2005", 16.0 / 9.0],
+	"tv_today": ["today", "freedtv_2005", 16.0 / 9.0],
+}
+## Each room's sound beds: id -> {bed: sound}.
+const SOUND2 := {
+	"tv_1937": {"fire": "fire", "clock": "clock", "whine": "tube_whine"},
+	"tv_1966": {"radiator": "radiator", "clock": "clock", "whine": "tube_whine"},
+	"tv_2002": {"fan": "hum"},
+	"tv_today": {"rain": "rain_glass"},
+}
+
+
+func era(id: String) -> Array:
+	return ROOMS2[id] if ROOMS2.has(id) else ROOMS[id]
+
+
+func run_tests() -> void:
+	test_name = "test_room_tv2"
+	for id: String in ROOMS2:
+		var r := EnvDoc.load_file("res://environments/%s.env.json" % id)
+		check("%s: the document reads %s" % [id, r["errors"]], (r["errors"] as Array).is_empty())
+		var doc: Dictionary = r["doc"]
+		if doc.is_empty():
+			continue
+		check("%s: named for its year (%s)" % [id, doc["name"]], str(doc["name"]).begins_with("TV %s - "
+				% ROOMS2[id][0]))
+		check("%s: in the Television group, described" % id, str(doc["room"].get("category", "")) == "tv"
+				and str(doc["room"].get("description", "")).length() > 40)
+		var room := await _built(id, doc)
+		await _common(id, room, doc)
+		match id:
+			"tv_1937":
+				await _tv_1937(room)
+			"tv_1966":
+				await _tv_1966(room)
+			"tv_2002":
+				await _tv_2002(room)
+			"tv_today":
+				await _tv_today(room)
+		RoomSound.check_beds(self, id, room, SOUND2[id], "small_room")
+		await sounds(id, room, SOUND2[id])
+		await done(room)
+		await RoomSound.check_level(self, self, id, doc)
+	_timeline()
+
+
+## The whole group sorts as a timeline: every TV room's name in year order, the present last.
+func _timeline() -> void:
+	var by_year := []
+	for id: String in ROOMS:
+		by_year.append([str(ROOMS[id][0]), id])
+	for id: String in ROOMS2:
+		by_year.append([str(ROOMS2[id][0]) if str(ROOMS2[id][0]).is_valid_int() else "9999", id])
+	by_year.sort_custom(func(a: Array, b: Array) -> bool: return str(a[0]) < str(b[0]))
+	var names: Array[String] = []
+	for y: Array in by_year:
+		names.append(str(EnvDoc.load_file("res://environments/%s.env.json" % y[1])["doc"].get("name", "")))
+	var sorted := names.duplicate()
+	sorted.sort()
+	check("the TV group's %d names sort as a timeline %s" % [names.size(), names], sorted == names
+			and names.size() == ROOMS.size() + ROOMS2.size())
+
+
+func _pieces(room: Node3D) -> Array:
+	return room.host.system("kit").params["pieces"]
+
+
+func _piece(room: Node3D, piece: String) -> Dictionary:
+	for e: Dictionary in _pieces(room):
+		if str(e["piece"]) == piece:
+			return e
+	return {}
+
+
+func _model_count(room: Node3D, model: String) -> int:
+	return (room.host.system("seats").drawn() as Array).filter(func(d: Dictionary) -> bool:
+			return d["model"] == model).size()
+
+
+## The set warms up in the pre-show: dim at first, full after.
+func _warms_up(label: String, room: Node3D) -> void:
+	var p := _p(room)
+	await _play(room, 1.0, STOPPED)
+	room.host.snapshot_override = PLAYING
+	var least := _extreme(room, "gain", false)
+	check("%s: the set warms up: dim at first (%.2f)" % [label, least], least < 0.65)
+	await _play(room, 10.0)
+	check("%s: then full (%.2f)" % [label, float(p.value("gain"))], absf(float(p.value("gain")) - 1.0) < 0.01)
+
+
+## 1937: a well-to-do drawing room: a walnut set, black and white at 405 lines, a marble fireplace with a coal fire,
+## parquet and a rug, two velvet armchairs, a standard lamp, the tea tray on the sideboard.
+func _tv_1937(room: Node3D) -> void:
+	var p := _p(room)
+	var b: Node = room.host.system("room")
+	check("1937: black and white broadcast", is_equal_approx(float(p.value("colour")), 0.0)
+			and str(p.value("source")) == "broadcast")
+	check("1937: Snow from the aerial at its default (%.2f)" % float(p.value("snow")),
+			absf(float(p.value("snow")) - 0.16) < 0.01)
+	room.host.set_setting("aerial", 0.0)
+	await _play(room, 0.5, STOPPED)
+	check("1937: Snow at the bottom: a clean picture", float(p.value("snow")) < 0.001)
+	room.host.set_setting("aerial", 0.16)
+	check("1937: a walnut set, a marble fireplace, parquet", str(b.params["telly_material"]["library"])
+			== "walnut_veneer" and str(b.params["surround"]["library"]) == "white_marble"
+			and str(b.params["floor"]["library"]) == "herringbone_parquet" and room.get_node_or_null("Fire") != null)
+	RoomSound.check_setting(self, "1937", room, "fire", "fire", false, true)
+	var board := _piece(room, "sideboard")
+	var tea := _piece(room, "tea_set")
+	check("1937: the tea tray on the sideboard", not tea.is_empty() and absf(float(tea["at"][1])
+			- float(board["size"][1])) < 0.005 and absf(float(tea["at"][0]) - float(board["at"][0])) < 0.01)
+	check("1937: a rug, a standard lamp (house group: the ritual dims it)", not _piece(room, "rug").is_empty()
+			and room.get_node_or_null("PieceLamps") != null)
+	check("1937: three velvet armchairs", _model_count(room, "club_chair") == 3)
+	check("1937: no problems placing the pieces", (room.host.system("kit").problems() as Array).is_empty())
+	await _warms_up("1937", room)
+	await _lamps("1937", room, 0.25)
+
+
+## 1966: the rented set on splayed legs, its channel dial, a teak sideboard, an orange settee, orange and teak.
+func _tv_1966(room: Node3D) -> void:
+	var p := _p(room)
+	var b: Node = room.host.system("room")
+	var t: Dictionary = Domestic._telly(Domestic.resolved(b.params))
+	check("1966: the set on splayed legs (a radiogram's)", str(t["stand"]) == "radiogram")
+	var body: Vector3 = t["body"][0]
+	var outer: Vector3 = t["body"][1]
+	var pic: Array = t["pic"]
+	var dial := _piece(room, "channel_dial")
+	var at := Vector3(float(dial["at"][0]), float(dial["at"][1]), float(dial["at"][2]))
+	var bottom := float(pic[0].y) - float(pic[1].y) * 0.5
+	check("1966: the channel dial on the set's front, under the picture (%s)" % at, not dial.is_empty()
+			and absf(at.z - float(pic[0].z)) < 0.002 and at.y < bottom - 0.035 and at.y > float(t["foot"]) + 0.035
+			and absf(at.x - body.x) + 0.1 < outer.x * 0.5)
+	check("1966: black and white", is_equal_approx(float(p.value("colour")), 0.0))
+	room.host.set_setting("aerial", 0.5)
+	await _play(room, 0.5, STOPPED)
+	check("1966: Snow from the aerial up (%.2f)" % float(p.value("snow")), absf(float(p.value("snow")) - 0.5) < 0.01)
+	room.host.set_setting("aerial", 0.12)
+	var board := _piece(room, "sideboard")
+	check("1966: a teak sideboard along the wall", not board.is_empty() and float(board["size"][0]) > 1.5)
+	check("1966: an orange settee of three, the viewer in its middle, and an armchair", _model_count(room, "settee")
+			== 3 and _model_count(room, "club_chair") == 1)
+	var cover: Dictionary = room.host.system("seats").params["upholstery"]
+	var orange := Color(float(cover["color"][0]), float(cover["color"][1]), float(cover["color"][2]))
+	check("1966: the settee orange (%s)" % orange, orange.r > 0.6 and orange.g < orange.r * 0.6 and orange.b < 0.2)
+	await _warms_up("1966", room)
+	room.host.set_setting("lamps", 0.6)
+	await _lamps("1966", room, 0.6)
+	room.host.set_setting("lamps", 0.3)
+
+
+## 2002: a big deep set filling the end of the lounge, a leather sofa, a glass coffee table under the sight line.
+func _tv_2002(room: Node3D) -> void:
+	var p := _p(room)
+	var b: Node = room.host.system("room")
+	var t: Dictionary = Domestic._telly(Domestic.resolved(b.params))
+	var body: Vector3 = t["body"][1]
+	check("2002: a big deep set (%.2f m wide, %.2f m deep)" % [body.x, body.z], body.x > 1.2 and body.z > 0.6)
+	var cover: Dictionary = room.host.system("seats").params["upholstery"]
+	check("2002: a leather sofa of three and an armchair", _model_count(room, "settee") == 3
+			and _model_count(room, "club_chair") == 1 and str(cover["library"]).ends_with("leather"))
+	var glass := room.get_node_or_null("PieceGlass") as MeshInstance3D
+	var table := _piece(room, "glass_table")
+	check("2002: a glass coffee table (see-through), low under the sight line", glass != null
+			and glass.is_in_group("env_see_through") and float(table["size"][1]) <= 0.45
+			and float(table["at"][2]) < -0.5)
+	room.host.set_setting("brightness", 0.8)
+	await _play(room, 0.5, STOPPED)
+	check("2002: Lamp in the set: an old lamp, a dimmer picture (%.2f)" % float(p.value("gain")),
+			absf(float(p.value("gain")) - 0.8) < 0.01)
+	room.host.set_setting("brightness", 0.95)
+	room.host.set_setting("lamps", 0.0)
+	await _lamps("2002", room, 0.0)
+	room.host.set_setting("lamps", 0.25)
+
+
+## The present: a thin panel on a dark wall, a media unit and a soundbar under it, a floor lamp by the sofa, rain on
+## the window now and then, a clean picture.
+func _tv_today(room: Node3D) -> void:
+	var p := _p(room)
+	var b: Node = room.host.system("room")
+	var t: Dictionary = Domestic._telly(Domestic.resolved(b.params))
+	check("today: a thin panel on the wall (%.2f m deep)" % float(t["body"][1].z), str(t["form"]) == "flat_panel"
+			and str(t["stand"]) == "wall" and float(t["body"][1].z) < 0.1)
+	var wall: Dictionary = b.params["walls"]
+	check("today: dark walls", Color(float(wall["color"][0]), float(wall["color"][1]),
+			float(wall["color"][2])).get_luminance() < 0.25)
+	var unit := _piece(room, "media_unit")
+	var bar := _piece(room, "soundbar")
+	var bottom := float(t["pic"][0].y) - float(t["pic"][1].y) * 0.5
+	check("today: a soundbar on the media unit under the picture", not unit.is_empty() and not bar.is_empty()
+			and absf(float(bar["at"][1]) - float(unit["size"][1])) < 0.005 and float(bar["at"][1])
+			+ float(bar["size"][1]) < float(t["foot"]))
+	check("today: a clean picture: no grid, no bleed, the film's own sound", float(p.value("panel_grid")) < 0.001
+			and float(p.value("panel_bleed")) < 0.001 and str(p.value("speaker")) == "none")
+	check("today: a floor lamp by the sofa (house group)", not _piece(room, "floor_lamp").is_empty()
+			and room.get_node_or_null("PieceLamps") != null and float(room.host.system("light").group_energy("house"))
+			> 0.0)
+	check("today: no wall lamps, no heater", int(b.params["lamps"]) == 0 and str(b.params["heater"]) == "none")
+	RoomSound.check_follows(self, "today", room, "rain", "weather.rain")
+	room.host.set_setting("lamp", 0.4)
+	await _lamps("today", room, 0.4)
+	room.host.set_setting("lamp", 0.15)
+	await _lamps("today", room, 0.15)
+	check("today: the picture's bottom over the soundbar (%.2f m)" % bottom, bottom > 0.55)
