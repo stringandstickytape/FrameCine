@@ -2978,3 +2978,23 @@ msgstr "影院"
 #. The Room tab: the group of television rooms (the history of television).
 msgid "Television"
 msgstr "电视"
+
+#. A room: a small multiplex screen of 1983 (the room list).
+msgid "Screen 3 - 1983"
+msgstr "3 号厅 - 1983"
+
+msgid "Weave and tilt"
+msgstr "画面抖动与倾斜"
+
+msgid "How much the worn print drifts in the gate, and how crooked the projector stands. At the bottom: steady and straight."
+msgstr "旧拷贝在片门中漂移的程度，以及放映机歪斜的程度。拉到最低：稳定且端正。"
+
+#. A room: a drive-in cinema of 1958, seen from a car (the room list).
+msgid "Drive-in - 1958"
+msgstr "汽车影院 - 1958"
+
+msgid "Window speaker"
+msgstr "车窗扬声器"
+
+msgid "The film's sound from the little speaker hung on the car's window: tinny, mono, a little rattle."
+msgstr "影片声音来自挂在车窗上的小扬声器：单薄、单声道，略带杂音。"

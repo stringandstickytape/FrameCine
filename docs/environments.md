@@ -1254,6 +1254,61 @@ noise, ghosting, a weak signal), display (a mechanical-scan set's orange glow, 1
 shadow mask; a flat panel). Each era is a preset of the chain plus a `domestic` room. Names are pastiche, never the
 real mark (the names check).
 
+### Room: Screen 3 - 1983
+
+`app/environments/screen_3_1983.env.json`. The old circle of a picture palace, walled off in 1983 into a small
+multiplex screen: a steep rake of multiplex seats, a plasterboard wall with the screen on it, a swirly carpet and a
+worn print.
+
+- **The hall** (`auditorium`, id `hall`): 11.2 m wide, 9 rows of 13 multiplex seats on a steep rake (0.42 m a row),
+  straight rows, the viewer in the middle of the fifth row from the front (the room's own seat, at the origin). The
+  old fabric panels and sconces run on along the side walls and stop at the partition (`partition_z` -7.4), so the
+  hall reads as cut in two. No drapes, no acoustic clouds; four exits with signs, the booth's windows in the rear
+  wall.
+- **The kit:** the swirling carpet on the floor; a plasterboard partition (taped joints, a skirting) over the
+  hall's own; a water stain where the roof leaks down the new wall, in its top left corner (three patches of
+  stained board, the dark tide line at their feet).
+- **Seats** (`seats`): seat 69, in the row in front a little to the left, is broken (its back slumped).
+- **Light:** the house lamps go down to 8 % over 4 s when the film starts or plays (cue `dim`, with the common Dim
+  during the film on) and come back up in the pre-show and after the end (`lights_up`). The exit sign stutters now
+  and then (cue `exit_sign`: every 20 s, a chance of 0.4, two dips of `light.signs` with fades of 0.2 s, under
+  2 Hz); it needs the common Flickering lights on.
+- **Screen:** 7 x 3.94 m on the partition, its masking (`screen_frame`) and the beam from the booth; smoke and haze
+  in the beam (`atmosphere`: `beam_haze` 0.6, `beam_smoke` 0.8); the worn print (`presentation` preset
+  `worn_print`: weave, tilt, flicker, dust, scratches, a hotspot). The film is drawn in the room (a picture stage).
+- **Setting:** Weave and tilt (`weave`, 0..1, default 0.7): `presentation.weave` by range [0, 1] and
+  `presentation.tilt` by range [0, 0.5] degrees. The common Motion setting scales both; Flickering lights holds the
+  lamp's flicker and the exit sign steady.
+- **Measured** (`tests/test_room_screen_3_1983.gd`, headless): 25 draws, 79 946 triangles, no live light, no
+  particles, 10.4 MB of textures; a clear sight line from all 117 seats.
+- **Sound to come:** the next screen's film rumbling through the wall (a low bed following `film.bass`, well under
+  the film); a small hall's acoustics.
+
+### Room: Drive-in - 1958
+
+`app/environments/drive_in_1958.env.json`, apart from the older drive-in scene (`drive_in.tscn`). The front bench of
+a convertible on a drive-in's lot in the desert, dusk falling to a starry night as the film runs.
+
+- **The lot** (`terrace`, id `lot`, style `lot`): humps and speaker posts in rows of bays, the ground out to 120 m;
+  the screen (24 x 10 m, 4 m up, 50 m ahead) on the kit's tower; a neon snack bar 16 m behind the car ("SNACK BAR").
+- **The car** (`vehicle`, id `car`): the viewer in the middle of the front bench (the room's own seat), a rear bench
+  behind; six places to pick.
+- **The sky** (`sky`): latitude 35, mid July, the screen facing west-south-west with the sunset's glow to its right.
+  Tracks by `film.minutes`: `dusk` from the last light (0) to night (0.75 at 12 minutes, 1 at 25), and `hour` from
+  20:45 on, so the stars turn through the film. `milky_way` follows `playback.playing` (0.25 to 0.85, smoothed 3 s).
+  Mesas round the horizon (`vista`).
+- **Life:** 30 moths in the projector's beam (the beam from the snack bar's roof, `screen_frame` without masking);
+  a plane's lights about every 5 minutes.
+- **Cues:** the headlamps off and the dials dimmed as the film starts or plays (`lamps_off`); in the pre-show the
+  dials lit, the headlamps off (`arrive`); 3 s after the end the headlamps come on (`time_to_go`).
+- **Setting:** Window speaker (`tinny`, bool, default off): `presentation.speaker` by map (`window` or `none`). It
+  is off by default: a whole film through a band-limited mono speaker is a big loss of the film's sound, which the
+  room must never spoil; the viewer turns it on for the effect. No picture stage, so the film layer stays.
+- **Measured** (`tests/test_room_drive_in_1958.gd`, headless): 30 draws, 17 288 triangles, no live light, no
+  particles, 11.3 MB of textures; a clear sight line from all 6 places.
+- **Sound to come:** crickets (a soft bed), a far freight train now and then (a one-shot, its horn far off), the
+  open air's acoustics (little reverb).
+
 ## Files
 
 | File | What |

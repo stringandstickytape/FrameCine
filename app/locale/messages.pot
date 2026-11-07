@@ -4053,8 +4053,24 @@ msgstr ""
 msgid "Cloud layers sky"
 msgstr ""
 
+#: environments/drive_in_1958.env.json
+msgid "Drive-in - 1958"
+msgstr ""
+
+#: environments/screen_3_1983.env.json
+msgid "Screen 3 - 1983"
+msgstr ""
+
 #: environments/cinema.env.json
 msgid "House lights in the film"
+msgstr ""
+
+#: environments/drive_in_1958.env.json
+msgid "Window speaker"
+msgstr ""
+
+#: environments/screen_3_1983.env.json
+msgid "Weave and tilt"
 msgstr ""
 
 #: environments/void.env.json
@@ -4063,6 +4079,14 @@ msgstr ""
 
 #: environments/cinema.env.json
 msgid "How bright the house lamps stay once the film has started."
+msgstr ""
+
+#: environments/drive_in_1958.env.json
+msgid "The film's sound from the little speaker hung on the car's window: tinny, mono, a little rattle."
+msgstr ""
+
+#: environments/screen_3_1983.env.json
+msgid "How much the worn print drifts in the gate, and how crooked the projector stands. At the bottom: steady and straight."
 msgstr ""
 
 #: environments/void.env.json
