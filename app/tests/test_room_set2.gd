@@ -12,12 +12,15 @@ extends "res://tests/env_builder_harness.gd"
 ##                       snow falls only under the open back of the roof
 ##   Flagship            a steep rake, black walls, blue step lights, a huge screen with its curve; the default seat
 ##                       in the middle of the rows; the ritual takes the house lamps out and the steps down
-## Every room: seat picking (a chosen seat folds away), the lights come back up in the pre-show.
+## Every room: seat picking (a chosen seat folds away), the lights come back up in the pre-show. The Palace's and the
+## Flagship's sound (tests/room_sound.gd): the concrete hall's echo and the bells the ritual rings; the Flagship's dry
+## acoustics and no beds; each room's level.
 ## Under a renderer (lavapipe, ENV_SHOTS set): a picture of each room from its default seat, and one looking up.
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_set2.gd
 
 const EnvLibrary := preload("res://scripts/env/env_library.gd")
 const Auditorium := preload("res://scripts/env/systems/auditorium.gd")
+const RoomSound := preload("res://tests/room_sound.gd")
 const ROOMS: Array[String] = ["atmospheric_1928", "palace_of_culture_1974", "flagship"]
 ## Well inside the headset's budget (the Frame draws the room twice, at 90 Hz).
 const OWN_BUDGET := {"draws": 32, "triangles": 300000, "lights": 0, "particles": 2000, "texture_mb": 32.0}
@@ -261,9 +264,17 @@ func _palace() -> void:
 	var clear := float(h.system("weather").snow_amount())
 	check("%s: snow falls when Heavy, stops when None (%.2f, %.2f)" % [id, heavy, clear], heavy > 0.5 and clear < 0.1)
 	h.set_setting("snow", "light")
+	# Sound: the concrete hall's echo; the house bells, played by the ritual only.
+	RoomSound.check_beds(self, id, room, {"bells": "three_bells"}, "concrete_hall")
+	var bells: Node = h.system("bells")
+	var rang: int = bells.plays
 	await _ritual(id, room, 0.1, 0.5)
+	check("%s: the ritual rings the bells once, Pre-show off none (%d)" % [id, bells.plays - rang],
+			bells.plays - rang == 1)
 	await _seat_picking(id, room)
+	var doc: Dictionary = room.doc
 	await done(room)
+	await RoomSound.check_level(self, self, id, doc)
 
 
 # --- Flagship --------------------------------------------------------------------------------------------------------
@@ -298,9 +309,15 @@ func _flagship() -> void:
 			dist / float(size[0]) > 0.8 and dist / float(size[0]) < 1.1)
 	check("%s: the picture's middle at the seated eyes' height (%.2f)" % [id, float(centre[1])],
 			absf(float(centre[1]) - 1.2) < 0.3)
+	# Sound: a damped modern hall's acoustics, no beds of its own.
+	RoomSound.check_beds(self, id, room, {}, "cinema")
+	var acoustics: Dictionary = h.system_of_kind("sound").values()
+	check("%s: drier than a cinema's preset (rt60 %.2f, damping %.2f)" % [id, acoustics["rt60"], acoustics["damping"]],
+			float(acoustics["rt60"]) < 0.7 and float(acoustics["damping"]) > 0.6)
 	await _ritual(id, room, 0.0, 0.35)
 	await _seat_picking(id, room)
 	await done(room)
+	await RoomSound.check_level(self, self, id, doc, true)
 
 
 # --- Pictures (lavapipe) ----------------------------------------------------------------------------------------------

@@ -1452,7 +1452,7 @@ as before. Settings: the pre-show ritual (common), the house lights in the film.
 
 `app/environments/void.env.json`: a black sky (nothing drawn), a mirror-black floor that takes the film's reflection
 (on by default), and a small ripple where the viewer's head moves more than 15 cm a second over the floor. Setting:
-the ripple's strength.
+the ripple's strength. Sound: none but the film's, and it says so (`sound_bed` `silence`, `acoustics` `vacuum`: dry).
 
 ## The presentation system
 
@@ -1604,6 +1604,10 @@ rake, and the back of the roof open to a winter night with birches and falling s
   between the viewer and the picture from there; from the back rows it falls round them.
 - **Default seat:** the middle of row 0.
 - **Measured:** 23 draws, 256 688 triangles, 1400 particles, 12.4 MB.
+- **Sound:** an echoey hall (`acoustics` `concrete_hall`: rt60 2.4, a 60 ms predelay and its echo); the house bells
+  (`sound_bed` `three_bells` by the stage, played by the ritual's first step: once as the film starts, none with the
+  Pre-show off). Measured (`test_room_set2.gd`): the bells' loudest second -52.2 dBFS at the slider's default,
+  14 dB under the level check's target; nothing else sounds.
 
 ### Room: Flagship
 
@@ -1624,6 +1628,8 @@ step lights, deep red seats, and a 20 m curved screen.
   screen starts with it until the viewer sets a curve of their own (`curved_screen.gd`; flattening it keeps 0, so the
   room stays flat). A setting still cannot choose the default seat: the room starts at its origin seat.
 - **Measured:** 17 draws, 228 806 triangles, 6.0 MB.
+- **Sound:** no beds: a modern hall is quiet but for the film. Its acoustics are drier than the `cinema` preset (rt60
+  0.5, damping 0.8, wet 0.12: black felt and foam), for any room sound to come; the film keeps its own mix.
 
 ### Room: Shopfront 1906
 
@@ -1720,9 +1726,12 @@ dim rose window, and the film's light on the columns.*
   builds again). The candles flicker (common Flickering lights).
 - **Cues:** `rose_dims` (starting: the rose window to 0.15 over 6 s), `rose_up` (pre-show and end: back over 5 s).
 - **Measured** (`tests/test_room_set5.gd`, headless): 14 draws, 8 290 triangles, no live light, 7.0 MB.
-- **Sound wanted** (with the sound systems): a long stone reverb on the room's own sounds (`acoustics`, about 3 s);
-  a faint wind in the clerestory and now and then a candle's gutter (`sound_bed`, very low); no organ, no bells. The
-  film's own `acoustics` section stays modest (rt60 1.6, wet 0.4) so speech in the film stays clear.
+- **Sound:** a long stone reverb on the room's own sounds (`acoustics` `stone_nave`, rt60 3); a faint wind high in
+  the clerestory (`sound_bed` `wind`, two voices 9 m up, `gain_db` -4); now and then a candle's gutter by the chancel
+  (`candle`, `every` 120, `gain_db` -4, its `level` on the Candles setting: none with no candles). No organ, no bells.
+  The film's own `acoustics` section stays modest (rt60 1.6, wet 0.4) so speech in the film stays clear. Measured
+  (`test_room_set5.gd`, the slider's default, a candle playing): -55.3 dBFS RMS in the pre-show, -70.5 under a film
+  at the reference level.
 
 ### Room: Reclaimed
 
@@ -1749,8 +1758,11 @@ fireflies and now and then a deer.*
   `deer_in_quiet` (6 s of a quiet scene: the deer comes; chance 0.5, at most every 15 minutes).
 - **Measured** (`tests/test_room_set5.gd`, headless): 30 draws, 116 858 triangles (the ivy and the plush seats),
   no live light, 1 600 particles, 10.4 MB. Its update: about 0.2 ms a frame on the desktop.
-- **Sound wanted** (with the sound systems): rain on leaves and on the boards, bound to `weather.rain`; drips after
-  it, bound to `weather.wet`; birds' calls (the birds' events), a soft night wind; all well under the film.
+- **Sound:** open air (`acoustics` `outdoors`); rain on the leaves round the viewer (`sound_bed` `rain_leaves`, four
+  voices under the open roof) and on the boards behind (`rain_leaves` at `pitch` 0.7, `gain_db` -6), both with their
+  `level` on `weather.rain`; drips into the puddle after it (`drips`, `level` on `weather.wet`); a soft night wind
+  (`wind`, `gain_db` -6). The birds' calls are the birds' own (`life`). Measured (`test_room_set5.gd`, the slider's
+  default, rain and wet at full): -49.9 dBFS RMS in the pre-show, -64.0 under a film at the reference level.
 - **Gaps:** the auditorium has no screen surface of its own, so there is no patched sheet: the picture hangs on the
   black front wall with no masking (a sheet like the shopfront's `sheet_frame` would need a parameter on the
   auditorium). Its walls have no damp or stain parameter.
@@ -1771,8 +1783,10 @@ candles in the walls, the film's colours in the ice, and the northern lights in 
   on `film.quiet`, so the setting can still give the aurora's level.
 - **Measured** (`tests/test_room_set5.gd`, headless): 17 draws, 15 976 triangles, no live light, 16 particles, 6.5
   MB.
-- **Sound wanted** (with the sound systems): far huskies now and then (`sound_bed`, `every`), a soft wind past the
-  doorway, the ice's creak now and then; very low.
+- **Sound:** the ice's bright ring (`acoustics` `ice`); far huskies beyond the doorway now and then (`sound_bed`
+  `huskies`, `every` 300, 120 m out); a soft wind past the doorway (`wind` at the doorway, `gain_db` -3); the ice
+  creaking in the wall now and then (`ice_creak`, `every` 240). Measured (`test_room_set5.gd`, the slider's default,
+  both one-shots playing): -54.6 dBFS RMS in the pre-show, -69.7 under a film at the reference level.
 - **Gaps:** the ice room opens only to the sides and behind, so the aurora shows in the window and the doorway,
   not over the screen; a skylight or an opening in the vault would need a parameter on `domestic`.
 
@@ -1943,9 +1957,11 @@ gather round the screen outside the glass; now and then, in a quiet scene, a wha
 - **Measured** (`test_room_bathysphere.gd`, headless): 12 draws, 79 078 triangles, no lights, no particles, 6 MB.
 - **The render** (lavapipe, from the seat): a dark blue dome on brass ribs over rows of teal seats, a school to each
   side of the picture, faint bells at its edges, the whale's shape crossing above it.
-- **Sound (later):** hull creaks now and then (a one-shot, low, behind and to the sides), a faint low hum of the
-  deep, the whale's song (the life system sings it already). Acoustics: a small hard metal and glass room
-  (`acoustics` rt60 0.9).
+- **Sound:** a small hard room of metal and glass (`acoustics` `hull`, rt60 0.9); the hull creaking now and then to
+  either side (`sound_bed` `hull_creak` twice, at the drum left and right, `every` 180 each: one about every 90 s);
+  the deep's low hum (`deep_hum`, `gain_db` -4); the whale's song is `life`'s (`voice_db` -4). Measured
+  (`test_room_bathysphere.gd`, the slider's default, both creaks playing): -52.0 dBFS RMS in the pre-show, -73.0
+  under a film at the reference level.
 - **Gap:** caustics. The light system has no moving light pattern; the room has a cool fill from above instead.
 
 ### Room: Crater
@@ -1974,7 +1990,9 @@ in a black sky full of stars. Silent: the room has no sound bed and makes no sou
 - **Measured** (`test_room_crater.gd`, headless): 12 draws, 15 836 triangles, no lights, no particles, 4.3 MB.
 - **The render** (lavapipe, from the seat): the framed screen on the pit floor, pale tiers either side, the dome's
   ribs meeting overhead, stars and the Milky Way through the glass, Earth up and to the right of the picture.
-- **Sound:** none, by design. Acoustics (for the film's spatial sound): a large glass dome, rt60 1.1, wet 0.35.
+- **Sound:** none, by design: `sound_bed` `silence` (it plays nothing) and `acoustics` `vacuum` (dry); no cue
+  sound, no life, no pause rise (the test measures nothing on Environment). Acoustics for the film's spatial sound:
+  a large glass dome, rt60 1.1, wet 0.35.
 
 Seven rooms, one for each TV preset, are the history of television: `app/environments/tv_<year>.env.json`, in the
 Room tab's Television group (`room.category` "tv"). Their names start "TV <year> - ", so the group reads as a
@@ -2020,6 +2038,10 @@ velvet, two angled in beside the viewer's. A wall lamp, a night window.
 - Cues: `tuning_in` (Pre-show): the signal weak at the start, the picture coming in over 6 s. The lamp down to 15 %
   in the film.
 - Measured: 18 draws, 2 216 triangles, 10 MB, no particles.
+- Sound: `acoustics` `small_room`; the coal fire (`sound_bed` `fire` in the grate, `gain_db` -3, on the Fire setting);
+  a clock on the mantel (`clock`); the disc's motor (`hum` at the set, `gain_db` -4). No tube whine: thirty lines on a
+  spinning disc, no tube. Measured (`test_room_tv.gd`, the slider's default): -55.1 dBFS RMS in the pre-show, -69.6
+  under a film at the reference level.
 
 ### Room: TV 1953 - by the fire
 
@@ -2033,6 +2055,11 @@ from time to time; through it, an evening sky over hills. A potted fern in the c
 - Settings: Snow from the aerial (0 to 60 %: `presentation.snow`); Fire in the grate.
 - Cues: `warm_up` (Pre-show): the valves warm up, the picture dim at first and full over 6 s. The lamps down to 25 %.
 - Measured: 24 draws, 10 168 triangles, 10.3 MB, 500 particles.
+- Sound: `acoustics` `small_room`; the fire's crackle in the grate (`sound_bed` `fire`, on the Fire setting); a clock
+  on the mantel (`clock`); rain on the window (`rain_glass` at the pane, `level` on `weather.rain`); the tube's faint
+  whine at a 405-line set's 10 125 Hz (`tube_whine`, `pitch` 0.648, `gain_db` -4); the cat's purr is `life`'s.
+  Measured (`test_room_tv.gd`, the slider's default, the rain full): -52.8 dBFS RMS in the pre-show, -66.3 under a
+  film at the reference level.
 
 ### Room: TV 1972 - first colour
 
@@ -2102,6 +2129,11 @@ a radiator under the window, rain in the night outside. A bean bag on the floor;
 - Settings: Weather at the window (raining, a dry night, showers: `weather.mode`); Fairy lights over the telly (0 to
   100 %: `domestic.fairy_glow`, 0 to 1.5; the accent group, the window's glow with it, stays as it is).
 - Measured: 20 draws, 8 470 triangles, 6.3 MB, 400 particles.
+- Sound: `acoustics` `small_room`; the radiator ticking under the window (`sound_bed` `radiator`); rain on the glass
+  (`rain_glass` at the pane, `level` on `weather.rain`); the tube's whine (`tube_whine`, 15 625 Hz); the tape going in
+  as the film starts (`vcr` under the telly, played by the cue `tape_in` in `starting`, with the Pre-show on).
+  Measured (`test_room_tv.gd`, the slider's default, the rain full, the tape going in): -52.6 dBFS RMS in the
+  pre-show, -66.7 under a film at the reference level.
 
 ### Room: TV 2005 - flat screen
 
