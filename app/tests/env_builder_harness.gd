@@ -15,6 +15,7 @@ const Registry := preload("res://scripts/env/systems/registry.gd")
 const PhysicsShapes := preload("res://scripts/play/physics_shapes.gd")
 ## The largest lightmap atlas a builder's mesh may ask for (texels a side).
 const MAX_ATLAS := 2048
+const EnvAudio := preload("res://scripts/env/env_audio.gd")
 
 var _failures := 0
 var _checks := 0
@@ -224,6 +225,49 @@ func clock_flashes(label: String, room: Node3D) -> void:
 	room.host.step(0.5)
 	check("%s: Flickering lights off: the clock held lit (%.2f)" % [label, kit.clock_level()], kit.clock_level() == 1.0)
 	room.host.set_setting("flicker", true)
+
+
+## The room's sound (docs/environments.md, "Sound and music", "For the rooms"): a small room's acoustics; these beds
+## (id -> sound), each in the room near what makes it, at its designed level 10 dB or more under the level check's
+## target, all of them together 6 dB or more under it; the streams made and the loops playing.
+func sounds(id: String, room: Node3D, want: Dictionary) -> void:
+	var host: Node = room.host
+	var ac: Node = null
+	for s: Node in host.order:
+		if s.get_script() == Registry.script_of("acoustics"):
+			ac = s
+	check("%s: a small room's acoustics" % id, ac != null and str(ac.params["preset"]) == "small_room")
+	var beds := {}
+	for s: Node in host.order:
+		if s.get_script() == Registry.script_of("sound_bed"):
+			beds[str(s.get("id"))] = s
+	var have := {}
+	for k: String in beds:
+		have[k] = str(beds[k].params["sound"])
+	check("%s: its sounds %s" % [id, have], have == want)
+	host.auto = false
+	for i in 200:
+		if beds.values().all(func(b: Node) -> bool: return b.stream() != null):
+			break
+		host.step(0.05)
+		await process_frame
+	check("%s: every sound made" % id, beds.values().all(func(b: Node) -> bool: return b.stream() != null))
+	var target := float(EnvAudio.LEVEL_TARGET_DB)
+	var power := 0.0
+	var dom: Node = host.system_of_kind("builder")
+	var box: AABB = dom.get_script().call("_box", dom.get_script().call("resolved", dom.params))
+	for k: String in beds:
+		var b: Node = beds[k]
+		var db := float(b.designed_db())
+		power += db_to_linear(db) ** 2
+		check("%s: %s %.1f dB, 10 dB or more under the target %.0f" % [id, k, db, target], db <= target - 10.0)
+		var at := Vector3(float(b.params["at"][0]), float(b.params["at"][1]), float(b.params["at"][2]))
+		check("%s: %s in the room (%s)" % [id, k, at], str(b.params["place"]) != "at" or box.grow(0.05).has_point(at))
+		if b.is_loop() and float(b.params["level"]) > 0.01:
+			check("%s: %s playing" % [id, k], b.playing())
+	if not beds.is_empty():
+		var all_db := 10.0 * log(power) / log(10.0)
+		check("%s: all its sounds together %.1f dB, 6 dB or more under the target" % [id, all_db], all_db <= target - 6.0)
 
 
 func done(room: Node3D) -> void:

@@ -129,6 +129,11 @@ func _common(id: String, room: Node3D, doc: Dictionary) -> void:
 	room.host.auto = false
 
 
+## A one-shot bed's plays so far.
+func _plays(room: Node3D, bed: String) -> int:
+	return int(room.host.system(bed).get("plays"))
+
+
 func _play(room: Node3D, seconds: float, snap := PLAYING) -> void:
 	room.host.snapshot_override = snap
 	var t := 0.0
@@ -234,6 +239,7 @@ func _tv_1972(room: Node3D) -> void:
 			and float(room.host.system("light").group_energy("house")) > 0.0)
 	check("1972: a bean bag beside three club chairs", room.room_seat_transforms().size() == 4)
 	await _lamps("1972", room, 0.3)
+	await sounds("1972", room, {"radiator": "radiator", "clock": "clock", "whine": "tube_whine"})
 
 
 ## 1983: a portable telly on a desk beside a home computer, the aerial lead's noise, bold lines.
@@ -263,6 +269,17 @@ func _tv_1983(room: Node3D) -> void:
 	room.host.step(0.1)
 	check("1983: the set tunes in to the computer's channel (a glitch)", float(p.get("_glitch")) > 0.5)
 	check("1983: a desk chair and a bean bag", room.room_seat_transforms().size() == 2)
+	await sounds("1983", room, {"rain": "rain_glass", "tape": "tape_load", "whine": "tube_whine"})
+	var w: Node = room.host.system("weather")
+	await _play(room, 20.0, STOPPED)
+	check("1983: rain on the glass as loud as the rain (%.2f, the weather's %.2f)" % [
+			float(room.host.system("rain").params["level"]), w.rain_amount()],
+			absf(float(room.host.system("rain").params["level"]) - w.rain_amount()) < 0.1 and w.rain_amount() > 0.1)
+	var loads := _plays(room, "tape")
+	await _play(room, 2.0)
+	await _play(room, 4.0, STOPPED)
+	check("1983: back in the pre-show, the computer loads from its cassette (%d plays)" % _plays(room, "tape"),
+			_plays(room, "tape") > loads)
 
 
 ## 1987: the family telly, a video recorder under it, a rented tape.
@@ -292,11 +309,20 @@ func _tv_1987(room: Node3D) -> void:
 	room.host.snapshot_override = PLAYING
 	room.host.step(0.1)
 	room.host.step(0.1)
-	check("1987: the tape starts with a tear", float(p.get("_glitch")) > 1.0)
+	check("1987: the tape goes in first, no tear yet (%.2f)" % float(p.get("_glitch")), float(p.get("_glitch")) < 0.01)
+	for i in 26:
+		room.host.step(0.1)
+	check("1987: then the picture starts with a tear (%.2f)" % float(p.get("_glitch")), float(p.get("_glitch")) > 1.0)
 	room.host.set_setting("lamps", 0.5)
 	await _lamps("1987", room, 0.5)
 	room.host.set_setting("lamps", 0.3)
 	await _lamps("1987", room, 0.3)
+	await sounds("1987", room, {"vcr": "vcr", "clock": "clock", "whine": "tube_whine", "fire": "fire",
+			"rain": "rain_glass"})
+	var takes := _plays(room, "vcr")
+	await _play(room, 2.0, STOPPED)
+	await _play(room, 1.0)
+	check("1987: the tape goes in as the film starts (%d plays)" % _plays(room, "vcr"), _plays(room, "vcr") > takes)
 
 
 ## 1993: a teenager's bedroom: no fort, fairy lights, a bean bag and the bed, rain or not.
@@ -352,3 +378,4 @@ func _tv_2005(room: Node3D) -> void:
 	room.host.set_setting("lamps", 0.0)
 	await _lamps("2005", room, 0.0)
 	room.host.set_setting("lamps", 0.3)
+	await sounds("2005", room, {})
