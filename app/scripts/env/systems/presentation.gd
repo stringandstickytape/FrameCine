@@ -6,7 +6,13 @@ extends "res://scripts/env/systems/env_system.gd"
 ##                  wobble, chroma bleed, head-switch noise at the bottom), broadcast (interlace)
 ##   transmission   aerial noise (snow), a ghost, a weak signal
 ##   display        mechanical (a 1930 mechanical-scan set's few orange lines), crt (curvature, round corners, a mask,
-##                  scanlines, the glass's reflection), panel (a flat panel's grid and backlight bleed)
+##                  scanlines, the glass's reflection), panel (a flat panel's grid and backlight bleed),
+##                  rear_projection (soft focus, convergence fringes, a hotspot, lenticular lines, a narrow fan of
+##                  light), oled (true blacks, a sheen at a glance)
+##   the set        its window (`tube`) and the film in it (aspect_mode: letterbox, pan and scan, 14:9, stretch), a
+##                  mirror's flip, the light off the screen's axis (off_axis), switching on and off (switch_on,
+##                  switch_off: a CRT's raster opens from a dot and collapses to a line and a dot, a valve set warms
+##                  up, a panel comes up) with our own switch sounds, and a channel change (channel)
 ##   speaker        the sound through a small speaker: a drive-in's window speaker, a telly's, a radio cabinet's, a
 ##                  flat panel's
 ## A preset (PRESETS: the TV eras, a worn print, a drive-in's) fills every parameter the document leaves out; the
@@ -25,9 +31,35 @@ const SHADER := preload("res://shaders/env_presentation.gdshader")
 const EnvAudio := preload("res://scripts/env/env_audio.gd")
 const VideoMode := preload("res://scripts/video_mode.gd")
 
+const SoundBed := preload("res://scripts/env/systems/sound_bed.gd")
+const Acoustics := preload("res://scripts/env/systems/acoustics.gd")
+const EnvSynth := preload("res://scripts/env/env_synth.gd")
+
 const SOURCES: Array[String] = ["none", "film", "tape", "broadcast"]
-const DISPLAYS: Array[String] = ["none", "mechanical", "crt", "panel"]
+const DISPLAYS: Array[String] = ["none", "mechanical", "crt", "panel", "rear_projection", "oled"]
 const MASKS: Array[String] = ["none", "shadow", "grille", "slot"]
+const ASPECT_MODES: Array[String] = ["letterbox", "pan_and_scan", "fourteen_nine", "stretch"]
+## How a set switches on and off ("auto": by its display: a CRT's raster, a valve set's warm-up for the mechanical
+## set, a panel's, a rear projection's slow fade).
+const SWITCHING: Array[String] = ["auto", "crt", "valve", "panel", "projection"]
+## Each way of switching: seconds to come on and to go off, and the sounds of each (env_synth.gd).
+const SWITCH := {
+	"crt": {"on": 1.6, "off": 1.1, "on_sounds": ["switch_clunk"], "off_sounds": ["switch_clunk", "crt_off"],
+			"channel": "channel_clunk"},
+	"valve": {"on": 8.0, "off": 2.4, "on_sounds": ["switch_clunk", "valve_hum"],
+			"off_sounds": ["switch_clunk", "crt_off"], "channel": "channel_clunk"},
+	"panel": {"on": 0.9, "off": 0.35, "on_sounds": [], "off_sounds": [], "channel": ""},
+	"projection": {"on": 3.0, "off": 0.6, "on_sounds": ["switch_clunk"], "off_sounds": ["switch_clunk"],
+			"channel": "channel_clunk"},
+}
+## The shortest switching on for each way (the dot's fade-in stays slower than the comfort ceiling's fade).
+const SWITCH_MIN_ON := {"crt": 1.5, "valve": 2.0, "panel": 0.6, "projection": 1.0}
+## The set's face when it is dark (gamma-encoded): a tube's grey glass, a rear projection's grey-black screen, a
+## panel's black, an OLED's true black.
+const FACES := {"none": 0.02, "mechanical": 0.015, "crt": 0.035, "panel": 0.012, "rear_projection": 0.045,
+		"oled": 0.0}
+## The sounds a set makes when it switches (sound_bed.gd LEVELS has their designed levels).
+const SWITCH_SOUNDS: Array[String] = ["switch_clunk", "valve_hum", "crt_off", "channel_clunk"]
 ## The speakers: the band (high-pass and low-pass, Hz; slope 1..4 = 6..24 dB an octave), an EQ6's six bands (dB at
 ## 32, 100, 320, 1000, 3200 and 10000 Hz), a little drive (0..1), and the stereo width (0: mono).
 const SPEAKERS := {
@@ -70,13 +102,14 @@ const PRESETS := {
 			+ "small round-cornered tube, 405-line interlace, snow and a ghost",
 			"params": {"source": "broadcast", "interlace": 0.6, "lines": 377, "snow": 0.22, "ghost": 0.25,
 					"ghost_shift": 0.035, "display": "crt", "tube": 1.3333, "curvature": 0.9, "corner": 0.6, "mask": "none",
-					"scanlines": 0.45, "glass": 0.7, "colour": 0.0, "tint": [0.92, 0.96, 1.0], "speaker": "telly"}},
+					"scanlines": 0.45, "glass": 0.7, "colour": 0.0, "tint": [0.92, 0.96, 1.0], "speaker": "telly",
+					"switching": "valve"}},
 	"colourstar_1972": {"title": "Colourstar, 1972", "description": "an early colour set: a curved tube with a "
 			+ "shadow mask, warm and rich colours, interlace, a faint ghost",
 			"params": {"source": "broadcast", "interlace": 0.5, "lines": 576, "snow": 0.06, "ghost": 0.12,
 					"display": "crt", "tube": 1.3333, "curvature": 0.7, "corner": 0.45, "mask": "shadow", "mask_pitch": 380.0,
 					"mask_strength": 0.35, "scanlines": 0.3, "glass": 0.6, "colour": 1.15, "tint": [1.0, 0.97, 0.9],
-					"speaker": "telly"}},
+					"speaker": "telly", "switching": "valve", "warm_up": 5.0}},
 	"sirclive_1983": {"title": "Sirclive, 1983", "description": "a portable telly on a home computer's aerial "
 			+ "lead: 240 bold lines, a little RF noise, bright colours on a shadow mask",
 			"params": {"source": "broadcast", "interlace": 0.0, "lines": 240, "snow": 0.05, "ghost": 0.06,
@@ -98,6 +131,29 @@ const PRESETS := {
 			+ "clean picture, a faint pixel grid, the backlight glowing through the dark scenes",
 			"params": {"display": "panel", "panel_grid": 0.4, "panel_pixels": 1366, "panel_bleed": 0.5,
 					"glass": 0.3, "speaker": "panel"}},
+	"mirrorlid_1937": {"title": "Mirrorlid, 1937", "description": "a pre-war set whose tube faces up, the picture "
+			+ "seen in the mirror in its lid: 405 lines, a small round 5:4 tube with a greenish white, a film panned "
+			+ "and scanned to fill it, a long warm-up",
+			"params": {"source": "broadcast", "interlace": 0.6, "lines": 377, "snow": 0.16, "ghost": 0.18,
+					"ghost_shift": 0.03, "display": "crt", "tube": 1.25, "curvature": 1.0, "corner": 0.75, "mask": "none",
+					"scanlines": 0.5, "glass": 0.55, "colour": 0.0, "tint": [0.9, 0.98, 0.9], "aspect_mode": "pan_and_scan",
+					"off_axis": 0.2, "switching": "valve", "warm_up": 10.0, "speaker": "cabinet"}},
+	"rental_1966": {"title": "Tellyhire, 1966", "description": "a rented black and white set in a console on "
+			+ "splayed legs: 405 lines, a film panned and scanned to fill the 4:3 tube, a valve set's warm-up",
+			"params": {"source": "broadcast", "interlace": 0.5, "lines": 377, "snow": 0.08, "ghost": 0.1,
+					"display": "crt", "tube": 1.3333, "curvature": 0.6, "corner": 0.4, "mask": "none", "scanlines": 0.4,
+					"glass": 0.6, "colour": 0.0, "tint": [0.94, 0.97, 1.0], "aspect_mode": "pan_and_scan",
+					"off_axis": 0.15, "switching": "valve", "warm_up": 9.0, "speaker": "telly"}},
+	"projection_2002": {"title": "Bigview, 2002", "description": "a big rear projection set playing a disc: soft "
+			+ "focus, faint colour fringes, a hotspot that follows the eye, fine lines on the screen, and a picture "
+			+ "that dims when seen from above or below",
+			"params": {"display": "rear_projection", "tube": 1.7778, "soft_focus": 0.5, "convergence": 0.45,
+					"lenticular": 0.5, "hotspot": 0.5, "off_axis": 0.8, "glass": 0.35, "aspect_mode": "letterbox",
+					"switching": "projection", "speaker": "panel"}},
+	"slimline_present": {"title": "Slimline, the present", "description": "a very thin OLED panel: true blacks, a "
+			+ "sharp picture with a little punch, a sheen only at a glance, the colour shifting a touch from the side",
+			"params": {"display": "oled", "tube": 1.7778, "off_axis": 0.25, "glass": 0.3, "aspect_mode": "letterbox",
+					"switching": "panel", "speaker": "panel"}},
 }
 
 
@@ -137,7 +193,8 @@ static func spec() -> Dictionary:
 			"scratches": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
 					"description": "film: thin scratches running down the print"},
 			"hotspot": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
-					"description": "film: the lamp's bright middle, the corners darker"},
+					"description": "film: the lamp's bright middle, the corners darker; rear projection: a faint "
+					+ "bright patch where the eye looks down the projector's light (it follows the head)"},
 			"tracking": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
 					"motion": {"max": 1.0}, "description": "tape: the lines' slow sideways wobble"},
 			"head_switch": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
@@ -160,14 +217,48 @@ static func spec() -> Dictionary:
 					"description": "transmission: a weak signal (paler, flatter, more snow)"},
 			"display": {"type": "enum", "values": DISPLAYS, "default": "none", "live": true,
 					"description": "the set: none, mechanical (a 1930 mechanical-scan set's few glowing lines), "
-					+ "crt (a picture tube), panel (a flat panel)"},
+					+ "crt (a picture tube), panel (a flat panel), rear_projection (a big set's screen lit from "
+					+ "behind), oled (a very thin panel with true blacks)"},
 			"curvature": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "live": true,
 					"description": "crt: how much the tube's face bulges"},
 			"corner": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.35, "live": true,
 					"description": "crt: the round corners (1: a radius of half the height)"},
 			"tube": {"type": "float", "min": 0.0, "max": 3.0, "default": 0.0, "live": true,
-					"description": "crt: the tube's aspect (4:3 is 1.33; 0: the picture's own). A wide film sits "
-					+ "letterboxed in a 4:3 tube: the round corners and the bulge are the tube's"},
+					"description": "the set's window: the tube's or the panel's aspect (4:3 is 1.33, 16:9 1.78; 0: "
+					+ "the picture's own). Give the room's screen the same shape. A wide film sits letterboxed in a 4:3 "
+					+ "tube: the round corners and the bulge are the tube's; outside the window the set's bezel shows"},
+			"aspect_mode": {"type": "enum", "values": ASPECT_MODES, "default": "letterbox", "live": true,
+					"description": "the film in the set's window: letterbox (all of it, black bars where its shape "
+					+ "differs), pan_and_scan (it fills the window, its sides cut off), fourteen_nine (the 14:9 "
+					+ "compromise: a little cut, thin bars), stretch (stretched to the window)"},
+			"mirror": {"type": "bool", "default": false, "live": true,
+					"description": "the picture flipped left to right: a mirror-lid set seen the wrong way round "
+					+ "(off: the set's electronics turn it round)"},
+			"off_axis": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
+					"description": "how much the picture changes seen from off its axis: a tube a little darker, a "
+					+ "rear projection much darker from above and below, a flat panel's colour and contrast shifting"},
+			"soft_focus": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
+					"description": "rear projection: the picture a little soft (1: about three pixels of a 1080 film)"},
+			"convergence": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
+					"description": "rear projection: the red and the blue a little apart, more at the edges"},
+			"lenticular": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
+					"description": "rear projection: the screen's fine vertical lines (seen close to)"},
+			"switching": {"type": "enum", "values": SWITCHING, "default": "auto", "live": true,
+					"description": "how the set switches on and off: crt (a dot opens out to the picture; off, it "
+					+ "collapses to a line and a dot that fades), valve (a slow warm-up, the picture brightening over "
+					+ "seconds), panel (it just comes up and goes black), projection (a slow fade up); auto: by the "
+					+ "display"},
+			"warm_up": {"type": "float", "min": 0.0, "max": 30.0, "default": 0.0, "live": true,
+					"description": "seconds the set takes to come on (0: its way's own: crt 1.6, valve 8, panel 0.9, "
+					+ "projection 3)"},
+			"starts_off": {"type": "bool", "default": false,
+					"description": "the set is off (dark) until a cue switches it on; it comes on by itself when the "
+					+ "film plays"},
+			"switch_sounds": {"type": "bool", "default": true, "live": true,
+					"description": "the set's own sounds as it switches (a power switch's clunk, the valves' hum "
+					+ "rising, the tube's faint tick as it collapses, a channel knob's clunk)"},
+			"sound_db": {"type": "float", "min": -30.0, "max": 6.0, "default": 0.0, "live": true, "loudness": true,
+					"description": "dB from the switch sounds' designed level"},
 			"mask": {"type": "enum", "values": MASKS, "default": "shadow", "live": true,
 					"description": "crt: the phosphors' mask: none (black and white), shadow (dot triads), grille "
 					+ "(an aperture grille's stripes), slot"},
@@ -199,7 +290,12 @@ static func spec() -> Dictionary:
 					"description": "the film's sound through a small speaker: " + "; ".join(speaker_text)},
 		},
 		"actions": {"glitch": "a moment's trouble: a tape's tracking tears, a broadcast's snow swells, a print "
-				+ "jumps in the gate (args: seconds, default 0.6, at most 3)"},
+				+ "jumps in the gate (args: seconds, default 0.6, at most 3)",
+				"switch_on": "the set comes on from dark, its own way (args: seconds, else warm_up)",
+				"switch_off": "the set goes dark, its own way: a tube collapses to a line and a dot with an "
+				+ "afterglow, a panel goes black",
+				"channel": "a channel change: the knob's clunk, the picture dips (a moment's snow on a tube; a "
+				+ "panel goes black) and comes back (args: seconds, default 1, at least 0.9)"},
 		"cost": {"draws": 0, "triangles": 0, "lights": 0, "particles": 0, "texture_mb": 0},
 	}
 
@@ -227,6 +323,21 @@ var _field := 0.0
 var _glitch := 0.0
 var _glitch_len := 0.6
 var _film_send_was := &"Master"
+## The set's power: "on", "off", "switching_on", "switching_off"; seconds into a switch and its length.
+var power := "on"
+var _power_t := 0.0
+var _power_len := 1.0
+## A channel change: seconds left and its length.
+var _channel := 0.0
+var _channel_len := 1.0
+## The screen's middle in the room (the switch sounds come from there).
+var _screen_at: Variant = null
+var _sound_task := -1
+var _made_sounds := {}
+var _pending_sounds: Array[String] = []
+## Switch and channel sounds played (tests): [sound, volume_db] each.
+var sounds_played: Array = []
+var _cull_was := 0.0
 
 
 func setup() -> void:
@@ -241,7 +352,10 @@ func setup() -> void:
 	for i in 4:
 		_scratches.append([-1.0, 0.0, 0.0])
 	_material.set_shader_parameter("pr_aspect", 16.0 / 9.0)
+	if bool(params.get("starts_off", false)):
+		power = "off"
 	_apply()
+	_prepare_sounds()
 
 
 ## The parameters the document gives this system (a value or a binding): they win over the preset.
@@ -287,9 +401,10 @@ func _f(param: String) -> float:
 	return float(value(param))
 
 
-## Whether a picture stage is on (the film is then drawn in the room).
+## Whether a picture stage is on (the film is then drawn in the room). A set that is off or switching draws too.
 func picture_on() -> bool:
-	return str(value("source")) != "none" or str(value("display")) != "none" or _f("snow") > 0.0 \
+	return power != "on" or _channel > 0.0 or str(value("source")) != "none" or str(value("display")) != "none" \
+			or _f("snow") > 0.0 or _f("tube") > 0.0 or bool(value("mirror")) \
 			or _f("ghost") > 0.0 or _f("weak") > 0.0 or not is_equal_approx(_f("colour"), 1.0) \
 			or not color_value("tint").is_equal_approx(Color.WHITE) or not is_equal_approx(_f("gain"), 1.0)
 
@@ -303,15 +418,24 @@ func material() -> ShaderMaterial:
 	return _material
 
 
-func _param_changed(_param: String, _value: Variant) -> void:
+func _param_changed(param: String, _value: Variant) -> void:
 	if _material != null:
 		_apply()
+		if param in ["preset", "switching", "display", "switch_sounds"]:
+			_prepare_sounds()
 
 
 func act(action: String, args: Dictionary) -> void:
-	if action == "glitch":
-		_glitch_len = clampf(float(args.get("seconds", 0.6)), 0.1, 3.0)
-		_glitch = _glitch_len
+	match action:
+		"glitch":
+			_glitch_len = clampf(float(args.get("seconds", 0.6)), 0.1, 3.0)
+			_glitch = _glitch_len
+		"switch_on":
+			switch_on(float(args.get("seconds", 0.0)))
+		"switch_off":
+			switch_off()
+		"channel":
+			change_channel(float(args.get("seconds", 1.0)))
 
 
 ## Every uniform of the stages from the parameters as they act now (the per-frame ones in tick()).
@@ -345,8 +469,22 @@ func _apply() -> void:
 	var t := color_value("tint")
 	m.set_shader_parameter("pr_tint", Vector3(t.r, t.g, t.b))
 	m.set_shader_parameter("pr_gain", _f("gain"))
+	m.set_shader_parameter("pr_aspect_mode", maxi(ASPECT_MODES.find(str(value("aspect_mode"))), 0))
+	m.set_shader_parameter("pr_mirror", bool(value("mirror")))
+	m.set_shader_parameter("pr_off_axis", _f("off_axis"))
+	m.set_shader_parameter("pr_soft", _f("soft_focus"))
+	m.set_shader_parameter("pr_convergence", _f("convergence"))
+	m.set_shader_parameter("pr_lenticular", _f("lenticular"))
+	var face := float(FACES.get(str(value("display")), 0.02))
+	m.set_shader_parameter("pr_face", Vector3(face, face, face))
+	# A rear projection's soft focus widens the screen's footprint filter: two taps a side are enough for a blur.
+	_copied.erase("footprint_taps")
+	if soft_taps():
+		var taps: Variant = m.get_shader_parameter("footprint_taps")
+		m.set_shader_parameter("footprint_taps", mini(int(taps) if taps != null else 3, 2))
 	_apply_turn()
 	_apply_glitch()
+	_apply_power()
 
 
 ## The tilt and the overscan that keeps its corners off the screen (film only).
@@ -364,7 +502,9 @@ func _apply_glitch() -> void:
 	var source := str(value("source"))
 	_material.set_shader_parameter("pr_tracking", minf(_f("tracking") + (3.0 * g if source == "tape" else 0.0), 4.0))
 	_material.set_shader_parameter("pr_head_switch", minf(_f("head_switch") + (g if source == "tape" else 0.0), 2.0))
-	_material.set_shader_parameter("pr_snow", minf(_f("snow") + (0.5 * g if source == "broadcast" else 0.0), 1.0))
+	var tuning := 0.45 * _channel_dip() if not _panel_like() else 0.0
+	_material.set_shader_parameter("pr_snow", minf(_f("snow") + (0.5 * g if source == "broadcast" else 0.0) + tuning,
+			1.0))
 	_material.set_shader_parameter("pr_ghost", _f("ghost"))
 
 
@@ -372,12 +512,14 @@ func tick(delta: float) -> void:
 	if _material == null:
 		return
 	var main := main_node()
+	_step_sounds()
+	_step_power(delta)
 	_attach(main, picture_on())
 	_apply_speaker(str(value("speaker")))
 	if not attached and main != null:
 		return
 	_clock += delta
-	if _glitch > 0.0:
+	if _glitch > 0.0 or _channel > 0.0:
 		_glitch = maxf(_glitch - delta, 0.0)
 		_apply_glitch()
 	var source := str(value("source"))
@@ -458,6 +600,238 @@ func flicker_gain() -> float:
 	return float(_material.get_shader_parameter("pr_flicker"))
 
 
+# --- Switching on and off, and the channel -----------------------------------------------------------------------------
+
+## The way this set switches (SWITCH's keys): the document's or the preset's, else by its display.
+func switch_style() -> String:
+	var s := str(value("switching"))
+	if SWITCH.has(s):
+		return s
+	match str(value("display")):
+		"crt":
+			return "crt"
+		"mechanical":
+			return "valve"
+		"rear_projection":
+			return "projection"
+	return "panel"
+
+
+func _panel_like() -> bool:
+	return switch_style() == "panel"
+
+
+## Comes on from dark (seconds: how long; 0: warm_up, else the way's own). Nothing while on or coming on.
+func switch_on(seconds := 0.0) -> void:
+	if power in ["on", "switching_on"]:
+		return
+	var style := switch_style()
+	var length := seconds if seconds > 0.0 else _f("warm_up")
+	if length <= 0.0:
+		length = float(SWITCH[style]["on"])
+	_power_len = maxf(length, float(SWITCH_MIN_ON[style]))
+	_power_t = 0.0
+	power = "switching_on"
+	_channel = 0.0
+	for s: String in SWITCH[style]["on_sounds"]:
+		_play_sound(s)
+	_apply_power()
+
+
+## Goes dark its own way. Nothing while off or going off.
+func switch_off() -> void:
+	if power in ["off", "switching_off"]:
+		return
+	var style := switch_style()
+	_power_len = float(SWITCH[style]["off"])
+	_power_t = 0.0
+	power = "switching_off"
+	_channel = 0.0
+	for s: String in SWITCH[style]["off_sounds"]:
+		_play_sound(s)
+	_apply_power()
+
+
+## A channel change: the knob's clunk, the picture dips and comes back (only while on).
+func change_channel(seconds := 1.0) -> void:
+	if power != "on":
+		return
+	_channel_len = clampf(seconds, 0.9, 3.0)
+	_channel = _channel_len
+	var s := str(SWITCH[switch_style()]["channel"])
+	if s != "":
+		_play_sound(s)
+	_apply_glitch()
+	_apply_power()
+
+
+## 0..1: how far into its dip a channel change is (down over its first 30 %, back over its last 40 %).
+func _channel_dip() -> float:
+	if _channel <= 0.0:
+		return 0.0
+	var u := 1.0 - _channel / maxf(_channel_len, 0.01)
+	return smoothstep(0.0, 0.3, u) * (1.0 - smoothstep(0.6, 1.0, u))
+
+
+func _step_power(delta: float) -> void:
+	if power == "off" and host != null and host.get("timeline") != null and str(host.timeline.state) == "playing":
+		# Never a dark set over a playing film: it comes on by itself.
+		switch_on()
+	if power in ["switching_on", "switching_off"]:
+		_power_t += delta
+		if _power_t >= _power_len:
+			power = "on" if power == "switching_on" else "off"
+		_apply_power()
+	if _channel > 0.0:
+		_channel = maxf(_channel - delta, 0.0)
+		_apply_power()
+		if _channel <= 0.0:
+			_apply_glitch()
+
+
+## The set's power now: [raster (its reach, 1, 1 the whole window), the picture's light, the beam's glow].
+func power_now() -> Array:
+	var style := switch_style()
+	var u := clampf(_power_t / maxf(_power_len, 0.01), 0.0, 1.0)
+	match power:
+		"off":
+			return [Vector2.ONE, 0.0, 0.0]
+		"switching_on":
+			match style:
+				"crt":
+					# A dot, the line opening out across, then the raster opening up and down.
+					var rx := lerpf(0.012, 1.0, smoothstep(0.2, 0.4, u))
+					var ry := lerpf(0.01, 1.0, smoothstep(0.4, 0.8, u))
+					var spot := 0.7 * smoothstep(0.0, 0.2, u) * (1.0 - smoothstep(0.4, 0.7, u))
+					return [Vector2(rx, ry), smoothstep(0.15, 0.95, u), spot]
+				"valve":
+					# Dark while the heaters warm, then the picture comes up dim and a little small, growing.
+					var r := lerpf(0.86, 1.0, smoothstep(0.15, 0.9, u))
+					return [Vector2(r, r), pow(smoothstep(0.15, 1.0, u), 1.6), 0.0]
+				"projection":
+					return [Vector2.ONE, pow(smoothstep(0.1, 1.0, u), 1.3), 0.0]
+			return [Vector2.ONE, smoothstep(0.3, 1.0, u), 0.0]
+		"switching_off":
+			if style in ["crt", "valve"]:
+				# Down to a line, across to a dot, and the dot's afterglow fading (longer on a valve set).
+				var ry := lerpf(1.0, 0.01, smoothstep(0.0, 0.2, u))
+				var rx := lerpf(1.0, 0.012, smoothstep(0.2, 0.36, u))
+				var fade := smoothstep(0.4, 1.0, u)
+				var spot := 0.75 * smoothstep(0.0, 0.3, u) * (1.0 - fade)
+				return [Vector2(rx, ry), 1.0 - smoothstep(0.2, 0.5, u), spot]
+			return [Vector2.ONE, 1.0 - smoothstep(0.0, 1.0, u), 0.0]
+	if _channel > 0.0:
+		var depth := 1.0 if _panel_like() else 0.55
+		return [Vector2.ONE, 1.0 - depth * _channel_dip(), 0.0]
+	return [Vector2.ONE, 1.0, 0.0]
+
+
+func _apply_power() -> void:
+	if _material == null:
+		return
+	var now := power_now()
+	var steady := power == "on" and _channel <= 0.0
+	_material.set_shader_parameter("pr_switching", not steady)
+	_material.set_shader_parameter("pr_raster", now[0])
+	_material.set_shader_parameter("pr_power", now[1])
+	_material.set_shader_parameter("pr_spot", now[2])
+
+
+# --- The switch sounds ---------------------------------------------------------------------------------------------
+
+## The sounds this set may make, made on a worker thread now (the valves' hum takes a moment).
+func _prepare_sounds() -> void:
+	if not bool(value("switch_sounds")):
+		return
+	var style := switch_style()
+	var want: Array[String] = []
+	for s: String in (SWITCH[style]["on_sounds"] as Array) + (SWITCH[style]["off_sounds"] as Array) \
+			+ [SWITCH[style]["channel"]]:
+		if s != "" and not EnvSynth.cached(s) and not (s in want):
+			want.append(s)
+	if want.is_empty() or _sound_task >= 0:
+		return
+	_sound_task = WorkerThreadPool.add_task(func() -> void:
+		for s in want:
+			_made_sounds[s] = EnvSynth.make(s), false, "presentation sounds")
+
+
+func _finish_sounds() -> void:
+	if _sound_task < 0:
+		return
+	WorkerThreadPool.wait_for_task_completion(_sound_task)
+	_sound_task = -1
+	for s: String in _made_sounds:
+		EnvSynth.put(s, _made_sounds[s])
+	_made_sounds.clear()
+
+
+func _step_sounds() -> void:
+	if _sound_task >= 0 and WorkerThreadPool.is_task_completed(_sound_task):
+		_finish_sounds()
+	if _sound_task < 0 and not _pending_sounds.is_empty():
+		var due := _pending_sounds.duplicate()
+		_pending_sounds.clear()
+		for s: String in due:
+			_play_sound(s)
+
+
+## Plays one of SWITCH_SOUNDS at the screen, at its designed level (sound_bed.gd LEVELS) and sound_db, lower while
+## the film plays (as a sound bed's film_db), on the room's bus.
+func _play_sound(sound: String) -> void:
+	if not bool(value("switch_sounds")) or room == null:
+		return
+	if not EnvSynth.cached(sound):
+		if _sound_task >= 0 and not WorkerThreadPool.is_task_completed(_sound_task):
+			_pending_sounds.append(sound)
+			return
+		_finish_sounds()
+	var w := EnvSynth.stream(sound)
+	if w == null:
+		return
+	Acoustics.ensure_bus()
+	var in_film := host != null and host.get("timeline") != null and str(host.timeline.state) in SoundBed.FILM_STATES
+	var db := float(SoundBed.LEVELS.get(sound, -60.0)) + _f("sound_db") + (-8.0 if in_film else 0.0) \
+			- EnvAudio.DEFAULT_DB - _level_of(sound, w)
+	var p := AudioStreamPlayer3D.new()
+	p.name = "%s_%s" % [id, sound]
+	p.unit_size = 2.0
+	p.max_db = 0.0
+	p.attenuation_filter_db = 0.0
+	p.position = _sound_place()
+	p.bus = Acoustics.BUS
+	p.stream = w
+	p.volume_db = db
+	own(p)
+	p.finished.connect(func() -> void:
+		_owned.erase(p)
+		p.queue_free())
+	p.play()
+	sounds_played.append([sound, db])
+
+
+static var _levels := {}
+
+
+static func _level_of(sound: String, w: AudioStreamWAV) -> float:
+	if not _levels.has(sound):
+		_levels[sound] = EnvSynth.level_db(w)
+	return float(_levels[sound])
+
+
+## The screen's middle in the room: as the room last placed it, else the document's.
+func _sound_place() -> Vector3:
+	if _screen_at is Vector3:
+		return _screen_at
+	if host != null and host.doc.get("screen") is Dictionary:
+		return RoomSchemaRef.vec3(host.doc["screen"].get("center", [0.0, 1.2, -2.0]))
+	return Vector3(0.0, 1.2, -2.0)
+
+
+func on_screen_changed(local: Transform3D, _size: Vector2) -> void:
+	_screen_at = local.origin
+
+
 # --- The screen -------------------------------------------------------------------------------------------------------
 
 ## The screen's flat mesh draws with this material while a picture stage is on; the film layer steps aside.
@@ -476,6 +850,9 @@ func _attach(main: Node, on: bool) -> void:
 		_copied.clear()
 		_copy_uniforms(main)
 		flat.material_override = _material
+		# The quad may grow to the set's window in the shader: cull it by that.
+		_cull_was = flat.extra_cull_margin
+		flat.extra_cull_margin = maxf(_cull_was, 1.0)
 		if layer != null and layer.has_method("request_scene"):
 			layer.call("request_scene", _request_key(), true)
 	else:
@@ -486,6 +863,7 @@ func _attach(main: Node, on: bool) -> void:
 func _detach_screen(main: Node) -> void:
 	if _flat != null and is_instance_valid(_flat) and _flat.material_override == _material:
 		_flat.material_override = main.screen.material if main != null else null
+		_flat.extra_cull_margin = _cull_was
 	_flat = null
 	var layer: Node = null
 	if main != null and is_instance_valid(main) and main.get("features") != null and is_instance_valid(main.features):
@@ -501,6 +879,11 @@ func noisy() -> bool:
 			or _f("snow") > 0.0 or _f("weak") > 0.0
 
 
+## Whether the soft focus takes the footprint filter down to two taps a side (a rear projection, soft).
+func soft_taps() -> bool:
+	return str(value("display")) == "rear_projection" and _f("soft_focus") > 0.0
+
+
 func _request_key() -> String:
 	return "presentation:%d" % get_instance_id()
 
@@ -514,6 +897,8 @@ func _copy_uniforms(main: Node) -> void:
 		var v: Variant = src.get_shader_parameter(n)
 		if n == "pc_deband" and no_deband:
 			v = 0.0
+		if n == "footprint_taps" and soft_taps():
+			v = mini(int(v), 2)
 		if _copied.has(n) and typeof(_copied[n]) == typeof(v) and _copied[n] == v:
 			continue
 		_copied[n] = v
@@ -594,6 +979,7 @@ static func speaker_bus() -> int:
 
 
 func _exit_tree() -> void:
+	_finish_sounds()
 	_apply_speaker("none")
 	var main := main_node()
 	if attached or _flat != null:
