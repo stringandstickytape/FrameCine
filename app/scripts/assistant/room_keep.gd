@@ -40,7 +40,7 @@ const PICTURE_KEYS: Array[String] = ["texture", "texture_file", "uv", "color"]
 
 static func keep(doc: Dictionary) -> Dictionary:
 	var out := doc.duplicate(true)
-	out["schema"] = RoomSchema.VERSION
+	out["schema"] = RoomSchema.version_for(out)
 	var kept: Array = []
 	var created: Array = []
 	var parts: Array = out.get("parts", []) if out.get("parts") is Array else []

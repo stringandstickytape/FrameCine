@@ -376,6 +376,8 @@ func fade(target: String, to: Variant, seconds: float, ease := "in_out") -> void
 		return
 	_held[target] = true
 	if to is Dictionary and (to as Dictionary).has("setting"):
+		# Held at a setting's value: a change to the setting moves it again (set_setting).
+		_held[target] = str(to["setting"])
 		to = settings.get(str(to["setting"]), 0.0)
 	var spec := _param_spec(target)
 	_fades[target] = {"from": param(target), "to": _typed(to, spec), "t": 0.0, "seconds": seconds, "ease": ease,
@@ -490,6 +492,9 @@ func set_setting(n: String, v: Variant) -> void:
 		# A parameter built once: the systems again, the binding taking the setting's value as they build.
 		rebuild()
 		return
+	for target: String in _held.keys():
+		if _held[target] is String and _held[target] == n and not _fades.has(target):
+			fade(target, {"setting": n}, 0.5)
 	for b: Dictionary in _bindings:
 		if str(b["b"]["bind"]) == ch:
 			var nv: Variant = _evaluate(b, 0.0)

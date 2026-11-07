@@ -1351,10 +1351,24 @@ static func _layers(fx: Variant) -> bool:
 	return EffectLibrary.has(fx_name) and bool(EffectLibrary.entry(fx_name)["layers"])
 
 
+## The version a room is kept as: SYSTEMS_VERSION when it has any of the environments engine's sections, else VERSION.
+static func version_for(doc: Dictionary) -> int:
+	for k: String in (load(ENV_DOC) as GDScript).get("SECTIONS"):
+		if doc.has(k):
+			return SYSTEMS_VERSION
+	return VERSION
+
+
 ## The room after a patch: parts replaced or added by name, removed ones gone, light / sky / recolour merged.
 static func merge(current: Dictionary, patch: Dictionary) -> Dictionary:
 	var out := current.duplicate(true)
-	out["schema"] = VERSION
+	# The environments engine's sections (version 4): a patch replaces each one it names; null takes it out.
+	for k: String in (load(ENV_DOC) as GDScript).get("SECTIONS"):
+		if patch.has(k) and patch[k] == null:
+			out.erase(k)
+		elif patch.has(k):
+			out[k] = patch[k].duplicate(true) if patch[k] is Dictionary or patch[k] is Array else patch[k]
+	out["schema"] = version_for(out)
 	for k in ["name", "light", "sky", "atmosphere", "seats", "default_seat", "screen", "lights"]:
 		if patch.has(k) and patch[k] == null:
 			out.erase(k)
