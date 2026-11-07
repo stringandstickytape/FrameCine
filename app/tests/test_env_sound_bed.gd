@@ -36,6 +36,8 @@ const ROOM := {
 				"to": [30.0, 0.5, -20.0], "reach": 20.0}},
 		{"system": "sound_bed", "id": "ticks", "params": {"sound": "tick", "every": 0.4, "jitter": 0.0}},
 		{"system": "sound_bed", "id": "crater", "params": {"sound": "silence"}},
+		{"system": "sound_bed", "id": "leaves", "params": {"sound": "rain_leaves", "place": "around", "voices": 2,
+				"radius": 6.0, "level": {"bind": "weather.rain", "smooth": 0.2}}},
 	],
 	"settings": [
 		{"name": "rain", "type": "range", "min": 0.0, "max": 1.0, "step": 0.1, "default": 1.0, "format": "percent",
@@ -149,6 +151,17 @@ func _behaviour() -> void:
 	await _seconds(2.0)
 	_check("bass: the wall rumbles (%.2f)" % float(wall.params["level"]), wall.playing()
 			and absf(float(wall.params["level"]) - 0.8) < 0.05)
+	h.signals.clear_fakes()
+	# Rain on leaves follows the weather system's channel (0 with no weather system).
+	var leaves: Node = h.system("leaves")
+	_check("no weather: the leaves are quiet", not leaves.playing())
+	h.signals.fake("weather.rain", 1.0)
+	await _seconds(1.5)
+	_check("weather.rain: rain on the leaves (%.2f), two voices" % float(leaves.params["level"]), leaves.playing()
+			and leaves.players().size() == 2 and float(leaves.params["level"]) > 0.95)
+	h.signals.fake("weather.rain", 0.0)
+	await _seconds(2.0)
+	_check("the rain stops: the leaves too", not leaves.playing())
 	h.signals.clear_fakes()
 	# One-shots.
 	_check("the train waits for its period", train.players().is_empty())
