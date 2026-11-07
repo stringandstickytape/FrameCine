@@ -25,6 +25,8 @@ const HULL_POINTS := 48
 const FLAT := 0.01
 ## The fallback leaves out meshes bigger than this (skies, the passthrough shell): nothing is thrown that far.
 const FALLBACK_MAX_EXTENT := 120.0
+## A box seen from inside (flip_faces: the dim room's walls) is hollow: walls this thick, outside its faces.
+const WALL_SLAB := 0.3
 ## The flat screen's box: this deep, behind the picture.
 const SCREEN_DEPTH := 0.12
 ## The curved screen: boxes along its arc.
@@ -76,10 +78,20 @@ static func mesh_shapes(root: Node3D, skip: Array = []) -> Array:
 		var aabb := xf * mesh.get_aabb()
 		if aabb.size.length() > FALLBACK_MAX_EXTENT:
 			continue
-		var exact := primitive_mesh_shape(mesh, xf)
-		if not exact.is_empty():
-			out.append(exact)
-			continue
+		# A primitive seen from inside (flip_faces) is a hollow room, not a solid: as a solid it held whatever was in it
+		# and pushed it out through the walls (a held object in the dim room fell for ever, 2026-11-07). A box becomes
+		# six slabs outside its faces; a sphere or a cylinder (a dome) its triangles.
+		if mesh is PrimitiveMesh and bool((mesh as PrimitiveMesh).flip_faces):
+			if mesh is BoxMesh:
+				var slabs := hollow_box((mesh as BoxMesh).size, xf)
+				if not slabs.is_empty():
+					out.append_array(slabs)
+					continue
+		else:
+			var exact := primitive_mesh_shape(mesh, xf)
+			if not exact.is_empty():
+				out.append(exact)
+				continue
 		var faces := mesh.get_faces()
 		if faces.is_empty():
 			continue
@@ -124,6 +136,26 @@ static func primitive_mesh_shape(mesh: Mesh, xf: Transform3D) -> Array:
 		cy.height = (mesh as CylinderMesh).height * k.y
 		return [cy, rigid]
 	return []
+
+
+## A box seen from inside, size `size` under xf (its scale may differ per axis, no shear): six slabs WALL_SLAB thick
+## just outside its faces, so what is inside stays in. [] when xf shears.
+static func hollow_box(size: Vector3, xf: Transform3D) -> Array:
+	var s := split(xf.basis)
+	var rest: Basis = s[1]
+	if not is_diagonal(rest):
+		return []
+	var full := size * Vector3(rest.x.x, rest.y.y, rest.z.z).abs()
+	var turn: Basis = s[0]
+	var out: Array = []
+	for axis in 3:
+		for side: float in [-1.0, 1.0]:
+			var centre := Vector3.ZERO
+			centre[axis] = side * (full[axis] + WALL_SLAB) * 0.5
+			var slab := full + Vector3.ONE * WALL_SLAB * 2.0
+			slab[axis] = WALL_SLAB
+			out.append(box(xf.origin + turn * centre, slab, turn))
+	return out
 
 
 ## A box round `aabb` (a mesh's extent) under xf: its centre and turn, the scale in its size.

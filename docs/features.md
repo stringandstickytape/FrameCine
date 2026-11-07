@@ -2680,9 +2680,9 @@ The material option `turn` (degrees) is new in the room document and the shader 
 
 ### Open questions
 
-- **The dim room's walls.** A held object goes through the dim room's walls and falls without end, a wall clock as
-  well as a poster (seen while writing `test_pictures`; the cinema is fine). It is older than this work and left as
-  it is.
+- **The dim room's walls (fixed 2026-11-07).** A held object went through the dim room's walls and fell without end:
+  its walls are one box seen from inside (`flip_faces`), and the shapes made it a solid box that pushed what was in it
+  out. A box seen from inside is now six wall slabs outside its faces (`physics_shapes.gd hollow_box()`).
 - **ambientCG's dimensionX** is read as centimetres. Their API gives no unit.
 - **Megascans' normal maps** are read as OpenGL (Y up), as the bundled ones. Not checked against a scan with clear
   relief.

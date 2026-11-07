@@ -72,6 +72,35 @@ func _run() -> void:
 # --- Shapes -----------------------------------------------------------------------------------------------------
 
 func _test_shapes() -> void:
+	# A box seen from inside (flip_faces: the dim room's walls) is a hollow room: six slabs outside its faces, none
+	# holding a point inside it (as a solid it pushed a held object out through the walls, 2026-11-07).
+	var room_box := BoxMesh.new()
+	room_box.size = Vector3(8, 3, 8)
+	room_box.flip_faces = true
+	var holder := Node3D.new()
+	var walls := MeshInstance3D.new()
+	walls.mesh = room_box
+	walls.position = Vector3(0, 1.5, -0.6)
+	holder.add_child(walls)
+	root.add_child(holder)
+	var hollow: Array = PhysicsShapes.mesh_shapes(holder)
+	var inside := Vector3(0.5, 1.2, -1.0)
+	var holds_inside := false
+	var sides := {}
+	for sh: Array in hollow:
+		var b := sh[0] as BoxShape3D
+		if b == null:
+			continue
+		var local: Vector3 = (sh[1] as Transform3D).affine_inverse() * inside
+		if absf(local.x) < b.size.x * 0.5 and absf(local.y) < b.size.y * 0.5 and absf(local.z) < b.size.z * 0.5:
+			holds_inside = true
+		var c: Vector3 = (sh[1] as Transform3D).origin - walls.position
+		for axis in 3:
+			if absf(c[axis]) > room_box.size[axis] * 0.5:
+				sides["%d%s" % [axis, "+" if c[axis] > 0.0 else "-"]] = true
+	_check("a box seen from inside: six wall slabs (%d), one past each face (%d), none holding a point inside"
+			% [hollow.size(), sides.size()], hollow.size() == 6 and sides.size() == 6 and not holds_inside)
+	holder.queue_free()
 	var s := PhysicsShapes.placement_shapes("box", {"size": [0.4, 0.2, 0.3]}, Basis())
 	_check("a box is a box shape of its size", s.size() == 1 and s[0][0] is BoxShape3D
 			and (s[0][0] as BoxShape3D).size.is_equal_approx(Vector3(0.4, 0.2, 0.3)))
