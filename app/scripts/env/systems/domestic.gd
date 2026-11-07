@@ -13,11 +13,17 @@ extends "res://scripts/env/systems/kit/builder.gd"
 ##                  window (rain on the pane: a weather system)
 ##   ice            a room of ice blocks under a low vault, hides on the floor, candles in the walls, the picture on
 ##                  a smoothed panel of ice, the doorway open to the night
+## The telly (`telly`): a deep cabinet, a small portable (a carry handle, an aerial, its knobs at the side) or a thin
+## flat panel (always 16:9, on a pedestal foot); on a stand (`telly_stand`): a chest of drawers, a radiogram, a desk, a
+## tv_unit (an open shelf under its top for a video recorder) or the wall. The picture stays where screen_size and
+## screen_bottom put it: the stand is as tall as the space under the set (stand_width, stand_shift: its width and its
+## move sideways under the set).
 ## Every parameter marked "auto" (an enum's "auto", 0 or -1 for a number, {} for a material, [0, 0] for a size) takes
 ## the style's value (STYLE_DEFAULTS); a document sets only what it changes.
 ##   Floor, Walls, Ceiling, Trim, Window (glass), Outside, Door, Fireplace, Fire, Radiator, Lamps, Screen (the screen's
 ##   own parts), Painting, Telly, Bed, Fort, FortSheet, FairyLights, Seats or Cushions
-## Slots for the kit: side_walls, screen, proscenium, floor, ceiling, corners, window, vista, mantel, fort_opening.
+## Slots for the kit: side_walls, screen, proscenium, floor, ceiling, corners, window, vista, mantel, fort_opening,
+## telly_stand (the stand's top), telly_shelf (a video recorder's place under the set).
 
 static func spec() -> Dictionary:
 	return {
@@ -57,6 +63,15 @@ const PARAMS := {
 			"description": "the painting over the screen: 0 down over it, 1 risen into the ceiling (a cue fades it)"},
 	"opening_screen": {"type": "bool", "default": false,
 			"description": "the telly fills the pillow fort's opening (not live: the fort builds again)"},
+	"telly": {"type": "enum", "values": ["cabinet", "portable", "flat_panel"], "default": "cabinet",
+			"description": "the telly: a deep cabinet, a small portable, or a thin flat panel (its picture 16:9)"},
+	"telly_stand": {"type": "enum", "values": ["chest", "radiogram", "desk", "tv_unit", "wall"], "default": "chest",
+			"description": "what the telly stands on: a chest of drawers, a radiogram, a desk, a tv unit with a shelf "
+			+ "for a video recorder, or the wall (a flat panel hangs on it, a set sits on a shelf)"},
+	"stand_width": {"type": "float", "min": 0.0, "max": 4.0, "default": 0.0,
+			"description": "the stand's width, metres (0: its own, a little wider than the set)"},
+	"stand_shift": {"type": "float", "min": -3.0, "max": 3.0, "default": 0.0,
+			"description": "the stand moved sideways under the set, metres (room for a computer beside it)"},
 	"window": {"type": "enum", "values": ["auto", "none", "left", "right", "back"], "default": "auto",
 			"description": "the wall with the window"},
 	"window_width": {"type": "float", "min": 0.0, "max": 8.0, "default": 0.0,
@@ -98,11 +113,11 @@ const PARAMS := {
 	"floor": {"type": "material", "default": AUTO_MAT, "description": "the floor"},
 	"ceiling": {"type": "material", "default": AUTO_MAT, "description": "the ceiling"},
 	"trim": {"type": "material", "default": AUTO_MAT,
-			"description": "skirting, frames, the door, the chest of drawers, the bed's frame"},
+			"description": "skirting, frames, the door, the telly's stand, the bed's frame"},
 	"surround": {"type": "material", "default": AUTO_MAT, "description": "the fireplace and its hearth"},
 	"radiator_material": {"type": "material", "default": AUTO_MAT, "description": "the radiator"},
 	"screen_surface": {"type": "material", "default": AUTO_MAT, "description": "the screen's white"},
-	"telly_material": {"type": "material", "default": AUTO_MAT, "description": "the telly's cabinet"},
+	"telly_material": {"type": "material", "default": AUTO_MAT, "description": "the telly's cabinet or case"},
 	"cushions": {"type": "material", "default": AUTO_MAT, "description": "the fort's cushions, the bed's duvet"},
 	"sheet": {"type": "material", "default": AUTO_MAT, "description": "the fort's bedsheet"},
 	"seat_cover": {"type": "material", "default": AUTO_MAT, "description": "the seats' cover (or the hides)"},
@@ -190,6 +205,16 @@ const FORT_TOP_FRONT := 1.55
 const FORT_TOP_BACK := 1.35
 const FORT_WALL := 0.56
 const DOOR_SIZE := Vector2(0.86, 2.02)
+## A portable's and a flat panel's picture when the document gives none (the style's is a cabinet's).
+const TELLY_SIZES := {"portable": [0.3, 0.225], "flat_panel": [0.8, 0.45]}
+## The flat panel: its depth, the speaker strip under the picture, the pedestal between it and its stand.
+const FLAT_DEPTH := 0.07
+const FLAT_STRIP := 0.05
+const PEDESTAL := 0.1
+## The stands under a set (but the chest, as it always was): [width beyond the set's, least width, least depth];
+## their back against the front wall, their front at the set's (a flat panel's pedestal set back on it).
+const STANDS := {"radiogram": [0.7, 1.5, 0.45], "desk": [0.6, 1.1, 0.7], "tv_unit": [0.3, 1.0, 0.45]}
+const Furniture := preload("res://scripts/env/systems/kit/furniture.gd")
 
 
 # --- From parameters alone ----------------------------------------------------------------------------------------
@@ -210,9 +235,12 @@ static func _auto(k: String, v: Variant) -> bool:
 static func resolved(p: Dictionary) -> Dictionary:
 	var out := p.duplicate()
 	var s: Dictionary = STYLE_DEFAULTS.get(str(p.get("style", "plain")), STYLE_DEFAULTS["plain"])
+	var form := str(p.get("telly", "cabinet"))
 	for k: String in s:
 		if _auto(k, p.get(k)):
 			out[k] = s[k]
+			if k == "screen_size" and TELLY_SIZES.has(form):
+				out[k] = TELLY_SIZES[form]
 	return out
 
 
@@ -324,6 +352,9 @@ static func _picture(p: Dictionary) -> Array:
 	var bottom := float(p["screen_bottom"])
 	match str(p["screen"]):
 		"telly":
+			var form := str(p.get("telly", "cabinet"))
+			if form == "flat_panel":
+				size.y = size.x * 9.0 / 16.0
 			if _fort(p) and bool(p["opening_screen"]):
 				# The telly fills the fort's opening: the picture as big as fits in it (its own shape kept), just
 				# beyond it.
@@ -331,6 +362,9 @@ static func _picture(p: Dictionary) -> Array:
 				var k := minf(open.x / size.x, open.y / size.y)
 				size *= k
 				return [Vector3(0.0, 0.35 + open.y * 0.5, FORT_FRONT - 0.35), size]
+			if str(p.get("telly_stand", "chest")) == "wall":
+				# On the wall: the set's back against it (a flat panel's bracket, a set's shelf).
+				return [Vector3(0.0, bottom + size.y * 0.5, fz + _set_depth(form, size) + 0.03), size]
 			return [Vector3(0.0, bottom + size.y * 0.5, fz + 0.5), size]
 		"projected":
 			return [Vector3(0.0, bottom + size.y * 0.5, fz + 0.12), size]
@@ -347,20 +381,106 @@ static func screen_for(given: Dictionary) -> Dictionary:
 	return {"center": [c.x, c.y, c.z], "size": [s.x, s.y]}
 
 
-## The telly's cabinet round the picture and the chest under it: [[centre, size]...].
-static func _telly_boxes(p: Dictionary) -> Array:
+## A set's depth front to back for its picture.
+static func _set_depth(form: String, s: Vector2) -> float:
+	match form:
+		"portable":
+			return clampf(s.x, 0.24, 0.42)
+		"flat_panel":
+			return FLAT_DEPTH
+	return clampf(s.x * 0.75, 0.35, 1.2)
+
+
+## The telly and its stand from the parameters alone: {pic [centre, size], form, stand, bezel, depth, foot (the set's
+## bottom over the floor), top (the stand's top), body [centre, size] (the set's outer box), stand_box [centre, size]
+## ([]: none), shelf [origin, room] (a video recorder's place: the middle of its foot, and the room there)}.
+static func _telly(p: Dictionary) -> Dictionary:
 	var pic := _picture(p)
 	var c: Vector3 = pic[0]
 	var s: Vector2 = pic[1]
-	var bezel := Vector2(maxf(0.06, s.x * 0.1), maxf(0.06, s.y * 0.12))
-	var outer := Vector2(s.x + bezel.x * 2.0, s.y + bezel.y * 2.6)
-	var depth := clampf(s.x * 0.75, 0.35, 1.2)
-	var mid_y := c.y - bezel.y * 0.3
-	var out: Array = [[Vector3(0.0, mid_y, c.z - depth * 0.5), Vector3(outer.x, outer.y, depth)]]
+	var form := str(p.get("telly", "cabinet"))
+	var stand := str(p.get("telly_stand", "chest"))
+	var depth := _set_depth(form, s)
+	var bezel: Vector2
+	var outer: Vector2
+	var mid_y: float
+	var cx := 0.0
+	match form:
+		"portable":
+			# The knobs' panel on the picture's right.
+			bezel = Vector2(maxf(0.035, s.x * 0.08), maxf(0.035, s.y * 0.1))
+			var side := maxf(0.06, s.x * 0.22)
+			outer = Vector2(s.x + bezel.x * 2.0 + side, s.y + bezel.y * 2.4)
+			cx = side * 0.5
+			mid_y = c.y - bezel.y * 0.2
+		"flat_panel":
+			bezel = Vector2(0.035, 0.035)
+			outer = Vector2(s.x + bezel.x * 2.0, s.y + bezel.y * 2.0 + FLAT_STRIP)
+			mid_y = c.y - FLAT_STRIP * 0.5
+		_:
+			bezel = Vector2(maxf(0.06, s.x * 0.1), maxf(0.06, s.y * 0.12))
+			outer = Vector2(s.x + bezel.x * 2.0, s.y + bezel.y * 2.6)
+			mid_y = c.y - bezel.y * 0.3
 	var foot := mid_y - outer.y * 0.5
-	if foot > 0.05:
-		out.append([Vector3(0.0, foot * 0.5, c.z - depth * 0.5 - 0.02), Vector3(maxf(outer.x + 0.3, 0.9), foot,
-				depth + 0.1)])
+	var pedestal := form == "flat_panel" and stand != "wall"
+	var top := foot - (PEDESTAL if pedestal else 0.0)
+	var out := {"pic": pic, "form": form, "stand": stand, "bezel": bezel, "depth": depth, "foot": foot, "top": top,
+			"pedestal": pedestal, "body": [Vector3(cx, mid_y, c.z - depth * 0.5), Vector3(outer.x, outer.y, depth)],
+			"stand_box": [], "shelf": []}
+	var shift := float(p.get("stand_shift", 0.0))
+	var given_w := float(p.get("stand_width", 0.0))
+	var fz := float(p["front_z"])
+	var set_back := 0.12 if pedestal else 0.0
+	match stand:
+		"chest":
+			if top > 0.05:
+				var cd := maxf(depth + 0.1, 0.4)
+				out["stand_box"] = [Vector3(shift, top * 0.5, c.z + 0.03 + set_back - cd * 0.5),
+						Vector3(given_w if given_w > 0.0 else maxf(outer.x + 0.3, 0.9), top, cd)]
+		"radiogram", "desk", "tv_unit":
+			if top > 0.05:
+				var own: Array = STANDS[stand]
+				var back := fz + 0.03
+				var d := maxf(float(own[2]), c.z + set_back - back)
+				out["stand_box"] = [Vector3(shift, top * 0.5, back + d * 0.5),
+						Vector3(given_w if given_w > 0.0 else maxf(outer.x + float(own[0]), float(own[1])), top, d)]
+		"wall":
+			# A cabinet or a portable on a shelf on brackets; a flat panel hangs on its own bracket (behind it).
+			if not pedestal and form != "flat_panel" and foot > 0.05:
+				var d := c.z + 0.02 - fz
+				out["stand_box"] = [Vector3(cx, foot - 0.015, fz + d * 0.5), Vector3(outer.x + 0.1, 0.03, d)]
+	out["shelf"] = _shelf(out, cx, outer, c)
+	return out
+
+
+## Where a video recorder goes under the set: the tv_unit's shelf; a desk's or a radiogram's top beside the set when
+## there is half a metre; else the floor in front of the stand (or under a set on the wall).
+static func _shelf(t: Dictionary, cx: float, outer: Vector2, c: Vector3) -> Array:
+	var sb: Array = t["stand_box"]
+	var stand := str(t["stand"])
+	if not sb.is_empty() and stand != "wall":
+		var sc: Vector3 = sb[0]
+		var ss: Vector3 = sb[1]
+		var front := sc.z + ss.z * 0.5
+		var y := Furniture.shelf_floor(float(t["top"]))
+		if stand == "tv_unit" and y > 0.0:
+			return [Vector3(sc.x, y, front - 0.17), Vector3(ss.x - 0.1, Furniture.SHELF_H, ss.z - 0.05)]
+		if stand in ["desk", "radiogram"]:
+			var right := (sc.x + ss.x * 0.5) - (cx + outer.x * 0.5)
+			var left := (cx - outer.x * 0.5) - (sc.x - ss.x * 0.5)
+			if maxf(right, left) >= 0.5:
+				var x := (cx + outer.x * 0.5 + right * 0.5) if right >= left else (cx - outer.x * 0.5 - left * 0.5)
+				return [Vector3(x, float(t["top"]), front - 0.17), Vector3(maxf(right, left), 0.4, ss.z)]
+		return [Vector3(cx, 0.0, front + 0.2), Vector3(0.6, float(t["top"]), 0.4)]
+	return [Vector3(cx, 0.0, c.z + 0.2), Vector3(0.6, float(t["foot"]), 0.4)]
+
+
+## The telly's body round the picture and the stand under it: [[centre, size]...].
+static func _telly_boxes(p: Dictionary) -> Array:
+	var t := _telly(p)
+	var out: Array = [t["body"]]
+	if not (t["stand_box"] as Array).is_empty():
+		out.append(t["stand_box"])
 	return out
 
 
@@ -464,6 +584,22 @@ static func slots_for(given: Dictionary) -> Dictionary:
 	if _fort(p):
 		out["fort_opening"] = [{"transform": Transform3D(Basis(), Vector3(0.0, 0.0, FORT_FRONT)),
 				"size": [FORT_HALF * 2.0, FORT_TOP_FRONT, 0.1]}]
+	if str(p["screen"]) == "telly":
+		# The stand's top at its front middle (things on it go behind: -z); on the wall, the floor under the set.
+		var t := _telly(p)
+		var sb: Array = t["stand_box"]
+		if not sb.is_empty() and str(t["stand"]) != "wall":
+			var bc: Vector3 = sb[0]
+			var bs: Vector3 = sb[1]
+			out["telly_stand"] = [{"transform": Transform3D(Basis(), Vector3(bc.x, float(t["top"]), bc.z + bs.z * 0.5)),
+					"size": [bs.x, float(t["top"]), bs.z]}]
+		else:
+			var body: Array = t["body"]
+			out["telly_stand"] = [{"transform": Transform3D(Basis(), Vector3((body[0] as Vector3).x, 0.0,
+					float(p["front_z"]) + 0.02)), "size": [(body[1] as Vector3).x, float(t["foot"]), 0.0]}]
+		var sh: Array = t["shelf"]
+		var room_size: Vector3 = sh[1]
+		out["telly_shelf"] = [{"transform": Transform3D(Basis(), sh[0]), "size": [room_size.x, room_size.y, room_size.z]}]
 	return out
 
 
@@ -480,6 +616,7 @@ var _fire_m: Array = []
 var _painting: MeshInstance3D
 var _painting_travel := 0.0
 var _wall_m: ShaderMaterial
+var _trim_m: ShaderMaterial
 
 
 func _m(key: String, instanced := false) -> ShaderMaterial:
@@ -546,7 +683,8 @@ func build() -> void:
 		ceil.face([Vector3(-hw, h, fz), Vector3(hw, h, fz), Vector3(hw, h, bz), Vector3(-hw, h, bz)], Vector3.DOWN)
 	_add_static("Ceiling", ceil)
 	var trim := RoomMesh.new()
-	trim.surface(_m("trim"))
+	_trim_m = _m("trim")
+	trim.surface(_trim_m)
 	if not ice:
 		_build_skirting(trim, door)
 	if not win.is_empty():
@@ -732,47 +870,141 @@ func _place_painting() -> void:
 		_painting.position = Vector3(0, float(params["painting_open"]) * _painting_travel, 0)
 
 
-## The telly on a chest of drawers: a deep cabinet round the picture (wider at the bottom for its controls), the
-## chest's drawers.
+## The telly (a cabinet, a portable or a flat panel) on its stand (in the trim's material).
 func _build_telly(trim: RoomMesh) -> void:
-	var pic := _picture(_p)
-	var c: Vector3 = pic[0]
-	var s: Vector2 = pic[1]
-	var boxes := _telly_boxes(_p)
+	var t := _telly(_p)
 	var tv := RoomMesh.new()
 	tv.surface(_m("telly_material"))
-	var cab: Array = boxes[0]
-	var centre: Vector3 = cab[0]
-	var size: Vector3 = cab[1]
-	# The front's bezel round the picture (the picture's own face is the screen), the body tapering behind.
+	match str(t["form"]):
+		"portable":
+			_build_portable(tv, t)
+		"flat_panel":
+			_build_flat_panel(tv, t)
+		_:
+			_build_cabinet(tv, t)
+	_add_static("Telly", tv)
+	_build_stand(trim, t)
+
+
+## The front round the picture (a face with the picture's hole: the picture's own face is the screen) over a body
+## (its own face at the front left out), and a dark glass behind the picture's plane (the film is drawn in front).
+func _telly_front(tv: RoomMesh, t: Dictionary, glass_back: float) -> Array:
+	var c: Vector3 = (t["pic"] as Array)[0]
+	var s: Vector2 = (t["pic"] as Array)[1]
+	var centre: Vector3 = (t["body"] as Array)[0]
+	var size: Vector3 = (t["body"] as Array)[1]
+	var left := centre.x - size.x * 0.5
+	var bottom := centre.y - size.y * 0.5
+	var holes := [Rect2(c.x - s.x * 0.5 - left, c.y - s.y * 0.5 - bottom, s.x, s.y)]
+	Shapes.wall(tv, Vector3(left, bottom, c.z), Vector3.RIGHT, Vector3.BACK, size.x, size.y, holes)
+	return [c, s, centre, size, left, bottom, glass_back]
+
+
+func _dark_glass(tv: RoomMesh, c: Vector3, s: Vector2, back: float) -> void:
+	tv.surface(_light.library("dark_metal", Color(0.03, 0.035, 0.035)))
+	Shapes.quad(tv, Vector3(c.x, c.y, c.z - back), Vector3(s.x * 0.5, 0, 0), Vector3(0, s.y * 0.5, 0), Vector3.BACK)
+
+
+## A deep cabinet round the picture (wider at the bottom for its controls), the body tapering behind, buttons under
+## the picture.
+func _build_cabinet(tv: RoomMesh, t: Dictionary) -> void:
+	var f := _telly_front(tv, t, 0.03)
+	var c: Vector3 = f[0]
+	var s: Vector2 = f[1]
+	var centre: Vector3 = f[2]
+	var size: Vector3 = f[3]
+	var bottom: float = f[5]
 	var front := c.z
-	var fr := Vector2(size.x * 0.5, size.y * 0.5)
-	var bottom := centre.y - fr.y
-	var top := centre.y + fr.y
-	var holes := [Rect2(fr.x - s.x * 0.5, c.y - s.y * 0.5 - bottom, s.x, s.y)]
-	Shapes.wall(tv, Vector3(-fr.x, bottom, front), Vector3.RIGHT, Vector3.BACK, size.x, top - bottom, holes)
 	var back_z := front - size.z
 	tv.box(Vector3(0, centre.y, front - 0.05), Vector3(size.x, size.y, 0.1), Basis(), [RoomMesh.BACK])
 	tv.box(Vector3(0, centre.y + 0.02, (front - 0.1 + back_z) * 0.5), Vector3(size.x * 0.7, size.y * 0.75,
 			size.z - 0.1), Basis(), [RoomMesh.BACK])
-	# A dark glass behind the picture's plane (the screen draws the film in front of it).
-	tv.surface(_light.library("dark_metal", Color(0.03, 0.035, 0.035)))
-	Shapes.quad(tv, Vector3(c.x, c.y, front - 0.03), Vector3(s.x * 0.5, 0, 0), Vector3(0, s.y * 0.5, 0), Vector3.BACK)
-	# Its buttons under the picture.
+	_dark_glass(tv, c, s, 0.03)
 	for k in 4:
-		tv.box(Vector3(fr.x - 0.06 - k * 0.05, bottom + (c.y - s.y * 0.5 - bottom) * 0.5, front + 0.006),
+		tv.box(Vector3(size.x * 0.5 - 0.06 - k * 0.05, bottom + (c.y - s.y * 0.5 - bottom) * 0.5, front + 0.006),
 				Vector3(0.03, 0.015, 0.012))
-	_add_static("Telly", tv)
-	if boxes.size() > 1:
-		var chest: Array = boxes[1]
-		var cc: Vector3 = chest[0]
-		var cs: Vector3 = chest[1]
-		trim.box(cc, cs, Basis(), [RoomMesh.DOWN])
-		var rows := maxi(int(cs.y / 0.22), 1)
-		for k in rows:
-			var y := cc.y - cs.y * 0.5 + (k + 0.5) * cs.y / rows
-			trim.box(Vector3(cc.x, y, cc.z + cs.z * 0.5 + 0.008), Vector3(cs.x - 0.06, cs.y / rows - 0.04, 0.016))
-			trim.box(Vector3(cc.x, y, cc.z + cs.z * 0.5 + 0.025), Vector3(0.12, 0.02, 0.02))
+
+
+## A portable: a small deep case, the picture on the left of its front and a panel of knobs and a speaker's slots on
+## the right, a carry handle on top and a rod aerial leaning back.
+func _build_portable(tv: RoomMesh, t: Dictionary) -> void:
+	var f := _telly_front(tv, t, 0.03)
+	var c: Vector3 = f[0]
+	var s: Vector2 = f[1]
+	var centre: Vector3 = f[2]
+	var size: Vector3 = f[3]
+	var front := c.z
+	var top := centre.y + size.y * 0.5
+	tv.box(Vector3(centre.x, centre.y, front - 0.04), Vector3(size.x, size.y, 0.08), Basis(), [RoomMesh.BACK])
+	tv.box(Vector3(centre.x, centre.y + 0.005, front - 0.08 - (size.z - 0.08) * 0.5), Vector3(size.x * 0.86,
+			size.y * 0.86, size.z - 0.08), Basis(), [RoomMesh.BACK])
+	# The handle: two lugs and a bar over the top; the aerial from the back corner.
+	for sd: float in [-1.0, 1.0]:
+		tv.box(Vector3(centre.x + sd * size.x * 0.3, top + 0.02, centre.z), Vector3(0.022, 0.04, 0.03), Basis(),
+				[RoomMesh.DOWN])
+	tv.box(Vector3(centre.x, top + 0.045, centre.z), Vector3(size.x * 0.6 + 0.022, 0.018, 0.03))
+	var foot := Vector3(centre.x + size.x * 0.36, top, centre.z - size.z * 0.3)
+	tv.box(foot + Vector3(0, 0.01, 0), Vector3(0.025, 0.02, 0.025), Basis(), [RoomMesh.DOWN])
+	Shapes.beam(tv, foot + Vector3(0, 0.02, 0), foot + Vector3(0.1, 0.4, -0.1), Vector2(0.005, 0.005))
+	_dark_glass(tv, c, s, 0.03)
+	# Knobs (short cylinders) and the speaker's slots on the panel.
+	var panel_x := (c.x + s.x * 0.5 + float((t["bezel"] as Vector2).x) * 0.5 + centre.x + size.x * 0.5) * 0.5
+	for k in 2:
+		Shapes.cylinder(tv, Vector3(panel_x, c.y + s.y * (0.28 - k * 0.3), front), 0.016, 0.014, 8,
+				Basis(Vector3.RIGHT, PI * 0.5))
+	for k in 4:
+		tv.box(Vector3(panel_x, c.y - s.y * 0.28 - k * 0.018, front + 0.002), Vector3(0.04, 0.005, 0.004), Basis(),
+				[RoomMesh.BACK])
+
+
+## A flat panel: a thin frame round the picture, a speaker strip under it, a shallow box at the back, and (not on
+## the wall) a pedestal: a neck and a foot on the stand's top.
+func _build_flat_panel(tv: RoomMesh, t: Dictionary) -> void:
+	var f := _telly_front(tv, t, 0.008)
+	var c: Vector3 = f[0]
+	var s: Vector2 = f[1]
+	var centre: Vector3 = f[2]
+	var size: Vector3 = f[3]
+	var bottom: float = f[5]
+	var front := c.z
+	tv.box(Vector3(centre.x, centre.y, front - size.z * 0.5), Vector3(size.x, size.y, size.z), Basis(), [RoomMesh.BACK])
+	tv.box(Vector3(centre.x, centre.y + 0.02, front - size.z - 0.02), Vector3(size.x * 0.62, size.y * 0.6, 0.04),
+			Basis(), [RoomMesh.BACK])
+	if bool(t["pedestal"]):
+		var stand_top := float(t["top"])
+		tv.box(Vector3(centre.x, (stand_top + bottom) * 0.5 + 0.02, front - size.z * 0.6), Vector3(0.07,
+				bottom - stand_top + 0.04, 0.04), Basis(), [RoomMesh.DOWN, RoomMesh.UP])
+		tv.box(Vector3(centre.x, stand_top + 0.009, front - size.z * 0.6), Vector3(minf(0.42, size.x * 0.55), 0.018,
+				0.24), Basis(), [RoomMesh.DOWN])
+	_dark_glass(tv, c, s, 0.008)
+	# The speaker strip's grille.
+	tv.box(Vector3(centre.x, bottom + FLAT_STRIP * 0.5 + 0.008, front + 0.002), Vector3(s.x * 0.86, FLAT_STRIP * 0.4,
+			0.004), Basis(), [RoomMesh.BACK])
+
+
+## The stand (the trim's material): a chest of drawers, a radiogram, a desk, a tv unit, or a shelf on the wall.
+func _build_stand(trim: RoomMesh, t: Dictionary) -> void:
+	var sb: Array = t["stand_box"]
+	if sb.is_empty():
+		return
+	var cc: Vector3 = sb[0]
+	var cs: Vector3 = sb[1]
+	var at := Transform3D(Basis(), Vector3(cc.x, 0.0, cc.z))
+	match str(t["stand"]):
+		"radiogram", "desk", "tv_unit":
+			Furniture.stand(str(t["stand"]), trim, at, cs, {"body": _trim_m})
+		"wall":
+			trim.box(cc, cs)
+			for sd: float in [-1.0, 1.0]:
+				trim.box(Vector3(cc.x + sd * (cs.x * 0.5 - 0.08), cc.y - 0.085, cc.z - cs.z * 0.25),
+						Vector3(0.025, 0.14, cs.z * 0.5), Basis(), [RoomMesh.UP])
+		_:
+			trim.box(cc, cs, Basis(), [RoomMesh.DOWN])
+			var rows := maxi(int(cs.y / 0.22), 1)
+			for k in rows:
+				var y := cc.y - cs.y * 0.5 + (k + 0.5) * cs.y / rows
+				trim.box(Vector3(cc.x, y, cc.z + cs.z * 0.5 + 0.008), Vector3(cs.x - 0.06, cs.y / rows - 0.04, 0.016))
+				trim.box(Vector3(cc.x, y, cc.z + cs.z * 0.5 + 0.025), Vector3(0.12, 0.02, 0.02))
 
 
 func _build_bed(trim: RoomMesh) -> void:

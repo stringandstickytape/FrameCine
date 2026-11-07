@@ -7,7 +7,9 @@ extends "res://tests/env_builder_harness.gd"
 ## swirling carpet over its floor, a plasterboard partition behind the rows, a balcony's front. A shopfront with a tin
 ## booth. A drive-in: the lot, a car, a screen tower, a neon snack bar. A rooftop with bougainvillea along every
 ## parapet. A nave with ivy and ferns, and a piece on a slot the nave lacks (reported, not placed). The pieces share
-## a few meshes; their boxes are there for object physics; the glow is live.
+## a few meshes; their boxes are there for object physics; the glow is live. A sitting room with every piece of
+## furniture: the video recorder in the tv unit's shelf, its clock flashing 12:00; the standard lamp's shade dims with
+## the house lights.
 ## godot --headless --xr-mode off --path app --script res://tests/test_env_kit.gd
 
 const Procedural := preload("res://scripts/env/systems/kit/procedural.gd")
@@ -98,4 +100,32 @@ func run_tests() -> void:
 	kit = room.host.system("kit")
 	check("nave: the missing slot reported (%s)" % [kit.problems()], kit.problems().size() == 1
 			and str(kit.problems()[0]).contains("no slot booth"))
+	await done(room)
+
+	# A sitting room furnished: every piece of furniture, the computer on the desk telly's stand, the video recorder
+	# in the tv unit's shelf.
+	var sitting := {"style": "plain", "screen": "telly", "screen_size": [0.54, 0.405], "screen_bottom": 0.72,
+			"telly_stand": "tv_unit", "rows_back": 0}
+	doc = room_doc("Furniture kit test", [{"system": "domestic", "id": "room", "params": sitting},
+			{"system": "kit", "id": "kit", "params": {"pieces": [
+				{"piece": "video_recorder", "slot": "telly_shelf"},
+				{"piece": "desk", "at": [-2.1, 0.0, 0.0], "yaw": 90.0},
+				{"piece": "computer", "at": [-2.2, 0.74, 0.0], "yaw": 90.0},
+				{"piece": "sideboard", "at": [2.35, 0.0, 0.2], "yaw": -90.0},
+				{"piece": "standard_lamp", "at": [1.6, 0.0, -3.1]},
+				{"piece": "rug", "at": [0.0, 0.0, -1.2], "size": [2.0, 0.012, 1.4], "accent": [0.3, 0.1, 0.05]},
+				{"piece": "coffee_table", "at": [0.0, 0.0, -1.3]}]}}], screen_of("domestic", sitting))
+	room = await check_room("kit furniture", doc, "room")
+	kit = room.host.system("kit")
+	check("furniture: everything placed (%s)" % [kit.problems()], kit.problems().is_empty())
+	check("furniture: one baked mesh, the lamp's shade, the clock", room.get_node_or_null("PieceStatic") != null
+			and room.get_node_or_null("PieceLamps") != null and room.get_node_or_null("PieceDisplay") != null)
+	# Boxes for every piece but the rug (flat on the floor): a desk 2, a computer 3, the rest 1 or 2.
+	check("furniture: boxes for object physics (%d)" % kit.collision_shapes().size(), kit.collision_shapes().size() >= 10)
+	var shade := room.get_node("PieceLamps") as MeshInstance3D
+	var lamp_m: ShaderMaterial = shade.mesh.surface_get_material(0)
+	room.host.system("light").set_param("house_lamps", 0.2)
+	check("furniture: the lamp's shade dims with the house lights (%.2f)" % float(lamp_m.get_shader_parameter("energy")),
+			float(lamp_m.get_shader_parameter("energy")) < 0.5)
+	await clock_flashes("furniture", room)
 	await done(room)

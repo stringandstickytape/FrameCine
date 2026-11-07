@@ -5,9 +5,12 @@ extends "res://scripts/env/systems/kit/builder.gd"
 ## slot's places (or every one), and an offset, a turn, a scale and a size in it. Pieces (kit/pieces.gd): balcony
 ## fronts, niches holding an urn, a lion or an obelisk (never a figure), urns, lions, obelisks, columns, courtyard
 ## façades, a castle gate round the screen, a tin booth, a neon snack bar, a drive-in's screen tower, bougainvillea,
-## ivy, ferns, a swirling carpet over the builder's floor, a plasterboard partition, curved bands on a wall.
+## ivy, ferns, a swirling carpet over the builder's floor, a plasterboard partition, curved bands on a wall; and
+## furniture (kit/furniture.gd): a desk, a computer, a video recorder whose clock flashes 12:00, a sideboard, a
+## standard lamp, a rug, a coffee table.
 ## All the pieces share a few meshes, one surface a material: a baked one (PieceStatic), an unbaked one for rounded
-## shapes and leaves (PieceSoft), the glows (windows, a booth's window) and each neon sign. The builder's slots come
+## shapes and leaves (PieceSoft), the lamp shades (PieceLamps), the glows (windows, a booth's window, the video
+## recorders' clocks: PieceDisplay) and each neon sign. The builder's slots come
 ## from its slots(); the auditorium has none of its own, so the kit works them out from its parameters (side_walls,
 ## proscenium, screen, rear_wall, floor, corners, ceiling, balcony).
 ## Its physics boxes exist once it is built (they follow the builder's slots): collision_shapes(), no static form.
@@ -20,7 +23,9 @@ static func spec() -> Dictionary:
 		"kind": "kit",
 		"description": "Modular pieces along a builder's slots: balcony fronts, niches with an urn, a lion or an "
 				+ "obelisk, columns, courtyard façades, a castle gate round the screen, a tin booth, a neon snack bar, "
-				+ "a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands.",
+				+ "a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
+				+ "furniture: a desk, a computer, a video recorder flashing 12:00, a sideboard, a standard lamp, a rug, "
+				+ "a coffee table.",
 		"params": PARAMS,
 		"requires": ["light"],
 		"provides": ["collision", "bake"],
@@ -36,9 +41,11 @@ const PIECE_FIELDS := {
 	"yaw": {"type": "float", "min": -360.0, "max": 360.0, "description": "a turn about the vertical, degrees"},
 	"scale": {"type": "float", "min": 0.2, "max": 5.0, "description": "a scale"},
 	"size": {"type": "vec3", "min": 0.0, "max": 60.0, "description": "width, height, depth (0: the slot's or its own)"},
-	"holds": {"type": "enum", "values": ["urn", "lion", "obelisk", "none"], "description": "what a niche holds"},
+	"holds": {"type": "enum", "values": ["urn", "lion", "obelisk", "none"],
+			"description": "what a niche holds (a computer: none leaves out its monitor, a telly is its screen)"},
 	"colour": {"type": "color", "description": "the piece's main colour"},
-	"accent": {"type": "color", "description": "a second colour (curves' second band, a snack bar's canopy)"},
+	"accent": {"type": "color",
+			"description": "a second colour (curves' second band, a snack bar's canopy, a rug's border, a lamp's pole)"},
 	"text": {"type": "string", "max": 12,
 			"description": "a neon sign's words (our letters: A B C D E F I K L N O P R S T U W, space)"},
 	"target": {"type": "string", "max": 32, "description": "the carpet's node (the builder's Floor by default)"},
@@ -59,7 +66,14 @@ const PARAMS := {
 	"roof": {"type": "material", "default": {"library": "red_brick", "color": [0.62, 0.32, 0.2]},
 			"description": "a façade's roof tiles"},
 	"iron": {"type": "material", "default": {"library": "dark_metal", "color": [0.07, 0.07, 0.07]},
-			"description": "balcony rails, the portcullis, arrow slits"},
+			"description": "balcony rails, the portcullis, arrow slits, handles, a video recorder, a lamp's base"},
+	"plastic": {"type": "material", "default": {"library": "pale_laminate", "color": [0.78, 0.74, 0.64]},
+			"description": "a computer's case, monitor and keyboard"},
+	"fabric": {"type": "material", "default": {"library": "woven_carpet", "color": [0.5, 0.22, 0.14]},
+			"description": "a rug"},
+	"lamp_colour": {"type": "color", "default": [1.0, 0.76, 0.48], "description": "a standard lamp's shade, lit"},
+	"display_colour": {"type": "color", "default": [0.35, 1.0, 0.78],
+			"description": "a video recorder's clock (it flashes 12:00; Flickering lights off holds it lit)"},
 	"leaves": {"type": "color", "default": [0.2, 0.36, 0.13], "description": "leaves (ivy darker, ferns lighter)"},
 	"flowers": {"type": "color", "default": [0.8, 0.12, 0.48], "description": "bougainvillea's bracts"},
 	"neon": {"type": "color", "default": [1.0, 0.32, 0.5], "description": "a neon sign's colour"},
@@ -78,6 +92,7 @@ class Ctx:
 	var kit: Node
 	var s: RefCounted
 	var u: RefCounted
+	var lit: RefCounted
 	var shapes: Array = []
 	var glows := {}
 	var signs: Array = []
@@ -109,6 +124,14 @@ class Ctx:
 		_mats[k] = m
 		return m
 
+	## A lamp shade's glow in this colour (the light system's lamp material, house group: the ritual dims it), made
+	## once a colour.
+	func shade(colour: Color) -> Material:
+		var k := "shade %s" % colour
+		if not _mats.has(k):
+			_mats[k] = kit._lamp(colour, 1.1, 1.0, "house")
+		return _mats[k]
+
 	func colour_of(key: String) -> Color:
 		var v: Variant = kit.params[key]
 		if v is Dictionary:
@@ -119,6 +142,14 @@ class Ctx:
 var _ctx: Ctx
 var _glow_m: Array = []
 var _problems: Array[String] = []
+## The video recorders' clocks: their material, the flash's time, the level now (0 dark .. 1 lit).
+var _display_m: ShaderMaterial
+var _blink_t := 0.0
+var _blink := 1.0
+## The clock flashes once a second, each change eased over about a fifth of a second (slower than the
+## photosensitivity ceiling's fade, env_checks.gd MIN_FADE).
+const BLINK_HZ := 1.0
+const DISPLAY_ENERGY := 1.6
 
 
 static func seat_slots_for(_p: Dictionary) -> Array:
@@ -221,6 +252,7 @@ func build() -> void:
 	_ctx.kit = self
 	_ctx.s = RoomMesh.new()
 	_ctx.u = RoomMesh.new()
+	_ctx.lit = RoomMesh.new()
 	_ctx.room = room
 	_ctx.rng.seed = 1928
 	var slots := builder_slots()
@@ -235,7 +267,13 @@ func build() -> void:
 			Pieces.build(piece, _ctx, xf_size[0], xf_size[1], e)
 	_add_static("PieceStatic", _ctx.s)
 	_add_unbaked("PieceSoft", _ctx.u)
+	_add_lamps("PieceLamps", _ctx.lit)
 	var glow := float(params["glow"])
+	if _ctx.glows.has("display"):
+		var c := color_param("display_colour")
+		var mi := _add_picture("PieceDisplay", _ctx.glows["display"], Procedural.gradient(c, c), Color(1, 1, 1),
+				DISPLAY_ENERGY * glow, "accent")
+		_display_m = mi.mesh.surface_get_material(0)
 	if _ctx.glows.has("window"):
 		var c := color_param("window_colour")
 		var mi := _add_picture("PieceWindows", _ctx.glows["window"], Procedural.gradient(c * 0.6, c), Color(1, 1, 1),
@@ -253,8 +291,26 @@ func build() -> void:
 		_glow_m.append([mi.mesh.surface_get_material(0), 1.8])
 	for k in mini(_ctx.lamps.size(), 4):
 		var l: Array = _ctx.lamps[k]
-		_light.add_lamp(l[0], (l[1] as Color) * float(_light.params["lamp_energy"]) * 0.5, -1.0)
-		_bake_omni("KitLamp%d" % k, l[0], 5.0, 0.6, l[1])
+		var strength := float(l[2]) if l.size() > 2 else 1.0
+		_light.add_lamp(l[0], (l[1] as Color) * float(_light.params["lamp_energy"]) * 0.5 * strength, -1.0)
+		_bake_omni("KitLamp%d" % k, l[0], 5.0 * sqrt(strength), 0.6 * strength, l[1])
+
+
+## The clocks flash 12:00: lit half a second, dark half a second, each change eased (no hard cut); held lit while
+## the room's Flickering lights is off.
+func tick(delta: float) -> void:
+	super(delta)
+	if _display_m == null:
+		return
+	_blink_t += delta
+	var steady: bool = host != null and host.has_method("setting") and host.setting("flicker") == false
+	_blink = 1.0 if steady else clampf(0.5 + 0.8 * sin(TAU * BLINK_HZ * _blink_t), 0.0, 1.0)
+	_display_m.set_shader_parameter("energy", DISPLAY_ENERGY * float(params["glow"]) * _group_level("accent") * _blink)
+
+
+## The clocks' level now: 1 lit, 0 dark (tests).
+func clock_level() -> float:
+	return _blink
 
 
 ## Where a piece goes: [transform, size] for each place (one, or every place of its slot).
