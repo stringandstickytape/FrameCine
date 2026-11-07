@@ -3011,3 +3011,40 @@ msgstr "小雪"
 
 msgid "Heavy snow"
 msgstr "大雪"
+
+#. A room: a narrow picture house of 1906 in a shop.
+msgid "Shopfront 1906"
+msgstr "1906 年店面影院"
+
+#. A room: a 1937 cinema in the streamline style.
+msgid "Streamline 1937"
+msgstr "1937 年流线型影院"
+
+#. A room: a pink and blue picture palace.
+msgid "Pink Palace"
+msgstr "粉色宫殿"
+
+msgid "Player piano"
+msgstr "自动钢琴"
+
+msgid "A player piano by the screen plays along with the film. Off: no piano."
+msgstr "银幕旁的自动钢琴随影片弹奏。关：没有钢琴。"
+
+msgid "Cove colours"
+msgstr "灯槽颜色"
+
+msgid "The cove lights' colour before the film. Changing: they move through the colours. In the film they take the film's colour."
+msgstr "影片开始前灯槽灯光的颜色。变换：在各种颜色之间轮换。影片放映时它们取影片的颜色。"
+
+#. A colour choice: the colours change in turn.
+msgid "Changing"
+msgstr "变换"
+
+msgid "Gold"
+msgstr "金色"
+
+msgid "Rose"
+msgstr "玫瑰色"
+
+msgid "Jade"
+msgstr "玉绿色"
