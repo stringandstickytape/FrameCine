@@ -207,19 +207,19 @@ user://materials/textures/<id>_orm.png     R 1 (no occlusion: it is in the colou
   `forget_user()` reads the folder again after an import or a delete.
 - **Loading:** a JPEG or PNG map is decoded, gets its mipmaps and goes to the GPU uncompressed (RGBA8).
 
-### ASTC on the headset: not in the export templates
+### ASTC on the headset: the encoder in the export templates (PLAYER_ASTC)
 
-`surface_import.gd` tries `Image.compress(COMPRESS_ASTC, ..., ASTC_FORMAT_8x8)` once at start. In the export
-templates it fails, so user materials are 1K, uncompressed. Why: in the engine (the fork too)
-`modules/astcenc/SCsub` builds astcenc with `ASTCENC_DECOMPRESS_ONLY` unless `env.editor_build`, and
-`modules/astcenc/register_types.cpp` sets `Image::_image_compress_astc_func` only under `#ifdef TOOLS_ENABLED`. The
-templates can decode ASTC, not encode it.
+`surface_import.gd` tries `Image.compress(COMPRESS_ASTC, ..., ASTC_FORMAT_8x8)` once at start. Upstream's export
+templates can't: `modules/astcenc/SCsub` builds astcenc with `ASTCENC_DECOMPRESS_ONLY` unless `env.editor_build`, and
+`modules/astcenc/register_types.cpp` sets `Image::_image_compress_astc_func` only under `#ifdef TOOLS_ENABLED`, so
+they decode ASTC but don't encode it. On such an engine user materials are 1K, uncompressed.
 
-The fork change that would allow it: build astcenc's encoder in template builds too (drop the
-`ASTCENC_DECOMPRESS_ONLY` define in `SCsub`) and set `_image_compress_astc_func` outside `TOOLS_ENABLED` in
-`register_types.cpp`. The cost: a larger binary (the encoder, some hundreds of KB) and a few seconds of CPU per map
-on the headset, in a worker thread. The import code needs no change: it writes `.mtex` files, and takes 2K maps,
-when the probe succeeds.
+The fork (`95e9090166`, "astcenc: the encoder in the export templates too") builds the encoder in every build and
+registers the hook outside `TOOLS_ENABLED`. The engine with it is PLAYER_ASTC (`docs/BUILD.md`), on the headset
+since 2026-11-07. Measured there: `material_status` says `2K ASTC 8x8`; a Poly Haven material (8.4 MB download)
+imported in about 20 s, all three maps 2048 x 2048 as `.mtex` with every mip level, 1.4 MB each. The import code did
+not change: it writes `.mtex` files, and takes 2K maps, when the probe succeeds. Materials imported before keep their
+1K PNG maps until imported again.
 
 ### Memory, each material
 
@@ -227,9 +227,10 @@ when the probe succeeds.
 |---|---|---|---|---|
 | Bundled, 1K, ASTC 8 x 8 | 0.35 MB | 0.35 MB | 0.35 MB | 1.05 MB |
 | User, 1K, uncompressed (now) | 5.6 MB | 5.6 MB | 1.4 MB (512) | 12.6 MB |
-| User, 2K, ASTC 8 x 8 (with the fork change) | 1.4 MB | 1.4 MB | 0.35 MB (1K) | 3.15 MB |
+| User, 2K, ASTC 8 x 8 (PLAYER_ASTC, measured) | 1.4 MB | 1.4 MB | 1.4 MB (2K) | 4.2 MB |
 
-With mipmaps. A room with five user materials takes about 63 MB of GPU memory against 5 MB for bundled ones.
+With mipmaps. A room with five user materials takes about 21 MB of GPU memory with ASTC (63 MB at 1K uncompressed)
+against 5 MB for bundled ones.
 `material_status` gives the sum on disk, the sum if all were loaded and what is loaded now
 (`MaterialLibrary.memory()`).
 

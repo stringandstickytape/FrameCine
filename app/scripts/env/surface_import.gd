@@ -11,10 +11,10 @@ extends RefCounted
 ## metalness where there is one. Height and displacement are dropped. The tiling is the surface's real size where its
 ## metadata gives one (Poly Haven's dimensions, ambientCG's, a Megascans scan's area).
 ##
-## The size: this engine build has no ASTC compressor (its templates are built with ASTCENC_DECOMPRESS_ONLY and the
-## compressor's hook is TOOLS_ENABLED only; docs/materials.md), so the maps are 1K, uncompressed, with mipmaps (the
-## packed map at half that): about 12.6 MB of GPU memory a material. Where Image.compress() can make ASTC (a build
-## with the encoder), 2K as .mtex blocks instead: about 3.2 MB.
+## The size: where Image.compress() can make ASTC (the fork's PLAYER_ASTC engine has the encoder in its templates;
+## docs/materials.md), 2K as .mtex blocks with every mip level: about 4.2 MB of GPU memory a material. On an engine
+## without it (upstream templates: ASTCENC_DECOMPRESS_ONLY, the hook TOOLS_ENABLED only) the maps are 1K,
+## uncompressed, with mipmaps (the packed map at half that): about 12.6 MB.
 ##
 ##   import_maps(site, asset, info, maps) -> {ok, entry} or {ok: false, error}        (safe on a worker thread)
 ##   import_megascans_zip(path, listing), import_ambientcg_zip(path, asset, info) -> the same

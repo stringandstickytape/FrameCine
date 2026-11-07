@@ -2644,9 +2644,10 @@ Haven and ambientCG (decision D29). The viewer does it in **Objects → Surfaces
   RGB, Y in alpha, as the shader reads `.mtex`); roughness (or inverted gloss) into the packed map at half size. Height
   and displacement are dropped. The tiling is the real size of the scan (Poly Haven's `dimensions`, ambientCG's
   `dimensionX`, Megascans' scan area), else 1 m.
-- **1K, uncompressed.** The export templates can't compress ASTC (`docs/materials.md`, "User materials"), so a user
-  material is a JPEG and two PNGs with mipmaps: about 12.6 MB of GPU memory each, against 1.05 MB for a bundled one.
-  `material_status` says how much the user materials take on disk and in memory.
+- **2K, ASTC.** The headset's engine (PLAYER_ASTC, 2026-11-07) compresses ASTC 8 x 8 at run time, so a user material
+  is three 2K `.mtex` maps with every mip level: about 4.2 MB of GPU memory each, against 1.05 MB for a bundled one.
+  On an engine without the encoder (`docs/materials.md`, "ASTC on the headset") it is 1K, uncompressed: about
+  12.6 MB. `material_status` says which, and how much the user materials take on disk and in memory.
 - **Your materials.** The materials list under the results (All or Yours) has **Apply to a part** and, for a user
   material, **Delete**.
 - **Commands:** `material_search {query, source, cursor}`, `material_import {source, id}`, `material_status`,
@@ -2713,4 +2714,5 @@ paints by material:
 - **Reset in the panel.** Put back is `part_reset` (the command) and Undo; the In this room list has Reset for an
   object's part. A room's own wall has no Reset button yet.
 - **The clipboard on the Frame.** `DisplayServer.clipboard_get_image()` on its X11 path is not tried on the headset.
-- **2K user materials.** Only with ASTC (a fork change, `docs/materials.md`): 1K uncompressed is the limit for now.
+- **2K user materials (done 2026-11-07).** With the fork's ASTC encoder in the templates (PLAYER_ASTC). Materials
+  imported before stay 1K until imported again.
