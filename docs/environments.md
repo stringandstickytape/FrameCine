@@ -239,7 +239,8 @@ whale sings as it passes, so the cue needs no `sound` step.
 | `states` | the states it may fire in |
 | `chance` | 0..1, rolled each time it would fire |
 | `cooldown` | seconds before it may fire again (the whale: at most once in 15 minutes) |
-| `steps` | run in order: `{"set": "<id>.<param>", "to": v, "seconds": s, "ease": "linear" or "in" or "out" or "in_out"}` (starts a fade and goes on), `{"wait": s}`, `{"release": "<id>.<param>", "seconds": s}` (back to its base value or binding), `{"do": "<id>.<action>", "args": {...}}`, `{"sound": "<synth>", "gain_db": g, "at": [x, y, z]}` |
+| `stop_in` | states that stop it while it runs: `["playing"]` stops a slow pre-show cue when the film starts. Its later steps don't run; what it set stays until a `release` or another cue |
+| `steps` | run in order: `{"set": "<id>.<param>", "to": v, "seconds": s, "ease": "linear" or "in" or "out" or "in_out"}` (starts a fade and goes on), `{"wait": s}`, `{"release": "<id>.<param>", "seconds": s}` (back to its base value or binding), `{"do": "<id>.<action>", "args": {...}}`, `{"sound": "<synth>", "gain_db": g, "at": [x, y, z]}`, `{"stop": "<cue>"}` (stops another cue of the room while it runs) |
 
 A cue's `set` holds the parameter until a `release`; a binding on the same parameter waits under it. A cue does not
 start again while it runs.
