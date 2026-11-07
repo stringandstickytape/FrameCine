@@ -2045,6 +2045,17 @@ screen may have is 0.3 m.
 | 2005 | 0.72 x 0.405 m (32 inch, 16:9) | 1.9 m | 21 degrees | the first flat panel: wider, and the sofa further back |
 | today | 1.20 x 0.675 m (55 inch, 16:9) | 3.2 m | 21 degrees | a thin panel on the wall, the sofa across the room |
 
+### Time travel
+
+One film, and while it plays the room moves forward through the history of television, an era at a time
+(`scripts/env/time_travel.gd`, `main.features.time_travel`; the Room tab's Television group: Time travel, and Over
+the film or every 5, 10 or 15 minutes; the assistant's `time_travel`). The eras are the TV rooms whose ids start
+`tv_`, in the order of their year (`tv_today` and `tv_future` last); the Pillow Fort is not an era. Turned on in a
+room that is not an era, it goes to the first at once. Over the film, the rest of the film is shared by the eras
+still to come (at least a minute each). The countdown runs only while the film plays; it stops itself at the last
+era, at the end of the film, on a new file, and when the viewer picks a room that is not an era. The film plays on
+through each change: only the room changes.
+
 ### Room: TV 1930 - glowing box
 
 1 of 11. A small dark parlour with a coal fire. A mechanical-scan set in a walnut cabinet on a walnut chest glows

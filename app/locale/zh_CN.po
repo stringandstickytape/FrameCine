@@ -3450,3 +3450,21 @@ msgstr "影片中的落地灯"
 
 msgid "How bright the floor lamp by the sofa stays once the film has started."
 msgstr "影片开始后沙发旁落地灯保持的亮度。"
+
+msgid "Time travel"
+msgstr "时光旅行"
+
+msgid "Over the film"
+msgstr "贯穿整部影片"
+
+msgid "Every 5 minutes"
+msgstr "每5分钟"
+
+msgid "Every 10 minutes"
+msgstr "每10分钟"
+
+msgid "Every 15 minutes"
+msgstr "每15分钟"
+
+msgid "One film, and the room moves forward through the history of television, an era at a time while it plays."
+msgstr "一部影片，播放时房间沿着电视的历史向前推进，一次一个年代。"

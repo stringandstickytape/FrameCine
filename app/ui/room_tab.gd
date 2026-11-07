@@ -49,6 +49,9 @@ var _env_rows: Array[Button] = []
 var _use_picture: Button
 ## This room's settings: the controls built from the declarations (name -> control), rebuilt when they change.
 var _this_room_box: VBoxContainer
+## Time travel through television (scripts/env/time_travel.gd), under Television.
+var _time_travel: Button
+var _time_travel_every: HFlowContainer
 ## The room's line about itself, under This room (EnvLibrary.description_of()).
 var _about: Label
 var _this_room: VBoxContainer
@@ -109,6 +112,14 @@ func bind(p_app: Node) -> void:
 	_tv_box.add_child(W.label("Television", &"MutedLabel"))
 	_tvs = W.flow()
 	_tv_box.add_child(_tvs)
+	_time_travel = W.toggle("Time travel", _on_time_travel)
+	_tv_box.add_child(W.hbox([_time_travel]))
+	_time_travel_every = W.choices(["Over the film", "Every 5 minutes", "Every 10 minutes", "Every 15 minutes"],
+			_on_time_travel_every)
+	_tv_box.add_child(_time_travel_every)
+	_tv_box.add_child(W.help("One film, and the room moves forward through the history of television, "
+			+ "an era at a time while it plays."))
+	app.features.time_travel.changed.connect(func(_on: bool) -> void: _sync_time_travel())
 	_built_in_label = W.label("Built in", &"MutedLabel")
 	box.add_child(_built_in_label)
 	_envs = W.flow()
@@ -294,6 +305,7 @@ func sync() -> void:
 	W.set_slider(_play_level, follow.play_level)
 	_play_level.visible = follow.enabled
 	_sync_sleep()
+	_sync_time_travel()
 
 
 func _sync_sleep() -> void:
@@ -315,6 +327,32 @@ func tick() -> void:
 	if sleep.active:
 		_sleep_status.text = sleep.status_text(true)
 	_sync_showing()
+
+
+func _on_time_travel(on: bool) -> void:
+	var tt: Node = app.features.time_travel
+	if on:
+		tt.start(int(tt.minutes))
+	else:
+		tt.stop()
+	_sync_time_travel()
+
+
+func _on_time_travel_every(i: int) -> void:
+	var tt: Node = app.features.time_travel
+	var m: int = tt.CHOICES[i]
+	if tt.active:
+		tt.start(m)
+	else:
+		tt.minutes = m
+		app.settings.set_value("time_travel", "minutes", m)
+	_sync_time_travel()
+
+
+func _sync_time_travel() -> void:
+	var tt: Node = app.features.time_travel
+	W.set_on(_time_travel, bool(tt.active))
+	W.set_choice(_time_travel_every, (tt.CHOICES as Array).find(int(tt.minutes)))
 
 
 ## The environment rows: rebuilt when the list changed (a photo room or a glTF room added), else only the mark moves.
