@@ -1191,6 +1191,7 @@ at 8 m they are 19 dB under their "in film" level even at -12. Without the filte
 | TV 1966 | `acoustics` `small_room`; `sound_bed` `radiator`; `clock`; `tube_whine` `pitch` 0.648 |
 | TV 2002 | `acoustics` `small_room`; `sound_bed` `hum` at the set (its fan), `gain_db` -3 |
 | TV today | `acoustics` `small_room` (`rt60` 0.3); `sound_bed` `rain_glass` on `weather.rain`, `gain_db` -6 |
+| TV tomorrow | `acoustics` `small_room` (`rt60` 0.3); no beds: a quiet room |
 
 ## Ambient life
 
@@ -2008,16 +2009,17 @@ in a black sky full of stars. Silent: the room has no sound bed and makes no sou
   sound, no life, no pause rise (the test measures nothing on Environment). Acoustics for the film's spatial sound:
   a large glass dome, rt60 1.1, wet 0.35.
 
-Eleven rooms are the history of television: `app/environments/tv_<year>.env.json` (the present's is `tv_today`), in
+Twelve rooms are the history of television: `app/environments/tv_<year>.env.json` (`tv_today`, `tv_future`), in
 the Room tab's Television group (`room.category` "tv"). Their names start "TV <year> - " ("TV today - " for the
-present, which sorts last), so the group reads as a timeline. (A room's name takes letters, digits, space, - and _
-only. "Television, 1930: ..." is refused, and the longer "Television 1930 - ..." names made the Room tab's card too
-wide in the pseudo-locale.) Each is a `domestic` room (style `plain`, or `bedroom_1993`) with `screen` "telly" and
-the era's preset on it, the `seats` system for the chairs, and cues for the lamps: down when the film starts or plays
-(`lamps_down`), up in the pre-show and after the end (`lamps_up`). Tested by `tests/test_room_tv.gd` (headless:
-every check of `test_environments.gd`, the preset, the telly's shape and size, each setting and what it does, the
-cues) and `tests/test_room_tv2.gd` (the rooms of 1937, 1966, 2002 and today the same way, and the whole group's names
-in year order).
+present and "TV tomorrow - " for the future, which sort last in that order), so the group reads as a timeline. (A
+room's name takes letters, digits, space, - and _ only. "Television, 1930: ..." is refused, and the longer
+"Television 1930 - ..." names made the Room tab's card too wide in the pseudo-locale.) Each is a `domestic` room
+(style `plain`, or `bedroom_1993`) with `screen` "telly" (tomorrow's: "wall") and the era's preset on it, the `seats`
+system for the chairs, and cues for the lamps: down when the film starts or plays (`lamps_down`), up in the pre-show
+and after the end (`lamps_up`). Tested by `tests/test_room_tv.gd` (headless: every check of `test_environments.gd`,
+the preset, the telly's shape and size, each setting and what it does, the cues) and `tests/test_room_tv2.gd` (the
+rooms of 1937, 1966, 2002, today and tomorrow the same way, and the whole group's names in the order time travel
+takes them).
 
 **The telly's shape.** The film is drawn on the screen's own mesh, which is the document's width at the film's
 aspect (`video_screen.gd get_flat_size()`); a document cannot give it another shape. So the domestic telly's tube (the
@@ -2044,6 +2046,7 @@ screen may have is 0.3 m.
 | 2002 | 1.10 x 0.62 m (50 inch rear projection, 16:9) | 3.0 m | 21 degrees | the big set across the lounge |
 | 2005 | 0.72 x 0.405 m (32 inch, 16:9) | 1.9 m | 21 degrees | the first flat panel: wider, and the sofa further back |
 | today | 1.20 x 0.675 m (55 inch, 16:9) | 3.2 m | 21 degrees | a thin panel on the wall, the sofa across the room |
+| tomorrow | 1.44 x 0.81 m (a part of the wall, 16:9) | 3.8 m | 22 degrees | no set: the wall is the picture, across a bare room |
 
 ### Time travel
 
@@ -2058,7 +2061,7 @@ through each change: only the room changes.
 
 ### Room: TV 1930 - glowing box
 
-1 of 11. A small dark parlour with a coal fire. A mechanical-scan set in a walnut cabinet on a walnut chest glows
+1 of 12. A small dark parlour with a coal fire. A mechanical-scan set in a walnut cabinet on a walnut chest glows
 orange with thirty lines (`glowbox_1930`, its sound through the radio cabinet's speaker). Three club chairs in
 velvet, two angled in beside the viewer's. A wall lamp, a night window.
 
@@ -2076,7 +2079,7 @@ velvet, two angled in beside the viewer's. A wall lamp, a night window.
 
 ### Room: TV 1937 - mirror lid
 
-2 of 11. A well-to-do drawing room: pale green walls, a herringbone parquet floor with a deep red rug, a white marble
+2 of 12. A well-to-do drawing room: pale green walls, a herringbone parquet floor with a deep red rug, a white marble
 fireplace with a coal fire, two velvet armchairs angled in beside the viewer's, a standard lamp, a walnut sideboard
 with the tea tray on it, a fern. The set is a tall walnut cabinet whose lid holds a mirror: the tube faces up and the
 picture is seen in the mirror (405 lines, black and white, the first regular service's).
@@ -2095,7 +2098,7 @@ picture is seen in the mirror (405 lines, black and white, the first regular ser
 
 ### Room: TV 1953 - coronation day
 
-3 of 11. Coronation day, June 1953: a terraced front room crammed for the day. Every chair in the house is pulled
+3 of 12. Coronation day, June 1953: a terraced front room crammed for the day. Every chair in the house is pulled
 round one small set in a walnut cabinet (`fireside_1953`: 405 lines, snow and a ghost): the viewer's armchair
 straight in front of it (the best seat), two more armchairs angled in, six kitchen chairs behind, three stools, two
 cushions on the rug in front where the children would sit. All empty. Bunting in red, white and blue across the
@@ -2122,7 +2125,7 @@ crown, no flag, no arms, no broadcaster's mark: the bunting's colours are all th
 
 ### Room: TV 1966 - rented set
 
-4 of 11. A 1960s living room in orange and teak: a pale wall, a deep orange carpet with a rug, the rented set in a
+4 of 12. A 1960s living room in orange and teak: a pale wall, a deep orange carpet with a rug, the rented set in a
 teak cabinet on splayed legs with a rotary channel dial and two small knobs under the picture, a long teak sideboard
 on the left wall, a low teak coffee table, an orange settee (the viewer in its middle) and an orange armchair, a
 standard lamp with an orange shade, a dusk sky and hills in the window on the right.
@@ -2142,7 +2145,7 @@ standard lamp with an orange shade, a dusk sky and hills in the window on the ri
 
 ### Room: TV 1972 - first colour
 
-5 of 11. Mustard walls with orange and brown bands sweeping behind the set, a swirling carpet with a mustard rug on
+5 of 12. Mustard walls with orange and brown bands sweeping behind the set, a swirling carpet with a mustard rug on
 it, three club chairs in orange velour and a bean bag. An early colour set in a teak-look cabinet on a radiogram
 (`colourstar_1972`: a shadow mask, warm rich colour), a teak sideboard on the right wall, a standard lamp in the
 corner. A summer dusk in the window.
@@ -2158,7 +2161,7 @@ corner. A summer dusk in the window.
 
 ### Room: TV 1983 - desk portable
 
-6 of 11. A small room at night: a light grey portable telly (a carry handle, a rod aerial, its knobs at the side) on
+6 of 12. A small room at night: a light grey portable telly (a carry handle, a rod aerial, its knobs at the side) on
 a desk with a pedestal of drawers, a beige home computer and its keyboard on the desk beside it, a wooden chair.
 Drizzle on the window, the street lamp's orange glow beyond it. `sirclive_1983`: the computer's aerial lead, 240 bold
 lines. A bean bag at the back for a second seat.
@@ -2177,7 +2180,7 @@ lines. A bean bag at the back for a second seat.
 
 ### Room: TV 1987 - rented tape
 
-7 of 11. The family living room on a wet night: a black telly on a wooden tv unit with a video recorder in its shelf,
+7 of 12. The family living room on a wet night: a black telly on a wooden tv unit with a video recorder in its shelf,
 its clock flashing 12:00, a three-seat settee and an armchair, a white-painted brick fireplace, a fern.
 `rewinder_1987`: a rented tape, tracking wobble, smeared colour, the tear at the bottom.
 
@@ -2198,7 +2201,7 @@ its clock flashing 12:00, a three-seat settee and an armchair, a white-painted b
 
 ### Room: TV 1993 - bedroom telly
 
-8 of 11. A teenager's bedroom (not the pillow fort): blue walls, fairy lights along the wall over the telly, the bed,
+8 of 12. A teenager's bedroom (not the pillow fort): blue walls, fairy lights along the wall over the telly, the bed,
 a radiator under the window, rain in the night outside. A bean bag on the floor; a second place sitting on the bed.
 `nightowl_1993`: a tape watched a few times on a flatter tube with an aperture grille.
 
@@ -2216,7 +2219,7 @@ a radiator under the window, rain in the night outside. A bean bag on the floor;
 
 ### Room: TV 2002 - rear projection
 
-9 of 11. A beige lounge with a cream carpet: a big deep rear projection set filling the end of the room, its
+9 of 12. A beige lounge with a cream carpet: a big deep rear projection set filling the end of the room, its
 cabinet down to the floor in charcoal grey, a 50 inch 16:9 picture; a black leather sofa of three (the viewer in its
 middle) and a leather armchair, a glass coffee table on a steel frame, a tall floor lamp, a plant, a dusk window.
 The set's picture dims when it is seen from the side (the display does it).
@@ -2236,7 +2239,7 @@ The set's picture dims when it is seen from the side (the display does it).
 
 ### Room: TV 2005 - flat screen
 
-10 of 11. A pale living room with a laminate floor, a grey three-seat settee and an armchair, a coffee table, a plant,
+10 of 12. A pale living room with a laminate floor, a grey three-seat settee and an armchair, a coffee table, a plant,
 a wide window on a sunset. A 32 inch flat panel on its pedestal on a low pale wooden tv unit (`freedtv_2005`: a free
 digital broadcast, a faint pixel grid, the backlight through the dark scenes).
 
@@ -2249,7 +2252,7 @@ digital broadcast, a faint pixel grid, the backlight through the dark scenes).
 
 ### Room: TV today - the present
 
-11 of 11. A living room now: charcoal walls, a grey oak floor with a pale grey rug, a thin panel on the wall (a 55
+11 of 12. A living room now: charcoal walls, a grey oak floor with a pale grey rug, a thin panel on the wall (a 55
 inch 16:9 picture, 3.2 m from the seat) over a long low oak media unit, a soundbar on the unit under the picture, a
 grey sofa of three and an armchair, a low oak coffee table, a tall floor lamp beside the sofa, a plant, a night window
 with rain on it now and then. No wall lamps, no fire: the film looks its best here (a clean picture, the film's own
@@ -2267,6 +2270,21 @@ sound, no small speaker).
   film at the reference level.
 - Until the presentation system has the OLED form and display, the panel is the flat panel on the wall with the 2005
   preset made clean.
+
+### Room: TV tomorrow - the wall
+
+12 of 12. Speculative, and kept calm: a bare pale room some day to come, a grey oak floor with a pale felt rug, a low
+linen sofa of three (the viewer in its middle), a long window on a night of stars. No set at all: a part of the far
+wall, in the walls' own plaster, becomes the picture. As the film starts it wakes, its light rising from half to full
+over 4 s; then the film plays untouched.
+
+- Systems: `light` (a cool low fill), `domestic` (`screen` `wall`, `screen_surface` the walls' plaster; `lamps` 0,
+  `heater` none), `kit` (a `rug`), `seats` (`settee`), `sky` (night, a few clouds, the Milky Way faint),
+  `presentation` (`preset` none: only the waking cue touches the picture).
+- Settings: Stars in the window (0 to 100 %: `sky.stars`).
+- Cues: `wall_wakes` (Pre-show): `presentation.gain` 0.5, then up to 1 over 4 s, then released.
+- Measured: 13 draws, 7 662 triangles, 5.3 MB, no particles.
+- Sound: `acoustics` `small_room` (`rt60` 0.3) and nothing else: a quiet room.
 
 **The kit's dressing for these rooms** (`kit/dressing.gd`, since 2026-11-07): `bunting` (a sagging string of
 pennants, red, white and blue in turn), `tea_set`, `sandwiches`, `stool`, `channel_dial` (a rotary dial with twelve

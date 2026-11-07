@@ -9,11 +9,13 @@ extends "res://tests/test_room_tv.gd"
 ## sideboard and the orange settee; the 2002 lounge's big deep set, the leather sofa and the glass table (see-through,
 ## under the sight line); the present's thin panel on a dark wall over a media unit and a soundbar, the floor lamp, a
 ## clean picture. Each room's settings and what they do, its cues, its sound (tests/room_sound.gd: the beds on the
-## room's bus, a bound bed on its setting or channel, the level under the film). And the whole TV group's names sort
-## as a timeline, the present last.
+## room's bus, a bound bed on its setting or channel, the level under the film). Tomorrow's bare room, where a part of
+## the wall wakes and becomes the picture. And the whole TV group's names sort as time travel takes them.
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_tv2.gd
 
-const Kit := preload("res://scripts/env/systems/kit.gd")
+const TimeTravel := preload("res://scripts/env/time_travel.gd")
+## The speculative future: a wall, not a telly (its own checks).
+const FUTURE := "tv_future"
 
 ## id -> [year (a word for the present), preset, aspect of the picture]
 const ROOMS2 := {
@@ -62,24 +64,70 @@ func run_tests() -> void:
 		await sounds(id, room, SOUND2[id])
 		await done(room)
 		await RoomSound.check_level(self, self, id, doc)
+	await _tv_future()
 	_timeline()
 
 
-## The whole group sorts as a timeline: every TV room's name in year order, the present last.
+## The whole group sorts as a timeline: every TV room's name in the order time travel takes them (its year_of: the
+## years, then today, then tomorrow), the present and the future last.
 func _timeline() -> void:
-	var by_year := []
+	var ids: Array[String] = []
 	for id: String in ROOMS:
-		by_year.append([str(ROOMS[id][0]), id])
+		ids.append(id)
 	for id: String in ROOMS2:
-		by_year.append([str(ROOMS2[id][0]) if str(ROOMS2[id][0]).is_valid_int() else "9999", id])
-	by_year.sort_custom(func(a: Array, b: Array) -> bool: return str(a[0]) < str(b[0]))
+		ids.append(id)
+	ids.append(FUTURE)
+	ids.sort_custom(func(a: String, b: String) -> bool: return TimeTravel.year_of(a) < TimeTravel.year_of(b))
 	var names: Array[String] = []
-	for y: Array in by_year:
-		names.append(str(EnvDoc.load_file("res://environments/%s.env.json" % y[1])["doc"].get("name", "")))
+	for id in ids:
+		names.append(str(EnvDoc.load_file("res://environments/%s.env.json" % id)["doc"].get("name", "")))
 	var sorted := names.duplicate()
 	sorted.sort()
-	check("the TV group's %d names sort as a timeline %s" % [names.size(), names], sorted == names
-			and names.size() == ROOMS.size() + ROOMS2.size())
+	check("the TV group's %d names sort as time travel takes them %s" % [names.size(), names], sorted == names
+			and names.size() == ROOMS.size() + ROOMS2.size() + 1 and ids[-2] == "tv_today" and ids[-1] == FUTURE)
+
+
+## Tomorrow: a calm bare room with no set at all; a part of the wall becomes the picture, 17 to 23 degrees across, and
+## wakes as the film starts (the picture's light from half to full, then the film untouched); stars in the long window.
+func _tv_future() -> void:
+	var r := EnvDoc.load_file("res://environments/%s.env.json" % FUTURE)
+	check("future: the document reads %s" % [r["errors"]], (r["errors"] as Array).is_empty())
+	var doc: Dictionary = r["doc"]
+	if doc.is_empty():
+		return
+	check("future: named, in the Television group (%s)" % doc["name"], str(doc["name"]).begins_with("TV tomorrow - ")
+			and str(doc["room"].get("category", "")) == "tv")
+	var room := await _built("tv_future", doc)
+	var b: Node = room.host.system("room")
+	var p := _p(room)
+	check("future: no set: the picture on the wall itself", str(b.params["screen"]) == "wall"
+			and room.get_node_or_null("Telly") == null and int(b.params["lamps"]) == 0
+			and str(b.params["heater"]) == "none")
+	var sc: Dictionary = b.screen()
+	var ds: Dictionary = doc["screen"]
+	var c := Vector3(float(sc["center"][0]), float(sc["center"][1]), float(sc["center"][2]))
+	var w := float(sc["size"][0])
+	check("future: the document's screen is the wall's (%s, %s)" % [ds, sc], c.is_equal_approx(Vector3(
+			float(ds["center"][0]), float(ds["center"][1]), float(ds["center"][2]))))
+	var deg := rad_to_deg(2.0 * atan(w * 0.5 / -c.z))
+	check("future: %.2f m wide at %.2f m: %.1f degrees" % [w, -c.z, deg], deg >= MIN_DEG and deg <= MAX_DEG
+			and absf(w / float(sc["size"][1]) - 16.0 / 9.0) < 0.01)
+	check("future: the film untouched outside the waking", not p.picture_on())
+	room.host.auto = false
+	await _play(room, 1.0, STOPPED)
+	room.host.snapshot_override = PLAYING
+	var least := _extreme(room, "gain", false)
+	check("future: the wall wakes: the picture half lit at first (%.2f)" % least, least < 0.6)
+	await _play(room, 7.0)
+	check("future: then the film itself, untouched (%.2f)" % float(p.value("gain")), not p.picture_on())
+	room.host.set_setting("stars", 0.0)
+	await _play(room, 0.5, STOPPED)
+	check("future: Stars in the window at the bottom: none (%.2f)" % float(room.host.param("sky.stars")),
+			float(room.host.param("sky.stars")) < 0.01)
+	room.host.set_setting("stars", 0.8)
+	check("future: a settee of three, the viewer in its middle", _model_count(room, "settee") == 3)
+	await sounds("future", room, {})
+	await done(room)
 
 
 func _pieces(room: Node3D) -> Array:

@@ -4205,6 +4205,10 @@ msgstr ""
 msgid "TV 2005 - flat screen"
 msgstr ""
 
+#: environments/tv_future.env.json
+msgid "TV tomorrow - the wall"
+msgstr ""
+
 #: environments/tv_today.env.json
 msgid "TV today - the present"
 msgstr ""
@@ -4315,6 +4319,10 @@ msgstr ""
 
 #: environments/tv_2005.env.json
 msgid "The first flat screen, 2005: a wide picture on a stand, the sofa further back."
+msgstr ""
+
+#: environments/tv_future.env.json
+msgid "A calm bare room some day to come: no set at all, a part of the wall wakes and becomes the picture."
 msgstr ""
 
 #: environments/tv_today.env.json
@@ -4432,6 +4440,10 @@ msgstr ""
 
 #: environments/tv_2005.env.json
 msgid "Backlight bleed"
+msgstr ""
+
+#: environments/tv_future.env.json
+msgid "Stars in the window"
 msgstr ""
 
 #: environments/tv_today.env.json
@@ -4568,6 +4580,10 @@ msgstr ""
 
 #: environments/tv_2005.env.json
 msgid "The early panel's backlight glowing through the dark scenes, most at the corners."
+msgstr ""
+
+#: environments/tv_future.env.json
+msgid "How many stars the night shows through the long window."
 msgstr ""
 
 #: environments/tv_today.env.json
