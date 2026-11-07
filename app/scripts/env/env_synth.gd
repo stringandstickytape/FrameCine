@@ -17,17 +17,23 @@ const RATE := 44100
 const REFERENCE_DB := -20.0
 const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale", "creak",
 		"projector", "wall_rumble", "cicadas", "moped", "train", "huskies", "hull_creak", "radiator", "rain_glass",
-		"rain_leaves", "gas_hiss"]
+		"rain_leaves", "gas_hiss", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain",
+		"clock", "tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
-		"hull_creak": 3.5, "radiator": 16.0, "rain_glass": 6.0, "rain_leaves": 6.0, "gas_hiss": 4.0}
+		"hull_creak": 3.5, "radiator": 16.0, "rain_glass": 6.0, "rain_leaves": 6.0, "gas_hiss": 4.0, "bird": 1.2,
+		"purr": 4.0, "crickets": 6.0, "fire": 8.0, "drips": 8.0, "wind": 12.0, "hum": 4.0, "deep_hum": 8.0,
+		"fountain": 6.0, "clock": 4.0, "tube_whine": 2.0, "three_bells": 3.2, "candle": 0.9, "ice_creak": 2.6,
+		"vcr": 4.5, "tape_load": 8.0}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
-		"gas_hiss"]
+		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine"]
 ## Sample rates below RATE for the far and low sounds (less to make, nothing lost above their band).
 const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiator": 22050, "moped": 32000,
-		"hull_creak": 32000}
+		"hull_creak": 32000, "purr": 22050, "crickets": 32000, "fire": 32000, "drips": 32000, "wind": 22050,
+		"hum": 22050, "deep_hum": 22050, "fountain": 32000, "candle": 32000, "ice_creak": 32000, "vcr": 32000,
+		"tape_load": 32000}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -207,6 +213,30 @@ static func _res(st: PackedFloat32Array, k: int, x: float, c: PackedFloat32Array
 	st[k + 1] = st[k]
 	st[k] = y
 	return y
+
+
+## The same resonator at a frequency that moves (its coefficients worked out each sample, nothing allocated).
+static func _res_f(st: PackedFloat32Array, k: int, x: float, f: float, rr: float, rate: float) -> float:
+	var y := (1.0 - rr) * x + 2.0 * rr * cos(TAU * f / rate) * st[k] - rr * rr * st[k + 1]
+	st[k + 1] = st[k]
+	st[k] = y
+	return y
+
+
+## Adds a small water drop at `at` seconds into s (a bubble's tone whose pitch rises as it rings, and a soft tap).
+static func _plink(s: PackedFloat32Array, rate: float, lead: int, at: float, f0: float, amp: float, rise: float,
+		decay: float, rng: RandomNumberGenerator) -> void:
+	var start := int(at * rate) + lead
+	var ph := 0.0
+	for j in int(5.0 / decay * rate):
+		var i := start + j
+		if i < 0:
+			continue
+		if i >= s.size():
+			break
+		var dt := float(j) / rate
+		ph += f0 * (1.0 + rise * dt) / rate
+		s[i] += (sin(TAU * ph) * exp(-dt * decay) + rng.randf_range(-1.0, 1.0) * exp(-dt * 1500.0) * 0.25) * amp
 
 
 static func _make_new(sound: String) -> AudioStreamWAV:
@@ -506,6 +536,327 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 				hp = hp - _lp(st, 1, hp, a_hp)
 				var flutter := 1.0 + 0.06 * sin(TAU * 3.0 * t) + _lp(st, 2, rng.randf_range(-1.0, 1.0), flutter_a) * 3.0
 				s[i] = (hp + _res(st, 4, x, bump) * 0.6) * flutter + _lp(st, 3, x, a_roar) * 0.4
+		"bird":
+			# A small songbird's call (life.gd's birds): three falling whistles, then a quick trill. Each note
+			# glides from f0 to f1 under a smooth swell, with a little of its octave.
+			var notes: Array = []
+			var at := 0.03
+			for k in 3:
+				var f0 := rng.randf_range(3600.0, 4400.0) - k * 150.0
+				var d := rng.randf_range(0.07, 0.11)
+				notes.append([at, d, f0, f0 - rng.randf_range(900.0, 1400.0), 1.0 - k * 0.1])
+				at += d + rng.randf_range(0.05, 0.08)
+			at += 0.06
+			var trill := rng.randf_range(4600.0, 5200.0)
+			for k in 7:
+				notes.append([at, 0.026, trill + 300.0, trill - 300.0, 0.55])
+				at += 0.04
+			var phase := PackedFloat32Array()
+			phase.resize(notes.size())
+			for i in total:
+				var t := float(i - lead) / r
+				var v := 0.0
+				for j in notes.size():
+					var nt: Array = notes[j]
+					var u := (t - float(nt[0])) / float(nt[1])
+					if u < 0.0 or u >= 1.0:
+						continue
+					var f := lerpf(float(nt[2]), float(nt[3]), u * u * (3.0 - 2.0 * u))
+					phase[j] += f / r
+					var env := pow(sin(PI * u), 2.0)
+					v += (sin(TAU * phase[j]) + 0.15 * sin(TAU * 2.0 * phase[j])) * env * float(nt[4])
+				s[i] = v
+		"purr":
+			# A cat's purr (life.gd's cat): a pulse about 25 times a second, through a low throat and chest,
+			# louder on the breath out than on the breath in, two breaths.
+			var throat := _res_c(140.0, 0.97, r)
+			var chest := _res_c(65.0, 0.985, r)
+			var a_lp := _a(500.0, r)
+			var breaths := [[0.05, 1.15, 26.0, 1.0], [1.3, 0.75, 23.0, 0.55], [2.15, 1.1, 26.5, 0.95],
+					[3.35, 0.6, 23.5, 0.5]]
+			var pulse_phase := 0.0
+			for i in total:
+				var t := float(i - lead) / r
+				var amp := 0.0
+				var rate_hz := 25.0
+				for b: Array in breaths:
+					var u := (t - float(b[0])) / float(b[1])
+					if u >= 0.0 and u < 1.0:
+						amp = pow(sin(PI * u), 0.6) * float(b[3])
+						rate_hz = float(b[2])
+				pulse_phase = fmod(pulse_phase + rate_hz / r, 1.0)
+				var x := rng.randf_range(-1.0, 1.0)
+				var burst := x * exp(-pulse_phase * 9.0) * amp
+				var v := _lp(st, 0, burst, a_lp)
+				v = v * 0.6 + _res(st, 1, v, throat) * 6.0 + _res(st, 3, v, chest) * 8.0
+				s[i] = v
+		"crickets":
+			# Field crickets on a summer night: four, each at its own pitch and steady rate, each chirp three or four
+			# short syllables of a pure tone; the near one louder. Every rate divides the loop: no seam.
+			var crickets := [[4600.0, 0.5, 0.0, 3, 1.0], [4250.0, 0.375, 0.11, 4, 0.6], [5000.0, 0.6, 0.27, 3, 0.45],
+					[4450.0, 0.4, 0.05, 3, 0.3]]
+			var syl := 0.016
+			var step := 0.026
+			var ph := PackedFloat32Array([0.0, 0.0, 0.0, 0.0])
+			for i in total:
+				var t := float(i - lead) / r
+				var v := 0.0
+				for j in 4:
+					var c: Array = crickets[j]
+					var tc := fposmod(t - float(c[2]), float(c[1]))
+					var k := int(tc / step)
+					var u := (tc - k * step) / syl
+					if k >= int(c[3]) or u >= 1.0:
+						continue
+					ph[j] = fmod(ph[j] + float(c[0]) * (1.0 - 0.02 * u) / r, 1.0)
+					var swell := 0.8 + 0.2 * sin(TAU * t * float(j + 1) / 6.0 + j)
+					v += sin(TAU * ph[j]) * pow(sin(PI * u), 2.0) * float(c[4]) * swell
+				s[i] = v
+		"fire":
+			# A wood or coal fire in the grate: the flames' soft roar (low noise that flickers), a little hiss, and the
+			# crackles: many small sharp ones and now and then a pop, each ringing one of a few modes.
+			var a_roar := _a(260.0, r)
+			var a_flick := _a(3.0, r)
+			var a_hiss := _a(2500.0, r)
+			var modes := [_res_c(1900.0, 0.9, r), _res_c(3300.0, 0.88, r), _res_c(5200.0, 0.85, r),
+					_res_c(850.0, 0.95, r)]
+			var env := PackedFloat32Array([0.0, 0.0, 0.0, 0.0])
+			var decay := PackedFloat32Array([exp(-900.0 / r), exp(-1100.0 / r), exp(-1300.0 / r), exp(-350.0 / r)])
+			for i in total:
+				var x := rng.randf_range(-1.0, 1.0)
+				var e := rng.randf()
+				if e < 14.0 / r:
+					var k := rng.randi_range(0, 2)
+					env[k] = maxf(env[k], rng.randf_range(0.2, 1.0))
+				elif e < 14.8 / r:
+					env[3] = maxf(env[3], rng.randf_range(0.6, 1.0))
+				var v := 0.0
+				for j in 4:
+					v += _res(st, j * 2, x * env[j], modes[j]) * (6.0 if j < 3 else 4.0)
+					env[j] *= decay[j]
+				var flicker := clampf(0.75 + _lp(st, 8, rng.randf_range(-1.0, 1.0), a_flick) * 6.0, 0.3, 1.3)
+				var roar := _lp(st, 10, _lp(st, 9, x, a_roar), a_roar) * 3.0 * flicker
+				var hiss := (x - _lp(st, 11, x, a_hiss)) * 0.03 * flicker
+				s[i] = v + roar + hiss
+		"drips":
+			# Drips after the rain: drops from leaves and a roof's edge into puddles, each a small plink, at odd
+			# moments; two steady leaks among them, whose periods divide the loop.
+			var t_end := float(total - lead) / r
+			var tt := -float(lead) / r
+			while tt < t_end:
+				_plink(s, r, lead, tt, rng.randf_range(700.0, 2400.0), rng.randf_range(0.25, 1.0), 16.0, 45.0, rng)
+				tt += rng.randf_range(0.08, 0.7)
+			for leak: Array in [[1.6, 0.3, 1250.0, 0.7], [2.0, 1.1, 1700.0, 0.5]]:
+				var k := -1
+				while true:
+					var at := float(leak[1]) + k * float(leak[0])
+					if at > t_end:
+						break
+					_plink(s, r, lead, at, float(leak[2]), float(leak[3]), 14.0, 40.0, rng)
+					k += 1
+		"wind":
+			# A soft wind past an opening: noise through a broad band that drifts with the gusts, a faint low roar, and
+			# a thin whistle that comes in the strongest gusts. Every swell divides the loop.
+			var a_low := _a(180.0, r)
+			for i in total:
+				var t := float(i - lead) / r
+				var gust := 0.55 + 0.22 * sin(TAU * t / 12.0) + 0.15 * sin(TAU * t / 4.0 + 1.3) \
+						+ 0.08 * sin(TAU * t / 3.0 + 0.4)
+				var x := rng.randf_range(-1.0, 1.0)
+				var band := _res_f(st, 0, x, 320.0 + 380.0 * gust, 0.985, r)
+				var whistle := _res_f(st, 2, x, 780.0 + 90.0 * sin(TAU * t / 6.0), 0.9985, r)
+				var low := _lp(st, 5, _lp(st, 4, x, a_low), a_low)
+				s[i] = band * gust * gust * 2.0 + whistle * maxf(gust - 0.6, 0.0) * 6.0 + low * 2.0 * gust
+		"hum":
+			# A motor's hum through glass (a pool's filter pump, a fridge): the mains' hum and its harmonics, beating
+			# with the motor's turning, a little water in the pipe, dulled by the pane. Whole cycles in the loop.
+			var a_glass := _a(450.0, r)
+			var a_water := _a(700.0, r)
+			var a_water_low := _a(150.0, r)
+			for i in total:
+				var t := float(i - lead) / r
+				var turn := 1.0 + 0.25 * sin(TAU * 24.0 * t)
+				var v := (sin(TAU * 100.0 * t) + 0.5 * sin(TAU * 200.0 * t + 0.6) + 0.3 * sin(TAU * 300.0 * t + 1.1)
+						+ 0.12 * sin(TAU * 400.0 * t)) * turn
+				var x := rng.randf_range(-1.0, 1.0)
+				var water := _lp(st, 0, x, a_water) - _lp(st, 1, x, a_water_low)
+				s[i] = _lp(st, 2, v * 0.6 + water * 0.8, a_glass)
+		"deep_hum":
+			# The hum of the deep on a hull: low tones beating slowly against each other, with enough of their
+			# harmonics to be heard on small speakers, a band of low noise (the water moving), a slow swell. Whole
+			# cycles in the loop.
+			var a_low := _a(140.0, r)
+			for i in total:
+				var t := float(i - lead) / r
+				var swell := 0.75 + 0.25 * sin(TAU * t / 8.0)
+				var v := sin(TAU * 55.0 * t) + sin(TAU * 55.25 * t + 0.4) * 0.8 + sin(TAU * 82.5 * t + 1.0) * 0.35 \
+						+ sin(TAU * 110.0 * t + 0.2) * 0.3 + sin(TAU * 165.0 * t + 2.0) * 0.12
+				var sea := _lp(st, 1, _lp(st, 0, rng.randf_range(-1.0, 1.0), a_low), a_low) * 8.0
+				s[i] = (v * 0.5 + sea) * swell
+		"fountain":
+			# A small fountain's trickle: water falling into a basin, many small bubbles (short tones whose pitch rises
+			# as they ring) over the soft splash of the fall.
+			var t_end := float(total - lead) / r
+			var tt := -float(lead) / r
+			while tt < t_end:
+				var f0 := lerpf(500.0, 1900.0, pow(rng.randf(), 1.6))
+				_plink(s, r, lead, tt, f0, rng.randf_range(0.1, 0.6), 10.0, rng.randf_range(60.0, 110.0), rng)
+				tt += rng.randf_range(0.002, 0.022)
+			var a_hi := _a(3000.0, r)
+			var a_lo := _a(600.0, r)
+			var a_flick := _a(30.0, r)
+			for i in total:
+				var x := rng.randf_range(-1.0, 1.0)
+				var splash := _lp(st, 0, x, a_hi) - _lp(st, 1, x, a_lo)
+				s[i] += splash * (0.5 + _lp(st, 2, rng.randf_range(-1.0, 1.0), a_flick) * 4.0) * 0.6
+		"clock":
+			# A clock on a shelf: the escapement's two beats each second, a tick and a slightly duller, slightly early
+			# tock, ringing the wooden case.
+			var modes := [_res_c(3100.0, 0.95, r), _res_c(1650.0, 0.96, r), _res_c(430.0, 0.985, r)]
+			var a_dull := _a(2000.0, r)
+			for i in total:
+				var t := float(i - lead) / r
+				var two := fposmod(t, 2.0)
+				var tock := two >= 0.97
+				var dt := two - (0.97 if tock else 0.0)
+				var ex := rng.randf_range(-1.0, 1.0) * exp(-dt * 3000.0) if dt < 0.006 else 0.0
+				if tock:
+					ex = _lp(st, 6, ex, a_dull) * 1.4
+				var v := _res(st, 0, ex, modes[0]) * (1.0 if not tock else 0.5) + _res(st, 2, ex, modes[1]) * 1.2 \
+						+ _res(st, 4, ex, modes[2]) * 1.5
+				s[i] = v
+		"tube_whine":
+			# A picture tube's line whine (the line scan at 15 625 Hz; at pitch 0.648 a 405-line set's 10 125 Hz) and a
+			# faint hum of its valves. Whole cycles in the loop.
+			for i in total:
+				var t := float(i - lead) / r
+				s[i] = sin(TAU * 15625.0 * t) * (1.0 + 0.05 * sin(TAU * 0.5 * t)) + sin(TAU * 100.0 * t) * 0.12 \
+						+ sin(TAU * 50.0 * t + 0.3) * 0.06
+		"three_bells":
+			# A soft house bell of three tones before the show, as struck bars ring (the tone, its fourth and tenth
+			# partials, which fade first): up a fifth, then down a minor third. Our own call.
+			var notes := [[0.02, 587.33], [0.47, 880.0], [0.92, 739.99]]
+			for i in total:
+				var t := float(i) / r
+				var v := 0.0
+				for nt: Array in notes:
+					var d := t - float(nt[0])
+					if d < 0.0:
+						continue
+					var f := float(nt[1])
+					v += (sin(TAU * f * d) + 0.25 * sin(TAU * f * 4.0 * d) * exp(-d * 6.0)
+							+ 0.06 * sin(TAU * f * 10.0 * d) * exp(-d * 14.0)) * exp(-d * 1.6) * minf(d / 0.004, 1.0)
+				s[i] = v
+		"candle":
+			# A candle gutters: a puff of the flame (low noise that wavers about nine times a second) and three or
+			# four tiny sputters of wax.
+			var a_puff := _a(500.0, r)
+			var a_puff_low := _a(120.0, r)
+			var spit := _res_c(3400.0, 0.9, r)
+			var spits: Array = []
+			var at := rng.randf_range(0.12, 0.2)
+			while at < 0.75:
+				spits.append([at, rng.randf_range(0.4, 1.0)])
+				at += rng.randf_range(0.1, 0.22)
+			var length := float(total) / r
+			for i in total:
+				var t := float(i) / r
+				var x := rng.randf_range(-1.0, 1.0)
+				var puff := (_lp(st, 0, x, a_puff) - _lp(st, 1, x, a_puff_low)) * 3.0
+				puff *= pow(sin(PI * t / length), 1.5) * (0.7 + 0.3 * sin(TAU * 9.0 * t))
+				var ex := 0.0
+				for sp: Array in spits:
+					var d := t - float(sp[0])
+					if d >= 0.0 and d < 0.004:
+						ex += x * exp(-d * 1500.0) * float(sp[1])
+				s[i] = puff + _res(st, 2, ex, spit) * 8.0
+		"ice_creak":
+			# Ice settling: a crack that sings down (a high ping falling fast, as ice does), then a low groan of
+			# stick-slip pulses through the block's dull modes.
+			var bank := [[110.0, 0.994, 1.0], [175.0, 0.993, 0.7], [420.0, 0.995, 0.3], [960.0, 0.996, 0.15]]
+			var cs: Array = []
+			for b: Array in bank:
+				cs.append(_res_c(float(b[0]), float(b[1]), r))
+			var ph := 0.0
+			var slip := 0.0
+			for i in total:
+				var t := float(i) / r
+				var v := 0.0
+				var d := t - 0.05
+				if d >= 0.0 and d < 0.4:
+					ph += (350.0 + 2450.0 * exp(-d * 18.0)) / r
+					v += sin(TAU * ph) * exp(-d * 10.0) * 0.6 + rng.randf_range(-1.0, 1.0) * exp(-d * 400.0)
+				var u := (t - 0.4) / 2.1
+				if u >= 0.0 and u < 1.0:
+					slip += (18.0 + 22.0 * sin(PI * u) + 5.0 * sin(TAU * 1.7 * t)) / r
+					var ex := 0.0
+					if slip >= 1.0:
+						slip -= 1.0
+						ex = rng.randf_range(0.6, 1.0) * pow(sin(PI * u), 0.8)
+					for j in bank.size():
+						v += _res(st, j * 2, ex, cs[j]) * float(bank[j][2]) * 0.8
+				s[i] = v
+		"vcr":
+			# A video recorder takes a tape: the tray's clunk, the motor's whirr rising as it threads the tape (the
+			# guides' clicks), the heads engaging (a softer clunk), then the drum's steady whirr, fading out.
+			var a_thud := _a(800.0, r)
+			var a_motor := _a(900.0, r)
+			var whirr := _res_c(1400.0, 0.97, r)
+			var drum := _res_c(750.0, 0.99, r)
+			var clunks := [[0.05, 1.0], [1.75, 0.6]]
+			var clicks := [[0.55, 0.4], [0.95, 0.35], [1.35, 0.45], [2.1, 0.25]]
+			var click := _res_c(2600.0, 0.93, r)
+			var saw := 0.0
+			for i in total:
+				var t := float(i) / r
+				var x := rng.randf_range(-1.0, 1.0)
+				var v := 0.0
+				for c: Array in clunks:
+					var d := t - float(c[0])
+					if d >= 0.0 and d < 0.3:
+						v += (sin(TAU * 85.0 * d) * exp(-d * 30.0) + _lp(st, 0, x, a_thud) * 3.0 * exp(-d * 120.0)) \
+								* float(c[1])
+				var ex := 0.0
+				for c: Array in clicks:
+					var d := t - float(c[0])
+					if d >= 0.0 and d < 0.003:
+						ex += x * float(c[1])
+				v += _res(st, 1, ex, click) * 6.0
+				var speed := smoothstep(0.3, 1.0, t) * (1.0 - smoothstep(3.6, 4.5, t))
+				saw = fmod(saw + (45.0 + 75.0 * smoothstep(0.3, 1.2, t)) / r, 1.0)
+				v += _lp(st, 3, saw * 2.0 - 1.0, a_motor) * 0.3 * speed
+				v += _res(st, 4, x, whirr) * 1.5 * speed
+				var spin := smoothstep(1.8, 2.4, t) * (1.0 - smoothstep(3.6, 4.5, t))
+				v += _res(st, 6, x, drum) * 3.0 * spin * (0.8 + 0.2 * sin(TAU * 25.0 * t))
+				s[i] = v
+		"tape_load":
+			# A home computer loads a program from a cassette: a steady pilot tone, a short gap, then the data's harsh
+			# warble (two tones, one for each bit, switching a thousand times a second); the tape's hiss under it.
+			var a_tape := _a(3200.0, r)
+			var a_hiss := _a(4000.0, r)
+			var ph := 0.0
+			var bit := 0
+			var bit_at := -1
+			for i in total:
+				var t := float(i) / r
+				var wow := 1.0 + 0.004 * sin(TAU * 0.6 * t)
+				var on := 0.0
+				var f := 800.0
+				if t >= 0.1 and t < 2.6:
+					on = 1.0
+				elif t >= 2.75 and t < 7.7:
+					on = 0.9
+					var b := int((t - 2.75) * 1000.0)
+					if b != bit_at:
+						bit_at = b
+						bit = rng.randi_range(0, 1)
+					f = 2000.0 if bit == 1 else 1000.0
+				ph = fmod(ph + f * wow / r, 1.0)
+				var sq := (1.0 if ph < 0.5 else -1.0) * on
+				var x := rng.randf_range(-1.0, 1.0)
+				var hiss := (x - _lp(st, 1, x, a_hiss)) * 0.06 * smoothstep(0.0, 0.05, t) \
+						* (1.0 - smoothstep(7.85, 8.0, t))
+				s[i] = _lp(st, 2, _lp(st, 0, sq, a_tape), a_tape) + hiss
 	return s
 
 

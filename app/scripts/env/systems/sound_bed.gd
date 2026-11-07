@@ -23,13 +23,16 @@ const Acoustics := preload("res://scripts/env/systems/acoustics.gd")
 
 const SOUNDS: Array[String] = ["silence", "projector", "wall_rumble", "cicadas", "moped", "train", "huskies",
 		"hull_creak", "radiator", "rain_glass", "rain_leaves", "gas_hiss", "noise", "rumble", "tick", "creak", "whale",
-		"chime", "gong"]
+		"chime", "gong", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock",
+		"tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load"]
 ## Each sound's designed level: dBFS RMS on Environment at the slider's default (-18 dB), full level, no film; a
 ## one-shot's loudest second. The level check's target is -38 dBFS; every bed is 12 dB or more under it.
 const LEVELS := {"projector": -51.0, "wall_rumble": -50.0, "cicadas": -54.0, "moped": -52.0, "train": -52.0,
 		"huskies": -54.0, "hull_creak": -52.0, "radiator": -55.0, "rain_glass": -52.0, "rain_leaves": -52.0,
 		"gas_hiss": -58.0, "noise": -54.0, "rumble": -52.0, "tick": -55.0, "creak": -54.0, "whale": -52.0,
-		"chime": -50.0, "gong": -52.0}
+		"chime": -50.0, "gong": -52.0, "bird": -54.0, "purr": -56.0, "crickets": -55.0, "fire": -54.0, "drips": -56.0,
+		"wind": -55.0, "hum": -58.0, "deep_hum": -54.0, "fountain": -56.0, "clock": -56.0, "tube_whine": -62.0,
+		"three_bells": -50.0, "candle": -58.0, "ice_creak": -55.0, "vcr": -54.0, "tape_load": -58.0}
 ## The states in which the film plays: the bed sits film_db lower.
 const FILM_STATES: Array[String] = ["starting", "playing", "credits"]
 ## Under this linear gain a bed stops its players.
@@ -41,9 +44,11 @@ static func spec() -> Dictionary:
 		"kind": "sound",
 		"description": "A looped bed or a one-shot from our own synthesiser, placed in the room: projector clatter, "
 				+ "rumble through a wall, cicadas, a passing moped, a far freight train, far huskies, hull creaks, a "
-				+ "ticking radiator, rain on glass or leaves, gas lamp hiss, or silence. It sits well under the film "
-				+ "(its designed level, ducked under the film, lower while the film plays) and can follow a channel "
-				+ "by its level (film.bass, weather.rain).",
+				+ "ticking radiator, rain on glass or leaves, gas lamp hiss, crickets, a fire's crackle, drips, wind, "
+				+ "a motor's hum, the deep's hum, a fountain, a clock, a picture tube's whine, a three-tone house bell, "
+				+ "a candle's gutter, ice creaking, a video recorder taking a tape, a cassette loading, a bird, a purr "
+				+ "or silence. It sits well under the film (its designed level, ducked under the film, lower while the "
+				+ "film plays) and can follow a channel by its level (film.bass, weather.rain, weather.wet).",
 		"params": {
 			"sound": {"type": "enum", "values": SOUNDS, "default": "silence",
 					"description": "the sound; silence plays nothing"},

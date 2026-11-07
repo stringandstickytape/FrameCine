@@ -43,7 +43,7 @@ const LIMITS := {"systems": 32, "settings": 16, "cues": 32, "steps": 32, "tracks
 const MATERIAL_KEYS: Array[String] = ["library", "color", "tint", "tiling", "pleats", "pleat_depth", "spill"]
 ## The synthesised sounds a cue may play (env_synth.gd NAMES; kept here so a document is checked without it).
 const SOUNDS: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale", "creak",
-		"moped", "train", "huskies", "hull_creak"]
+		"moped", "train", "huskies", "hull_creak", "bird", "purr", "three_bells", "candle", "ice_creak"]
 
 ## The common room settings (docs/environments.md, "Common settings"): every room has them, from the shared systems.
 ## "applies": when it shows (always; the room has curtains or a cue that requires it; a system of that kind; a

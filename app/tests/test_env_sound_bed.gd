@@ -6,7 +6,8 @@ extends SceneTree
 ## pre-show and sit low in the film; rain follows its setting, the rumble the film's bass; one-shots come back every so
 ## often, travel, and play on a cue; silence plays nothing. Then the level check: every bed alone, at the slider's
 ## default, in the pre-show, in the film and under a film at the reference level; the test room's sum; and every shipped
-## room with sound beds or music. Prints the measured levels.
+## room with sound beds or music. Every sound the rooms want is there; ambient life's calls measured as life.gd plays
+## them, at the distances the rooms give them. Prints the measured levels.
 ## godot --headless --xr-mode off --path app --script res://tests/test_env_sound_bed.gd
 
 const Fixture := preload("res://tests/env_sound_fixture.gd")
@@ -60,8 +61,10 @@ func _seconds(s: float) -> void:
 
 func _run() -> void:
 	_spec()
+	_wanted()
 	await _behaviour()
 	await _levels()
+	await _calls()
 	print("test_env_sound_bed: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	quit(_failures)
 
@@ -228,8 +231,8 @@ func _levels() -> void:
 			peak = a["peak"]
 			Fixture.set_state(room, "playing")
 			await _seconds(3.2)
-			film = (await Fixture.measure(self, length, 0.1))["rms"]
-			under = (await Fixture.measure(self, length, 0.4, EnvSynth.REFERENCE_DB))["rms"]
+			film = (await Fixture.measure(self, minf(length, 4.0), 0.1))["rms"]
+			under = (await Fixture.measure(self, minf(length, 4.0), 0.4, EnvSynth.REFERENCE_DB))["rms"]
 		else:
 			# A one-shot: its loudest second, from the stream and the player's volume.
 			pre = EnvSynth.level_db(w) + bed.volume_db() + EnvAudio.DEFAULT_DB
@@ -274,6 +277,76 @@ func _levels() -> void:
 		room.queue_free()
 		await _frames(2)
 	print("  shipped rooms with sound beds or music: %d" % shipped)
+
+
+## The sounds the rooms ask for (docs/environments.md, each room's "Sound wanted"; "Sound and music", "For the rooms").
+const WANTED := {
+	"Shopfront 1906": ["projector", "gas_hiss"], "Pink Palace": ["chime", "three_bells"],
+	"Nave": ["wind", "candle"], "Reclaimed": ["rain_leaves", "drips", "bird", "wind"],
+	"Ice cinema": ["huskies", "wind", "ice_creak"], "Screen 3": ["wall_rumble"], "Drive-in": ["crickets", "train"],
+	"Screening room 1962": ["fire", "hum", "three_bells"], "Athens rooftop": ["cicadas", "moped", "purr"],
+	"Pillow Fort": ["radiator", "rain_glass"], "Bathysphere": ["hull_creak", "deep_hum", "whale"],
+	"TV 1953": ["fire", "clock", "rain_glass", "purr", "tube_whine"], "TV 1972": ["radiator", "clock", "tube_whine"],
+	"TV 1983": ["tape_load", "rain_glass", "tube_whine"], "TV 1987": ["vcr", "clock"],
+	"TV 1993": ["radiator", "rain_glass", "vcr"], "Atmospheric 1928": ["fountain"],
+}
+
+
+func _wanted() -> void:
+	var missing: Array = []
+	for room: String in WANTED:
+		for sound: String in WANTED[room]:
+			if not (sound in SoundBed.SOUNDS and sound in EnvSynth.NAMES):
+				missing.append("%s: %s" % [room, sound])
+	_check("every sound the rooms want is there %s" % [missing], missing.is_empty())
+	var calls := ["bird", "purr", "whale"]
+	_check("the ambient life's calls are cue sounds", calls.all(func(n: String) -> bool: return n in EnvDoc.SOUNDS))
+	_check("every cue sound is synthesised", EnvDoc.SOUNDS.all(func(n: String) -> bool: return n in EnvSynth.NAMES))
+
+
+## Ambient life's calls as life.gd plays them (host.play_sound -> env_audio.play: a 3D player on Environment, unit
+## size 3, at voice_db), at the distances the rooms give them: their loudest second at the slider's default.
+func _calls() -> void:
+	print("  ambient life's calls (loudest second, dBFS, the slider's default):")
+	var room := Fixture.build(self, {"schema": 4, "name": "Calls", "systems": []})
+	await _frames(2)
+	# [sound, voice_db, metres from the seat, what]
+	var cases := [["bird", -12.0, 3.0, "a bird at 3 m"], ["bird", -12.0, 8.0, "a bird on the roof's edge, 8 m"],
+			["purr", -12.0, 1.5, "the cat by the seat, 1.5 m"], ["purr", -12.0, 4.0, "the cat at 4 m"],
+			["whale", -12.0, 3.0, "the whale at 3 m (no fall-off)"], ["whale", -12.0, 22.0, "the whale's song, 22 m"],
+			["whale", -14.0, 22.0, "the Bathysphere's whale (voice_db -14), 22 m"],
+			["whale", -6.0, 22.0, "the whale at voice_db -6, 22 m"],
+			["whale", -4.0, 22.0, "the whale at voice_db -4, 22 m"],
+			["bird", -12.0, 3.0, "a bird at 3 m, no distance filter", true],
+			["bird", -12.0, 8.0, "a bird at 8 m, no distance filter", true]]
+	for c: Array in cases:
+		var w := EnvSynth.stream(str(c[0]))
+		var p := AudioStreamPlayer3D.new()
+		p.unit_size = 3.0
+		p.max_db = 0.0
+		p.volume_db = float(c[1])
+		if c.size() > 4:
+			p.attenuation_filter_db = 0.0
+		p.bus = EnvAudio.ENVIRONMENT
+		p.stream = w
+		root.add_child(p)
+		var d := float(c[2])
+		p.position = Vector3(0.0, 1.2, 0.0) + Vector3(-0.3, 0.55, -0.78).normalized() * d
+		p.play()
+		var env: PackedFloat32Array = await Fixture.envelope(self, w.get_length() + 0.2, 0.25)
+		p.queue_free()
+		var loud := -120.0
+		for i in range(0, maxi(env.size() - 3, 1)):
+			var sum := 0.0
+			for j in range(i, mini(i + 4, env.size())):
+				sum += db_to_linear(env[j]) ** 2
+			loud = maxf(loud, linear_to_db(sqrt(sum / 4.0)) + EnvAudio.DEFAULT_DB)
+		print("    %-48s %6.1f (designed %.1f, in film %.1f)" % [c[3], loud, SoundBed.LEVELS[c[0]],
+				SoundBed.LEVELS[c[0]] - 8.0])
+		_check("%s: under the target with 8 dB to spare (%.1f)" % [c[3], loud], loud < EnvAudio.LEVEL_TARGET_DB - 8.0)
+		await _frames(2)
+	room.queue_free()
+	await _frames(2)
 
 
 func _check(what: String, ok: bool) -> void:
