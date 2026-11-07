@@ -491,7 +491,7 @@ msgstr ""
 msgid "Already in your pictures: %s"
 msgstr ""
 
-#: scripts/pictures/picture_library.gd:85 ui/object_section.gd:499 ui/pane_ui.gd:52 ui/picture_tab.gd:288
+#: scripts/pictures/picture_library.gd:85 ui/object_section.gd:499 ui/pane_ui.gd:55 ui/picture_tab.gd:288
 msgid "Picture"
 msgstr ""
 
@@ -1037,7 +1037,7 @@ msgstr ""
 msgid "Carbon fibre"
 msgstr ""
 
-#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/system_tab.gd:325 ui/ui_layer.gd:429
+#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/system_tab.gd:325 ui/ui_layer.gd:430
 msgid "Assistant"
 msgstr ""
 
@@ -1058,7 +1058,7 @@ msgstr ""
 msgid "Let an assistant find me"
 msgstr ""
 
-#: ui/assistant_row.gd:97
+#: ui/assistant_row.gd:97 ui/pane_ui.gd:54
 msgid "Stop"
 msgstr ""
 
@@ -1891,7 +1891,7 @@ msgstr ""
 msgid "optional"
 msgstr ""
 
-#: ui/hw_video_row.gd:25 ui/pane_ui.gd:62
+#: ui/hw_video_row.gd:25 ui/pane_ui.gd:65
 msgid "Details"
 msgstr ""
 
@@ -1924,7 +1924,7 @@ msgstr ""
 msgid "Specials"
 msgstr ""
 
-#: ui/library_view.gd:237 ui/library_view.gd:241 ui/pane_ui.gd:51 ui/pane_ui.gd:697
+#: ui/library_view.gd:237 ui/library_view.gd:241 ui/pane_ui.gd:54 ui/pane_ui.gd:701
 msgid "Play"
 msgstr ""
 
@@ -2008,12 +2008,12 @@ msgstr ""
 msgid "%s deleted"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:646 ui/ui_layer.gd:225
-#: ui/ui_layer.gd:399 ui/ui_layer.gd:942 ui/ui_layer.gd:946 ui/ui_layer.gd:980
+#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:646 ui/ui_layer.gd:226
+#: ui/ui_layer.gd:400 ui/ui_layer.gd:943 ui/ui_layer.gd:947 ui/ui_layer.gd:981
 msgid "Undo"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:910
+#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:911
 msgid "The headset's cameras can't show here."
 msgstr ""
 
@@ -2289,99 +2289,99 @@ msgstr ""
 msgid "abc"
 msgstr ""
 
-#: ui/pane_ui.gd:233
+#: ui/pane_ui.gd:237
 msgid "Steady detail"
 msgstr ""
 
-#: ui/pane_ui.gd:237 ui/picture_tab.gd:28
+#: ui/pane_ui.gd:241 ui/picture_tab.gd:28
 msgid "Smooth banding"
-msgstr ""
-
-#: ui/pane_ui.gd:615
-#, c-format
-msgid "%s, %s"
-msgstr ""
-
-#: ui/pane_ui.gd:618
-#, c-format
-msgid "battery %d %%, charging"
 msgstr ""
 
 #: ui/pane_ui.gd:619
 #, c-format
+msgid "%s, %s"
+msgstr ""
+
+#: ui/pane_ui.gd:622
+#, c-format
+msgid "battery %d %%, charging"
+msgstr ""
+
+#: ui/pane_ui.gd:623
+#, c-format
 msgid "battery %d %%"
 msgstr ""
 
-#: ui/pane_ui.gd:623 ui/pane_ui.gd:662 ui/ui_layer.gd:465
+#: ui/pane_ui.gd:627 ui/pane_ui.gd:666 ui/ui_layer.gd:466
 msgid "Listening"
 msgstr ""
 
-#: ui/pane_ui.gd:739
+#: ui/pane_ui.gd:743
 #, c-format
 msgid "Chapter %s"
 msgstr ""
 
-#: ui/pane_ui.gd:236
+#: ui/pane_ui.gd:240
 msgid "Fine detail filtered where the picture is shrunk, so it doesn't shimmer."
 msgstr ""
 
-#: ui/pane_ui.gd:240
+#: ui/pane_ui.gd:244
 msgid "Hides the steps in dark gradients (8-bit video)."
 msgstr ""
 
-#: ui/pane_ui.gd:51
+#: ui/pane_ui.gd:54
 msgid "Previous"
 msgstr ""
 
-#: ui/pane_ui.gd:51
+#: ui/pane_ui.gd:54
 msgid "−10 s"
 msgstr ""
 
-#: ui/pane_ui.gd:51
+#: ui/pane_ui.gd:54
 msgid "+10 s"
 msgstr ""
 
-#: ui/pane_ui.gd:51
+#: ui/pane_ui.gd:54
 msgid "Next"
 msgstr ""
 
-#: ui/pane_ui.gd:52
+#: ui/pane_ui.gd:55
 msgid "Source"
 msgstr ""
 
-#: ui/pane_ui.gd:52
+#: ui/pane_ui.gd:55
 msgid "Sound"
 msgstr ""
 
-#: ui/pane_ui.gd:52
+#: ui/pane_ui.gd:55
 msgid "Subtitles"
 msgstr ""
 
-#: ui/pane_ui.gd:52
+#: ui/pane_ui.gd:55
 msgid "Room"
 msgstr ""
 
-#: ui/pane_ui.gd:52 environments/showrooms/index.json
+#: ui/pane_ui.gd:55 environments/showrooms/index.json
 msgid "Objects"
 msgstr ""
 
-#: ui/pane_ui.gd:52
+#: ui/pane_ui.gd:55
 msgid "Mixed reality"
 msgstr ""
 
-#: ui/pane_ui.gd:53
+#: ui/pane_ui.gd:56
 msgid "System"
 msgstr ""
 
-#: ui/pane_ui.gd:62
+#: ui/pane_ui.gd:65
 msgid "List"
 msgstr ""
 
-#: ui/pane_ui.gd:62
+#: ui/pane_ui.gd:65
 msgid "Grid"
 msgstr ""
 
-#: ui/pane_ui.gd:697
+#: ui/pane_ui.gd:701
 msgid "Pause"
 msgstr ""
 
@@ -2901,7 +2901,7 @@ msgstr ""
 msgid "Back to defaults"
 msgstr ""
 
-#: ui/room_tab.gd:158 ui/ui_layer.gd:999
+#: ui/room_tab.gd:158 ui/ui_layer.gd:1000
 msgid "Seat"
 msgstr ""
 
@@ -3779,7 +3779,7 @@ msgstr ""
 msgid "Allow for an hour"
 msgstr ""
 
-#: ui/system_tab.gd:346 ui/ui_layer.gd:783
+#: ui/system_tab.gd:346 ui/ui_layer.gd:784
 msgid "Revoke"
 msgstr ""
 
@@ -3894,126 +3894,126 @@ msgstr ""
 msgid "LIVE"
 msgstr ""
 
-#: ui/ui_layer.gd:190
+#: ui/ui_layer.gd:191
 #, c-format
 msgid "Resumed at %s"
 msgstr ""
 
-#: ui/ui_layer.gd:190
+#: ui/ui_layer.gd:191
 msgid "Start over"
 msgstr ""
 
-#: ui/ui_layer.gd:225
+#: ui/ui_layer.gd:226
 #, c-format
 msgid "Remote: %s"
 msgstr ""
 
-#: ui/ui_layer.gd:399 ui/ui_layer.gd:404
+#: ui/ui_layer.gd:400 ui/ui_layer.gd:405
 #, c-format
 msgid "Assistant: %s"
 msgstr ""
 
-#: ui/ui_layer.gd:442
+#: ui/ui_layer.gd:443
 #, c-format
 msgid "Left controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:444
+#: ui/ui_layer.gd:445
 #, c-format
 msgid "Right controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:445
+#: ui/ui_layer.gd:446
 #, c-format
 msgid "Controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:452
+#: ui/ui_layer.gd:453
 #, c-format
 msgid "Left controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:454
+#: ui/ui_layer.gd:455
 #, c-format
 msgid "Right controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:455
+#: ui/ui_layer.gd:456
 #, c-format
 msgid "Controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:783
+#: ui/ui_layer.gd:784
 msgid "Remote changes allowed for an hour"
 msgstr ""
 
-#: ui/ui_layer.gd:796
+#: ui/ui_layer.gd:797
 msgid "Connecting..."
 msgstr ""
 
-#: ui/ui_layer.gd:806
+#: ui/ui_layer.gd:807
 msgid "Starting the browser..."
 msgstr ""
 
-#: ui/ui_layer.gd:820
+#: ui/ui_layer.gd:821
 msgid "Point at a seat and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:830
+#: ui/ui_layer.gd:831
 msgid "Seat unchanged"
 msgstr ""
 
-#: ui/ui_layer.gd:856
+#: ui/ui_layer.gd:857
 msgid "That can't be applied here"
 msgstr ""
 
-#: ui/ui_layer.gd:860
+#: ui/ui_layer.gd:861
 msgid "Point at a part and pull the trigger. Stick: size and turn the pattern. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:861
+#: ui/ui_layer.gd:862
 msgid "Point at a part and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:873
+#: ui/ui_layer.gd:874
 msgid "That object can't be placed here"
 msgstr ""
 
-#: ui/ui_layer.gd:877
+#: ui/ui_layer.gd:878
 msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:911
+#: ui/ui_layer.gd:912
 msgid "That's as many areas as there can be: delete one first."
 msgstr ""
 
-#: ui/ui_layer.gd:928 ui/ui_layer.gd:939
+#: ui/ui_layer.gd:929 ui/ui_layer.gd:940
 msgid "Nothing marked"
 msgstr ""
 
-#: ui/ui_layer.gd:942
+#: ui/ui_layer.gd:943
 #, c-format
 msgid "%s added: the cameras show there"
 msgstr ""
 
-#: ui/ui_layer.gd:946
+#: ui/ui_layer.gd:947
 #, c-format
 msgid "%s changed"
 msgstr ""
 
-#: ui/ui_layer.gd:964
+#: ui/ui_layer.gd:965
 msgid "Nothing changed"
 msgstr ""
 
-#: ui/ui_layer.gd:964
+#: ui/ui_layer.gd:965
 msgid "Nothing placed"
 msgstr ""
 
-#: ui/ui_layer.gd:983
+#: ui/ui_layer.gd:984
 msgid "Not placed"
 msgstr ""
 
-#: ui/ui_layer.gd:997
+#: ui/ui_layer.gd:998
 msgid "No seat there"
 msgstr ""
 

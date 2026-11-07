@@ -440,7 +440,13 @@ func _docked_focus_checks(ui: PaneUI) -> void:
 	main.ui.on_stick(hand, Vector2.ZERO, 0.016)
 	await _frames(2)
 	var focus: Control = main.ui.panel.focus_owner()
-	_check("stick focus: stick right moves the focus to +10 s (%s)" % (focus.get_meta("label", "") if focus != null
+	_check("stick focus: stick right moves the focus to Stop (%s)" % (focus.get_meta("label", "") if focus != null
+			else "none"), focus is Button and str((focus as Button).get_meta("label", "")) == "Stop")
+	main.ui.on_stick(hand, Vector2(1, 0), 0.016)
+	main.ui.on_stick(hand, Vector2.ZERO, 0.016)
+	await _frames(2)
+	focus = main.ui.panel.focus_owner()
+	_check("stick focus: and on to +10 s (%s)" % (focus.get_meta("label", "") if focus != null
 			else "none"), focus is Button and str((focus as Button).get_meta("label", "")) == "+10 s")
 	var pos: float = main.player.get_position()
 	main.ui.on_trigger(hand, true)

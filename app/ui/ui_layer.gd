@@ -178,6 +178,7 @@ func setup(p_app: Node3D) -> void:
 	ui.play_pause_pressed.connect(func() -> void: app.player.toggle())
 	ui.previous_requested.connect(func() -> void: app.previous_file())
 	ui.next_requested.connect(func() -> void: app.next_file())
+	ui.stop_requested.connect(func() -> void: app.close_media())
 	ui.skip_requested.connect(func(d: float) -> void: app.player.seek_relative(d))
 
 	# App -> pane.

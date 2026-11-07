@@ -41,6 +41,7 @@ Commands marked (core) are registered by the core agent (`state`, `tracks`, `aud
 | -10 s, +10 s | `seek` `seconds` -10 / 10, `relative` true (control) |
 | Play / Pause | `play`, `pause` (control) |
 | Previous, Next | `previous`, `next` (control) |
+| Stop | `stop` (control): the file closes, resume keeps its place |
 | 4x, 8x (held) | `trick_play` (control) |
 | Chapter ticks on the bar, "chapter 3/12" in the header | `chapters` (read) |
 | Header: time, time left, end time, battery | `state` (read, core) |

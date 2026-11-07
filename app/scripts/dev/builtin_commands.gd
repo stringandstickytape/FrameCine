@@ -61,6 +61,9 @@ func register_all() -> void:
 				{"name": "from_start", "type": "bool", "default": false}],
 		"level": "control", "assistant": "control",
 		"returns": "the state once open, or {opening: path} if still connecting"})
+	R.register("stop", _cmd_stop, {"description": "Stops: the file closes (resume keeps its place), the playlist "
+			+ "is cleared and the room goes to its pre-show (a telly switches off).", "level": "control",
+			"assistant": "control", "returns": "the state"})
 	R.register("next", _cmd_next, {"description": "The next file of the playlist.", "level": "control",
 			"assistant": "control", "returns": "the state"})
 	R.register("previous", _cmd_previous, {"description": "The previous file, or the start of this one after 3 s.",
@@ -281,6 +284,18 @@ func _cmd_pause(_args: Dictionary, ctx: DevCommands.Call) -> Variant:
 	ctx.summary = "pause"
 	if was:
 		ctx.undo = func() -> void: _main().player.play()
+	return host.app_state()
+
+
+func _cmd_stop(_args: Dictionary, ctx: DevCommands.Call) -> Variant:
+	var m := _main()
+	var old: String = m.current_path
+	if old == "":
+		return ctx.fail("nothing is open")
+	m.close_media()
+	ctx.summary = "stopped %s" % old.get_file()
+	# Undo opens it again; resume brings back its place.
+	ctx.undo = func() -> void: _main().open_path(old, false)
 	return host.app_state()
 
 

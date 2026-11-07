@@ -17,7 +17,7 @@ const COMMANDS := ["playback", "trick_play", "frame_step", "loop", "loop_clear",
 		"screenshot_frame", "av_calibrate", "picture", "set_mode", "mode_auto", "folder_rule", "set_3d", "set_screen",
 		"set_horizon", "set_picture", "set_hdr", "set_lens", "slideshow", "pip_set", "pip_swap", "pip_close",
 		"picture_reset", "sound", "set_sound", "subtitle_settings", "set_subtitle_options", "second_subtitles",
-		"play", "pause", "seek", "next", "previous", "chapter", "chapters", "subtitles", "find_line", "script_lines",
+		"play", "pause", "stop", "seek", "next", "previous", "chapter", "chapters", "subtitles", "find_line", "script_lines",
 		"jump_to_line", "pc_audio", "pc_audio_status"]
 const STUB := "stub://flat_mono"
 
@@ -319,6 +319,10 @@ func _tagged() -> void:
 	r = await _run_cmd("chapters", {})
 	_check("chapters: the list and the current one", r["ok"] and (r["result"] as Dictionary).has_all(["count",
 			"current", "list"]))
+	# Stop (the pane's Stop): the file closes; with nothing open it is refused.
+	r = await _run_cmd("stop", {})
+	_check("stop: the file closes", r["ok"] and main.current_path == "" and not main.player.has_source())
+	_check("stop with nothing open is refused", not (await _run_cmd("stop", {}))["ok"])
 
 
 func _run_cmd(command: String, args: Dictionary) -> Dictionary:

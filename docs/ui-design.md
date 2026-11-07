@@ -6,7 +6,7 @@ Status: current. The menu is on the tablet (`ui/tablet.gd`): a landscape panel b
 tilted up towards them, placed from the head's heading when the menu button opens it and then fixed in the room.
 Its top pane has a small header line (the chapter; the clock, time left and end, battery, low controllers,
 Listening), the title, the time (LIVE, the trick play speed) and the time bar with chapter ticks and the seek bar's
-picture, and under them a band: the transport as icons on the left (previous, -10 s, play / pause, +10 s, next, 4x
+picture, and under them a band: the transport as icons on the left (previous, -10 s, play / pause, stop, +10 s, next, 4x
 and 8x held) and the picture's switches on the right (Steady detail, Smooth banding); the menu's panel reaches up
 over the gap into the band, so they are its own buttons. The main pane has the tabs as a rail down the left (in a scroll of its own, for larger text) with each tab's places or sections beside it, the section
 picked filling the rest, and the footer. It all fits the main pane's 961 x 463 layout pixels at the default text

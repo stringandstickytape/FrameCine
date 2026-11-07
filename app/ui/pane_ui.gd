@@ -4,9 +4,9 @@ extends PanelContainer
 ## in the pane's SubViewport (ui/pane.gd).
 ##
 ## Top to bottom: a band over the tablet's now playing pane (the panel reaches up into it, ui/tablet.gd menu_band();
-## the user, 2026-11-06): the transport on the left as icons (previous, -10 s, play / pause, +10 s, next; hold 4x / 8x
-## for trick play; the skips and the trick buttons hide when the source can't seek) and on the right the picture's
-## toggles (Steady detail: the footprint filter; Smooth banding: the deband). A see-through spacer over the gap
+## the user, 2026-11-06): the transport on the left as icons (previous, -10 s, play / pause, stop, +10 s, next;
+## hold 4x / 8x for trick play; the skips and the trick buttons hide when the source can't seek) and on the right
+## the picture's toggles (Steady detail: the footprint filter; Smooth banding: the deband). A see-through spacer over the gap
 ## between the panes. Then a row: down the left a rail
 ## of the tabs (Source, Picture, Sound, Subtitles, Room, Objects, Mixed reality, System), an icon (ui/icons.gd) and
 ## the name each; beside it Source's places (the files tab's own column) or any other tab's sections (the user,
@@ -41,6 +41,8 @@ const EndTime := preload("res://scripts/play/end_time.gd")
 signal play_pause_pressed
 signal previous_requested
 signal next_requested
+## Stop: the film closes (its place kept by resume), the room's pre-show, a telly switching off.
+signal stop_requested
 signal skip_requested(delta_seconds: float)
 
 enum Tab { FILES, PICTURE, SOUND, SUBTITLES, ROOM, OBJECTS, MIXED_REALITY, SYSTEM }
@@ -48,7 +50,7 @@ const TAB_NAMES: Array[String] = ["Files", "Picture", "Sound", "Subtitles", "Roo
 ## The rail's names and icons for the tabs (Files is called Source there), its width and its icons' size (pixels), and
 ## Source's views.
 ## The transport buttons' names, in order (tooltips and meta "label"; "Play" turns "Pause" while playing).
-const TRANSPORT_NAMES: Array[String] = ["Previous", "−10 s", "Play", "+10 s", "Next"] # i18n
+const TRANSPORT_NAMES: Array[String] = ["Previous", "−10 s", "Play", "Stop", "+10 s", "Next"] # i18n
 const TABLET_TAB_NAMES: Array[String] = ["Source", "Picture", "Sound", "Subtitles", "Room", "Objects", "Mixed reality", # i18n
 		"System"] # i18n
 const TABLET_TAB_ICONS: Array[String] = ["source", "picture", "sound", "subtitles", "room", "objects", "mixed-reality",
@@ -199,8 +201,9 @@ func _build_open() -> void:
 	var names := TRANSPORT_NAMES
 	for spec: Array in [["previous", names[0], func() -> void: previous_requested.emit()],
 			["back-10", names[1], func() -> void: skip_requested.emit(-10.0)], ["play", names[2], Callable()],
-			["forward-10", names[3], func() -> void: skip_requested.emit(10.0)],
-			["next", names[4], func() -> void: next_requested.emit()]]:
+			["stop", names[3], func() -> void: stop_requested.emit()],
+			["forward-10", names[4], func() -> void: skip_requested.emit(10.0)],
+			["next", names[5], func() -> void: next_requested.emit()]]:
 		var b: Button
 		if spec[0] == "play":
 			_play_button = W.button("", func() -> void: play_pause_pressed.emit(), &"PlayButton")
