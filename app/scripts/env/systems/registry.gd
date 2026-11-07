@@ -17,6 +17,8 @@ const SYSTEMS := {
 	"screen_frame": "res://scripts/env/systems/screen_frame.gd",
 	"showing": "res://scripts/env/systems/showing.gd",
 	"mirror_floor": "res://scripts/env/systems/mirror_floor.gd",
+	"atmosphere": "res://scripts/env/systems/atmosphere.gd",
+	"weather": "res://scripts/env/systems/weather.gd",
 	"life": "res://scripts/env/systems/life.gd",
 }
 ## The kinds a system may be (spec().kind).
