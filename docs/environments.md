@@ -158,8 +158,8 @@ parameters only.
 | timeline and cues | | below; part of the host, not a registered system | built |
 | film signals | | below; part of the host | built |
 | `presentation` | screen | the chain of stages from source to display: source (film, tape, broadcast), transmission (aerial noise, ghosting), display (CRT, mask, curvature, a telly's glass). TV-era presets | next |
-| `seats` | seats | seat models and kits outside the builders (a bench seat, pews, cushions, club chairs) | next |
-| `motion` | motion | slow moves of the room's things (a curtain's sway, an organ rising, Earth turning), held to the comfort limits. Never the viewer | next |
+| `seats` | seats | seat models outside the builders (folding chairs, plush tip-up seats, multiplex seats and a broken one, pews, club chairs, director's chairs, a bench seat, cushions, hides, a bean bag), drawn in the builders' seat slots, in rows of its own, or as broken seats over a builder's own | built |
+| `motion` | motion | slow moves of the room's things (a curtain's sway, an organ rising, a painting sliding up, a festoon rising in swags, Earth turning), held to the comfort limits. Never the viewer | built |
 
 ## Bindings and film signals
 
@@ -399,7 +399,7 @@ and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider'
 | `seats_per_row`, `seat_pitch` | 27, 0.58 | seats along a row, centre to centre |
 | `row_radius` | 45 | rows curve round a point this far ahead; 0 is straight rows |
 | `block_x` | 8.1 | the seats reach this far either side; the side aisles go from there to the walls |
-| `seat_model` | `stadium` | the seat (slot; more come with the seats system) |
+| `seat_model` | `stadium` | the seat: `stadium` (drawn by the auditorium), or a single seat of the seats system: `plush`, `multiplex`, `folding_chair`, `club_chair`, `director`, `cushion`, `bean_bag` (set `seat_pitch` to fit) |
 | `seat_upholstery`, `seat_shell` | velvet, black leather | materials |
 | `seat_tint_spread` | 0.12 | how much the seats differ, one from the next |
 | `wall_treatment` | `panels` | `panels` (fabric panels with wooden rails) or `plain` |
@@ -412,6 +412,143 @@ and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider'
 | `booth` | true | the projection booth's windows in the rear wall; `lens` is its lens |
 | `doors` | true | the four exits with signs |
 | materials | the cinema's | `floor`, `walls`, `front_wall`, `ceiling`, `panel_fabric`, `panel_wood`, `stage`, `curtains`, `door_leaf`, `door_metal`, `brass` |
+
+## The seats system
+
+`scripts/env/systems/seats.gd`. Seat models outside the builders, and the seats a room draws with them.
+
+### The models
+
+Each model is low-poly (boxes and rounded boxes) in its own frame: the floor point under the seated eyes at the
+origin, facing -Z. Each has two library materials (CC0), `upholstery` and `frame`, with its own defaults.
+
+| Model | Triangles | Forms | Folds away | Use |
+|---|---|---|---|---|
+| `stadium` | 646 | up, broken | yes | the cinema's seat (the auditorium draws it itself) |
+| `folding_chair` | 148 | | yes | slatted wooden chair, 1906 |
+| `plush` | 644 | up, broken | yes | velvet tip-up seat on cast standards, palaces |
+| `multiplex` | 656 | up, broken | yes | moulded shell, fabric insert, cup holder, 1980s |
+| `pew` | 48 a place | | no | a segment a place wide; the ends are drawn apart |
+| `club_chair` | 556 | | yes | deep leather armchair |
+| `director` | 188 | | yes | crossed legs, canvas seat and back |
+| `bench_seat` | 384 a place | | no | a convertible's tuck-and-roll bench; side trim drawn apart |
+| `cushion` | 322 | | no | a buttoned floor cushion |
+| `hide` | 462 | | no | a pelt over a low block (of ice) |
+| `bean_bag` | 196 | | no | a squat sack with a dent |
+
+Forms: `up` is a tip-up seat tipped up (the hall is empty). `broken` is a seat with its back slumped and its cushion
+hanging.
+
+### Three ways in
+
+- **The builders' seat slots.** A builder with `seat_slots()` (shopfront, nave, terrace, domestic, vehicle,
+  dome_hall) draws no seats of its own when the room has a seats system. The seats system draws a seat in every slot.
+  With `model` "auto" the slot's style chooses: chair: folding_chair, pew: pew, bench: bench_seat, cushion and tier:
+  cushion, club: club_chair, ring: plush. The builder lists these seats (its `seats()`), so they are listed once.
+  A slot is `{transform, row, style, width, builder}`. Slots of one row run left to right; a gap of more than 1.5
+  widths starts a new pew. The pews' ends and the benches' trim go into one static mesh, `SeatEnds`.
+- **Its own seats.** Rows round `origin` (`per_row`, `rows_front`, `rows_back`, `pitch`, `row_depth`, `row_rise`,
+  `aisle`, `facing`), and single `places` (`{at, turn, model}`). These are its `seats()`: seat choice, seat
+  picking and the sight-line check use them.
+- **Broken seats over a builder's own.** `broken` names room seats by their index in the room's seat list. Over a
+  builder that draws its own seats (the auditorium, Screen 3), the seats system folds that seat away in the builder's
+  MultiMesh "Seats" and draws a broken one of the builder's `seat_model` in its place. It does this again after every
+  room move, so the seat stays away when the viewer has sat there and moved on.
+
+A builder can also draw any model itself: `seats.gd model_mesh(model, upholstery, frame, width, form)`. The
+auditorium's `seat_mesh()` does, for every `seat_model` but the stadium seat.
+
+### Drawing
+
+- One MultiMesh a model and form: `Seats`, `SeatsUp`, `SeatsBroken`. The upholstery takes a slight tint seat by
+  seat (`variation`, `seed`), as in the cinema.
+- The viewer's own seat folds away (`fold_own`): chairs only. A pew, a bench, a cushion, a hide or a bean bag stays.
+- `tipped`: the share of tip-up seats left tipped up.
+- `collision_shapes()`: each seat's model boxes (one or two), for object physics.
+
+Measured headless (`test_env_seats.gd`): 15 plush seats are 2 draws and 9 660 triangles. A tipped or broken form
+adds two draws. Pews' ends add one or two.
+
+| Parameter | Default | What |
+|---|---|---|
+| `model` | auto | the seat; auto: by each slot's style (its own rows: folding chairs) |
+| `from_builders` | true | a seat in every seat slot of the room's builders |
+| `per_row`, `rows_front`, `rows_back` | 0, 0, 0 | its own rows |
+| `pitch`, `row_depth`, `row_rise`, `aisle` | 0 (the model's width), 1.1, 0, 0 | their spacing |
+| `origin`, `facing` | [0, 0, 0], 0 | the middle of the row at origin; the rows' turn |
+| `places` | [] | single seats: `{at, turn, model}` |
+| `upholstery`, `frame` | null (the model's own) | library materials |
+| `variation`, `seed` | 1, 1906 | the tint seat by seat |
+| `tipped` | 0 | the share of tip-up seats tipped up |
+| `broken` | [] | room seats drawn broken (at most 8) |
+| `fold_own` | true | the viewer's own chair folded away |
+
+## The motion system
+
+`scripts/env/systems/motion.gd`. Slow moves of the room's things. It never moves the viewer or their horizon
+(`moves_viewer` false in its spec).
+
+One motion system moves one thing. Give each its own id: the id names its actions (`organ.rise`). The thing is:
+
+- a node the document names: `node` (its name), among the nodes of the system `system` (an id), or anywhere in the
+  room when `system` is empty;
+- or a festoon curtain it builds itself: `build` "festoon". It hangs over the screen (`festoon_size` 0: the
+  screen's size with a margin) in `festoon_swags` swags, `festoon_depth` in front, in the `curtain` material.
+
+### Modes
+
+| Mode | What | Parameters |
+|---|---|---|
+| `travel` | along `path` (offsets from where it stands, in its parent's frame) and to `turn_to` (degrees, about `pivot` in its own frame). `at` 0 is where it stands, 1 the path's end | `path`, `turn_to`, `pivot`, `at` (live), `speed`, `accel`, `turn_speed` |
+| `sway` | to and fro about `sway_axis` and along `shift_dir`, one swing every `sway_period` seconds | `sway_angle` (live), `sway_shift` (live), `sway_period`, `pivot` |
+| `turn` | round `turn_axis` | `turn_rate` (live) |
+
+A festoon travels too: `at` 1 is fully up. The hem rises, the cloth above it gathers into tiers of folds, and
+between the lift cords it falls in swags that deepen as it rises.
+
+Actions: `rise` (to at 1), `lower` (to at 0), `go` (args `at`), each with `seconds` as a wish; `snap` (at once,
+args `at`); `start` and `stop` (a sway or a turn eases in or out). A cue can also `set` `<id>.at`.
+
+### Comfort
+
+| Limit | Value |
+|---|---|
+| speed | 0.5 m/s |
+| acceleration | 0.3 m/s² |
+| turning speed (travel) | 20 degrees/s, speeding up at 8 degrees/s² |
+| sway | 5 degrees, 0.1 m, a swing at least every 3 s |
+| turn | 15 degrees/s, speeding up at 8 degrees/s² |
+
+- Each limit is a `motion` flag in the spec, and the parameter's range ends there. The comfort check and the
+  schema refuse more.
+- Whatever drives `at` (an action, a cue's fade, a binding), the thing follows it no faster than its limits. It
+  speeds up and slows down smoothly. An action's `seconds` is a wish: when it asks for more than the limits, the
+  move takes longer. A sway or a turn starts from still and eases in.
+- **The Motion setting** (common) scales every motion parameter: half Motion is half the sway, half the speed.
+  Under 25 % a travel does not move at all: it snaps to the end it heads for, or (`reduced` "fade") fades out,
+  jumps and fades back in. A cue's fade on `at` then snaps to its end too.
+- **In front of the screen.** A thing that stands between the viewer and the screen until it moves (`in_front`: a
+  painting over the screen; the festoon always) does not count against the sight-line check. It is in the group
+  `env_in_front`. It never stays in the way through the film: 4 s after the film starts (no cue took it away), it
+  goes to its end by itself. A room whose Pre-show is off needs no cue for it.
+
+Measured (`test_env_motion.gd`): an organ console rising 2.8 m at 0.3 m/s and 0.15 m/s² takes 11.3 s and never goes
+faster. A festoon of 5 swags is 1 draw and 840 triangles; the mesh is made again only while it moves.
+
+### Examples
+
+```json
+{"system": "motion", "id": "organ", "params": {"system": "kit", "node": "OrganConsole",
+ "path": [[0, 2.8, 0]], "speed": 0.3, "accel": 0.15}}
+{"system": "motion", "id": "painting", "params": {"node": "Painting", "path": [[0, 3.0, 0]], "in_front": true,
+ "reduced": "fade"}}
+{"system": "motion", "id": "festoon", "params": {"build": "festoon", "festoon_swags": 6}}
+{"system": "motion", "id": "earth", "params": {"system": "sky", "node": "Earth", "mode": "turn",
+ "turn_rate": {"bind": "setting.earth_speed", "range": [0.5, 4.0]}}}
+```
+
+The ritual raises them: `{"do": "organ.rise", "args": {"seconds": 12}}`, `{"do": "festoon.rise", "args":
+{"seconds": 8}}`.
 
 ## The converted cinema
 
@@ -523,4 +660,10 @@ document. Each room agent owns its documents, its CC0 assets under `app/environm
   from listening in the headset.
 - **The Void's reflection** is now on by default (it was off): the Void's design is a mirror floor. It costs a
   quad that samples the video.
-- **One seat model.** `seat_model` has only `stadium`; the seats system brings the others.
+- **Seat boxes in the auditorium.** The auditorium's `collision_shapes()` gives every seat the stadium seat's two
+  boxes, whatever `seat_model` is. The other models are about that size, but a club chair or a bean bag is wider.
+  `seats.gd model_boxes()` has each model's boxes; the auditorium could use them.
+- **The film layer and things in front of the screen.** On the Frame the film layer is drawn over everything in front
+  of it. A painting or a festoon in front of the screen (motion's `in_front`, the group `env_in_front`) is hidden
+  under the film unless `film_layer.gd _covered()` also steps aside for nodes in that group. Until then, such a
+  thing is seen only while no film is open, or with the film layer off.
