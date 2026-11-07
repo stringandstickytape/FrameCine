@@ -106,7 +106,7 @@ func _place() -> void:
 	var t: Transform3D = screen.global_transform
 	_placed_for = t
 	# The room may be moved (seat choice, #19): its floor moves with it.
-	var y: float = floor_y + (main.env.position.y if main.env != null else 0.0) + 0.002
+	var y: float = floor_y + (main.env.global_position.y if main.env != null else 0.0) + 0.002
 	var foot := Vector3(t.origin.x, y, t.origin.z)
 	var viewer := Vector3(0.0, y, 0.0)
 	var length := foot.distance_to(viewer) + 0.5

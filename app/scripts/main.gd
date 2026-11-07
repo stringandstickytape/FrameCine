@@ -118,6 +118,10 @@ const ENVIRONMENTS: Array = [
 const SEEK_STEP := 10.0
 const SEEK_REPEAT := 0.4
 const FLAT_EYE_HEIGHT := 1.2
+## The eye height every room is built for: a seated viewer's (scripts/assistant/room_schema.gd NOMINAL_EYE_HEIGHT).
+## The room is lifted by the viewer's real eye height less this, so their eyes are where the room's seat puts them
+## and a telly, a screen's frame or a stage lines up with the picture (lift_room()).
+const ROOM_EYE_HEIGHT := 1.2
 ## A grip shorter than this, with the hand turned less than GRIP_TAP_ANGLE, is a tap (screen to gaze).
 const GRIP_TAP_MSEC := 350
 const GRIP_TAP_ANGLE := deg_to_rad(4.0)
@@ -876,6 +880,7 @@ func use_environment(node: VREnvironment, id: String, keep_screen := false, keep
 	env = node
 	env_root.add_child(env)
 	env_id = id
+	lift_room()
 	room_light = float(settings.get_value("env_" + env_id, "light", room_light if keep_screen else 1.0))
 	env.apply_light(room_light)
 	if not keep_screen:
@@ -977,6 +982,18 @@ func _save_screen_settings() -> void:
 ## The room's own screen placement as a short key: a saved placement remembers the one it was made against.
 static func _screen_default_key(d: Dictionary) -> String:
 	return "%.2f %.2f %.2f" % [float(d.get("width", 0.0)), float(d.get("distance", 0.0)), float(d.get("height_offset", 0.0))]
+
+
+## The room up or down so the viewer's eyes are at its seat's eye height (ROOM_EYE_HEIGHT above its floor): the
+## screen is placed from the eyes, so without it a viewer whose eyes are higher (sitting tall, standing) sees the
+## picture float above the room's telly (the user, 2026-11-07: TV 1930's picture well above the set). Not in the
+## passthrough room (the real room), lying down (the pose places the screen), or off XR.
+func lift_room() -> void:
+	var lift := 0.0
+	var lying := features != null and features.get("pose") != null and bool(features.pose.get("lying"))
+	if use_xr and env_id != "passthrough" and not lying:
+		lift = eye_height - ROOM_EYE_HEIGHT
+	env_root.position.y = lift
 
 
 ## Puts the flat screen at screen_yaw / screen_distance / eye height + offset, facing the viewer; the overlay with it.
@@ -1497,6 +1514,7 @@ func _process(delta: float) -> void:
 		_eye_height_frames -= 1
 		if _eye_height_frames == 0:
 			eye_height = maxf(xr_camera.global_position.y, 0.5)
+			lift_room()
 			_place_screen()
 			print("Recentered; eye height %.2f m" % eye_height)
 

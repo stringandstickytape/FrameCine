@@ -56,6 +56,9 @@ func set_lying(on: bool) -> void:
 	if on == lying:
 		return
 	lying = on
+	# Lying down, the room stays at the floor (the pose places the screen); sitting up, it meets the eyes again.
+	if main.has_method("lift_room"):
+		main.lift_room()
 	if on:
 		yaw = main.screen_yaw if not follow else yaw
 		pitch = clampf(_head_pitch(), 0.0, LYING_MAX)
