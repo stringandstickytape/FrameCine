@@ -455,7 +455,8 @@ hanging.
 - **Broken seats over a builder's own.** `broken` names room seats by their index in the room's seat list. Over a
   builder that draws its own seats (the auditorium, Screen 3), the seats system folds that seat away in the builder's
   MultiMesh "Seats" and draws a broken one of the builder's `seat_model` in its place. It does this again after every
-  room move, so the seat stays away when the viewer has sat there and moved on.
+  room move, so the seat stays away when the viewer has sat there and moved on. The broken seat takes the builder's
+  seat materials (unless `upholstery` or `frame` is set). So it matches the seats next to it and adds no textures.
 
 A builder can also draw any model itself: `seats.gd model_mesh(model, upholstery, frame, width, form)`. The
 auditorium's `seat_mesh()` does, for every `seat_model` but the stadium seat.
@@ -469,7 +470,8 @@ auditorium's `seat_mesh()` does, for every `seat_model` but the stadium seat.
 - `collision_shapes()`: each seat's model boxes (one or two), for object physics.
 
 Measured headless (`test_env_seats.gd`): 15 plush seats are 2 draws and 9 660 triangles. A tipped or broken form
-adds two draws. Pews' ends add one or two.
+adds two draws. Pews' ends add one or two. Texture memory is a budget figure measured headless. Under lavapipe a PC
+holds the textures decompressed (the headset keeps them ASTC), so the cinema alone reads 144 MB there.
 
 | Parameter | Default | What |
 |---|---|---|

@@ -600,11 +600,16 @@ func _cover(builder: Node, i: int, xf: Transform3D) -> void:
 		m = "multiplex"
 	var width := float(builder.params.get("seat_pitch", model_width(m))) if builder.get("params") is Dictionary \
 			else model_width(m)
+	var under: MultiMeshInstance3D = null
 	for n: Node in builder.call("owned"):
 		if n is MultiMeshInstance3D and n.name == &"Seats":
 			_covered.append([n, i])
-	_entries.append({"xf": xf, "model": m, "width": width, "form": "broken", "own": false, "run": "",
-			"overlay": [builder, i]})
+			under = n
+	var e := {"xf": xf, "model": m, "width": width, "form": "broken", "own": false, "run": "",
+			"overlay": [builder, i]}
+	if under != null:
+		e["under"] = under
+	_entries.append(e)
 	_hide_covered()
 
 
@@ -645,6 +650,29 @@ func _material(part: String, model: String) -> ShaderMaterial:
 	return out
 
 
+## A broken seat over a builder's own: the builder's seat materials (its upholstery: the one tinted per seat), so it
+## matches its neighbours and brings no textures of its own. A material given in params wins; `fallback` when the
+## builder's seat has no such surface.
+func _under_materials(under: MultiMeshInstance3D, fallback: Array) -> Array:
+	var out := fallback.duplicate()
+	var mesh: Mesh = under.multimesh.mesh if is_instance_valid(under) and under.multimesh != null else null
+	if mesh == null:
+		return out
+	var tinted: Material = null
+	var other: Material = null
+	for s in mesh.get_surface_count():
+		var m := mesh.surface_get_material(s)
+		if m is ShaderMaterial and (m as ShaderMaterial).get_shader_parameter("instance_tint") == true:
+			tinted = m if tinted == null else tinted
+		elif m != null and other == null:
+			other = m
+	if not (params.get("upholstery") is Dictionary) and tinted != null:
+		out[0] = tinted
+	if not (params.get("frame") is Dictionary) and other != null:
+		out[1] = other
+	return out
+
+
 func _draw() -> void:
 	_groups.clear()
 	_names_used.clear()
@@ -652,8 +680,11 @@ func _draw() -> void:
 	for i in _entries.size():
 		var e: Dictionary = _entries[i]
 		var key := "%s|%s|%d" % [e["model"], e["form"], roundi(float(e["width"]) * 100.0)]
+		if e.has("under"):
+			key += "|%d" % (e["under"] as Object).get_instance_id()
 		if not _groups.has(key):
-			_groups[key] = {"entries": [], "model": e["model"], "form": e["form"], "width": float(e["width"])}
+			_groups[key] = {"entries": [], "model": e["model"], "form": e["form"], "width": float(e["width"]),
+					"under": e.get("under")}
 		_groups[key]["entries"].append(i)
 		e["group"] = key
 		e["instance"] = (_groups[key]["entries"] as Array).size() - 1
@@ -670,10 +701,13 @@ func _draw() -> void:
 		var model := str(g["model"])
 		if not mats.has(model):
 			mats[model] = [_material("upholstery", model), _material("frame", model)]
+		var pair: Array = mats[model]
+		if g["under"] != null:
+			pair = _under_materials(g["under"], pair)
 		var mm := MultiMesh.new()
 		mm.transform_format = MultiMesh.TRANSFORM_3D
 		mm.use_colors = true
-		mm.mesh = model_mesh(model, mats[model][0], mats[model][1], float(g["width"]), str(g["form"]))
+		mm.mesh = model_mesh(model, pair[0], pair[1], float(g["width"]), str(g["form"]))
 		var list: Array = g["entries"]
 		mm.instance_count = list.size()
 		for j in list.size():

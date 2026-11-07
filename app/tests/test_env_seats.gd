@@ -231,7 +231,26 @@ func _auditorium() -> void:
 			sys.hides >= hides + 2 and (not _rendered()
 			or mmi.multimesh.get_instance_transform(5).basis.get_scale().is_zero_approx()))
 	var stats := EnvChecks.measure(room)
-	_check("the hall with its broken seat within budget %s" % [stats], EnvChecks.budget(stats).is_empty())
+	# The budget's texture memory is measured headless (docs, "Headset budget"); a PC's renderer holds the headset's
+	# ASTC textures decompressed (the cinema alone: 144 MB under lavapipe).
+	var limits := EnvChecks.BUDGET.duplicate()
+	if _rendered():
+		limits.erase("texture_mb")
+	_check("the hall with its broken seat within budget %s" % [stats], EnvChecks.budget(stats, limits).is_empty())
+	var broken := room.find_child("SeatsBroken", true, false) as MultiMeshInstance3D
+	var seat_mats := func(m: Mesh) -> Array:
+		var out: Array = []
+		for s in m.get_surface_count():
+			out.append(m.surface_get_material(s))
+		return out
+	var theirs: Array = seat_mats.call(mmi.multimesh.mesh)
+	_check("the broken seat in the hall's own materials", seat_mats.call(broken.multimesh.mesh).all(
+			func(m: Material) -> bool: return m in theirs))
+	broken.visible = false
+	var without := EnvChecks.measure(room)
+	broken.visible = true
+	_check("the broken seat brings no textures (%s MB, %s without it)" % [stats["texture_mb"], without["texture_mb"]],
+			is_equal_approx(float(stats["texture_mb"]), float(without["texture_mb"])))
 	room.queue_free()
 	await process_frame
 
