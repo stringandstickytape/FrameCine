@@ -192,11 +192,11 @@ func _atmospheric() -> void:
 	check("%s: and follow it (%s)" % [id, c], c.b > c.r + 0.1)
 	h.signals.clear_fakes()
 	# The courtyard's fountain in a niche on the left wall, through the hall's acoustics.
-	var RoomSound: GDScript = load("res://tests/room_sound_checks.gd")
-	var bus: Array = RoomSound.on_room_bus(room, ["fountain"])
+	var SoundChecks: GDScript = load("res://tests/room_sound_checks.gd")
+	var bus: Array = SoundChecks.on_room_bus(room, ["fountain"])
 	check("%s: the fountain on the room's bus, under Environment (the slider, the duck, Ambience) %s" % [id, bus],
 			bus.is_empty())
-	var ac: Array = RoomSound.acoustics(room, "cinema", 0.7)
+	var ac: Array = SoundChecks.acoustics(room, "cinema", 0.7)
 	check("%s: the acoustics cinema %s" % [id, ac], ac.is_empty())
 	var fountain: Node = h.system("fountain")
 	var spouts: Array = fountain.players()
@@ -208,8 +208,8 @@ func _atmospheric() -> void:
 	check("%s: the pre-show: the dusk back to twilight (%.2f)" % [id, h.param("sky.dusk")],
 			absf(float(h.param("sky.dusk")) - 0.4) < 0.02)
 	await _seat_picking(id, room)
-	var r: Dictionary = await RoomSound.levels(self, room, id)
-	for v: Array in RoomSound.verdicts(id, r):
+	var r: Dictionary = await SoundChecks.levels(self, room, id)
+	for v: Array in SoundChecks.verdicts(id, r):
 		check(v[0], v[1])
 	await done(room)
 
