@@ -471,6 +471,22 @@ func _render() -> void:
 	var middle := (shots["fireside_1953"] as Image).get_pixel(VIEW.x / 2, VIEW.y * 3 / 5)
 	_check("a round-cornered tube: its corner black (%s), its middle lit" % corner, corner.get_luminance() < 0.02
 			and middle.get_luminance() > 0.2)
+	# The tube's shape (tube 1.33 in the sets before 2000): a 16:9 film letterboxed in a 4:3 tube has the tube's round
+	# corners, which lie mostly in the bars above and below, so less of the picture's corner is cut than when the
+	# corners are the picture's own.
+	_check("the sets before 2000 have a 4:3 tube, the flat panel none", is_equal_approx(float(Presentation.PRESETS[
+			"fireside_1953"]["params"]["tube"]), 1.3333) and not Presentation.PRESETS["freedtv_2005"]["params"].has("tube"))
+	var own_p := _presentation("fireside_1953", tex)
+	var om: ShaderMaterial = own_p.material()
+	om.set_shader_parameter("pr_tube", 0.0)
+	(base[1] as MeshInstance3D).material_override = om
+	var own_img: Image = await _shot(base[0])
+	own_p.queue_free()
+	var at := Vector2i(VIEW.x * 3 / 100, VIEW.y * 8 / 100)
+	var cut := own_img.get_pixel(at.x, at.y).get_luminance()
+	var kept := (shots["fireside_1953"] as Image).get_pixel(at.x, at.y).get_luminance()
+	_check("a 4:3 tube round a wide film: its corner cut less (%.3f against %.3f with the picture's own corners)"
+			% [kept, cut], kept > cut + 0.1 and cut < 0.05)
 	var bar := (shots["fireside_1953"] as Image).get_pixel(VIEW.x * 3 / 14, VIEW.y / 4)
 	_check("black and white: the yellow bar grey (%s)" % bar, absf(bar.r - bar.b) < 0.08 and absf(bar.r - bar.g) < 0.08)
 	var glow := (shots["glowbox_1930"] as Image).get_pixel(VIEW.x / 2, VIEW.y / 2)

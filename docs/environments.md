@@ -60,7 +60,7 @@ still read, without change. Every key of version 3 keeps its meaning.
 |---|---|
 | `schema` | 4 |
 | `name` | the room's name; a room that ships has its name as a translation key |
-| `room` | the room as a whole: `ambient` (0..1, its surfaces' light with a dark screen), `screen_glow` (0..2), `curtains` (the pre-show's curtains may close here), `reacts_to_film` (the film's transients may flash the light), `reflection` (the floor reflection's default here), `reflection_floor` (its height; null: none) and `category` (where the Room tab lists it: `cinema` under Cinemas, `tv` under Television, `other` with the other rooms, the default; `env_library.gd category_of()`) |
+| `room` | the room as a whole: `ambient` (0..1, its surfaces' light with a dark screen), `screen_glow` (0..2), `curtains` (the pre-show's curtains may close here), `reacts_to_film` (the film's transients may flash the light), `reflection` (the floor reflection's default here), `reflection_floor` (its height; null: none) and `category` (where the Room tab lists it: `cinema` under Cinemas, `tv` under Television, `other` with the other rooms, the default; `env_library.gd category_of()`) and `description` (a line about the room under the Room tab's "This room", at most 200 characters; a key, so a room that ships translates it) |
 | `screen` | as version 3: the default screen's `center` and `size` |
 | `acoustics` | the room's sound for spatial audio (`get_sound_room()`, `scripts/play/spatial_audio.gd`): `box` ({min, max}; default: the builder's walls), `reflect`, `rt60`, `wet`, `surround_height`, `array`, `array_spacing`, `ring`, `distance` |
 | `systems` | the systems, in build order: `{system, id, params}`. `id` defaults to the system's name; two of one system need their own ids. Cues and bindings address a parameter as `<id>.<param>` |
@@ -149,7 +149,7 @@ parameters only.
 | `mirror_floor` | builder | a black floor that takes the film's reflection, a ripple where the viewer moves | built |
 | `shopfront`, `nave`, `dome_hall`, `terrace`, `domestic`, `vehicle` | builder | the other parametric structures (shopfront hall, nave, dome, open-air terrace or lot, domestic room, vehicle interior; below, "The builders") | built |
 | `kit` | kit | modular pieces placed along a builder's slots (balcony fronts, niches, columns, façades; below, "The kit") | built |
-| objects, materials, pictures | | as now: `parts` placements, library materials, pictures | as now |
+| objects, materials, pictures | | as now: `parts` placements, library materials, pictures (an assistant's room). A shipped room's things are kit pieces (below, "The kit"): the kit builds them on the house shader, lit as the room is, and its pieces are original, so a document room places no library objects | as now |
 | `sky`, `vista` | sky | a sky dome (twilight to night, the real stars and constellations, the Milky Way, clouds lit by the screen, an aurora, Earth from the Moon), far scenery from simple shapes (hills, mesas, a floodlit acropolis, birches in snow, cypresses, a glowing pool); below, "The sky and the vista" | built |
 | `atmosphere`, `weather` | atmosphere | haze, dust and smoke in the beam, ground fog and mist, breath; rain and snow through open roofs and outside windows, rain on a pane, a puddle that reflects the film, a weather cycle (below, "Atmosphere and weather") | built |
 | `life` | life | non-human ambient life: moths, birds, fish, fireflies, a cat, a deer, glowing deep-sea creatures, a whale, plane lights. Never people (below, "Ambient life") | built |
@@ -239,7 +239,8 @@ whale sings as it passes, so the cue needs no `sound` step.
 | `states` | the states it may fire in |
 | `chance` | 0..1, rolled each time it would fire |
 | `cooldown` | seconds before it may fire again (the whale: at most once in 15 minutes) |
-| `steps` | run in order: `{"set": "<id>.<param>", "to": v, "seconds": s, "ease": "linear" or "in" or "out" or "in_out"}` (starts a fade and goes on), `{"wait": s}`, `{"release": "<id>.<param>", "seconds": s}` (back to its base value or binding), `{"do": "<id>.<action>", "args": {...}}`, `{"sound": "<synth>", "gain_db": g, "at": [x, y, z]}` |
+| `stop_in` | states that stop it while it runs: `["playing"]` stops a slow pre-show cue when the film starts. Its later steps don't run; what it set stays until a `release` or another cue |
+| `steps` | run in order: `{"set": "<id>.<param>", "to": v, "seconds": s, "ease": "linear" or "in" or "out" or "in_out"}` (starts a fade and goes on), `{"wait": s}`, `{"release": "<id>.<param>", "seconds": s}` (back to its base value or binding), `{"do": "<id>.<action>", "args": {...}}`, `{"sound": "<synth>", "gain_db": g, "at": [x, y, z]}`, `{"stop": "<cue>"}` (stops another cue of the room while it runs) |
 
 A cue's `set` holds the parameter until a `release`; a binding on the same parameter waits under it. A cue does not
 start again while it runs.
@@ -580,6 +581,11 @@ Six more builders of kind `builder`, and the `kit`. They keep the auditorium's c
 - **Lamps** use the light system's groups: `house` (the ritual takes them down), `accent`, `signs`, `booth`. A flame
   or a candle flickers with the builder's `flicker` parameter. Every frequency is under 3 Hz. The room's Flickering
   lights setting holds it steady.
+- **A lamp colour a cue moves** (since 2026-11-07): the light system's live `glow_colour` and `glow_mix` (0 by
+  default: the lamps' own colours) take the `house`, `steps` and `stage` lamps' glow toward one colour. A builder's
+  lamp colour parameters are not live (the room builds again), so a cue that changes the lamps' colour fades these:
+  the Streamline's Changing cove (`cove_cycle`, and `cove_settles` when the film starts). The stand-in lamps and a
+  baked lightmap keep the builder's colour.
 - **Glass** (a window, a dome's panes, a windscreen) is in the group `env_see_through`. The sight-line check looks
   through it. It blends; it never multiplies.
 - **The sight line:** a flat-floored builder keeps the picture's bottom at 1.1 m or more over the floor, so chair
@@ -644,6 +650,8 @@ screen (style `ring`). Beyond glass: nothing (a sky system's sky), deep water, o
 
 - `radius`, `centre_z`, `floor_y`, `drum_height`, `dome_height`, `dome` (`glass` or `solid`), `ribs`, `rings`.
 - `outside` (`none`, `water`, `night`), `water_top`, `water_deep`; live: `outside_glow`.
+- `glass_colour` and `glass_alpha` (0.05; lower is clearer): a pale tint at a low alpha keeps the view out clear,
+  where before a room needed a near-black tint to stop the glass hazing what lies outside.
 - Seats: `rows_front`, `rows_back`, `row_depth`, `seat_pitch`, `arc_deg`, `seat_model`.
 - Slots: `drum`, `screen`, `proscenium`, `floor`, `ceiling`.
 - Measured (glass, about 120 seats): 8 draws, 88k triangles, 4 MB.
@@ -1213,7 +1221,7 @@ the ripple's strength.
 | broadcast | `interlace`, `lines` | the two fields' lines, one after the other |
 | transmission | `snow`, `ghost`, `ghost_shift`, `weak` | aerial noise, a faint second picture to the right, a weak signal (paler, flatter, more snow) |
 | display | `display`: `none`, `mechanical`, `crt`, `panel` | the set |
-| crt | `curvature`, `corner`, `mask` (`none`, `shadow`, `grille`, `slot`), `mask_pitch`, `mask_strength`, `scanlines`, `glass` | the bulging face, round corners, the phosphors' mask, the gaps between lines, the glass's reflection (a soft light behind the viewer that moves as the head moves) |
+| crt | `curvature`, `corner`, `tube` (the tube's aspect: 1.33 in the sets before 2000; 0 the picture's own), `mask` (`none`, `shadow`, `grille`, `slot`), `mask_pitch`, `mask_strength`, `scanlines`, `glass` | the bulging face, round corners, the phosphors' mask, the gaps between lines, the glass's reflection (a soft light behind the viewer that moves as the head moves) |
 | mechanical | `mech_lines` | a 1930 mechanical-scan set: a few lines across, a neon's orange glow, dark edges |
 | panel | `panel_grid`, `panel_pixels`, `panel_bleed` | the gaps between the pixels, the backlight through the dark scenes |
 | colour | `colour`, `tint`, `gain` | saturation (0: black and white), the tube's tint, brightness |
@@ -1701,8 +1709,9 @@ the telly's shape and size, each setting and what it does, the cues).
 **The telly's shape.** The film is drawn on the screen's own mesh, which is the document's width at the film's
 aspect (`video_screen.gd get_flat_size()`); a document cannot give it another shape. So the domestic telly's tube (the
 cabinet's opening and the dark glass behind the picture) is 4:3 for the sets before 2000, and a 16:9 film sits in it
-letterboxed, as a wide film did on a 4:3 set. A 4:3 film fills the tube. The CRT's bulge and round corners are those
-of the film's own rectangle, not the tube's (the open question "A telly's shape" stays open).
+letterboxed, as a wide film did on a 4:3 set. A 4:3 film fills the tube. The CRT's bulge and round corners are the
+tube's (`presentation.tube` 1.33 in the presets before 2000, since 2026-11-07): the corners lie mostly in the bars
+above and below a wide film and clip its corners a little, and its edges bow as a 4:3 face's would.
 
 **The telly's size.** The headset shows about 20 pixels a degree, so a set as small as it really was, across a room,
 would be a postage stamp. The viewer's chair is pulled up to the set instead: every picture is 17 to 23 degrees across
@@ -1892,9 +1901,8 @@ document. Each room agent owns its documents, its CC0 assets under `app/environm
   from listening in the headset.
 - **The Void's reflection** is now on by default (it was off): the Void's design is a mirror floor. It costs a
   quad that samples the video.
-- **A telly's shape.** The presentation draws on the screen's own mesh, which has the film's aspect: a CRT's round
-  corners and bulge are those of a 16:9 picture for a 16:9 film. A 4:3 tube with the film letterboxed in it needs a
-  screen of the tube's shape (the room's builder, or a later screen parameter).
+- **A telly's shape** (settled 2026-11-07). The presentation still draws on the screen's own mesh at the film's
+  aspect, but `tube` gives the CRT's corners and bulge the tube's shape round it.
 - **The presentation in the layer.** A source-only chain (weave and grain) could stay in the film layer, as the
   projector feature's weave does; the presentation draws in the room for every picture stage, for one path. Its cost
   on the Frame is not measured yet.

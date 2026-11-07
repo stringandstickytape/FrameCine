@@ -3317,3 +3317,96 @@ msgstr "电视填满入口"
 #. Pillow Fort 1993: the setting's description.
 msgid "The telly stands just beyond the fort's opening and fills it; off, it is back on its chest of drawers across the room."
 msgstr "电视就放在枕头堡入口外，正好填满入口；关闭时，它回到房间另一头的抽屉柜上。"
+
+msgid "A picture palace built as a courtyard under a twilight sky: lit windows, iron balconies, cypresses over the walls and real stars."
+msgstr "一座建成庭院模样的电影宫，头顶是暮色天空：亮灯的窗户、铁艺阳台、墙头的柏树和真实的星空。"
+
+msgid "A glass dome on the sea floor: fish drift past, glowing creatures come to the screen, and now and then a whale passes in a quiet scene."
+msgstr "海底的玻璃圆顶：鱼群游过，发光的生物向屏幕靠近，安静的片段里偶尔有鲸鱼经过。"
+
+msgid "The converted cinema: rows on a rake, curtains that part when the film starts, and the house lights going down."
+msgstr "改建的电影院：阶梯座位，影片开始时幕布拉开，场灯渐暗。"
+
+msgid "An amphitheatre on the Moon under a glass dome: Earth turns slowly over the film, and the Milky Way comes out when the lights go down."
+msgstr "月球上玻璃圆顶下的圆形剧场：地球在影片上方缓缓转动，灯光暗下时银河显现。"
+
+msgid "A drive-in lot at dusk, seen from a convertible's bench seat: the stars come out over the film, moths in the beam, mesas on the horizon."
+msgstr "黄昏时的汽车影院，从敞篷车的长椅上观看：星星在影片上方出现，光束里有飞蛾，地平线上是平顶山。"
+
+msgid "A big modern cinema: a steep rake, black walls, blue step lights and a huge curved screen."
+msgstr "大型现代影院：陡峭的阶梯、黑色墙面、蓝色台阶灯和一块巨大的弧形银幕。"
+
+msgid "A cinema of ice blocks with seats on hides: the walls glow in the film's colours, and an aurora swells outside in quiet scenes."
+msgstr "冰块砌成的影院，座位铺着兽皮：墙壁映着影片的颜色，安静的片段里窗外极光涌动。"
+
+msgid "A stone nave with the screen in the chancel: pews, candles, a dim rose window and the film's light climbing the stone."
+msgstr "石砌的中殿，银幕在圣坛里：长椅、烛光、昏暗的玫瑰窗，影片的光沿着石墙向上爬。"
+
+msgid "A concrete hall of the 1970s: ochre curtains, a mosaic wall that glitters in the screen's light, and snow on the birches outside."
+msgstr "七十年代的混凝土大厅：土黄色幕布、在银幕光下闪烁的马赛克墙，窗外的树上覆着雪。"
+
+msgid "A pillow fort in a bedroom, 1993: cushions and a bedsheet, fairy lights, rain on the window, and the telly filling the opening."
+msgstr "1993年卧室里的枕头堡：靠垫和床单、彩灯、窗上的雨，电视填满了堡的开口。"
+
+msgid "A plush picture palace in pink and blue: a sunburst ceiling with cycling lights, chandeliers, a balcony and a ceremonial curtain."
+msgstr "粉蓝两色的豪华电影宫：灯光变幻的放射状天花板、枝形吊灯、楼座和一道礼仪幕布。"
+
+msgid "An old picture house taken back by nature: half its roof gone to the stars, ivy and ferns, rain into a puddle that gives back the film."
+msgstr "被大自然收回的老影院：半个屋顶已向星空敞开，常春藤和野草，雨水落进映着影片的水洼。"
+
+msgid "A summer cinema on a rooftop: director's chairs, bougainvillea, a floodlit acropolis on its hill, and a cat on the wall."
+msgstr "屋顶上的夏日露天影院：导演椅、三角梅、山上灯火通明的卫城，墙头一只猫。"
+
+msgid "A tired multiplex screen, 1983: plasterboard, a swirly carpet, a broken seat, smoke in the beam and a worn print."
+msgstr "1983年一间疲惫的多厅影院放映厅：石膏板墙、旋涡花纹地毯、一个坏座位、光束里的烟雾和一卷磨损的拷贝。"
+
+msgid "A private screening room, 1962: walnut walls, club chairs, a pool glowing through the window, and a painting that slides up to show the screen."
+msgstr "1962年的私人放映室：胡桃木墙面、俱乐部椅、窗外发光的泳池，一幅画升起露出银幕。"
+
+msgid "A shopfront picture house, 1906: a pressed tin ceiling, folding chairs, gas lamps and a dusty beam from the tin booth."
+msgstr "1906年的店面电影院：压花锡板天花板、折叠椅、煤气灯，铁皮放映间射出满是尘埃的光束。"
+
+msgid "A streamline cinema, 1937: cream faience bands, cove lights that change colour, an organ that rises from the pit, and a festoon curtain."
+msgstr "1937年的流线型影院：奶油色釉面砖带、变色的灯槽、从乐池升起的管风琴和一道花彩幕布。"
+
+msgid "The first television, 1930: a small glowing picture in a cabinet, the chair pulled up close."
+msgstr "1930年最早的电视：柜子里一块发光的小画面，椅子拉得很近。"
+
+msgid "A front room in 1953: a big set for its day, armchairs gathered round, and a fire in the grate."
+msgstr "1953年的客厅：在当时算大的电视机、围拢的扶手椅，壁炉里生着火。"
+
+msgid "The first colour set, 1972: the television in the corner and the chairs in a row."
+msgstr "1972年第一台彩电：电视放在角落，椅子排成一排。"
+
+msgid "A portable on a desk, 1983: a small screen up close, as a home computer's was."
+msgstr "1983年书桌上的便携电视：小屏幕就在眼前，就像当年家用电脑的屏幕。"
+
+msgid "A family set in 1987: a rented tape, the settee across from the television."
+msgstr "1987年的家庭电视：一盘租来的录像带，沙发正对着电视。"
+
+msgid "A bedroom telly in 1993, seen from a bean bag on the floor."
+msgstr "1993年卧室里的电视，从地上的懒人沙发看过去。"
+
+msgid "The first flat screen, 2005: a wide picture on a stand, the sofa further back."
+msgstr "2005年第一台平板电视：架子上一块宽屏，沙发离得更远。"
+
+msgid "Nothing but black and a mirror floor that gives back the film, with a ripple where you move."
+msgstr "只有黑暗和一面映出影片的镜面地板，你移动的地方会泛起波纹。"
+
+msgid "A small dark room with nothing in it to look at but the film."
+msgstr "一间昏暗的小房间，除了影片别无可看。"
+
+msgid "Your own room through the headset's cameras, with the film in front of you."
+msgstr "通过头显摄像头看到你自己的房间，影片就在你面前。"
+
+msgid "A small home theatre: a sofa in a dark room, the screen above a low cabinet, tower speakers either side."
+msgstr "小型家庭影院：昏暗房间里的沙发，矮柜上方的银幕，两侧是落地音箱。"
+
+msgid "A drive-in at night, seen from a car in the middle of the lot: other cars, speaker posts and stars."
+msgstr "夜晚的汽车影院，从停车场中间的一辆车里观看：周围的车、扬声器柱和星星。"
+
+msgid "A planetarium: reclined seats under a dark dome full of stars, a skyline round its foot."
+msgstr "天文馆：深色圆顶下的躺椅，满天星斗，圆顶脚下一圈城市剪影。"
+
+msgid "An open geodesic dome on a wide plain at dusk, the first stars coming out overhead."
+msgstr "黄昏时宽阔平原上一座敞开的网格球顶，头顶第一批星星正在出现。"

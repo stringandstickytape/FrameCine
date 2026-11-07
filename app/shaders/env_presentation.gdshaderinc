@@ -48,6 +48,9 @@ uniform float pr_weak = 0.0;
 uniform int pr_display = 0;
 uniform float pr_curvature = 0.0;
 uniform float pr_corner = 0.0;
+// The tube's aspect (0: the picture's own). A wide film letterboxed in a squarer tube keeps the tube's round corners
+// and bulge, not the picture's.
+uniform float pr_tube = 0.0;
 // 0 none, 1 shadow mask (dot triads), 2 aperture grille (stripes), 3 slot mask.
 uniform int pr_mask = 0;
 uniform float pr_mask_pitch = 420.0;
@@ -80,11 +83,19 @@ float pr_keep(float coord) {
 // The position in the eye's picture to sample for the screen point mesh_uv (0..1, y down): the tube's curvature,
 // the film's tilt and weave, the tape's wobble and head-switch tear. Uniform control flow only (the caller takes the
 // derivatives of the result).
+// The tube's half size in the picture's units (the picture's height 1): the picture's own, or a squarer tube round a
+// wide picture (taller: the picture letterboxed in it), or a wider tube round a square one (pillarboxed).
+vec2 pr_tube_half() {
+	float t = pr_tube > 0.0 ? pr_tube : pr_aspect;
+	return t < pr_aspect ? vec2(0.5 * pr_aspect, 0.5 * pr_aspect / t) : vec2(0.5 * t, 0.5);
+}
+
 vec2 pr_geometry(vec2 mesh_uv, float time) {
 	vec2 c = (mesh_uv - 0.5) * vec2(pr_aspect, 1.0);
-	// A tube's face bulges: the picture's edges bow out and its corners fall off the glass.
+	// A tube's face bulges: the picture's edges bow out and its corners fall off the glass (by the tube's height).
 	float k = pr_display == 2 ? pr_curvature * 0.09 : 0.0;
-	c *= 1.0 + k * dot(c, c);
+	float th = 2.0 * pr_tube_half().y;
+	c *= 1.0 + k * dot(c, c) / (th * th);
 	c = mat2(pr_turn.xy, pr_turn.zw) * c;
 	vec2 p = c / vec2(pr_aspect, 1.0) + 0.5 + pr_weave;
 	if (pr_source == 2) {
@@ -226,15 +237,17 @@ vec3 pr_display_of(vec3 rgb, vec2 mesh_uv, vec2 p, vec3 to_eye, vec3 ax, vec3 ay
 			rgb *= mix(vec3(1.0), pr_mask_pattern(mesh_uv), km) / (1.0 - 0.5 * km);
 		}
 		// Darker towards the tube's edges.
-		rgb *= 1.0 - 0.35 * pr_curvature * dot(c0, c0);
+		vec2 tube = pr_tube_half();
+		vec2 ct = c0 / (2.0 * tube.y);
+		rgb *= 1.0 - 0.35 * pr_curvature * dot(ct, ct);
 		// The glass: a soft light behind the viewer seen in the bulge, and a faint sheen at a glance.
-		vec3 n = normalize(az + (c0.x * ax - c0.y * ay) * pr_curvature * 0.7);
+		vec3 n = normalize(az + (ct.x * ax - ct.y * ay) * pr_curvature * 0.7);
 		vec3 r = reflect(-to_eye, n);
 		vec3 light = normalize(az + ay * 0.55 - ax * 0.35);
 		float spec = pow(max(dot(r, light), 0.0), 14.0);
 		float sheen = 1.0 - max(dot(n, to_eye), 0.0);
 		rgb += vec3(0.82, 0.86, 0.92) * pr_glass * (0.2 * spec + 0.05 * sheen + 0.012);
-		float corner = pr_rounded(c0, vec2(0.5 * pr_aspect, 0.5), 0.5 * pr_corner);
+		float corner = pr_rounded(c0, tube, pr_corner * tube.y);
 		return rgb * corner;
 	}
 	if (pr_display == 3) {

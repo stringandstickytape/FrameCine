@@ -269,6 +269,23 @@ func _test_room_tab() -> void:
 	_check("Television shows only with a TV room", tab._tv_box.visible == (tab._tvs.get_child_count() > 0))
 	_check("a category the rooms don't know is refused", not EnvDoc.validate({"schema": 4, "name": "x",
 			"room": {"category": "radio"}})["ok"])
+	# Every room that ships says what it is, under This room (room.description, a key).
+	var no_line: Array = []
+	for id: String in tab._env_ids:
+		if not tab.is_yours(id) and not Showrooms.is_showroom(id) and EnvLibrary.description_of(id) == "":
+			no_line.append(id)
+	_check("every shipped room has a line about itself (none: %s)" % [no_line], no_line.is_empty())
+	_check("a description over 200 characters is refused", not EnvDoc.validate({"schema": 4, "name": "x",
+			"room": {"description": "x".repeat(201)}})["ok"])
+	var was_env: String = main.env_id
+	main.set_environment("nave")
+	await _frames(2)
+	tab.sync()
+	_check("the Nave's line shows under This room (%s)" % tab._about.text, tab._this_room_box.visible
+			and tab._about.visible and tab._about.text == tr(EnvLibrary.description_of("nave")))
+	main.set_environment(was_env)
+	await _frames(2)
+	tab.sync()
 	_check("the viewer's own rooms apart (%d)" % tab._yours.get_child_count(), (tab._yours.get_children() as Array).size()
 			== tab._env_ids.filter(func(id: String) -> bool: return tab.is_yours(id)).size()
 			and tab._yours_box.visible == (tab._yours.get_child_count() > 0))

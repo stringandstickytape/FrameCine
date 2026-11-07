@@ -69,29 +69,29 @@ const PRESETS := {
 	"fireside_1953": {"title": "Fireside, 1953", "description": "a black and white set on a rooftop aerial: a "
 			+ "small round-cornered tube, 405-line interlace, snow and a ghost",
 			"params": {"source": "broadcast", "interlace": 0.6, "lines": 377, "snow": 0.22, "ghost": 0.25,
-					"ghost_shift": 0.035, "display": "crt", "curvature": 0.9, "corner": 0.6, "mask": "none",
+					"ghost_shift": 0.035, "display": "crt", "tube": 1.3333, "curvature": 0.9, "corner": 0.6, "mask": "none",
 					"scanlines": 0.45, "glass": 0.7, "colour": 0.0, "tint": [0.92, 0.96, 1.0], "speaker": "telly"}},
 	"colourstar_1972": {"title": "Colourstar, 1972", "description": "an early colour set: a curved tube with a "
 			+ "shadow mask, warm and rich colours, interlace, a faint ghost",
 			"params": {"source": "broadcast", "interlace": 0.5, "lines": 576, "snow": 0.06, "ghost": 0.12,
-					"display": "crt", "curvature": 0.7, "corner": 0.45, "mask": "shadow", "mask_pitch": 380.0,
+					"display": "crt", "tube": 1.3333, "curvature": 0.7, "corner": 0.45, "mask": "shadow", "mask_pitch": 380.0,
 					"mask_strength": 0.35, "scanlines": 0.3, "glass": 0.6, "colour": 1.15, "tint": [1.0, 0.97, 0.9],
 					"speaker": "telly"}},
 	"sirclive_1983": {"title": "Sirclive, 1983", "description": "a portable telly on a home computer's aerial "
 			+ "lead: 240 bold lines, a little RF noise, bright colours on a shadow mask",
 			"params": {"source": "broadcast", "interlace": 0.0, "lines": 240, "snow": 0.05, "ghost": 0.06,
-					"ghost_shift": 0.012, "display": "crt", "curvature": 0.8, "corner": 0.5, "mask": "shadow",
+					"ghost_shift": 0.012, "display": "crt", "tube": 1.3333, "curvature": 0.8, "corner": 0.5, "mask": "shadow",
 					"mask_pitch": 300.0, "mask_strength": 0.4, "scanlines": 0.65, "glass": 0.6, "colour": 1.2,
 					"speaker": "telly"}},
 	"rewinder_1987": {"title": "Rewinder, 1987", "description": "a rented tape on the family telly: tracking "
 			+ "wobble, chroma bleed, the head-switch tear at the bottom, a slot mask",
 			"params": {"source": "tape", "tracking": 0.5, "head_switch": 0.7, "chroma_bleed": 0.6, "tape_noise": 0.4,
-					"lines": 576, "display": "crt", "curvature": 0.55, "corner": 0.35, "mask": "slot",
+					"lines": 576, "display": "crt", "tube": 1.3333, "curvature": 0.55, "corner": 0.35, "mask": "slot",
 					"mask_pitch": 420.0, "mask_strength": 0.3, "scanlines": 0.3, "glass": 0.5, "speaker": "telly"}},
 	"nightowl_1993": {"title": "Nightowl, 1993", "description": "a bedroom telly with a flatter tube and an "
 			+ "aperture grille, playing a tape that has been watched a few times",
 			"params": {"source": "tape", "tracking": 0.25, "head_switch": 0.5, "chroma_bleed": 0.4,
-					"tape_noise": 0.25, "lines": 576, "display": "crt", "curvature": 0.35, "corner": 0.25,
+					"tape_noise": 0.25, "lines": 576, "display": "crt", "tube": 1.3333, "curvature": 0.35, "corner": 0.25,
 					"mask": "grille", "mask_pitch": 480.0, "mask_strength": 0.3, "scanlines": 0.25, "glass": 0.45,
 					"speaker": "telly"}},
 	"freedtv_2005": {"title": "FreeDTV, 2005", "description": "a free digital broadcast on an early flat panel: a "
@@ -165,6 +165,9 @@ static func spec() -> Dictionary:
 					"description": "crt: how much the tube's face bulges"},
 			"corner": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.35, "live": true,
 					"description": "crt: the round corners (1: a radius of half the height)"},
+			"tube": {"type": "float", "min": 0.0, "max": 3.0, "default": 0.0, "live": true,
+					"description": "crt: the tube's aspect (4:3 is 1.33; 0: the picture's own). A wide film sits "
+					+ "letterboxed in a 4:3 tube: the round corners and the bulge are the tube's"},
 			"mask": {"type": "enum", "values": MASKS, "default": "shadow", "live": true,
 					"description": "crt: the phosphors' mask: none (black and white), shadow (dot triads), grille "
 					+ "(an aperture grille's stripes), slot"},
@@ -328,6 +331,7 @@ func _apply() -> void:
 	m.set_shader_parameter("pr_weak", _f("weak"))
 	m.set_shader_parameter("pr_curvature", _f("curvature"))
 	m.set_shader_parameter("pr_corner", _f("corner"))
+	m.set_shader_parameter("pr_tube", _f("tube"))
 	m.set_shader_parameter("pr_mask", maxi(MASKS.find(str(value("mask"))), 0))
 	m.set_shader_parameter("pr_mask_pitch", _f("mask_pitch"))
 	m.set_shader_parameter("pr_mask_strength", _f("mask_strength"))

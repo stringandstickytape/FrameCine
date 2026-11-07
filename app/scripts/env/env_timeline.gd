@@ -9,6 +9,7 @@ extends RefCounted
 ##   observe(snap, delta)   one step: snap {open, playing, position, duration, intermission, ended}
 ##   state, previous        the state now and the one before
 ##   run_cue(name)          starts a cue now (tests, the assistant's room preview)
+##   stop_cue(name)         stops a running cue (its later steps don't run)
 ##   fired                  [[cue, clock], ...] every cue started (tests)
 ##   signal state_changed(state, previous)
 
@@ -104,6 +105,11 @@ func _state_for(snap: Dictionary, delta: float) -> String:
 # --- Cues -------------------------------------------------------------------------------------------------------------
 
 func _on_state(s: String) -> void:
+	# A running cue whose stop_in lists this state stops first (its later steps don't run; its fades stay where they
+	# are until a release or another cue moves them), so a cue started on entering it can take over.
+	for n: String in _running.keys():
+		if s in (_running[n]["cue"].get("stop_in", []) as Array):
+			_running.erase(n)
 	for c: Dictionary in _cues:
 		var w: Dictionary = c.get("when", {})
 		if not w.has("state"):
@@ -175,12 +181,19 @@ func _start(c: Dictionary) -> void:
 	_running[n] = {"cue": c, "step": 0, "wait": 0.0}
 
 
+## Stops a running cue (a stop step, the cue's stop_in): its later steps don't run. False when it wasn't running.
+func stop_cue(cue_name: String) -> bool:
+	return _running.erase(cue_name)
+
+
 func running() -> Array:
 	return _running.keys()
 
 
 func _run(delta: float) -> void:
 	for n: String in _running.keys():
+		if not _running.has(n):
+			continue
 		var r: Dictionary = _running[n]
 		r["wait"] = float(r["wait"]) - delta
 		var steps: Array = r["cue"]["steps"]
@@ -197,5 +210,9 @@ func _run(delta: float) -> void:
 				host.do_action(str(s["do"]), s.get("args", {}))
 			elif s.has("sound"):
 				host.play_sound(str(s["sound"]), float(s.get("gain_db", 0.0)), s.get("at"))
-		if int(r["step"]) >= steps.size() and float(r["wait"]) <= 0.0:
+			elif s.has("stop"):
+				stop_cue(str(s["stop"]))
+				if not _running.has(n):
+					break
+		if _running.has(n) and int(r["step"]) >= steps.size() and float(r["wait"]) <= 0.0:
 			_running.erase(n)

@@ -114,7 +114,7 @@ func _build_systems() -> void:
 		var spec: Dictionary = Registry.spec(_system_name(bits[0]))["params"][bits[1]]
 		var e := {"sys": s, "param": bits[1], "spec": spec, "b": b, "value": null}
 		e["value"] = _evaluate(e, 0.0)
-		s.params[bits[1]] = e["value"]
+		s.params[bits[1]] = _comfort(spec, e["value"])
 		_bindings.append(e)
 	for s: Node in order:
 		s.call("setup")
