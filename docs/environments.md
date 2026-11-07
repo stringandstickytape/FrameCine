@@ -149,7 +149,7 @@ parameters only.
 | `mirror_floor` | builder | a black floor that takes the film's reflection, a ripple where the viewer moves | built |
 | `shopfront`, `nave`, `dome_hall`, `terrace`, `domestic`, `vehicle` | builder | the other parametric structures (shopfront hall, nave, dome, open-air terrace or lot, domestic room, vehicle interior; below, "The builders") | built |
 | `kit` | kit | modular pieces placed along a builder's slots (balcony fronts, niches, columns, façades; below, "The kit") | built |
-| objects, materials, pictures | | as now: `parts` placements, library materials, pictures | as now |
+| objects, materials, pictures | | as now: `parts` placements, library materials, pictures (an assistant's room). A shipped room's things are kit pieces (below, "The kit"): the kit builds them on the house shader, lit as the room is, and its pieces are original, so a document room places no library objects | as now |
 | `sky`, `vista` | sky | a sky dome (twilight to night, the real stars and constellations, the Milky Way, clouds lit by the screen, an aurora, Earth from the Moon), far scenery from simple shapes (hills, mesas, a floodlit acropolis, birches in snow, cypresses, a glowing pool); below, "The sky and the vista" | built |
 | `atmosphere`, `weather` | atmosphere | haze, dust and smoke in the beam, ground fog and mist, breath; rain and snow through open roofs and outside windows, rain on a pane, a puddle that reflects the film, a weather cycle (below, "Atmosphere and weather") | built |
 | `life` | life | non-human ambient life: moths, birds, fish, fireflies, a cat, a deer, glowing deep-sea creatures, a whale, plane lights. Never people (below, "Ambient life") | built |
@@ -577,6 +577,11 @@ Six more builders of kind `builder`, and the `kit`. They keep the auditorium's c
 - **Lamps** use the light system's groups: `house` (the ritual takes them down), `accent`, `signs`, `booth`. A flame
   or a candle flickers with the builder's `flicker` parameter. Every frequency is under 3 Hz. The room's Flickering
   lights setting holds it steady.
+- **A lamp colour a cue moves** (since 2026-11-07): the light system's live `glow_colour` and `glow_mix` (0 by
+  default: the lamps' own colours) take the `house`, `steps` and `stage` lamps' glow toward one colour. A builder's
+  lamp colour parameters are not live (the room builds again), so a cue that changes the lamps' colour fades these:
+  the Streamline's Changing cove (`cove_cycle`, and `cove_settles` when the film starts). The stand-in lamps and a
+  baked lightmap keep the builder's colour.
 - **Glass** (a window, a dome's panes, a windscreen) is in the group `env_see_through`. The sight-line check looks
   through it. It blends; it never multiplies.
 - **The sight line:** a flat-floored builder keeps the picture's bottom at 1.1 m or more over the floor, so chair

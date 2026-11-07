@@ -52,6 +52,11 @@ static func spec() -> Dictionary:
 					"description": "the exit signs' and the booth's glow"},
 			"accent": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
 					"description": "accent lamps' glow (group accent)"},
+			"glow_colour": {"type": "color", "default": [1.0, 1.0, 1.0], "live": true,
+					"description": "a colour the house, step and stage lamps' glow goes to by glow_mix (a cue moves "
+					+ "it: the Streamline's changing cove)"},
+			"glow_mix": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
+					"description": "0: the lamps' own colours; 1: glow_colour"},
 			"dimmed_level": {"type": "float", "min": -1.0, "max": 1.0, "default": -1.0, "live": true,
 					"brightness": true, "description": "the room light's level while the film plays (light follows "
 					+ "playback); -1: the app's own (the Room tab's Dimmed to)"},
@@ -69,8 +74,10 @@ const GROUPS := {"house": "house_lamps", "steps": "step_lights", "stage": "step_
 
 var _static_materials: Array[ShaderMaterial] = []
 var _seat_materials: Array[ShaderMaterial] = []
-## [material, energy as designed, group]
+## [material, energy as designed, group, colour as designed]
 var _lamp_materials: Array = []
+## The groups glow_colour and glow_mix colour.
+const GLOW_GROUPS: Array[String] = ["house", "steps", "stage"]
 ## [position (room frame), colour x energy, cone cosine]
 var _lamps: Array = []
 var _bake_root: Node3D
@@ -141,12 +148,20 @@ func _set_fill(m: ShaderMaterial, k: float) -> void:
 func lamp_material(colour: Color, energy: float, follows_house: float, group := "accent") -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = LAMP_SHADER
-	m.set_shader_parameter("colour", colour)
 	m.set_shader_parameter("follows_house", follows_house)
 	m.set_shader_parameter("house_reference", float(room.get("ambient_level")))
-	_lamp_materials.append([m, energy, group])
+	_lamp_materials.append([m, energy, group, colour])
+	m.set_shader_parameter("colour", _shown_colour(colour, group))
 	m.set_shader_parameter("energy", energy * _group_level(group))
 	return m
+
+
+## A lamp's colour as shown: its own, or toward glow_colour by glow_mix (the house, step and stage groups).
+func _shown_colour(colour: Color, group: String) -> Color:
+	var mix := float(params.get("glow_mix", 0.0))
+	if mix <= 0.0 or not (group in GLOW_GROUPS):
+		return colour
+	return colour.lerp(color_param("glow_colour"), clampf(mix, 0.0, 1.0))
 
 
 func _group_level(group: String) -> float:
@@ -175,6 +190,17 @@ func _param_changed(param: String, _value: Variant) -> void:
 	if param in GROUPS.values():
 		for e: Array in _lamp_materials:
 			(e[0] as ShaderMaterial).set_shader_parameter("energy", float(e[1]) * _group_level(str(e[2])))
+	elif param in ["glow_colour", "glow_mix"]:
+		for e: Array in _lamp_materials:
+			(e[0] as ShaderMaterial).set_shader_parameter("colour", _shown_colour(e[3], str(e[2])))
+
+
+## A group's lamp colour as shown now (tests).
+func group_colour(group: String) -> Color:
+	for e: Array in _lamp_materials:
+		if e[2] == group:
+			return (e[0] as ShaderMaterial).get_shader_parameter("colour")
+	return Color.BLACK
 
 
 ## The lamps' glow by group, as shown now (tests).
