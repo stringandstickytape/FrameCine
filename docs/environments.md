@@ -1247,6 +1247,69 @@ people.
 | 16 | Void | `mirror_floor` | black | | | | ripple |
 | 17 | Pillow Fort, 1993 | `domestic` (cushions, a bedsheet), a tree, a tin of sweets (objects) | fairy lights (`light`, flicker), rain on the window (`weather`) | a ticking radiator (`sound_bed`) | the VCR flashes 12:00 (object widget) | a CRT telly (`presentation`, TV-era display) | the telly fills the opening |
 
+### Room: Atmospheric 1928
+
+`app/environments/atmospheric_1928.env.json`. A picture palace built as a courtyard under a twilight sky: plaster
+houses with lit windows and iron balconies along both walls, niches with lions, urns and obelisks between them, a
+castle gate round the screen, cypresses over the walls.
+
+- **Systems:** `light`; `auditorium` (`ceiling_cover` 0, walls 7.5 m, `proscenium` none, plain plaster walls, plush
+  seats 0.6 m apart, 25 a row); `screen_frame`; `showing`; `kit` (the castle gate, columns in the front corners, and
+  on the 14 side-wall places, in turn: niches with lions, façades the walls' full height, niches with urns,
+  façades, niches with obelisks, façades, niches with urns); `sky` (latitude 37, mid July, 21:30, `dusk` 0.4, no
+  constellation lines, the Milky Way at 0.5); `vista` (cypresses 15 m out at the front corners and behind, hills).
+- **Setting:** Clouds (0 to 100 %, 40 % by default): `sky.clouds` by `range` [0, 0.8]. The clouds' own colour
+  follows `film.colour` (strength 0.4, smooth 1 s), and `cloud_screen` 1.2 lets the ones towards the screen catch
+  its light.
+- **Cues:** `ritual` (starting, Pre-show on): the house lamps to half over 1.5 s, the curtains part over 4 s, the
+  dusk deepens from 0.4 to 0.8 over 10 s, then the lamps to 12 % and the steps to half over 5 s. `dim` (Pre-show
+  off): the same without the curtains. `lights_up` (pre-show, ended): the lamps, the steps and the twilight back.
+- **Default seat:** the middle of row 0 (7 rows in front, 3 behind).
+- **Measured** (`test_room_set2.gd`): 26 draws, 199 724 triangles, no live light, no particles, 9.4 MB.
+
+### Room: Palace of Culture 1974
+
+`app/environments/palace_of_culture_1974.env.json`. The cinema hall of a civic palace of culture: board-marked
+concrete, mosaic panels on the side walls that take the screen's light, ochre curtains, straight rows on a parquet
+rake, and the back of the roof open to a winter night with birches and falling snow.
+
+- **Systems:** `light`; `auditorium` (22 x 22.6 m, 10 m high, 8 rows in front and 4 behind, straight, 29 seats a
+  row in woven red with oak arms; `concrete_panels` walls and ceiling; six panels a side of `terrazzo` in muted gold
+  with `spill` 5 (the concrete's is the light's 3), steel rails; ochre velvet drapes; `ceiling_cover` 0.76: open
+  from just behind the viewer's row); `screen_frame`; `showing`; `sky` (latitude 56, mid January, full night,
+  grey clouds); `vista` (birches 14 to 18 m out behind and to both sides, hills); `weather` (`falls` snow, 1400
+  flakes, one area under the open roof, from z 2.2 to the rear wall).
+- **Setting:** Snow (no snow, light, heavy; light by default): `weather.mode` (clear, light, heavy), `sky.clouds`
+  (0.2, 0.55, 0.85) and `vista.snow` (0.8, 1, 1), each by `map`.
+- **Cues:** `ritual`: the lamps to half over 2 s, the curtains part over 5 s, then the lamps to 10 % and the steps
+  to half over 6 s. `dim` and `lights_up` as in the Atmospheric.
+- **The mosaic:** no library material or shader option sparkles yet; the mosaic is terrazzo that takes more of
+  the film's light (its colours) than the walls round it.
+- **The snow and the picture:** the snow falls only under the open roof, behind the default seat, so nothing falls
+  between the viewer and the picture from there; from the back rows it falls round them.
+- **Default seat:** the middle of row 0.
+- **Measured:** 23 draws, 256 688 triangles, 1400 particles, 12.4 MB.
+
+### Room: Flagship
+
+`app/environments/flagship.env.json`. A large modern cinema: black walls and ceiling, a steep stadium rake, blue
+step lights, deep red seats, and a 20 m curved screen.
+
+- **Systems:** `light` (a cool fill); `auditorium` (26 x 27 m; 7 rows in front and 6 behind, 1.25 m deep and
+  0.55 m higher each: a 24 degree rake; rows curving round a point 30 m ahead; 25 seats a row, 0.62 m apart; black
+  felt walls and stage, black foam ceiling, black drapes, dark metal rails; `step_colour` blue; no sconces);
+  `screen_frame`; `showing`.
+- **Screen:** 20 x 8.4 m, its middle at the seated eyes' height, 18.2 m from the default seat (0.9 of its width),
+  `curve` 0.3.
+- **Cues:** `ritual`: the lamps to 40 % over 2 s, the curtains part over 6 s, then the lamps out and the steps to
+  35 % over 5 s. `dim` and `lights_up` as above.
+- **Seat choice:** the default seat is the middle (row 0, with 7 rows in front and 6 behind). The front-middle
+  and the back are the other good seats; the viewer picks them by pointing.
+- **Not yet:** `env_room.gd` has no `get_default_seat()`, `get_seat_names()`, `has_home_screen()` or
+  `get_home_curve()`, so a document room always starts at its origin seat and its `screen.curve` is not applied (an
+  assistant's room has both). A setting cannot choose the default seat, and the curve waits for that hook.
+- **Measured:** 17 draws, 228 806 triangles, 6.0 MB.
+
 ### TV-era rooms
 
 The same `presentation` chain makes the TV-era rooms: source (a broadcast, a tape, a disc), transmission (aerial

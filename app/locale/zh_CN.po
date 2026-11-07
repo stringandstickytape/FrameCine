@@ -2978,3 +2978,36 @@ msgstr "影院"
 #. The Room tab: the group of television rooms (the history of television).
 msgid "Television"
 msgstr "电视"
+
+#. A room: an atmospheric picture palace of 1928, a courtyard open to the twilight sky.
+msgid "Atmospheric 1928"
+msgstr "星空庭院影院 1928"
+
+#. A room: a large modern cinema with a steep rake and a huge curved screen.
+msgid "Flagship"
+msgstr "旗舰影院"
+
+#. A room: the cinema hall of a 1970s palace of culture (a civic arts centre).
+msgid "Palace of Culture 1974"
+msgstr "文化宫 1974"
+
+msgid "Clouds"
+msgstr "云"
+
+msgid "How much of the open sky the clouds cover. They catch the film's light."
+msgstr "露天天空中云的多少。云会映出影片的光。"
+
+msgid "Snow"
+msgstr "雪"
+
+msgid "Snow through the open back of the roof, over the birches outside."
+msgstr "雪从屋顶敞开的后部飘进来，也落在外面的树林里。"
+
+msgid "No snow"
+msgstr "无雪"
+
+msgid "Light snow"
+msgstr "小雪"
+
+msgid "Heavy snow"
+msgstr "大雪"
