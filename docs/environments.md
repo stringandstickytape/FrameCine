@@ -2030,7 +2030,7 @@ screen may have is 0.3 m.
 One film, and while it plays the room moves forward through the history of television, an era at a time
 (`scripts/env/time_travel.gd`, `main.features.time_travel`; the Room tab's Television group: Time travel, and Over
 the film or every 5, 10 or 15 minutes; the assistant's `time_travel`). The eras are the TV rooms whose ids start
-`tv_`, in the order of their year (`tv_present` and `tv_future` last); the Pillow Fort is not an era. Turned on in a
+`tv_`, in the order of their year (`tv_today` and `tv_future` last); the Pillow Fort is not an era. Turned on in a
 room that is not an era, it goes to the first at once. Over the film, the rest of the film is shared by the eras
 still to come (at least a minute each). The countdown runs only while the film plays; it stops itself at the last
 era, at the end of the film, on a new file, and when the viewer picks a room that is not an era. The film plays on

@@ -3,7 +3,7 @@ extends Node
 ## Time travel through television (docs/environments.md, "Time travel"): one film, and while it plays the room moves
 ## forward through the history of television, an era at a time, from the oldest set to the newest. Each era is a
 ## shipped TV room (EnvLibrary.category_of() "tv" whose id starts "tv_"), in the order of its year (tv_1930 ...
-## tv_2005, then tv_present, then tv_future); the Pillow Fort and the other rooms are not eras.
+## tv_2005, then tv_today, then tv_future); the Pillow Fort and the other rooms are not eras.
 ##
 ##   start(minutes)   on: minutes between eras (0: spread over the rest of the film); in a room that is not an era,
 ##                    the first era at once
@@ -54,12 +54,12 @@ func eras() -> Array[String]:
 	return out
 
 
-## An era's year from its id: tv_1953 1953; tv_present after every year, tv_future after that.
+## An era's year from its id: tv_1953 1953; tv_today (or tv_present) after every year, tv_future after that.
 static func year_of(id: String) -> int:
 	var rest := id.trim_prefix(PREFIX)
 	if rest.is_valid_int():
 		return int(rest)
-	if rest == "present":
+	if rest in ["present", "today", "now"]:
 		return 3000
 	if rest == "future":
 		return 4000
