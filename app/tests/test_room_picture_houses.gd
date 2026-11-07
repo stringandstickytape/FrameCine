@@ -180,18 +180,26 @@ func _streamline() -> void:
 	festoon = room.host.system("festoon")
 	# Changing: the cove moves through the colours in the pre-show.
 	var seen := {}
+	var lamp_seen := {}
+	var light: Node = room.host.system("light")
 	var t := 0.0
 	while t < 45.0:
 		_play(room, 1.0, false, false, 0.0)
 		var c: Color = room.host.param("cove.fog_colour")
 		seen["%.1f %.1f %.1f" % [c.r, c.g, c.b]] = true
+		var lc: Color = light.call("group_colour", "house")
+		lamp_seen["%.1f %.1f %.1f" % [lc.r, lc.g, lc.b]] = true
 		t += 1.0
 	_check("streamline: the cove cycles before the film (%d colours seen)" % seen.size(), seen.size() >= 4)
+	_check("streamline: and the lamps' glow with it (%d colours seen)" % lamp_seen.size(), lamp_seen.size() >= 4)
 	_check("streamline: the cove glows before the film", float(room.host.param("cove.fog")) > 0.5
 			and float(room.host.param("cove_film.fog")) < 0.05)
 	# The ritual: the console rises from the pit, the festoon rises, the lamps go down.
 	var pos := _play(room, 9.0, true, true, 0.0)
 	_check("streamline: the ritual fired", room.host.timeline.fired.any(func(f: Array) -> bool: return f[0] == "ritual"))
+	_check("streamline: the film starts: the cycle stops and the lamps go back to gold (%s)"
+			% light.call("group_colour", "house"), not ("cove_cycle" in room.host.timeline.running())
+			and (light.call("group_colour", "house") as Color).is_equal_approx(gold))
 	_check("streamline: the festoon rising (%.2f)" % festoon.call("progress"), float(festoon.call("progress")) > 0.3)
 	_check("streamline: the console rising (%.2f)" % organ.call("progress"), float(organ.call("progress")) > 0.1)
 	pos = _play(room, 8.0, true, true, pos)

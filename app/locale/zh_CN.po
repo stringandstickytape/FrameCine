@@ -3309,3 +3309,11 @@ msgstr "无雨的夜晚"
 
 msgid "Showers"
 msgstr "阵雨"
+
+#. Pillow Fort 1993: a room setting.
+msgid "The telly fills the opening"
+msgstr "电视填满入口"
+
+#. Pillow Fort 1993: the setting's description.
+msgid "The telly stands just beyond the fort's opening and fills it; off, it is back on its chest of drawers across the room."
+msgstr "电视就放在枕头堡入口外，正好填满入口；关闭时，它回到房间另一头的抽屉柜上。"

@@ -149,7 +149,7 @@ parameters only.
 | `mirror_floor` | builder | a black floor that takes the film's reflection, a ripple where the viewer moves | built |
 | `shopfront`, `nave`, `dome_hall`, `terrace`, `domestic`, `vehicle` | builder | the other parametric structures (shopfront hall, nave, dome, open-air terrace or lot, domestic room, vehicle interior; below, "The builders") | built |
 | `kit` | kit | modular pieces placed along a builder's slots (balcony fronts, niches, columns, façades; below, "The kit") | built |
-| objects, materials, pictures | | as now: `parts` placements, library materials, pictures | as now |
+| objects, materials, pictures | | as now: `parts` placements, library materials, pictures (an assistant's room). A shipped room's things are kit pieces (below, "The kit"): the kit builds them on the house shader, lit as the room is, and its pieces are original, so a document room places no library objects | as now |
 | `sky`, `vista` | sky | a sky dome (twilight to night, the real stars and constellations, the Milky Way, clouds lit by the screen, an aurora, Earth from the Moon), far scenery from simple shapes (hills, mesas, a floodlit acropolis, birches in snow, cypresses, a glowing pool); below, "The sky and the vista" | built |
 | `atmosphere`, `weather` | atmosphere | haze, dust and smoke in the beam, ground fog and mist, breath; rain and snow through open roofs and outside windows, rain on a pane, a puddle that reflects the film, a weather cycle (below, "Atmosphere and weather") | built |
 | `life` | life | non-human ambient life: moths, birds, fish, fireflies, a cat, a deer, glowing deep-sea creatures, a whale, plane lights. Never people (below, "Ambient life") | built |
@@ -239,7 +239,8 @@ whale sings as it passes, so the cue needs no `sound` step.
 | `states` | the states it may fire in |
 | `chance` | 0..1, rolled each time it would fire |
 | `cooldown` | seconds before it may fire again (the whale: at most once in 15 minutes) |
-| `steps` | run in order: `{"set": "<id>.<param>", "to": v, "seconds": s, "ease": "linear" or "in" or "out" or "in_out"}` (starts a fade and goes on), `{"wait": s}`, `{"release": "<id>.<param>", "seconds": s}` (back to its base value or binding), `{"do": "<id>.<action>", "args": {...}}`, `{"sound": "<synth>", "gain_db": g, "at": [x, y, z]}` |
+| `stop_in` | states that stop it while it runs: `["playing"]` stops a slow pre-show cue when the film starts. Its later steps don't run; what it set stays until a `release` or another cue |
+| `steps` | run in order: `{"set": "<id>.<param>", "to": v, "seconds": s, "ease": "linear" or "in" or "out" or "in_out"}` (starts a fade and goes on), `{"wait": s}`, `{"release": "<id>.<param>", "seconds": s}` (back to its base value or binding), `{"do": "<id>.<action>", "args": {...}}`, `{"sound": "<synth>", "gain_db": g, "at": [x, y, z]}`, `{"stop": "<cue>"}` (stops another cue of the room while it runs) |
 
 A cue's `set` holds the parameter until a `release`; a binding on the same parameter waits under it. A cue does not
 start again while it runs.
@@ -577,6 +578,11 @@ Six more builders of kind `builder`, and the `kit`. They keep the auditorium's c
 - **Lamps** use the light system's groups: `house` (the ritual takes them down), `accent`, `signs`, `booth`. A flame
   or a candle flickers with the builder's `flicker` parameter. Every frequency is under 3 Hz. The room's Flickering
   lights setting holds it steady.
+- **A lamp colour a cue moves** (since 2026-11-07): the light system's live `glow_colour` and `glow_mix` (0 by
+  default: the lamps' own colours) take the `house`, `steps` and `stage` lamps' glow toward one colour. A builder's
+  lamp colour parameters are not live (the room builds again), so a cue that changes the lamps' colour fades these:
+  the Streamline's Changing cove (`cove_cycle`, and `cove_settles` when the film starts). The stand-in lamps and a
+  baked lightmap keep the builder's colour.
 - **Glass** (a window, a dome's panes, a windscreen) is in the group `env_see_through`. The sight-line check looks
   through it. It blends; it never multiplies.
 - **The sight line:** a flat-floored builder keeps the picture's bottom at 1.1 m or more over the floor, so chair
@@ -1366,6 +1372,19 @@ covers them, as the screen would.
 | Crater | `sky` `mode` `space`, `earth` on, `earth_turn` from the Earth's speed setting, `milky_way` bound to `playback.playing` |
 | Screening room 1962 | `vista` pool behind the window, `pool_glow` 1 |
 
+## A room's screen and its builder
+
+A document gives the screen (`screen`: centre, size, curve). Two things follow from it in `env_room.gd`:
+
+- **Its curve.** `get_home_curve()` gives `screen.curve` (0..1), and the app's screen starts with it until the viewer
+  sets a curve of their own (`scripts/play/curved_screen.gd`). A flat screen in a room that curves by itself is kept
+  as 0, so it stays flat.
+- **A builder that moves it.** A builder with a static `screen_for(params)` (shopfront, nave, dome_hall, domestic)
+  says where it puts the picture. The room takes that place for the document's parameters (with every room setting at
+  its default) as the document's own; when a setting rebuilds the room (`env_host.gd` signal `rebuilt`), the screen
+  moves and resizes by the builder's change, and the app places the film there again (the seat's `home_screen()`).
+  Tested in `app/tests/test_env_screen_follow.gd`.
+
 ## The converted cinema
 
 `app/environments/cinema.env.json` with `cinema.tscn` and a thin `cinema.gd`. It looks the same: the render test
@@ -1542,9 +1561,9 @@ step lights, deep red seats, and a 20 m curved screen.
   35 % over 5 s. `dim` and `lights_up` as above.
 - **Seat choice:** the default seat is the middle (row 0, with 7 rows in front and 6 behind). The front-middle
   and the back are the other good seats; the viewer picks them by pointing.
-- **Not yet:** `env_room.gd` has no `get_default_seat()`, `get_seat_names()`, `has_home_screen()` or
-  `get_home_curve()`, so a document room always starts at its origin seat and its `screen.curve` is not applied (an
-  assistant's room has both). A setting cannot choose the default seat, and the curve waits for that hook.
+- **The curve (since 2026-11-07):** `env_room.gd get_home_curve()` gives the document's `screen.curve`, and the
+  screen starts with it until the viewer sets a curve of their own (`curved_screen.gd`; flattening it keeps 0, so the
+  room stays flat). A setting still cannot choose the default seat: the room starts at its origin seat.
 - **Measured:** 17 draws, 228 806 triangles, 6.0 MB.
 
 ### Room: Shopfront 1906
@@ -1803,10 +1822,10 @@ window, and the telly filling the fort's opening, showing the film as a tube sho
 - **Flicker:** the fairy lights waver slowly (the builder's `flicker`); Flickering lights holds them.
 - **Default seat:** the middle cushion (the origin), 1.25 m from the picture.
 - **Measured:** 20 draws, 5 290 triangles, 0 lights, 300 particles, 6.0 MB.
-- **Not as the table:** `telly_fills` is not a setting. The app's screen comes from the document once
-  (`env_room.gd` `_apply_room()`); a setting on `domestic.opening_screen` rebuilds the telly in its other place but
-  leaves the film where it was, so the room keeps the telly in the opening. No VCR flashing 12:00 (no object widget
-  for it, and a document room places no objects); no tree or tin of sweets.
+- **The telly fills the opening (a setting since 2026-11-07):** `telly_fills` (on by default) is bound to
+  `domestic.opening_screen`. Turning it off rebuilds the room with the telly on its chest of drawers across the
+  room, and the film goes with it (`env_room.gd _follow_builder_screen()`, below). No VCR flashing 12:00 yet (no
+  object widget for it, and a document room places no objects); no tree or tin of sweets.
 - **Sound wanted:** a ticking radiator, rain on the glass following `weather.rain`; a small, soft room (rt60 0.3).
 
 ### Room: Bathysphere

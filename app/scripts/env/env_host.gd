@@ -14,6 +14,10 @@ extends Node
 ##   fade(target, to, seconds, ease), release(target, seconds, ease), do_action(target, args), play_sound(...)
 ##   param(target) -> Variant               "<id>.<param>" as it is now
 ##   rebuild()                              the systems again (a setting bound to a parameter that is built once)
+##   signal rebuilt                         after rebuild() (the room may move its screen: env_room.gd)
+
+## After rebuild(): the systems are new (a builder may now put the screen elsewhere).
+signal rebuilt
 
 const Registry := preload("res://scripts/env/systems/registry.gd")
 const EnvDoc := preload("res://scripts/env/env_doc.gd")
@@ -138,6 +142,7 @@ func rebuild() -> void:
 	if _screen_size != Vector2.ZERO:
 		on_screen_changed(_screen_local, _screen_size)
 	on_room_moved()
+	rebuilt.emit()
 
 
 func system(sid: String) -> Node:

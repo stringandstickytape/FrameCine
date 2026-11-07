@@ -34,7 +34,7 @@ const PARAM_TYPES: Array[String] = ["float", "int", "bool", "color", "enum", "ve
 		"material", "object"]
 const SETTING_TYPES: Array[String] = ["bool", "range", "choice"]
 const FORMATS: Array[String] = ["percent", "db", "seconds", "minutes", "times", "number"]
-const STEP_KINDS: Array[String] = ["set", "wait", "release", "do", "sound"]
+const STEP_KINDS: Array[String] = ["set", "wait", "release", "do", "sound", "stop"]
 const EASES: Array[String] = ["linear", "in", "out", "in_out"]
 const LIMITS := {"systems": 32, "settings": 16, "cues": 32, "steps": 32, "tracks": 16, "credits": 64,
 		"choices": 8, "keys": 32, "label": 40, "description": 200, "name": 32, "seconds": 600.0,
@@ -570,6 +570,9 @@ static func _cues(v: Variant, ctx: Dictionary, errors: Array) -> void:
 	var list: Array = v
 	if list.size() > int(LIMITS["cues"]):
 		errors.append(_e("$.cues", "at most %d cues" % LIMITS["cues"]))
+	# Every cue's name first: a stop step may name a cue further down.
+	ctx["cues"] = list.filter(func(c: Variant) -> bool: return c is Dictionary).map(
+			func(c: Dictionary) -> String: return str(c.get("name", "")))
 	var names := {}
 	for i in list.size():
 		var path := "$.cues[%d]" % i
@@ -577,7 +580,7 @@ static func _cues(v: Variant, ctx: Dictionary, errors: Array) -> void:
 			errors.append(_e(path, "{name, when, steps}"))
 			continue
 		var c: Dictionary = list[i]
-		var known := ["name", "when", "requires", "states", "chance", "cooldown", "steps"]
+		var known := ["name", "when", "requires", "states", "chance", "cooldown", "stop_in", "steps"]
 		for k: Variant in c:
 			if not (str(k) in known):
 				errors.append(_e("%s.%s" % [path, k], "unknown (known: %s)" % ", ".join(known)))
@@ -593,6 +596,10 @@ static func _cues(v: Variant, ctx: Dictionary, errors: Array) -> void:
 		if c.has("states"):
 			if not (c["states"] is Array) or not (c["states"] as Array).all(func(s: Variant) -> bool: return s in STATES):
 				errors.append(_e(path + ".states", "a list of states: %s" % ", ".join(STATES)))
+		if c.has("stop_in"):
+			if not (c["stop_in"] is Array) or (c["stop_in"] as Array).is_empty() \
+					or not (c["stop_in"] as Array).all(func(s: Variant) -> bool: return s in STATES):
+				errors.append(_e(path + ".stop_in", "a list of states that stop it: %s" % ", ".join(STATES)))
 		if c.has("chance") and (not _num(c["chance"]) or float(c["chance"]) < 0.0 or float(c["chance"]) > 1.0):
 			errors.append(_e(path + ".chance", "0..1"))
 		if c.has("cooldown") and (not _num(c["cooldown"]) or float(c["cooldown"]) < 0.0
@@ -677,7 +684,7 @@ static func _step(v: Variant, path: String, ctx: Dictionary, errors: Array) -> v
 		return
 	var kind: String = kinds[0]
 	var allowed := {"set": ["set", "to", "seconds", "ease"], "wait": ["wait"], "release": ["release", "seconds", "ease"],
-			"do": ["do", "args"], "sound": ["sound", "gain_db", "at"]}
+			"do": ["do", "args"], "sound": ["sound", "gain_db", "at"], "stop": ["stop"]}
 	for k: Variant in s:
 		if not (str(k) in allowed[kind]):
 			errors.append(_e("%s.%s" % [path, k], "unknown in a %s step (known: %s)" % [kind, ", ".join(allowed[kind])]))
@@ -702,6 +709,9 @@ static func _step(v: Variant, path: String, ctx: Dictionary, errors: Array) -> v
 					check_value(tg[1], s["to"], path + ".to", errors, {"no_bind": true})
 		"release":
 			_target(s["release"], path + ".release", ctx, errors)
+		"stop":
+			if not (s["stop"] is String) or not (str(s["stop"]) in (ctx.get("cues", []) as Array)):
+				errors.append(_e(path + ".stop", "the name of a cue of this room"))
 		"wait":
 			if not _num(s["wait"]) or float(s["wait"]) < 0.0 or float(s["wait"]) > float(LIMITS["seconds"]):
 				errors.append(_e(path + ".wait", "seconds, 0..%d" % int(LIMITS["seconds"])))

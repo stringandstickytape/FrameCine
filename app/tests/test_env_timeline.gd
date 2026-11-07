@@ -43,6 +43,7 @@ func _run() -> void:
 	_states()
 	_cues()
 	_ritual()
+	_stopping()
 	print("test_env_timeline: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	quit(_failures)
 
@@ -212,6 +213,56 @@ func _ritual() -> void:
 	_check("Pre-show off: the plain dim, not the ritual (%s)" % [_names(h)], _names(h).count("ritual") == 1
 			and "dim" in _names(h))
 	cinema.queue_free()
+
+
+## A cue stops in a state it lists (stop_in) and by another cue's stop step: its later steps don't run.
+func _stopping() -> void:
+	var doc := {"schema": 4, "name": "Stopping", "systems": [{"system": "light"}],
+		"timeline": {"starting_seconds": 2.0},
+		"cues": [
+			{"name": "slow_up", "when": {"state": ["preshow", "ended"]}, "stop_in": ["starting", "playing"],
+				"steps": [{"wait": 3.0}, {"set": "light.house_lamps", "to": 1.0}]},
+			{"name": "down", "when": {"state": "starting"}, "stop_in": ["preshow", "ended"],
+				"steps": [{"set": "light.house_lamps", "to": 0.2}, {"wait": 5.0}, {"set": "light.signs", "to": 0.0}]},
+			{"name": "long", "when": {"state": "paused"}, "steps": [{"wait": 4.0}, {"set": "light.signs", "to": 0.9}]},
+			{"name": "stopper", "when": {"state": "paused"}, "steps": [{"wait": 1.0}, {"stop": "long"}]},
+		]}
+	var bad := doc.duplicate(true)
+	bad["cues"][3]["steps"][1]["stop"] = "nowhere"
+	bad["cues"][0]["stop_in"] = ["later"]
+	var v := EnvDoc.validate(bad)
+	_check("a stop step names a cue of the room, stop_in lists states (%s)" % [v["errors"]], not v["ok"]
+			and v["errors"].any(func(e: Dictionary) -> bool: return str(e["path"]).ends_with(".stop"))
+			and v["errors"].any(func(e: Dictionary) -> bool: return str(e["path"]).ends_with(".stop_in")))
+	var room := _room(doc)
+	var h: Node = room.host
+	h.snapshot_override = {"open": true, "playing": false, "position": 0.0, "duration": 6000.0}
+	h.step(0.05)
+	_check("the pre-show starts the slow lights up", "slow_up" in h.timeline.running())
+	h.snapshot_override = {"open": true, "playing": true, "position": 0.0, "duration": 6000.0}
+	_steps(h, 0.5)
+	_check("the film starts: the slow lights up stops (%s)" % [h.timeline.running()],
+			not ("slow_up" in h.timeline.running()) and "down" in h.timeline.running())
+	_steps(h, 3.0)
+	_check("and its later step never runs: the lamps stay down (%.2f)" % h.param("light.house_lamps"),
+			is_equal_approx(float(h.param("light.house_lamps")), 0.2))
+	var signs_before := float(h.param("light.signs"))
+	h.snapshot_override = {"open": false}
+	_steps(h, 0.5)
+	_check("closed half way: the dimming stops (%s)" % [h.timeline.running()], not ("down" in h.timeline.running()))
+	_steps(h, 3.0)
+	_check("its last step doesn't run (signs %.2f)" % h.param("light.signs"),
+			is_equal_approx(float(h.param("light.signs")), signs_before))
+	h.snapshot_override = {"open": true, "playing": true, "position": 600.0, "duration": 6000.0}
+	_steps(h, 0.5)
+	h.snapshot_override = {"open": true, "playing": false, "position": 600.0, "duration": 6000.0}
+	_steps(h, 0.5)
+	_check("paused: both run", "long" in h.timeline.running() and "stopper" in h.timeline.running())
+	_steps(h, 1.0)
+	_check("a stop step stops another cue (%s)" % [h.timeline.running()], not ("long" in h.timeline.running()))
+	_steps(h, 3.0)
+	_check("which never sets the signs (%.2f)" % h.param("light.signs"), not is_equal_approx(float(h.param("light.signs")), 0.9))
+	room.queue_free()
 
 
 func _check(what: String, ok: bool) -> void:
