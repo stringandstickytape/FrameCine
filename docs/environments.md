@@ -1895,7 +1895,10 @@ window, and the telly filling the fort's opening, showing the film as a tube sho
   `domestic.opening_screen`. Turning it off rebuilds the room with the telly on its chest of drawers across the
   room, and the film goes with it (`env_room.gd _follow_builder_screen()`, below); the video recorder goes with it
   too (its slot follows the set). No tree or tin of sweets.
-- **Sound wanted:** a ticking radiator, rain on the glass following `weather.rain`; a small, soft room (rt60 0.3).
+- **Sound:** `acoustics` `small_room` (`rt60` 0.3); `sound_bed`s: `radiator` at the radiator, `rain_glass` at the
+  window with `level` on `weather.rain` (it goes quiet as the Rain setting dries the night), `vcr` by the video
+  recorder, played by the cue `tape_in` as the film starts (the tape goes in). Each at its designed level: together
+  about -49 dBFS in the pre-show, 11 dB under the level check's target, 8 dB lower while the film plays.
 
 ### Room: Bathysphere
 
@@ -2039,6 +2042,8 @@ corner. A summer dusk in the window.
 - Settings: Snow from the aerial (0 to 40 %); Colour (the set's colour knob, 0.5 to 1.5 times: `presentation.colour`).
 - Cues: `warm_up` (Pre-show), the lamps (and the standard lamp's shade: house group) down to 30 %.
 - Measured: 24 draws, 9 694 triangles, 7.5 MB (before the furniture: 19 draws, 9 252 triangles, 7.5 MB).
+- Sound: `acoustics` `small_room`; `sound_bed`s `radiator` at the radiator, `clock` on the sideboard, `tube_whine` at
+  the set (about -52 dBFS together, 14 dB under the target).
 
 ### Room: TV 1983 - desk portable
 
@@ -2055,6 +2060,9 @@ lines. A bean bag at the back for a second seat.
 - Cues: `tuning_in` (Pre-show): a `glitch` as the set finds the computer's channel.
 - Measured: 16 draws, 1 110 triangles, 8.0 MB (before the furniture: 17 draws, 952 triangles, 8.2 MB). The picture
   is 5 cm lower than before (its centre 0.90 m), so the desk is a desk's height.
+- Sound: `acoustics` `small_room`; `sound_bed`s `rain_glass` at the window, `level` on `weather.rain`; `tape_load`
+  by the computer, played 2 s into the pre-show by the cue `loading` (the computer loads from its cassette, very
+  low); `tube_whine` at the portable.
 
 ### Room: TV 1987 - rented tape
 
@@ -2072,6 +2080,10 @@ its clock flashing 12:00, a three-seat settee and an armchair, a white-painted b
   setting. The clock flashes all the time (Flickering lights off holds it lit).
 - Measured: 27 draws, 9 646 triangles, 9.3 MB, 500 particles (before the furniture: 25 draws, 10 108 triangles,
   9.5 MB).
+- Sound: `acoustics` `small_room`; `sound_bed`s `vcr` at the tv unit (the cue `tape_start` plays it as the film
+  starts, then the tear 2.5 s later), `clock` on the mantel, `tube_whine` at the set, `fire` at the grate (`gain_db`
+  -4: the fire is lit), `rain_glass` at the window (`gain_db` -3, `level` on `weather.rain`: the rain comes and goes).
+  About -49 dBFS together at full rain, 11 dB under the target.
 
 ### Room: TV 1993 - bedroom telly
 
@@ -2102,6 +2114,7 @@ digital broadcast, a faint pixel grid, the backlight through the dark scenes).
   `vista` (hills), `presentation`.
 - Settings: Wall lamps in the film; Backlight bleed (`presentation.panel_bleed`).
 - Measured: 21 draws, 9 690 triangles, 10.3 MB (before the furniture: 19 draws, 10 232 triangles, 10.3 MB).
+- Sound: `acoustics` `small_room` only; no beds (a flat panel is silent).
 
 **What the systems lack for these rooms** (each room took the closest thing there is):
 
@@ -2110,8 +2123,9 @@ digital broadcast, a faint pixel grid, the backlight through the dark scenes).
   keeps its chest).
 - The seats system's own places are not listed before the room is built (no static layout), so the seat list before
   the build is the builder's alone.
-- Sound: none yet; the rooms get theirs when the sound systems are merged (each room's own sound comes from its
-  presentation's speaker meanwhile).
+- Sound: each room's beds and acoustics are in its own section (the recipes: "Sound and music", "For the rooms").
+  `test_room_tv.gd` checks them: the sounds, each in the room, each 10 dB or more under the level check's target and
+  all together 6 dB or more under it, the loops playing, the one-shots played by their cues.
 
 ## Files
 
