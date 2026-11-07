@@ -646,6 +646,8 @@ screen (style `ring`). Beyond glass: nothing (a sky system's sky), deep water, o
 
 - `radius`, `centre_z`, `floor_y`, `drum_height`, `dome_height`, `dome` (`glass` or `solid`), `ribs`, `rings`.
 - `outside` (`none`, `water`, `night`), `water_top`, `water_deep`; live: `outside_glow`.
+- `glass_colour` and `glass_alpha` (0.05; lower is clearer): a pale tint at a low alpha keeps the view out clear,
+  where before a room needed a near-black tint to stop the glass hazing what lies outside.
 - Seats: `rows_front`, `rows_back`, `row_depth`, `seat_pitch`, `arc_deg`, `seat_model`.
 - Slots: `drum`, `screen`, `proscenium`, `floor`, `ceiling`.
 - Measured (glass, about 120 seats): 8 draws, 88k triangles, 4 MB.

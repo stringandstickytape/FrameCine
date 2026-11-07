@@ -72,6 +72,8 @@ const PARAMS := {
 	"seat_frame": {"type": "material", "default": {"library": "dark_metal", "color": [0.1, 0.1, 0.11]},
 			"description": "the seats' frame"},
 	"glass_colour": {"type": "color", "default": [0.55, 0.75, 0.82], "description": "the glass's tint"},
+	"glass_alpha": {"type": "float", "min": 0.0, "max": 0.3, "default": 0.05,
+			"description": "how much of the glass's tint lies over what is outside (lower: clearer, less haze)"},
 	"lamps": {"type": "int", "min": 0, "max": 24, "default": 12, "description": "lamps round the drum's top"},
 	"lamp_colour": {"type": "color", "default": [1.0, 0.82, 0.6], "description": "the lamps' glow"},
 }
@@ -218,7 +220,7 @@ func build() -> void:
 		var panes := RoomMesh.new()
 		panes.surface(GLASS)
 		_dome_lathe(panes, base, r, dome_h, true)
-		_add_glass("Panes", panes, color_param("glass_colour"), 0.05)
+		_add_glass("Panes", panes, color_param("glass_colour"), float(params["glass_alpha"]))
 		var ribs := RoomMesh.new()
 		ribs.surface(_mat("frame"))
 		var n := int(params["ribs"])
