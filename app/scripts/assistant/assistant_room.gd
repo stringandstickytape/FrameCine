@@ -169,9 +169,18 @@ static func _shown_material(g: GeometryInstance3D) -> Material:
 	return m
 
 
-## The library material a surface shows ("oak_planks"; under an effect too), "" when none.
-static func material_id_of(g: GeometryInstance3D) -> String:
-	var m := _shown_material(g)
+## What one surface of a mesh shows: the override for all of it, else that surface's material.
+static func shown_material_at(g: GeometryInstance3D, surface: int) -> Material:
+	if g.material_override != null or not (g is MeshInstance3D) or surface <= 0:
+		return _shown_material(g)
+	var mi := g as MeshInstance3D
+	return mi.get_active_material(surface) if mi.mesh != null and surface < mi.mesh.get_surface_count() else null
+
+
+## The library material a surface shows ("oak_planks"; under an effect too), "" when none; `surface`: one surface of
+## a mesh (shown_material_at()).
+static func material_id_of(g: GeometryInstance3D, surface := 0) -> String:
+	var m := shown_material_at(g, surface)
 	if m != null and m.has_meta("library_material"):
 		return str(m.get_meta("library_material"))
 	return MaterialLibrary.id_of(m)
@@ -424,34 +433,43 @@ static func _add_contact_shadows(layer: Node3D, p_doc: Dictionary) -> void:
 ## whole model's material when it has one, else the part's own colour), in the document's order, so an entry with only
 ## an emission keeps the part's colour and a later entry wins where two set the same field. A picture replaces the
 ## colour unless the entry gives one. Parts that end up alike share one material (two shelves painted the same).
+##
+## A material-level entry ("Sofa/@Fabric", paint by material) reaches only the surfaces that show that file material
+## (surface_targets()). A mesh it reaches is then done surface by surface (its whole-part entries go on each surface,
+## in the same order), so a later entry still wins; other meshes keep the one override for the whole part.
 static func _recolour_parts(layer: Node3D, p_doc: Dictionary, assets: Dictionary) -> void:
 	var looks := {}
 	var whole := {}
 	for p: Dictionary in p_doc.get("parts", []):
 		if p.get("material") is Dictionary and not (p["material"] as Dictionary).is_empty():
 			whole[str(p["name"])] = p["material"]
+	var entries: Array = []
+	var by_surface := {}
 	for r: Dictionary in p_doc.get("recolour", []):
-		var split := RoomSchema.split_match(str(r["match"]))
-		if split.is_empty():
+		if RoomSchema.split_match(str(r["match"])).is_empty():
 			continue
+		var targets := surface_targets(layer, str(r["match"]))
+		entries.append([r, targets])
+		for t: Array in targets:
+			if int(t[1]) >= 0:
+				by_surface[t[0]] = true
+	for e: Array in entries:
+		var r: Dictionary = e[0]
 		var m: Dictionary = r.get("material", {}) if r.get("material") is Dictionary else {}
-		for mi: MeshInstance3D in part_targets(layer, str(r["match"])):
-			if not looks.has(mi):
-				var node: Node = mi
-				while node != null and node.get_parent() != layer:
-					node = node.get_parent()
-				var placed := str(node.name) if node != null else ""
-				if mi.has_meta("look"):
-					# What _part() made it show: its own colour and picture under the placement's material.
-					var own: Dictionary = mi.get_meta("look")
-					looks[mi] = {"m": (own["m"] as Dictionary).duplicate(true), "image": own["image"]}
-				else:
-					var base: Dictionary = (whole[placed] as Dictionary).duplicate(true) if whole.has(placed) \
-							else {"color": _colour_of(mi) if _colour_of(mi) != "" else "#b0b0b0"}
-					# The whole model's picture, read under its part's key.
-					looks[mi] = {"m": base, "image": "part:" + placed if base.has("texture")
-							or base.has("texture_file") else ""}
-			var look: Dictionary = looks[mi]
+		var keys: Array = []
+		for t: Array in e[1]:
+			var mi: MeshInstance3D = t[0]
+			if not by_surface.has(mi):
+				keys.append([mi, -1])
+			elif int(t[1]) >= 0:
+				keys.append([mi, int(t[1])])
+			else:
+				for si in mi.mesh.get_surface_count():
+					keys.append([mi, si])
+		for k: Array in keys:
+			if not looks.has(k):
+				looks[k] = _part_look(layer, k[0], int(k[1]), whole)
+			var look: Dictionary = looks[k]
 			var before: Dictionary = (look["m"] as Dictionary).duplicate(true)
 			if m.has("texture") or m.has("texture_file"):
 				before.erase("color")
@@ -460,8 +478,8 @@ static func _recolour_parts(layer: Node3D, p_doc: Dictionary, assets: Dictionary
 				look["image"] = ""
 			# A library material and a picture exclude each other (RoomSchema.merge_material()).
 			look["m"] = RoomSchema.merge_material(before, m)
-	for mi: MeshInstance3D in looks:
-		var look: Dictionary = looks[mi]
+	for k: Array in looks:
+		var look: Dictionary = looks[k]
 		var key: String = look["image"]
 		var plain: Dictionary = (look["m"] as Dictionary).duplicate()
 		plain.erase("texture")
@@ -469,7 +487,33 @@ static func _recolour_parts(layer: Node3D, p_doc: Dictionary, assets: Dictionary
 		var share := JSON.stringify(plain, "", true) + key
 		if not _shared_materials.has(share):
 			_shared_materials[share] = material(look["m"], assets, key)
-		mi.material_override = _shared_materials[share]
+		var mi: MeshInstance3D = k[0]
+		if int(k[1]) < 0:
+			mi.material_override = _shared_materials[share]
+		else:
+			mi.set_surface_override_material(int(k[1]), _shared_materials[share])
+
+
+## What a part (surface -1: the whole mesh) showed before its part-level recolours: _model_surfaces()'s look (its own
+## colour and picture under the placement's material), else the placement's material, else its own colour.
+static func _part_look(layer: Node3D, mi: MeshInstance3D, surface: int, whole: Dictionary) -> Dictionary:
+	var s := maxi(surface, 0)
+	var looks: Array = mi.get_meta("looks", [])
+	if s < looks.size() and looks[s] is Dictionary:
+		var own: Dictionary = looks[s]
+		return {"m": (own["m"] as Dictionary).duplicate(true), "image": own["image"]}
+	if s == 0 and mi.has_meta("look"):
+		var own: Dictionary = mi.get_meta("look")
+		return {"m": (own["m"] as Dictionary).duplicate(true), "image": own["image"]}
+	var node: Node = mi
+	while node != null and node.get_parent() != layer:
+		node = node.get_parent()
+	var placed := str(node.name) if node != null else ""
+	var colour := _colour_of(mi) if surface < 0 else _material_colour(mi.get_active_material(s))
+	var base: Dictionary = (whole[placed] as Dictionary).duplicate(true) if whole.has(placed) \
+			else {"color": colour if colour != "" else "#b0b0b0"}
+	# The whole model's picture, read under its part's key.
+	return {"m": base, "image": "part:" + placed if base.has("texture") or base.has("texture_file") else ""}
 
 
 ## Materials shared by the parts of the room being built (cleared at each build).
@@ -477,18 +521,41 @@ static var _shared_materials := {}
 
 
 ## The parts of placed models a part-level match reaches ("Shelf*/Board?": a pattern on each side), in the layer.
+## A material-level match ("Sofa/@Fabric", paint by material) reaches the parts that have a surface showing it.
 static func part_targets(layer: Node, match: String) -> Array:
+	var out: Array = []
+	for t: Array in surface_targets(layer, match):
+		if not (t[0] in out):
+			out.append(t[0])
+	return out
+
+
+## What a part-level match reaches, as [MeshInstance3D, surface]: a part ("Shelf/Board") is its mesh, surface -1 (all
+## of it); a material ("Sofa/@Fabric": "@" and the file material's name, a pattern too) is each surface of the placed
+## model that shows that material (RoomModel.surface_material()), over all its meshes.
+static func surface_targets(layer: Node, match: String) -> Array:
 	var s := RoomSchema.split_match(match)
 	var out: Array = []
 	if s.is_empty() or layer == null:
 		return out
+	var by_material := str(s[1]).begins_with("@")
+	var wanted := str(s[1]).substr(1) if by_material else str(s[1])
 	for n in layer.get_children():
 		if not (n is Node3D) or not str(n.name).match(s[0]):
 			continue
 		var parts := parts_of_placed(n)
 		for pn: String in parts:
-			if pn.match(s[1]):
-				out.append(parts[pn])
+			var mi: MeshInstance3D = parts[pn]
+			if not by_material:
+				if pn.match(wanted):
+					out.append([mi, -1])
+				continue
+			if mi.mesh == null:
+				continue
+			for si in mi.mesh.get_surface_count():
+				var named := RoomModel.surface_material(mi, si)
+				if named != "" and named.match(wanted):
+					out.append([mi, si])
 	return out
 
 
@@ -505,9 +572,33 @@ static func parts_of_placed(n: Node) -> Dictionary:
 	return {}
 
 
+## A placed model's file materials (paint by material, "<placed>/@<material>"): [{name, parts: the parts with a
+## surface showing it, material: the library material its first surface shows now, or ""}], in the file's order.
+static func materials_of_placed(n: Node) -> Array:
+	var out: Array = []
+	var index := {}
+	var by_name := parts_of_placed(n)
+	for pn: String in by_name:
+		var mi: MeshInstance3D = by_name[pn]
+		if mi.mesh == null:
+			continue
+		for si in mi.mesh.get_surface_count():
+			var named := RoomModel.surface_material(mi, si)
+			if named == "":
+				continue
+			if not index.has(named):
+				index[named] = out.size()
+				out.append({"name": named, "parts": [], "material": material_id_of(mi, si)})
+			var e: Dictionary = out[index[named]]
+			if not (pn in e["parts"]):
+				(e["parts"] as Array).append(pn)
+	return out
+
+
 ## The placements (parts with "object": in a kept room every part), for room_state and the Room tab:
 ## [{name, object, object_name, position, rotation, scale, parts: [{name, color, material: the library material's id
-## or "", effect: the effect's id or "", recolour: the entry that sets it last, or null}]}].
+## or "", effect: the effect's id or "", recolour: the entry that sets it last, or null}], materials:
+## materials_of_placed()}].
 static func placed_objects(env: Node) -> Array:
 	var out: Array = []
 	if env == null or env.get_script() != load("res://scripts/assistant/assistant_room.gd"):
@@ -532,7 +623,7 @@ static func placed_objects(env: Node) -> Array:
 		var m: Dictionary = library.call("get_object", str(p["object"]))
 		out.append({"name": p["name"], "object": p["object"], "object_name": m.get("name", ""),
 				"position": p.get("position", [0, 0, 0]), "rotation": p.get("rotation", [0, 0, 0]),
-				"scale": p.get("scale", 1.0), "parts": parts})
+				"scale": p.get("scale", 1.0), "parts": parts, "materials": materials_of_placed(node)})
 	return out
 
 
@@ -735,6 +826,11 @@ static func _model_surfaces(model: Node3D, p: Dictionary, pictures: Dictionary, 
 			mi.set_surface_override_material(s, _shared_materials[share])
 			if s == 0:
 				mi.set_meta("look", {"m": look, "image": key})
+			# Each surface's, for a material-level recolour (_part_look()).
+			var all: Array = mi.get_meta("looks", [])
+			all.resize(mi.mesh.get_surface_count())
+			all[s] = {"m": look, "image": key}
+			mi.set_meta("looks", all)
 
 
 ## A surface material's colour as "#rrggbb" (or "#rrggbbaa" when see-through): what it shows before a placement's

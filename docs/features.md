@@ -2665,7 +2665,8 @@ One action for a material and a picture alike (`app/scripts/assistant/part_apply
 
 1. Pick a material (Surfaces) or a picture (Pictures), then **Apply to a part**. The panel goes.
 2. The laser shows what it points at: a room's wall, floor or seat, or a part of a placed object. That part shows the
-   material or the picture at once.
+   material or the picture at once. On an imported model it goes by material: every surface of that object with the
+   material the laser is on (a sofa's fabric, but not its wooden legs; all four legs when they share one).
 3. Stick up or down: the pattern bigger or smaller. Stick left or right: it turns. The legends say **APPLY**,
    **SIZE / TURN** and **CANCEL**.
 4. The trigger puts it there. B or the menu button cancels ("Nothing changed").
@@ -2677,6 +2678,25 @@ cover rules are as before: an object's part follows its object.
 
 The material option `turn` (degrees) is new in the room document and the shader (`room_material.gdshaderinc`
 `uv_turn`).
+
+### Paint by material
+
+A model's part is often one mesh with several materials, and several parts may share one. The user asked
+(2026-11-07) to paint "only the components with the same texture as the one we're pointing at", so the apply mode
+paints by material:
+
+- **The names.** Reading a model (`room_model.gd load_glb()`), each surface keeps the name of its material in the
+  file (meta `surface_materials`): the glTF material's name made plain and unique, else `material_1`, `material_2`,
+  and so on. Surfaces that share a material in the file share the name. A part's `materials` lists them.
+- **The match.** `"<placed>/@<material>"` (`"Sofa/@Fabric"`) is a part-level recolour entry that reaches every
+  surface of that placed object with the material, over all its meshes (`assistant_room.gd surface_targets()`). A
+  mesh it reaches is recoloured surface by surface, and the entries go on in the document's order, so a later
+  whole-part entry (`"Sofa/Body"`) still wins over it.
+- **Pointing.** `part_apply.gd pick()` finds the surface the ray meets (its triangle's index), and gives
+  `surface_material` and `same` (the match). The apply mode paints `same` and shows the preview on those surfaces
+  only. A built-in object's part and a room's surface have no file material: they are painted whole, as before.
+- **The assistant.** `pointed_part` gives `same`; `material_apply`, `picture_apply` and `part_reset` take it as the
+  part; `object_info` with `placed` lists the model's `materials` (name, parts, the library material shown).
 
 ### Open questions
 

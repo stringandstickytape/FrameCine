@@ -11,7 +11,15 @@ extends RefCounted
 ## shows what the room built it with.
 ##
 ##   pick(main, origin, direction) -> {part, kind: room | object, placed, name, node, point, normal, distance,
-##                                     material, picture} or {}        a ray (world frame) against the room's parts
+##                                     material, picture, surface, surface_material, same} or {}
+##                                     a ray (world frame) against the room's parts
+##   target_of(hit) -> what painting the picked part reaches: its same-material match, else the part
+##
+## Paint by material: a model's part is often one mesh with several materials (a sofa's fabric and its wooden legs),
+## and several parts may share one (four legs). pick() names the file material of the surface the ray meets
+## (surface_material) and the match that reaches every surface of that object showing it ("Sofa/@Fabric": same), and
+## the apply mode paints that, so the fabric changes and the legs stay. A part with no file material (a built-in
+## object's, a room surface) is painted whole, as before.
 ##   apply(tree, caller, part, change) -> {ok, summary, undo, ...} or {ok: false, error}
 ##   reset(tree, caller, part)          the same
 ##   library_change(id, tiling, turn, tint) -> the material object for a library material
@@ -20,6 +28,7 @@ const ObjectCommands := preload("res://scripts/assistant/object_commands.gd")
 const ObjectLibrary := preload("res://scripts/assistant/object_library.gd")
 const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
+const RoomModel := preload("res://scripts/assistant/room_model.gd")
 const DevCommands := preload("res://scripts/dev/dev_commands.gd")
 
 const REACH := 30.0
@@ -87,10 +96,40 @@ static func pick(main: Node, origin: Vector3, direction: Vector3, reach := REACH
 	if best.is_empty():
 		return {}
 	var g := best["node"] as GeometryInstance3D
-	best["material"] = _assistant_room().call("material_id_of", g)
-	var shown: Material = _assistant_room().call("_shown_material", g)
+	var surface := int(best.get("surface", 0))
+	best["surface_material"] = ""
+	best["same"] = ""
+	if best["kind"] == "object" and g is MeshInstance3D:
+		var named := RoomModel.surface_material(g as MeshInstance3D, surface)
+		if named != "":
+			best["surface_material"] = named
+			best["same"] = "%s/@%s" % [best["placed"], named]
+	best["material"] = _assistant_room().call("material_id_of", g, surface)
+	var shown: Material = _assistant_room().call("shown_material_at", g, surface)
 	best["picture"] = shown is ShaderMaterial and (shown as ShaderMaterial).get_shader_parameter("use_texture") == true
 	return best
+
+
+## What painting the picked part reaches: its same-material match when it has one, else the part.
+static func target_of(hit: Dictionary) -> String:
+	var same := str(hit.get("same", ""))
+	return same if same != "" else str(hit.get("part", ""))
+
+
+## The surfaces a match lights up while the apply mode shows it: [[GeometryInstance3D, surface (-1: all of it)], ...]
+## (AssistantRoom.surface_targets() for a placed object's; the room surfaces of that name, whole).
+static func preview_targets(main: Node, match: String) -> Array:
+	var env: Node = main.get("env") if main != null else null
+	if env == null or match == "":
+		return []
+	if match.contains("/"):
+		return _assistant_room().call("surface_targets", env.get_node_or_null(LAYER), match)
+	var base: Node3D = _room_editor().call("_base", env)
+	var out: Array = []
+	if base != null:
+		for n in base.find_children(match, "GeometryInstance3D", true, false):
+			out.append([n, -1])
+	return out
 
 
 ## Where a ray meets one surface (nearer than `nearer`): {node, point, normal, distance} or {}.
@@ -130,8 +169,25 @@ static func _hit(g: GeometryInstance3D, origin: Vector3, dir: Vector3, nearer: f
 			continue
 		nearer = dist
 		best = {"node": g, "point": p, "normal": (xf.basis.inverse().transposed() * (r["normal"] as Vector3))
-				.normalized(), "distance": dist}
+				.normalized(), "distance": dist, "surface": _surface_of(mesh, int(r.get("face_index", -1)))}
 	return best
+
+
+## Which surface of a mesh a triangle (its index in mesh.get_faces()'s order: the surfaces' triangles one after the
+## other) belongs to; 0 when it can't tell.
+static func _surface_of(mesh: Mesh, face: int) -> int:
+	if face < 0 or mesh == null or mesh.get_surface_count() <= 1:
+		return 0
+	var start := 0
+	for s in mesh.get_surface_count():
+		if mesh is ArrayMesh and (mesh as ArrayMesh).surface_get_primitive_type(s) != Mesh.PRIMITIVE_TRIANGLES:
+			continue
+		var idx: int = mesh.surface_get_array_index_len(s)
+		var n: int = (idx if idx > 0 else mesh.surface_get_array_len(s)) / 3
+		if face < start + n:
+			return s
+		start += n
+	return 0
 
 
 static func _triangles(mesh: Mesh) -> Object:
@@ -233,15 +289,20 @@ static func register_commands(_host: Node = null) -> void:
 		var room: Transform3D = _room_editor().call("to_room", _main())
 		var at: Vector3 = room * (p["point"] as Vector3)
 		return {"part": p["part"], "kind": p["kind"], "placed": p["placed"], "name": p["name"],
+				"surface_material": p["surface_material"], "same": p["same"],
 				"material": p["material"], "picture": p["picture"], "distance": snappedf(float(p["distance"]), 0.01),
 				"point": [snappedf(at.x, 0.01), snappedf(at.y, 0.01), snappedf(at.z, 0.01)]}, {
 		"description": "What the user's laser (the pointer controller's ray) is on now: a room surface (a wall, the "
 				+ "floor, the seats: its name, recolour's match) or a part of something placed (\"Poster/Picture\"), "
-				+ "so \"make this wall brick\" can be material_apply with that part. Empty part: it points at nothing.",
+				+ "so \"make this wall brick\" can be material_apply with that part. Empty part: it points at nothing. "
+				+ "A placed model's part may have several materials (a sofa's fabric and its legs): same "
+				+ "(\"Sofa/@Fabric\") reaches every surface of that object with the material the laser is on, and is "
+				+ "what the user's own apply mode paints; give it as the part for \"make this fabric velvet\".",
 		"params": [], "assistant": "read", "title": "What the laser points at",
 		"returns": "{part (the name material_apply, picture_apply and part_reset take), kind: room | object, placed, "
-				+ "name, material (the library material it shows, or empty), picture, distance, point [x, y, z] (room "
-				+ "frame)} or {part: \"\", message}"})
+				+ "name, surface_material (the model file's material the laser is on, or empty), same (\"<placed>/@"
+				+ "<material>\": every surface of the object with it, or empty), material (the library material it "
+				+ "shows, or empty), picture, distance, point [x, y, z] (room frame)} or {part: \"\", message}"})
 	R.register("material_apply", func(a: Dictionary, ctx: DevCommands.Call) -> Variant:
 		var id := str(a["material"])
 		if not MaterialLibrary.has(id):
@@ -251,10 +312,12 @@ static func register_commands(_host: Node = null) -> void:
 				else null)
 		return ObjectCommands._give(ctx, await apply(Engine.get_main_loop() as SceneTree, ctx.caller, part, change)), {
 		"description": "Puts a library material (bundled or the user's own: the materials command) on one part: a "
-				+ "room surface by name (pointed_part, room_state) or a placed object's part (\"Shelf/Board\"). Kept "
-				+ "in the room like a recolour, with an undo; part_reset puts it back.",
+				+ "room surface by name (pointed_part, room_state) or a placed object's part (\"Shelf/Board\"), or on "
+				+ "every surface of a placed object with one of its model's materials (\"Sofa/@Fabric\": pointed_part's "
+				+ "same; object_info with placed lists the materials). Kept in the room like a recolour, with an "
+				+ "undo; part_reset puts it back.",
 		"params": [{"name": "part", "type": "string", "required": true, "description": "The part: pointed_part's "
-				+ "part, a room surface's name or \"<placed>/<part>\"."},
+				+ "part or same, a room surface's name, \"<placed>/<part>\" or \"<placed>/@<material>\"."},
 				{"name": "material", "type": "string", "required": true, "description": "The material's id."},
 				{"name": "tiling", "type": "float", "default": 0.0, "description": "Metres per repeat of the pattern "
 				+ "(0.02 to 20); 0: the material's own (its real size where known)."},
@@ -270,6 +333,6 @@ static func register_commands(_host: Node = null) -> void:
 		"description": "Puts a part back as the room built it: the material, picture or colour given to it "
 				+ "(material_apply, picture_apply, recolour) goes. With an undo.",
 		"params": [{"name": "part", "type": "string", "required": true, "description": "The part (pointed_part's "
-				+ "part, a room surface's name or \"<placed>/<part>\")."}],
+				+ "part or same, a room surface's name, \"<placed>/<part>\" or \"<placed>/@<material>\")."}],
 		"level": "change", "assistant": "room", "title": "Put a part back",
 		"returns": "{state: kept, ...}"})

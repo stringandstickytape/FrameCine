@@ -67,13 +67,15 @@ static func register_commands(_host: Node = null) -> void:
 			return ctx.fail("no object %s (object_library lists them)" % a["id"])
 		return m, {
 		"description": "One library object (its parts with their colours, size, mount) or one placed in the room "
-				+ "(its parts as they show now and which recolour sets each).",
+				+ "(its parts as they show now and which recolour sets each, and its model's materials: \"<placed>/@"
+				+ "<material>\" paints every surface with one, as the user's apply mode does).",
 		"params": [{"name": "id", "type": "string", "default": "", "description": "A library object's id "
 				+ "(object_library)."},
 				{"name": "placed", "type": "string", "default": "", "description": "Instead: the name of an object "
 				+ "placed in the room (room_state's objects)."}],
 		"assistant": "read", "title": "An object's parts", "returns": "{id, name, mount, size, parts: [{name, color, "
-				+ "texture}]} or {name, object, parts: [{name, color, recolour}]}"})
+				+ "texture, materials}]} or {name, object, parts: [{name, color, recolour}], materials: [{name, parts, "
+				+ "material}]}"})
 	R.register("object_import", func(a: Dictionary, ctx: DevCommands.Call) -> Variant:
 		return await _cmd_import(a, ctx), {
 		"description": "Adds an object to the library from a .glb (taken as it is) or an SVG drawing (made solid: "

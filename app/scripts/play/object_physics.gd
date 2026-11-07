@@ -223,8 +223,10 @@ func _rebuild() -> void:
 	changed.emit()
 	if not _bodies.is_empty():
 		# The room's own shapes a moment after it came on (while it settles in), not at the first pick-up.
+		# By id: the room may be gone (rebuilt) by then.
+		var env_id := env.get_instance_id()
 		get_tree().create_timer(ROOM_SHAPES_AFTER).timeout.connect(func() -> void:
-			if _env == env:
+			if is_instance_valid(_env) and _env.get_instance_id() == env_id:
 				_ensure_room())
 
 

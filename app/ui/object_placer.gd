@@ -9,7 +9,9 @@ extends Node3D
 ## Apply (paint by part, scripts/assistant/part_apply.gd; docs/features.md "Apply to a part"): a material or a picture
 ## chosen in the Objects tab goes on the part the laser points at (a wall, the floor, a seat, an object's part),
 ## shown there while it points; the stick sizes the pattern (up and down: metres per repeat) and turns it (left and
-## right); the trigger applies it (kept in the room, with Undo; the panel comes back); B or menu cancels.
+## right); the trigger applies it (kept in the room, with Undo; the panel comes back); B or menu cancels. On a placed
+## model it paints by material: every surface of that object with the material the laser is on (a sofa's fabric, not
+## its legs; PartApply.target_of()), and the preview shows on those surfaces only.
 ##
 ##   start_place(id) / start_move(name) / start_apply(what) -> bool      update(hand) -> the laser's length
 ##   on_stick()  commit()
@@ -46,7 +48,10 @@ var apply_tiling := 1.0
 var apply_turn := 0.0
 var _apply_base_tiling := 1.0
 var _shown_on: GeometryInstance3D
-var _shown_was: Material
+## What the preview changed, to put back: [{node, override, surfaces: [each surface's override before]}].
+var _shown: Array = []
+## The match the preview shows on (PartApply.target_of()).
+var _shown_match := ""
 var _picture_material: Material
 var _preview: Node3D
 var _hidden: Node3D
@@ -105,27 +110,79 @@ func apply_change() -> Dictionary:
 	return {}
 
 
-## The aimed part shows what is being applied (its own material back when the laser leaves it).
-func _show_on(g: GeometryInstance3D) -> void:
-	if g == _shown_on and g != null and applying.has("picture"):
+## The aimed part shows what is being applied (its own material back when the laser leaves it): the whole part, or on
+## a placed model the surfaces with the material the laser is on (PartApply.target_of(), preview_targets()).
+func _show_on(hit: Dictionary) -> void:
+	var g: GeometryInstance3D = hit.get("node") if not hit.is_empty() else null
+	var match := PartApply.target_of(hit) if g != null else ""
+	if g == _shown_on and g != null and match == _shown_match and applying.has("picture"):
 		return
 	_unshow()
 	if g == null:
 		return
 	_shown_on = g
-	_shown_was = g.material_override
+	_shown_match = match
+	var targets := PartApply.preview_targets(app, match) if match != "" else []
+	if targets.is_empty():
+		targets = [[g, -1]]
+	var surfaces := {}
+	for t: Array in targets:
+		var node: GeometryInstance3D = t[0]
+		if not surfaces.has(node):
+			surfaces[node] = []
+		(surfaces[node] as Array).append(int(t[1]))
+	for node: GeometryInstance3D in surfaces:
+		var before := {"node": node, "override": node.material_override, "surfaces": [], "only": []}
+		if not (-1 in surfaces[node]) and node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+			var mi := node as MeshInstance3D
+			for si in mi.mesh.get_surface_count():
+				(before["surfaces"] as Array).append(mi.get_surface_override_material(si))
+			before["only"] = surfaces[node]
+		_shown.append(before)
+	_paint_preview(_preview_material())
+
+
+## What the preview shows: the material with the stick's pattern, or the picture.
+func _preview_material() -> Material:
 	if applying.has("material"):
-		g.material_override = MaterialLibrary.get_material(str(applying["material"]), {"tiling": apply_tiling,
-				"turn": apply_turn})
-	else:
-		g.material_override = _picture_material
+		return MaterialLibrary.get_material(str(applying["material"]), {"tiling": apply_tiling, "turn": apply_turn})
+	return _picture_material
+
+
+## The preview on what _show_on() took: a whole part's override, or the chosen surfaces (the part's override, when it
+## has one, moves onto its other surfaces meanwhile, so the chosen ones show).
+func _paint_preview(m: Material) -> void:
+	for before: Dictionary in _shown:
+		var node: GeometryInstance3D = before["node"]
+		if not is_instance_valid(node):
+			continue
+		var only: Array = before["only"]
+		if only.is_empty():
+			node.material_override = m
+			continue
+		var mi := node as MeshInstance3D
+		var whole: Material = before["override"]
+		mi.material_override = null
+		for si in mi.mesh.get_surface_count():
+			if si in only:
+				mi.set_surface_override_material(si, m)
+			elif whole != null:
+				mi.set_surface_override_material(si, whole)
 
 
 func _unshow() -> void:
-	if _shown_on != null and is_instance_valid(_shown_on):
-		_shown_on.material_override = _shown_was
+	for before: Dictionary in _shown:
+		var node: GeometryInstance3D = before["node"]
+		if not is_instance_valid(node):
+			continue
+		var was: Array = before["surfaces"]
+		if node is MeshInstance3D and not was.is_empty():
+			for si in mini(was.size(), (node as MeshInstance3D).mesh.get_surface_count()):
+				(node as MeshInstance3D).set_surface_override_material(si, was[si])
+		node.material_override = before["override"]
+	_shown.clear()
 	_shown_on = null
-	_shown_was = null
+	_shown_match = ""
 
 
 func start_place(id: String) -> bool:
@@ -200,11 +257,10 @@ func _end() -> void:
 func update(hand: Node3D) -> float:
 	if not applying.is_empty():
 		var hit := PartApply.pick(app, hand.call("get_ray_origin"), hand.call("get_ray_direction"), REACH)
-		var was := str(aimed.get("part", ""))
 		aimed = hit
 		var g: GeometryInstance3D = hit.get("node") if not hit.is_empty() else null
-		if g != _shown_on or str(hit.get("part", "")) != was:
-			_show_on(g)
+		if g != _shown_on or (PartApply.target_of(hit) if g != null else "") != _shown_match:
+			_show_on(hit)
 		return float(hit.get("distance", FREE_DISTANCE))
 	if _preview == null or not is_instance_valid(_preview):
 		_end()
@@ -237,9 +293,8 @@ func on_stick(stick: Vector2, delta: float) -> void:
 		if absf(stick.y) > STICK_DEAD:
 			apply_tiling = clampf(apply_tiling * exp(stick.y * SIZE_RATE * delta), 0.05, 20.0)
 			changed = true
-		if changed and _shown_on != null and is_instance_valid(_shown_on):
-			_shown_on.material_override = MaterialLibrary.get_material(str(applying["material"]),
-					{"tiling": apply_tiling, "turn": apply_turn})
+		if changed and not _shown.is_empty():
+			_paint_preview(_preview_material())
 		return
 	if not applying.is_empty():
 		return
@@ -253,7 +308,7 @@ func on_stick(stick: Vector2, delta: float) -> void:
 ## The trigger: the object is set where it shows (a room change, kept, with an undo). {ok, summary, undo} or {error}.
 func commit() -> Dictionary:
 	if not applying.is_empty() and not _busy:
-		var part := str(aimed.get("part", ""))
+		var part := PartApply.target_of(aimed)
 		if part == "":
 			return {"ok": false, "error": TranslationServer.translate("Point at a part first")} # i18n
 		_busy = true

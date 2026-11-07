@@ -320,10 +320,11 @@ static func register_commands(_host: Node = null) -> void:
 		return ObjectCommands._give(ctx, await PartApply.apply(_tree(), ctx.caller, str(a["part"]),
 				texture_change(id))), {
 		"description": "Puts a kept picture on one part: a room surface by name (pointed_part, room_state) or a "
-				+ "placed object's part (\"Poster/Picture\"). Kept in the room like a recolour with a texture; "
-				+ "part_reset puts the part back.",
+				+ "placed object's part (\"Poster/Picture\"), or every surface of a placed object with one of its "
+				+ "model's materials (\"Sofa/@Fabric\": pointed_part's same). Kept in the room like a recolour with a "
+				+ "texture; part_reset puts the part back.",
 		"params": [{"name": "part", "type": "string", "required": true, "description": "The part (pointed_part's "
-				+ "part, a room surface's name or \"<placed>/<part>\")."},
+				+ "part or same, a room surface's name, \"<placed>/<part>\" or \"<placed>/@<material>\")."},
 				{"name": "picture", "type": "string", "required": true, "description": "The picture's id "
 				+ "(pictures)."}],
 		"level": "change", "assistant": "room", "title": "Put a picture on a part",

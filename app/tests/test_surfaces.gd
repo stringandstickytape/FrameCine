@@ -20,6 +20,8 @@ const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const PartApply := preload("res://scripts/assistant/part_apply.gd")
 const ObjectCommands := preload("res://scripts/assistant/object_commands.gd")
 const AssistantRoom := preload("res://scripts/assistant/assistant_room.gd")
+const ObjectLibrary := preload("res://scripts/assistant/object_library.gd")
+const RoomModel := preload("res://scripts/assistant/room_model.gd")
 const RoomEditor := preload("res://scripts/assistant/room_editor.gd")
 const DevCommands := preload("res://scripts/dev/dev_commands.gd")
 const CommandHost := preload("res://scripts/dev/command_host.gd")
@@ -113,9 +115,10 @@ func _run() -> void:
 	await _test_status()
 	await _test_apply()
 	await _test_apply_mode()
+	await _test_paint_by_material()
 
 	fab.withdraw_eula()
-	_forget_rooms(["acg_testbricks000", "Test Box", "ms_" + MS_ASSET])
+	_forget_rooms(["acg_testbricks000", "Test Box", "ms_" + MS_ASSET, "Test Sofa"])
 	MaterialLibrary.user_dir = MaterialLibrary.USER_DIR
 	MaterialLibrary.forget_user()
 	_wipe(ROOT)
@@ -566,6 +569,171 @@ func _test_apply_mode() -> void:
 			and not layer.is_applying() and node != null and node.material_override != showing)
 	await PartApply.reset(self, null, part)
 	await _frames(3)
+
+
+## Paint by material: a model whose Body mesh has two materials (Fabric, Wood) and whose Leg shares Wood.
+func _test_paint_by_material() -> void:
+	# The box from before would stand in the way.
+	await ObjectCommands.remove_placed(self, null, "Test Box")
+	await _frames(5)
+	var glb := _sofa_glb()
+	var read := RoomModel.load_glb(glb)
+	var body_read := (read["node"] as Node).find_child("Body", true, false) as MeshInstance3D
+	var leg_wood := false
+	for q: Dictionary in read["parts"]:
+		leg_wood = leg_wood or (q["name"] == "Leg" and q["materials"] == ["Wood"])
+	_check("the model's surfaces name their file materials (%s)" % [read.get("parts")], body_read != null
+			and RoomModel.surface_material(body_read, 0) == "Fabric" and RoomModel.surface_material(body_read, 1)
+			== "Wood" and leg_wood)
+	(read["node"] as Node).free()
+	var imp := ObjectLibrary.import_glb(glb, "Test Sofa", ["sofa"], "floor")
+	_check("the sofa imports (%s)" % imp.get("error", ""), imp.get("ok") == true)
+	if imp.get("ok") != true:
+		return
+	var oid: String = imp["manifest"]["id"]
+	var r: Dictionary = await ObjectCommands.place(self, null, oid, {"name": "Test Sofa", "position": [0, 1.2, -2.5]})
+	await _frames(5)
+	_check("the sofa placed (%s)" % r.get("error", ""), r.get("ok") == true)
+	var env: Node3D = main.env
+	var parts: Dictionary = AssistantRoom.parts_of_placed(env.get_node("AssistantLayer/Test Sofa"))
+	var body := parts.get("Body") as MeshInstance3D
+	var leg := parts.get("Leg") as MeshInstance3D
+	_check("its parts: Body and Leg", body != null and leg != null)
+	if body == null or leg == null:
+		return
+	var eye: Vector3 = main.camera.global_position
+	_aim(eye, _surface_centre(body, 0))
+	var p: Dictionary = PartApply.pointed(main)
+	_check("pointed_part on the fabric: its material and the same-material match (%s)" % [p], p.get("part")
+			== "Test Sofa/Body" and p.get("surface_material") == "Fabric" and p.get("same") == "Test Sofa/@Fabric")
+	_aim(eye, _surface_centre(body, 1))
+	p = PartApply.pointed(main)
+	_check("on the Body's wood: Wood (%s)" % [p.get("same")], p.get("surface_material") == "Wood"
+			and p.get("same") == "Test Sofa/@Wood")
+	var c: Dictionary = await commands.run("pointed_part", {})
+	_check("pointed_part (assistant) gives same too", c.get("ok") == true and c["result"]["same"] == "Test Sofa/@Wood")
+	var info: Dictionary = await commands.run("object_info", {"placed": "Test Sofa"})
+	_check("object_info lists the placed model's materials (%s)" % [info.get("result")],
+			JSON.stringify(info.get("result", {})).contains("\"Fabric\"")
+			and JSON.stringify(info.get("result", {})).contains("\"Wood\""))
+	# The fabric only.
+	var fabric := "acg_testbricks000"
+	c = await commands.run("material_apply", {"part": "Test Sofa/@Fabric", "material": fabric})
+	await _frames(5)
+	_check("material_apply on Test Sofa/@Fabric (%s)" % [c.get("error", "")], c.get("ok") == true
+			and _entry(main.env.get("doc"), "Test Sofa/@Fabric").get("material", {}).get("library_material") == fabric)
+	parts = AssistantRoom.parts_of_placed(main.env.get_node("AssistantLayer/Test Sofa"))
+	body = parts["Body"]
+	leg = parts["Leg"]
+	_check("the fabric shows it; the Body's wood and the Leg don't", AssistantRoom.material_id_of(body, 0) == fabric
+			and AssistantRoom.material_id_of(body, 1) != fabric and AssistantRoom.material_id_of(leg) != fabric
+			and body.material_override == null)
+	# The wood, on the Body and the Leg alike.
+	var wood := "ph_test_brick_wall_00"
+	c = await commands.run("material_apply", {"part": "Test Sofa/@Wood", "material": wood})
+	await _frames(5)
+	parts = AssistantRoom.parts_of_placed(main.env.get_node("AssistantLayer/Test Sofa"))
+	body = parts["Body"]
+	leg = parts["Leg"]
+	_check("@Wood: the Body's wood and the Leg, the fabric kept (%s)" % [c.get("error", "")], c.get("ok") == true
+			and AssistantRoom.material_id_of(body, 1) == wood and AssistantRoom.material_id_of(leg) == wood
+			and AssistantRoom.material_id_of(body, 0) == fabric)
+	# The apply mode paints by material.
+	var layer: Node = main.ui
+	var placer: Node = layer._placer
+	var hand: Node3D = layer.pointer_hand
+	var id := "ms_" + MS_ASSET
+	_aim(eye, _surface_centre(leg, 0))
+	layer.start_part_apply({"material": id})
+	placer.update(hand)
+	_check("the apply mode on the Leg aims at the wood (%s)" % [placer.aimed.get("same")],
+			PartApply.target_of(placer.aimed) == "Test Sofa/@Wood")
+	_check("and the preview shows on the Leg and the Body's wood, not the fabric",
+			MaterialLibrary.id_of(AssistantRoom.shown_material_at(leg, 0)) == id
+			and MaterialLibrary.id_of(AssistantRoom.shown_material_at(body, 1)) == id
+			and AssistantRoom.material_id_of(body, 0) == fabric)
+	layer.cancel_object_place()
+	_check("B: the preview goes, each surface as it was", AssistantRoom.material_id_of(body, 1) == wood
+			and AssistantRoom.material_id_of(leg) == wood and AssistantRoom.material_id_of(body, 0) == fabric
+			and body.material_override == null)
+	_aim(eye, _surface_centre(body, 0))
+	layer.start_part_apply({"material": id})
+	placer.update(hand)
+	r = await placer.commit()
+	await _frames(5)
+	parts = AssistantRoom.parts_of_placed(main.env.get_node("AssistantLayer/Test Sofa"))
+	body = parts["Body"]
+	leg = parts["Leg"]
+	_check("the trigger on the fabric: Test Sofa/@Fabric changes, the wood stays (%s)" % [r.get("error", "")],
+			r.get("ok") == true and AssistantRoom.material_id_of(body, 0) == id
+			and AssistantRoom.material_id_of(body, 1) == wood and AssistantRoom.material_id_of(leg) == wood)
+	# A whole-part entry after: it wins on both of the Body's surfaces.
+	c = await commands.run("material_apply", {"part": "Test Sofa/Body", "material": fabric})
+	await _frames(5)
+	parts = AssistantRoom.parts_of_placed(main.env.get_node("AssistantLayer/Test Sofa"))
+	body = parts["Body"]
+	leg = parts["Leg"]
+	_check("a later whole-part entry covers the Body, the Leg keeps the wood", c.get("ok") == true
+			and AssistantRoom.material_id_of(body, 0) == fabric and AssistantRoom.material_id_of(body, 1) == fabric
+			and AssistantRoom.material_id_of(leg) == wood)
+	c = await commands.run("part_reset", {"part": "Test Sofa/@Wood"})
+	await _frames(5)
+	_check("part_reset on a material", c.get("ok") == true and _entry(main.env.get("doc"), "Test Sofa/@Wood")
+			.is_empty())
+	c = await commands.run("material_apply", {"part": "Test Sofa/@Velvet", "material": fabric})
+	_check("a material the model doesn't have: refused", c.get("ok") == false)
+	await ObjectCommands.remove_placed(self, null, "Test Sofa")
+	ObjectLibrary.delete(oid)
+
+
+## A surface's middle, in the world.
+static func _surface_centre(mi: MeshInstance3D, s: int) -> Vector3:
+	var verts: PackedVector3Array = mi.mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX]
+	var box := AABB(verts[0], Vector3.ZERO)
+	for v in verts:
+		box = box.expand(v)
+	return mi.global_transform * box.get_center()
+
+
+## The test sofa: Body (a fabric box and a wooden box, one mesh, two surfaces) and Leg (wood, the same material).
+static func _sofa_glb() -> PackedByteArray:
+	var fabric := StandardMaterial3D.new()
+	fabric.resource_name = "Fabric"
+	fabric.albedo_color = Color(0.7, 0.1, 0.1)
+	var wood := StandardMaterial3D.new()
+	wood.resource_name = "Wood"
+	wood.albedo_color = Color(0.5, 0.3, 0.1)
+	var root := Node3D.new()
+	root.name = "Sofa"
+	var mesh := ArrayMesh.new()
+	for k in 2:
+		var b := BoxMesh.new()
+		b.size = Vector3(0.6, 0.6, 0.6)
+		var arrays := b.get_mesh_arrays()
+		var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		for i in verts.size():
+			verts[i] += Vector3(-0.5 if k == 0 else 0.5, 0, 0)
+		arrays[Mesh.ARRAY_VERTEX] = verts
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		mesh.surface_set_material(k, fabric if k == 0 else wood)
+	var body := MeshInstance3D.new()
+	body.name = "Body"
+	body.mesh = mesh
+	root.add_child(body)
+	var leg_mesh := BoxMesh.new()
+	leg_mesh.size = Vector3(0.3, 0.3, 0.3)
+	leg_mesh.material = wood
+	var leg := MeshInstance3D.new()
+	leg.name = "Leg"
+	leg.mesh = leg_mesh
+	leg.position = Vector3(1.3, 0, 0)
+	root.add_child(leg)
+	var doc := GLTFDocument.new()
+	var state := GLTFState.new()
+	doc.append_from_scene(root, state)
+	var out := doc.generate_buffer(state)
+	root.free()
+	return out
 
 
 # --- Helpers ---------------------------------------------------------------------------------------------------------

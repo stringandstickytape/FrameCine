@@ -11,6 +11,7 @@ extends RefCounted
 ##   turn_inside_out_shapes(mesh) -> [the fixed ArrayMesh or null, how many shapes were turned]
 ##   decode_image(bytes) -> {image} or {error}
 ##   parts_of(node) -> {part name: MeshInstance3D}                 a read model's parts (meta PART_META)
+##   surface_material(mi, s) -> the file material's name of a surface (meta SURFACE_MATERIALS_META), "" when none
 ##
 ## A model's parts (docs/assistant.md, "Objects"): every mesh node of the file, named by its glTF node name, else its
 ## mesh's name, else part_1, part_2, ... in the file's node order; made plain (letters, digits, space, - and _) and
@@ -35,6 +36,10 @@ const SCRIPT_KEYS: Array[String] = ["script", "gdscript", "code", "eval", "javas
 const PART_META := "object_part"
 ## The meta on a surface's material that names its picture (load_glb's "pictures"): an unlit material with a picture.
 const PICTURE_META := "picture"
+## The meta on a model's MeshInstance3D that names each surface's material in the file (a PackedStringArray, one per
+## surface): the glTF material's name, made plain and unique, else material_1, material_2, ... Surfaces that share a
+## material in the file share the name, so "<placed>/@<material>" reaches them all (paint by material).
+const SURFACE_MATERIALS_META := "surface_materials"
 const PART_NAME_MAX := 40
 
 
@@ -122,12 +127,21 @@ static func load_glb(bytes: PackedByteArray) -> Dictionary:
 	# room shows them as it shows a part's picture (assistant_room.gd material()).
 	var picture_bytes := _picture_bytes(_json_of(bytes), bytes)
 	var pictures := {}
+	# The file's materials by name (paint by material): the source material -> its plain, unique name.
+	var material_names := {}
+	var taken := {}
 	for mi: MeshInstance3D in scene.find_children("*", "MeshInstance3D", true, false):
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		if mi.mesh == null:
 			continue
-		var part := {"name": str(mi.get_meta(PART_META, mi.name)), "color": "", "texture": false, "triangles": 0}
+		var part := {"name": str(mi.get_meta(PART_META, mi.name)), "color": "", "texture": false, "triangles": 0,
+				"materials": []}
+		var surface_names := PackedStringArray()
 		for s in mi.mesh.get_surface_count():
+			var named := _material_name(mi.get_active_material(s), material_names, taken)
+			surface_names.append(named)
+			if named != "" and not (named in part["materials"]):
+				part["materials"].append(named)
 			var idx: int = mi.mesh.surface_get_array_index_len(s)
 			var n: int = (idx if idx > 0 else mi.mesh.surface_get_array_len(s)) / 3
 			triangles += n
@@ -150,6 +164,7 @@ static func load_glb(bytes: PackedByteArray) -> Dictionary:
 				converted.set_meta(PICTURE_META, pic)
 				converted.set_meta("shown_colour", src.albedo_color)
 			mi.set_surface_override_material(s, converted)
+		mi.set_meta(SURFACE_MATERIALS_META, surface_names)
 		parts.append(part)
 	var biggest := 0
 	for t: Texture2D in textures.values():
@@ -318,6 +333,34 @@ static func plain_part_name(text: String) -> String:
 	for c in text.strip_edges():
 		out += c if c.is_valid_identifier() or c.is_valid_int() or c in " -_" else "_"
 	return out.strip_edges().left(PART_NAME_MAX)
+
+
+## A file material's name for paint by material: its own name made plain (unique among the file's materials), else
+## material_N; "" for a surface with none. `names` and `taken` carry the file's names so far.
+static func _material_name(m: Material, names: Dictionary, taken: Dictionary) -> String:
+	if m == null:
+		return ""
+	if names.has(m):
+		return names[m]
+	var base := plain_part_name(String(m.resource_name))
+	if base == "":
+		base = "material_%d" % (names.size() + 1)
+	var unique := base
+	var n := 2
+	while taken.has(unique.to_lower()):
+		unique = "%s_%d" % [base, n]
+		n += 1
+	taken[unique.to_lower()] = true
+	names[m] = unique
+	return unique
+
+
+## The file material's name of a model's surface (meta SURFACE_MATERIALS_META), "" when it has none.
+static func surface_material(mi: MeshInstance3D, s: int) -> String:
+	if mi == null or not mi.has_meta(SURFACE_MATERIALS_META):
+		return ""
+	var names: PackedStringArray = mi.get_meta(SURFACE_MATERIALS_META)
+	return names[s] if s >= 0 and s < names.size() else ""
 
 
 ## A read model's parts by name (its MeshInstance3D nodes with PART_META; a node without it, by its own name).

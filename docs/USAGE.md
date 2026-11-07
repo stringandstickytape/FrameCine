@@ -392,6 +392,8 @@ Kept pictures stay on this headset, for your own use: the app never uploads or s
    one of yours.
 
 **Apply to a part** (a material or a picture): the panel goes, and the part the laser points at shows it at once.
+On an imported object it goes on every surface with the same material as the one you point at: point at a sofa's
+fabric and only the fabric changes, not the wooden legs.
 
 | Control | Apply to a part |
 |---|---|

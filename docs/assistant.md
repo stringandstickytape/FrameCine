@@ -514,6 +514,7 @@ deleted object back.
 | `Wall shelf/Board` | the board of that shelf only |
 | `Wall shelf*/B*` | every part starting with B of every shelf |
 | `Chair/part_1` | the first unnamed mesh of an imported model placed as Chair |
+| `Sofa/@Fabric` | every surface of Sofa with its model's material Fabric, over all its meshes (paint by material: the fabric, not the wooden legs); `object_info` with `placed` lists the materials |
 
 A part-level entry is a `recolour` entry of the document; `material`'s fields go on top of what the part showed (the
 whole object's material when it has one, else the part's own colour), so an `emission` alone keeps the colour, a
@@ -644,7 +645,7 @@ user's content; source addresses stay on the headset and are never in an answer.
 | `pictures_search {query}` | control | opens Google Images for the words in the browser on the big screen: `{opened, note}`. Nothing more: tell the user how to keep one |
 | `pictures` | read | `{pictures: [{id, title, aspect, width, height, alpha, date, objects: [{id, as}]}], count, as}`, newest first |
 | `picture_place {picture, as, name, where, position, rotation, turn, scale}` | room | `as`: `poster`, `framed`, `canvas` or `cutout`. The object is made at the picture's shape (once for each kind) and placed as `object_place` places (`where` empty: a wall one on the wall the user looks at, a cut-out on the floor before them). A wall one stays on its wall until the user pulls it off. `{state: kept, placed, name, ...}` |
-| `picture_apply {part, picture}` | room | the picture on one part (`pointed_part`'s part, a room surface's name or `"<placed>/<part>"`), kept like a recolour, with an undo |
+| `picture_apply {part, picture}` | room | the picture on one part (`pointed_part`'s part or `same`, a room surface's name, `"<placed>/<part>"` or `"<placed>/@<material>"`), kept like a recolour, with an undo |
 | `picture_delete {picture}` | room, destructive | deletes the picture and the objects made from it: `{deleted}`. Refused while a kept room places one of them: `{error, rooms}` |
 
 ### Surfaces
@@ -660,8 +661,8 @@ Fab"), Poly Haven and ambientCG (`scripts/env/surface_store.gd`, `surface_import
 | `material_import {source, id}` | room | starts the import in the background: `{state: started, source, id, title}`, or `{state: already, material: {id, name}}`. Megascans before the user accepts Fab's licence: `error: "eula"` |
 | `material_status` | read | `{job, busy, backoff_s {polyhaven, ambientcg, megascans}, fab_eula_accepted, user_materials, disk_bytes, gpu_bytes_if_all_loaded, gpu_bytes_loaded, astc, resolution}`; poll it after `material_import` until `job.state` is done, already, failed or cancelled |
 | `materials {tag}` | read | the library, the user's materials too (`source`: the site, else `bundled`; `user`) |
-| `material_apply {part, material, tiling, turn, tint}` | room | a library material on one part: a room surface by name or `"<placed>/<part>"`. `tiling` metres a repeat (0: the material's own), `turn` degrees, `tint` `#rrggbb`. Kept like a recolour, with an undo |
-| `pointed_part` | read | what the user's laser is on: `{part, kind: room \| object, placed, name, material, picture, distance, point}`, or `{part: "", message}`. "Make this wall brick": `pointed_part`, then `material_apply` with its `part` |
+| `material_apply {part, material, tiling, turn, tint}` | room | a library material on one part: a room surface by name, `"<placed>/<part>"`, or `"<placed>/@<material>"` (every surface of that object with one of its model's materials). `tiling` metres a repeat (0: the material's own), `turn` degrees, `tint` `#rrggbb`. Kept like a recolour, with an undo |
+| `pointed_part` | read | what the user's laser is on: `{part, kind: room \| object, placed, name, surface_material, same, material, picture, distance, point}`, or `{part: "", message}`. "Make this wall brick": `pointed_part`, then `material_apply` with its `part`. "Make this fabric velvet": `material_apply` with its `same` (`"Sofa/@Fabric"`: the fabric, not the legs) |
 | `part_reset {part}` | room | the part as the room built it: the material, picture or colour given to it goes |
 
 Errors, beside `ok: false`: `error` is a code and `message` says it in English: `eula`, `backoff` (`wait` seconds,
