@@ -82,3 +82,15 @@ stars are the sky's public-domain data above.
 No bundled asset. The ice room, the hides, the aurora, the stars and the breath are built in code (`domestic.gd`,
 `seats.gd`, `sky.gd`, `atmosphere.gd`) on library materials (the ice style's `white_marble`, `rough_plaster`,
 `smooth_plaster`, `felt`, the hide's `plush_carpet`, all CC0), with the ice-block pattern drawn in `procedural.gd`.
+
+## Bathysphere
+
+- `app/environments/bathysphere.env.json`: no asset of its own. The hall, the water, the fish, the glowing creatures
+  and the whale are made in code by the systems; its surfaces are library materials (oak planks, dark metal, brass,
+  velvet). The whale's song is synthesised.
+
+## Crater
+
+- `app/environments/crater.env.json`: no asset of its own. The tiers, the rocks, the dome, the crater's rim, Earth
+  and the stars are made in code by the systems (the stars from the catalogue under "Data"); its surfaces are library
+  materials (rough plaster, smooth concrete, dark metal, brushed steel). It makes no sound.
