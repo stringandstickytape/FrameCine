@@ -3235,9 +3235,6 @@ msgstr "粗扫描线"
 msgid "The tape"
 msgstr "录像带"
 
-msgid "Wall lamps in the film"
-msgstr "放映时的壁灯"
-
 msgid "Weather at the window"
 msgstr "窗外天气"
 
