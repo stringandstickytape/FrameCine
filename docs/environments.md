@@ -1437,6 +1437,71 @@ a convertible on a drive-in's lot in the desert, dusk falling to a starry night 
 - **Sound to come:** crickets (a soft bed), a far freight train now and then (a one-shot, its horn far off), the
   open air's acoustics (little reverb).
 
+### Room: Screening room 1962
+
+`app/environments/screening_room_1962.env.json` (Cinemas). A private screening room in a house: walnut panelling, a
+deep carpet, a brick fireplace with a slow fire, brass wall lamps, six club chairs in two rows, and a pool glowing in
+the garden beyond the picture window. Before the film a painting hangs over the screen; it slides up into the ceiling
+as the film starts.
+
+- **Systems:** `light`; `domestic` (`walnut_1962`, `outside` none so the vista shows through the window); `seats`
+  (`club_chair` in the builder's six slots, brown leather on walnut); `sky` (a clear night, latitude 34, `dusk` 0.9);
+  `vista` (the pool 11 m out at -58 degrees, seen through the window from the viewer's seat; hills on the horizon).
+- **The ritual** (cues on `room.painting_open` and `light.house_lamps`): in the pre-show and after the end the lamps
+  come up over 4 s and the painting comes down over 6 s (`painting_down`, with the Pre-show on). As the film starts
+  from its start (`ritual`), the lamps go to half over 1.5 s, the painting rises over 7 s (1.84 m, at most about 0.4 m/s,
+  under the motion limit), and the lamps go down to the setting over 4 s. A film resumed later (`painting_away`, on
+  playing, intermission, credits) takes the painting up over 4 s whatever the Pre-show. With the Pre-show off the
+  painting stays up and `dim` takes the lamps down over 3 s.
+- **Settings:** `house_level`, "Wall lamps in the film" (0..1, 15 %).
+- **Default seat:** the middle of the front row (the origin), 5.1 m from a 2.6 m picture.
+- **Measured:** 18 draws, 9 600 triangles, 0 lights, 0 particles, 10.4 MB.
+- **Not yet:** a bar cart (the object library has none, and a room that ships as a document places no objects).
+  Sound wanted: a crackle from the fire, a faint pool filter's hum through the glass, a soft chime before the
+  ritual; a small, dry room (rt60 0.45).
+
+### Room: Athens rooftop
+
+`app/environments/rooftop_athens.env.json` (Cinemas). An open-air summer cinema on a roof in Athens (the name is short:
+a longer one, "Athens rooftop summer cinema", made its button wider than the Room tab in the pseudo-locale): director's
+chairs in rows on the tiles, a low whitewashed wall with bougainvillea over it, strings of bulbs, the screen painted on
+the next building's blind wall. Beside the wall the acropolis stands floodlit on its hill under a summer night's
+stars; planes cross now and then, and a cat walks along the wall top.
+
+- **Systems:** `light`; `terrace` (`rooftop`, a wall 8 m high, seven rows of nine); `seats` (`director`); `kit`
+  (bougainvillea on four of the right wall's places, clear of the cat's way); `sky` (latitude 38, day 200, 21:30, the
+  screen facing 200 degrees, the sunset's glow at 300); `vista` (the acropolis at 52 degrees, 150 m, size 2: clear
+  of the screen wall's edge and over the low wall from the seat; hills); `life` `planes` (plane lights) and `cat`
+  (its way along the left wall's top, 6.65 m out: never in the sight line, measured over 4 minutes).
+- **Film-time track:** `sky.dusk` from 0.75 to full night over the first 20 minutes of the film.
+- **Settings:** `floodlights`, "Floodlights on the hill" (0..1, full): `vista.floodlight`.
+- **Default seat:** the middle of the third row from the back (the origin), 11.9 m from a 6.4 m picture.
+- **Measured:** 15 draws, 29 086 triangles, 0 lights, 0 particles, 9.3 MB.
+- **Sound wanted:** cicadas (a bed, fading as the film starts), mopeds far off now and then, the cat's purr when it
+  sits; open air (rt60 0.25, wet 0.15).
+
+### Room: Pillow Fort 1993
+
+`app/environments/pillow_fort_1993.env.json` (Television). A child's bedroom on a rainy night: a pillow fort of
+cushions and a bedsheet on broom handles round three floor cushions, fairy lights along its front, rain on the
+window, and the telly filling the fort's opening, showing the film as a tube shows a tape watched a few times.
+
+- **Systems:** `light`; `domestic` (`bedroom_1993`, `opening_screen` on: a 1.33 x 1.0 m picture just beyond the
+  opening); `seats` (`cushion` in the fort's three slots); `weather` (the pane on the window, facing in; 300 drops
+  outside it; the Rain setting on `mode`); `presentation` (`nightowl_1993`: a tape, a CRT with an aperture grille;
+  the speaker by the setting).
+- **Settings:** `rain`, "Rain on the window" (rain, drizzle, coming and going, none; rain): `weather.mode` by `map`;
+  `telly_sound`, "The telly's own speaker" (off): `presentation.speaker` `telly` or `none`, so the film keeps its
+  own sound unless asked.
+- **Flicker:** the fairy lights waver slowly (the builder's `flicker`); Flickering lights holds them.
+- **Default seat:** the middle cushion (the origin), 1.25 m from the picture.
+- **Measured:** 20 draws, 5 290 triangles, 0 lights, 300 particles, 6.0 MB.
+- **Not as the table:** `telly_fills` is not a setting. The app's screen comes from the document once
+  (`env_room.gd` `_apply_room()`); a setting on `domestic.opening_screen` rebuilds the telly in its other place but
+  leaves the film where it was, so the room keeps the telly in the opening. No VCR flashing 12:00 (no object widget
+  for it, and a document room places no objects); no tree or tin of sweets.
+- **Sound wanted:** a ticking radiator, rain on the glass following `weather.rain`; a small, soft room (rt60 0.3).
+
 ## Files
 
 | File | What |

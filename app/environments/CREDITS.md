@@ -46,3 +46,20 @@ presentation system's shader.
 No bundled asset. The lot, the car, the screen tower, the snack bar and its neon letters are the systems' own shapes
 on library materials (`smooth_concrete` and the builders' defaults); the sky's stars are the sky system's catalogue
 (above), the mesas and the moths are made in code.
+
+## Screening room 1962 (`screening_room_1962`)
+
+No bundled assets. The walnut room, its painting, the club chairs, the pool and the night sky are made in code by the
+systems (`domestic`, `seats`, `sky`, `vista`) on library materials; the painting's abstract picture is generated
+(`procedural.gd`).
+
+## Athens rooftop summer cinema (`rooftop_athens`)
+
+No bundled assets. The terrace, the director's chairs, the bougainvillea, the acropolis on its hill, the sky, the
+planes' lights and the cat are made in code by the systems (`terrace`, `seats`, `kit`, `vista`, `sky`, `life`) on
+library materials.
+
+## Pillow Fort 1993 (`pillow_fort_1993`)
+
+No bundled assets. The bedroom, the fort, the fairy lights, the telly, the cushions and the rain are made in code by
+the systems (`domestic`, `seats`, `weather`, `presentation`) on library materials.
