@@ -18,14 +18,15 @@ const REFERENCE_DB := -20.0
 const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale", "creak",
 		"projector", "wall_rumble", "cicadas", "moped", "train", "huskies", "hull_creak", "radiator", "rain_glass",
 		"rain_leaves", "gas_hiss", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain",
-		"clock", "tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load"]
+		"clock", "tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load", "switch_clunk", "valve_hum",
+		"crt_off", "channel_clunk"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
 		"hull_creak": 3.5, "radiator": 16.0, "rain_glass": 6.0, "rain_leaves": 6.0, "gas_hiss": 4.0, "bird": 1.2,
 		"purr": 4.0, "crickets": 6.0, "fire": 8.0, "drips": 8.0, "wind": 12.0, "hum": 4.0, "deep_hum": 8.0,
 		"fountain": 6.0, "clock": 4.0, "tube_whine": 2.0, "three_bells": 3.2, "candle": 0.9, "ice_creak": 2.6,
-		"vcr": 4.5, "tape_load": 8.0}
+		"vcr": 4.5, "tape_load": 8.0, "switch_clunk": 0.6, "valve_hum": 8.0, "crt_off": 1.4, "channel_clunk": 0.45}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
 		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine"]
@@ -33,7 +34,7 @@ const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "r
 const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiator": 22050, "moped": 32000,
 		"hull_creak": 32000, "purr": 22050, "crickets": 32000, "fire": 32000, "drips": 32000, "wind": 22050,
 		"hum": 22050, "deep_hum": 22050, "fountain": 32000, "candle": 32000, "ice_creak": 32000, "vcr": 32000,
-		"tape_load": 32000}
+		"tape_load": 32000, "switch_clunk": 32000, "valve_hum": 22050, "crt_off": 32000, "channel_clunk": 32000}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -857,6 +858,99 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 				var hiss := (x - _lp(st, 1, x, a_hiss)) * 0.06 * smoothstep(0.0, 0.05, t) \
 						* (1.0 - smoothstep(7.85, 8.0, t))
 				s[i] = _lp(st, 2, _lp(st, 0, sq, a_tape), a_tape) + hiss
+		"switch_clunk":
+			# A telly's mechanical power switch: the toggle's snap (a sharp click through two small resonances), the
+			# contacts' bounce a few milliseconds after, the cabinet's wooden knock, and the speaker's soft thump as the
+			# amplifier wakes.
+			var snap := _res_c(2800.0, 0.95, r)
+			var body := _res_c(1150.0, 0.93, r)
+			var wood := _res_c(220.0, 0.985, r)
+			var a_knock := _a(600.0, r)
+			var hits := [[0.02, 1.0], [0.026, 0.45], [0.034, 0.25]]
+			for i in total:
+				var t := float(i) / r
+				var x := rng.randf_range(-1.0, 1.0)
+				var ex := 0.0
+				for h: Array in hits:
+					var d := t - float(h[0])
+					if d >= 0.0 and d < 0.002:
+						ex += x * float(h[1])
+				var v := _res(st, 0, ex, snap) * 5.0 + _res(st, 2, ex, body) * 3.0 + _res(st, 4, ex, wood) * 6.0
+				var d0 := t - 0.02
+				if d0 >= 0.0:
+					v += _lp(st, 6, x, a_knock) * 2.0 * exp(-d0 * 90.0)
+				var dp := t - 0.11
+				if dp >= 0.0:
+					v += sin(TAU * 55.0 * dp) * exp(-dp * 22.0) * 0.35 * minf(dp / 0.01, 1.0)
+				s[i] = v
+		"valve_hum":
+			# A valve set warming up: the mains transformer's hum (100 Hz and its harmonics, a faint 50 Hz) and a little
+			# buzz, the speaker's soft rush coming up as the valves warm over five seconds, then settling to a murmur and
+			# fading (a tube_whine bed can take over).
+			var a_rush := _a(2500.0, r)
+			var a_rush_lo := _a(300.0, r)
+			for i in total:
+				var t := float(i) / r
+				var rise := smoothstep(0.3, 5.5, t)
+				var settle := (1.0 - 0.6 * smoothstep(5.5, 7.0, t)) * (1.0 - smoothstep(7.2, 8.0, t)) \
+						* smoothstep(0.0, 0.3, t)
+				var hum := sin(TAU * 50.0 * t) * 0.25 + sin(TAU * 100.0 * t) + sin(TAU * 150.0 * t) * 0.35 \
+						+ sin(TAU * 200.0 * t) * 0.3 + sin(TAU * 300.0 * t) * 0.12
+				var buzz := (sin(TAU * 400.0 * t) * 0.5 + sin(TAU * 500.0 * t) * 0.35 + sin(TAU * 700.0 * t) * 0.2) * 0.1
+				var x := rng.randf_range(-1.0, 1.0)
+				var rush := (_lp(st, 0, x, a_rush) - _lp(st, 1, x, a_rush_lo)) * 0.8 * smoothstep(1.5, 6.0, t)
+				s[i] = (hum * (0.15 + 0.85 * rise) + buzz * rise + rush) * settle
+		"crt_off":
+			# A picture tube switched off: a soft thunk as the high voltage lets go, a tiny tick, then the glass's static
+			# crackling faintly now and then as it discharges.
+			var a_thunk := _a(400.0, r)
+			var tick := _res_c(4200.0, 0.9, r)
+			var cracks: Array = []
+			var at := 0.25
+			while at < 1.2:
+				cracks.append([at, rng.randf_range(0.2, 0.7)])
+				at += rng.randf_range(0.06, 0.25)
+			for i in total:
+				var t := float(i) / r
+				var x := rng.randf_range(-1.0, 1.0)
+				var v := 0.0
+				var d := t - 0.03
+				if d >= 0.0:
+					v += sin(TAU * 70.0 * d) * exp(-d * 28.0) * 0.6 + _lp(st, 0, x, a_thunk) * 1.5 * exp(-d * 60.0)
+				var ex := 0.0
+				if t >= 0.05 and t < 0.052:
+					ex += x
+				for c: Array in cracks:
+					var dc := t - float(c[0])
+					if dc >= 0.0 and dc < 0.0015:
+						ex += x * float(c[1]) * 0.5
+				s[i] = v + _res(st, 1, ex, tick) * 4.0
+		"channel_clunk":
+			# A rotary channel knob turned one step: the detent's ratchet as it climbs, the spring's snap into the next
+			# notch and a softer second snap, the knock through the wooden cabinet.
+			var snap := _res_c(2300.0, 0.95, r)
+			var tick := _res_c(3800.0, 0.9, r)
+			var wood := _res_c(180.0, 0.985, r)
+			var a_knock := _a(700.0, r)
+			var hits := [[0.012, 0.25, 0], [0.028, 0.3, 0], [0.044, 0.35, 0], [0.09, 1.0, 1], [0.118, 0.5, 1]]
+			for i in total:
+				var t := float(i) / r
+				var x := rng.randf_range(-1.0, 1.0)
+				var ex_tick := 0.0
+				var ex_snap := 0.0
+				for h: Array in hits:
+					var dh := t - float(h[0])
+					if dh >= 0.0 and dh < 0.0015:
+						if int(h[2]) == 0:
+							ex_tick += x * float(h[1])
+						else:
+							ex_snap += x * float(h[1])
+				var v := _res(st, 0, ex_snap, snap) * 5.0 + _res(st, 2, ex_tick, tick) * 3.0 \
+						+ _res(st, 4, ex_snap, wood) * 7.0
+				var d := t - 0.09
+				if d >= 0.0:
+					v += _lp(st, 6, x, a_knock) * 1.5 * exp(-d * 100.0)
+				s[i] = v
 	return s
 
 
