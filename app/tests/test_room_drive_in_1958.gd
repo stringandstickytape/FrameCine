@@ -7,9 +7,11 @@ extends "res://tests/env_builder_harness.gd"
 ## tower and a neon snack bar behind, the car, dusk falling to a starry night over the film's first minutes and the
 ## stars turning through it, mesas round the horizon, moths in the projector's beam, a plane's lights now and then,
 ## the Window speaker setting (off by default: the film's own sound; on: the window speaker), and the car's lamps:
-## off for the film, the dials dimmed, the headlamps on again after the end.
+## off for the film, the dials dimmed, the headlamps on again after the end. Its sound: crickets round the car, a far
+## freight train now and then, the open air's acoustics, the level measured (with the train passing).
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_drive_in_1958.gd
 
+const RoomSound := preload("res://tests/room_sound_checks.gd")
 const PATH := "res://environments/drive_in_1958.env.json"
 
 
@@ -101,4 +103,37 @@ func run_tests() -> void:
 		h.step(0.05)
 	check("after the end: the headlamps on, time to go (%.2f)" % float(car.params["headlamps"]),
 			float(car.params["headlamps"]) > 1.0)
+
+	# The sound: crickets round the car, a far freight train now and then (its horn in it), the open air.
+	var bus := RoomSound.on_room_bus(room, ["crickets", "train"])
+	check("the crickets and the train on the room's bus, under Environment (the slider, the duck, Ambience) %s"
+			% [bus], bus.is_empty())
+	var ac := RoomSound.acoustics(room, "outdoors", 0.2)
+	check("the open air's acoustics (rt60 0.2) %s" % [ac], ac.is_empty())
+	var crickets: Node = h.system("crickets")
+	var round_ok: bool = crickets.players().size() == 4
+	for q: Node3D in crickets.players():
+		round_ok = round_ok and absf(Vector2(q.position.x, q.position.z).length() - 8.0) < 0.01
+	check("crickets round the car: four voices 8 m out", crickets.is_loop() and crickets.playing() and round_ok)
+	var train: Node = h.system("train")
+	check("the train every 15 minutes or so, a one-shot of its own bed (no cue sound)", not train.is_loop()
+			and is_equal_approx(float(train.params["every"]), 900.0) and float(train.params["reach"]) >= 300.0
+			and (doc["cues"] as Array).all(func(c: Dictionary) -> bool: return (c["steps"] as Array).all(
+				func(s: Dictionary) -> bool: return not s.has("sound"))))
+	check("the train waits for its time", train.players().is_empty())
+	h.snapshot_override = {"open": true, "playing": true, "position": 600.0, "duration": 6000.0}
+	for i in 80:
+		h.step(0.05)
+	h.do_action("train.play", {})
+	h.step(0.05)
+	var engine: Array = train.players()
+	check("it comes by far off (%s)" % [engine.map(func(p: Node) -> float: return (p as Node3D).position.length())],
+			train.playing() and train.plays == 1 and engine.size() == 1
+			and (engine[0] as Node3D).position.length() > 300.0)
+	check("in the film the train sits 8 dB under its level (%.1f dB)" % train.designed_db(),
+			absf(train.designed_db() - (-60.0)) < 0.2)
+	check("the window speaker still off by default", str(pres.value("speaker")) == "none")
+	var lv: Dictionary = await RoomSound.levels(self, room, "Drive-in")
+	for v: Array in RoomSound.verdicts("Drive-in", lv):
+		check(v[0], v[1])
 	await done(room)

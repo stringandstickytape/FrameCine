@@ -6,9 +6,11 @@ extends "res://tests/env_builder_harness.gd"
 ## the hall's plasterboard partition with the screen on it, the swirling carpet, multiplex seats with one broken in
 ## the row in front, the water stain on the new wall, smoke in the beam, the worn print (its Weave and tilt setting
 ## moves the weave and the tilt, the Motion setting scales them), the exit sign that flickers now and then (held by
-## Flickering lights off), and the house lamps that go down for the film and come back up at the end.
+## Flickering lights off), and the house lamps that go down for the film and come back up at the end. Its sound: the
+## next screen's film rumbling through the wall with the film's bass, a small hall's acoustics, the level measured.
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_screen_3_1983.gd
 
+const RoomSound := preload("res://tests/room_sound_checks.gd")
 const Procedural := preload("res://scripts/env/systems/kit/procedural.gd")
 const PATH := "res://environments/screen_3_1983.env.json"
 const BROKEN := 69
@@ -117,4 +119,29 @@ func run_tests() -> void:
 		low = minf(low, float(h.param("light.signs")))
 	check("the exit sign dips (to %.2f) and comes back (%.2f)" % [low, float(h.param("light.signs"))], low < 0.5
 			and float(h.param("light.signs")) > 0.95)
+
+	# The sound: the next screen's film rumbling through the left wall, following the film's bass; a small hall.
+	var bus := RoomSound.on_room_bus(room, ["next_screen"])
+	check("the rumble on the room's bus, under Environment (the slider, the duck, Ambience) %s" % [bus], bus.is_empty())
+	var ac := RoomSound.acoustics(room, "small_room", 0.6)
+	check("a small hall's acoustics (rt60 0.6) %s" % [ac], ac.is_empty())
+	var wall: Node = h.system("next_screen")
+	check("the wall's rumble keeps its level in the film (film_db 0)", str(wall.params["sound"]) == "wall_rumble"
+			and is_zero_approx(float(wall.params["film_db"])))
+	h.snapshot_override = {"open": true, "playing": true, "position": 600.0, "duration": 6000.0}
+	h.signals.fake("film.bass", 0.0)
+	for i in 40:
+		h.step(0.05)
+	check("no bass in the film: the wall is quiet (%.3f)" % float(wall.params["level"]), not wall.playing())
+	h.signals.fake("film.bass", 0.8)
+	for i in 40:
+		h.step(0.05)
+	var through: Array = wall.players()
+	check("the film's bass: the wall rumbles (%.2f), from the left wall" % float(wall.params["level"]),
+			wall.playing() and absf(float(wall.params["level"]) - 0.8) < 0.05 and through.size() == 1
+			and (through[0] as Node3D).position.x < -5.0)
+	h.signals.clear_fakes()
+	var lv: Dictionary = await RoomSound.levels(self, room, "Screen 3", {"film.bass": 0.8})
+	for v: Array in RoomSound.verdicts("Screen 3", lv):
+		check(v[0], v[1])
 	await done(room)

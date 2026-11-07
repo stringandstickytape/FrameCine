@@ -4,9 +4,14 @@ extends SceneTree
 ## Palace"), each its document alone: built headless as the app builds it (env_room.gd) and checked for what makes it
 ## that room. Every room: the checks (schema, comfort, licences, names, no people), the headset's budget with room to
 ## spare, a clear sight line from every seat, the viewer's own seat at the origin among the room's seats, its systems,
-## its settings, and its ritual run through the timeline (lamps down, curtains or festoon, the organ console).
+## its settings, and its ritual run through the timeline (lamps down, curtains or festoon, the organ console). And its
+## sound (docs/environments.md, "Sound and music"): the beds and instruments on the room's bus, its acoustics, the
+## projector behind and the player piano that starts with the film and follows its jumps (Shopfront), the organ that
+## plays as the console rises and closes as it sinks (Streamline), the house bells in the ritual (Pink Palace), and the
+## level under the film, measured.
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_picture_houses.gd
 
+const RoomSound := preload("res://tests/room_sound_checks.gd")
 const EnvChecks := preload("res://scripts/env/env_checks.gd")
 const EnvDoc := preload("res://scripts/env/env_doc.gd")
 const EnvRoom := preload("res://scripts/env/env_room.gd")
@@ -92,6 +97,22 @@ func _done(room: Node3D) -> void:
 	await process_frame
 
 
+## The room's sound systems on the room's bus, its acoustics.
+func _sound_systems(label: String, room: Node3D, ids: Array, preset: String, rt60: float) -> void:
+	var bus := RoomSound.on_room_bus(room, ids)
+	_check("%s: %s on the room's bus, under Environment (the slider, the duck, Ambience) %s" % [label, ids, bus],
+			bus.is_empty())
+	var ac := RoomSound.acoustics(room, preset, rt60)
+	_check("%s: the acoustics %s (rt60 %.2f) %s" % [label, preset, rt60, ac], ac.is_empty())
+
+
+## The level check, in real time.
+func _sound_levels(label: String, room: Node3D) -> void:
+	var r: Dictionary = await RoomSound.levels(self, room, label)
+	for v: Array in RoomSound.verdicts(label, r):
+		_check(v[0], v[1])
+
+
 # --- Shopfront 1906 ----------------------------------------------------------------------------------------------------
 
 func _shopfront() -> void:
@@ -114,10 +135,21 @@ func _shopfront() -> void:
 			window.distance_to(Vector3(lens[0], lens[1], lens[2])) < 0.05)
 	var air: Node = room.host.system("atmosphere")
 	_check("shopfront: a dusty beam", float(air.params["beam_dust"]) >= 0.5 and float(air.params["beam_haze"]) > 0.0)
-	# The piano setting is declared (it binds to the music system once sound lands).
+	# The piano setting: the music system's player piano on or off.
 	var decl: Array = room.declared_settings()
 	_check("shopfront: its setting, the player piano (on)", decl.size() == 1 and decl[0]["name"] == "piano"
 			and decl[0]["type"] == "bool" and room.host.setting("piano") == true)
+	# The sound: the projector's clatter from the booth behind, the gas's hiss, the player piano by the screen.
+	_sound_systems("shopfront", room, ["projector", "gas", "piano"], "shopfront", 0.9)
+	var projector: Node = room.host.system("projector")
+	var clatter: Array = projector.players()
+	_check("shopfront: the projector clatters from the booth behind (%s)" % [clatter.map(func(p: Node) -> Variant:
+			return (p as Node3D).position)], projector.is_loop() and clatter.size() == 1
+			and (clatter[0] as Node3D).position.distance_to(Vector3(lens[0], lens[1], lens[2])) < 0.6)
+	_check("shopfront: the gas lamps' hiss", room.host.system("gas").is_loop() and room.host.system("gas").playing())
+	var piano: Node = room.host.system("piano")
+	_check("shopfront: a player piano by the screen", str(piano.params["instrument"]) == "piano" and piano.is_ready()
+			and (piano.owned()[0] as Node3D).position.z < -6.0)
 	_check("shopfront: the common settings that apply: ritual and flickering lights",
 			room.common_applies("ritual") and room.common_applies("flicker"))
 	# The gas lamps flicker, and hold steady with Flickering lights off.
@@ -135,12 +167,36 @@ func _shopfront() -> void:
 	# The ritual: the gas turned down, the street's glow dimmed; lights up at the end.
 	var pos := _play(room, 2.0, false, false, 0.0)
 	_check("shopfront: lamps up in the pre-show", _lamps(room) > 0.95)
-	pos = _play(room, 12.0, true, true, 0.0)
+	_check("shopfront: the piano silent in the pre-show (%d notes)" % piano.notes_played, piano.notes_played == 0
+			and not piano.sounding())
+	pos = _play(room, 3.0, true, true, 0.0)
+	_check("shopfront: the film starts (%s): the piano plays (%d notes)" % [room.host.timeline.state,
+			piano.notes_played], room.host.timeline.state == "starting" and piano.notes_played > 4 and piano.sounding())
+	pos = _play(room, 9.0, true, true, pos)
 	_check("shopfront: the ritual fired", room.host.timeline.fired.any(func(f: Array) -> bool: return f[0] == "ritual"))
 	_check("shopfront: the gas down in the film (%.2f)" % _lamps(room), _lamps(room) < 0.25)
 	_check("shopfront: the street dimmed", float(room.host.param("hall.street_glow")) < 0.3)
+	# The piano follows the film's jumps: a sudden loud moment, an agitato; calm again, its oom-pah.
+	_check("shopfront: in the film it plays on, an oom-pah (%s, drive %.2f)" % [piano.bar_kind, piano.params["drive"]],
+			piano.sounding() and piano.bar_kind == "oompah")
+	room.host.signals.fake("film.transient", 1.0)
+	pos = _play(room, 4.0, true, true, pos)
+	_check("shopfront: a jump in the film: the piano's agitato (%s, drive %.2f)" % [piano.bar_kind,
+			piano.params["drive"]], piano.bar_kind == "agitato" and float(piano.params["drive"]) > 0.65)
+	room.host.signals.fake("film.transient", 0.0)
+	pos = _play(room, 8.0, true, true, pos)
+	_check("shopfront: calm again (%s, drive %.2f)" % [piano.bar_kind, piano.params["drive"]],
+			piano.bar_kind == "oompah" and float(piano.params["drive"]) < 0.4)
+	room.host.set_setting("piano", false)
+	pos = _play(room, 3.0, true, true, pos)
+	_check("shopfront: Player piano off: silent (%d voices)" % piano.voices_sounding(), not piano.sounding())
+	room.host.set_setting("piano", true)
+	pos = _play(room, 2.0, true, true, pos)
+	_check("shopfront: and on again", piano.sounding())
 	_play(room, 6.0, true, false, 6000.0)
 	_check("shopfront: lamps up after the end (%.2f)" % _lamps(room), _lamps(room) > 0.95)
+	_check("shopfront: the piano rests after the end", not piano.sounding())
+	await _sound_levels("shopfront", room)
 	await _done(room)
 
 
@@ -194,8 +250,18 @@ func _streamline() -> void:
 	_check("streamline: and the lamps' glow with it (%d colours seen)" % lamp_seen.size(), lamp_seen.size() >= 4)
 	_check("streamline: the cove glows before the film", float(room.host.param("cove.fog")) > 0.5
 			and float(room.host.param("cove_film.fog")) < 0.05)
-	# The ritual: the console rises from the pit, the festoon rises, the lamps go down.
+	# The organ: silent in the pre-show, the console down.
+	_sound_systems("streamline", room, ["pipes"], "cinema", 0.7)
+	var pipes: Node = room.host.system("pipes")
+	_check("streamline: the organ at the console, a theatre organ", str(pipes.params["instrument"]) == "organ"
+			and str(pipes.params["stop"]) == "theatre" and (pipes.owned()[0] as Node3D).position.z < -11.0)
+	_play(room, 3.0, false, false, 0.0)
+	_check("streamline: the organ silent in the pre-show (%d notes)" % pipes.notes_played, pipes.notes_played == 0
+			and not pipes.sounding())
+	# The ritual: the console rises from the pit, the festoon rises, the lamps go down; the organ plays.
 	var pos := _play(room, 9.0, true, true, 0.0)
+	_check("streamline: the organ plays as the console rises (%d notes)" % pipes.notes_played,
+			pipes.sounding() and pipes.notes_played > 4)
 	_check("streamline: the ritual fired", room.host.timeline.fired.any(func(f: Array) -> bool: return f[0] == "ritual"))
 	_check("streamline: the film starts: the cycle stops and the lamps go back to gold (%s)"
 			% light.call("group_colour", "house"), not ("cove_cycle" in room.host.timeline.running())
@@ -213,9 +279,17 @@ func _streamline() -> void:
 	_check("streamline: in the film the cove follows the film's colour (%s)" % fc, fc.b > fc.r and fc.b > 0.6)
 	_check("streamline: the film's cove shows in the film, the pre-show's goes", float(room.host.param("cove_film.fog")) > 0.4
 			and float(room.host.param("cove.fog")) < 0.2)
-	# The console goes down again 30 s into the film.
-	pos = _play(room, 30.0, true, true, pos)
+	_check("streamline: the organ plays on under the film while the console is up (%s, %.1f dB)" % [
+			room.host.timeline.state, pipes.designed_db()], room.host.timeline.state == "playing" and pipes.sounding()
+			and pipes.designed_db() < -57.0)
+	# The console goes down again 30 s into the film; the organ closes with a cadence as it sinks, and rests.
+	pos = _play(room, 8.0, true, true, pos)
+	_check("streamline: as the console sinks, the organ's closing cadence (%s)" % pipes.bar_kind,
+			pipes.bar_kind == "flourish" and pipes.sounding())
+	pos = _play(room, 22.0, true, true, pos)
 	_check("streamline: the console back in the pit (%.2f)" % organ.call("progress"), float(organ.call("progress")) < 0.01)
+	_check("streamline: the organ gone with it, for the rest of the film", pipes.resting() and not pipes.sounding())
+	await _sound_levels("streamline", room)
 	# With Motion low the console and festoon do not travel: they are where they go at once.
 	await _done(room)
 	room = await _room("streamline_1937")
@@ -225,6 +299,21 @@ func _streamline() -> void:
 	_play(room, 0.5, true, true, 0.0)
 	_check("streamline: reduced Motion: the console snaps up (%.2f)" % organ.call("progress"),
 			float(organ.call("progress")) > 0.99)
+	# Back to the pre-show while the organ plays: it stops as the console goes down.
+	pipes = room.host.system("pipes")
+	pipes.finish_loading()
+	_play(room, 4.0, true, true, 0.5)
+	_check("streamline: the organ plays (%d notes)" % pipes.notes_played, pipes.sounding())
+	_play(room, 5.0, false, false, 0.0)
+	_check("streamline: back to the pre-show: the organ stops with the console down (%.2f)" % organ.call("progress"),
+			not pipes.sounding() and float(organ.call("progress")) < 0.01)
+	# Pre-show off: no ritual, no console, no organ.
+	room.host.set_setting("ritual", false)
+	var notes: int = pipes.notes_played
+	_play(room, 12.0, true, true, 0.0)
+	_check("streamline: Pre-show off: the organ stays silent (%d notes)" % (pipes.notes_played - notes),
+			pipes.notes_played == notes and not pipes.sounding() and float(organ.call("progress")) < 0.01)
+	room.host.set_setting("ritual", true)
 	await _done(room)
 
 
@@ -247,6 +336,10 @@ func _pink_palace() -> void:
 	_check("pink palace: seats in the balcony (%d)" % balcony.size(), balcony.size() >= 30)
 	_check("pink palace: no settings of its own; the pre-show applies", room.declared_settings().is_empty()
 			and room.common_applies("ritual") and room.has_curtains)
+	_sound_systems("pink palace", room, ["bells"], "cinema", 0.7)
+	var bells: Node = room.host.system("bells")
+	_check("pink palace: the house bells by the stage, a one-shot", str(bells.params["sound"]) == "three_bells"
+			and not bells.is_loop() and float(bells.params["every"]) == 0.0)
 	# The sunburst's lamps swell and fall slowly in the pre-show.
 	var lo := 1.0
 	var t := 0.0
@@ -255,14 +348,19 @@ func _pink_palace() -> void:
 		lo = minf(lo, _lamps(room))
 		t += DT
 	_check("pink palace: the ceiling's lamps cycle in the pre-show (down to %.2f)" % lo, lo < 0.75 and lo > 0.4)
+	_check("pink palace: no bells in the pre-show", bells.plays == 0)
 	# The ceremonial curtain parts, and the lamps stay down whatever the cycle was doing.
 	var pos := _play(room, 15.0, true, true, 0.0)
+	_check("pink palace: the ritual rings the house bells once, through their bed (%d; cue sounds %s)" % [bells.plays,
+			room.host.sounds], bells.plays == 1 and room.host.sounds.is_empty())
 	var log: Array = room.host.system("showing").log
 	_check("pink palace: the curtains part in the ritual %s" % [log],
 			log.any(func(a: Array) -> bool: return a[0] == "open_curtains"))
 	_check("pink palace: lamps down in the film (%.2f)" % _lamps(room), _lamps(room) < 0.2)
 	pos = _play(room, 20.0, true, true, pos)
 	_check("pink palace: and they stay down (%.2f)" % _lamps(room), _lamps(room) < 0.2)
+	_check("pink palace: the bells once only", bells.plays == 1)
+	await _sound_levels("pink palace", room)
 	await _done(room)
 
 

@@ -1444,7 +1444,9 @@ A document gives the screen (`screen`: centre, size, curve). Two things follow f
 (`tests/test_env_cinema_render.gd`, lavapipe) draws the old cinema (`tests/fixtures/cinema_v3.gd`, the room as code
 before the conversion) and the new from the seat and from the aisle and compares them pixel by pixel. The bake hooks
 (`static_meshes`, `bake_lights`, `set_baking`, `set_baked`) come from the light system, so the headset's bake path is
-as before. Settings: the pre-show ritual (common), the house lights in the film.
+as before. Settings: the pre-show ritual (common), the house lights in the film. Sound: the ritual's chime as it was
+(a cue's `sound` step at -6 dB, -46.2 dBFS RMS at the slider's default), and the hall's `acoustics` (`cinema`, rt60
+0.7) on the room's bus; the film keeps its own mix.
 
 ## The Void
 
@@ -1573,8 +1575,12 @@ castle gate round the screen, cypresses over the walls.
 - **Cues:** `ritual` (starting, Pre-show on): the house lamps to half over 1.5 s, the curtains part over 4 s, the
   dusk deepens from 0.4 to 0.8 over 10 s, then the lamps to 12 % and the steps to half over 5 s. `dim` (Pre-show
   off): the same without the curtains. `lights_up` (pre-show, ended): the lamps, the steps and the twilight back.
+- **Sound:** `acoustics` `cinema` (rt60 0.7); a `sound_bed` `fountain` in the urn niche on the left wall behind the
+  viewer (`at` [-9.3, 1.5, 3.5], `reach` 8, `gain_db` -4: about 10 m from the default seat, so `reach` 3 left it
+  60 dB under the film's reference).
 - **Default seat:** the middle of row 0 (7 rows in front, 3 behind).
-- **Measured** (`test_room_set2.gd`): 26 draws, 199 724 triangles, no live light, no particles, 9.4 MB.
+- **Measured** (`test_room_set2.gd`): 26 draws, 199 724 triangles, no live light, no particles, 9.4 MB. Sound at the
+  slider's default (dBFS RMS): -64.5 in the pre-show, -72.4 in the film, -79.8 under a film at the reference level.
 
 ### Room: Palace of Culture 1974
 
@@ -1634,14 +1640,18 @@ lamps, the film on a framed sheet. Its test: `tests/test_room_picture_houses.gd`
   front of the viewer's and 3 behind, the tin an aged cream, gas lamps with `flicker` 0.6; `seats` (folding chairs
   in the builder's slots); `kit` (a tin booth in the back corner's `booth` slot); `screen_frame` (no black masking:
   the sheet's frame; the beam from the booth's window); `atmosphere` (`beam_haze` 0.4, `beam_dust` 0.7).
-- **Setting:** `piano` (Player piano, on). Declared now; it binds to the `music` system's player piano when sound is
-  merged.
+- **Sound:** `acoustics` `shopfront` (pressed tin, rt60 0.9); `sound_bed` `projector` at the booth's window behind
+  (`reach` 5); `sound_bed` `gas` (`gas_hiss`, everywhere); `music` `piano` (a player piano by the screen's left,
+  `at` [-2.4, 0.8, -6.6], `reach` 7): it starts its piece in `starting` and plays on through the film, `drive` on
+  `film.transient` (`range` [0.3, 1], smooth 0.5 s: an agitato after a jump, its oom-pah again when the film calms),
+  `on` on the setting. All at their designed levels. No piano is drawn (the kit has none).
+- **Setting:** `piano` (Player piano, on): `piano.on`.
 - **Cues:** `ritual` (starting, Pre-show on): the gas down to half over 2 s, then to 18 % over 5 s, the street's glow
   through the shop window down with it. `dim` (Pre-show off): the gas to 18 % over 3 s. `lights_up` (pre-show, end):
   the gas up over 4 s, the street's glow back.
-- **Measured** (headless): 17 draws, 10 168 triangles, no lights, no particles, 8.4 MB; 63 seats.
-- **Sound to come:** the projector's clatter from the booth behind (a bed, low); a player piano by the screen that
-  starts in `starting` and plays along, answering `film.transient`, under the film.
+- **Measured** (headless): 17 draws, 10 168 triangles, no lights, no particles, 8.4 MB; 63 seats. Sound at the
+  slider's default (dBFS RMS): -52.3 in the pre-show, -54.7 as the film starts, -57.1 in the film, -64.1 under a film
+  at the reference level.
 
 ### Room: Streamline 1937
 
@@ -1664,12 +1674,20 @@ a gold festoon curtain, an organ console that rises from the pit, and cove light
 - **Setting:** `cove` (Cove colours: Changing, Gold, Rose, Jade, Blue). It sets the house lamps' and the step lights'
   colour (the room builds again) and the cove's glow. With Changing, the glow goes gold, rose, jade, blue in turn
   (`cove_cycle`, every 20 s in the pre-show, paused, at the end and in the intermission).
-- **Cues:** `ritual` (starting): the lamps to half, the console rises over 10 s, the festoon rises, the lamps to 15 %
-  over 5 s. `organ_down` (playing): 30 s on, the console goes back into the pit. `dim` (Pre-show off). `lights_up`
-  (pre-show, end): lamps up, the festoon and the console down. With Pre-show off the festoon rises by itself 4 s into
-  the film (the motion system's in-front rule).
-- **Measured** (headless): 27 draws, 182 676 triangles, no lights, no particles, 8.0 MB; 275 seats.
-- **Sound to come:** an organ (`music`) that plays as the console rises and stops as it sinks, under the film.
+- **Sound:** `acoustics` `cinema` (rt60 0.7); `music` (id `pipes`) `organ` with the `theatre` stop at the console
+  (`at` [0, -1.5, -11.7], `reach` 12), `plays_in` `starting` only, `on` on the common Pre-show setting: with the
+  Pre-show off the console stays down and the organ silent. It plays from the ritual (`pipes.play`, as the console
+  rises) through the film's first half-minute, 6 dB lower in the film and ducked under it, and closes with a cadence
+  (`pipes.flourish`, 38 s into the ritual) as the console sinks, then rests for the rest of the film. `lights_up`
+  stops it (`pipes.stop`, 3 s) if the film is closed before.
+- **Cues:** `ritual` (starting): the lamps to half, the console rises over 10 s and the organ plays, the festoon
+  rises, the lamps to 15 % over 5 s; 38 s in, the organ's closing cadence. `organ_down` (playing; stops in the
+  pre-show and at the end): 30 s on, the console goes back into the pit. `dim` (Pre-show off). `lights_up`
+  (pre-show, end): lamps up, the festoon and the console down, the organ stopped. With Pre-show off the festoon rises
+  by itself 4 s into the film (the motion system's in-front rule).
+- **Measured** (headless): 27 draws, 182 676 triangles, no lights, no particles, 8.0 MB; 275 seats. Sound at the
+  slider's default (dBFS RMS): silent in the pre-show, -57.3 as the console rises, -59.4 in the film, -68.5 under a
+  film at the reference level.
 
 ### Room: Pink Palace
 
@@ -1685,10 +1703,14 @@ ceiling, a plush balcony, lamps that swell and fall before the film, and a cerem
   then sees the bottom of the picture over the balcony's parapet. The `balcony_front` piece is 0.8 m high for the
   same reason.
 - **Cues:** `sunburst` (every 10 s in the pre-show): the ceiling's lamps fall to 55 % over 4 s and rise again over 4 s.
-  `ritual` (starting): the chime, the lamps to half, the curtains part over 5 s, then after 6.5 s (after any `sunburst`
-  still running) the lamps to 15 % over 5 s. `dim` (Pre-show off): the same wait, then 15 % over 3 s. `lights_up`.
+  `ritual` (starting): the house bells (`bells.play`), the lamps to half, the curtains part over 5 s, then after 6.5 s
+  (after any `sunburst` still running) the lamps to 15 % over 5 s. `dim` (Pre-show off): the same wait, then 15 %
+  over 3 s. `lights_up`.
+- **Sound:** `acoustics` `cinema` (rt60 0.7); `sound_bed` `bells` (`three_bells` by the stage, `at` [0, 3, -12],
+  `reach` 12, `film_db` -4), a one-shot the ritual plays in place of the cue's chime (it was a `sound` step at -6).
 - **Settings:** none of its own (the common ones).
-- **Measured** (headless): 22 draws, 234 504 triangles, no lights, no particles, 9.0 MB; 356 seats.
+- **Measured** (headless): 22 draws, 234 504 triangles, no lights, no particles, 9.0 MB; 356 seats. Sound at the
+  slider's default (dBFS RMS): -57.6 as the film starts (the bells), silent in the pre-show and the film.
 
 ### Room: Nave
 
@@ -1801,9 +1823,11 @@ worn print.
   `presentation.tilt` by range [0, 0.5] degrees. The common Motion setting scales both; Flickering lights holds the
   lamp's flicker and the exit sign steady.
 - **Measured** (`tests/test_room_screen_3_1983.gd`, headless): 25 draws, 79 946 triangles, no live light, no
-  particles, 10.4 MB of textures; a clear sight line from all 117 seats.
-- **Sound to come:** the next screen's film rumbling through the wall (a low bed following `film.bass`, well under
-  the film); a small hall's acoustics.
+  particles, 10.4 MB of textures; a clear sight line from all 117 seats. Sound at the slider's default (dBFS RMS,
+  `film.bass` held at 0.8): -57.9 in the pre-show, -56.7 in the film, -61.8 under a film at the reference level.
+- **Sound:** `acoustics` `small_room` (rt60 0.6); `sound_bed` `next_screen` (`wall_rumble` through the left wall,
+  `at` [-5.4, 1.5, -2], `reach` 5.5): `level` on `film.bass` (smooth 0.3 s), `film_db` 0, so it swells with the
+  film's low end and is silent when there is none; the duck keeps it under the film.
 
 ### Room: Drive-in - 1958
 
@@ -1826,9 +1850,11 @@ a convertible on a drive-in's lot in the desert, dusk falling to a starry night 
   is off by default: a whole film through a band-limited mono speaker is a big loss of the film's sound, which the
   room must never spoil; the viewer turns it on for the effect. No picture stage, so the film layer stays.
 - **Measured** (`tests/test_room_drive_in_1958.gd`, headless): 30 draws, 17 288 triangles, no live light, no
-  particles, 11.3 MB of textures; a clear sight line from all 6 places.
-- **Sound to come:** crickets (a soft bed), a far freight train now and then (a one-shot, its horn far off), the
-  open air's acoustics (little reverb).
+  particles, 11.3 MB of textures; a clear sight line from all 6 places. Sound at the slider's default (dBFS RMS,
+  with the train passing): -57.8 in the pre-show, -63.0 in the film, -69.7 under a film at the reference level.
+- **Sound:** `acoustics` `outdoors` (rt60 0.2); `sound_bed` `crickets` around the car (four voices, `radius` 8);
+  `sound_bed` `train` (a freight train about 380 m off, `at` [-260, 2, -280], `reach` 300, `every` 900: now and
+  then, its two-note horn early on). The window speaker stays the Window speaker setting (`presentation.speaker`).
 
 ### Room: Screening room 1962
 
@@ -1848,10 +1874,13 @@ as the film starts.
   painting stays up and `dim` takes the lamps down over 3 s.
 - **Settings:** `house_level`, "Wall lamps in the film" (0..1, 15 %).
 - **Default seat:** the middle of the front row (the origin), 5.1 m from a 2.6 m picture.
-- **Measured:** 18 draws, 9 600 triangles, 0 lights, 0 particles, 10.4 MB.
+- **Sound:** `acoustics` `small_room` (rt60 0.45); `sound_bed` `fire` at the hearth (`reach` 2.5); `sound_bed`
+  `pump` (`hum`: the pool's filter pump beyond the window, `at` [-3.6, 0.6, -2.2], `reach` 3); `sound_bed` `bells`
+  (`three_bells`, `film_db` -4), played first in the ritual (`bells.play`) before the painting rises.
+- **Measured:** 18 draws, 9 600 triangles, 0 lights, 0 particles, 10.4 MB. Sound at the slider's default (dBFS RMS):
+  -58.1 in the pre-show, -53.9 as the film starts (the bells), -65.2 in the film, -72.9 under a film at the reference
+  level.
 - **Not yet:** a bar cart (the object library has none, and a room that ships as a document places no objects).
-  Sound wanted: a crackle from the fire, a faint pool filter's hum through the glass, a soft chime before the
-  ritual; a small, dry room (rt60 0.45).
 
 ### Room: Athens rooftop
 
@@ -1869,9 +1898,12 @@ stars; planes cross now and then, and a cat walks along the wall top.
 - **Film-time track:** `sky.dusk` from 0.75 to full night over the first 20 minutes of the film.
 - **Settings:** `floodlights`, "Floodlights on the hill" (0..1, full): `vista.floodlight`.
 - **Default seat:** the middle of the third row from the back (the origin), 11.9 m from a 6.4 m picture.
-- **Measured:** 15 draws, 29 086 triangles, 0 lights, 0 particles, 9.3 MB.
-- **Sound wanted:** cicadas (a bed, fading as the film starts), mopeds far off now and then, the cat's purr when it
-  sits; open air (rt60 0.25, wet 0.15).
+- **Sound:** `acoustics` `outdoors` (rt60 0.25, wet 0.15); `sound_bed` `cicadas` around the roof (four voices,
+  `radius` 9, `reach` 9), `film_db` -14: they fade as the film starts; `sound_bed` `moped` passing in the street
+  12 m below (`at` [-45, -12, 12] `to` [45, -12, 12], `reach` 20, `every` 240, `jitter` 0.5); the cat's purr as it
+  sits, from `life` at `voice_db` -15.
+- **Measured:** 15 draws, 29 086 triangles, 0 lights, 0 particles, 9.3 MB. Sound at the slider's default (dBFS RMS):
+  -54.4 in the pre-show, -70.0 in the film, -77.4 under a film at the reference level.
 
 ### Room: Pillow Fort 1993
 
