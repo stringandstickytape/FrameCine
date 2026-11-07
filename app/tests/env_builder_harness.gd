@@ -159,6 +159,73 @@ func _builder(label: String, room: Node3D, builder_id: String, shapes_before: Ar
 				seats[b.hidden_seat()].origin.length() < 0.05 if b.hidden_seat() >= 0 else false)
 
 
+## The domestic telly round its picture (the builder's screen {center, size}): the set's front face is in the picture's
+## plane with the picture inside it, and its glass is just behind, the picture's own size. "" when it is so, else why
+## not. Reads the Telly mesh's flat faces facing the viewer.
+func telly_glass(room: Node3D, screen: Dictionary) -> String:
+	var telly := room.get_node_or_null("Telly") as MeshInstance3D
+	if telly == null:
+		return "no Telly"
+	var c := Vector3(float(screen["center"][0]), float(screen["center"][1]), float(screen["center"][2]))
+	var pic := Rect2(c.x - float(screen["size"][0]) * 0.5, c.y - float(screen["size"][1]) * 0.5,
+			float(screen["size"][0]), float(screen["size"][1]))
+	# Every triangle facing +z with its three corners at one depth, by that depth (mm).
+	var planes := {}
+	var faces := telly.mesh.get_faces()
+	for i in range(0, faces.size(), 3):
+		var a := telly.transform * faces[i]
+		var b := telly.transform * faces[i + 1]
+		var d := telly.transform * faces[i + 2]
+		if absf(a.z - b.z) > 0.0005 or absf(a.z - d.z) > 0.0005:
+			continue
+		var key := roundi(a.z * 1000.0)
+		var r := Rect2(Vector2(a.x, a.y), Vector2.ZERO).expand(Vector2(b.x, b.y)).expand(Vector2(d.x, d.y))
+		planes[key] = (planes[key] as Rect2).merge(r) if planes.has(key) else r
+	var front_key := roundi(c.z * 1000.0)
+	if not planes.has(front_key):
+		return "no front face in the picture's plane (z %.3f; planes %s)" % [c.z, planes.keys()]
+	var front: Rect2 = planes[front_key]
+	if not front.grow(0.001).encloses(pic):
+		return "the picture %s is not inside the set's front %s" % [pic, front]
+	for key: int in planes:
+		var z := key / 1000.0
+		var r: Rect2 = planes[key]
+		if z < c.z and z > c.z - 0.06 and absf(r.position.x - pic.position.x) < 0.005 \
+				and absf(r.position.y - pic.position.y) < 0.005 and absf(r.size.x - pic.size.x) < 0.005 \
+				and absf(r.size.y - pic.size.y) < 0.005:
+			return ""
+	return "no glass the picture's size just behind it (%s, planes %s)" % [pic, planes]
+
+
+## A kit's video recorder: its clock's digits glow (12:00 in seven segments: 21 of them) and flash once a second, each
+## change eased (never faster than the photosensitivity ceiling's fade); Flickering lights off holds it lit.
+func clock_flashes(label: String, room: Node3D) -> void:
+	var kit: Node = room.host.system_of_kind("kit")
+	var display := room.get_node_or_null("PieceDisplay") as MeshInstance3D
+	var tris := (display.mesh.get_faces().size() / 3) if display != null else 0
+	check("%s: the video recorder's clock, 12:00 in segments (%d triangles)" % [label, tris], tris == 42)
+	if kit == null:
+		return
+	room.host.auto = false
+	var values: Array[float] = []
+	for i in 90:
+		room.host.step(1.0 / 30.0)
+		values.append(kit.clock_level())
+	var rises := 0
+	var fastest := 0.0
+	for i in range(1, values.size()):
+		fastest = maxf(fastest, absf(values[i] - values[i - 1]) * 30.0)
+		if values[i - 1] < 0.5 and values[i] >= 0.5:
+			rises += 1
+	check("%s: the clock flashes 12:00 once a second (%.2f..%.2f, %d in 3 s), eased (%.1f a second)" % [label,
+			values.min(), values.max(), rises, fastest], float(values.min()) < 0.05 and float(values.max()) > 0.95
+			and rises >= 2 and rises <= 3 and fastest <= 1.0 / EnvChecks.MIN_FADE)
+	room.host.set_setting("flicker", false)
+	room.host.step(0.5)
+	check("%s: Flickering lights off: the clock held lit (%.2f)" % [label, kit.clock_level()], kit.clock_level() == 1.0)
+	room.host.set_setting("flicker", true)
+
+
 func done(room: Node3D) -> void:
 	room.queue_free()
 	await process_frame

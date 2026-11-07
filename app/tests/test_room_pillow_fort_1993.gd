@@ -5,7 +5,7 @@ extends "res://tests/room_doc_harness.gd"
 ## bedsheet round three floor cushions, fairy lights along the fort's hem that flicker slowly (steady with Flickering
 ## lights off), the telly filling the fort's opening, its picture a 1993 tube playing a tape (the presentation's
 ## Nightowl preset), the telly's speaker only when the setting asks; rain on the window pane (at the window, facing
-## in) and outside it, by the Rain setting. Rendered (with a renderer): user://room_render/pillow_fort_1993_*.png.
+## in) and outside it, by the Rain setting; the video recorder under the telly flashing 12:00. Rendered (with a renderer): user://room_render/pillow_fort_1993_*.png.
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_pillow_fort_1993.gd
 
 const PATH := "res://environments/pillow_fort_1993.env.json"
@@ -76,6 +76,22 @@ func run_tests() -> void:
 	host.step(0.5)
 	check("Flickering lights off: steady (%.3f)" % b.flicker_factor(), is_equal_approx(b.flicker_factor(), 1.0))
 	host.set_setting("flicker", true)
+	# The video recorder on the floor under the telly, its clock flashing 12:00.
+	var vcr: Dictionary = host.system("kit").params["pieces"][0]
+	var shelf: Transform3D = b.slots()["telly_shelf"][0]["transform"]
+	var t: Dictionary = Domestic._telly(Domestic.resolved(b.params))
+	check("the video recorder under the telly, in front of its chest (%s)" % shelf.origin, vcr["piece"] == "video_recorder"
+			and vcr["slot"] == "telly_shelf" and shelf.origin.y < float(t["foot"]) and shelf.origin.z
+			> float(sc["center"][2]) and shelf.origin.z < Domestic.FORT_FRONT + 0.1
+			and (host.system("kit").problems() as Array).is_empty())
+	await clock_flashes("pillow_fort_1993", room)
+	host.set_setting("telly_fills", false)
+	await process_frame
+	var across: Transform3D = host.system("room").slots()["telly_shelf"][0]["transform"]
+	check("the telly back across the room: its video recorder with it (%s)" % across.origin, across.origin.z < -2.5
+			and room.get_node_or_null("PieceDisplay") != null and (host.system("kit").problems() as Array).is_empty())
+	host.set_setting("telly_fills", true)
+	await process_frame
 	if rendering():
 		await _render(room)
 	await done(room)

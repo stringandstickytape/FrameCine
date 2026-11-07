@@ -80,16 +80,24 @@ const MODELS := {
 		"frame": {"library": "corduroy", "color": [0.2, 0.3, 0.45]}, "fold": false, "segment": false,
 		"width": 0.95, "forms": [],
 		"boxes": [[Vector3(0.0, 0.25, -0.05), Vector3(0.9, 0.5, 0.9), 0.0]]},
+	"settee": {"upholstery": {"library": "melange_fabric", "color": [0.45, 0.38, 0.3]},
+		"frame": {"library": "oak_veneer", "color": [0.28, 0.18, 0.1]}, "fold": false, "segment": true,
+		"width": 0.62, "forms": [],
+		"boxes": [[Vector3(0.0, 0.24, -0.03), Vector3(1.0, 0.48, 0.84), 0.0],
+				[Vector3(0.0, 0.68, 0.32), Vector3(1.0, 0.5, 0.2), 12.0]]},
 }
 const MODEL_NAMES: Array[String] = ["stadium", "folding_chair", "plush", "multiplex", "pew", "club_chair",
-		"director", "bench_seat", "cushion", "hide", "bean_bag"]
+		"director", "bench_seat", "cushion", "hide", "bean_bag", "settee"]
 ## The models a hall of rows takes (auditorium.gd seat_model): single seats, not segments.
 const SINGLE_MODELS: Array[String] = ["stadium", "folding_chair", "plush", "multiplex", "club_chair", "director",
 		"cushion", "bean_bag"]
 ## A builder's slot style -> the model drawn there when `model` is auto.
 const STYLE_MODELS := {"chair": "folding_chair", "pew": "pew", "bench": "bench_seat", "cushion": "cushion",
-		"club": "club_chair", "ring": "plush", "tier": "cushion", "hide": "hide", "director": "director"}
+		"club": "club_chair", "ring": "plush", "tier": "cushion", "hide": "hide", "director": "director",
+		"settee": "settee"}
 ## The tip-up seat tipped up (degrees) and the broken seat's back, slumped (degrees from upright).
+## A settee's arm, its width.
+const SETTEE_ARM := 0.17
 const TIP_UP_DEG := 78.0
 const BROKEN_BACK_DEG := 36.0
 
@@ -100,7 +108,8 @@ static func spec() -> Dictionary:
 		"description": "Seat models and the seats a room draws with them: in the builders' seat slots (by the slot's "
 				+ "style or one model), in rows or single places of its own, and broken seats over a builder's own. "
 				+ "Models: stadium, folding_chair (1906), plush (tip-up, palaces), multiplex (1980s, a broken one), "
-				+ "pew, club_chair, director, bench_seat, cushion, hide, bean_bag. Instanced, tinted seat by seat, "
+				+ "pew, club_chair, director, bench_seat, cushion, hide, bean_bag, settee (two or three places in a "
+				+ "row, its arms at the ends). Instanced, tinted seat by seat, "
 				+ "the viewer's own chair folded away, boxes for object physics.",
 		"params": PARAMS,
 		"actions": {},
@@ -112,7 +121,7 @@ static func spec() -> Dictionary:
 
 const PARAMS := {
 	"model": {"type": "enum", "values": ["auto", "stadium", "folding_chair", "plush", "multiplex", "pew",
-			"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag"], "default": "auto",
+			"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag", "settee"], "default": "auto",
 			"description": "the seat; auto: by each slot's style (its own rows: folding chairs)"},
 	"from_builders": {"type": "bool", "default": true,
 			"description": "a seat in every seat slot of the room's builders"},
@@ -138,7 +147,7 @@ const PARAMS := {
 				"at": {"type": "vec3", "min": -200.0, "max": 200.0, "description": "the floor point"},
 				"turn": {"type": "float", "min": -180.0, "max": 180.0, "description": "degrees (0: towards -z)"},
 				"model": {"type": "enum", "values": ["auto", "stadium", "folding_chair", "plush", "multiplex", "pew",
-						"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag"],
+						"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag", "settee"],
 						"description": "this one's model; auto: the system's"}}},
 			"description": "single seats of its own: {at, turn, model}"},
 	"upholstery": {"type": "material", "default": null, "nullable": true,
@@ -194,6 +203,8 @@ static func model_mesh(model: String, upholstery: Material, frame: Material, wid
 			_hide(b, upholstery, frame)
 		"bean_bag":
 			_bean_bag(b, upholstery)
+		"settee":
+			_settee(b, upholstery, w)
 		_:
 			_folding_chair(b, upholstery, frame, w)
 	return b.commit(false)
@@ -213,6 +224,15 @@ static func end_piece(b: RoomMesh, model: String, xf: Transform3D, w: float, sid
 		"bench_seat":
 			b.surface(upholstery)
 			b.box(xf * Vector3(x, 0.45, -0.06), Vector3(0.05, 0.22, 0.52), xf.basis, [RoomMesh.DOWN])
+		"settee":
+			# A padded arm, and the settee's two feet at that end.
+			var ax := side * (w * 0.5 + SETTEE_ARM * 0.5)
+			b.surface(upholstery)
+			b.rounded_box(Vector3.ZERO, Vector3(SETTEE_ARM, 0.6, 0.86), 0.06, xf * Transform3D(Basis(),
+					Vector3(ax, 0.38, 0.0)), 1, Vector3i.ZERO, 0.0, [RoomMesh.DOWN])
+			b.surface(frame)
+			for z: float in [-0.36, 0.36]:
+				b.box(xf * Vector3(ax, 0.04, z), Vector3(0.05, 0.08, 0.05), xf.basis, [RoomMesh.DOWN, RoomMesh.UP])
 
 
 ## The theatre seats: a cushion and a back between half arm rests and half standards (a joined row, as the stadium
@@ -356,6 +376,20 @@ static func _bench(b: RoomMesh, u: Material, f: Material, w: float) -> void:
 			Vector3i.ZERO, 0.0, [RoomMesh.DOWN, Vector3.LEFT, Vector3.RIGHT])
 	b.surface(f)
 	b.box(Vector3(0.0, 0.15, -0.06), Vector3(w, 0.3, 0.46), Basis(), [RoomMesh.DOWN, Vector3.LEFT, Vector3.RIGHT])
+
+
+## A settee's segment, one place wide: the upholstered base (open at the sides: it runs on into the next place), the
+## place's own seat cushion and back cushion, the back behind them. The arms and feet are end_piece().
+static func _settee(b: RoomMesh, u: Material, w: float) -> void:
+	var sides := [Vector3.LEFT, Vector3.RIGHT]
+	b.surface(u)
+	b.box(Vector3(0.0, 0.22, -0.02), Vector3(w, 0.28, 0.82), Basis(), sides + [RoomMesh.DOWN])
+	b.box(Vector3(0.0, 0.58, 0.36), Vector3(w, 0.44, 0.1), Basis(), sides + [RoomMesh.DOWN])
+	b.rounded_box(Vector3(0.0, 0.42, -0.08), Vector3(w - 0.012, 0.13, 0.62), 0.05, Transform3D(), 1, Vector3i(1, 0, 1),
+			0.0, [RoomMesh.DOWN])
+	b.rounded_box(Vector3.ZERO, Vector3(w - 0.012, 0.44, 0.16), 0.06,
+			Transform3D(Basis(Vector3.RIGHT, deg_to_rad(12.0)), Vector3(0.0, 0.68, 0.24)), 1, Vector3i(1, 1, 0), 0.0,
+			[RoomMesh.DOWN])
 
 
 ## A floor cushion, buttoned in the middle.
@@ -696,6 +730,10 @@ func _draw() -> void:
 		var v := lerpf(0.98, rng.randf_range(0.86, 1.1), k)
 		var warm := rng.randf_range(-0.04, 0.04) * k
 		tints.append(Color(v * (1.0 + warm), v, v * (1.0 - warm)))
+	# A settee is one piece of furniture: its places take no tint of their own, so they match each other and its arms.
+	for i in _entries.size():
+		if _entries[i]["model"] == "settee":
+			tints[i] = Color(1, 1, 1)
 	for key: String in _groups:
 		var g: Dictionary = _groups[key]
 		var model := str(g["model"])
