@@ -5,7 +5,8 @@ extends "res://tests/room_doc_harness.gd"
 ## bedsheet round three floor cushions, fairy lights along the fort's hem that flicker slowly (steady with Flickering
 ## lights off), the telly filling the fort's opening, its picture a 1993 tube playing a tape (the presentation's
 ## Nightowl preset), the telly's speaker only when the setting asks; rain on the window pane (at the window, facing
-## in) and outside it, by the Rain setting; the video recorder under the telly flashing 12:00. Rendered (with a renderer): user://room_render/pillow_fort_1993_*.png.
+## in) and outside it, by the Rain setting; the video recorder under the telly flashing 12:00; the sound (a small
+## room, a ticking radiator, rain on the glass with the rain, the tape going in as the film starts). Rendered (with a renderer): user://room_render/pillow_fort_1993_*.png.
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_pillow_fort_1993.gd
 
 const PATH := "res://environments/pillow_fort_1993.env.json"
@@ -58,10 +59,14 @@ func run_tests() -> void:
 	steps(host, 90.0)
 	check("Rain: none dries up (%.2f, %s)" % [w.rain_amount(), w.params["mode"]], w.rain_amount() < 0.05
 			and w.params["mode"] == "clear")
+	check("and the rain on the glass goes quiet (%.2f)" % float(host.system("rain").params["level"]),
+			float(host.system("rain").params["level"]) < 0.1)
 	host.set_setting("rain", "drizzle")
 	check("Rain: drizzle (%s)" % w.params["mode"], w.params["mode"] == "light")
 	host.set_setting("rain", "rain")
 	steps(host, 60.0)
+	check("rain on the glass again (%.2f)" % float(host.system("rain").params["level"]),
+			float(host.system("rain").params["level"]) > 0.8)
 	# The fairy lights flicker slowly; Flickering lights off holds them.
 	var values: Array[float] = []
 	for i in 90:
@@ -85,6 +90,15 @@ func run_tests() -> void:
 			> float(sc["center"][2]) and shelf.origin.z < Domestic.FORT_FRONT + 0.1
 			and (host.system("kit").problems() as Array).is_empty())
 	await clock_flashes("pillow_fort_1993", room)
+	# The sound: a small room, the radiator ticking, rain on the glass, the tape going in as the film starts.
+	await sounds("pillow_fort_1993", room, {"radiator": "radiator", "rain": "rain_glass", "vcr": "vcr"})
+	var takes := int(host.system("vcr").get("plays"))
+	host.snapshot_override = {"open": false}
+	steps(host, 1.0)
+	host.snapshot_override = {"open": true, "playing": true, "position": 0.0, "duration": 5400.0}
+	steps(host, 1.0)
+	check("the tape goes in as the film starts (%d plays)" % int(host.system("vcr").get("plays")),
+			int(host.system("vcr").get("plays")) > takes)
 	host.set_setting("telly_fills", false)
 	await process_frame
 	var across: Transform3D = host.system("room").slots()["telly_shelf"][0]["transform"]
