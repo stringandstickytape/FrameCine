@@ -13,6 +13,9 @@ extends "res://tests/env_builder_harness.gd"
 ##   may bring the deer down the side aisle, never into the sight line; broken seats, never the viewer's own.
 ## - Ice cinema: ice style, hides on every seat, the doorway behind the viewer towards the aurora; Aurora sets its
 ##   base and a quiet scene swells it, slowly, and lets it go; breath fog; the ice takes the film's light.
+## Each room's sound (tests/room_sound.gd): its acoustics and beds on the room's bus, the Nave's candle on Candles, the
+## Reclaimed's rain and drips on the weather, the ice's huskies and creaks now and then; its level under the target
+## and far under a film.
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_set5.gd
 
 ## Each room well inside the headset's budget (its figures in docs/environments.md).
@@ -38,6 +41,7 @@ func _load(id: String) -> Dictionary:
 
 
 const EnvLibrary := preload("res://scripts/env/env_library.gd")
+const RoomSound := preload("res://tests/room_sound.gd")
 
 
 ## The common part: built and checked, inside the margin, the default seat at the origin, something under every seat,
@@ -172,7 +176,20 @@ func _nave() -> void:
 	_steps(host, 6.0)
 	check("nave: ended: the rose window back (%.2f)" % float(nave.params["rose_glow"]),
 			is_equal_approx(float(nave.params["rose_glow"]), glow0))
+	# Sound: the stone's long reverb, a faint wind high in the clerestory, now and then a candle's gutter; no organ.
+	RoomSound.check_beds(self, "nave", room, {"wind": "wind", "candle": "candle"}, "stone_nave")
+	var reverb: Dictionary = host.system_of_kind("sound").values()
+	check("nave: a long stone reverb (rt60 %.1f)" % float(reverb["rt60"]), absf(float(reverb["rt60"]) - 3.0) < 0.01)
+	var wind: Node = host.system("wind")
+	check("nave: the wind high up (%s)" % [wind.players().map(func(q: Node3D) -> float: return q.position.y)],
+			not wind.players().is_empty() and wind.players().all(func(q: Node3D) -> bool: return q.position.y > 6.0))
+	var candle: Node = host.system("candle")
+	check("nave: a candle's gutter now and then (every %.0f s)" % float(candle.params["every"]),
+			not candle.is_loop() and float(candle.params["every"]) >= 60.0)
+	RoomSound.check_setting(self, "nave", room, "candle", "candles", "none", "few")
+	check("nave: no music system (no organ)", host.systems_of_kind("music").is_empty())
 	await done(room)
+	await RoomSound.check_level(self, self, "nave", doc)
 
 
 func _has(room: Node, node_name: String) -> bool:
@@ -264,7 +281,19 @@ func _reclaimed() -> void:
 	host.set_setting("life", false)
 	_steps(host, 2.0)
 	check("reclaimed: Ambient life off: they fade away", not deer.active and not host.system("birds").active)
+	# Sound: open air; rain on the leaves and the boards with the rain, drips with the wet, a soft wind; the birds'
+	# calls are the birds' own.
+	RoomSound.check_beds(self, "reclaimed", room, {"rain": "rain_leaves", "rain_boards": "rain_leaves",
+			"drips": "drips", "wind": "wind"}, "outdoors")
+	RoomSound.check_follows(self, "reclaimed", room, "rain", "weather.rain")
+	RoomSound.check_follows(self, "reclaimed", room, "rain_boards", "weather.rain")
+	RoomSound.check_follows(self, "reclaimed", room, "drips", "weather.wet")
+	check("reclaimed: rain round the viewer (%d voices)" % host.system("rain").players().size(),
+			host.system("rain").players().size() == 4)
+	check("reclaimed: the wind under the rest (%.1f dB)" % float(host.system("wind").params["gain_db"]),
+			float(host.system("wind").params["gain_db"]) <= -6.0)
 	await done(room)
+	await RoomSound.check_level(self, self, "reclaimed", doc)
 
 
 func _v3(v: Variant) -> Vector3:
@@ -327,4 +356,19 @@ func _ice() -> void:
 			float(sky.params["aurora"]) < 0.01)
 	host.signals.fake("film.quiet", 0.0)
 	_steps(host, 1.0)
+	# Sound: the ice's ring; far huskies now and then, a soft wind past the doorway, the ice creaking now and then.
+	RoomSound.check_beds(self, "ice", room, {"huskies": "huskies", "wind": "wind", "creak": "ice_creak"}, "ice")
+	var huskies: Node = host.system("huskies")
+	var creak: Node = host.system("creak")
+	var far := _v3(huskies.params["at"]).length()
+	check("ice: the huskies far off (%.0f m)" % far, far > 50.0)
+	check("ice: the wind at the doorway behind (z %.1f)" % float(host.system("wind").params["at"][2]),
+			float(host.system("wind").params["at"][2]) > 2.5)
+	var h0: int = huskies.plays
+	var c0: int = creak.plays
+	_steps(host, 650.0, 0.5)
+	check("ice: in 11 minutes the huskies call and the ice creaks, now and then (%d, %d)" % [huskies.plays - h0,
+			creak.plays - c0], huskies.plays - h0 >= 1 and huskies.plays - h0 <= 3 and creak.plays - c0 >= 2
+			and creak.plays - c0 <= 4)
 	await done(room)
+	await RoomSound.check_level(self, self, "ice", doc)

@@ -5,11 +5,13 @@ extends "res://tests/env_builder_harness.gd"
 ## is (schema, budget, sight lines, comfort, licences, names, no people) and as a builder's room (seats, physics,
 ## bake); then what makes it this room: the dome covers the tiers and the screen and adds no floor or seats of its own,
 ## the sky is space with Earth over the screen, Earth turns at the Earth's speed setting (scaled by Motion), the Milky
-## Way comes up as the film starts, the dome's lamps go down with the film, and the room is silent: no sound at all.
+## Way comes up as the film starts, the dome's lamps go down with the film, and the room is silent: no sound at all
+## (a silence bed, dry acoustics, nothing measured on Environment; the Void's sound checked the same way).
 ## Under lavapipe it draws the room from its own seat and Earth over it.
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_crater.gd
 
 const RoomRender := preload("res://tests/room_render.gd")
+const RoomSound := preload("res://tests/room_sound.gd")
 const DOC := "res://environments/crater.env.json"
 
 
@@ -102,7 +104,17 @@ func run_tests() -> void:
 	check("silent: no life, no sound steps, no pause rise", host.systems_of_kind("life").is_empty()
 			and not JSON.stringify(doc["cues"]).contains("\"sound\"")
 			and float(doc["audio"]["pause_rise_db"]) == 0.0)
+	RoomSound.check_beds(self, "crater", room, {"silence": "silence"}, "vacuum")
+	check("silent: no music", host.systems_of_kind("music").is_empty())
 	await done(room)
+	await RoomSound.check_level(self, self, "crater", doc, true)
+	# The Void is silent too, and says so the same way.
+	var void_doc: Dictionary = EnvDoc.load_file("res://environments/void.env.json")["doc"]
+	var kinds: Array = void_doc["systems"].map(func(e: Dictionary) -> String: return "%s %s" % [e["system"],
+			e.get("params", {}).get("sound", e.get("params", {}).get("preset", ""))])
+	check("void: a silence bed and dry acoustics only (%s)" % [kinds], kinds.has("sound_bed silence")
+			and kinds.has("acoustics vacuum") and not JSON.stringify(void_doc).contains("\"music\""))
+	await RoomSound.check_level(self, self, "void", void_doc, true)
 	await _render(doc)
 
 

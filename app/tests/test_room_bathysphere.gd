@@ -6,10 +6,13 @@ extends "res://tests/env_builder_harness.gd"
 ## makes it this room: the glass looks out on dark water, the screen stands inside the glass, the fish and the glowing
 ## creatures stay outside the glass and come nearer in a bright scene, the whale passes in a quiet scene as often as
 ## the Whale setting says (never; rarely; sometimes) and never more than its cooldown allows, the house lamps go down
-## with the film, and the room makes no sound but the whale's song. Under lavapipe it draws the room from its own seat.
+## with the film, no cue sounds but the whale's song; the hull's acoustics, its creaks to either side now and then and
+## the deep's hum on the room's bus, under the level check's target and far under a film (tests/room_sound.gd).
+## Under lavapipe it draws the room from its own seat.
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_bathysphere.gd
 
 const RoomRender := preload("res://tests/room_render.gd")
+const RoomSound := preload("res://tests/room_sound.gd")
 const DOC := "res://environments/bathysphere.env.json"
 
 
@@ -134,10 +137,30 @@ func run_tests() -> void:
 	for i in 30:
 		host.step(0.25)
 	check("and come up at the end", float(host.param("light.house_lamps")) > 0.95)
-	# Sound: only the whale's song (the sound beds come later).
+	# Sound: no cue sounds but the whale's song (life's); the hull's ring, its creaks to the sides now and then, the
+	# deep's low hum.
 	var other: Array = host.sounds.filter(func(s: Variant) -> bool: return not str(s).contains("whale"))
-	check("no sound but the whale's (%s)" % [other], other.is_empty())
+	check("no cue sound but the whale's (%s)" % [other], other.is_empty())
+	check("the whale sings at voice_db -4", is_equal_approx(float(host.system("whale").params["voice_db"]), -4.0))
+	RoomSound.check_beds(self, "bathysphere", room, {"creak_left": "hull_creak", "creak_right": "hull_creak",
+			"deep": "deep_hum"}, "hull")
+	var reverb: Dictionary = host.system_of_kind("sound").values()
+	check("a small hard room of metal and glass (rt60 %.1f)" % float(reverb["rt60"]),
+			absf(float(reverb["rt60"]) - 0.9) < 0.01)
+	var left: Node = host.system("creak_left")
+	var right: Node = host.system("creak_right")
+	check("the creaks to either side (x %.1f, %.1f)" % [float(left.params["at"][0]), float(right.params["at"][0])],
+			float(left.params["at"][0]) < -5.0 and float(right.params["at"][0]) > 5.0)
+	var l0: int = left.plays
+	var r0: int = right.plays
+	for i in 900:
+		host.step(0.5)
+	check("in 7.5 minutes the hull creaks now and then (%d left, %d right)" % [left.plays - l0, right.plays - r0],
+			left.plays - l0 >= 2 and right.plays - r0 >= 2 and left.plays - l0 + right.plays - r0 <= 8)
+	check("the deep's hum low (gain %.0f dB)" % float(host.system("deep").params["gain_db"]),
+			float(host.system("deep").params["gain_db"]) < 0.0 and host.system("deep").playing())
 	await done(room)
+	await RoomSound.check_level(self, self, "bathysphere", doc)
 	await _render(doc)
 
 
