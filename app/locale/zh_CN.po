@@ -2967,3 +2967,6 @@ msgstr "影片开始后场灯保持的亮度。"
 
 msgid "A faint ring on the floor where you move. At the bottom: none."
 msgstr "你移动时地面上出现的淡淡波纹。拉到最低：无。"
+
+msgid "On; this room draws the film itself, for the look of its screen."
+msgstr "开；此房间自己绘制影片，以呈现它的屏幕效果。"

@@ -1680,6 +1680,10 @@ System tab can turn it off. Code: `app/scripts/play/film_layer.gd`, `app/shaders
     its dot, whose bounds, seen from the eyes, cover part of the picture. The layer comes back one second after the
     view is clear (`film_layer.gd _covered()`, `COVER_RELEASE`). The same for a curved screen drawn by cylinder layers
     ([view] cylinder_layers): tested against the plane through its middle, widened by how far its edges come forward.
+- **A room that draws the film itself:** a room whose presentation has a picture stage (a telly's tube and glass, a
+  worn print's dust; `docs/environments.md`, "The presentation system") asks with `request_scene(who, on)`. While any
+  room asks, no layer is made and the screen's mesh draws the film with the room's material. The setting is not
+  touched; the System tab says why.
 - **Same as before:** colour (BT.709 / 601 / 2020, PQ and HLG tone mapping, 10-bit planes), picture controls,
   sharpen, deinterlace, zoom and pan, 3D depth shift, edge fade, film grain, and the dimming when the menu opens or
   the sleep timer fades. The bias light, the floor reflection and the room's light from the screen read the video
