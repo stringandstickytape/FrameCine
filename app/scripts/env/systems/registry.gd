@@ -23,6 +23,8 @@ const SYSTEMS := {
 	"atmosphere": "res://scripts/env/systems/atmosphere.gd",
 	"weather": "res://scripts/env/systems/weather.gd",
 	"life": "res://scripts/env/systems/life.gd",
+	"sky": "res://scripts/env/systems/sky.gd",
+	"vista": "res://scripts/env/systems/vista.gd",
 }
 ## The kinds a system may be (spec().kind).
 const KINDS: Array[String] = ["builder", "kit", "light", "sky", "atmosphere", "life", "sound", "music", "screen",
