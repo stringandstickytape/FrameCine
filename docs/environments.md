@@ -815,7 +815,8 @@ the pieces. The kit must come after its builder in the document. A room may have
 | `target` | the node the carpet goes on (the builder's `Floor` by default) |
 
 Other parameters: `builder` (the builder's id; empty: the room's first builder); materials `stone`, `plaster`,
-`wood`, `tin`, `roof`, `iron`, `plastic` (a computer), `fabric` (a rug); colours `leaves`, `flowers`, `neon`,
+`wood`, `tin`, `roof`, `iron`, `plastic` (a computer), `fabric` (a rug), `china` (a tea set, plates), `cloth`
+(bunting, sandwiches; the last two coloured per vertex); `glass_colour` (a glass table's top); colours `leaves`, `flowers`, `neon`,
 `window_colour`, `lamp_colour` (a standard lamp's shade), `display_colour` (a video recorder's clock); live: `glow`
 (lit windows, the booth's window, neon, the clocks).
 
@@ -840,6 +841,15 @@ Other parameters: `builder` (the builder's id; empty: the room's first builder);
 | `standard_lamp` | a round base and a thin pole (`iron`, or the entry's `accent`), a drum shade that glows in the entry's colour (`house` group) and gives a dim stand-in lamp |
 | `rug` | a field (`fabric` in the entry's colour), a border a little raised (its `accent`, or the field's darker), a fringe at either end |
 | `coffee_table` | a top on four legs, a shelf under it (`wood`) |
+| `bunting` | a string across a room sagging by the size's height, a pennant every 0.26 m, red, white and blue in turn (`colour`, white, `accent`); it hangs from its point (`cloth`) |
+| `tea_set` | a tray (`wood`), a teapot in the entry's colour, a milk jug, a sugar bowl, four cups on saucers (`china`) |
+| `sandwiches` | a plate (`china`), triangles of bread with the filling between (`cloth`, the filling in the entry's colour), two layers |
+| `stool` | a round seat on four splayed legs with rungs (`wood`). 0.36 x 0.46 m |
+| `channel_dial` | a rotary channel dial: a plate (`plastic` in the `accent`), twelve stops, the knob and its pointer, two small knobs (`iron`); it hangs on a set's front |
+| `soundbar` | a long low case (`iron`), its cloth front (`fabric` in the `accent`). 0.9 x 0.065 x 0.09 m |
+| `floor_lamp` | a flat base, a slim pole, a tall column shade that glows in the entry's colour (`house` group) and gives a dim stand-in lamp |
+| `glass_table` | a low coffee table: a steel frame (`tin`), a glass top (the kit's glass mesh `PieceGlass`, `glass_colour`, in `env_see_through`) |
+| `media_unit` | a long low cabinet on a dark plinth set back under it, three doors without handles (`wood`) |
 
 The furniture is drawn by `scripts/env/systems/kit/furniture.gd` (plain boxes and turned shapes of our own: no maker's
 shape, no badge, no lettering), which the domestic builder's telly stands use too. A piece stands with its foot at the
@@ -1209,6 +1219,10 @@ at 8 m they are 19 dB under their "in film" level even at -12. Without the filte
 | TV 1987 | `acoustics` `small_room`; `sound_bed` `vcr` (`play` in `starting`: the tape goes in); `clock`; `tube_whine` |
 | TV 1993 | `acoustics` `small_room`; `sound_bed` `radiator`, `rain_glass` on `weather.rain`; `vcr` in `starting`; `tube_whine` |
 | TV 2005 | `acoustics` `small_room`; no beds (a flat panel is silent) |
+| TV 1937 | `acoustics` `small_room`; `sound_bed` `fire` (on the Fire setting); `clock`; `tube_whine` `pitch` 0.648, `gain_db` -4 |
+| TV 1966 | `acoustics` `small_room`; `sound_bed` `radiator`; `clock`; `tube_whine` `pitch` 0.648 |
+| TV 2002 | `acoustics` `small_room`; `sound_bed` `hum` at the set (its fan), `gain_db` -3 |
+| TV today | `acoustics` `small_room` (`rt60` 0.3); `sound_bed` `rain_glass` on `weather.rain`, `gain_db` -6 |
 
 ## Ambient life
 
@@ -2094,14 +2108,16 @@ in a black sky full of stars. Silent: the room has no sound bed and makes no sou
   sound, no life, no pause rise (the test measures nothing on Environment). Acoustics for the film's spatial sound:
   a large glass dome, rt60 1.1, wet 0.35.
 
-Seven rooms, one for each TV preset, are the history of television: `app/environments/tv_<year>.env.json`, in the
-Room tab's Television group (`room.category` "tv"). Their names start "TV <year> - ", so the group reads as a
-timeline. (A room's name takes letters, digits, space, - and _ only. "Television, 1930: ..." is refused, and the
-longer "Television 1930 - ..." names made the Room tab's card too wide in the pseudo-locale.) Each is a `domestic`
-room (style `plain`, or `bedroom_1993`) with `screen` "telly" and the era's preset on it, the `seats` system for the
-chairs, and cues for the lamps: down when the film starts or plays (`lamps_down`), up in the pre-show and after the
-end (`lamps_up`). Tested by `tests/test_room_tv.gd` (headless: every check of `test_environments.gd`, the preset,
-the telly's shape and size, each setting and what it does, the cues).
+Eleven rooms are the history of television: `app/environments/tv_<year>.env.json` (the present's is `tv_today`), in
+the Room tab's Television group (`room.category` "tv"). Their names start "TV <year> - " ("TV today - " for the
+present, which sorts last), so the group reads as a timeline. (A room's name takes letters, digits, space, - and _
+only. "Television, 1930: ..." is refused, and the longer "Television 1930 - ..." names made the Room tab's card too
+wide in the pseudo-locale.) Each is a `domestic` room (style `plain`, or `bedroom_1993`) with `screen` "telly" and
+the era's preset on it, the `seats` system for the chairs, and cues for the lamps: down when the film starts or plays
+(`lamps_down`), up in the pre-show and after the end (`lamps_up`). Tested by `tests/test_room_tv.gd` (headless:
+every check of `test_environments.gd`, the preset, the telly's shape and size, each setting and what it does, the
+cues) and `tests/test_room_tv2.gd` (the rooms of 1937, 1966, 2002 and today the same way, and the whole group's names
+in year order).
 
 **The telly's shape.** The film is drawn on the screen's own mesh, which is the document's width at the film's
 aspect (`video_screen.gd get_flat_size()`); a document cannot give it another shape. So the domestic telly's tube (the
@@ -2118,16 +2134,31 @@ screen may have is 0.3 m.
 | Room | The tube (w x h) | From the viewer's eyes | Across | Why |
 |---|---|---|---|---|
 | 1930 | 0.30 x 0.225 m | 0.9 m | 19 degrees | the smallest screen a document may give; the set's own window was smaller, so the chair is close, as a family huddled round one |
-| 1953 | 0.36 x 0.27 m (a 17 inch tube) | 1.1 m | 19 degrees | a big set for its day; the armchairs gathered round |
+| 1937 | 0.30 x 0.225 m (the mirror's picture) | 0.85 m | 20 degrees | a mirror-lid set: the chair close to the cabinet, as the family's was |
+| 1953 | 0.36 x 0.27 m (a 17 inch tube) | 1.1 m | 19 degrees | coronation day: every chair in the house round it, and the viewer's the best one |
+| 1966 | 0.46 x 0.345 m (23 inch) | 1.3 m | 20 degrees | the rented set, the settee across from it |
 | 1972 | 0.46 x 0.345 m (22 inch) | 1.4 m | 19 degrees | the colour set in the corner, the chairs in a row |
 | 1983 | 0.30 x 0.225 m (14 inch portable) | 0.8 m | 21 degrees | at a desk: the portable is near, as a screen for a home computer was |
 | 1987 | 0.54 x 0.405 m (26 inch) | 1.5 m | 20 degrees | the family set, the settee across from it |
 | 1993 | 0.40 x 0.30 m (20 inch) | 1.1 m | 21 degrees | a bedroom set seen from a bean bag on the floor |
+| 2002 | 1.10 x 0.62 m (50 inch rear projection, 16:9) | 3.0 m | 21 degrees | the big set across the lounge |
 | 2005 | 0.72 x 0.405 m (32 inch, 16:9) | 1.9 m | 21 degrees | the first flat panel: wider, and the sofa further back |
+| today | 1.20 x 0.675 m (55 inch, 16:9) | 3.2 m | 21 degrees | a thin panel on the wall, the sofa across the room |
+
+### Time travel
+
+One film, and while it plays the room moves forward through the history of television, an era at a time
+(`scripts/env/time_travel.gd`, `main.features.time_travel`; the Room tab's Television group: Time travel, and Over
+the film or every 5, 10 or 15 minutes; the assistant's `time_travel`). The eras are the TV rooms whose ids start
+`tv_`, in the order of their year (`tv_today` and `tv_future` last); the Pillow Fort is not an era. Turned on in a
+room that is not an era, it goes to the first at once. Over the film, the rest of the film is shared by the eras
+still to come (at least a minute each). The countdown runs only while the film plays; it stops itself at the last
+era, at the end of the film, on a new file, and when the viewer picks a room that is not an era. The film plays on
+through each change: only the room changes.
 
 ### Room: TV 1930 - glowing box
 
-1 of 7. A small dark parlour with a coal fire. A mechanical-scan set in a walnut cabinet on a walnut chest glows
+1 of 11. A small dark parlour with a coal fire. A mechanical-scan set in a walnut cabinet on a walnut chest glows
 orange with thirty lines (`glowbox_1930`, its sound through the radio cabinet's speaker). Three club chairs in
 velvet, two angled in beside the viewer's. A wall lamp, a night window.
 
@@ -2143,27 +2174,75 @@ velvet, two angled in beside the viewer's. A wall lamp, a night window.
   spinning disc, no tube. Measured (`test_room_tv.gd`, the slider's default): -55.1 dBFS RMS in the pre-show, -69.6
   under a film at the reference level.
 
-### Room: TV 1953 - by the fire
+### Room: TV 1937 - mirror lid
 
-2 of 7. A sitting room with a lit coal fire and a cat on the hearth. A small black and white set in a walnut cabinet
-on a chest (`fireside_1953`: 405 lines, snow and a ghost). Four empty armchairs gathered round it. Rain on the window
-from time to time; through it, an evening sky over hills. A potted fern in the corner.
+2 of 11. A well-to-do drawing room: pale green walls, a herringbone parquet floor with a deep red rug, a white marble
+fireplace with a coal fire, two velvet armchairs angled in beside the viewer's, a standard lamp, a walnut sideboard
+with the tea tray on it, a fern. The set is a tall walnut cabinet whose lid holds a mirror: the tube faces up and the
+picture is seen in the mirror (405 lines, black and white, the first regular service's).
 
-- Systems: `light`, `domestic`, `kit` (ferns), `seats` (three armchairs as places), `sky` (dusk 0.85, clouds 0.7),
-  `vista` (hills to the left), `weather` (changing, 500 drops outside the window, the pane), `life` (`cat`, its path
-  along the hearth), `presentation`.
+- Systems: `light`, `domestic` (2.9 m high; 0.85 m from the seat to the picture; the window on the left with a dark
+  night glow, the fireplace on the right, `surround` `white_marble`), `kit` (a `rug`, a `standard_lamp`, a
+  `sideboard`, a `tea_set` on it, ferns), `seats` (two armchairs as places), `presentation`.
+- Settings: Snow from the aerial (0 to 50 %); Fire in the grate.
+- Cues: `warm_up` (Pre-show): the valves warm up over 7 s. The lamps (the standard lamp with them) down to 25 %.
+- Measured: 23 draws, 4 096 triangles, 12.0 MB, no particles.
+- Sound: `acoustics` `small_room`; `sound_bed`s `fire` in the grate (on the Fire setting), `clock` on the mantel,
+  `tube_whine` at 405 lines (`pitch` 0.648, `gain_db` -4). Measured (`test_room_tv2.gd`): -56.5 dBFS RMS in the
+  pre-show, -70.9 under a film at the reference level.
+- Until the presentation system has the mirror-lid form, the set is a walnut cabinet on a walnut chest with the
+  1953 preset (`fireside_1953`, its ghost fainter).
+
+### Room: TV 1953 - coronation day
+
+3 of 11. Coronation day, June 1953: a terraced front room crammed for the day. Every chair in the house is pulled
+round one small set in a walnut cabinet (`fireside_1953`: 405 lines, snow and a ghost): the viewer's armchair
+straight in front of it (the best seat), two more armchairs angled in, six kitchen chairs behind, three stools, two
+cushions on the rug in front where the children would sit. All empty. Bunting in red, white and blue across the
+ceiling in three strings, a tea set on the sideboard, plates of paste sandwiches on the sideboard and on a side table,
+the coal fire lit, the cat on the hearth. It rained that day: a grey sky in the window and rain on the glass. No
+crown, no flag, no arms, no broadcaster's mark: the bunting's colours are all there is of the day.
+
+- Systems: `light`, `domestic` (2.3 m half width, 3.3 m behind; `outside` `glow` grey), `kit` (ferns, a `rug`,
+  three `bunting`, a `sideboard` with a `tea_set` and `sandwiches`, a `coffee_table` with two plates of `sandwiches`,
+  three `stool`s), `seats` (two armchairs, six kitchen chairs (`folding_chair`) and two `cushion`s as places; the
+  viewer's armchair the builder's, `seat_pitch` 0.96 so it draws with the others), `weather` (changing, mostly rain:
+  `cycle_start` 0.5, 500 drops outside the window, the pane), `life` (`cat`, along the hearth), `presentation`.
 - Settings: Snow from the aerial (0 to 60 %: `presentation.snow`); Fire in the grate.
 - Cues: `warm_up` (Pre-show): the valves warm up, the picture dim at first and full over 6 s. The lamps down to 25 %.
-- Measured: 24 draws, 10 168 triangles, 10.3 MB, 500 particles.
+- The set stays 19 degrees across from the viewer's chair (the size table): the room is crowded round a small set,
+  and the viewer has the good chair.
+- Measured: 29 draws, 7 665 triangles, 12.0 MB, 500 particles (the sky and the hills gave way to a grey glow, which
+  paid for the chairs and the dressing).
 - Sound: `acoustics` `small_room`; the fire's crackle in the grate (`sound_bed` `fire`, on the Fire setting); a clock
   on the mantel (`clock`); rain on the window (`rain_glass` at the pane, `level` on `weather.rain`); the tube's faint
   whine at a 405-line set's 10 125 Hz (`tube_whine`, `pitch` 0.648, `gain_db` -4); the cat's purr is `life`'s.
-  Measured (`test_room_tv.gd`, the slider's default, the rain full): -52.8 dBFS RMS in the pre-show, -66.3 under a
+  Measured (`test_room_tv.gd`, the slider's default, the rain full): -52.7 dBFS RMS in the pre-show, -66.0 under a
   film at the reference level.
+
+### Room: TV 1966 - rented set
+
+4 of 11. A 1960s living room in orange and teak: a pale wall, a deep orange carpet with a rug, the rented set in a
+teak cabinet on splayed legs with a rotary channel dial and two small knobs under the picture, a long teak sideboard
+on the left wall, a low teak coffee table, an orange settee (the viewer in its middle) and an orange armchair, a
+standard lamp with an orange shade, a dusk sky and hills in the window on the right.
+
+- Systems: `light`, `domestic` (`telly_stand` `radiogram`: the splayed legs; a radiator under the window), `kit` (a
+  `channel_dial` on the set's front, a `sideboard`, a `rug`, a `coffee_table`, a `standard_lamp`, ferns), `seats`
+  (`model` `settee` in the builder's three slots, an armchair as a place), `sky` (dusk 0.55), `vista` (hills),
+  `presentation`.
+- Settings: Snow from the aerial (0 to 50 %); Wall lamps in the film (0 to 100 %, default 30 %).
+- Cues: `warm_up` (Pre-show), the lamps down to the setting.
+- Measured: 27 draws, 10 406 triangles, 14.3 MB, no particles.
+- Sound: `acoustics` `small_room`; `sound_bed`s `radiator` under the window (`gain_db` -2), `clock` on the sideboard,
+  `tube_whine` at 405 lines (`pitch` 0.648, `gain_db` -3: a dual-standard set, on the older channels' 405 lines).
+  Measured (`test_room_tv2.gd`): -62.8 dBFS RMS in the pre-show, -75.3 under a film at the reference level.
+- Until the presentation system has the console form and its own preset, the set is the cabinet on the radiogram's
+  legs with the 1953 preset, a little flatter (`curvature` 0.65).
 
 ### Room: TV 1972 - first colour
 
-3 of 7. Mustard walls with orange and brown bands sweeping behind the set, a swirling carpet with a mustard rug on
+5 of 11. Mustard walls with orange and brown bands sweeping behind the set, a swirling carpet with a mustard rug on
 it, three club chairs in orange velour and a bean bag. An early colour set in a teak-look cabinet on a radiogram
 (`colourstar_1972`: a shadow mask, warm rich colour), a teak sideboard on the right wall, a standard lamp in the
 corner. A summer dusk in the window.
@@ -2179,7 +2258,7 @@ corner. A summer dusk in the window.
 
 ### Room: TV 1983 - desk portable
 
-4 of 7. A small room at night: a light grey portable telly (a carry handle, a rod aerial, its knobs at the side) on
+6 of 11. A small room at night: a light grey portable telly (a carry handle, a rod aerial, its knobs at the side) on
 a desk with a pedestal of drawers, a beige home computer and its keyboard on the desk beside it, a wooden chair.
 Drizzle on the window, the street lamp's orange glow beyond it. `sirclive_1983`: the computer's aerial lead, 240 bold
 lines. A bean bag at the back for a second seat.
@@ -2198,7 +2277,7 @@ lines. A bean bag at the back for a second seat.
 
 ### Room: TV 1987 - rented tape
 
-5 of 7. The family living room on a wet night: a black telly on a wooden tv unit with a video recorder in its shelf,
+7 of 11. The family living room on a wet night: a black telly on a wooden tv unit with a video recorder in its shelf,
 its clock flashing 12:00, a three-seat settee and an armchair, a white-painted brick fireplace, a fern.
 `rewinder_1987`: a rented tape, tracking wobble, smeared colour, the tear at the bottom.
 
@@ -2219,7 +2298,7 @@ its clock flashing 12:00, a three-seat settee and an armchair, a white-painted b
 
 ### Room: TV 1993 - bedroom telly
 
-6 of 7. A teenager's bedroom (not the pillow fort): blue walls, fairy lights along the wall over the telly, the bed,
+8 of 11. A teenager's bedroom (not the pillow fort): blue walls, fairy lights along the wall over the telly, the bed,
 a radiator under the window, rain in the night outside. A bean bag on the floor; a second place sitting on the bed.
 `nightowl_1993`: a tape watched a few times on a flatter tube with an aperture grille.
 
@@ -2235,9 +2314,29 @@ a radiator under the window, rain in the night outside. A bean bag on the floor;
   Measured (`test_room_tv.gd`, the slider's default, the rain full, the tape going in): -52.6 dBFS RMS in the
   pre-show, -66.7 under a film at the reference level.
 
+### Room: TV 2002 - rear projection
+
+9 of 11. A beige lounge with a cream carpet: a big deep rear projection set filling the end of the room, its
+cabinet down to the floor in charcoal grey, a 50 inch 16:9 picture; a black leather sofa of three (the viewer in its
+middle) and a leather armchair, a glass coffee table on a steel frame, a tall floor lamp, a plant, a dusk window.
+The set's picture dims when it is seen from the side (the display does it).
+
+- Systems: `light`, `domestic` (the cabinet's picture 1.1 x 0.62 m, 3 m from the seat; the stand and the trim in the
+  set's charcoal, so the set reads as one cabinet to the floor), `kit` (a `glass_table`: its top in the kit's glass,
+  see-through; a `floor_lamp`, ferns), `seats` (`settee` in black leather, an armchair), `sky`, `vista`,
+  `presentation`.
+- Settings: Wall lamps in the film; Lamp in the set (0.8 to 1.1 times: `presentation.gain`, an old projection lamp's
+  dimmer picture).
+- Cues: the lamps down to the setting.
+- Measured: 24 draws, 9 908 triangles, 8.3 MB, no particles.
+- Sound: `acoustics` `small_room`; the set's cooling fan (`sound_bed` `hum` at the set, `gain_db` -3). Measured
+  (`test_room_tv2.gd`): -68.4 dBFS RMS in the pre-show, -83.5 under a film at the reference level.
+- Until the presentation system has the rear projection form and its display, the set is the deep cabinet (as deep
+  as the picture is wide, three quarters) on a chest in the same charcoal, with the 2005 preset's panel and no grid.
+
 ### Room: TV 2005 - flat screen
 
-7 of 7. A pale living room with a laminate floor, a grey three-seat settee and an armchair, a coffee table, a plant,
+10 of 11. A pale living room with a laminate floor, a grey three-seat settee and an armchair, a coffee table, a plant,
 a wide window on a sunset. A 32 inch flat panel on its pedestal on a low pale wooden tv unit (`freedtv_2005`: a free
 digital broadcast, a faint pixel grid, the backlight through the dark scenes).
 
@@ -2247,6 +2346,33 @@ digital broadcast, a faint pixel grid, the backlight through the dark scenes).
 - Settings: Wall lamps in the film; Backlight bleed (`presentation.panel_bleed`).
 - Measured: 21 draws, 9 690 triangles, 10.3 MB (before the furniture: 19 draws, 10 232 triangles, 10.3 MB).
 - Sound: `acoustics` `small_room` only; no beds (a flat panel is silent).
+
+### Room: TV today - the present
+
+11 of 11. A living room now: charcoal walls, a grey oak floor with a pale grey rug, a thin panel on the wall (a 55
+inch 16:9 picture, 3.2 m from the seat) over a long low oak media unit, a soundbar on the unit under the picture, a
+grey sofa of three and an armchair, a low oak coffee table, a tall floor lamp beside the sofa, a plant, a night window
+with rain on it now and then. No wall lamps, no fire: the film looks its best here (a clean picture, the film's own
+sound, no small speaker).
+
+- Systems: `light` (a low grey fill), `domestic` (`telly` `flat_panel` on the `wall`; `lamps` 0, `heater` none, the
+  window's night glow), `kit` (a `media_unit`, a `soundbar`, a `rug`, a `coffee_table`, a `floor_lamp`, ferns),
+  `seats` (`settee`, an armchair), `weather` (changing, the pane only: no drops falling), `presentation`
+  (`freedtv_2005` with no grid, no bleed, 3840 pixels, `speaker` none).
+- Settings: Floor lamp in the film (0 to 100 %, default 15 %: the house group, the floor lamp's shade).
+- Cues: the floor lamp down to the setting.
+- Measured: 22 draws, 2 934 triangles, 7.0 MB, no particles.
+- Sound: `acoustics` `small_room` (`rt60` 0.3: soft furnishings); `rain_glass` at the window (`gain_db` -6, `level`
+  on `weather.rain`). Measured (`test_room_tv2.gd`, the rain full): -65.2 dBFS RMS in the pre-show, -80.4 under a
+  film at the reference level.
+- Until the presentation system has the OLED form and display, the panel is the flat panel on the wall with the 2005
+  preset made clean.
+
+**The kit's dressing for these rooms** (`kit/dressing.gd`, since 2026-11-07): `bunting` (a sagging string of
+pennants, red, white and blue in turn), `tea_set`, `sandwiches`, `stool`, `channel_dial` (a rotary dial with twelve
+stops and two small knobs, on a set's front), `soundbar`, `floor_lamp` (a column shade, house group), `glass_table`
+(the kit's glass mesh, `PieceGlass`, see-through) and `media_unit`. The china and the cloth (bunting, bread) are one
+material each, coloured per vertex: bunting, a tea set and three plates of sandwiches cost two draws.
 
 **What the systems lack for these rooms** (each room took the closest thing there is):
 
