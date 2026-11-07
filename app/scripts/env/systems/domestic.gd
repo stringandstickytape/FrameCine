@@ -821,8 +821,11 @@ func build() -> void:
 		_build_fairy_lights()
 	_build_lamps(win)
 	_build_seats()
-	_bake_spot("Ceiling", Vector3(0, h + rise - 0.1, (fz + bz) * 0.5), true, 75.0, h + rise + 1.0, 0.35,
-			color_param("lamp_colour"))
+	# The main light, off in a pillow fort: the film is watched by the fairy lights and the telly (the user,
+	# 2026-11-07: far too bright inside the fort).
+	if not _fort(p):
+		_bake_spot("Ceiling", Vector3(0, h + rise - 0.1, (fz + bz) * 0.5), true, 75.0, h + rise + 1.0, 0.35,
+				color_param("lamp_colour"))
 
 
 func _build_skirting(trim: RoomMesh, door: Array) -> void:
@@ -1410,14 +1413,18 @@ func _build_fort(trim: RoomMesh) -> void:
 			var y := lerpf(FORT_TOP_FRONT, FORT_TOP_BACK, t) - 0.16 * sin(u * PI) * sin(t * PI) - 0.04 * sin(u * PI)
 			line.append(Vector3(x, y, z))
 		grid.append(line)
+	# The inside face a little inside the outside one: two faces in one place let the bake light the inside from
+	# above (the sheet's underside came out near white).
+	const INSIDE := 0.012
 	for side: float in [-1.0, 1.0]:
+		var drop := Vector3(0, -INSIDE, 0) if side > 0.0 else Vector3.ZERO
 		for j in nz:
 			var a := PackedVector3Array()
 			var c := PackedVector3Array()
 			var ns := PackedVector3Array()
 			for i in nx + 1:
-				a.append(grid[j][i])
-				c.append(grid[j + 1][i])
+				a.append(grid[j][i] + drop)
+				c.append(grid[j + 1][i] + drop)
 				ns.append(Vector3.DOWN * side)
 			sheet.strip(a, c, ns)
 		# The sides: hanging from the canopy's edges to the cushions' tops, a little outside them.
@@ -1427,8 +1434,9 @@ func _build_fort(trim: RoomMesh) -> void:
 			var ns := PackedVector3Array()
 			for j in nz + 1:
 				var edge: Vector3 = grid[j][0 if e < 0.0 else nx]
-				a.append(edge)
-				c.append(Vector3(e * (hx + 0.08), FORT_WALL, edge.z))
+				var inward := Vector3(-e * INSIDE, 0, 0) if side > 0.0 else Vector3.ZERO
+				a.append(edge + drop + inward)
+				c.append(Vector3(e * (hx + 0.08), FORT_WALL, edge.z) + inward)
 				ns.append(Vector3(-e * side, 0, 0))
 			sheet.strip(a, c, ns)
 		# A short hem over the opening.
@@ -1436,7 +1444,7 @@ func _build_fort(trim: RoomMesh) -> void:
 		var c := PackedVector3Array()
 		var ns := PackedVector3Array()
 		for i in nx + 1:
-			var top: Vector3 = grid[0][i]
+			var top: Vector3 = grid[0][i] + (Vector3(0, 0, INSIDE) if side > 0.0 else Vector3.ZERO)
 			a.append(top)
 			c.append(top + Vector3(0, -0.1, -0.01))
 			ns.append(Vector3.BACK * side)
