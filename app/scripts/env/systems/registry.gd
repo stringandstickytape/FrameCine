@@ -18,6 +18,8 @@ const SYSTEMS := {
 	"showing": "res://scripts/env/systems/showing.gd",
 	"mirror_floor": "res://scripts/env/systems/mirror_floor.gd",
 	"presentation": "res://scripts/env/systems/presentation.gd",
+	"seats": "res://scripts/env/systems/seats.gd",
+	"motion": "res://scripts/env/systems/motion.gd",
 	"atmosphere": "res://scripts/env/systems/atmosphere.gd",
 	"weather": "res://scripts/env/systems/weather.gd",
 	"life": "res://scripts/env/systems/life.gd",
