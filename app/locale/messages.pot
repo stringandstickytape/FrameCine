@@ -957,7 +957,7 @@ msgstr ""
 msgid "Red"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:55
+#: scripts/xr/controller_look.gd:55 environments/streamline_1937.env.json
 msgid "Blue"
 msgstr ""
 
@@ -4053,8 +4053,28 @@ msgstr ""
 msgid "Cloud layers sky"
 msgstr ""
 
+#: environments/pink_palace.env.json
+msgid "Pink Palace"
+msgstr ""
+
+#: environments/shopfront_1906.env.json
+msgid "Shopfront 1906"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Streamline 1937"
+msgstr ""
+
 #: environments/cinema.env.json
 msgid "House lights in the film"
+msgstr ""
+
+#: environments/shopfront_1906.env.json
+msgid "Player piano"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Cove colours"
 msgstr ""
 
 #: environments/void.env.json
@@ -4065,7 +4085,31 @@ msgstr ""
 msgid "How bright the house lamps stay once the film has started."
 msgstr ""
 
+#: environments/shopfront_1906.env.json
+msgid "A player piano by the screen plays along with the film. Off: no piano."
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "The cove lights' colour before the film. Changing: they move through the colours. In the film they take the film's colour."
+msgstr ""
+
 #: environments/void.env.json
 msgid "A faint ring on the floor where you move. At the bottom: none."
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Changing"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Gold"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Rose"
+msgstr ""
+
+#: environments/streamline_1937.env.json
+msgid "Jade"
 msgstr ""
 

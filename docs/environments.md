@@ -1247,6 +1247,71 @@ people.
 | 16 | Void | `mirror_floor` | black | | | | ripple |
 | 17 | Pillow Fort, 1993 | `domestic` (cushions, a bedsheet), a tree, a tin of sweets (objects) | fairy lights (`light`, flicker), rain on the window (`weather`) | a ticking radiator (`sound_bed`) | the VCR flashes 12:00 (object widget) | a CRT telly (`presentation`, TV-era display) | the telly fills the opening |
 
+### Room: Shopfront 1906
+
+`app/environments/shopfront_1906.env.json`. A narrow picture house in a shop: pressed tin, folding chairs and gas
+lamps, the film on a framed sheet. Its test: `tests/test_room_picture_houses.gd`.
+
+- **Systems:** `light`; `shopfront` (id `hall`): a 5.6 m hall 4.2 m high, the sheet 4.4 x 2.5 m at 7.4 m, 5 rows in
+  front of the viewer's and 3 behind, the tin an aged cream, gas lamps with `flicker` 0.6; `seats` (folding chairs
+  in the builder's slots); `kit` (a tin booth in the back corner's `booth` slot); `screen_frame` (no black masking:
+  the sheet's frame; the beam from the booth's window); `atmosphere` (`beam_haze` 0.4, `beam_dust` 0.7).
+- **Setting:** `piano` (Player piano, on). Declared now; it binds to the `music` system's player piano when sound is
+  merged.
+- **Cues:** `ritual` (starting, Pre-show on): the gas down to half over 2 s, then to 18 % over 5 s, the street's glow
+  through the shop window down with it. `dim` (Pre-show off): the gas to 18 % over 3 s. `lights_up` (pre-show, end):
+  the gas up over 4 s, the street's glow back.
+- **Measured** (headless): 17 draws, 10 168 triangles, no lights, no particles, 8.4 MB; 63 seats.
+- **Sound to come:** the projector's clatter from the booth behind (a bed, low); a player piano by the screen that
+  starts in `starting` and plays along, answering `film.transient`, under the film.
+
+### Room: Streamline 1937
+
+`app/environments/streamline_1937.env.json`. A streamline cinema: warm plaster with cream faience bands, jade drapes,
+a gold festoon curtain, an organ console that rises from the pit, and cove lights that change colour. Its test:
+`tests/test_room_picture_houses.gd`.
+
+- **Systems:** `light`; `auditorium` (id `hall`): the cinema's hall with plain walls, plush seats (25 a row, 0.6 m),
+  a jade-green carpet, jade drapes, a black marble stage, the house lamps and the step and stage lights in the cove
+  colour; `kit` (id `console`): three moulded panels below the pit's floor, the organ console; `kit` (id `bands`):
+  three `curves` pieces a wall, flattened into long bands of cream with jade and gold, 3 to 4.4 m up; `motion` (id
+  `organ`): the console 2.15 m up out of the pit (0.25 m/s); `motion` (id `festoon`): a gold festoon of 6 swags over
+  the screen, at the motion limits (0.5 m/s, 0.3 m/s²); `screen_frame`; `atmosphere` (id `cove`): `beam_haze` 0.2 and
+  two thin fog layers under the ceiling, the cove's glow in the setting's colour, shown out of the film; `atmosphere`
+  (id `cove_film`): the same layers in the film's colour (`film.colour`, strength 0.85), shown in the film.
+- **The console** is the `console` kit's mesh, so this kit comes before `bands` in the document: the kit's mesh is
+  named `PieceStatic`, and a second kit's mesh of that name is renamed when it is added. The console's top stays
+  under the sight line to the picture's bottom from the front row when it is up (the test checks the sight line with
+  it up).
+- **Setting:** `cove` (Cove colours: Changing, Gold, Rose, Jade, Blue). It sets the house lamps' and the step lights'
+  colour (the room builds again) and the cove's glow. With Changing, the glow goes gold, rose, jade, blue in turn
+  (`cove_cycle`, every 20 s in the pre-show, paused, at the end and in the intermission).
+- **Cues:** `ritual` (starting): the lamps to half, the console rises over 10 s, the festoon rises, the lamps to 15 %
+  over 5 s. `organ_down` (playing): 30 s on, the console goes back into the pit. `dim` (Pre-show off). `lights_up`
+  (pre-show, end): lamps up, the festoon and the console down. With Pre-show off the festoon rises by itself 4 s into
+  the film (the motion system's in-front rule).
+- **Measured** (headless): 27 draws, 182 676 triangles, no lights, no particles, 8.0 MB; 275 seats.
+- **Sound to come:** an organ (`music`) that plays as the console rises and stops as it sinks, under the film.
+
+### Room: Pink Palace
+
+`app/environments/pink_palace.env.json`. A picture palace in pink: pink and blue waves on the walls and across the
+ceiling, a plush balcony, lamps that swell and fall before the film, and a ceremonial curtain. Its test:
+`tests/test_room_picture_houses.gd`.
+
+- **Systems:** `light`; `auditorium` (id `hall`): plain dusty-pink walls, a pale pink ceiling with its panels, a rose
+  carpet, pink drapes, plush seats in rose velvet (25 a row), rows 0.85 m deep, a balcony of 3 rows; `kit`: a long
+  `curves` piece on each side wall (pink and blue), four across the ceiling between its panels, a pink `balcony_front`
+  on the balcony; `screen_frame`; `showing` (the pre-show's curtains).
+- **The screen** is 0.3 m higher than the cinema's (centre 1.9 m) and the rows 0.85 m deep: the balcony's front row
+  then sees the bottom of the picture over the balcony's parapet. The `balcony_front` piece is 0.8 m high for the
+  same reason.
+- **Cues:** `sunburst` (every 10 s in the pre-show): the ceiling's lamps fall to 55 % over 4 s and rise again over 4 s.
+  `ritual` (starting): the chime, the lamps to half, the curtains part over 5 s, then after 6.5 s (after any `sunburst`
+  still running) the lamps to 15 % over 5 s. `dim` (Pre-show off): the same wait, then 15 % over 3 s. `lights_up`.
+- **Settings:** none of its own (the common ones).
+- **Measured** (headless): 22 draws, 234 504 triangles, no lights, no particles, 9.0 MB; 356 seats.
+
 ### TV-era rooms
 
 The same `presentation` chain makes the TV-era rooms: source (a broadcast, a tape, a disc), transmission (aerial
