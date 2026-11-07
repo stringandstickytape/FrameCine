@@ -3480,3 +3480,9 @@ msgstr "窗外的星星"
 
 msgid "How many stars the night shows through the long window."
 msgstr "长窗外的夜空里有多少星星。"
+
+msgid "Wrong way round"
+msgstr "左右颠倒"
+
+msgid "The picture as the mirror shows it, left and right swapped. Off: the set turns it round."
+msgstr "画面如镜中所见，左右互换。关闭：由电视机把它转回来。"

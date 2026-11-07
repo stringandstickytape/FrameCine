@@ -19,10 +19,10 @@ const FUTURE := "tv_future"
 
 ## id -> [year (a word for the present), preset, aspect of the picture]
 const ROOMS2 := {
-	"tv_1937": ["1937", "fireside_1953", 4.0 / 3.0],
-	"tv_1966": ["1966", "fireside_1953", 4.0 / 3.0],
-	"tv_2002": ["2002", "freedtv_2005", 16.0 / 9.0],
-	"tv_today": ["today", "freedtv_2005", 16.0 / 9.0],
+	"tv_1937": ["1937", "mirrorlid_1937", 1.25],
+	"tv_1966": ["1966", "rental_1966", 4.0 / 3.0],
+	"tv_2002": ["2002", "projection_2002", 16.0 / 9.0],
+	"tv_today": ["today", "slimline_present", 16.0 / 9.0],
 }
 ## Each room's sound beds: id -> {bed: sound}.
 const SOUND2 := {
@@ -60,6 +60,10 @@ func run_tests() -> void:
 				await _tv_2002(room)
 			"tv_today":
 				await _tv_today(room)
+		await switches(id, room, id == "tv_1966")
+		var p := _p(room)
+		check("%s: the set's window the picture's shape (tube %.3f)" % [id, float(p.value("tube"))],
+				absf(float(p.value("tube")) - float(ROOMS2[id][2])) < 0.01)
 		RoomSound.check_beds(self, id, room, SOUND2[id], "small_room")
 		await sounds(id, room, SOUND2[id])
 		await done(room)
@@ -146,22 +150,23 @@ func _model_count(room: Node3D, model: String) -> int:
 			return d["model"] == model).size()
 
 
-## The set warms up in the pre-show: dim at first, full after.
-func _warms_up(label: String, room: Node3D) -> void:
-	var p := _p(room)
-	await _play(room, 1.0, STOPPED)
-	room.host.snapshot_override = PLAYING
-	var least := _extreme(room, "gain", false)
-	check("%s: the set warms up: dim at first (%.2f)" % [label, least], least < 0.65)
-	await _play(room, 10.0)
-	check("%s: then full (%.2f)" % [label, float(p.value("gain"))], absf(float(p.value("gain")) - 1.0) < 0.01)
-
-
-## 1937: a well-to-do drawing room: a walnut set, black and white at 405 lines, a marble fireplace with a coal fire,
-## parquet and a rug, two velvet armchairs, a standard lamp, the tea tray on the sideboard.
+## 1937: a well-to-do drawing room: a walnut mirror-lid set (the picture the tube's face in its lid's mirror), black
+## and white at 405 lines, the Wrong way round setting, a marble fireplace with a coal fire, parquet and a rug, two
+## velvet armchairs, a standard lamp, the tea tray on the sideboard.
 func _tv_1937(room: Node3D) -> void:
 	var p := _p(room)
 	var b: Node = room.host.system("room")
+	var t: Dictionary = Domestic._telly(Domestic.resolved(b.params))
+	check("1937: a mirror-lid cabinet on the floor, its lid open over the tube", str(t["form"]) == "mirror_lid"
+			and t.has("lid") and t.has("tube") and float(t["foot"]) < 0.01)
+	check("1937: a valve set's long warm-up (%.0f s)" % float(p.value("warm_up")), p.switch_style() == "valve"
+			and float(p.value("warm_up")) >= 8.0)
+	check("1937: the set turns the mirror's picture round (Wrong way round off)", not bool(p.value("mirror")))
+	room.host.set_setting("wrong_way", true)
+	await _play(room, 0.5, STOPPED)
+	check("1937: Wrong way round: left and right swapped", bool(p.value("mirror")))
+	room.host.set_setting("wrong_way", false)
+	await _play(room, 0.5, STOPPED)
 	check("1937: black and white broadcast", is_equal_approx(float(p.value("colour")), 0.0)
 			and str(p.value("source")) == "broadcast")
 	check("1937: Snow from the aerial at its default (%.2f)" % float(p.value("snow")),
@@ -182,7 +187,6 @@ func _tv_1937(room: Node3D) -> void:
 			and room.get_node_or_null("PieceLamps") != null)
 	check("1937: three velvet armchairs", _model_count(room, "club_chair") == 3)
 	check("1937: no problems placing the pieces", (room.host.system("kit").problems() as Array).is_empty())
-	await _warms_up("1937", room)
 	await _lamps("1937", room, 0.25)
 
 
@@ -191,16 +195,18 @@ func _tv_1966(room: Node3D) -> void:
 	var p := _p(room)
 	var b: Node = room.host.system("room")
 	var t: Dictionary = Domestic._telly(Domestic.resolved(b.params))
-	check("1966: the set on splayed legs (a radiogram's)", str(t["stand"]) == "radiogram")
+	check("1966: a console on splayed legs, its doors folded back", str(t["form"]) == "console"
+			and t.has("legs") and float(t["foot"]) > 0.3 and bool(b.params["telly_doors"]))
 	var body: Vector3 = t["body"][0]
 	var outer: Vector3 = t["body"][1]
 	var pic: Array = t["pic"]
 	var dial := _piece(room, "channel_dial")
 	var at := Vector3(float(dial["at"][0]), float(dial["at"][1]), float(dial["at"][2]))
-	var bottom := float(pic[0].y) - float(pic[1].y) * 0.5
-	check("1966: the channel dial on the set's front, under the picture (%s)" % at, not dial.is_empty()
-			and absf(at.z - float(pic[0].z)) < 0.002 and at.y < bottom - 0.035 and at.y > float(t["foot"]) + 0.035
-			and absf(at.x - body.x) + 0.1 < outer.x * 0.5)
+	var r := float(dial["size"][0]) * 0.5
+	var side := at.x - float(pic[0].x) - float(pic[1].x) * 0.5
+	check("1966: the channel dial on the set's front, in the strip beside the picture (%s)" % at, not dial.is_empty()
+			and absf(at.z - float(pic[0].z)) < 0.002 and side > r and at.x + r < body.x + outer.x * 0.5
+			and at.y - r * 3.6 > float(t["foot"]) and at.y + r < body.y + outer.y * 0.5)
 	check("1966: black and white", is_equal_approx(float(p.value("colour")), 0.0))
 	room.host.set_setting("aerial", 0.5)
 	await _play(room, 0.5, STOPPED)
@@ -213,7 +219,8 @@ func _tv_1966(room: Node3D) -> void:
 	var cover: Dictionary = room.host.system("seats").params["upholstery"]
 	var orange := Color(float(cover["color"][0]), float(cover["color"][1]), float(cover["color"][2]))
 	check("1966: the settee orange (%s)" % orange, orange.r > 0.6 and orange.g < orange.r * 0.6 and orange.b < 0.2)
-	await _warms_up("1966", room)
+	check("1966: a valve set, a film panned and scanned to fill the tube", p.switch_style() == "valve"
+			and str(p.value("aspect_mode")) == "pan_and_scan")
 	room.host.set_setting("lamps", 0.6)
 	await _lamps("1966", room, 0.6)
 	room.host.set_setting("lamps", 0.3)
@@ -225,7 +232,10 @@ func _tv_2002(room: Node3D) -> void:
 	var b: Node = room.host.system("room")
 	var t: Dictionary = Domestic._telly(Domestic.resolved(b.params))
 	var body: Vector3 = t["body"][1]
-	check("2002: a big deep set (%.2f m wide, %.2f m deep)" % [body.x, body.z], body.x > 1.2 and body.z > 0.6)
+	check("2002: a big deep rear projection set from the floor (%.2f m wide, %.2f m deep)" % [body.x, body.z],
+			str(t["form"]) == "rear_projection" and body.x > 1.2 and body.z > 0.6 and float(t["foot"]) < 0.01)
+	check("2002: the picture dims seen from off its axis (%.2f)" % float(p.value("off_axis")),
+			str(p.value("display")) == "rear_projection" and float(p.value("off_axis")) >= 0.5)
 	var cover: Dictionary = room.host.system("seats").params["upholstery"]
 	check("2002: a leather sofa of three and an armchair", _model_count(room, "settee") == 3
 			and _model_count(room, "club_chair") == 1 and str(cover["library"]).ends_with("leather"))
@@ -250,8 +260,8 @@ func _tv_today(room: Node3D) -> void:
 	var p := _p(room)
 	var b: Node = room.host.system("room")
 	var t: Dictionary = Domestic._telly(Domestic.resolved(b.params))
-	check("today: a thin panel on the wall (%.2f m deep)" % float(t["body"][1].z), str(t["form"]) == "flat_panel"
-			and str(t["stand"]) == "wall" and float(t["body"][1].z) < 0.1)
+	check("today: a very thin OLED panel on the wall (%.2f m deep)" % float(t["body"][1].z), str(t["form"]) == "oled"
+			and str(t["stand"]) == "wall" and float(t["body"][1].z) < 0.05)
 	var wall: Dictionary = b.params["walls"]
 	check("today: dark walls", Color(float(wall["color"][0]), float(wall["color"][1]),
 			float(wall["color"][2])).get_luminance() < 0.25)
@@ -261,8 +271,8 @@ func _tv_today(room: Node3D) -> void:
 	check("today: a soundbar on the media unit under the picture", not unit.is_empty() and not bar.is_empty()
 			and absf(float(bar["at"][1]) - float(unit["size"][1])) < 0.005 and float(bar["at"][1])
 			+ float(bar["size"][1]) < float(t["foot"]))
-	check("today: a clean picture: no grid, no bleed, the film's own sound", float(p.value("panel_grid")) < 0.001
-			and float(p.value("panel_bleed")) < 0.001 and str(p.value("speaker")) == "none")
+	check("today: a clean picture on an OLED, letterboxed, the film's own sound", str(p.value("display")) == "oled"
+			and str(p.value("aspect_mode")) == "letterbox" and str(p.value("speaker")) == "none")
 	check("today: a floor lamp by the sofa (house group)", not _piece(room, "floor_lamp").is_empty()
 			and room.get_node_or_null("PieceLamps") != null and float(room.host.system("light").group_energy("house"))
 			> 0.0)

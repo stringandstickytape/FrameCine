@@ -81,6 +81,7 @@ func run_tests() -> void:
 				await _tv_1993(room)
 			"tv_2005":
 				await _tv_2005(room)
+		await switches(id, room, id == "tv_1972")
 		if SOUND.has(id):
 			_sound(id, room)
 		await done(room)
@@ -134,7 +135,8 @@ func _common(id: String, room: Node3D, doc: Dictionary) -> void:
 			float(ds["center"][0]), float(ds["center"][1]), float(ds["center"][2]))) and size.is_equal_approx(
 			Vector2(float(ds["size"][0]), float(ds["size"][1]))))
 	check("%s: the tube's shape (%.3f)" % [id, size.aspect()], absf(size.aspect() - float(era(id)[2])) < 0.01)
-	var why := telly_glass(room, sc)
+	# A mirror-lid set's picture is the tube's face in the lid's mirror, not glass in a front (tv_1937's own checks).
+	var why := "" if str(b.params.get("telly", "")) == "mirror_lid" else telly_glass(room, sc)
 	check("%s: the picture on the set's glass %s" % [id, why], why == "")
 	var deg := rad_to_deg(2.0 * atan(size.x * 0.5 / -c.z))
 	check("%s: %.2f m wide at %.2f m: %.1f degrees from the viewer's seat" % [id, size.x, -c.z, deg],
@@ -146,7 +148,47 @@ func _common(id: String, room: Node3D, doc: Dictionary) -> void:
 	check("%s: every seat in front of the telly, at least 0.7 m away" % id, seats.all(
 			func(s: Transform3D) -> bool: return s.origin.z > c.z + 0.7))
 	check("%s: object physics (%d shapes)" % [id, room.collision_shapes().size()], room.collision_shapes().size() > 8)
+	check("%s: the set dark until it is switched on (%s)" % [id, p.power], p.power == "off")
 	room.host.auto = false
+
+
+## The set switches on as the film starts (its own way: a valve set's slow warm-up, a tube's dot opening out, a
+## panel coming up), with its own sounds, and off when the film ends; with `channel`, a channel's clunk once it is on.
+## Leaves the room in the pre-show, the set on.
+func switches(id: String, room: Node3D, channel := false) -> void:
+	var p := _p(room)
+	var ended := {"open": true, "playing": false, "position": 0.0, "duration": 5400.0, "ended": true}
+	# The set's sounds are made on a worker thread the first time (the valves' hum takes a moment): the host's steps
+	# here take no time, so wait for them in real frames.
+	for i in 600:
+		if int(p.get("_sound_task")) < 0:
+			break
+		room.host.step(0.02)
+		await process_frame
+	await _play(room, 1.0, STOPPED)
+	await _play(room, 4.0)
+	check("%s: on in the film (%s)" % [id, p.power], p.power in ["on", "switching_on"])
+	await _play(room, 12.0)
+	check("%s: fully on (%s)" % [id, p.power], p.power == "on")
+	await _play(room, 0.5, ended)
+	check("%s: the film ends: the set switches off (%s)" % [id, p.power], p.power in ["switching_off", "off"])
+	await _play(room, 4.0, ended)
+	check("%s: and is dark (%s)" % [id, p.power], p.power == "off")
+	await _play(room, 1.0, STOPPED)
+	p.sounds_played.clear()
+	room.host.snapshot_override = PLAYING
+	room.host.step(0.1)
+	room.host.step(0.1)
+	var style := str(p.switch_style())
+	check("%s: the film starts: the set comes on its own way (%s, %s)" % [id, style, p.power],
+			p.power == "switching_on" or (style == "panel" and p.power == "off"))
+	await _play(room, 14.0)
+	var heard: Array = (p.sounds_played as Array).map(func(s: Array) -> String: return str(s[0]))
+	check("%s: on, with its own sounds %s (%s)" % [id, heard, style], p.power == "on"
+			and (style == "panel" or heard.has("switch_clunk")))
+	if channel:
+		check("%s: then a channel's clunk %s" % [id, heard], heard.has("channel_clunk"))
+	await _play(room, 1.0, STOPPED)
 
 
 ## A one-shot bed's plays so far.
@@ -266,11 +308,7 @@ func _tv_1953(room: Node3D) -> void:
 	var b: Node = room.host.system("room")
 	check("1953: a grey day beyond the window", room.get_node_or_null("Window") != null
 			and str(b.params["outside"]) == "glow" and room.host.system("sky") == null)
-	room.host.snapshot_override = PLAYING
-	var least := _extreme(room, "gain", false)
-	check("1953: the set warms up: dim at first (%.2f)" % least, least < 0.6)
-	await _play(room, 9.0)
-	check("1953: then full (%.2f)" % float(p.value("gain")), absf(float(p.value("gain")) - 1.0) < 0.01)
+	check("1953: a valve set (it warms up slowly)", p.switch_style() == "valve")
 	await _lamps("1953", room, 0.25)
 
 
