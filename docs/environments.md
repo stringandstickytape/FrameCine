@@ -1630,6 +1630,139 @@ in a black sky full of stars. Silent: the room has no sound bed and makes no sou
   ribs meeting overhead, stars and the Milky Way through the glass, Earth up and to the right of the picture.
 - **Sound:** none, by design. Acoustics (for the film's spatial sound): a large glass dome, rt60 1.1, wet 0.35.
 
+Seven rooms, one for each TV preset, are the history of television: `app/environments/tv_<year>.env.json`, in the
+Room tab's Television group (`room.category` "tv"). Their names start "TV <year> - ", so the group reads as a
+timeline. (A room's name takes letters, digits, space, - and _ only. "Television, 1930: ..." is refused, and the
+longer "Television 1930 - ..." names made the Room tab's card too wide in the pseudo-locale.) Each is a `domestic`
+room (style `plain`, or `bedroom_1993`) with `screen` "telly" and the era's preset on it, the `seats` system for the
+chairs, and cues for the lamps: down when the film starts or plays (`lamps_down`), up in the pre-show and after the
+end (`lamps_up`). Tested by `tests/test_room_tv.gd` (headless: every check of `test_environments.gd`, the preset,
+the telly's shape and size, each setting and what it does, the cues).
+
+**The telly's shape.** The film is drawn on the screen's own mesh, which is the document's width at the film's
+aspect (`video_screen.gd get_flat_size()`); a document cannot give it another shape. So the domestic telly's tube (the
+cabinet's opening and the dark glass behind the picture) is 4:3 for the sets before 2000, and a 16:9 film sits in it
+letterboxed, as a wide film did on a 4:3 set. A 4:3 film fills the tube. The CRT's bulge and round corners are those
+of the film's own rectangle, not the tube's (the open question "A telly's shape" stays open).
+
+**The telly's size.** The headset shows about 20 pixels a degree, so a set as small as it really was, across a room,
+would be a postage stamp. The viewer's chair is pulled up to the set instead: every picture is 17 to 23 degrees across
+from the viewer's own seat (the test holds it), its centre 0.25 to 0.3 m under the eyes. The smallest width a document
+screen may have is 0.3 m.
+
+| Room | The tube (w x h) | From the viewer's eyes | Across | Why |
+|---|---|---|---|---|
+| 1930 | 0.30 x 0.225 m | 0.9 m | 19 degrees | the smallest screen a document may give; the set's own window was smaller, so the chair is close, as a family huddled round one |
+| 1953 | 0.36 x 0.27 m (a 17 inch tube) | 1.1 m | 19 degrees | a big set for its day; the armchairs gathered round |
+| 1972 | 0.46 x 0.345 m (22 inch) | 1.4 m | 19 degrees | the colour set in the corner, the chairs in a row |
+| 1983 | 0.30 x 0.225 m (14 inch portable) | 0.8 m | 21 degrees | at a desk: the portable is near, as a screen for a home computer was |
+| 1987 | 0.54 x 0.405 m (26 inch) | 1.5 m | 20 degrees | the family set, the settee across from it |
+| 1993 | 0.40 x 0.30 m (20 inch) | 1.1 m | 21 degrees | a bedroom set seen from a bean bag on the floor |
+| 2005 | 0.72 x 0.405 m (32 inch, 16:9) | 1.9 m | 21 degrees | the first flat panel: wider, and the sofa further back |
+
+### Room: TV 1930 - glowing box
+
+1 of 7. A small dark parlour with a coal fire. A mechanical-scan set in a walnut cabinet on a walnut chest glows
+orange with thirty lines (`glowbox_1930`, its sound through the radio cabinet's speaker). Three club chairs in
+velvet, two angled in beside the viewer's. A wall lamp, a night window.
+
+- Systems: `light` (a low, warm fill), `domestic` (2 x 1.4 m in front, 2.6 m behind; fireplace on the right, the
+  window on the left with a dark night glow), `seats` (two club chairs as places), `presentation`.
+- Settings: Lines in the picture (30 as it was, 60, 120: `presentation.mech_lines` by `map`); Fire in the grate
+  (`domestic.fire`).
+- Cues: `tuning_in` (Pre-show): the signal weak at the start, the picture coming in over 6 s. The lamp down to 15 %
+  in the film.
+- Measured: 18 draws, 2 216 triangles, 10 MB, no particles.
+
+### Room: TV 1953 - by the fire
+
+2 of 7. A sitting room with a lit coal fire and a cat on the hearth. A small black and white set in a walnut cabinet
+on a chest (`fireside_1953`: 405 lines, snow and a ghost). Four empty armchairs gathered round it. Rain on the window
+from time to time; through it, an evening sky over hills. A potted fern in the corner.
+
+- Systems: `light`, `domestic`, `kit` (ferns), `seats` (three armchairs as places), `sky` (dusk 0.85, clouds 0.7),
+  `vista` (hills to the left), `weather` (changing, 500 drops outside the window, the pane), `life` (`cat`, its path
+  along the hearth), `presentation`.
+- Settings: Snow from the aerial (0 to 60 %: `presentation.snow`); Fire in the grate.
+- Cues: `warm_up` (Pre-show): the valves warm up, the picture dim at first and full over 6 s. The lamps down to 25 %.
+- Measured: 24 draws, 10 168 triangles, 10.3 MB, 500 particles.
+
+### Room: TV 1972 - first colour
+
+3 of 7. Mustard walls with orange and brown bands sweeping behind the set, a swirling carpet, three club chairs in
+orange velour and a bean bag. An early colour set in a teak-look cabinet (`colourstar_1972`: a shadow mask, warm
+rich colour). A summer dusk in the window.
+
+- Systems: `light`, `domestic` (a radiator under the window), `kit` (carpet, curves on the front wall), `seats` (a
+  bean bag as a place), `sky` (dusk 0.45), `vista` (hills), `presentation`.
+- Settings: Snow from the aerial (0 to 40 %); Colour (the set's colour knob, 0.5 to 1.5 times: `presentation.colour`).
+- Cues: `warm_up` (Pre-show), the lamps down to 30 %.
+- Measured: 19 draws, 9 252 triangles, 7.5 MB.
+
+### Room: TV 1983 - desk portable
+
+4 of 7. A small room at night: a portable telly on a desk, a beige home computer on the desk in front of it, a wooden
+chair. Drizzle on the window, the street lamp's orange glow beyond it. `sirclive_1983`: the computer's aerial lead,
+240 bold lines. A bean bag at the back for a second seat.
+
+- Systems: `light`, `domestic` (no lamps; the outside glow sodium orange), `kit` (two `partition` pieces: the desk,
+  0.75 m high, level with the telly's foot, and the computer, a beige box), `seats` (the bean bag), `weather` (light
+  rain on the pane only), `presentation`.
+- Settings: Aerial lead noise (`presentation.snow`); Bold lines (`presentation.scanlines` 0.65 or 0.2).
+- Cues: `tuning_in` (Pre-show): a `glitch` as the set finds the computer's channel.
+- Measured: 17 draws, 952 triangles, 8.2 MB.
+
+### Room: TV 1987 - rented tape
+
+5 of 7. The family living room on a wet night: a black telly on a wooden cabinet with a video recorder in its top
+shelf, a settee of three chairs and an armchair, a white-painted brick fireplace, a fern. `rewinder_1987`: a rented
+tape, tracking wobble, smeared colour, the tear at the bottom.
+
+- Systems: `light`, `domestic`, `kit` (a `partition` as the video recorder, ferns), `seats` (the armchair), `sky`
+  (night, clouds), `vista` (hills), `weather` (changing, 500 drops, the pane), `presentation`.
+- Settings: The tape (fresh, rented, worn out: `tape_noise`, `chroma_bleed` and `head_switch` by `map`); Wall lamps in
+  the film (0 to 100 %, default 30 %).
+- Cues: `tape_start` (Pre-show): the tape tears for a moment as it starts (`glitch`, 1.5 s). The lamps follow the
+  setting.
+- Measured: 25 draws, 10 108 triangles, 9.5 MB, 500 particles.
+
+### Room: TV 1993 - bedroom telly
+
+6 of 7. A teenager's bedroom (not the pillow fort): blue walls, fairy lights along the wall over the telly, the bed,
+a radiator under the window, rain in the night outside. A bean bag on the floor; a second place sitting on the bed.
+`nightowl_1993`: a tape watched a few times on a flatter tube with an aperture grille.
+
+- Systems: `light` (`accent` bound to the fairy lights' setting), `domestic` (`bedroom_1993`, `fort` off,
+  `fairy_lights` on), `seats` (bean bags; a cushion on the bed), `sky` (night), `weather` (by the setting, 400 drops,
+  the pane), `presentation`.
+- Settings: Weather at the window (raining, a dry night, showers: `weather.mode`); Fairy lights over the telly (0 to
+  100 %: `light.accent`, which also scales the window's glow group).
+- Measured: 20 draws, 8 470 triangles, 6.3 MB, 400 particles.
+
+### Room: TV 2005 - flat screen
+
+7 of 7. A pale living room with a laminate floor, a grey settee of three chairs and an armchair, a plant, a wide
+window on a sunset. A 32 inch flat panel on a low wooden stand (`freedtv_2005`: a free digital broadcast, a faint
+pixel grid, the backlight through the dark scenes).
+
+- Systems: `light`, `domestic`, `kit` (ferns), `seats` (the armchair), `sky` (dusk 0.6), `vista` (hills),
+  `presentation`.
+- Settings: Wall lamps in the film; Backlight bleed (`presentation.panel_bleed`).
+- Measured: 19 draws, 10 232 triangles, 10.3 MB.
+
+**What the systems lack for these rooms** (each room took the closest thing there is):
+
+- A tube's own shape for the CRT (above). The domestic telly is always a deep box (its depth 0.75 of its width), so
+  the 2005 flat panel is a deep box from the side.
+- Furniture: there is no desk, computer, video recorder, sideboard, standard lamp, rug or settee. The desk, the
+  computer and the video recorder are the kit's `partition` (a plasterboard box with a skirting) in laminate and
+  plastic colours; the settee is three club chairs in a row. The radio-style cabinet of 1930 is the telly on a walnut
+  chest.
+- The seats system's own places are not listed before the room is built (no static layout), so the seat list before
+  the build is the builder's alone.
+- Sound: none yet; the rooms get theirs when the sound systems are merged (each room's own sound comes from its
+  presentation's speaker meanwhile).
+
 ## Files
 
 | File | What |
