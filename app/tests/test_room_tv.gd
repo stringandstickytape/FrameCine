@@ -9,7 +9,8 @@ extends "res://tests/env_builder_harness.gd"
 ## starting; the lamps down in the film and up after it); the era's own things (a fire, the cat; a radiogram, a
 ## sideboard, a rug and a standard lamp; a portable on a desk beside a computer; a video recorder under the set
 ## flashing 12:00 and a settee; a bed and fairy lights; a flat panel on a tv unit, a coffee table; rain on the pane);
-## the picture on the set's glass in every room.
+## the picture on the set's glass in every room. The 1930, 1953 and 1993 rooms' sound (tests/room_sound.gd): their
+## beds on the room's bus, each bound bed on its setting or channel, the tape going in, the level.
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_tv.gd
 
 const Presentation := preload("res://scripts/env/systems/presentation.gd")
@@ -30,6 +31,14 @@ const EYE := 1.2
 ## The picture's width from the viewer's own seat, degrees: small sets are small, but the film stays watchable.
 const MIN_DEG := 17.0
 const MAX_DEG := 23.0
+
+const RoomSound := preload("res://tests/room_sound.gd")
+## The rooms' sound beds checked here: id -> {bed: sound}.
+const SOUND := {
+	"tv_1930": {"fire": "fire", "clock": "clock", "motor": "hum"},
+	"tv_1953": {"fire": "fire", "clock": "clock", "rain": "rain_glass", "whine": "tube_whine"},
+	"tv_1993": {"radiator": "radiator", "rain": "rain_glass", "vcr": "vcr", "whine": "tube_whine"},
+}
 
 const PLAYING := {"open": true, "playing": true, "position": 0.0, "duration": 5400.0}
 const STOPPED := {"open": false}
@@ -65,7 +74,11 @@ func run_tests() -> void:
 				await _tv_1993(room)
 			"tv_2005":
 				await _tv_2005(room)
+		if SOUND.has(id):
+			_sound(id, room)
 		await done(room)
+		if SOUND.has(id):
+			await RoomSound.check_level(self, self, id, doc)
 	var sorted := names.duplicate()
 	sorted.sort()
 	check("the names sort by year, so the group reads as a timeline %s" % [names], sorted == names)
@@ -352,3 +365,31 @@ func _tv_2005(room: Node3D) -> void:
 	room.host.set_setting("lamps", 0.0)
 	await _lamps("2005", room, 0.0)
 	room.host.set_setting("lamps", 0.3)
+
+
+## The room's sound (docs/environments.md, "Sound and music", "For the rooms"): its beds on the room's bus, a small
+## room's acoustics, the fire on the Fire setting, rain on the glass with the weather's rain, the tube's whine at the
+## era's line pitch (none for the 1930 disc), the tape going in as the film starts.
+func _sound(id: String, room: Node3D) -> void:
+	var h: Node = room.host
+	RoomSound.check_beds(self, id, room, SOUND[id], "small_room")
+	if h.system("fire") != null:
+		RoomSound.check_setting(self, id, room, "fire", "fire", false, true)
+	if h.system("rain") != null:
+		RoomSound.check_follows(self, id, room, "rain", "weather.rain")
+	var whine: Node = h.system("whine")
+	if id == "tv_1953":
+		check("1953: the tube's whine at a 405-line set's pitch, low (%.3f, %.0f dB)" % [float(whine.params["pitch"]),
+				float(whine.params["gain_db"])], is_equal_approx(float(whine.params["pitch"]), 0.648)
+				and float(whine.params["gain_db"]) < 0.0)
+	if id == "tv_1993":
+		check("1993: the tube's whine at 625 lines (%.3f)" % float(whine.params["pitch"]),
+				is_equal_approx(float(whine.params["pitch"]), 1.0))
+		var vcr: Node = h.system("vcr")
+		h.set_setting("ritual", true)
+		_play(room, 1.0, STOPPED)
+		var v0: int = vcr.plays
+		_play(room, 2.0)
+		check("1993: the film starts: the tape goes in (%d, %s)" % [vcr.plays - v0, h.timeline.state],
+				vcr.plays - v0 == 1)
+		_play(room, 1.0, STOPPED)
