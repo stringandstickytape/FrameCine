@@ -44,6 +44,9 @@ static func schema(doc: Dictionary) -> Array:
 
 ## The built room's figures: draws (a mesh surface each), triangles, live lights (visible, not the bake's hidden
 ## ones), particles (their amounts) and texture memory (the images' bytes with their mip levels, each texture once).
+## Texture memory is the headset's: a library map loaded from its .mtex counts its ASTC blocks (MaterialLibrary's
+## frame_bytes meta), also where this GPU has no ASTC and holds it decompressed (lavapipe, a PC), so the figure is
+## the same headless, rendered and on the Frame.
 static func measure(room: Node) -> Dictionary:
 	var draws := 0
 	var tris := 0
@@ -97,12 +100,19 @@ static func _textures(m: Material, out: Dictionary) -> void:
 		for u: Dictionary in (m as ShaderMaterial).shader.get_shader_uniform_list():
 			var t: Variant = (m as ShaderMaterial).get_shader_parameter(u["name"])
 			if t is ImageTexture and not out.has((t as Texture2D).get_rid()):
-				var img := (t as ImageTexture).get_image()
-				out[(t as Texture2D).get_rid()] = img.get_data_size() if img != null else 0
+				out[(t as Texture2D).get_rid()] = _texture_bytes(t as ImageTexture)
 	elif m is BaseMaterial3D:
 		var t: Texture2D = (m as BaseMaterial3D).albedo_texture
 		if t is ImageTexture and not out.has(t.get_rid()):
-			out[t.get_rid()] = (t as ImageTexture).get_image().get_data_size()
+			out[t.get_rid()] = _texture_bytes(t as ImageTexture)
+
+
+## A texture's bytes on the headset: its frame_bytes meta (a library map's ASTC size), else its image's.
+static func _texture_bytes(t: ImageTexture) -> int:
+	if t.has_meta(MaterialLibrary.FRAME_BYTES_META):
+		return int(t.get_meta(MaterialLibrary.FRAME_BYTES_META))
+	var img := t.get_image()
+	return img.get_data_size() if img != null else 0
 
 
 static func budget(stats: Dictionary, limits := BUDGET) -> Array:

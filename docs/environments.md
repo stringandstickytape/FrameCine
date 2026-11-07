@@ -367,6 +367,10 @@ and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider'
 1. **Schema:** `RoomSchema.validate(doc, "new")`, with the version 4 sections.
 2. **Headset budget:** the room is built headless and measured: draw calls (one a mesh surface), triangles, live
    lights (the bake's hidden lights do not count), particles, and texture memory (the images' bytes with mip levels).
+   Texture memory is the headset's: a library map counts its ASTC blocks as loaded from its `.mtex`
+   (`MaterialLibrary.FRAME_BYTES_META`), so the figure is the same headless, under lavapipe and on the Frame. Before
+   2026-11-07 a rendered measure counted the maps as a GPU without ASTC holds them, decompressed (the cinema read
+   144 MB under lavapipe against 9 MB on the Frame).
 
    | Budget | Per room | The cinema | The Void |
    |---|---|---|---|
@@ -473,8 +477,7 @@ auditorium's `seat_mesh()` does, for every `seat_model` but the stadium seat.
 - `collision_shapes()`: each seat's model boxes (one or two), for object physics.
 
 Measured headless (`test_env_seats.gd`): 15 plush seats are 2 draws and 9 660 triangles. A tipped or broken form
-adds two draws. Pews' ends add one or two. Texture memory is a budget figure measured headless. Under lavapipe a PC
-holds the textures decompressed (the headset keeps them ASTC), so the cinema alone reads 144 MB there.
+adds two draws. Pews' ends add one or two. Texture memory is the headset's, rendered or not ("The checks").
 
 | Parameter | Default | What |
 |---|---|---|

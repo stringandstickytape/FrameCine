@@ -247,11 +247,8 @@ func _auditorium() -> void:
 			sys.hides >= hides + 2 and (not _rendered()
 			or mmi.multimesh.get_instance_transform(5).basis.get_scale().is_zero_approx()))
 	var stats := EnvChecks.measure(room)
-	# The budget's texture memory is measured headless (docs, "Headset budget"); a PC's renderer holds the headset's
-	# ASTC textures decompressed (the cinema alone: 144 MB under lavapipe).
+	# Texture memory is the headset's, rendered or not (env_checks.gd measure(): a library map counts its ASTC size).
 	var limits := EnvChecks.BUDGET.duplicate()
-	if _rendered():
-		limits.erase("texture_mb")
 	_check("the hall with its broken seat within budget %s" % [stats], EnvChecks.budget(stats, limits).is_empty())
 	var broken := room.find_child("SeatsBroken", true, false) as MultiMeshInstance3D
 	var seat_mats := func(m: Mesh) -> Array:

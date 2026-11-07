@@ -83,11 +83,8 @@ func _run() -> void:
 	await process_frame
 	var stats := EnvChecks.measure(room)
 	print("  the test room: %s" % [stats])
-	# Rendered, the hall's library materials load larger than headless (the cinema's own textures, not life's: the
-	# creatures have none); the budget is the headless measure (test_environments.gd).
+	# Texture memory is the headset's, rendered or not (env_checks.gd measure()).
 	var limits := EnvChecks.BUDGET.duplicate()
-	if DisplayServer.get_name() != "headless":
-		limits.erase("texture_mb")
 	_check("within the headset's budget %s" % [EnvChecks.budget(stats, limits)], EnvChecks.budget(stats, limits).is_empty())
 	var blocked: Array = await EnvChecks.sight_line(self, room)
 	_check("a clear sight line from every seat (%s)" % [blocked], blocked.is_empty())
