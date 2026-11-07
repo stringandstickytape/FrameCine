@@ -15,6 +15,7 @@ extends Node
 
 const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
 const BUS := "Master"
+const FILM_BUS := "Film"
 const TAU_S := 0.1
 const SLEW := PI * RoomSchema.MAX_HZ
 const AVERAGE_S := 3.0
@@ -57,7 +58,10 @@ func _sampling(on: bool) -> void:
 
 
 func _process(delta: float) -> void:
-	var bus := AudioServer.get_bus_index(BUS)
+	# The film's own bus (scripts/env/env_audio.gd) when there is one: the room's sounds never drive the glow.
+	var bus := AudioServer.get_bus_index(FILM_BUS)
+	if bus < 0:
+		bus = AudioServer.get_bus_index(BUS)
 	var peak := maxf(db_to_linear(AudioServer.get_bus_peak_volume_left_db(bus, 0)),
 			db_to_linear(AudioServer.get_bus_peak_volume_right_db(bus, 0)))
 	step(peak, delta)

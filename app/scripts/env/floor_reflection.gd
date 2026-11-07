@@ -8,7 +8,7 @@ extends Node3D
 ## The screen's material uniforms are copied to the reflection's each frame while it shows.
 ##
 ##   enabled                on for this environment ([env_<id>] reflection; default on where the room has a floor
-##                          for it, except the void)
+##                          for it; a room built from a document says, its reflection_default: on in the Void)
 ##   available() -> bool    this room has a floor for it
 ##   strength               [reflection] strength, 0..0.6 (default 0.25)
 ##   set_enabled(on), set_strength(v), is_showing()
@@ -84,6 +84,10 @@ func _on_environment() -> void:
 	elif DEFAULT_FLOORS.has(main.env_id):
 		floor_y = DEFAULT_FLOORS[main.env_id]
 	var default_on := available() and not DEFAULT_FLOORS.has(main.env_id)
+	# A room built from a document says (scripts/env/env_room.gd: its room section's reflection; the Void's mirror
+	# floor is made for it).
+	if env != null and env.get("reflection_default") != null and available():
+		default_on = bool(env.get("reflection_default"))
 	enabled = bool(main.settings.get_value("env_" + main.env_id, "reflection", default_on))
 	_place()
 	changed.emit()

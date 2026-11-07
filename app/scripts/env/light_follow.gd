@@ -40,8 +40,16 @@ func set_play_level(v: float) -> void:
 func wanted() -> float:
 	if not enabled:
 		return 1.0
+	# The room's own "Dim during the film" (scripts/env/room_settings.gd), and the level a room dims to (a room built
+	# from a document: its light system's dimmed_level; -1 is this one's).
+	var rs: Node = main.features.get("room_settings") if main.get("features") != null else null
+	if rs != null and not bool(rs.value("dim")):
+		return 1.0
 	var watching: bool = main.player.has_source() and main.player.is_playing() and not main.menu_shown
-	return play_level if watching else 1.0
+	var level := play_level
+	if main.env != null and main.env.has_method("dimmed_level") and float(main.env.dimmed_level()) >= 0.0:
+		level = float(main.env.dimmed_level())
+	return level if watching else 1.0
 
 
 func _process(_delta: float) -> void:

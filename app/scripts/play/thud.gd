@@ -29,6 +29,16 @@ const TAIL_SECONDS := 0.8
 const PITCH_AT_30CM := 150.0
 const PITCH_RANGE := Vector2(45.0, 600.0)
 const SpatialAudio := preload("res://scripts/play/spatial_audio.gd")
+## The thud is a room's sound: on the Environment bus (scripts/env/env_audio.gd), ducked under the film and at the
+## Environment sound slider. Its peak (LEVEL) was made for the Master bus; this lifts it back by most of the slider's
+## default (-18 dB), so a thrown object still sounds, 6 dB under where it was.
+const ENV_BUS := &"Environment"
+const ENV_GAIN_DB := 12.0
+
+
+static func _bus() -> StringName:
+	return ENV_BUS if AudioServer.get_bus_index(ENV_BUS) >= 0 else &"Master"
+
 
 var main: Node3D
 var last := {}
@@ -182,6 +192,9 @@ func _start_stream() -> void:
 		gen.buffer_length = BUFFER_SECONDS
 		_player = AudioStreamPlayer.new()
 		_player.name = "ThudStream"
+		# A room's sound (scripts/env/env_audio.gd): ducked under the film, at the Environment sound slider.
+		_player.bus = _bus()
+		_player.volume_db = ENV_GAIN_DB if _player.bus == ENV_BUS else 0.0
 		_player.stream = gen
 		add_child(_player)
 	_player.play()
@@ -239,9 +252,11 @@ func _play_3d(s: PackedFloat32Array, at: Vector3) -> void:
 	wav.data = data
 	var p := AudioStreamPlayer3D.new()
 	p.name = "Thud3D"
+	p.bus = _bus()
+	p.volume_db = ENV_GAIN_DB if p.bus == ENV_BUS else 0.0
 	p.stream = wav
 	p.unit_size = 3.0
-	p.max_db = 0.0
+	p.max_db = p.volume_db
 	add_child(p)
 	p.global_position = at
 	p.finished.connect(p.queue_free)

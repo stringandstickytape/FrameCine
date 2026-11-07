@@ -100,7 +100,7 @@ func _run() -> void:
 			and FileAccess.file_exists(sky_dir.path_join("test_pano_copy.png")))
 	_check("a picture already there: its id", EnvLibrary.add_skybox(sky_dir.path_join("test_pano.png")) == "sky:test_pano.png")
 	DirAccess.remove_absolute(outside)
-	# #62 floor reflection: on in the home theatre (it has a floor for it), off by default in the void, never in 360.
+	# #62 floor reflection: on in the home theatre (it has a floor for it), on by default in the void, never in 360.
 	var refl: Node = main.features.reflection
 	main.open_path("stub://flat_sbs")
 	main.set_environment("home_theatre")
@@ -118,7 +118,11 @@ func _run() -> void:
 	_check("drive-in: no floor for it", not refl.available() and not refl.is_showing())
 	main.set_environment("void")
 	await _frames(2)
-	_check("void: available, off by default", refl.available() and not refl.enabled and not refl.is_showing())
+	# The Void's mirror floor is made for the film's reflection (environments/void.env.json, docs/environments.md).
+	_check("void: available, on by default (its mirror floor)", refl.available() and refl.enabled and refl.is_showing())
+	refl.set_enabled(false)
+	await _frames(2)
+	_check("void: turned off", not refl.is_showing())
 	refl.set_enabled(true)
 	await _frames(2)
 	_check("void: turned on", refl.is_showing())

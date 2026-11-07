@@ -6,12 +6,15 @@ extends Node
 ##   transients  a sudden loud jump (a thunderclap, an explosion) flashes the room light briefly, in rooms that opt in
 ##               (an environment's `reacts_to_film`; the drive-in under its open sky)
 ## Off by default ([react] enabled); `strength` scales both. The sound is read from an AudioEffectSpectrumAnalyzer
-## added to the Master bus while it is on (removed when off), so it hears what the viewer hears, whatever plays it:
-## the stereo player or the cinema speakers (#21). With the PC audio sink (#9) the headset is silent and nothing
-## reacts. The controllers' haptics setting (#32) must be on for the pulses.
+## added to the Film bus (scripts/env/env_audio.gd; Master when there is none) while it is on or a room's film
+## signals ask for it (request_analysis; removed when neither), so it hears the film, whatever plays it: the stereo
+## player or the cinema speakers (#21), and never the room's own sounds. With the PC audio sink (#9) the headset is
+## silent and nothing reacts. The controllers' haptics setting (#32) must be on for the pulses.
 ##
 ##   enabled, set_enabled(on), strength, set_strength(v)
 ##   feed(bass_db, broad_db, delta)   one step with levels in dBFS (from the analyzer; tests call it directly)
+##   levels() -> [bass_db, broad_db]  the last levels read (the film signals, scripts/env/env_signals.gd)
+##   request_analysis(who, on)        keep the analyser on for `who` with [react] off (no pulses, no flashes)
 ##   pulses, flashes                  counts (tests, the overlay)
 ##   signal pulsed(amplitude), signal flashed(amount)
 
@@ -20,7 +23,8 @@ const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
 signal pulsed(amplitude: float)
 signal flashed(amount: float)
 
-const BUS := "Master"
+const BUS := "Film"
+const FALLBACK_BUS := "Master"
 const BASS := Vector2(20.0, 120.0)
 const BROAD := Vector2(120.0, 8000.0)
 ## Bass level (dBFS) where pulses start, and where they reach full amplitude.
@@ -50,6 +54,9 @@ var _since_pulse := 1.0
 var _since_flash := 10.0
 var _analyzer: AudioEffectSpectrumAnalyzerInstance
 var _effect_index := -1
+var _bus := ""
+var _requests := {}
+var _levels: Array = [-120.0, -120.0]
 
 
 func _ready() -> void:
@@ -61,7 +68,34 @@ func _ready() -> void:
 func set_enabled(on: bool) -> void:
 	enabled = on
 	main.settings.set_value("react", "enabled", true if on else null)
-	_attach(on)
+	_attach(on or _requested())
+
+
+## Keep the analyser on for `who` (a room's film signals) even with [react] off: levels() then has the film's levels.
+func request_analysis(who: Object, on: bool) -> void:
+	var was := _requested()
+	if on:
+		_requests[who.get_instance_id()] = true
+	else:
+		_requests.erase(who.get_instance_id())
+	if _requested() != was:
+		_attach(enabled or _requested())
+
+
+func _requested() -> bool:
+	for id: int in _requests.keys():
+		if not is_instance_id_valid(id):
+			_requests.erase(id)
+	return not _requests.is_empty()
+
+
+## [bass_db, broad_db]: the last levels read from the analyser.
+func levels() -> Array:
+	return _levels
+
+
+static func bus_name() -> String:
+	return BUS if AudioServer.get_bus_index(BUS) >= 0 else FALLBACK_BUS
 
 
 func set_strength(v: float) -> void:
@@ -74,8 +108,9 @@ func room_opts_in() -> bool:
 
 
 func _attach(on: bool) -> void:
-	var bus := AudioServer.get_bus_index(BUS)
 	if on and _effect_index < 0:
+		_bus = bus_name()
+		var bus := AudioServer.get_bus_index(_bus)
 		var fx := AudioEffectSpectrumAnalyzer.new()
 		fx.buffer_length = 0.1
 		fx.fft_size = AudioEffectSpectrumAnalyzer.FFT_SIZE_1024
@@ -83,10 +118,20 @@ func _attach(on: bool) -> void:
 		_effect_index = AudioServer.get_bus_effect_count(bus) - 1
 		_analyzer = AudioServer.get_bus_effect_instance(bus, _effect_index) as AudioEffectSpectrumAnalyzerInstance
 	elif not on and _effect_index >= 0:
-		AudioServer.remove_bus_effect(bus, _effect_index)
-		_effect_index = -1
-		_analyzer = null
+		_detach()
 		_unflash()
+
+
+## Takes the analyser off its bus (found by its instance: another feature's effect may have moved it).
+func _detach() -> void:
+	var bus := AudioServer.get_bus_index(_bus)
+	if bus >= 0:
+		for i in AudioServer.get_bus_effect_count(bus):
+			if AudioServer.get_bus_effect_instance(bus, i) == _analyzer:
+				AudioServer.remove_bus_effect(bus, i)
+				break
+	_effect_index = -1
+	_analyzer = null
 
 
 func _unflash() -> void:
@@ -96,10 +141,13 @@ func _unflash() -> void:
 
 
 func _process(delta: float) -> void:
-	if not enabled or _analyzer == null or not main.player.is_playing():
+	if _analyzer == null or not main.player.is_playing():
 		return
-	feed(_db(_analyzer.get_magnitude_for_frequency_range(BASS.x, BASS.y)),
-			_db(_analyzer.get_magnitude_for_frequency_range(BROAD.x, BROAD.y)), delta)
+	var bass := _db(_analyzer.get_magnitude_for_frequency_range(BASS.x, BASS.y))
+	var broad := _db(_analyzer.get_magnitude_for_frequency_range(BROAD.x, BROAD.y))
+	_levels = [bass, broad]
+	if enabled:
+		feed(bass, broad, delta)
 
 
 static func _db(m: Vector2) -> float:
@@ -107,6 +155,7 @@ static func _db(m: Vector2) -> float:
 
 
 func feed(bass_db: float, broad_db: float, delta: float) -> void:
+	_levels = [bass_db, broad_db]
 	_since_pulse += delta
 	_since_flash += delta
 	# Bass -> a pulse to both hands, scaled between the floor and full.
@@ -137,4 +186,4 @@ func feed(bass_db: float, broad_db: float, delta: float) -> void:
 
 func _exit_tree() -> void:
 	if _effect_index >= 0:
-		AudioServer.remove_bus_effect(AudioServer.get_bus_index(BUS), _effect_index)
+		_detach()

@@ -138,6 +138,8 @@ const HwVideo := preload("res://scripts/play/hw_video.gd")
 const FilmLayer := preload("res://scripts/play/film_layer.gd")
 const ObjectPhysics := preload("res://scripts/play/object_physics.gd")
 const ObjectGrab := preload("res://scripts/play/object_grab.gd")
+const EnvAudio := preload("res://scripts/env/env_audio.gd")
+const RoomSettings := preload("res://scripts/env/room_settings.gd")
 
 ## The app core (scripts/main.gd). Untyped: main.gd preloads this script, so a typed reference would be circular.
 var main: Node3D
@@ -205,6 +207,11 @@ var real_windows: RealWindows
 var lightmaps: RoomLightmaps
 var physics: ObjectPhysics
 var grab: ObjectGrab
+## The audio buses: Film, Environment (ducked under the film; the Environment sound slider), Interface
+## (scripts/env/env_audio.gd, docs/environments.md).
+var env_audio: EnvAudio
+## Every room's own settings: the common ones and the room's document's (scripts/env/room_settings.gd).
+var room_settings: RoomSettings
 
 
 func _ready() -> void:
@@ -274,6 +281,8 @@ func _ready() -> void:
 	real_windows = _add(RealWindows.new(), "RealWindows")
 	physics = _add(ObjectPhysics.new(), "ObjectPhysics")
 	grab = _add(ObjectGrab.new(), "ObjectGrab")
+	room_settings = _add(RoomSettings.new(), "RoomSettings")
+	env_audio = _add(EnvAudio.new(), "EnvAudio")
 
 
 func _add(node: Node, node_name: String) -> Node:

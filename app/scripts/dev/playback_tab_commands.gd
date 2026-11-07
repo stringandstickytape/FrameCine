@@ -705,6 +705,10 @@ static func _register_sound(host: Node) -> void:
 		_field("av_offset_ms", "float", "delays the picture (+) or the sound (-) to line them up, -300 to 300 ms",
 				func(m: Node) -> float: return roundf(float(m.player.av_offset) * 1000.0),
 				func(m: Node, v: float) -> void: m.set_av_offset(v / 1000.0), {"min": -300.0, "max": 300.0}),
+		_field("environment_sound_db", "float", "the room's own sound (rain, birds, the projector) on its own bus, "
+				+ "always ducked under the film: -60 (off) to 0 dB; -18 is the default",
+				func(m: Node) -> float: return float(m.features.env_audio.environment_db),
+				func(m: Node, v: float) -> void: m.features.env_audio.set_environment_db(v), {"min": -60.0, "max": 0.0}),
 		_field("live_delay", "float", "for live streams: how far behind live to play, 0.1 to 2.5 s (a change "
 				+ "reopens a live stream)", func(m: Node) -> float: return float(m.features.live.latency),
 				func(m: Node, v: float) -> void: m.features.live.set_latency(v), {"min": 0.1, "max": 2.5}),
@@ -803,6 +807,7 @@ static func _sound_state(m: Node) -> Dictionary:
 	return {
 		"volume": m.volume,
 		"av_offset_ms": roundf(float(m.player.av_offset) * 1000.0),
+		"environment_sound_db": float(f.env_audio.environment_db),
 		"live": bool(f.live.live),
 		"live_delay": float(f.live.latency),
 		"night": {"available": bool(night.available()), "on": bool(night.night), "strength": float(night.strength),

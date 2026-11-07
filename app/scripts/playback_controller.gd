@@ -8,6 +8,7 @@ extends Node
 const VideoSource := preload("res://scripts/video/video_source.gd")
 const VideoSourceFactory := preload("res://scripts/video/video_source_factory.gd")
 const HWVideoSource := preload("res://scripts/video/hw_video_source.gd")
+const EnvAudio := preload("res://scripts/env/env_audio.gd")
 
 ## A new source is open (or a stand-in for a file that couldn't be played).
 signal opened
@@ -74,6 +75,9 @@ const SETTLE_MAX_FRAMES := 720
 func _ready() -> void:
 	audio = AudioStreamPlayer.new()
 	audio.name = "Audio"
+	# The film's own bus (scripts/env/env_audio.gd): the room's sounds duck under it, the binaural mix included.
+	EnvAudio.ensure_buses()
+	audio.bus = EnvAudio.FILM
 	add_child(audio)
 
 

@@ -17,7 +17,7 @@ const AREA := {
 	"room_settings": "read", "set_environment": "room", "use_picture_as_room": "room", "seat": "control",
 	"floor_reflection": "room", "bias_light": "room", "react_to_film": "room", "projector_beam": "room",
 	"time_of_day": "room", "room_light": "room", "dim_while_playing": "room", "curtains": "room", "up_next": "room",
-	"intermission": "room", "crossfade": "room", "sleep_timer": "control",
+	"intermission": "room", "crossfade": "room", "sleep_timer": "control", "room_setting": "room",
 	"system_settings": "read", "panel_layout": "settings", "reset_panel_layout": "settings",
 	"accessibility": "settings", "foveation": "settings", "controller_looks": "read", "controller_look": "settings",
 	"haptics": "settings", "jog_wheel": "settings", "seek_bar_pictures": "settings",
