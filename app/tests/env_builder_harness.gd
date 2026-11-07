@@ -265,6 +265,12 @@ func sounds(id: String, room: Node3D, want: Dictionary) -> void:
 		check("%s: %s in the room (%s)" % [id, k, at], str(b.params["place"]) != "at" or box.grow(0.05).has_point(at))
 		if b.is_loop() and float(b.params["level"]) > 0.01:
 			check("%s: %s playing" % [id, k], b.playing())
+			var bus := "Environment room"
+			var i := AudioServer.get_bus_index(bus)
+			check("%s: %s on the room's bus, which sends to Environment (%s)" % [id, k, (b.players() as Array).map(
+					func(p: Node) -> String: return str(p.get("bus")))], (b.players() as Array).all(
+					func(p: Node) -> bool: return str(p.get("bus")) == bus) and i >= 0
+					and str(AudioServer.get_bus_send(i)) == str(EnvAudio.ENVIRONMENT))
 	if not beds.is_empty():
 		var all_db := 10.0 * log(power) / log(10.0)
 		check("%s: all its sounds together %.1f dB, 6 dB or more under the target" % [id, all_db], all_db <= target - 6.0)
