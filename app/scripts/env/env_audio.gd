@@ -25,12 +25,14 @@ const MIN_DB := -60.0
 const DEFAULT_DB := -18.0
 ## The room's offset at its bottom mutes the room (env_doc.gd COMMON_SETTINGS ambience_db).
 const ROOM_OFF_DB := -25.0
-## The duck: a compressor on Environment keyed from Film. Chosen from tests/test_env_audio.gd's tones: about 8 dB of
-## duck under a film at the reference level, more under a loud scene, none in silence.
-const DUCK_THRESHOLD_DB := -38.0
-const DUCK_RATIO := 2.5
+## The duck: a compressor on Environment keyed from Film. The engine's compressor reduces by about 2.08 x (the
+## sidechain's peak over the threshold, in dB) x (1 - 1 / ratio): chosen from tests/test_env_audio.gd's tones for
+## about 8 dB under a film at the reference level (peaks near -17 dBFS), about 20 dB under a loud scene, none in
+## silence.
+const DUCK_THRESHOLD_DB := -26.0
+const DUCK_RATIO := 1.75
 const DUCK_ATTACK_US := 20000.0
-const DUCK_RELEASE_MS := 400.0
+const DUCK_RELEASE_MS := 300.0
 ## The pause rise fades over this long.
 const RISE_SECONDS := 2.0
 ## The level check's target: the room's ambience at the slider's default, RMS, no louder than this (dBFS): the film's
