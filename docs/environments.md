@@ -147,8 +147,8 @@ parameters only.
 | `screen_frame` | screen | the black masking round the screen, the projector's beam from a lens | built |
 | `showing` | showing | the curtains' part in the ritual: actions `open_curtains`, `close_curtains` (the pre-show's curtains, `scripts/env/preshow.gd`) | built |
 | `mirror_floor` | builder | a black floor that takes the film's reflection, a ripple where the viewer moves | built |
-| `shopfront`, `nave`, `dome_hall`, `terrace`, `domestic`, `vehicle` | builder | the other parametric structures (shopfront hall, nave, dome, open-air terrace or lot, domestic room, vehicle interior) | next |
-| `kit` | kit | modular pieces placed along a builder's slots (balcony fronts, niches, columns, façades) | next |
+| `shopfront`, `nave`, `dome_hall`, `terrace`, `domestic`, `vehicle` | builder | the other parametric structures (shopfront hall, nave, dome, open-air terrace or lot, domestic room, vehicle interior; below, "The builders") | built |
+| `kit` | kit | modular pieces placed along a builder's slots (balcony fronts, niches, columns, façades; below, "The kit") | built |
 | objects, materials, pictures | | as now: `parts` placements, library materials, pictures | as now |
 | `sky`, `vista` | sky | a sky dome (twilight to night, the real stars and constellations, the Milky Way, clouds lit by the screen, an aurora, Earth from the Moon), far scenery from simple shapes (hills, mesas, a floodlit acropolis, birches in snow, cypresses, a glowing pool); below, "The sky and the vista" | built |
 | `atmosphere`, `weather` | atmosphere | haze, dust and smoke in the beam, ground fog and mist, breath; rain and snow through open roofs and outside windows, rain on a pane, a puddle that reflects the film, a weather cycle (below, "Atmosphere and weather") | built |
@@ -559,6 +559,227 @@ faster. A festoon of 5 swags is 1 draw and 840 triangles; the mesh is made again
 
 The ritual raises them: `{"do": "organ.rise", "args": {"seconds": 12}}`, `{"do": "festoon.rise", "args":
 {"seconds": 8}}`.
+
+## The builders
+
+Six more builders of kind `builder`, and the `kit`. They keep the auditorium's conventions. They extend
+`scripts/env/systems/kit/builder.gd`, and they share the helpers in `scripts/env/systems/kit/` (`build_util.gd`,
+`shapes.gd`, `procedural.gd`, `seat_models.gd`, `pieces.gd`, the glass and glow shaders).
+
+- **The viewer's seat** is at the origin, facing -Z. The floor under it is at y 0 (a lot's ground and an
+  amphitheatre's pit can be lower).
+- **Static parts** are meshes with their own UV2, baked by the light system's hooks. Rounded parts (seats, statues,
+  leaves) are not baked.
+- **Materials** are library materials on the house shader, from the light system. Patterns (pressed tin, ice blocks,
+  a swirling carpet, corrugated tin, plasterboard) are our own maps, drawn in `procedural.gd` and put on a library
+  material. The library material is CC0, so the licence check still holds.
+- **Lamps** use the light system's groups: `house` (the ritual takes them down), `accent`, `signs`, `booth`. A flame
+  or a candle flickers with the builder's `flicker` parameter. Every frequency is under 3 Hz. The room's Flickering
+  lights setting holds it steady.
+- **Glass** (a window, a dome's panes, a windscreen) is in the group `env_see_through`. The sight-line check looks
+  through it. It blends; it never multiplies.
+- **The sight line:** a flat-floored builder keeps the picture's bottom at 1.1 m or more over the floor, so chair
+  backs never block it.
+- **Physics:** `collision_shapes()` gives cheap boxes. Seat boxes come only when the builder draws its own seats.
+- **The screen:** each builder's static `screen_for(params)` gives the default screen ({center, size}). A room
+  document's `screen` should match it.
+
+### Seat slots (the interface with `seats`)
+
+Each builder's static `seat_slots_for(params)` gives its seats as slots, from the parameters alone. A slot is
+`{transform, row, style, width, builder}`.
+
+- `transform`: the floor point under the seated eyes, facing -Z in its own frame.
+- `row`: 0 is the viewer's row. Rows in front count up. Rows behind are negative.
+- `style`: `chair`, `pew`, `bench`, `cushion`, `club`, `ring` or `tier`.
+- `width`: metres along the row. A row's slots go left to right. A pew's or a bench's slots are `width` apart. An
+  aisle leaves a gap wider than 1.5 widths.
+
+With a `seats` system in the room, the builder draws no seats and gives no seat boxes; the seats system draws them in
+the slots. Without one, the builder draws plain default seats (`seat_models.gd`). Single seats (chair, club, ring)
+are one MultiMesh, with the viewer's own seat folded away. Pews, benches and cushions are one static mesh.
+
+### Slots for the kit
+
+Each builder's `slots()` gives named places for kit pieces: `{name: [{transform, size}]}`. A piece's front faces its
+local +Z (into the room). Common names: `side_walls`, `screen`, `proscenium`, `rear_wall`, `floor`, `ceiling`,
+`corners`. Each builder adds its own (below).
+
+### `shopfront`
+
+A narrow picture house of about 1906 in a shop. A wooden dado, pressed tin above it and on the ceiling, a small
+raised end with a framed sheet, the shop window and door behind the seats with the street's glow, gas lamps that
+flicker, folding chairs in rows.
+
+- Size: `width`, `height`, `screen_wall_z`, `front_z`. Rows: `rows_front`, `rows_back`, `row_pitch`,
+  `chairs_per_row`, `chair_pitch`, `seat_model`.
+- The end: `stage_depth`, `stage_height`, `screen_size`, `screen_bottom`, `sheet_frame`.
+- Walls: `dado_height`, `tin_pattern` (`pressed_tin` or `plain`), `tin_walls`.
+- Live: `street_glow`, `flicker`. Lamps: `lamps_per_side`, `lamp_height`, `lamp_colour`.
+- Slots: `booth` (the back corner's floor), `side_walls`, `screen`, `proscenium`, `rear_wall`, `ceiling`, `floor`.
+- Measured: 13 draws, 12k triangles, 7 MB.
+
+### `nave`
+
+A church-like nave. Two arcades of round columns, side aisles, clerestory walls with dim windows, a barrel vault, a
+chancel up three steps with the screen under the chancel arch, a rose window over it, candle stands that flicker,
+pews.
+
+- Size: `nave_width`, `aisle_width`, `rear_z`, `chancel_z`, `chancel_depth`, `chancel_rise`, `bay`,
+  `column_height`, `column_radius`, `wall_height`, `vault`.
+- Pews: `rows_front`, `rows_back`, `row_pitch`, `places_per_pew`, `place_width` (one slot a place, style `pew`).
+- Live: `rose_glow`, `flicker`. Also `rose_window`, `rose_radius`, `clerestory_windows`, `candles`.
+- Slots: `niches` (the aisles' walls), `columns`, `screen`, `proscenium` (the chancel arch), `rear_wall`, `floor`.
+- Measured: 11 draws, 4.4k triangles, 8 MB.
+
+### `dome_hall`
+
+A round hall under a dome, glass or solid. A low drum wall, lamps round it, a low stage, seats on arcs round the
+screen (style `ring`). Beyond glass: nothing (a sky system's sky), deep water, or a dark night. With `has_floor` and
+`seating` off, it covers another builder (the crater: an amphitheatre under a glass dome).
+
+- `radius`, `centre_z`, `floor_y`, `drum_height`, `dome_height`, `dome` (`glass` or `solid`), `ribs`, `rings`.
+- `outside` (`none`, `water`, `night`), `water_top`, `water_deep`; live: `outside_glow`.
+- Seats: `rows_front`, `rows_back`, `row_depth`, `seat_pitch`, `arc_deg`, `seat_model`.
+- Slots: `drum`, `screen`, `proscenium`, `floor`, `ceiling`.
+- Measured (glass, about 120 seats): 8 draws, 88k triangles, 4 MB.
+
+### `terrace`
+
+Open air, under a sky system's sky. Three styles. `terrace.gd STYLES` holds the parameters each style needs; a room
+document sets them.
+
+| Style | What | Its parameters |
+|---|---|---|
+| `rooftop` (default) | a tiled roof terrace, a low parapet, the screen painted on the next building's blind wall, strings of bulbs, chairs in rows | the defaults |
+| `lot` | a drive-in's lot: low humps across each row of bays, speaker posts beside the cars' front seats, the screen on a frame (or `screen` `none` and the kit's tower). No seats of its own: the car's | `half_width` 20, `front_z` -50, `back_z` 12, `ground_y` -0.5, `ground_extent` 120, `parapet` false, `screen` frame, `screen_size` [24, 10], `screen_bottom` 4, `seating` false, `string_lights` false |
+| `amphitheatre` | stone tiers on arcs round the screen, rising behind the viewer (style `tier`), rocks on a dusty plain: a lunar amphitheatre | `half_width` 14, `front_z` -14, `back_z` 10, `ground_extent` 150, `parapet` false, `screen` frame, `screen_size` [8, 4.5], `screen_bottom` 1.6, `rows_front` 3, `rows_back` 6, `row_pitch` 0.95, `seat_pitch` 0.6, `string_lights` false |
+
+- The ground beyond the terrace (`ground_extent`, up to 400 m) is not baked, so the lightmap stays small.
+- Other parameters: `parapet_height`, `wall_height`, `tier_rise`, `arc_deg`, `rocks`, `bays`, `bay_pitch`,
+  `bulb_colour`, materials.
+- Slots: `parapet` (along the parapets' tops), `screen`, `proscenium`, `floor`, `corners`.
+- Measured: rooftop 8 draws, 12k triangles, 7 MB; lot 5 draws, 3k triangles; amphitheatre 4 draws, 2k triangles.
+
+### `domestic`
+
+A room in a house: walls, a window, a door, a fireplace or a radiator, wall lamps, and a screen. Four styles. Every
+parameter left on "auto" takes the style's value (`domestic.gd STYLE_DEFAULTS`): an enum's `auto`, 0 for a size, -1
+for a count that can be 0, `{}` for a material, `[0, 0]` for the screen's size. A document sets only what it changes.
+
+| Style | What |
+|---|---|
+| `plain` | a sitting room: club chairs, a pull-down screen, a radiator under the window |
+| `walnut_1962` | a private screening room: walnut panelling, a deep carpet, two rows of club chairs, a picture window (a pool beyond it: a vista), a brick fireplace, brass wall lamps, a painting over the screen |
+| `bedroom_1993` | a child's bedroom: a pillow fort of cushions and a bedsheet on broom handles round the viewer's cushion, fairy lights along its front, a telly on a chest of drawers, a bed, a radiator under the window |
+| `ice` | a room of ice blocks under a low vault, hides on the floor, candles in the walls, the picture on a smoothed panel of ice, the doorway open to the night |
+
+- Size: `half_width`, `front_z`, `back_z`, `height`, `vault_rise`.
+- The screen (`screen`): `projected` (a pull-down screen), `wall` (a panel on the wall), `painting` (a framed
+  painting covers the screen and rises into a slot in the ceiling), `telly` (on a chest of drawers). Also
+  `screen_size`, `screen_bottom`.
+- `painting_open` (live, 0 to 1): 1 is risen (the screen shows), 0 is down over the screen. A cue fades it for the
+  ritual (the `motion` system can move the `Painting` node too).
+- `opening_screen` (not live: the room builds again): the telly fills the pillow fort's opening. The picture is as
+  big as fits in the opening, just beyond it.
+- `window` (`none`, `left`, `right`, `back`), `window_width`; `outside` (`glow` or `none`: a vista's or a sky's view
+  shows through), `outside_top`, `outside_bottom`; live: `outside_glow`.
+- `door` (`none`, `left`, `right`, `back`). In ice it is an open doorway with the night's glow beyond.
+- `heater` (`none`, `fireplace`, `radiator`). The fireplace is on the wall across from the window. The radiator is
+  under the window. Live: `fire`, `flicker`.
+- `lamps` (on each side wall), `lamp_colour`; `fort`, `fairy_lights` (`auto`, `on`, `off`), `fairy_colour`.
+- Seats: `seat_model` (`club`, `cushion`, `plush`, `director`, `folding`), `rows_front`, `rows_back`,
+  `seats_per_row`, `seat_pitch`, `row_pitch`. Cushions are style `cushion`.
+- `wall_pattern` (`plain`, `ice_blocks`, `plasterboard`) and materials: `walls`, `floor`, `ceiling`, `trim`,
+  `surround`, `radiator_material`, `screen_surface`, `telly_material`, `cushions`, `sheet`, `seat_cover`,
+  `seat_frame`.
+- Slots: `side_walls`, `screen`, `proscenium`, `floor`, `ceiling`, `corners`, `window` (the pane: a weather system's
+  `pane_center`, `pane_size`, `pane_yaw`), `vista` (beyond the window, facing in), `mantel`, `fort_opening`.
+- Measured: plain 13 draws, 4k triangles; walnut 16 draws; bedroom 18 draws, 6k triangles; ice 11 draws, 12k
+  triangles. 4 to 10 MB.
+
+### `vehicle`
+
+The inside of a generic 1950s convertible with its top down, facing the screen (on the terrace's lot). No mirror, no
+badge, no maker's shape.
+
+- A front bench and a rear bench, three places each (style `bench`). The viewer is in the middle of the front bench,
+  at the origin. The left place has the steering wheel in front of it; the wheel's top is under 1.05 m.
+- The wraparound windscreen's top is under the eyes (1.12 m), so the view of a screen up on a lot's frame or tower
+  goes over it. Its glass is see-through.
+- Parameters: `ground_y` (the ground under the car; the wheels show when it is under the body), `rear_seat`, `top`
+  (`folded` or `none`), `fins`; live: `headlamps`, `dial_glow`; `dial_colour`; materials `body`, `chrome`,
+  `upholstery`, `piping`, `carpet`, `tyres`, `hood_cover`.
+- It brings no screen. `screen_for()` gives the lot's, so a test room has one.
+- Slots: `dash`, `bonnet`, `rear_shelf`, `floor`.
+- Measured: 16 draws, 6k triangles. The car's parts share one baked and one unbaked mesh.
+
+### The film layer and the builders
+
+On the Frame the film is a layer drawn over everything between the eyes and the picture
+(`scripts/play/film_layer.gd`). The builders keep everything solid out of that space (the sight-line check holds
+it). Glass in front of the picture (a windscreen) would simply not show over the picture there. Two parts can come
+in front of the picture on purpose: the domestic painting when it is down (`painting_open` under 1), and the pillow
+fort's hem and fairy lights if a seat's eyes are lower than the check's 1.2 m. The film layer hides them while a film
+plays unless it steps aside. It steps aside today only for physics objects, the controllers and the laser
+(`_covered()`). The painting's ritual happens before the film, so the picture under the painting is usually black,
+but the layer still draws there. This needs a hook from the film layer (a room's parts that cover the screen); it is
+an open question below.
+
+## The kit
+
+`scripts/env/systems/kit.gd`, kind `kit`, with the pieces in `scripts/env/systems/kit/pieces.gd`. A document lists
+the pieces. The kit must come after its builder in the document.
+
+```json
+{"system": "kit", "params": {"pieces": [
+  {"piece": "niche", "slot": "side_walls", "index": 4, "holds": "lion", "at": [0, 1, 0]},
+  {"piece": "bougainvillea", "slot": "parapet", "index": -1},
+  {"piece": "snack_bar", "at": [0, -0.5, 16], "yaw": 180, "text": "SNACKS"}]}}
+```
+
+| Key | What |
+|---|---|
+| `piece` | which piece (below) |
+| `slot`, `index` | a slot of the builder and which of its places; `index` -1 is every place. No slot: `at` is in the room's frame |
+| `at`, `yaw`, `scale` | an offset in the slot's frame, a turn about the vertical (degrees), a scale |
+| `size` | width, height, depth; 0 takes the slot's size (for façades, curves, ivy, bougainvillea, balcony fronts, partitions) or the piece's own |
+| `holds` | what a niche holds: `urn`, `lion`, `obelisk` or `none` |
+| `colour`, `accent` | the piece's main colour, and a second one |
+| `text` | a neon sign's words in our own letters: A B C D E F I K L N O P R S T U W and the space |
+| `target` | the node the carpet goes on (the builder's `Floor` by default) |
+
+Other parameters: `builder` (the builder's id; empty: the room's first builder); materials `stone`, `plaster`,
+`wood`, `tin`, `roof`, `iron`; colours `leaves`, `flowers`, `neon`, `window_colour`; live: `glow` (lit windows, the
+booth's window, neon).
+
+| Piece | What |
+|---|---|
+| `balcony_front` | a moulded parapet panel with a rail, bands and round bosses |
+| `niche` | pilasters, an arch, a shell hood, a darker back and a shelf, holding an urn, a lion or an obelisk. Never a figure or a torso |
+| `urn`, `lion`, `obelisk`, `column` | on the floor; the lion lies on a plinth, its head up |
+| `facade` | a courtyard's plastered wall with a cornice, a tiled eave, two arched windows lit from inside, shutters, an iron balcony |
+| `castle_gate` | towers with battlements and arrow slits either side of the screen, a wall over it, a raised portcullis whose teeth hang just above the picture. Sized to the room's screen |
+| `booth` | a projection booth of corrugated tin, its window lit towards the screen (`booth` group) |
+| `snack_bar` | a counter, shelves, a canopy, a neon sign (`signs` group) |
+| `screen_tower` | a drive-in's tower behind the room's screen: the face, posts and braces |
+| `bougainvillea`, `ivy`, `ferns` | leaves (unbaked): bougainvillea over a parapet's top and down its face, ivy up a wall, ferns in a clump on the floor |
+| `carpet` | the builder's floor takes the swirling carpet pattern |
+| `partition` | a plasterboard wall with taped joints and a skirting |
+| `curves` | two bands in waves along a wall (pink and blue by default) |
+
+- **Cost by material:** all the pieces share a baked mesh (`PieceStatic`) and an unbaked one (`PieceSoft`), one
+  surface a material, plus one draw for the lit windows, one for booth windows and one a neon sign. Thirteen pieces in
+  the atmospheric test take 10 draws.
+- **The auditorium's slots:** the auditorium has no `slots()`, so the kit works them out from its parameters:
+  `side_walls` (every 2.5 m on both walls, at the side aisle's floor), `proscenium` (the stage's top), `rear_wall`,
+  `corners` (the pit's front corners), `floor`, `ceiling`, and `balcony` when it has one.
+- **Physics:** the pieces' boxes follow the builder's slots, so they exist once the room is built
+  (`collision_shapes()`); there is no static form.
+- **Problems:** a slot the builder lacks, or an index past its places, is reported by `problems()` and the piece is
+  not placed.
+- Measured: bougainvillea along the rooftop's 14 parapet places: 2 draws, 23k triangles. The atmospheric hall's
+  pieces: 11 draws.
 
 ## Atmosphere and weather
 
@@ -1040,6 +1261,7 @@ real mark (the names check).
 | `app/scripts/env/env_doc.gd` | the version 4 sections' validation, bindings, settings declarations |
 | `app/scripts/env/systems/registry.gd`, `env_system.gd` | the registry and the system base |
 | `app/scripts/env/systems/*.gd` | the systems |
+| `app/scripts/env/systems/kit/` | the builders' common base (`builder.gd`) and helpers, the kit's pieces (`pieces.gd`), the glass and glow shaders |
 | `app/scripts/env/env_host.gd` | the host: builds the systems, runs the signals, bindings, timeline and cues |
 | `app/scripts/env/env_room.gd` | the environment node of a room that ships as a document |
 | `app/scripts/env/env_signals.gd`, `env_timeline.gd` | film signals; states and cues |
@@ -1106,3 +1328,10 @@ document. Each room agent owns its documents, its CC0 assets under `app/environm
   room with many fliers should be timed on the headset.
 - **Calls without a sound.** Birds' calls and the cat's purr are events until the synthesiser has a `bird` and a
   `purr`.
+- **Parts of a room in front of the picture (settled 2026-11-07).** The domestic painting (while down) and the
+  pillow fort's hem are in the group `env_in_front`, as motion's in-front things are, so on the Frame the film
+  layer steps aside while they cover the picture and the film draws in the room behind them. A fort hem over the
+  picture keeps the film in the room for the whole showing (the layer's sharpness is lost there).
+- **Auto parameters in `domestic`.** Its parameters left on auto take the style's values, so the licences check
+  reads only the materials a document names. Every style's material is a bundled CC0 library material, so the check
+  still holds, but it does not see them.
