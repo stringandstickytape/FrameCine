@@ -202,7 +202,10 @@ func _resolve() -> void:
 		for r: Node in roots:
 			if not is_instance_valid(r):
 				continue
-			var n: Node = r if r.name == want else r.find_child(want, true, false)
+			# A system's node by its name, or by the plain name it had before a second system of its kind
+			# (env_system.gd own()).
+			var n: Node = r if r.name == want or str(r.get_meta("env_name", "")) == want \
+					else r.find_child(want, true, false)
 			if n is Node3D:
 				_node = n
 				break

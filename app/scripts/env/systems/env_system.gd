@@ -59,8 +59,19 @@ func on_screen_changed(_local: Transform3D, _size: Vector2) -> void:
 	pass
 
 
-## Adds a node to the room and remembers it as this system's.
+## Adds a node to the room and remembers it as this system's. Two systems of one kind in a room (two kits) name their
+## nodes alike: the second's takes its id after the name ("PieceStatic_furniture"), never the engine's "@...@" name,
+## and keeps the plain name in the meta "env_name" (what a motion system's `node` finds among a system's nodes).
 func own(node: Node) -> Node:
+	var plain := String(node.name)
+	if plain != "" and room.has_node(NodePath(plain)):
+		var unique := "%s_%s" % [plain, id]
+		var k := 2
+		while room.has_node(NodePath(unique)):
+			unique = "%s_%s%d" % [plain, id, k]
+			k += 1
+		node.name = unique
+	node.set_meta("env_name", plain)
 	room.add_child(node)
 	_owned.append(node)
 	return node

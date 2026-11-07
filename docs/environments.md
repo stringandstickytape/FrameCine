@@ -138,6 +138,11 @@ func static_meshes(), bake_lights(), set_baking(on), set_baked(on)   # the light
 A system never reads a file a document names, never loads a script and never evaluates text. It reads its own
 parameters only.
 
+`own(node)` keeps node names steady when a room has two systems of one kind (two kits, two builders): a name the room
+already has takes the system's id after it (the second kit's `PieceStatic` is `PieceStatic_furniture`), never the
+engine's `@...@` name, and the node keeps its plain name in the meta `env_name`. A motion system's `node` finds a
+system's node by either name. Tested in `test_env_kit.gd` (two kits in one room).
+
 ### The systems
 
 | System | Kind | Role | State |
@@ -446,6 +451,7 @@ origin, facing -Z. Each has two library materials (CC0), `upholstery` and `frame
 | `cushion` | 322 | | no | a buttoned floor cushion |
 | `hide` | 462 | | no | a pelt over a low block (of ice) |
 | `bean_bag` | 196 | | no | a squat sack with a dent |
+| `settee` | 276 a place, 106 an end | | no | a segment a place wide: the base, a seat cushion and a back cushion each; the padded arms and the feet are its ends. Two or three places in a row make a settee; its places take no tint of their own, so they match |
 
 Forms: `up` is a tip-up seat tipped up (the hall is empty). `broken` is a seat with its back slumped and its cushion
 hanging.
@@ -457,7 +463,9 @@ hanging.
   With `model` "auto" the slot's style chooses: chair: folding_chair, pew: pew, bench: bench_seat, cushion and tier:
   cushion, club: club_chair, ring: plush. The builder lists these seats (its `seats()`), so they are listed once.
   A slot is `{transform, row, style, width, builder}`. Slots of one row run left to right; a gap of more than 1.5
-  widths starts a new pew. The pews' ends and the benches' trim go into one static mesh, `SeatEnds`.
+  widths starts a new pew. The pews' ends, the benches' trim and the settees' arms go into one static mesh,
+  `SeatEnds`. With `model` `settee`, a builder's row of three slots is one settee (set the builder's seat pitch to
+  about 0.6 m: the slot's width is the place's).
 - **Its own seats.** Rows round `origin` (`per_row`, `rows_front`, `rows_back`, `pitch`, `row_depth`, `row_rise`,
   `aisle`, `facing`), and single `places` (`{at, turn, model}`). These are its `seats()`: seat choice, seat
   picking and the sight-line check use them.
@@ -474,7 +482,8 @@ auditorium's `seat_mesh()` does, for every `seat_model` but the stadium seat.
 
 - One MultiMesh a model and form: `Seats`, `SeatsUp`, `SeatsBroken`. The upholstery takes a slight tint seat by
   seat (`variation`, `seed`), as in the cinema.
-- The viewer's own seat folds away (`fold_own`): chairs only. A pew, a bench, a cushion, a hide or a bean bag stays.
+- The viewer's own seat folds away (`fold_own`): chairs only. A pew, a bench, a settee, a cushion, a hide or a bean
+  bag stays.
 - `tipped`: the share of tip-up seats left tipped up.
 - `collision_shapes()`: each seat's model boxes (one or two), for object physics.
 
@@ -502,8 +511,8 @@ adds two draws. Pews' ends add one or two. Texture memory is the headset's, rend
 
 One motion system moves one thing. Give each its own id: the id names its actions (`organ.rise`). The thing is:
 
-- a node the document names: `node` (its name), among the nodes of the system `system` (an id), or anywhere in the
-  room when `system` is empty;
+- a node the document names: `node` (its name, or the plain name it had before `own()` gave it its system's id),
+  among the nodes of the system `system` (an id), or anywhere in the room when `system` is empty;
 - or a festoon curtain it builds itself: `build` "festoon". It hangs over the screen (`festoon_size` 0: the
   screen's size with a margin) in `festoon_swags` swags, `festoon_depth` in front, in the `curtain` material.
 
@@ -566,7 +575,7 @@ The ritual raises them: `{"do": "organ.rise", "args": {"seconds": 12}}`, `{"do":
 
 Six more builders of kind `builder`, and the `kit`. They keep the auditorium's conventions. They extend
 `scripts/env/systems/kit/builder.gd`, and they share the helpers in `scripts/env/systems/kit/` (`build_util.gd`,
-`shapes.gd`, `procedural.gd`, `seat_models.gd`, `pieces.gd`, the glass and glow shaders).
+`shapes.gd`, `procedural.gd`, `seat_models.gd`, `pieces.gd`, `furniture.gd`, the glass and glow shaders).
 
 - **The viewer's seat** is at the origin, facing -Z. The floor under it is at y 0 (a lot's ground and an
   amphitheatre's pit can be lower).
@@ -685,27 +694,48 @@ for a count that can be 0, `{}` for a material, `[0, 0]` for the screen's size. 
 
 - Size: `half_width`, `front_z`, `back_z`, `height`, `vault_rise`.
 - The screen (`screen`): `projected` (a pull-down screen), `wall` (a panel on the wall), `painting` (a framed
-  painting covers the screen and rises into a slot in the ceiling), `telly` (on a chest of drawers). Also
+  painting covers the screen and rises into a slot in the ceiling), `telly` (a set on a stand: below). Also
   `screen_size`, `screen_bottom`.
 - `painting_open` (live, 0 to 1): 1 is risen (the screen shows), 0 is down over the screen. A cue fades it for the
   ritual (the `motion` system can move the `Painting` node too).
 - `opening_screen` (not live: the room builds again): the telly fills the pillow fort's opening. The picture is as
   big as fits in the opening, just beyond it.
+- The telly (`telly`): `cabinet` (a deep box, wider at the bottom for its buttons; the default), `portable` (a small
+  deep case, its knobs and a speaker's slots on a panel to the right of the picture, a carry handle, a rod aerial) or
+  `flat_panel` (a thin frame, a speaker strip under the picture, 7 cm deep; its picture is always 16:9, its height
+  from its width). Left on auto, `screen_size` is the form's own: a portable 0.3 x 0.225 m, a flat panel 0.8 x 0.45 m.
+- Its stand (`telly_stand`): `chest` (a chest of drawers, as before), `radiogram` (a long low cabinet on splayed
+  legs, a grille of slats, two sliding doors), `desk` (a top, a pedestal of three drawers, legs, a modesty panel),
+  `tv_unit` (a low cabinet with an open shelf under its top, 14 cm high, for a video recorder, and doors below) or
+  `wall` (a flat panel hangs on it, its back at the wall; a cabinet or a portable sits on a shelf on two brackets).
+  The picture stays where `screen_size` and `screen_bottom` put it; the stand is as tall as the space under the set
+  (a flat panel stands on a 10 cm pedestal). A stand's back is at the front wall and its front at the set's (a
+  flat panel's foot set back 12 cm on it). `stand_width` (0: its own, a little wider than the set) and
+  `stand_shift` (metres sideways; the picture does not move) leave room beside the set. The stands are in the trim's
+  material and drawn by `kit/furniture.gd`, as the kit's furniture is.
+- On the wall, the picture is the set's depth and 3 cm out from the front wall; otherwise it is 0.5 m out, as before.
+  `screen_for()` follows every form and stand, so the room's screen sits on the set's glass (tested for each form on
+  each stand).
 - `window` (`none`, `left`, `right`, `back`), `window_width`; `outside` (`glow` or `none`: a vista's or a sky's view
   shows through), `outside_top`, `outside_bottom`; live: `outside_glow`.
 - `door` (`none`, `left`, `right`, `back`). In ice it is an open doorway with the night's glow beyond.
 - `heater` (`none`, `fireplace`, `radiator`). The fireplace is on the wall across from the window. The radiator is
   under the window. Live: `fire`, `flicker`.
-- `lamps` (on each side wall), `lamp_colour`; `fort`, `fairy_lights` (`auto`, `on`, `off`), `fairy_colour`.
+- `lamps` (on each side wall), `lamp_colour`; `fort`, `fairy_lights` (`auto`, `on`, `off`), `fairy_colour`; live:
+  `fairy_glow` (0 to 1.5: the fairy lights' bulbs and the light they give, and nothing else).
 - Seats: `seat_model` (`club`, `cushion`, `plush`, `director`, `folding`), `rows_front`, `rows_back`,
   `seats_per_row`, `seat_pitch`, `row_pitch`. Cushions are style `cushion`.
 - `wall_pattern` (`plain`, `ice_blocks`, `plasterboard`) and materials: `walls`, `floor`, `ceiling`, `trim`,
   `surround`, `radiator_material`, `screen_surface`, `telly_material`, `cushions`, `sheet`, `seat_cover`,
   `seat_frame`.
 - Slots: `side_walls`, `screen`, `proscenium`, `floor`, `ceiling`, `corners`, `window` (the pane: a weather system's
-  `pane_center`, `pane_size`, `pane_yaw`), `vista` (beyond the window, facing in), `mantel`, `fort_opening`.
+  `pane_center`, `pane_size`, `pane_yaw`), `vista` (beyond the window, facing in), `mantel`, `fort_opening`; with a
+  telly, `telly_stand` (the stand's top at its front middle, facing the room: a piece on it goes at a negative z; on
+  the wall, the floor under the set) and `telly_shelf` (a video recorder's place: the tv unit's shelf; a desk's or a
+  radiogram's top beside the set when there is half a metre; else the floor in front of the stand).
 - Measured: plain 13 draws, 4k triangles; walnut 16 draws; bedroom 18 draws, 6k triangles; ice 11 draws, 12k
-  triangles. 4 to 10 MB.
+  triangles. 4 to 10 MB. A telly on its stand adds no draw of its own (the set is one mesh, the stand is in the trim):
+  each form on each stand in a plain room is 12 draws and 3.8k to 4.2k triangles.
 
 ### `vehicle`
 
@@ -738,7 +768,8 @@ an open question below.
 ## The kit
 
 `scripts/env/systems/kit.gd`, kind `kit`, with the pieces in `scripts/env/systems/kit/pieces.gd`. A document lists
-the pieces. The kit must come after its builder in the document.
+the pieces. The kit must come after its builder in the document. A room may have two kits, each with its own id
+(their nodes keep apart: see `own()` above).
 
 ```json
 {"system": "kit", "params": {"pieces": [
@@ -753,14 +784,15 @@ the pieces. The kit must come after its builder in the document.
 | `slot`, `index` | a slot of the builder and which of its places; `index` -1 is every place. No slot: `at` is in the room's frame |
 | `at`, `yaw`, `scale` | an offset in the slot's frame, a turn about the vertical (degrees), a scale |
 | `size` | width, height, depth; 0 takes the slot's size (for façades, curves, ivy, bougainvillea, balcony fronts, partitions) or the piece's own |
-| `holds` | what a niche holds: `urn`, `lion`, `obelisk` or `none` |
-| `colour`, `accent` | the piece's main colour, and a second one |
+| `holds` | what a niche holds: `urn`, `lion`, `obelisk` or `none`; a computer with `none` has no monitor |
+| `colour`, `accent` | the piece's main colour, and a second one (a rug's border, a lamp's pole) |
 | `text` | a neon sign's words in our own letters: A B C D E F I K L N O P R S T U W and the space |
 | `target` | the node the carpet goes on (the builder's `Floor` by default) |
 
 Other parameters: `builder` (the builder's id; empty: the room's first builder); materials `stone`, `plaster`,
-`wood`, `tin`, `roof`, `iron`; colours `leaves`, `flowers`, `neon`, `window_colour`; live: `glow` (lit windows, the
-booth's window, neon).
+`wood`, `tin`, `roof`, `iron`, `plastic` (a computer), `fabric` (a rug); colours `leaves`, `flowers`, `neon`,
+`window_colour`, `lamp_colour` (a standard lamp's shade), `display_colour` (a video recorder's clock); live: `glow`
+(lit windows, the booth's window, neon, the clocks).
 
 | Piece | What |
 |---|---|
@@ -776,10 +808,29 @@ booth's window, neon).
 | `carpet` | the builder's floor takes the swirling carpet pattern |
 | `partition` | a plasterboard wall with taped joints and a skirting |
 | `curves` | two bands in waves along a wall (pink and blue by default) |
+| `desk` | a top, a pedestal of three drawers on its right, legs on its left, a modesty panel (`wood`, handles in `iron`). 1.2 x 0.74 x 0.65 m |
+| `computer` | a flat beige case with two drive slots, a CRT monitor on it, a keyboard with its rows of keys in front (`plastic`, the glass and slots in `iron`). `holds` `none`: no monitor (a telly is its screen) |
+| `video_recorder` | a slim case (`iron` in the entry's colour), the cassette's door, five buttons, a display window whose clock flashes 12:00 (below). 0.43 x 0.09 x 0.3 m |
+| `sideboard` | doors either side, three drawers between, short legs, the top overhanging (`wood`, handles in `iron`) |
+| `standard_lamp` | a round base and a thin pole (`iron`, or the entry's `accent`), a drum shade that glows in the entry's colour (`house` group) and gives a dim stand-in lamp |
+| `rug` | a field (`fabric` in the entry's colour), a border a little raised (its `accent`, or the field's darker), a fringe at either end |
+| `coffee_table` | a top on four legs, a shelf under it (`wood`) |
+
+The furniture is drawn by `scripts/env/systems/kit/furniture.gd` (plain boxes and turned shapes of our own: no maker's
+shape, no badge, no lettering), which the domestic builder's telly stands use too. A piece stands with its foot at the
+slot's point and its front towards the slot's +z; the domestic builder's `telly_stand` and `telly_shelf` slots are
+made for it (the computer on a desk beside a portable, the video recorder in a tv unit's shelf).
+
+**The video recorder's clock.** 12:00 in seven segments of our own (quads, no font, no texture of letters), in
+`display_colour`, all the room's clocks one mesh (`PieceDisplay`, accent group). It flashes once a second: lit half a
+second, dark half a second, each change eased over about 0.2 s (slower than the photosensitivity ceiling's fade). The
+room's Flickering lights off holds it lit. `clock_level()` gives its level now (tests).
 
 - **Cost by material:** all the pieces share a baked mesh (`PieceStatic`) and an unbaked one (`PieceSoft`), one
-  surface a material, plus one draw for the lit windows, one for booth windows and one a neon sign. Thirteen pieces in
-  the atmospheric test take 10 draws.
+  surface a material, plus the lamp shades (`PieceLamps`, one draw a shade colour), one draw for the lit windows, one
+  for booth windows, one for the clocks and one a neon sign. Thirteen pieces in the atmospheric test take 10 draws.
+  Triangles: desk 108, tv unit 100, radiogram 182, sideboard 162, coffee table 64, computer 132, video recorder 112
+  and its clock 42, standard lamp 128, rug 22.
 - **The auditorium's slots:** the auditorium has no `slots()`, so the kit works them out from its parameters:
   `side_walls` (every 2.5 m on both walls, at the side aisle's floor), `proscenium` (the stage's top), `rear_wall`,
   `corners` (the pit's front corners), `floor`, `ceiling`, and `balcony` when it has one.
@@ -1847,20 +1898,25 @@ cushions and a bedsheet on broom handles round three floor cushions, fairy light
 window, and the telly filling the fort's opening, showing the film as a tube shows a tape watched a few times.
 
 - **Systems:** `light`; `domestic` (`bedroom_1993`, `opening_screen` on: a 1.33 x 1.0 m picture just beyond the
-  opening); `seats` (`cushion` in the fort's three slots); `weather` (the pane on the window, facing in; 300 drops
-  outside it; the Rain setting on `mode`); `presentation` (`nightowl_1993`: a tape, a CRT with an aperture grille;
-  the speaker by the setting).
+  opening); `kit` (a `video_recorder` in the `telly_shelf` slot: on the floor in front of the telly's chest, its
+  clock flashing 12:00); `seats` (`cushion` in the fort's three slots); `weather` (the pane on the window, facing in;
+  300 drops outside it; the Rain setting on `mode`); `presentation` (`nightowl_1993`: a tape, a CRT with an aperture
+  grille; the speaker by the setting).
 - **Settings:** `rain`, "Rain on the window" (rain, drizzle, coming and going, none; rain): `weather.mode` by `map`;
   `telly_sound`, "The telly's own speaker" (off): `presentation.speaker` `telly` or `none`, so the film keeps its
   own sound unless asked.
-- **Flicker:** the fairy lights waver slowly (the builder's `flicker`); Flickering lights holds them.
+- **Flicker:** the fairy lights waver slowly (the builder's `flicker`), the video recorder's clock flashes; Flickering
+  lights holds them.
 - **Default seat:** the middle cushion (the origin), 1.25 m from the picture.
-- **Measured:** 20 draws, 5 290 triangles, 0 lights, 300 particles, 6.0 MB.
+- **Measured:** 23 draws, 5 444 triangles, 0 lights, 300 particles, 6.0 MB.
 - **The telly fills the opening (a setting since 2026-11-07):** `telly_fills` (on by default) is bound to
   `domestic.opening_screen`. Turning it off rebuilds the room with the telly on its chest of drawers across the
-  room, and the film goes with it (`env_room.gd _follow_builder_screen()`, below). No VCR flashing 12:00 yet (no
-  object widget for it, and a document room places no objects); no tree or tin of sweets.
-- **Sound wanted:** a ticking radiator, rain on the glass following `weather.rain`; a small, soft room (rt60 0.3).
+  room, and the film goes with it (`env_room.gd _follow_builder_screen()`, below); the video recorder goes with it
+  too (its slot follows the set). No tree or tin of sweets.
+- **Sound:** `acoustics` `small_room` (`rt60` 0.3); `sound_bed`s: `radiator` at the radiator, `rain_glass` at the
+  window with `level` on `weather.rain` (it goes quiet as the Rain setting dries the night), `vcr` by the video
+  recorder, played by the cue `tape_in` as the film starts (the tape goes in). Each at its designed level: together
+  about -49 dBFS in the pre-show, 11 dB under the level check's target, 8 dB lower while the film plays.
 
 ### Room: Bathysphere
 
@@ -1980,42 +2036,59 @@ from time to time; through it, an evening sky over hills. A potted fern in the c
 
 ### Room: TV 1972 - first colour
 
-3 of 7. Mustard walls with orange and brown bands sweeping behind the set, a swirling carpet, three club chairs in
-orange velour and a bean bag. An early colour set in a teak-look cabinet (`colourstar_1972`: a shadow mask, warm
-rich colour). A summer dusk in the window.
+3 of 7. Mustard walls with orange and brown bands sweeping behind the set, a swirling carpet with a mustard rug on
+it, three club chairs in orange velour and a bean bag. An early colour set in a teak-look cabinet on a radiogram
+(`colourstar_1972`: a shadow mask, warm rich colour), a teak sideboard on the right wall, a standard lamp in the
+corner. A summer dusk in the window.
 
-- Systems: `light`, `domestic` (a radiator under the window), `kit` (carpet, curves on the front wall), `seats` (a
-  bean bag as a place), `sky` (dusk 0.45), `vista` (hills), `presentation`.
+- Systems: `light`, `domestic` (a radiator under the window; `telly_stand` `radiogram`), `kit` (carpet, curves on the
+  front wall, a velvet `rug`, a `sideboard`, a `standard_lamp` with an orange shade), `seats` (a bean bag as a
+  place), `sky` (dusk 0.45), `vista` (hills), `presentation`.
 - Settings: Snow from the aerial (0 to 40 %); Colour (the set's colour knob, 0.5 to 1.5 times: `presentation.colour`).
-- Cues: `warm_up` (Pre-show), the lamps down to 30 %.
-- Measured: 19 draws, 9 252 triangles, 7.5 MB.
+- Cues: `warm_up` (Pre-show), the lamps (and the standard lamp's shade: house group) down to 30 %.
+- Measured: 24 draws, 9 694 triangles, 7.5 MB (before the furniture: 19 draws, 9 252 triangles, 7.5 MB).
+- Sound: `acoustics` `small_room`; `sound_bed`s `radiator` at the radiator, `clock` on the sideboard, `tube_whine` at
+  the set (about -52 dBFS together, 14 dB under the target).
 
 ### Room: TV 1983 - desk portable
 
-4 of 7. A small room at night: a portable telly on a desk, a beige home computer on the desk in front of it, a wooden
-chair. Drizzle on the window, the street lamp's orange glow beyond it. `sirclive_1983`: the computer's aerial lead,
-240 bold lines. A bean bag at the back for a second seat.
+4 of 7. A small room at night: a light grey portable telly (a carry handle, a rod aerial, its knobs at the side) on
+a desk with a pedestal of drawers, a beige home computer and its keyboard on the desk beside it, a wooden chair.
+Drizzle on the window, the street lamp's orange glow beyond it. `sirclive_1983`: the computer's aerial lead, 240 bold
+lines. A bean bag at the back for a second seat.
 
-- Systems: `light`, `domestic` (no lamps; the outside glow sodium orange), `kit` (two `partition` pieces: the desk,
-  0.75 m high, level with the telly's foot, and the computer, a beige box), `seats` (the bean bag), `weather` (light
-  rain on the pane only), `presentation`.
+- Systems: `light`, `domestic` (no lamps; the outside glow sodium orange; `telly` `portable` on a `desk` 1.35 m
+  wide, moved 0.2 m left: 0.74 m high, the portable's foot), `kit` (a `computer` on the `telly_stand` slot, left of
+  the set, `holds` `none`: the telly is its screen), `seats` (the bean bag), `weather` (light rain on the pane only),
+  `presentation`.
 - Settings: Aerial lead noise (`presentation.snow`); Bold lines (`presentation.scanlines` 0.65 or 0.2).
 - Cues: `tuning_in` (Pre-show): a `glitch` as the set finds the computer's channel.
-- Measured: 17 draws, 952 triangles, 8.2 MB.
+- Measured: 16 draws, 1 110 triangles, 8.0 MB (before the furniture: 17 draws, 952 triangles, 8.2 MB). The picture
+  is 5 cm lower than before (its centre 0.90 m), so the desk is a desk's height.
+- Sound: `acoustics` `small_room`; `sound_bed`s `rain_glass` at the window, `level` on `weather.rain`; `tape_load`
+  by the computer, played 2 s into the pre-show by the cue `loading` (the computer loads from its cassette, very
+  low); `tube_whine` at the portable.
 
 ### Room: TV 1987 - rented tape
 
-5 of 7. The family living room on a wet night: a black telly on a wooden cabinet with a video recorder in its top
-shelf, a settee of three chairs and an armchair, a white-painted brick fireplace, a fern. `rewinder_1987`: a rented
-tape, tracking wobble, smeared colour, the tear at the bottom.
+5 of 7. The family living room on a wet night: a black telly on a wooden tv unit with a video recorder in its shelf,
+its clock flashing 12:00, a three-seat settee and an armchair, a white-painted brick fireplace, a fern.
+`rewinder_1987`: a rented tape, tracking wobble, smeared colour, the tear at the bottom.
 
-- Systems: `light`, `domestic`, `kit` (a `partition` as the video recorder, ferns), `seats` (the armchair), `sky`
-  (night, clouds), `vista` (hills), `weather` (changing, 500 drops, the pane), `presentation`.
+- Systems: `light`, `domestic` (`telly_stand` `tv_unit`; seat pitch 0.58 m), `kit` (a `video_recorder` in the
+  `telly_shelf` slot, ferns), `seats` (`model` `settee` in the builder's three slots: one settee, the viewer in its
+  middle; the armchair as a place), `sky` (night, clouds), `vista` (hills), `weather` (changing, 500 drops, the
+  pane), `presentation`.
 - Settings: The tape (fresh, rented, worn out: `tape_noise`, `chroma_bleed` and `head_switch` by `map`); Wall lamps in
   the film (0 to 100 %, default 30 %).
 - Cues: `tape_start` (Pre-show): the tape tears for a moment as it starts (`glitch`, 1.5 s). The lamps follow the
-  setting.
-- Measured: 25 draws, 10 108 triangles, 9.5 MB, 500 particles.
+  setting. The clock flashes all the time (Flickering lights off holds it lit).
+- Measured: 27 draws, 9 646 triangles, 9.3 MB, 500 particles (before the furniture: 25 draws, 10 108 triangles,
+  9.5 MB).
+- Sound: `acoustics` `small_room`; `sound_bed`s `vcr` at the tv unit (the cue `tape_start` plays it as the film
+  starts, then the tear 2.5 s later), `clock` on the mantel, `tube_whine` at the set, `fire` at the grate (`gain_db`
+  -4: the fire is lit), `rain_glass` at the window (`gain_db` -3, `level` on `weather.rain`: the rain comes and goes).
+  About -49 dBFS together at full rain, 11 dB under the target.
 
 ### Room: TV 1993 - bedroom telly
 
@@ -2023,36 +2096,36 @@ tape, tracking wobble, smeared colour, the tear at the bottom.
 a radiator under the window, rain in the night outside. A bean bag on the floor; a second place sitting on the bed.
 `nightowl_1993`: a tape watched a few times on a flatter tube with an aperture grille.
 
-- Systems: `light` (`accent` bound to the fairy lights' setting), `domestic` (`bedroom_1993`, `fort` off,
-  `fairy_lights` on), `seats` (bean bags; a cushion on the bed), `sky` (night), `weather` (by the setting, 400 drops,
+- Systems: `light`, `domestic` (`bedroom_1993`, `fort` off, `fairy_lights` on, `fairy_glow` bound to the fairy
+  lights' setting), `seats` (bean bags; a cushion on the bed), `sky` (night), `weather` (by the setting, 400 drops,
   the pane), `presentation`.
 - Settings: Weather at the window (raining, a dry night, showers: `weather.mode`); Fairy lights over the telly (0 to
-  100 %: `light.accent`, which also scales the window's glow group).
+  100 %: `domestic.fairy_glow`, 0 to 1.5; the accent group, the window's glow with it, stays as it is).
 - Measured: 20 draws, 8 470 triangles, 6.3 MB, 400 particles.
 
 ### Room: TV 2005 - flat screen
 
-7 of 7. A pale living room with a laminate floor, a grey settee of three chairs and an armchair, a plant, a wide
-window on a sunset. A 32 inch flat panel on a low wooden stand (`freedtv_2005`: a free digital broadcast, a faint
-pixel grid, the backlight through the dark scenes).
+7 of 7. A pale living room with a laminate floor, a grey three-seat settee and an armchair, a coffee table, a plant,
+a wide window on a sunset. A 32 inch flat panel on its pedestal on a low pale wooden tv unit (`freedtv_2005`: a free
+digital broadcast, a faint pixel grid, the backlight through the dark scenes).
 
-- Systems: `light`, `domestic`, `kit` (ferns), `seats` (the armchair), `sky` (dusk 0.6), `vista` (hills),
-  `presentation`.
+- Systems: `light`, `domestic` (`telly` `flat_panel`, 7 cm deep, on a `tv_unit` 1.4 m wide; seat pitch 0.6 m), `kit`
+  (ferns, a `coffee_table`), `seats` (`model` `settee` in the builder's slots; the armchair), `sky` (dusk 0.6),
+  `vista` (hills), `presentation`.
 - Settings: Wall lamps in the film; Backlight bleed (`presentation.panel_bleed`).
-- Measured: 19 draws, 10 232 triangles, 10.3 MB.
+- Measured: 21 draws, 9 690 triangles, 10.3 MB (before the furniture: 19 draws, 10 232 triangles, 10.3 MB).
+- Sound: `acoustics` `small_room` only; no beds (a flat panel is silent).
 
 **What the systems lack for these rooms** (each room took the closest thing there is):
 
-- A tube's own shape for the CRT (above). The domestic telly is always a deep box (its depth 0.75 of its width), so
-  the 2005 flat panel is a deep box from the side.
-- Furniture: there is no desk, computer, video recorder, sideboard, standard lamp, rug or settee. The desk, the
-  computer and the video recorder are the kit's `partition` (a plasterboard box with a skirting) in laminate and
-  plastic colours; the settee is three club chairs in a row. The radio-style cabinet of 1930 is the telly on a walnut
-  chest.
+- A tube's own shape for the CRT (above).
+- The radio-style cabinet of 1930 is the telly on a walnut chest (a `radiogram` stand is there now; the 1930 room
+  keeps its chest).
 - The seats system's own places are not listed before the room is built (no static layout), so the seat list before
   the build is the builder's alone.
-- Sound: none yet; the rooms get theirs when the sound systems are merged (each room's own sound comes from its
-  presentation's speaker meanwhile).
+- Sound: each room's beds and acoustics are in its own section (the recipes: "Sound and music", "For the rooms").
+  `test_room_tv.gd` checks them: the sounds, each in the room, each 10 dB or more under the level check's target and
+  all together 6 dB or more under it, the loops playing, the one-shots played by their cues.
 
 ## Files
 
@@ -2061,7 +2134,7 @@ pixel grid, the backlight through the dark scenes).
 | `app/scripts/env/env_doc.gd` | the version 4 sections' validation, bindings, settings declarations |
 | `app/scripts/env/systems/registry.gd`, `env_system.gd` | the registry and the system base |
 | `app/scripts/env/systems/*.gd` | the systems |
-| `app/scripts/env/systems/kit/` | the builders' common base (`builder.gd`) and helpers, the kit's pieces (`pieces.gd`), the glass and glow shaders |
+| `app/scripts/env/systems/kit/` | the builders' common base (`builder.gd`) and helpers, the kit's pieces (`pieces.gd`), the furniture (`furniture.gd`), the glass and glow shaders |
 | `app/scripts/env/env_host.gd` | the host: builds the systems, runs the signals, bindings, timeline and cues |
 | `app/scripts/env/env_room.gd` | the environment node of a room that ships as a document |
 | `app/scripts/env/env_signals.gd`, `env_timeline.gd` | film signals; states and cues |

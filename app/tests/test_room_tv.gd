@@ -6,11 +6,15 @@ extends "res://tests/env_builder_harness.gd"
 ## budget, a clear sight line from every seat; the Television group; the era's preset on a telly; the telly's shape
 ## (4:3 before 2000, 16:9 for the flat panel) and its size from the viewer's own seat (small, but 17 to 23 degrees
 ## across); the room's own settings and what each does to its system; the cues (the set warming up, tuning in, a tape
-## starting; the lamps down in the film and up after it); the era's own things (a fire, the cat, a desk and a
-## computer, a video recorder, a bed and fairy lights, rain on the pane).
+## starting; the lamps down in the film and up after it); the era's own things (a fire, the cat; a radiogram, a
+## sideboard, a rug and a standard lamp; a portable on a desk beside a computer; a video recorder under the set
+## flashing 12:00 and a settee; a bed and fairy lights; a flat panel on a tv unit, a coffee table; rain on the pane);
+## the picture on the set's glass in every room.
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_tv.gd
 
 const Presentation := preload("res://scripts/env/systems/presentation.gd")
+const Domestic := preload("res://scripts/env/systems/domestic.gd")
+const Furniture := preload("res://scripts/env/systems/kit/furniture.gd")
 
 ## id -> [year, preset, aspect of the tube]
 const ROOMS := {
@@ -110,6 +114,8 @@ func _common(id: String, room: Node3D, doc: Dictionary) -> void:
 			float(ds["center"][0]), float(ds["center"][1]), float(ds["center"][2]))) and size.is_equal_approx(
 			Vector2(float(ds["size"][0]), float(ds["size"][1]))))
 	check("%s: the tube's shape (%.3f)" % [id, size.aspect()], absf(size.aspect() - float(ROOMS[id][2])) < 0.01)
+	var why := telly_glass(room, sc)
+	check("%s: the picture on the set's glass %s" % [id, why], why == "")
 	var deg := rad_to_deg(2.0 * atan(size.x * 0.5 / -c.z))
 	check("%s: %.2f m wide at %.2f m: %.1f degrees from the viewer's seat" % [id, size.x, -c.z, deg],
 			deg >= MIN_DEG and deg <= MAX_DEG)
@@ -121,6 +127,11 @@ func _common(id: String, room: Node3D, doc: Dictionary) -> void:
 			func(s: Transform3D) -> bool: return s.origin.z > c.z + 0.7))
 	check("%s: object physics (%d shapes)" % [id, room.collision_shapes().size()], room.collision_shapes().size() > 8)
 	room.host.auto = false
+
+
+## A one-shot bed's plays so far.
+func _plays(room: Node3D, bed: String) -> int:
+	return int(room.host.system(bed).get("plays"))
 
 
 func _play(room: Node3D, seconds: float, snap := PLAYING) -> void:
@@ -218,22 +229,36 @@ func _tv_1972(room: Node3D) -> void:
 	await _play(room, 0.5, STOPPED)
 	check("1972: Aerial noise up (%.2f)" % float(p.value("snow")), absf(float(p.value("snow")) - 0.4) < 0.01)
 	room.host.set_setting("aerial", 0.06)
-	check("1972: the bands and the carpet", room.host.system("kit") != null
-			and (room.host.system("kit").params["pieces"] as Array).size() == 2)
+	var kit: Node = room.host.system("kit")
+	var names := (kit.params["pieces"] as Array).map(func(e: Dictionary) -> String: return str(e["piece"]))
+	check("1972: the bands, the carpet, a rug, a sideboard, a standard lamp %s" % [names], names == ["carpet", "curves",
+			"rug", "sideboard", "standard_lamp"] and (kit.problems() as Array).is_empty())
+	check("1972: the set on a radiogram", str(room.host.system("room").params["telly_stand"]) == "radiogram")
+	var shade := room.get_node_or_null("PieceLamps") as MeshInstance3D
+	check("1972: the standard lamp's shade glows (house group: the ritual dims it)", shade != null
+			and float(room.host.system("light").group_energy("house")) > 0.0)
 	check("1972: a bean bag beside three club chairs", room.room_seat_transforms().size() == 4)
 	await _lamps("1972", room, 0.3)
+	await sounds("1972", room, {"radiator": "radiator", "clock": "clock", "whine": "tube_whine"})
 
 
 ## 1983: a portable telly on a desk beside a home computer, the aerial lead's noise, bold lines.
 func _tv_1983(room: Node3D) -> void:
 	var p := _p(room)
-	var sc: Dictionary = room.host.system("room").screen()
-	var pieces: Array = room.host.system("kit").params["pieces"]
-	var desk: Dictionary = pieces[0]
-	var top := float(desk["size"][1])
-	var foot := float(sc["center"][1]) - float(sc["size"][1]) * 0.5 - 0.096
-	check("1983: the telly stands on the desk (desk %.3f, the telly's foot %.3f)" % [top, foot], absf(top - foot) < 0.01)
-	check("1983: the computer on the desk", float(pieces[1]["at"][1]) == top)
+	var b: Node = room.host.system("room")
+	var t: Dictionary = Domestic._telly(Domestic.resolved(b.params))
+	check("1983: a portable on a desk", str(t["form"]) == "portable" and str(t["stand"]) == "desk")
+	var desk: Transform3D = b.slots()["telly_stand"][0]["transform"]
+	check("1983: the telly stands on the desk (desk %.3f, the telly's foot %.3f)" % [desk.origin.y, float(t["foot"])],
+			absf(desk.origin.y - float(t["foot"])) < 0.001 and desk.origin.y > 0.7 and desk.origin.y < 0.78)
+	var kit: Node = room.host.system("kit")
+	var pc: Dictionary = kit.params["pieces"][0]
+	check("1983: the computer on the desk, the telly its screen (no monitor)", str(pc["piece"]) == "computer"
+			and str(pc["slot"]) == "telly_stand" and str(pc["holds"]) == "none" and (kit.problems() as Array).is_empty())
+	var boxes: Array = kit.collision_shapes()
+	var on_desk := boxes.any(func(sh: Array) -> bool: return absf((sh[1] as Transform3D).origin.y - (desk.origin.y
+			+ 0.055)) < 0.01)
+	check("1983: its case's box on the desk's top (%d boxes)" % boxes.size(), on_desk)
 	check("1983: bold lines", absf(float(p.value("scanlines")) - 0.65) < 0.01)
 	room.host.set_setting("bold_lines", false)
 	await _play(room, 0.5, STOPPED)
@@ -244,6 +269,17 @@ func _tv_1983(room: Node3D) -> void:
 	room.host.step(0.1)
 	check("1983: the set tunes in to the computer's channel (a glitch)", float(p.get("_glitch")) > 0.5)
 	check("1983: a desk chair and a bean bag", room.room_seat_transforms().size() == 2)
+	await sounds("1983", room, {"rain": "rain_glass", "tape": "tape_load", "whine": "tube_whine"})
+	var w: Node = room.host.system("weather")
+	await _play(room, 20.0, STOPPED)
+	check("1983: rain on the glass as loud as the rain (%.2f, the weather's %.2f)" % [
+			float(room.host.system("rain").params["level"]), w.rain_amount()],
+			absf(float(room.host.system("rain").params["level"]) - w.rain_amount()) < 0.1 and w.rain_amount() > 0.1)
+	var loads := _plays(room, "tape")
+	await _play(room, 2.0)
+	await _play(room, 4.0, STOPPED)
+	check("1983: back in the pre-show, the computer loads from its cassette (%d plays)" % _plays(room, "tape"),
+			_plays(room, "tape") > loads)
 
 
 ## 1987: the family telly, a video recorder under it, a rented tape.
@@ -256,18 +292,37 @@ func _tv_1987(room: Node3D) -> void:
 	check("1987: a worn tape: more noise, the tear at the bottom", absf(float(p.value("tape_noise")) - 0.75) < 0.01
 			and absf(float(p.value("head_switch")) - 1.0) < 0.01)
 	room.host.set_setting("tape", "rented")
+	var b: Node = room.host.system("room")
+	var t: Dictionary = Domestic._telly(Domestic.resolved(b.params))
+	var shelf: Transform3D = b.slots()["telly_shelf"][0]["transform"]
 	var vcr: Dictionary = room.host.system("kit").params["pieces"][1]
-	var sc: Dictionary = room.host.system("room").screen()
-	check("1987: the video recorder under the telly", float(vcr["at"][1]) + float(vcr["size"][1]) < float(sc["center"][1])
-			- float(sc["size"][1]) * 0.5 - 0.1)
+	check("1987: the video recorder in the tv unit's shelf under the telly (%.3f, the set's foot %.3f)" % [
+			shelf.origin.y, float(t["foot"])], str(t["stand"]) == "tv_unit" and str(vcr["piece"]) == "video_recorder"
+			and str(vcr["slot"]) == "telly_shelf" and shelf.origin.y > 0.3 and shelf.origin.y + 0.09
+			< float(t["foot"]) - Furniture.TOP_T + 0.001)
+	await clock_flashes("1987", room)
+	var drawn: Array = room.host.system("seats").drawn()
+	var settee := drawn.filter(func(d: Dictionary) -> bool: return d["model"] == "settee")
+	check("1987: a settee of three places, the viewer's in the middle, and an armchair (%d, %d)" % [settee.size(),
+			drawn.size()], settee.size() == 3 and drawn.size() == 4 and settee.any(func(d: Dictionary) -> bool:
+			return (d["xf"] as Transform3D).origin.length() < 0.05) and room.get_node_or_null("SeatEnds") != null)
 	room.host.snapshot_override = PLAYING
 	room.host.step(0.1)
 	room.host.step(0.1)
-	check("1987: the tape starts with a tear", float(p.get("_glitch")) > 1.0)
+	check("1987: the tape goes in first, no tear yet (%.2f)" % float(p.get("_glitch")), float(p.get("_glitch")) < 0.01)
+	for i in 26:
+		room.host.step(0.1)
+	check("1987: then the picture starts with a tear (%.2f)" % float(p.get("_glitch")), float(p.get("_glitch")) > 1.0)
 	room.host.set_setting("lamps", 0.5)
 	await _lamps("1987", room, 0.5)
 	room.host.set_setting("lamps", 0.3)
 	await _lamps("1987", room, 0.3)
+	await sounds("1987", room, {"vcr": "vcr", "clock": "clock", "whine": "tube_whine", "fire": "fire",
+			"rain": "rain_glass"})
+	var takes := _plays(room, "vcr")
+	await _play(room, 2.0, STOPPED)
+	await _play(room, 1.0)
+	check("1987: the tape goes in as the film starts (%d plays)" % _plays(room, "vcr"), _plays(room, "vcr") > takes)
 
 
 ## 1993: a teenager's bedroom: no fort, fairy lights, a bean bag and the bed, rain or not.
@@ -285,11 +340,19 @@ func _tv_1993(room: Node3D) -> void:
 	await _play(room, 0.5, STOPPED)
 	check("1993: Weather rain (%s)" % w.params["mode"], str(w.params["mode"]) == "heavy")
 	room.host.set_setting("weather", "changing")
+	var bulbs := (room.get_node("FairyLights") as MeshInstance3D).mesh.surface_get_material(0) as ShaderMaterial
+	var lit := float(bulbs.get_shader_parameter("energy"))
 	room.host.set_setting("fairy", 0.0)
 	await _play(room, 4.0, STOPPED)
-	check("1993: Fairy lights at the bottom: off (%.3f)" % float(room.host.param("light.accent")),
-			float(room.host.param("light.accent")) < 0.02)
+	var off := float(bulbs.get_shader_parameter("energy"))
+	check("1993: Fairy lights at the bottom: off (glow %.3f, the bulbs %.3f from %.3f)" % [
+			float(b.params["fairy_glow"]), off, lit], float(b.params["fairy_glow"]) < 0.02 and off < 0.02 and lit > 0.5)
+	check("1993: and nothing else dims with them (the accent group %.2f)" % float(room.host.param("light.accent")),
+			float(room.host.param("light.accent")) > 0.99)
 	room.host.set_setting("fairy", 0.7)
+	await _play(room, 4.0, STOPPED)
+	check("1993: Fairy lights back (glow %.2f)" % float(b.params["fairy_glow"]),
+			absf(float(b.params["fairy_glow"]) - 1.05) < 0.02)
 	check("1993: no lamps of its own to dim", int(b.params["lamps"]) <= 0)
 
 
@@ -297,6 +360,17 @@ func _tv_1993(room: Node3D) -> void:
 func _tv_2005(room: Node3D) -> void:
 	var p := _p(room)
 	check("2005: a flat panel", str(p.value("display")) == "panel")
+	var b: Node = room.host.system("room")
+	var t: Dictionary = Domestic._telly(Domestic.resolved(b.params))
+	check("2005: the set itself a thin flat panel on a pedestal on a tv unit (%.2f m deep)" % float(t["body"][1].z),
+			str(t["form"]) == "flat_panel" and str(t["stand"]) == "tv_unit" and bool(t["pedestal"])
+			and float(t["body"][1].z) < 0.1)
+	var pieces: Array = room.host.system("kit").params["pieces"]
+	check("2005: a coffee table in front of the settee", pieces.any(func(e: Dictionary) -> bool:
+			return str(e["piece"]) == "coffee_table" and float(e["at"][2]) < -0.5))
+	var drawn: Array = room.host.system("seats").drawn()
+	check("2005: a settee of three and an armchair", drawn.filter(func(d: Dictionary) -> bool:
+			return d["model"] == "settee").size() == 3 and drawn.size() == 4)
 	room.host.set_setting("backlight", 0.0)
 	await _play(room, 0.5, STOPPED)
 	check("2005: Backlight bleed off (%.2f)" % float(p.value("panel_bleed")), float(p.value("panel_bleed")) < 0.001)
@@ -304,3 +378,4 @@ func _tv_2005(room: Node3D) -> void:
 	room.host.set_setting("lamps", 0.0)
 	await _lamps("2005", room, 0.0)
 	room.host.set_setting("lamps", 0.3)
+	await sounds("2005", room, {})

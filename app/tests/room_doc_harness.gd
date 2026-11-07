@@ -30,8 +30,14 @@ func check_shipped(label: String, path: String, builder_id: String) -> Node3D:
 	check("%s: the viewer's seat at the origin, the room's own (%d seats)" % [label, seats.size()],
 			seats.any(func(t: Transform3D) -> bool: return t.origin.length() < 0.05))
 	var shapes: Array = room.collision_shapes()
-	check("%s: collision shapes (%d), as many as before the build (%d)" % [label, shapes.size(), shapes_before],
-			shapes.size() > 4 and shapes.size() == shapes_before)
+	# A kit's boxes follow the builder's slots, so they exist only once built (no static form).
+	var built_only := 0
+	for s: Node in room.host.order:
+		if s.has_method("collision_shapes") and not s.get_script().has_method("collision_shapes_for") \
+				and s.get_script() == Registry.script_of("kit"):
+			built_only += (s.collision_shapes() as Array).size()
+	check("%s: collision shapes (%d), as many as before the build (%d, %d only once built)" % [label, shapes.size(),
+			shapes_before, built_only], shapes.size() > 4 and shapes.size() - built_only == shapes_before)
 	var body := StaticBody3D.new()
 	for sh: Array in shapes:
 		var cs := CollisionShape3D.new()

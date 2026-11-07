@@ -5,17 +5,21 @@ extends RefCounted
 ## offset, turn and size in it), its front faces local +Z, its foot is at local y 0. Statues are animals and things,
 ## never a figure or a torso. Static; kit.gd calls build(piece, ctx, xf, size, entry).
 ##
-## ctx (kit.gd's Ctx): s (baked RoomMesh), u (unbaked RoomMesh: rounded shapes, leaves), mat(key, colour) -> material
-## (made once a key and colour), shapes (physics boxes), glows (lamp quads by key), screen (the room's screen:
-## {xf, size}), room (the environment node), rng.
+## ctx (kit.gd's Ctx): s (baked RoomMesh), u (unbaked RoomMesh: rounded shapes, leaves), lit (unbaked RoomMesh of
+## lamp shades), mat(key, colour) -> material (made once a key and colour), shade(colour) -> a lamp shade's glow,
+## shapes (physics boxes), glows (lamp quads by key), lamps ([at, colour, strength]: stand-in lamps), screen (the
+## room's screen: {xf, size}), room (the environment node), rng. The furniture (desk, computer, video_recorder,
+## sideboard, standard_lamp, rug, coffee_table) is furniture.gd's.
 
 const RoomMesh := preload("res://scripts/env/room_mesh.gd")
 const Shapes := preload("res://scripts/env/systems/kit/shapes.gd")
 const Procedural := preload("res://scripts/env/systems/kit/procedural.gd")
 const PhysicsShapes := preload("res://scripts/play/physics_shapes.gd")
+const Furniture := preload("res://scripts/env/systems/kit/furniture.gd")
 
 const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk", "column", "facade", "castle_gate",
-		"booth", "snack_bar", "screen_tower", "bougainvillea", "ivy", "ferns", "carpet", "partition", "curves"]
+		"booth", "snack_bar", "screen_tower", "bougainvillea", "ivy", "ferns", "carpet", "partition", "curves",
+		"desk", "computer", "video_recorder", "sideboard", "standard_lamp", "rug", "coffee_table"]
 ## Each piece's size when neither the entry nor its slot gives one: [width, height, depth].
 const SIZES := {
 	"balcony_front": [6.0, 1.0, 0.25], "niche": [1.3, 2.6, 0.4], "urn": [0.5, 1.0, 0.5], "lion": [0.55, 0.9, 1.0],
@@ -23,9 +27,15 @@ const SIZES := {
 	"booth": [2.0, 2.3, 1.8], "snack_bar": [3.2, 2.8, 2.0], "screen_tower": [0.0, 0.0, 2.0],
 	"bougainvillea": [2.5, 1.6, 0.3], "ivy": [2.0, 2.5, 0.2], "ferns": [1.0, 0.8, 1.0], "carpet": [0.0, 0.0, 0.0],
 	"partition": [6.0, 3.0, 0.12], "curves": [2.0, 3.0, 0.1],
+	"desk": [1.2, 0.74, 0.65], "computer": [0.44, 0.42, 0.56], "video_recorder": [0.43, 0.09, 0.3],
+	"sideboard": [1.6, 0.8, 0.45], "standard_lamp": [0.36, 1.55, 0.36], "rug": [2.0, 0.012, 1.4],
+	"coffee_table": [1.0, 0.42, 0.55],
 }
 ## The pieces that stand on a floor (their slot's origin is a floor point); the others hang on a wall.
-const STANDING: Array[String] = ["urn", "lion", "obelisk", "column", "booth", "snack_bar", "ferns", "partition"]
+const STANDING: Array[String] = ["urn", "lion", "obelisk", "column", "booth", "snack_bar", "ferns", "partition",
+		"desk", "computer", "video_recorder", "sideboard", "standard_lamp", "rug", "coffee_table"]
+## What a video recorder's clock shows (kit.gd flashes it).
+const CLOCK := "12:00"
 
 
 static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
@@ -64,6 +74,51 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			_partition(c, xf, size, e)
 		"curves":
 			_curves(c, xf, size, e)
+		"desk", "sideboard", "coffee_table":
+			var m := {"body": c.mat("wood", e.get("colour")), "detail": c.mat("iron")}
+			_solids(c, xf, Furniture.stand(piece, c.s, xf, size, m))
+		"computer":
+			var m := {"body": c.mat("plastic", e.get("colour")), "detail": c.mat("iron")}
+			_solids(c, xf, Furniture.computer(c.s, xf, size, m, str(e.get("holds", "")) != "none"))
+		"video_recorder":
+			_video_recorder(c, xf, size, e)
+		"standard_lamp":
+			_standard_lamp(c, xf, size, e)
+		"rug":
+			var field := _colour(e, c.colour_of("fabric"))
+			var accent: Variant = e.get("accent")
+			Furniture.rug(c.s, xf, size, {"body": c.mat("fabric", field),
+					"detail": c.mat("fabric", _to_color(accent) if accent != null else field * 0.55)})
+
+
+# --- Furniture (furniture.gd draws it) -----------------------------------------------------------------------------
+
+## A piece of furniture's boxes ([[centre, size]] in its own frame) as physics shapes.
+static func _solids(c: Object, xf: Transform3D, boxes: Array) -> void:
+	for bx: Array in boxes:
+		_solid(c, xf, bx[0], bx[1])
+
+
+## A video recorder, its clock's digits glowing in its window (the "display" glow: kit.gd flashes it).
+static func _video_recorder(c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
+	var body := _colour(e, c.colour_of("iron"))
+	var m := {"body": c.mat("iron", body), "detail": c.mat("iron", body * 0.35)}
+	var win: Array = Furniture.video_recorder(c.s, xf, size, m)
+	var g: Array = c.glows.get("display", [])
+	g.append_array(Furniture.seven_segments(CLOCK, win[0], win[1], win[2], win[3], win[4]))
+	c.glows["display"] = g
+	_solid(c, xf, Vector3(0, size.y * 0.5, 0), size)
+
+
+## A standard lamp: its shade glows (house group) and gives a dim stand-in lamp while the light system has room.
+static func _standard_lamp(c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
+	var shade := _colour(e, c.colour_of("lamp_colour"))
+	var accent: Variant = e.get("accent")
+	var m := {"body": c.mat("iron"), "pole": c.mat("iron", _to_color(accent) if accent != null else null),
+			"shade": c.shade(shade)}
+	var at := Furniture.standard_lamp(c.s, c.lit, xf, size, m)
+	c.lamps.append([xf * at, shade, 0.45])
+	_solid(c, xf, Vector3(0, size.y * 0.5, 0), Vector3(0.3, size.y, 0.3))
 
 
 # --- In the piece's frame ------------------------------------------------------------------------------------------
