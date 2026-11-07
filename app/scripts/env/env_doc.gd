@@ -21,12 +21,12 @@ const VERSION := 4
 ## The sections version 4 adds to version 3.
 const SECTIONS: Array[String] = ["room", "acoustics", "systems", "settings", "cues", "timeline", "audio", "credits"]
 ## Film signals and the other channels a binding may follow (docs/environments.md, "Bindings and film signals"), by
-## what they give: unit (0..1), raw (any number), color, name (a state's name: map it).
+## what they give: unit (0..1), raw (any number), color, name (a state's name: map it). weather.*: systems/weather.gd.
 const CHANNELS := {
 	"film.colour": "color", "film.brightness": "unit", "film.bass": "unit", "film.transient": "unit",
 	"film.quiet": "unit", "film.progress": "unit", "film.minutes": "raw", "time.of_day": "unit",
 	"playback.state": "name", "playback.playing": "unit", "comfort.motion": "unit",
-}
+	"weather.rain": "unit", "weather.snow": "unit", "weather.wet": "unit"}
 const SETTING_PREFIX := "setting."
 ## The timeline's states (env_timeline.gd).
 const STATES: Array[String] = ["preshow", "starting", "playing", "paused", "intermission", "credits", "ended"]
