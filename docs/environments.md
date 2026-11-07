@@ -151,8 +151,8 @@ parameters only.
 | `kit` | kit | modular pieces placed along a builder's slots (balcony fronts, niches, columns, façades) | next |
 | objects, materials, pictures | | as now: `parts` placements, library materials, pictures | as now |
 | `sky`, `vista` | sky | a sky dome (gradient, stars with real constellations, clouds lit by the screen, aurora), far scenery cards (mesas, an acropolis, birches) | next |
-| `atmosphere`, `weather` | atmosphere | haze in the beam, fog, breath, rain, snow, mist, a weather cycle | next |
-| `life` | life | non-human ambient life: moths, birds, fish, fireflies, a cat, a deer, a whale. Never people | next |
+| `atmosphere`, `weather` | atmosphere | haze, dust and smoke in the beam, ground fog and mist, breath; rain and snow through open roofs and outside windows, rain on a pane, a puddle that reflects the film, a weather cycle (below, "Atmosphere and weather") | built |
+| `life` | life | non-human ambient life: moths, birds, fish, fireflies, a cat, a deer, glowing deep-sea creatures, a whale, plane lights. Never people (below, "Ambient life") | built |
 | `sound_bed`, `acoustics` | sound | looped beds and one-shots from our own synthesiser or CC0 samples, placed in the room, on the Environment bus | next |
 | `music` | music | instruments that play themselves (a player piano, an organ), from our own synthesiser | next |
 | timeline and cues | | below; part of the host, not a registered system | built |
@@ -197,6 +197,8 @@ and range: a binding whose range leaves the parameter's range is refused.
 | `playback.playing` | 1 while playing | 0..1 |
 | `setting.<name>` | a room setting: a range normalised over its own range, a bool 0 or 1, a choice by `map` | 0..1 |
 | `comfort.motion` | the room's Motion setting | 0..1 |
+| `weather.rain`, `weather.snow` | what falls now (the weather system; 0 without one) | 0..1 |
+| `weather.wet` | how wet the room is: it follows the rain and dries slowly after it | 0..1 |
 
 Tests feed the channels with `signals.fake(channel, value)`.
 
@@ -223,8 +225,11 @@ pre-show waits up to 4 s for the cue before it opens them itself.
 ```json
 {"name": "whale", "when": {"signal": "film.quiet", "above": 0.9, "for": 4},
  "states": ["playing"], "chance": 0.5, "cooldown": 900,
- "steps": [{"do": "life.whale", "args": {"side": "left"}}, {"sound": "whale", "gain_db": -6}]}
+ "steps": [{"do": "whale.pass", "args": {"side": "left"}}]}
 ```
+
+`whale.pass` is the action `pass` of the system with the id `whale` (a `life` system whose creature is the whale). The
+whale sings as it passes, so the cue needs no `sound` step.
 
 | Key | What |
 |---|---|
@@ -412,6 +417,232 @@ and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider'
 | `booth` | true | the projection booth's windows in the rear wall; `lens` is its lens |
 | `doors` | true | the four exits with signs |
 | materials | the cinema's | `floor`, `walls`, `front_wall`, `ceiling`, `panel_fabric`, `panel_wood`, `stage`, `curtains`, `door_leaf`, `door_metal`, `brass` |
+
+## Atmosphere and weather
+
+Two systems of kind `atmosphere`. Both are cheap: shader cards and GPU particles, no volumetric fog, no depth texture,
+no live light. Neither makes a sound. Neither moves the viewer.
+
+### `atmosphere`
+
+`scripts/env/systems/atmosphere.gd`. The room's air. Each part is built only when the document gives it (a value over
+0, or a binding), so a room pays only for what it uses.
+
+| Parameter | Default | What |
+|---|---|---|
+| `beam_haze` | 0 | haze in the projector's beam. Live, a brightness |
+| `beam_dust` | 0 | dust motes that twinkle in the beam. Live, a brightness |
+| `beam_smoke` | 0 | the haze billows into slow rising smoke. Live, a brightness |
+| `beam_colour` | warm white | the beam's light. Live (it can follow `film.colour`) |
+| `follow_picture` | true | the haze takes the picture's colour and brightness from the bias light |
+| `lens` | null | the beam's lens; null: the `screen_frame` system's (else the cinema's booth) |
+| `fog` | 0 | ground fog or mist: how thick. Live (it can follow `weather.wet`: mist after rain) |
+| `fog_height`, `fog_center`, `fog_size`, `fog_layers`, `fog_speed`, `fog_walls`, `fog_colour` | 0.6 m, the origin, 16 x 16 m, 4, 0.3, false, pale grey | the fog's reach, place, size, layers (one draw each), drift, edges and colour |
+| `breath` | 0 | breath fog in a cold room: how much a puff shows. Live |
+| `breath_seconds`, `breath_colour` | 5 s, pale blue-white | seconds between puffs (each a little more or less) and the colour |
+
+- **The haze** (`shaders/env_haze_beam.gdshader`) is a beam-shaped volume: the cone's four sides from the lens to the
+  screen's corners, and a cross of two planes through its axis. Each surface samples a slowly drifting noise field.
+  It is drawn additively. It is brightest near the lens and gone before the screen, so the picture stays clean. It
+  shows while the `screen_frame` beam would: a flat film playing, not the projector feature's own beam. It is
+  stronger as the house lights go down. `beam_haze` can also follow `film.brightness`, and `beam_colour`
+  `film.colour`.
+- **The fog** is the assistant room's fog (`shaders/room_fog.gdshader`): soft layers up to `fog_height`, denser low
+  down. Low and thick is ground fog; high and thin is mist.
+- **Breath** (`shaders/env_haze_breath.gdshader`, 16 GPU particles): now and then a puff starts 14 cm under the eyes
+  and 10 cm ahead, drifts forward and down, and fades in 2.4 s. It never rises to the eyes' level: its top stays more
+  than 20 degrees under the eye line (the test checks it), so it never hides the screen. The puff follows the head's
+  turn, not its tilt.
+
+Measured (`test_env_atmosphere.gd`): beam, four fog layers and breath: 6 draws, 14 triangles, 16 particles.
+
+### `weather`
+
+`scripts/env/systems/weather.gd`.
+
+| Parameter | Default | What |
+|---|---|---|
+| `mode` | `changing` | `clear`, `light` (a drizzle or flurries), `heavy` (rain or snow), or `changing`: the cycle. Live |
+| `falls` | `rain` | `rain` or `snow` (built once) |
+| `intensity` | 1 | how much falls at the heaviest. Live |
+| `cycle_minutes`, `cycle_start` | 24, 0.3 | the cycle's length, and where in it the room starts |
+| `change_seconds`, `dry_minutes` | 40, 4 | how long a change of weather takes; how long the wet takes to dry |
+| `areas` | none | up to 3 boxes `{min, max}` the rain or snow falls through, top to floor: an open roof, the view outside a window |
+| `particles` | 1200 | drops or flakes over all the areas, shared by their floor area (the room's budget is 4000) |
+| `wind`, `colour` | 0.2 m/s along x, pale blue-grey | the drift; the drops' colour (lit by the room and the film) |
+| `pane`, `pane_center`, `pane_size`, `pane_yaw` | off | drops on a window pane |
+| `puddle`, `puddle_center`, `puddle_size`, `puddle_reflect` | off | a puddle on the floor that reflects the film; `puddle_reflect` is live |
+
+Actions: `shower` (args `seconds`, `amount`: a passing shower whatever the mode) and `clear_up` (args `seconds`: the
+rain eases off now and holds off).
+
+- **The cycle:** clear, drizzle, rain, clearing, clear, over `cycle_minutes`. The amount eases to its target over
+  `change_seconds`, so a change of mode is never sudden. The wet follows the rain and dries over `dry_minutes`.
+- **The state:** `weather_state()` is `clear`, `drizzle`, `rain` or `clearing` (snow: `clear`, `flurries`, `snow`,
+  `clearing`). The signal `weather_changed(state)` fires on a change.
+- **For other systems and cues:** the weather writes the channels `weather.rain`, `weather.snow` and `weather.wet`
+  into the host's signals each frame. A sound bed follows them by a binding (rain on glass:
+  `{"bind": "weather.rain", "smooth": 1}`; drips on leaves: `weather.wet`). A cue can wait for them:
+  `{"when": {"signal": "weather.rain", "above": 0.5}}`. Without a weather system they read 0. The methods
+  `rain_amount()`, `snow_amount()`, `wet_amount()` give the same.
+- **Falling** (`shaders/env_rain_fall.gdshader`): GPU particles, one emitter per area. A drop is a thin upright streak;
+  a flake a soft disc that sways. The share that shows follows the amount (`amount_ratio`), so the particle count
+  never rises over the declared one.
+- **The pane** (`shaders/env_rain_pane.gdshader`): beads that come and go while it rains and stay a while after, and
+  drops that run down in wavering paths with trails. All procedural; no screen texture.
+- **The puddle** (`shaders/env_rain_puddle.gdshader`): dark water with a ragged edge, and in it the part of the picture a
+  mirror there would show (the screen's own uniforms, copied each frame as the floor reflection does). Rings spread
+  where drops land while it rains. With no film it takes the film's colours from the bias light.
+- **Turning it off:** a room setting mapped onto `mode`, for example
+  `{"bind": "setting.weather", "map": {"changing": "changing", "rain": "heavy", "clear": "clear"}}`.
+
+Measured (`test_env_weather.gd`, a hall with half its ceiling open): two areas, a pane and a puddle, 1500 drops: 4
+draws, 4 triangles, 1500 particles. The hall and the weather together: 24 draws.
+
+### The film layer
+
+On the Frame the film is an OpenXR layer drawn over everything between the eyes and the picture
+(`scripts/play/film_layer.gd`). Haze, rain or fog in front of the picture is hidden there; around the picture it
+shows. These systems do not make the layer step aside: it would cost the layer's sharpness for the whole film. The
+choice keeps the picture clean, which is also why the haze fades out before the screen. What is drawn: the beam above
+and round the picture, rain in the room and outside windows, the puddle on the floor (it lies below the picture as
+seen from any seat), breath under the eye line. On the desktop, and with the layer off, rain in front of the picture
+shows over it.
+
+### For the rooms
+
+| Room | Use |
+|---|---|
+| Shopfront 1906 | `atmosphere`: `beam_haze` 0.4, `beam_dust` 0.7 |
+| Screen 3, 1983 | `atmosphere`: `beam_haze` 0.6, `beam_smoke` 0.8 |
+| Palace of Culture | `weather`: `falls` snow, `mode` heavy or light, an area outside the windows |
+| Reclaimed | `weather`: `mode` from the Weather setting, an area under the open roof, `puddle` in front of the screen; `atmosphere.fog` bound to `weather.wet` for mist after rain |
+| Ice cinema | `atmosphere`: `breath` 0.6, a little low `fog` |
+| Pillow Fort | `weather`: `pane` on the window, `mode` light or changing, no areas (or one outside the window) |
+
+## Ambient life
+
+`scripts/env/systems/life.gd`, kind `life`. Animals only, never people. One system is one kind of creature. A room
+with moths and a cat has two `life` systems, each with its own id (for example `moths` and `cat`). A cue calls a
+creature by that id: `whale.pass`, `cat.settle`.
+
+Each creature is a script in `scripts/env/systems/life/` (the base is `creature.gd`). All are procedural low-poly
+meshes on two shaders: `shaders/env_life.gdshader` (unlit with the room's spill; wings, legs, the body's wave and the
+head move in the vertex shader) and `shaders/env_life_glow.gdshader` (additive: glowing points and bells). There are
+no textures, no live lights and no particles.
+
+| Parameter | Default | What |
+|---|---|---|
+| `creature` | `moth` | `moth`, `bird`, `firefly`, `cat`, `deer`, `fish`, `jelly` (glowing deep-sea creatures), `whale`, `plane` (a plane's lights). Built once |
+| `count` | 0 | how many; 0: the creature's own (below). The cat, the deer and the whale are one at most |
+| `region` | null | the box `{min, max}` they keep to, in the room's frame; null: the creature's own |
+| `path` | [] | points in the room's frame: the cat's wall top, the deer's and the whale's way (first to last), the birds' perches |
+| `size` | 1 | times the creature's own size |
+| `speed` | 1 | times its own speed. Live |
+| `colour` | null | the body's colour, or the glow's (fireflies, jellies); null: its own. Live, a brightness (it can follow `film.colour`) |
+| `glow` | 1 | how bright the lights are (fireflies, jellies, planes). Live, a brightness |
+| `attraction` | 0.5 | how strongly they go to the light: moths to the beam, fish and jellies to the screen. Live |
+| `activity` | 1 | the share out and about; the rest fade away. For birds: how often they flit. Live |
+| `every` | null | seconds between visits on average (the deer, planes, a bird across the roof); 0: only on a cue; null: its own |
+| `keep_out` | 0.4 m | how far they keep from the sight line to the picture |
+| `personal` | 1.5 m | how far they keep from the viewer's eyes |
+| `blink` | true | fireflies flash and a plane's strobe blinks; off: a steady glow. Live. A `flicker` parameter: the common "Flickering lights" setting holds it steady |
+| `voice`, `voice_db` | true, -12 dB | a call where the synthesiser has one (now only the whale's song), on the Environment bus |
+
+Actions (each creature does what fits it; args in brackets):
+
+| Action | What |
+|---|---|
+| `pass` | one goes by now: the whale or the deer crosses, a plane flies over, a bird flies the length of the roof, the cat walks its wall, the school sweeps past (`side`: left or right; `seconds`) |
+| `scatter` | they start away and settle again: birds take off and circle, fish dart, moths and fireflies spread, the cat trots off (`from`: [x, y, z]) |
+| `settle` | they rest now: birds to their perches, the cat sits, fish and moths slow |
+| `call` | one call: a bird's, the cat's purr, the whale's song |
+
+### The creatures
+
+| Creature | Own count | What it does |
+|---|---|---|
+| `moth` | 40 | pale, 7 cm. They flutter in the projector's beam, between a tenth and three fifths of the way from the lens, lit by the beam. `attraction` is the share that keep to the beam. Without a beam they wander the region |
+| `bird` | 6 (40 at most) | dark, 32 cm across the wings. They roost on perches (the path, or the region's top edges), turn now and then, and one at a time flit to another perch on an arc through the open air |
+| `firefly` | 60 | yellow-green points low in the region. Each flashes every 1.5 to 6 s (a 0.6 s swell and fall), faint between |
+| `cat` | 1 | dark, 42 cm. It walks its wall, sits a while, walks on and turns at the ends. Sitting down it purrs |
+| `deer` | 1 | every 300 s on average it comes out of the dark at one end of its path, grazes once or twice, and fades at the far end. By default its way runs past the viewer's left |
+| `fish` | 48 | a silver school, 28 cm each. The school's centre wanders the region; `attraction` pulls it to the region's point nearest the screen. They take the screen's light on their flanks |
+| `jelly` | 18 | bells of 35 cm that glow at the rim and pulse every 2 to 3 s. Each has a place on a ring round the picture, just clear of the sight line, in front of the screen or behind it |
+| `whale` | 1 | 14 m, dark, slow. It comes only when called (`every` 0 by default): a cue on `film.quiet` with a long cooldown. By default its way runs high behind the screen. A third of the way along it sings |
+| `plane` | 2 at once | a red, a green and a white light and a soft white strobe every 1.5 s, on a great circle 160 m out, 17 to 52 degrees up. A crossing takes a minute or two. One every 75 s on average |
+
+The flashes and the strobe are slow swells, far under the photosensitivity limit. With `blink` off or the room's
+"Flickering lights" setting off, they glow steady.
+
+### Out of the viewer's face and the sight line
+
+- **The sight line** is the pyramid from the viewer's eyes to the picture's edges, widened by `keep_out`, from the
+  eyes to the screen's plane. The eyes are the camera's; without a camera, the room's seat nearest the origin, 1.2 m
+  up. It follows the screen when the viewer moves or resizes it.
+- **Fliers and swimmers** (moths, birds, fireflies, fish, jellies) are pushed out of the pyramid every frame, and out
+  of a `personal` sphere round the eyes.
+- **Walkers** (the cat, the deer, the whale) follow their path. In the sight line they never stop, and go 2.5 times
+  faster. The test holds each walker's longest time in the sight line under 4 s.
+- **Moths in the beam** use the part of the beam over the viewer's head, outside the pyramid.
+- **The Ambient life setting** (common, `life`): off, every creature fades away over 1.5 s; on, they fade back.
+
+### Film reactions
+
+The system reads no film signal itself. A room binds the live parameters in its document, so the host computes only
+the channels a room uses. Suggested bindings:
+
+| Creature | Binding |
+|---|---|
+| fireflies | `glow`: `{"bind": "film.brightness", "range": [1.0, 0.2], "smooth": 1}`: they dim while the film is bright |
+| fish, jellies | `attraction`: `{"bind": "film.brightness", "smooth": 2}`: they come closer in a bright scene |
+| jellies | `colour`: `{"bind": "film.colour", "strength": 0.5, "base": "#59bfff", "smooth": 1}` |
+| birds | `activity`: `{"bind": "time.of_day"}`: they roost at night |
+| planes | `activity`: `{"bind": "time.of_day", "invert": true}`: lights at night only |
+| the whale | a cue: `{"when": {"signal": "film.quiet", "above": 0.9, "for": 4}, "states": ["playing"], "cooldown": 900, "steps": [{"do": "whale.pass"}]}` |
+
+### Sounds
+
+Only the whale makes a sound: the synthesiser's `whale`, from where the whale is, on the Environment bus. At the
+default `voice_db` (-12) it measures -53.8 dBFS RMS, under the -38 dBFS target. A bird's call and the cat's purr are
+events (the signal `creature_event(what, at)` and the list `events`). They become sounds when the synthesiser gets a
+`bird` and a `purr` (`EnvDoc.SOUNDS`); the system then plays them with no other change.
+
+### The film layer
+
+On the Frame the film layer is drawn over anything between the eyes and the picture. Ambient life does not make the
+layer step aside. Instead, no creature goes into the sight line, so nothing of it is hidden and the film stays sharp.
+Only a walker whose path crosses the sight line can be in it, and only while it trots through; on the Frame it is
+hidden there for that moment. Rooms should give walkers paths clear of the sight line.
+
+### Cost
+
+Each creature is one draw: a MultiMesh for the many, one mesh for the cat, the deer and the whale (the sight-line check
+puts a MultiMesh's base mesh at every seat). Measured at the own counts (`test_env_life.gd`):
+
+| Creature | Triangles | Ticks (desktop, ms a frame) |
+|---|---|---|
+| moths | 240 | 0.37 |
+| birds | 186 | 0.01 |
+| fireflies | 120 | 0.24 |
+| fish | 1632 | 0.22 |
+| jellies | 1080 | 0.11 |
+| planes | 16 | 0.01 |
+| the cat | 86 | 0.01 |
+| the deer | 98 | 0.01 |
+| the whale | 102 | 0.00 |
+
+All nine at once: 9 draws, about 3600 triangles, under 1 ms a frame on the desktop. The spec declares the largest (fish,
+1700 triangles); 200 fish would be 6800. The time on the Frame is not measured yet.
+
+### For the rooms
+
+| Room | Use |
+|---|---|
+| Drive-in | `moth` in the beam; `plane` with `activity` bound to `time.of_day` inverted |
+| Rooftop Athens | `cat` with a `path` along the wall top, clear of the sight line; `plane` |
+| Reclaimed | `bird` with perches on the broken roof's edge; `firefly` low over the floor, `glow` bound to `film.brightness`; `deer` with a path along a side aisle |
+| Bathysphere | `fish` and `jelly` outside the glass, `attraction` bound to `film.brightness`; `whale` on the quiet-scene cue, its `chance` set by the room's whale setting |
 
 ## The converted cinema
 
@@ -608,3 +839,7 @@ document. Each room agent owns its documents, its CC0 assets under `app/environm
 - **The presentation in the layer.** A source-only chain (weave and grain) could stay in the film layer, as the
   projector feature's weave does; the presentation draws in the room for every picture stage, for one path. Its cost
   on the Frame is not measured yet.
+- **Ambient life on the Frame.** The creatures' ticks are measured on the desktop only (under 1 ms for all nine). A
+  room with many fliers should be timed on the headset.
+- **Calls without a sound.** Birds' calls and the cat's purr are events until the synthesiser has a `bird` and a
+  `purr`.
