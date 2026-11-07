@@ -1177,7 +1177,7 @@ the ripple's strength.
 | broadcast | `interlace`, `lines` | the two fields' lines, one after the other |
 | transmission | `snow`, `ghost`, `ghost_shift`, `weak` | aerial noise, a faint second picture to the right, a weak signal (paler, flatter, more snow) |
 | display | `display`: `none`, `mechanical`, `crt`, `panel` | the set |
-| crt | `curvature`, `corner`, `mask` (`none`, `shadow`, `grille`, `slot`), `mask_pitch`, `mask_strength`, `scanlines`, `glass` | the bulging face, round corners, the phosphors' mask, the gaps between lines, the glass's reflection (a soft light behind the viewer that moves as the head moves) |
+| crt | `curvature`, `corner`, `tube` (the tube's aspect: 1.33 in the sets before 2000; 0 the picture's own), `mask` (`none`, `shadow`, `grille`, `slot`), `mask_pitch`, `mask_strength`, `scanlines`, `glass` | the bulging face, round corners, the phosphors' mask, the gaps between lines, the glass's reflection (a soft light behind the viewer that moves as the head moves) |
 | mechanical | `mech_lines` | a 1930 mechanical-scan set: a few lines across, a neon's orange glow, dark edges |
 | panel | `panel_grid`, `panel_pixels`, `panel_bleed` | the gaps between the pixels, the backlight through the dark scenes |
 | colour | `colour`, `tint`, `gain` | saturation (0: black and white), the tube's tint, brightness |
@@ -1663,8 +1663,9 @@ the telly's shape and size, each setting and what it does, the cues).
 **The telly's shape.** The film is drawn on the screen's own mesh, which is the document's width at the film's
 aspect (`video_screen.gd get_flat_size()`); a document cannot give it another shape. So the domestic telly's tube (the
 cabinet's opening and the dark glass behind the picture) is 4:3 for the sets before 2000, and a 16:9 film sits in it
-letterboxed, as a wide film did on a 4:3 set. A 4:3 film fills the tube. The CRT's bulge and round corners are those
-of the film's own rectangle, not the tube's (the open question "A telly's shape" stays open).
+letterboxed, as a wide film did on a 4:3 set. A 4:3 film fills the tube. The CRT's bulge and round corners are the
+tube's (`presentation.tube` 1.33 in the presets before 2000, since 2026-11-07): the corners lie mostly in the bars
+above and below a wide film and clip its corners a little, and its edges bow as a 4:3 face's would.
 
 **The telly's size.** The headset shows about 20 pixels a degree, so a set as small as it really was, across a room,
 would be a postage stamp. The viewer's chair is pulled up to the set instead: every picture is 17 to 23 degrees across
@@ -1848,9 +1849,8 @@ document. Each room agent owns its documents, its CC0 assets under `app/environm
   from listening in the headset.
 - **The Void's reflection** is now on by default (it was off): the Void's design is a mirror floor. It costs a
   quad that samples the video.
-- **A telly's shape.** The presentation draws on the screen's own mesh, which has the film's aspect: a CRT's round
-  corners and bulge are those of a 16:9 picture for a 16:9 film. A 4:3 tube with the film letterboxed in it needs a
-  screen of the tube's shape (the room's builder, or a later screen parameter).
+- **A telly's shape** (settled 2026-11-07). The presentation still draws on the screen's own mesh at the film's
+  aspect, but `tube` gives the CRT's corners and bulge the tube's shape round it.
 - **The presentation in the layer.** A source-only chain (weave and grain) could stay in the film layer, as the
   projector feature's weave does; the presentation draws in the room for every picture stage, for one path. Its cost
   on the Frame is not measured yet.
