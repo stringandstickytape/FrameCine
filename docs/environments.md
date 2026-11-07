@@ -981,10 +981,3 @@ document. Each room agent owns its documents, its CC0 assets under `app/environm
   room with many fliers should be timed on the headset.
 - **Calls without a sound.** Birds' calls and the cat's purr are events until the synthesiser has a `bird` and a
   `purr`.
-- **Seat boxes in the auditorium.** The auditorium's `collision_shapes()` gives every seat the stadium seat's two
-  boxes, whatever `seat_model` is. The other models are about that size, but a club chair or a bean bag is wider.
-  `seats.gd model_boxes()` has each model's boxes; the auditorium could use them.
-- **The film layer and things in front of the screen.** On the Frame the film layer is drawn over everything in front
-  of it. A painting or a festoon in front of the screen (motion's `in_front`, the group `env_in_front`) is hidden
-  under the film unless `film_layer.gd _covered()` also steps aside for nodes in that group. Until then, such a
-  thing is seen only while no film is open, or with the film layer off.

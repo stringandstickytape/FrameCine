@@ -200,6 +200,22 @@ func _auditorium() -> void:
 			== EnvChecks._triangles(Seats.model_mesh("plush", u, f, 0.62)))
 	var blocked: Array = await EnvChecks.sight_line(self, room)
 	_check("plush hall: a clear sight line %s" % [blocked], blocked.is_empty())
+	# Object physics: the hall's seats take the model's own boxes (seats.gd model_boxes()), not the stadium seat's.
+	var hall_p := EnvDoc.with_defaults(Auditorium.PARAMS, {"seat_model": "club_chair", "seat_pitch": 0.62,
+			"seats_per_row": 21})
+	var stadium_p := hall_p.duplicate()
+	stadium_p["seat_model"] = "stadium"
+	var club_boxes: Array = Seats.model_boxes("club_chair", Transform3D())
+	var with_club: Array = Auditorium.collision_shapes_for(hall_p)
+	var sizes := {}
+	for s: Array in with_club:
+		if s[0] is BoxShape3D:
+			sizes[(s[0] as BoxShape3D).size] = true
+	var all_club := true
+	for b: Array in club_boxes:
+		all_club = all_club and sizes.has((b[0] as BoxShape3D).size)
+	_check("a club-chair hall's seats collide as club chairs (%d shapes, %d for stadium seats)" % [with_club.size(),
+			Auditorium.collision_shapes_for(stadium_p).size()], all_club and not sizes.has(Auditorium.SEAT_BOX_SIZE))
 	room.queue_free()
 	await process_frame
 	# Screen 3's broken seat: a multiplex hall with one seat broken by the seats system.

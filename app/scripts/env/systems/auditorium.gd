@@ -342,7 +342,13 @@ static func collision_shapes_for(p: Dictionary) -> Array:
 	var back_xf := Transform3D(tilt.basis, tilt * SEAT_BACK_CENTRE)
 	var all := l.seat_transforms()
 	all.append_array(_balcony_seats_for(p, l))
+	# Another seat model's own boxes (seats.gd model_boxes(): a club chair or a bean bag is wider than the stadium seat).
+	var model := str(p.get("seat_model", "stadium"))
+	var seats_script: GDScript = load(SEATS) if model != "stadium" else null
 	for st in all:
+		if seats_script != null:
+			out.append_array(seats_script.call("model_boxes", model, st))
+			continue
 		out.append([cushion, st * Transform3D(Basis(), SEAT_BOX_CENTRE)])
 		out.append([back, st * back_xf])
 	for b: Array in _balcony_boxes(p, l):

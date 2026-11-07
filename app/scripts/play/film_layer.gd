@@ -204,6 +204,12 @@ func _covered() -> String:
 				nodes.append(n)
 				if part == "Visual":
 					fresh[n.get_instance_id()] = true
+	# A room's things that stand in front of the screen on purpose (motion's in_front: a painting, a festoon; group
+	# env_in_front, docs/environments.md), while they show.
+	for n: Node in main.get_tree().get_nodes_in_group("env_in_front") if main.is_inside_tree() else []:
+		if n is Node3D and (n as Node3D).is_visible_in_tree():
+			nodes.append(n)
+			fresh[n.get_instance_id()] = true
 	if nodes.is_empty():
 		return ""
 	var screen := Transform3D(flat.global_transform.basis.orthonormalized(), flat.global_transform.origin)

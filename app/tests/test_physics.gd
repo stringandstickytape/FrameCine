@@ -300,6 +300,25 @@ func _test_screen() -> void:
 		film.kind = saved_kind
 		_check("a curved screen: a controller in front of its edge covers it (%s)" % by, by.begins_with(str(hand.name)))
 		main.screen.set_curve_radius(was_radius)
+		await _frames(2)
+		# A room's thing in front of the screen on purpose (motion's in_front, group env_in_front) covers it too.
+		hand.visible = false
+		var card := MeshInstance3D.new()
+		card.name = "InFrontCard"
+		var quad := QuadMesh.new()
+		quad.size = Vector2(0.5, 0.5)
+		card.mesh = quad
+		card.add_to_group("env_in_front")
+		main.add_child(card)
+		var flat_mid: Vector3 = main.screen.get_node("Flat").global_transform.origin
+		card.global_position = cam.global_position.lerp(flat_mid, 0.5)
+		await _frames(1)
+		by = film._covered()
+		_check("a room's thing in front on purpose (env_in_front) covers it (%s)" % by, by.contains("InFrontCard"))
+		card.visible = false
+		by = film._covered()
+		_check("and not once it is hidden (%s)" % by, not by.contains("InFrontCard"))
+		card.queue_free()
 		hand.global_transform = was_xf
 		hand.visible = was_visible
 		hand.show_when_tracked = was_shown
