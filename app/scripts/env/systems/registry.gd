@@ -17,6 +17,9 @@ const SYSTEMS := {
 	"screen_frame": "res://scripts/env/systems/screen_frame.gd",
 	"showing": "res://scripts/env/systems/showing.gd",
 	"mirror_floor": "res://scripts/env/systems/mirror_floor.gd",
+	"sound_bed": "res://scripts/env/systems/sound_bed.gd",
+	"acoustics": "res://scripts/env/systems/acoustics.gd",
+	"music": "res://scripts/env/systems/music.gd",
 }
 ## The kinds a system may be (spec().kind).
 const KINDS: Array[String] = ["builder", "kit", "light", "sky", "atmosphere", "life", "sound", "music", "screen",
