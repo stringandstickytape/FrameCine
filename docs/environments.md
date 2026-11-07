@@ -704,6 +704,28 @@ for a count that can be 0, `{}` for a material, `[0, 0]` for the screen's size. 
   deep case, its knobs and a speaker's slots on a panel to the right of the picture, a carry handle, a rod aerial) or
   `flat_panel` (a thin frame, a speaker strip under the picture, 7 cm deep; its picture is always 16:9, its height
   from its width). Left on auto, `screen_size` is the form's own: a portable 0.3 x 0.225 m, a flat panel 0.8 x 0.45 m.
+- The eras' sets (`telly`), for the history of television:
+  - `mirror_lid` (1937): a tall cabinet whose tube faces up in its top, and a lid hinged along the back of the top,
+    open at 45 degrees, a mirror on its underside. The picture you see is the tube's reflection: upright, over the
+    hinge's line (7 cm out from the front wall), its bottom 5 cm over the cabinet's top. So `screen_for()` gives the
+    reflection's place and the app's screen sits there, behind the mirror. Behind the picture the mirror shows the
+    tube's dark face and the cabinet's shadowed top. The lid is its own mesh (`Lid`: see-through for the sight line, its
+    back lies across the line of sight; in `env_in_front`, so the film layer steps aside), the mirror's glass a faint
+    sheen (`Mirror`). The cabinet is at least 0.7 m wide, so seats well to the side still see every corner in the
+    mirror (tested from every seat). 0.3 x 0.24 m (5:4), its bottom 0.98 m. Seen from the side, the picture stands
+    behind the lid. The lid is not a physics shape. Use the presentation's `tube` 1.25 (`mirrorlid_1937`).
+  - `console` (1960s): a wooden cabinet on four splayed legs, the 4:3 tube over a speaker's cloth grille, two knobs.
+    `telly_doors`: two doors, open and folded back beside it. 0.48 x 0.36 m, its bottom 0.62 m.
+  - `rear_projection` (2002): a big deep cabinet from the floor (0.62 m deep below the picture, 0.36 m behind it,
+    the back sloping between), a narrow frame round a grey-black screen, two speaker grilles under it. About 50
+    inches: 1.016 x 0.762 m (4:3), or 1.107 x 0.623 m with `telly_aspect` `wide`. Its bottom 0.55 m.
+  - `oled` (the present): a very thin panel (3 cm with its electronics), a hair's bezel, a true black glass, a slim
+    pedestal on the stand or flat on the wall. Always 16:9; 1.21 x 0.68 m (55 inches).
+  - The first three stand on the floor: `telly_stand` does not apply, and the screen is the set's depth and 5 cm out
+    from the front wall. Left on 0, `screen_bottom` is the form's own.
+- `telly_aspect` (`auto`, `standard`, `wide`): the picture's height from its width, 4:3 or 16:9. Auto: as
+  `screen_size` gives it (a flat panel and an OLED always 16:9).
+- `telly_doors` (bool): a console's doors.
 - Its stand (`telly_stand`): `chest` (a chest of drawers, as before), `radiogram` (a long low cabinet on splayed
   legs, a grille of slats, two sliding doors), `desk` (a top, a pedestal of three drawers, legs, a modesty panel),
   `tv_unit` (a low cabinet with an open shelf under its top, 14 cm high, for a video recorder, and doors below) or
@@ -732,10 +754,13 @@ for a count that can be 0, `{}` for a material, `[0, 0]` for the screen's size. 
   `pane_center`, `pane_size`, `pane_yaw`), `vista` (beyond the window, facing in), `mantel`, `fort_opening`; with a
   telly, `telly_stand` (the stand's top at its front middle, facing the room: a piece on it goes at a negative z; on
   the wall, the floor under the set) and `telly_shelf` (a video recorder's place: the tv unit's shelf; a desk's or a
-  radiogram's top beside the set when there is half a metre; else the floor in front of the stand).
+  radiogram's top beside the set when there is half a metre; else the floor in front of the stand). A console's and
+  a rear projection's `telly_stand` is the set's own top; for a set on the floor `telly_shelf` is the floor in front.
 - Measured: plain 13 draws, 4k triangles; walnut 16 draws; bedroom 18 draws, 6k triangles; ice 11 draws, 12k
   triangles. 4 to 10 MB. A telly on its stand adds no draw of its own (the set is one mesh, the stand is in the trim):
-  each form on each stand in a plain room is 12 draws and 3.8k to 4.2k triangles.
+  each form on each stand in a plain room is 12 draws and 3.8k to 4.2k triangles. In a small plain room
+  (`test_env_domestic.gd`): an OLED 12 draws, a console and a rear projection 13 (their cloth), the mirror-lid set 14
+  (its lid and its mirror), 2.2k to 2.4k triangles.
 
 ### `vehicle`
 
@@ -1022,11 +1047,16 @@ tones and swells divide its length, so it has no seam.
 | `three_bells` | one-shot 3.2 | a soft house bell: three struck-bar tones, up a fifth, down a minor third (our own call) | before the show |
 | `vcr` | one-shot 4.5 | a video recorder takes a tape: the clunk, the motor threading the tape with its clicks, the heads engaging, the drum's whirr | a cue: the tape goes in |
 | `tape_load` | one-shot 8 | a home computer loads from cassette: a pilot tone, a gap, the data's two-tone warble, the tape's hiss | a cue, very low |
+| `switch_clunk` | one-shot 0.6 | a telly's power switch: the toggle's snap, the contacts' bounce, the cabinet's knock, the speaker's soft thump | the presentation's `switch_on` and `switch_off` |
+| `valve_hum` | one-shot 8 | a valve set warming up: the transformer's hum and a little buzz and the speaker's rush rising over five seconds, settling and fading | a valve set's `switch_on` |
+| `crt_off` | one-shot 1.4 | a tube switched off: a soft thunk, a tiny tick, the glass's static crackling faintly | a tube's `switch_off`, very low |
+| `channel_clunk` | one-shot 0.45 | a rotary channel knob: the detent's ratchet, the spring's snap into the notch, a knock through the cabinet | the presentation's `channel` |
 | `bird`, `purr`, `whale` | one-shot 1.2, 4, 5 | a songbird's call, a cat's purr (two breaths), a whale's song | ambient life's calls (below) |
 | `chime`, `gong`, `rumble`, `tick`, `creak` | one-shot | the foundation's sounds | cues |
 
 Cue sounds (`EnvDoc.SOUNDS`, for a cue's `sound` step and ambient life's calls): the foundation's seven, `moped`,
-`train`, `huskies`, `hull_creak`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`. A cue's `sound` step plays at
+`train`, `huskies`, `hull_creak`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `switch_clunk`, `crt_off`,
+`channel_clunk` (not `valve_hum`: 8 s, too long to make on the main thread). A cue's `sound` step plays at
 the reference level less its `gain_db`: at 0 dB it reaches the level check's target, so give it -10 or lower. A
 `sound_bed` with `play` is the levelled way: it plays at the sound's designed level.
 
@@ -1113,6 +1143,8 @@ second.
 | `three_bells` | -50 | -50.0 | -58.0 | | -40.1 |
 | `vcr` | -54 | -54.0 | -62.0 | | -41.3 |
 | `tape_load` | -58 | -58.0 | -66.0 | | -56.5 |
+| `switch_clunk`, `channel_clunk` | -54, -55 | -54.0, -55.0 | -62.0, -63.0 | | -26.4, -25.5 |
+| `valve_hum`, `crt_off` | -58, -60 | -58.0, -60.0 | -66.0, -68.0 | | -49.7, -33.7 |
 | `rumble`, `gong`, `whale` | -52 | -52.0 | -60.0 | | -41.6, -41.4, -48.4 |
 | `tick`, `creak` | -55, -54 | -55.0, -54.0 | -63.0, -62.0 | | -25.4, -35.4 |
 | `chime` | -50 | -50.0 | -58.0 | | -40.1 |
@@ -1481,17 +1513,75 @@ the ripple's strength. Sound: none but the film's, and it says so (`sound_bed` `
 | tape | `tracking`, `head_switch`, `chroma_bleed`, `tape_noise` | the lines' slow sway, the torn last lines at the bottom, the colour late and smeared, noise and paler colour |
 | broadcast | `interlace`, `lines` | the two fields' lines, one after the other |
 | transmission | `snow`, `ghost`, `ghost_shift`, `weak` | aerial noise, a faint second picture to the right, a weak signal (paler, flatter, more snow) |
-| display | `display`: `none`, `mechanical`, `crt`, `panel` | the set |
-| crt | `curvature`, `corner`, `tube` (the tube's aspect: 1.33 in the sets before 2000; 0 the picture's own), `mask` (`none`, `shadow`, `grille`, `slot`), `mask_pitch`, `mask_strength`, `scanlines`, `glass` | the bulging face, round corners, the phosphors' mask, the gaps between lines, the glass's reflection (a soft light behind the viewer that moves as the head moves) |
+| display | `display`: `none`, `mechanical`, `crt`, `panel`, `rear_projection`, `oled` | the set |
+| crt | `curvature`, `corner`, `mask` (`none`, `shadow`, `grille`, `slot`), `mask_pitch`, `mask_strength`, `scanlines`, `glass` | the bulging face, round corners, the phosphors' mask, the gaps between lines, the glass's reflection (a soft light behind the viewer that moves as the head moves) |
 | mechanical | `mech_lines` | a 1930 mechanical-scan set: a few lines across, a neon's orange glow, dark edges |
 | panel | `panel_grid`, `panel_pixels`, `panel_bleed` | the gaps between the pixels, the backlight through the dark scenes |
+| rear_projection | `soft_focus`, `convergence`, `lenticular`, `hotspot` | a 2002 rear projection: the picture a little soft, the red and the blue a little apart (more at the edges), the screen's fine vertical lines, a faint bright patch where the eye looks down the projector's light (it follows the head), a grey-black face |
+| oled | | true blacks (no backlight, no lift), a little punch in the colour and the middle tones (black stays black, white white: the film's levels are kept), a sheen only at a glance |
+| the window | `tube`, `aspect_mode`, `mirror` | below |
+| off axis | `off_axis` | below |
+| switching | `switching`, `warm_up`, `starts_off`, `switch_sounds`, `sound_db` | below |
 | colour | `colour`, `tint`, `gain` | saturation (0: black and white), the tube's tint, brightness |
 | speaker | `speaker`: `none`, `window`, `telly`, `cabinet`, `panel` | the film's sound through a small speaker |
 
-Every parameter is live. `weave`, `tilt` and `tracking` are motion parameters (the room's Motion setting scales
-them). `flicker` is a brightness that flickers: it wavers by at most 3.5 %, more slowly than 3 times a second, and
-stays steady with Flickering lights off. Action: `glitch` (a moment's trouble: a tape's tracking tears, a broadcast's
-snow swells, a print jumps in the gate; `seconds`, default 0.6).
+Every parameter is live but `starts_off`. `weave`, `tilt` and `tracking` are motion parameters (the room's Motion
+setting scales them). `flicker` is a brightness that flickers: it wavers by at most 3.5 %, more slowly than 3 times a
+second, and stays steady with Flickering lights off. Actions: `glitch` (a moment's trouble: a tape's tracking tears, a
+broadcast's snow swells, a print jumps in the gate; `seconds`, default 0.6), `switch_on`, `switch_off`, `channel`
+(below).
+
+**The set's window and the film in it.** The app makes the film's quad as wide as the room's screen, its height from
+the film's shape. The set's window is as wide, its shape `tube`.
+- `tube`: the window's aspect, for every display (1.33 for the tubes before 2000, 1.78 for a 16:9 panel, 1.25 for the
+  1937 tube; 0: the film's own). Give the room's screen the same shape: outside the window the shader discards the
+  film, so the set's bezel shows there.
+- When the window is taller than the film's quad (a wide film in a 4:3 tube), the quad grows to the window in the
+  vertex stage (its height only, so a curved screen keeps its curve), and the bars are drawn as the set's black (with
+  its glass and round corners). The flat mesh's cull margin grows by a metre while the presentation draws it.
+- `aspect_mode`: `letterbox` (as before: all of the film, black bars where its shape differs; a 4:3 film on a 16:9
+  panel is pillarboxed), `pan_and_scan` (the film fills the window, its sides cut off: the 1937 and 1966 presets),
+  `fourteen_nine` (14:9 of a wide film across the window: a little cut, thin bars), `stretch` (the film stretched to
+  the window: a 4:3 film on a 16:9 panel).
+- `mirror`: the picture flipped left to right, a mirror-lid set seen the wrong way round. Off by default: the set's
+  electronics turn it round.
+
+**Off the axis.** `off_axis` (0 to 1, default 0) changes the picture by the angle from the viewer's eye to the screen's
+normal, per eye: a tube a little darker from the side, a rear projection's light in a narrow fan (wide across, narrow
+up and down: from 30 degrees above it is half as bright, from the side much less dim), a flat panel's contrast and
+colour shifting (most from above and below), an OLED's colour a touch cooler.
+
+**Switching on and off.** `switch_on` and `switch_off` (actions) take the set from and to dark, its own way
+(`switching`; `auto` by the display):
+
+| Way | On | Off |
+|---|---|---|
+| `crt` (auto for `crt`) | 1.6 s (at least 1.5): a small dot, a line opening across, then the raster opening up and down | 1.1 s: the picture collapses to a line, the line to a dot, the dot fades (its afterglow) |
+| `valve` (auto for `mechanical`; `fireside_1953`, `colourstar_1972`, the 1937 and 1966 presets) | 8 s (`warm_up`): dark while the heaters warm, then the picture comes up dim and a little small, growing and brightening | 2.4 s: as a tube's, the dot lingering |
+| `panel` (auto for `panel` and `oled`) | 0.9 s: it just comes up | 0.35 s: it goes black |
+| `projection` (auto for `rear_projection`) | 3 s: a slow fade up | 0.6 s: a fade down |
+
+- `warm_up` gives the seconds to come on (0: the way's own). `switch_on` takes `seconds` too.
+- `starts_off`: the set is dark (its face drawn: a tube's grey glass, a rear projection's grey-black, an OLED's black)
+  until a cue switches it on. It comes on by itself when the film plays, so a film never plays on a dark set.
+- `channel` (action, `seconds`, default 1, at least 0.9): a channel change. The knob's clunk, the picture dips to about
+  half with a moment's snow and comes back; a panel goes black for a moment.
+- Comfort: the light and the beam's glow each rise and fall at most once, and each fade takes at least the comfort
+  ceiling's fade (`env_checks.gd MIN_FADE`). The squeezed picture and the line are never brighter than 0.85. The dot
+  is small: about 3 % of the picture's height across. Tested in `test_env_presentation.gd`.
+- Sounds: `switch_sounds` (default on) plays our own sounds at the screen on the room's bus, at their designed levels
+  (`sound_bed.gd LEVELS`) plus `sound_db`, 8 dB lower while the film plays: a `crt` set's `switch_clunk` on and
+  `switch_clunk` and `crt_off` off; a valve set's `switch_clunk` and `valve_hum` on; a projection's `switch_clunk`; a
+  panel is silent. A channel change plays `channel_clunk` (not on a panel). They are made on a worker thread when the
+  room is built.
+- A cue: `{"do": "presentation.switch_on"}` in `starting` (the Pre-show), `{"do": "presentation.switch_off"}` in
+  `ended`.
+
+**Not built: the 1930 set's 12.5 frames a second.** The mechanical set drew 12.5 pictures a second. Holding each
+frame for 80 ms needs a history of the film's frames: a copy of the decoder's planes (hardware textures on the Frame)
+made 12.5 times a second by a render pass of its own, and both eyes for a 3D film. And the held frames would put a
+12.5 Hz change into the picture, in the band (3 to 30 Hz) the comfort rules keep out, even behind the Motion and
+Flickering lights settings. So it is left out; the 30 lines and the orange glow carry the era.
 
 **Presets.** `preset` fills every parameter the document leaves out. The document's own values and bindings win. To
 move a preset's value by a cue, give it in the document. The names are pastiche.
@@ -1507,6 +1597,10 @@ move a preset's value by a cue, give it in the document. The names are pastiche.
 | `rewinder_1987` | TV era | a rented tape: wobble, bleed, the bottom's tear; a slot mask |
 | `nightowl_1993` | Pillow Fort | a tape watched a few times; a flatter tube with an aperture grille |
 | `freedtv_2005` | TV era | a free digital broadcast on an early flat panel: a faint pixel grid, backlight bleed |
+| `mirrorlid_1937` | TV era | a pre-war mirror-lid set: 405 lines, a small round 5:4 tube (`tube` 1.25), greenish white, snow and a ghost, the film panned and scanned, a valve warm-up of 10 s |
+| `rental_1966` | TV era | a rented black and white console: 405 lines, a 4:3 tube, the film panned and scanned, a valve warm-up of 9 s |
+| `projection_2002` | TV era | a 50 inch rear projection playing a disc: 16:9, soft focus, fringes, lenticular lines, a hotspot, a picture that dims from above or below (`off_axis` 0.8) |
+| `slimline_present` | TV era | a very thin OLED panel: 16:9, true blacks, a sheen at a glance, a touch of colour shift from the side |
 
 **How the film is drawn.** On the Frame the film is an OpenXR layer, and a layer skips the scene's shaders. So while a
 picture stage is on, the screen's flat mesh draws the film with the presentation's material, and the film layer
@@ -1541,9 +1635,15 @@ the figures move by about 10 % from run to run):
 | `fireside_1953`, `colourstar_1972`, `sirclive_1983`, `rewinder_1987`, `nightowl_1993` | 0.88 to 0.97 |
 | `worn_print`, `starlight_lot_1958` | 1.0 to 1.05 |
 | `freedtv_2005` | 1.14 |
+| `mirrorlid_1937`, `rental_1966` (2026-11-07) | 0.95 to 1.0 |
+| `slimline_present` (2026-11-07) | 0.95 to 1.2 |
+| `projection_2002` (2026-11-07) | 1.8 to 2.0 |
 
 The noisy chains cost less than the screen's own shader because its deband (eight reads) is off under them; with the
-deband left on they measured 1.45 to 2.2 times. On the Adreno the screen's shader is bound by its texture reads (the footprint filter, the deband); the stages are
+deband left on they measured 1.45 to 2.2 times. The rear projection costs most: its soft focus widens the footprint
+filter (held to two taps a side, so at most eight reads) and its fringes take two more samples. In the test the card
+is smaller than the view, so the screen's own filter takes one sample and the rear projection's eight; with a 4K
+film on the headset the screen's filter already takes up to eighteen, and the rear projection's eight are fewer. On the Adreno the screen's shader is bound by its texture reads (the footprint filter, the deband); the stages are
 ALU of a few dozen operations and at most two more bilinear reads, and a telly covers a small part of the view (a
 0.6 m set at 1.5 m is about 6 % of an eye's pixels). Not measured on the headset yet.
 
