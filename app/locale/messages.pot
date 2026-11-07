@@ -4182,6 +4182,10 @@ msgid "Rain on the window"
 msgstr ""
 
 #: environments/pillow_fort_1993.env.json
+msgid "The telly fills the opening"
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
 msgid "The telly's own speaker"
 msgstr ""
 
@@ -4283,6 +4287,10 @@ msgstr ""
 
 #: environments/pillow_fort_1993.env.json
 msgid "Rain on the glass and in the street, a drizzle, rain that comes and goes, or a dry night."
+msgstr ""
+
+#: environments/pillow_fort_1993.env.json
+msgid "The telly stands just beyond the fort's opening and fills it; off, it is back on its chest of drawers across the room."
 msgstr ""
 
 #: environments/pillow_fort_1993.env.json

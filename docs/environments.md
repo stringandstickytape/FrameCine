@@ -1129,6 +1129,19 @@ covers them, as the screen would.
 | Crater | `sky` `mode` `space`, `earth` on, `earth_turn` from the Earth's speed setting, `milky_way` bound to `playback.playing` |
 | Screening room 1962 | `vista` pool behind the window, `pool_glow` 1 |
 
+## A room's screen and its builder
+
+A document gives the screen (`screen`: centre, size, curve). Two things follow from it in `env_room.gd`:
+
+- **Its curve.** `get_home_curve()` gives `screen.curve` (0..1), and the app's screen starts with it until the viewer
+  sets a curve of their own (`scripts/play/curved_screen.gd`). A flat screen in a room that curves by itself is kept
+  as 0, so it stays flat.
+- **A builder that moves it.** A builder with a static `screen_for(params)` (shopfront, nave, dome_hall, domestic)
+  says where it puts the picture. The room takes that place for the document's parameters (with every room setting at
+  its default) as the document's own; when a setting rebuilds the room (`env_host.gd` signal `rebuilt`), the screen
+  moves and resizes by the builder's change, and the app places the film there again (the seat's `home_screen()`).
+  Tested in `app/tests/test_env_screen_follow.gd`.
+
 ## The converted cinema
 
 `app/environments/cinema.env.json` with `cinema.tscn` and a thin `cinema.gd`. It looks the same: the render test
@@ -1305,9 +1318,9 @@ step lights, deep red seats, and a 20 m curved screen.
   35 % over 5 s. `dim` and `lights_up` as above.
 - **Seat choice:** the default seat is the middle (row 0, with 7 rows in front and 6 behind). The front-middle
   and the back are the other good seats; the viewer picks them by pointing.
-- **Not yet:** `env_room.gd` has no `get_default_seat()`, `get_seat_names()`, `has_home_screen()` or
-  `get_home_curve()`, so a document room always starts at its origin seat and its `screen.curve` is not applied (an
-  assistant's room has both). A setting cannot choose the default seat, and the curve waits for that hook.
+- **The curve (since 2026-11-07):** `env_room.gd get_home_curve()` gives the document's `screen.curve`, and the
+  screen starts with it until the viewer sets a curve of their own (`curved_screen.gd`; flattening it keeps 0, so the
+  room stays flat). A setting still cannot choose the default seat: the room starts at its origin seat.
 - **Measured:** 17 draws, 228 806 triangles, 6.0 MB.
 
 ### Room: Shopfront 1906
@@ -1566,10 +1579,10 @@ window, and the telly filling the fort's opening, showing the film as a tube sho
 - **Flicker:** the fairy lights waver slowly (the builder's `flicker`); Flickering lights holds them.
 - **Default seat:** the middle cushion (the origin), 1.25 m from the picture.
 - **Measured:** 20 draws, 5 290 triangles, 0 lights, 300 particles, 6.0 MB.
-- **Not as the table:** `telly_fills` is not a setting. The app's screen comes from the document once
-  (`env_room.gd` `_apply_room()`); a setting on `domestic.opening_screen` rebuilds the telly in its other place but
-  leaves the film where it was, so the room keeps the telly in the opening. No VCR flashing 12:00 (no object widget
-  for it, and a document room places no objects); no tree or tin of sweets.
+- **The telly fills the opening (a setting since 2026-11-07):** `telly_fills` (on by default) is bound to
+  `domestic.opening_screen`. Turning it off rebuilds the room with the telly on its chest of drawers across the
+  room, and the film goes with it (`env_room.gd _follow_builder_screen()`, below). No VCR flashing 12:00 yet (no
+  object widget for it, and a document room places no objects); no tree or tin of sweets.
 - **Sound wanted:** a ticking radiator, rain on the glass following `weather.rain`; a small, soft room (rt60 0.3).
 
 ### Room: Bathysphere

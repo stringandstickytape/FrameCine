@@ -7,6 +7,9 @@ extends "res://environments/vr_environment.gd"
 ##   get_sound_room()       the builders' walls with the document's acoustics
 ##   static_meshes(), bake_lights(), set_baking(on), set_baked(on), is_baked()   the light system's bake hooks
 ##   on_screen_changed()    the systems follow the screen (the masking, the beam)
+##   get_home_curve()       the document's screen.curve (the room starts curved until the viewer sets a curve)
+## A builder whose screen moves with a setting that rebuilds it (the domestic telly filling the pillow fort's opening)
+## moves the room's screen with it: the document's screen by the builder's move (_follow_builder_screen()).
 ## and from the document's room section: ambient_level, screen_glow, reacts_to_film, has_curtains (the pre-show's
 ## curtains, while the room's Pre-show setting is on), reflection_floor_y and reflection_default (the floor reflection).
 ## The room settings feature (scripts/env/room_settings.gd) gives it the room's settings: apply_room_settings().
@@ -31,6 +34,8 @@ var reflection_default := false
 var _main: Node
 var _screen_world := Transform3D()
 var _screen_size := Vector2.ZERO
+## The builder's screen for the document's own parameters ({center, size}), {} when no builder places one.
+var _builder_screen_doc := {}
 
 static var _docs := {}
 
@@ -57,6 +62,9 @@ func _ready() -> void:
 	_doc()
 	_apply_room()
 	host = EnvHost.attach(self, doc)
+	_builder_screen_doc = _builder_screen(false)
+	_follow_builder_screen(false)
+	host.rebuilt.connect(func() -> void: _follow_builder_screen(true))
 	_sync_curtains()
 	_fit_to_screen()
 	host.on_room_moved()
@@ -82,6 +90,78 @@ func _apply_room() -> void:
 		var facing := RoomSchema.screen_facing(s)
 		screen_anchor.transform = Transform3D(Basis.looking_at(-facing, Vector3.UP), RoomSchema.vec3(s["center"]))
 		default_screen_width = float(s["size"][0])
+
+
+## The first builder's screen (its static screen_for()): for the document's parameters, or for the live ones.
+func _builder_screen(live: bool) -> Dictionary:
+	for entry: Dictionary in doc.get("systems", []):
+		var script := Registry.script_of(str(entry["system"]))
+		if script == null or not script.has_method("screen_for"):
+			continue
+		var p: Dictionary
+		var node: Node = host.system(str(entry.get("id", entry["system"]))) if live and host != null else null
+		if node != null and node.get("params") is Dictionary:
+			p = node.get("params")
+		else:
+			p = EnvDoc.with_defaults(Registry.spec(str(entry["system"]))["params"], _defaults_of(entry.get("params", {})))
+		var sc: Variant = script.call("screen_for", p)
+		return sc if sc is Dictionary and (sc as Dictionary).has("center") else {}
+	return {}
+
+
+## A system's document parameters as they are with every room setting at its default: a binding to one of the
+## document's settings through a map takes the map's value for the default; any other binding is left out (the
+## parameter's own default).
+func _defaults_of(given: Variant) -> Dictionary:
+	var out := {}
+	if not (given is Dictionary):
+		return out
+	var defaults := {}
+	for s: Variant in doc.get("settings", []):
+		if s is Dictionary:
+			defaults[str(s.get("name", ""))] = s.get("default")
+	for k: Variant in given:
+		var v: Variant = given[k]
+		if not (v is Dictionary and (v as Dictionary).has("bind")):
+			out[k] = v
+			continue
+		var bind := str(v["bind"])
+		var name := bind.trim_prefix("setting.")
+		if bind.begins_with("setting.") and defaults.has(name) and v.get("map") is Dictionary:
+			var key := str(defaults[name]).to_lower()
+			if (v["map"] as Dictionary).has(key):
+				out[k] = v["map"][key]
+	return out
+
+
+## Where the builder puts the screen now against where it puts it for the document: the document's screen moved and
+## sized by the difference. tell_main: the app places its screen there again (a setting changed in the room).
+func _follow_builder_screen(tell_main: bool) -> void:
+	if _builder_screen_doc.is_empty() or not (doc.get("screen") is Dictionary) or screen_anchor == null:
+		return
+	var now := _builder_screen(true)
+	if now.is_empty():
+		return
+	var s: Dictionary = doc["screen"]
+	var c0 := RoomSchema.vec3(_builder_screen_doc["center"])
+	var c1 := RoomSchema.vec3(now["center"])
+	var w0 := float(_builder_screen_doc["size"][0])
+	var scale := float(now["size"][0]) / w0 if w0 > 0.0 else 1.0
+	var centre := RoomSchema.vec3(s["center"]) + (c1 - c0)
+	var width := float(s["size"][0]) * scale
+	var moved := not (screen_anchor.transform.origin.is_equal_approx(centre)
+			and is_equal_approx(default_screen_width, width))
+	screen_anchor.transform = Transform3D(screen_anchor.transform.basis, centre)
+	default_screen_width = width
+	var main := _find_main()
+	if tell_main and moved and main != null and main.get("env") == self:
+		var seat: Node = main.features.get("seat") if main.get("features") != null else null
+		main.screen_width = width
+		if seat != null and seat.has_method("home_screen"):
+			seat.home_screen()
+		else:
+			var d := get_default_screen()
+			main.set_screen(width, d["distance"], d["height_offset"])
 
 
 func _sync_curtains() -> void:
@@ -180,9 +260,16 @@ func room_seat_transforms() -> Array[Transform3D]:
 	for entry: Dictionary in _doc().get("systems", []):
 		var script := Registry.script_of(str(entry["system"]))
 		if script != null and script.has_method("layout"):
-			var p := EnvDoc.with_defaults(Registry.spec(str(entry["system"]))["params"], entry.get("params", {}))
+			var p := EnvDoc.with_defaults(Registry.spec(str(entry["system"]))["params"], _defaults_of(entry.get("params", {})))
 			out.append_array(script.call("layout", p).seat_transforms())
 	return out
+
+
+## The screen's own curve (scripts/play/curved_screen.gd): the document's screen.curve (0..1), -1 when it gives none.
+## The room starts with it until the viewer sets a curve of their own.
+func get_home_curve() -> float:
+	var s: Variant = _doc().get("screen")
+	return float((s as Dictionary)["curve"]) if s is Dictionary and (s as Dictionary).has("curve") else -1.0
 
 
 func get_sound_room() -> Dictionary:
@@ -197,7 +284,7 @@ func collision_shapes() -> Array:
 	for entry: Dictionary in _doc().get("systems", []):
 		var script := Registry.script_of(str(entry["system"]))
 		if script != null and script.has_method("collision_shapes_for"):
-			var p := EnvDoc.with_defaults(Registry.spec(str(entry["system"]))["params"], entry.get("params", {}))
+			var p := EnvDoc.with_defaults(Registry.spec(str(entry["system"]))["params"], _defaults_of(entry.get("params", {})))
 			out.append_array(script.call("collision_shapes_for", p))
 	return out
 

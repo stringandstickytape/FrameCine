@@ -19,7 +19,8 @@ extends Node
 ##   static build(size, radius) -> ArrayMesh
 ## Not for a captured window: its pointer maps onto the plane, so the window stays flat.
 ## Settings: [screen_<environment id>] curve_radius (the radius, as before; read back as an amount at the
-## environment's distance).
+## environment's distance). A room with a curve of its own (get_home_curve(): a room document's screen.curve, an
+## assistant's room's) starts with it until the viewer sets one; flattening such a room keeps 0 so it stays flat.
 
 signal changed(radius: float)
 
@@ -49,10 +50,19 @@ static func amount_for(distance: float, p_radius: float) -> float:
 
 
 func _load() -> void:
-	var stored := float(main.settings.get_value("screen_" + main.env_id, "curve_radius", 0.0))
-	amount = amount_for(main.screen_distance, stored)
+	var section: String = "screen_" + str(main.env_id)
+	if main.settings.has_value(section, "curve_radius"):
+		amount = amount_for(main.screen_distance, float(main.settings.get_value(section, "curve_radius", 0.0)))
+	else:
+		amount = maxf(_home_amount(), 0.0)
 	radius = radius_for(main.screen_distance, amount)
 	_apply()
+
+
+## The room's own curve (0..1), or -1 when it has none.
+func _home_amount() -> float:
+	var env: Node = main.get("env")
+	return float(env.call("get_home_curve")) if env != null and env.has_method("get_home_curve") else -1.0
 
 
 ## 0..1 of a full wrap (radius = the screen distance).
@@ -80,7 +90,9 @@ func _follow_distance() -> void:
 
 func _store() -> void:
 	radius = radius_for(main.screen_distance, amount)
-	main.settings.set_value("screen_" + main.env_id, "curve_radius", snappedf(radius, 0.01) if radius > 0.0 else null)
+	# Flat in a room that curves by itself is kept as 0, else it would curve again next time.
+	var keep: Variant = snappedf(radius, 0.01) if radius > 0.0 else (0.0 if _home_amount() > 0.0 else null)
+	main.settings.set_value("screen_" + main.env_id, "curve_radius", keep)
 	_apply()
 
 
