@@ -140,6 +140,7 @@ const ObjectPhysics := preload("res://scripts/play/object_physics.gd")
 const ObjectGrab := preload("res://scripts/play/object_grab.gd")
 const EnvAudio := preload("res://scripts/env/env_audio.gd")
 const RoomSettings := preload("res://scripts/env/room_settings.gd")
+const TimeTravel := preload("res://scripts/env/time_travel.gd")
 
 ## The app core (scripts/main.gd). Untyped: main.gd preloads this script, so a typed reference would be circular.
 var main: Node3D
@@ -212,6 +213,9 @@ var grab: ObjectGrab
 var env_audio: EnvAudio
 ## Every room's own settings: the common ones and the room's document's (scripts/env/room_settings.gd).
 var room_settings: RoomSettings
+## Time travel through television: the room moves forward an era at a time while the film plays
+## (scripts/env/time_travel.gd).
+var time_travel: TimeTravel
 
 
 func _ready() -> void:
@@ -283,6 +287,7 @@ func _ready() -> void:
 	grab = _add(ObjectGrab.new(), "ObjectGrab")
 	room_settings = _add(RoomSettings.new(), "RoomSettings")
 	env_audio = _add(EnvAudio.new(), "EnvAudio")
+	time_travel = _add(TimeTravel.new(), "TimeTravel")
 
 
 func _add(node: Node, node_name: String) -> Node:

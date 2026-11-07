@@ -125,6 +125,16 @@ func register_all() -> void:
 		"params": [{"name": "set", "type": "string", "required": true, "enum": SLEEP_CHOICES,
 				"description": "off, a number of minutes (15, 30, 60 or 90), or end_of_file."}],
 		"level": "control", "returns": "{active, end_of_file, remaining, status}", "assistant": "control"})
+	R.register("time_travel", _cmd_time_travel, {
+		"description": "Time travel through television: while the film plays, the room moves forward through the "
+				+ "TV rooms, oldest set to newest, an era at a time; the film plays on.",
+		"params": [{"name": "on", "type": "bool", "required": true,
+				"description": "Starts it (true; in a room that isn't a TV era, the first era at once) or stops it."},
+				{"name": "minutes", "type": "int", "enum": [0, 5, 10, 15],
+				"description": "Minutes in each era; 0 spreads them over the rest of the film (default: the last)."},
+				{"name": "advance", "type": "bool",
+				"description": "true: the next era now (with on true)."}],
+		"level": "change", "returns": "{active, minutes, remaining, era, eras}", "assistant": "room"})
 
 
 # --- Reads -------------------------------------------------------------------------------------------------------
@@ -183,6 +193,7 @@ static func room_settings(m: Node) -> Dictionary:
 		"dim_while_playing": {"on": bool(f.light_follow.enabled), "level": snappedf(float(f.light_follow.play_level), 0.01)},
 		"showing": showing,
 		"sleep": _sleep_state(m),
+		"time_travel": _time_travel_state(m),
 		"this_room": f.room_settings.schema(),
 	}
 
@@ -199,6 +210,12 @@ static func _sleep_state(m: Node) -> Dictionary:
 	var sleep: Node = m.features.sleep
 	return {"active": bool(sleep.active), "end_of_file": bool(sleep.end_of_file),
 			"remaining": snappedf(float(sleep.remaining()), 1.0), "status": sleep.status_text()}
+
+
+static func _time_travel_state(m: Node) -> Dictionary:
+	var tt: Node = m.features.time_travel
+	return {"active": bool(tt.active), "minutes": int(tt.minutes), "remaining": snappedf(float(tt.remaining()), 1.0),
+			"era": str(m.env_id) if str(m.env_id) in tt.eras() else "", "eras": tt.eras()}
 
 
 static func _picture_shown(m: Node) -> bool:
@@ -507,6 +524,37 @@ func _cmd_crossfade(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 
 
 # --- The sleep timer --------------------------------------------------------------------------------------------------
+
+func _cmd_time_travel(args: Dictionary, ctx: DevCommands.Call) -> Variant:
+	var m := _main()
+	var tt: Node = m.features.time_travel
+	var was := [bool(tt.active), int(tt.minutes), str(m.env_id)]
+	if tt.eras().is_empty():
+		return ctx.fail("no TV rooms to travel through")
+	if bool(args["on"]):
+		var minutes := int(args.get("minutes", tt.minutes))
+		if not (minutes in tt.CHOICES):
+			return ctx.fail("minutes: 0 (over the film), 5, 10 or 15")
+		tt.start(minutes)
+		if bool(args.get("advance", false)):
+			tt.advance()
+		ctx.summary = "time travel: %s, in %s" % ["over the film" if tt.minutes == 0 else "every %d min" % tt.minutes,
+				m.env_id]
+	else:
+		tt.stop()
+		ctx.summary = "time travel off"
+	_sync_tab()
+	ctx.undo = func() -> void:
+		if str(m.env_id) != was[2]:
+			m.set_environment(was[2])
+		if was[0]:
+			tt.start(was[1])
+		else:
+			tt.stop()
+			tt.minutes = was[1]
+		_sync_tab()
+	return _time_travel_state(m)
+
 
 func _cmd_sleep(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 	var m := _main()

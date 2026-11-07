@@ -3410,3 +3410,21 @@ msgstr "天文馆：深色圆顶下的躺椅，满天星斗，圆顶脚下一圈
 
 msgid "An open geodesic dome on a wide plain at dusk, the first stars coming out overhead."
 msgstr "黄昏时宽阔平原上一座敞开的网格球顶，头顶第一批星星正在出现。"
+
+msgid "Time travel"
+msgstr "时光旅行"
+
+msgid "Over the film"
+msgstr "贯穿整部影片"
+
+msgid "Every 5 minutes"
+msgstr "每5分钟"
+
+msgid "Every 10 minutes"
+msgstr "每10分钟"
+
+msgid "Every 15 minutes"
+msgstr "每15分钟"
+
+msgid "One film, and the room moves forward through the history of television, an era at a time while it plays."
+msgstr "一部影片，播放时房间沿着电视的历史向前推进，一次一个年代。"

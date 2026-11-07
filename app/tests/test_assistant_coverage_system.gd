@@ -18,6 +18,7 @@ const AREA := {
 	"floor_reflection": "room", "bias_light": "room", "react_to_film": "room", "projector_beam": "room",
 	"time_of_day": "room", "room_light": "room", "dim_while_playing": "room", "curtains": "room", "up_next": "room",
 	"intermission": "room", "crossfade": "room", "sleep_timer": "control", "room_setting": "room",
+	"time_travel": "room",
 	"system_settings": "read", "panel_layout": "settings", "reset_panel_layout": "settings",
 	"accessibility": "settings", "foveation": "settings", "controller_looks": "read", "controller_look": "settings",
 	"haptics": "settings", "jog_wheel": "settings", "seek_bar_pictures": "settings",
@@ -53,6 +54,7 @@ func _run() -> void:
 	await _test_effects()
 	await _test_showing()
 	await _test_sleep()
+	await _test_time_travel()
 	await _test_system()
 	await _test_rest()
 
@@ -392,6 +394,32 @@ func _assistant_switches() -> Array:
 		for key in cfg.get_section_keys("assistant"):
 			out.append([key, cfg.get_value("assistant", key)])
 	return out
+
+
+## Time travel: on moves a room that isn't an era to the first; advance goes to the next; off stays; undo puts it back.
+func _test_time_travel() -> void:
+	var tt: Node = main.features.time_travel
+	var before: String = main.env_id
+	main.set_environment("void")
+	await _frames(2)
+	var eras: Array = tt.eras()
+	_check("time travel: the eras in order (%s)" % [eras], eras.size() >= 7 and eras[0] == "tv_1930"
+			and eras.find("tv_1953") < eras.find("tv_2005") and not ("pillow_fort_1993" in eras))
+	var r: Dictionary = await _run_cmd("time_travel", {"on": true, "minutes": 5})
+	_check("time travel on: the first era at once (%s)" % main.env_id, r["ok"] and tt.active and main.env_id == eras[0]
+			and int(tt.minutes) == 5 and is_equal_approx(float(tt.remaining()), 300.0))
+	_check("and the read says so", bool((await _read("room_settings"))["time_travel"]["active"]))
+	r = await _run_cmd("time_travel", {"on": true, "advance": true})
+	_check("advance: the next era (%s)" % main.env_id, r["ok"] and main.env_id == eras[1] and tt.active)
+	main.set_environment("cinema")
+	await _frames(2)
+	_check("the viewer picks a room that isn't an era: time travel stops", not tt.active)
+	r = await _run_cmd("time_travel", {"on": true, "minutes": 7})
+	_check("a choice it doesn't have is refused", not r["ok"])
+	r = await _run_cmd("time_travel", {"on": false})
+	_check("off", r["ok"] and not tt.active)
+	main.set_environment(before)
+	await _frames(2)
 
 
 func _check(what: String, ok: bool) -> void:

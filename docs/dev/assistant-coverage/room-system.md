@@ -64,6 +64,7 @@ Objects tab calls the same functions (`app/ui/object_section.gd`, `app/ui/object
 | Intermission, its minutes | `intermission` {on, minutes} (room) |
 | Crossfade music, Crossfade films | `crossfade` {music_seconds, video_seconds} (room) |
 | Sleep timer (Off, 15, 30, 60, 90 min, End of file), its countdown | `sleep_timer` {set} (control); the countdown: `room_settings` sleep (read) |
+| Time travel under Television (on, Over the film, Every 5, 10, 15 minutes) | `time_travel` {on, minutes, advance} (room); its state: `room_settings` time_travel (read) |
 
 The whole tab in one read: `room_settings` (read).
 
