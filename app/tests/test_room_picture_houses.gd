@@ -205,114 +205,87 @@ func _shopfront() -> void:
 func _streamline() -> void:
 	var room := await _room("streamline_1937")
 	var hall := _system(room, "hall", "builder")
+	var kit := _system(room, "moderne", "kit")
 	_system(room, "console", "kit")
-	_system(room, "bands", "kit")
 	var organ := _system(room, "organ", "motion")
 	var festoon := _system(room, "festoon", "motion")
-	_system(room, "cove", "atmosphere")
-	_system(room, "cove_film", "atmosphere")
-	_check("streamline: plain walls under the faience bands", hall.params["wall_treatment"] == "plain"
-			and (room.host.system("bands").params["pieces"] as Array).all(func(p: Dictionary) -> bool:
-				return p["piece"] == "curves"))
-	_check("streamline: the organ console is the console kit's mesh", organ.call("target") != null
-			and organ.call("target").name == "PieceStatic" and room.host.system("console").owned().has(organ.call("target")))
+	_system(room, "screen_frame", "screen")
+	_system(room, "air", "atmosphere")
+	# Since 2026-11-08 the hall is the moderne kit's (kit/streamline.gd): its own ceiling of coves, proscenium, bands.
+	var kinds: Array = (kit.params["pieces"] as Array).map(func(p: Dictionary) -> String: return str(p["piece"]))
+	_check("streamline: the moderne hall and the stepped proscenium over plain walls (%s)" % [kinds],
+			hall.params["wall_treatment"] == "plain" and kinds.has("moderne_hall") and kinds.has("ziggurat")
+			and kit.call("problems").is_empty())
+	_check("streamline: the organ console moves whole on its lift", organ.call("target") != null
+			and organ.call("target").name == "Console" and room.host.system("console").owned().has(organ.call("target")))
 	_check("streamline: the festoon is in front of the picture until it rises",
 			festoon.call("target") != null and festoon.call("target").is_in_group("env_in_front"))
-	# The cove colours: gold by default, the lamps and the cove's haze; another choice builds the room again.
+	# The cove colours: gold by default; a steady choice holds; Changing cycles before the film.
 	_check("streamline: Changing by default", room.host.setting("cove") == "changing")
-	var gold := Color(1.0, 0.74, 0.42)
-	_check("streamline: gold lamps by default", (hall.params["house_lamp_colour"] as Color).is_equal_approx(gold))
+	var gold := Color(1.0, 0.72, 0.4)
+	_check("streamline: gold coves by default", (kit.call("cove_colour_now") as Color).is_equal_approx(gold))
+	# The setting moves only live parameters: the room is not built again (the console stays where it is).
 	room.host.set_setting("cove", "jade")
-	hall = room.host.system("hall")
-	var jade := Color(0.5, 0.92, 0.72)
-	_check("streamline: Jade turns the lamps and the cove jade",
-			(hall.params["house_lamp_colour"] as Color).is_equal_approx(jade)
-			and (room.host.param("cove.fog_colour") as Color).is_equal_approx(jade))
-	# A steady colour does not cycle.
+	var jade := Color(0.42, 0.92, 0.7)
 	_play(room, 25.0, false, false, 0.0)
-	_check("streamline: Jade holds", (room.host.param("cove.fog_colour") as Color).is_equal_approx(jade))
+	_check("streamline: Jade turns the coves jade, and holds, without building the room again",
+			(kit.call("cove_colour_now") as Color).is_equal_approx(jade) and room.host.system("moderne") == kit)
 	room.host.set_setting("cove", "changing")
-	organ = room.host.system("organ")
-	festoon = room.host.system("festoon")
-	# Changing: the cove moves through the colours in the pre-show.
 	var seen := {}
-	var lamp_seen := {}
-	var light: Node = room.host.system("light")
 	var t := 0.0
 	while t < 45.0:
 		_play(room, 1.0, false, false, 0.0)
-		var c: Color = room.host.param("cove.fog_colour")
+		var c: Color = kit.call("cove_colour_now")
 		seen["%.1f %.1f %.1f" % [c.r, c.g, c.b]] = true
-		var lc: Color = light.call("group_colour", "house")
-		lamp_seen["%.1f %.1f %.1f" % [lc.r, lc.g, lc.b]] = true
 		t += 1.0
-	_check("streamline: the cove cycles before the film (%d colours seen)" % seen.size(), seen.size() >= 4)
-	_check("streamline: and the lamps' glow with it (%d colours seen)" % lamp_seen.size(), lamp_seen.size() >= 4)
-	_check("streamline: the cove glows before the film", float(room.host.param("cove.fog")) > 0.5
-			and float(room.host.param("cove_film.fog")) < 0.05)
-	# The organ: silent in the pre-show, the console down.
+	_check("streamline: the coves cycle before the film (%d colours seen)" % seen.size(), seen.size() >= 4)
+	# The organ: the console rises from the pit as the room opens and the organ plays.
 	_sound_systems("streamline", room, ["pipes"], "cinema", 0.7)
 	var pipes: Node = room.host.system("pipes")
 	_check("streamline: the organ at the console, a theatre organ", str(pipes.params["instrument"]) == "organ"
 			and str(pipes.params["stop"]) == "theatre" and (pipes.owned()[0] as Node3D).position.z < -11.0)
-	_play(room, 3.0, false, false, 0.0)
-	_check("streamline: the organ silent in the pre-show (%d notes)" % pipes.notes_played, pipes.notes_played == 0
-			and not pipes.sounding())
-	# The ritual: the console rises from the pit, the festoon rises, the lamps go down; the organ plays.
-	var pos := _play(room, 9.0, true, true, 0.0)
-	_check("streamline: the organ plays as the console rises (%d notes)" % pipes.notes_played,
-			pipes.sounding() and pipes.notes_played > 4)
+	_check("streamline: in the pre-show the console up (%.2f) and the organ playing (%d notes)" % [
+			organ.call("progress"), pipes.notes_played], float(organ.call("progress")) > 0.99 and pipes.sounding())
+	# The ritual: the organ's cadence, the console down, the festoon up, the lamps down.
+	# The cadence comes once the bar playing now has ended (the organ writes its bars a little ahead).
+	var pos := 0.0
+	var cadence := false
+	for i in 30:
+		pos = _play(room, 0.2, true, true, pos)
+		cadence = cadence or pipes.bar_kind == "flourish"
 	_check("streamline: the ritual fired", room.host.timeline.fired.any(func(f: Array) -> bool: return f[0] == "ritual"))
-	_check("streamline: the film starts: the cycle stops and the lamps go back to gold (%s)"
-			% light.call("group_colour", "house"), not ("cove_cycle" in room.host.timeline.running())
-			and (light.call("group_colour", "house") as Color).is_equal_approx(gold))
-	_check("streamline: the festoon rising (%.2f)" % festoon.call("progress"), float(festoon.call("progress")) > 0.3)
-	_check("streamline: the console rising (%.2f)" % organ.call("progress"), float(organ.call("progress")) > 0.1)
-	pos = _play(room, 8.0, true, true, pos)
-	_check("streamline: festoon up, console up, lamps down (%.2f, %.2f, %.2f)" % [festoon.call("progress"),
+	_check("streamline: the film starts: the organ's closing cadence", cadence)
+	_check("streamline: the cycle stops", not ("cove_cycle" in room.host.timeline.running()))
+	_check("streamline: the festoon rising (%.2f)" % festoon.call("progress"), float(festoon.call("progress")) > 0.1)
+	pos = _play(room, 20.0, true, true, pos)
+	_check("streamline: festoon up, console down, lamps down (%.2f, %.2f, %.2f)" % [festoon.call("progress"),
 			organ.call("progress"), _lamps(room)], float(festoon.call("progress")) > 0.99
-			and float(organ.call("progress")) > 0.99 and _lamps(room) < 0.2)
-	# In the film the cove takes the film's colour.
+			and float(organ.call("progress")) < 0.01 and _lamps(room) < 0.2)
+	_check("streamline: the organ rests for the film", pipes.resting() and not pipes.sounding())
+	# In the film the coves take the film's colour, at a glow.
 	room.host.signals.fake("film.colour", Color(0.1, 0.3, 0.9))
 	pos = _play(room, 15.0, true, true, pos)
-	var fc: Color = room.host.param("cove_film.fog_colour")
-	_check("streamline: in the film the cove follows the film's colour (%s)" % fc, fc.b > fc.r and fc.b > 0.6)
-	_check("streamline: the film's cove shows in the film, the pre-show's goes", float(room.host.param("cove_film.fog")) > 0.4
-			and float(room.host.param("cove.fog")) < 0.2)
-	_check("streamline: the organ plays on under the film while the console is up (%s, %.1f dB)" % [
-			room.host.timeline.state, pipes.designed_db()], room.host.timeline.state == "playing" and pipes.sounding()
-			and pipes.designed_db() < -57.0)
-	# The console goes down again 30 s into the film; the organ closes with a cadence as it sinks, and rests.
-	pos = _play(room, 8.0, true, true, pos)
-	_check("streamline: as the console sinks, the organ's closing cadence (%s)" % pipes.bar_kind,
-			pipes.bar_kind == "flourish" and pipes.sounding())
-	pos = _play(room, 22.0, true, true, pos)
-	_check("streamline: the console back in the pit (%.2f)" % organ.call("progress"), float(organ.call("progress")) < 0.01)
-	_check("streamline: the organ gone with it, for the rest of the film", pipes.resting() and not pipes.sounding())
+	var fc: Color = kit.call("cove_colour_now")
+	_check("streamline: in the film the coves follow the film's colour (%s)" % fc, fc.b > fc.r and fc.b > 0.5)
 	await _sound_levels("streamline", room)
-	# With Motion low the console and festoon do not travel: they are where they go at once.
+	# With Motion low the console and the festoon do not travel: they are where they go at once.
 	await _done(room)
 	room = await _room("streamline_1937")
 	room.host.set_setting("motion", 0.1)
 	organ = room.host.system("organ")
-	_play(room, 1.0, false, false, 0.0)
-	_play(room, 0.5, true, true, 0.0)
+	_play(room, 4.0, false, false, 0.0)
 	_check("streamline: reduced Motion: the console snaps up (%.2f)" % organ.call("progress"),
 			float(organ.call("progress")) > 0.99)
-	# Back to the pre-show while the organ plays: it stops as the console goes down.
+	# Pre-show off: no prelude, no console, no organ.
 	pipes = room.host.system("pipes")
-	pipes.finish_loading()
-	_play(room, 4.0, true, true, 0.5)
-	_check("streamline: the organ plays (%d notes)" % pipes.notes_played, pipes.sounding())
-	_play(room, 5.0, false, false, 0.0)
-	_check("streamline: back to the pre-show: the organ stops with the console down (%.2f)" % organ.call("progress"),
-			not pipes.sounding() and float(organ.call("progress")) < 0.01)
-	# Pre-show off: no ritual, no console, no organ.
 	room.host.set_setting("ritual", false)
-	var notes: int = pipes.notes_played
 	_play(room, 12.0, true, true, 0.0)
-	_check("streamline: Pre-show off: the organ stays silent (%d notes)" % (pipes.notes_played - notes),
-			pipes.notes_played == notes and not pipes.sounding() and float(organ.call("progress")) < 0.01)
+	var notes: int = pipes.notes_played
+	_play(room, 2.0, false, false, 0.0)
+	_play(room, 20.0, false, false, 0.0)
+	_check("streamline: Pre-show off: the console stays down (%.2f), the organ silent (%d notes)" % [
+			organ.call("progress"), pipes.notes_played - notes], pipes.notes_played == notes and not pipes.sounding()
+			and float(organ.call("progress")) < 0.01)
 	room.host.set_setting("ritual", true)
 	await _done(room)
 
