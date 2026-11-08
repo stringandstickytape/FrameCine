@@ -3373,8 +3373,8 @@ msgstr "1962年的私人放映室：胡桃木墙面、俱乐部椅、窗外发�
 msgid "A shopfront picture house, 1906: a pressed tin ceiling, folding chairs, gas lamps and a dusty beam from the tin booth."
 msgstr "1906年的店面电影院：压花锡板天花板、折叠椅、煤气灯，铁皮放映间射出满是尘埃的光束。"
 
-msgid "A streamline cinema, 1937: cream faience bands, cove lights that change colour, an organ that rises from the pit, and a festoon curtain."
-msgstr "1937年的流线型影院：奶油色釉面砖带、变色的灯槽、从乐池升起的管风琴和一道花彩幕布。"
+msgid "A streamline cinema, 1937: coves that glow and change colour, a stepped proscenium round a rising sun, faience bands round the hall, an organ that rises from the pit, a festoon."
+msgstr "1937年的流线型影院：发光变色的灯槽、环绕旭日的阶梯式台口、环绕大厅的釉面砖带、从乐池升起的管风琴和一道花彩幕布。"
 
 msgid "The first television, 1930: a small glowing picture in a cabinet, the chair pulled up close."
 msgstr "1930年最早的电视：柜子里一块发光的小画面，椅子拉得很近。"

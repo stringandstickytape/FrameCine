@@ -20,13 +20,15 @@ const Furniture := preload("res://scripts/env/systems/kit/furniture.gd")
 const Dressing := preload("res://scripts/env/systems/kit/dressing.gd")
 const Courtyard := preload("res://scripts/env/systems/kit/courtyard.gd")
 const IceHall := preload("res://scripts/env/systems/kit/ice_hall.gd")
+const Streamline := preload("res://scripts/env/systems/kit/streamline.gd")
 
 const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk", "column", "facade", "castle_gate",
 		"booth", "snack_bar", "screen_tower", "bougainvillea", "ivy", "ferns", "carpet", "partition", "curves",
 		"desk", "computer", "video_recorder", "sideboard", "standard_lamp", "rug", "coffee_table", "bunting", "tea_set",
 		"sandwiches", "stool", "channel_dial", "soundbar", "floor_lamp", "glass_table", "media_unit",
 		"house", "palace_gate", "cypress", "palm", "pine", "lantern", "pedestal",
-		"ice_shell", "ice_screen", "ice_benches", "ice_outside"]
+		"ice_shell", "ice_screen", "ice_benches", "ice_outside",
+		"moderne_hall", "ziggurat", "organ_console"]
 ## Each piece's size when neither the entry nor its slot gives one: [width, height, depth].
 const SIZES := {
 	"balcony_front": [6.0, 1.0, 0.25], "niche": [1.3, 2.6, 0.4], "urn": [0.5, 1.0, 0.5], "lion": [0.55, 0.9, 1.0],
@@ -44,6 +46,7 @@ const SIZES := {
 	"pine": [7.0, 10.0, 7.0], "lantern": [0.3, 0.6, 0.6], "pedestal": [0.8, 1.1, 1.2],
 	"ice_shell": [0.0, 0.0, 0.0], "ice_screen": [0.0, 0.0, 0.0], "ice_benches": [0.0, 0.0, 0.0],
 	"ice_outside": [0.0, 0.0, 0.0],
+	"moderne_hall": [0.0, 0.0, 0.0], "ziggurat": [0.0, 0.0, 0.0], "organ_console": [1.9, 1.25, 1.6],
 }
 ## The pieces that stand on a floor (their slot's origin is a floor point); the others hang on a wall.
 const STANDING: Array[String] = ["urn", "lion", "obelisk", "column", "booth", "snack_bar", "ferns", "partition",
@@ -112,6 +115,8 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			Courtyard.build(piece, c, xf, size, e)
 		"ice_shell", "ice_screen", "ice_benches", "ice_outside":
 			IceHall.build(piece, c, xf, size, e)
+		"moderne_hall", "ziggurat", "organ_console":
+			Streamline.build(piece, c, xf, size, e)
 
 
 # --- Furniture (furniture.gd draws it) -----------------------------------------------------------------------------
@@ -556,10 +561,12 @@ static func _carpet(c: Object, e: Dictionary) -> void:
 	if node == null:
 		return
 	var colour := _colour(e, Color(0.4, 0.12, 0.2))
+	# Its pattern: the swirls by default (since 2026-11-08 an entry may name another of procedural.gd's).
+	var pattern := str(e.get("pattern", "swirl_carpet"))
 	for s in node.mesh.get_surface_count():
 		var m := node.mesh.surface_get_material(s) as ShaderMaterial
 		if m != null and m.shader != null and m.get_shader_parameter("albedo_map") != null:
-			Procedural.apply(m, "swirl_carpet", colour)
+			Procedural.apply(m, pattern, colour)
 			c.carpeted.append(m)
 		break
 

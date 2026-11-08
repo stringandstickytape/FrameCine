@@ -7,17 +7,18 @@ extends RefCounted
 ## (apply()). Pictures (a rose window, neon letters, the water round a dome) are plain colour textures for the light
 ## system's lamp material. Static; preload to use.
 ##
-##   PATTERNS                    pressed_tin, ice_blocks, swirl_carpet, corrugated, plasterboard
+##   PATTERNS                    pressed_tin, ice_blocks, swirl_carpet, corrugated, plasterboard, roof_tiles, ashlar,
+##                               lime_wash, quarry_tiles, deco_carpet (rising suns in rows: the Streamline's aisles)
 ##   maps(pattern) -> {albedo, normal, orm, mean}   the pattern's textures (mean: its albedo's mean, linear)
 ##   apply(material, pattern, colour)   a house material shows the pattern in this colour (on average)
 ##   glass(colour, alpha, room) -> ShaderMaterial   see-through glass that dims with the house lights
 ##   rose_window(), letters(text, colour, back), gradient(top, bottom), abstract(seed, palette), flame()   pictures
 
 const PATTERNS: Array[String] = ["pressed_tin", "ice_blocks", "swirl_carpet", "corrugated", "plasterboard",
-		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles"]
+		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles", "deco_carpet"]
 const SIZE := 128
 ## Patterns drawn larger than SIZE (many tiles a repeat, each its own: since 2026-11-08, the Athens rooftop's floor).
-const SIZES := {"quarry_tiles": 256}
+const SIZES := {"quarry_tiles": 256, "deco_carpet": 256}
 const GLASS_SHADER := preload("res://scripts/env/systems/kit/env_glass.gdshader")
 
 static var _maps := {}
@@ -191,6 +192,34 @@ static func _sample(pattern: String, u: float, v: float) -> Array:
 			c = c.lerp(Color(0.4, 0.38, 0.36), grout)
 			var h := lerpf(dish - chip * 0.25, 0.25, grout)
 			return [h, c, lerpf(0.72, 0.95, grout)]
+		# Since 2026-11-08, the Streamline 1937's aisles: a moderne carpet.
+		"deco_carpet":
+			# Rising suns in rows, each row half a sun along from the last: on a jade ground, a sun's half disc of
+			# cream, three gold arcs round it and dark rays between, a fine gold line under each row. Woven: a fleck.
+			var row := int(floor(v * 2.0))
+			var cu := fposmod(u * 2.0 + 0.5 * float(row % 2), 1.0)
+			var cv := fposmod(v * 2.0, 1.0)
+			var p := Vector2(cu - 0.5, 1.0 - cv - 0.12)
+			var r := p.length()
+			var ang := atan2(p.x, p.y)
+			var c := Color(0.1, 0.3, 0.25)
+			var gold := Color(0.78, 0.58, 0.24)
+			var h := 0.5
+			if p.y > 0.0:
+				var rays := smoothstep(0.55, 0.75, cos(ang * 9.0)) * smoothstep(0.16, 0.17, r) \
+						* (1.0 - smoothstep(0.38, 0.4, r))
+				c = c.lerp(Color(0.05, 0.16, 0.13), rays * 0.85)
+				for arc: float in [0.2, 0.28, 0.36]:
+					var on := 1.0 - smoothstep(0.012, 0.022, absf(r - arc))
+					c = c.lerp(gold, on)
+					h += 0.15 * on
+				var sun := 1.0 - smoothstep(0.13, 0.145, r)
+				c = c.lerp(Color(0.86, 0.78, 0.6), sun)
+			var line := 1.0 - smoothstep(0.008, 0.016, absf(cv - 0.88))
+			c = c.lerp(gold, line * 0.8)
+			var fleck := _noise(u, v, 64, 21)
+			c = c * (0.92 + 0.16 * fleck)
+			return [h + 0.1 * fleck, c, 0.95]
 	return [0.5, Color(0.5, 0.5, 0.5), 0.8]
 
 

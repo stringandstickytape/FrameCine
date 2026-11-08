@@ -8,7 +8,9 @@ extends "res://scripts/env/systems/kit/builder.gd"
 ## ivy, ferns, a swirling carpet over the builder's floor, a plasterboard partition, curved bands on a wall; and
 ## furniture (kit/furniture.gd): a desk, a computer, a video recorder whose clock flashes 12:00, a sideboard, a
 ## standard lamp, a rug, a coffee table; and the TV rooms' dressing (kit/dressing.gd): bunting, a tea set, sandwiches,
-## a stool, a channel dial, a soundbar, a floor lamp, a glass table (its top in PieceGlass, see-through), a media unit.
+## a stool, a channel dial, a soundbar, a floor lamp, a glass table (its top in PieceGlass, see-through), a media unit;
+## and the moderne hall's (kit/streamline.gd, since 2026-11-08): its walls and coved ceiling, a stepped proscenium, an
+## organ console (its coves in PieceCove, its clock in PieceClock).
 ## All the pieces share a few meshes, one surface a material: a baked one (PieceStatic), an unbaked one for rounded
 ## shapes and leaves (PieceSoft), the lamp shades (PieceLamps), the glows (windows, a booth's window, the video
 ## recorders' clocks: PieceDisplay) and each neon sign. The builder's slots come
@@ -28,7 +30,9 @@ static func spec() -> Dictionary:
 		"description": "Modular pieces along a builder's slots: balcony fronts, niches with an urn, a lion or an "
 				+ "obelisk, columns, courtyard façades, a castle gate round the screen, a tin booth, a neon snack bar, "
 				+ "a Mediterranean courtyard (houses with balconies, towers, loggias and lit windows, a palace gate "
-				+ "with drapes, lanterns, a lion on a pedestal, cypresses, palms and pines), a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
+				+ "with drapes, lanterns, a lion on a pedestal, cypresses, palms and pines), a 1930s moderne hall (a "
+				+ "ceiling of glowing coves, faience and chrome speed bands, a stepped proscenium round a rising sun, "
+				+ "organ grilles, a clock, an illuminated organ console on its lift), a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
 				+ "furniture: a desk, a computer, a video recorder flashing 12:00, a sideboard, a standard lamp, a rug, "
 				+ "a coffee table; dressing: bunting, a tea set, sandwiches, a stool, a channel dial, a soundbar, a "
 				+ "floor lamp, a glass table, a media unit.",
@@ -60,6 +64,8 @@ const PIECE_FIELDS := {
 	"features": {"type": "list", "max": 16, "of": {"type": "enum", "values": Courtyard.FEATURES},
 			"description": "a courtyard piece's parts (a house: balcony, loggia, tower, pergola, oriel, exit, ...)"},
 	"seed": {"type": "int", "min": 0, "max": 100000, "description": "the piece's own variation (a house's windows)"},
+	# Since 2026-11-08 (the Streamline 1937's aisles): which pattern a carpet shows (the swirls by default).
+	"pattern": {"type": "enum", "values": Procedural.PATTERNS, "description": "a carpet's pattern (swirl_carpet if none)"},
 }
 const PARAMS := {
 	"builder": {"type": "string", "max": 32, "default": "",
@@ -115,6 +121,23 @@ const PARAMS := {
 	"flicker": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "flicker": true,
 			"steady": 0.0, "brightness": true,
 			"description": "how much the pieces' candle flames waver (slowly; Flickering lights holds them)"},
+	# Since 2026-11-08, for the Streamline 1937's moderne hall (kit/streamline.gd); the other rooms keep their
+	# defaults. Coves: plaster washed by hidden lamps (shaders/env_cove.gdshader), their colour live.
+	"cove": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
+			"description": "how bright the coves' hidden lamps are (times the house lamps' level)"},
+	"cove_colour": {"type": "color", "default": [1.0, 0.74, 0.42], "live": true,
+			"description": "the coves' light (a setting or a cue moves it)"},
+	"cove_film_colour": {"type": "color", "default": [1.0, 0.74, 0.42], "live": true,
+			"description": "the coves' light in the film (bind it to film.colour)"},
+	"cove_film": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
+			"description": "0: the coves in cove_colour; 1: in cove_film_colour"},
+	"faience": {"type": "material", "default": {"library": "white_marble", "color": [0.9, 0.84, 0.68]},
+			"description": "glazed faience: bands, a balcony front, a console's body (it shines: a clear glaze)"},
+	"chrome": {"type": "material", "default": {"library": "brushed_steel", "color": [0.82, 0.82, 0.84]},
+			"description": "chrome or nickel trim: rails, bands, brackets (it reflects the room)"},
+	"group": {"type": "string", "max": 32, "default": "",
+			"description": "the pieces' meshes under one node of this name (a motion system moves them together: an "
+			+ "organ console on its lift); empty: each in the room"},
 }
 ## Pieces that take their slot's size when the entry gives none (the others keep their own size).
 const FILLS: Array[String] = ["facade", "curves", "ivy", "bougainvillea", "balcony_front", "partition"]
@@ -124,6 +147,7 @@ const FILLS: Array[String] = ["facade", "curves", "ivy", "bougainvillea", "balco
 class Ctx:
 	const P := preload("res://scripts/env/systems/kit/pieces.gd")
 	const Proc := preload("res://scripts/env/systems/kit/procedural.gd")
+	const Refl := preload("res://scripts/env/systems/kit/reflect.gd")
 	var kit: Node
 	var s: RefCounted
 	var u: RefCounted
@@ -151,6 +175,28 @@ class Ctx:
 	var spots: Array = []
 	## The Ice cinema's hall (kit/ice_hall.gd, since 2026-11-08): its meshes and candles over its pieces, or null.
 	var ice: Object = null
+	## The moderne hall's pieces (kit/streamline.gd, since 2026-11-08): the coves' plaster (vertex colour: its colour,
+	## alpha the cove's light on it), clock faces ([centre, half across, half up, facing]), footlights (stand-in lamps
+	## round the stage in the cove's colour, live: [at, cone cosine (-1 all round), strength]), and lights for the bake
+	## only ([at, colour, energy, reach]).
+	var cove: RefCounted
+	var clocks: Array = []
+	var footlights: Array = []
+	var glow_lights: Array = []
+
+	## A soft (unbaked) tinted material that reflects (kit/reflect.gd): metal 0 a clear glaze or lacquer, 1 chrome.
+	func shiny(key: String, metal: float, amount: float, roughness := 0.1) -> Material:
+		var k := "shiny %s %s %s %s" % [key, metal, amount, roughness]
+		if _mats.has(k):
+			return _mats[k]
+		var d: Dictionary = (kit.params[key] as Dictionary).duplicate()
+		d["color"] = [1.0, 1.0, 1.0]
+		var m: ShaderMaterial = kit._light.from_param(d, true)
+		m.set_shader_parameter("instance_tint", true)
+		Refl.make(m, metal, amount, roughness)
+		kit._reflect.append(m)
+		_mats[k] = m
+		return m
 
 	## The floor's height under a point of the room (the piece's foot when the builder gives none).
 	func ground_at(p: Vector3, fallback: float) -> float:
@@ -235,6 +281,23 @@ var _window_m: ShaderMaterial
 var _water_m: ShaderMaterial
 ## The water's own clock (seconds x water_motion x the Motion setting), so a still setting stops it where it is.
 var _water_t := 0.0
+## The moderne hall's (kit/streamline.gd): the coves' material, the clocks' face, the reflecting materials (glaze,
+## lacquer, chrome: their world is set each frame), the footlights' stand-in lamps ([index, strength]), the node the
+## meshes go under (`group`), and the seconds since the clock's hands were last set.
+var _cove_m: ShaderMaterial
+var _clock_m: ShaderMaterial
+var _reflect: Array[ShaderMaterial] = []
+var _footlights: Array = []
+var _group_node: Node3D
+var _clock_t := 1.0
+var _footlight_key := Color(-1, -1, -1)
+var _footlight_wait := 0.0
+const Reflect := preload("res://scripts/env/systems/kit/reflect.gd")
+const COVE_SHADER := preload("res://shaders/env_cove.gdshader")
+const CLOCK_SHADER := preload("res://shaders/env_clock.gdshader")
+const SkySys := preload("res://scripts/env/systems/sky.gd")
+## The footlights' energy (stand-in lamps: they light the festoon and the console in the cove's colour).
+const FOOTLIGHT_ENERGY := 5.0
 ## The clock flashes once a second, each change eased over about a fifth of a second (slower than the
 ## photosensitivity ceiling's fade, env_checks.gd MIN_FADE).
 const BLINK_HZ := 1.0
@@ -347,8 +410,13 @@ func build() -> void:
 	_ctx.rng.seed = 1928
 	_ctx.windows = RoomMesh.new()
 	_ctx.water = RoomMesh.new()
+	_ctx.cove = RoomMesh.new()
 	_window_m = null
 	_water_m = null
+	_cove_m = null
+	_clock_m = null
+	_reflect.clear()
+	_footlights.clear()
 	var b := _builder()
 	if b != null:
 		_ctx.builder_params = b.params
@@ -397,6 +465,7 @@ func build() -> void:
 		var mi := _add_picture("PiecePortDim", _ctx.glows["port_dim"], Auditorium.port_picture(false), Color(1, 1, 1),
 				1.3 * glow, "booth")
 		_glow_m.append([mi.mesh.surface_get_material(0), 1.3])
+	_add_moderne_meshes()
 	var neon := color_param("neon")
 	for k in _ctx.signs.size():
 		var sg: Array = _ctx.signs[k]
@@ -436,6 +505,154 @@ func _add_courtyard_meshes() -> void:
 		_add_unbaked("PieceWater", _ctx.water)
 
 
+## The moderne hall's meshes (kit/streamline.gd): the coves (PieceCove: their own shader, never baked), the clocks
+## (PieceClock), the footlights (stand-in lamps first, so they always have a place), the bake's own lights.
+func _add_moderne_meshes() -> void:
+	if _cove_m != null:
+		_add_unbaked("PieceCove", _ctx.cove)
+		_update_cove()
+	if not _ctx.clocks.is_empty():
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		for q: Array in _ctx.clocks:
+			var c: Vector3 = q[0]
+			var u: Vector3 = q[1]
+			var v: Vector3 = q[2]
+			var n: Vector3 = q[3]
+			# A round face: a fan of 32 (UV 0..1 over the square round it).
+			var sides := 32
+			for k in sides:
+				var a0 := TAU * k / sides
+				var a1 := TAU * (k + 1) / sides
+				var pts := [Vector2.ZERO, Vector2(cos(a0), sin(a0)), Vector2(cos(a1), sin(a1))]
+				# Godot draws the side where the corners run clockwise.
+				if u.cross(v).dot(n) > 0.0:
+					pts = [pts[0], pts[2], pts[1]]
+				for p: Vector2 in pts:
+					st.set_normal(n)
+					st.set_uv(Vector2(0.5 + p.x * 0.5, 0.5 - p.y * 0.5))
+					st.add_vertex(c + u * p.x + v * p.y)
+		_clock_m = ShaderMaterial.new()
+		_clock_m.shader = CLOCK_SHADER
+		_clock_m.set_shader_parameter("house_reference", float(room.get("ambient_level")))
+		var mesh := st.commit()
+		mesh.surface_set_material(0, _clock_m)
+		var mi := _add_mesh("PieceClock", mesh)
+		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		_set_clock()
+	for f: Array in _ctx.footlights:
+		var i: int = _light.add_lamp(f[0], Color(0, 0, 0), float(f[1]))
+		if i >= 0:
+			_footlights.append([i, float(f[2])])
+	_update_footlights()
+	for k in _ctx.glow_lights.size():
+		var g: Array = _ctx.glow_lights[k]
+		_bake_omni("KitGlow%d" % k if id == "kit" else "KitGlow%d_%s" % [k, id], g[0], float(g[3]), float(g[2]), g[1])
+
+
+## The coves' plaster (shaders/env_cove.gdshader), made when a piece first draws a cove.
+func cove_material() -> ShaderMaterial:
+	if _cove_m == null:
+		_cove_m = ShaderMaterial.new()
+		_cove_m.shader = COVE_SHADER
+		_cove_m.set_shader_parameter("house_reference", float(room.get("ambient_level")))
+		# The coves are high and pale: they take less of the film's spill than the walls, or the ceiling would glow in
+		# the picture's colours over the film.
+		_cove_m.set_shader_parameter("spill", float(_light.params["spill"]) * 0.6)
+		_cove_m.set_shader_parameter("mottle", SkySys.noise_texture())
+		var t: Array = _light.params["fill_top"]
+		var b: Array = _light.params["fill_bottom"]
+		_cove_m.set_shader_parameter("sky_top", Vector3(float(t[0]), float(t[1]), float(t[2])))
+		_cove_m.set_shader_parameter("sky_bottom", Vector3(float(b[0]), float(b[1]), float(b[2])))
+	return _cove_m
+
+
+## The coves' colour now: cove_colour toward cove_film_colour by cove_film.
+func cove_colour_now() -> Color:
+	return color_param("cove_colour").lerp(color_param("cove_film_colour"), clampf(float(params["cove_film"]), 0.0, 1.0))
+
+
+func _update_cove() -> void:
+	if _cove_m == null:
+		return
+	_cove_m.set_shader_parameter("glow_colour", cove_colour_now())
+	_cove_m.set_shader_parameter("glow", float(params["cove"]) * _group_level("house"))
+
+
+## The footlights' stand-in lamps in the cove's colour, at the house lamps' level.
+func _update_footlights() -> void:
+	if _footlights.is_empty():
+		return
+	var c := cove_colour_now() * FOOTLIGHT_ENERGY * float(params["cove"]) * _group_level("house")
+	for f: Array in _footlights:
+		_light.set_lamp(int(f[0]), c * float(f[1]))
+
+
+## The clocks' hands from the real time (the room's own clock: the system's).
+func _set_clock() -> void:
+	if _clock_m == null:
+		return
+	var t := Time.get_time_dict_from_system()
+	var minutes := float(t["minute"]) + float(t["second"]) / 60.0
+	var hours := fmod(float(t["hour"]), 12.0) + minutes / 60.0
+	_clock_m.set_shader_parameter("minute_angle", TAU * minutes / 60.0)
+	_clock_m.set_shader_parameter("hour_angle", TAU * hours / 12.0)
+	_clock_m.set_shader_parameter("energy", 1.3 * _group_level("house"))
+
+
+## The clock's hands now, radians clockwise from twelve: [hour, minute] (tests).
+func clock_hands() -> Array:
+	if _clock_m == null:
+		return []
+	return [float(_clock_m.get_shader_parameter("hour_angle")), float(_clock_m.get_shader_parameter("minute_angle"))]
+
+
+## The coves now (tests): {colour, glow}.
+func cove_state() -> Dictionary:
+	if _cove_m == null:
+		return {}
+	return {"colour": _cove_m.get_shader_parameter("glow_colour"), "glow": float(_cove_m.get_shader_parameter("glow"))}
+
+
+## The reflecting materials' world (kit/reflect.gd): an indoor one, the plaster's warm tone round the horizon, the
+## coves' light above, the carpet below, the screen with the picture, and one glint: the proscenium's glow.
+func _update_reflect() -> void:
+	if _reflect.is_empty() or _ctx == null:
+		return
+	var house := _group_level("house")
+	var cove := cove_colour_now() * float(params["cove"]) * house
+	var wall := Color(0.16, 0.12, 0.09) * (0.15 + 0.85 * house)
+	var screen: Dictionary = _ctx.screen
+	var xf: Transform3D = screen.get("xf", Transform3D())
+	var size: Vector2 = screen.get("size", Vector2(12, 5))
+	var sc := xf.origin
+	var playing: bool = host != null and str(host.timeline.state) in ["playing", "starting", "credits"]
+	# The picture in the chrome at a third: a full one glints in the colours of every cut at the edge of vision.
+	Reflect.update(_reflect, null, room, xf, size, sc + Vector3(0.0, size.y * 0.5 + 2.2, 0.6), cove * 0.6,
+			Vector2(size.x * 0.8, 1.2), 0.33 if playing else 0.0)
+	for m: ShaderMaterial in _reflect:
+		m.set_shader_parameter("refl_zenith", cove * 0.35 + wall * 0.3)
+		m.set_shader_parameter("refl_horizon", wall)
+		m.set_shader_parameter("refl_ground", Color(0.02, 0.03, 0.025) * (0.3 + 0.7 * house))
+
+
+## The pieces' meshes under one node when `group` is given (an organ console on its lift moves as one).
+func _add_mesh(node_name: String, mesh: Mesh) -> MeshInstance3D:
+	var g := str(params.get("group", ""))
+	if g == "":
+		return super(node_name, mesh)
+	if _group_node == null or not is_instance_valid(_group_node):
+		_group_node = Node3D.new()
+		_group_node.name = g
+		own(_group_node)
+	var mi := MeshInstance3D.new()
+	mi.name = node_name
+	mi.mesh = mesh
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_group_node.add_child(mi)
+	return mi
+
+
 ## The windows' material (the light system's lamp material, house group, on the courtyard window shader), made when
 ## a piece first draws a window.
 func window_material() -> ShaderMaterial:
@@ -468,6 +685,23 @@ func tick(delta: float) -> void:
 	if _water_m != null:
 		_water_t += delta * float(params["water_motion"])
 		_water_m.set_shader_parameter("clock", _water_t)
+	if _cove_m != null or not _footlights.is_empty() or not _reflect.is_empty():
+		# The house lamps' level moves without telling the kit (a cue on the light system): follow it here, the
+		# footlights only when they change (each change re-places every lamp).
+		_update_cove()
+		_update_reflect()
+		var key := cove_colour_now() * float(params["cove"]) * _group_level("house")
+		_footlight_wait -= delta
+		if _footlight_wait <= 0.0 and not key.is_equal_approx(_footlight_key):
+			# At most ten times a second: a colour's fade is seconds long.
+			_footlight_wait = 0.1
+			_footlight_key = key
+			_update_footlights()
+	if _clock_m != null:
+		_clock_t += delta
+		if _clock_t >= 1.0:
+			_clock_t = 0.0
+			_set_clock()
 	if _display_m == null:
 		return
 	_blink_t += delta

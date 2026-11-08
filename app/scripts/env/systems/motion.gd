@@ -113,6 +113,10 @@ const PARAMS := {
 	"festoon_swags": {"type": "int", "min": 2, "max": 12, "default": 5, "description": "festoon: swags across"},
 	"festoon_depth": {"type": "float", "min": 0.0, "max": 2.0, "default": 0.25,
 			"description": "festoon: how far in front of the screen it hangs, metres"},
+	# Since 2026-11-08 (the Streamline 1937): fully up, a festoon's swags hang about a quarter of its drop under its
+	# top; hung higher, behind a proscenium's head, it clears the picture. 0.5, as before, is the default.
+	"festoon_top": {"type": "float", "min": 0.0, "max": 6.0, "default": 0.5,
+			"description": "festoon: how far its top hangs over the screen's top, metres"},
 	"curtain": {"type": "material", "default": {"library": "velvet", "color": [0.62, 0.42, 0.16], "tiling": 0.3},
 			"description": "festoon: its cloth"},
 }
@@ -535,7 +539,8 @@ func _place_festoon() -> void:
 	var given := Vector2(float(params["festoon_size"][0]), float(params["festoon_size"][1]))
 	_festoon_size = Vector2(given.x if given.x > 0.0 else size.x + 0.8, given.y if given.y > 0.0 else size.y + 0.7)
 	# Its top over the screen's, the margin above; a little in front.
-	_festoon.transform = local * Transform3D(Basis(), Vector3(0.0, size.y * 0.5 + 0.5, float(params["festoon_depth"])))
+	_festoon.transform = local * Transform3D(Basis(), Vector3(0.0, size.y * 0.5 + float(params["festoon_top"]),
+			float(params["festoon_depth"])))
 	_rest = _festoon.transform
 	_festoon_lift = -1.0
 	_lift_festoon(_u)
