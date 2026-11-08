@@ -314,7 +314,11 @@ func talk_hand() -> XRHand:
 	if _ptt != null and is_instance_valid(_ptt):
 		return pointer_hand
 	var dictation: Node = app.get("browser_dictation") if app != null else null
-	return pointer_hand if dictation != null and dictation.wants_talk() else null
+	if dictation != null and dictation.wants_talk():
+		return pointer_hand
+	# A PC window's pane in focus takes the voice as text (scripts/pc/pc_windows.gd).
+	var pc: Node = app.features.get("pc_windows") if app != null and app.get("features") != null else null
+	return pointer_hand if pc != null and pc.wants_talk() else null
 
 
 ## The bumper (the app's "labels" action): on the talk hand, hold to record and release to send. True when used.
@@ -323,6 +327,9 @@ func talk_hand() -> XRHand:
 func on_bumper(hand: XRHand, held: bool) -> bool:
 	var dictation: Node = app.get("browser_dictation") if app != null else null
 	if hand == pointer_hand and dictation != null and dictation.on_talk(held, _talk_as_before.bind(hand)):
+		return true
+	var pc: Node = app.features.get("pc_windows") if app != null and app.get("features") != null else null
+	if hand == pointer_hand and pc != null and pc.on_talk(held):
 		return true
 	return _talk_as_before(held, hand)
 
@@ -682,7 +689,9 @@ func _update_pointer() -> void:
 
 func _grab_owns(hand: XRHand) -> bool:
 	var grab: Node = app.features.get("grab") if app.features != null else null
-	return grab != null and grab.owns_laser(hand)
+	# A PC window's pane draws its own laser too (scripts/pc/pc_windows.gd).
+	var pc: Node = app.features.get("pc_windows") if app.features != null else null
+	return (grab != null and grab.owns_laser(hand)) or (pc != null and pc.owns_laser(hand))
 
 
 ## Whether this hand's laser is the menu's (or Place's, seat picking's, marking's) now: object physics' grab

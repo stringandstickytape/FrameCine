@@ -225,7 +225,7 @@ func _prune() -> void:
 
 
 static func _tracked(path: String) -> bool:
-	return not (path.begins_with("browser://") or path.begins_with("window://"))
+	return not (path.begins_with("browser://") or path.begins_with("window://") or path.begins_with("pcwindow://"))
 
 
 static func _clock(t: float) -> String:
