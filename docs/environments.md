@@ -2290,7 +2290,7 @@ The deep pass (2026-11-08) made the city round the roof and the roof itself by h
   bell towers, lit from the square below. A chapel on a far hill behind with zig-zag lamps up its path. Far hills
   166 m out with a thousand lights. A warm haze thickens with distance.
 - **The hill:** an invented temple on a rock beside the screen building (52 degrees, 150 m; its plateau 13 m up):
-  its walls with buttresses, a ruined temple of eight by seventeen columns, a smaller one, a gateway, pines, white
+  its walls with buttresses, a ruined temple of six by thirteen columns, a smaller one, a gateway, pines, white
   houses round its foot; floodlit honey-gold from below (stylised: not a copy of any real building).
 - **The roof:** terracotta quarry tiles (`quarry_tiles`), the whitewashed parapet with its coping, stains and spouts;
   the screen painted on the next building's weathered wall, the ghost of an older roof's gable on it, two ghost
@@ -2322,7 +2322,7 @@ The deep pass (2026-11-08) made the city round the roof and the roof itself by h
   the church, `reach` 30, `gain_db` -4, `film_db` -30, played by the `evening` cue; the cat's purr as it sits, from
   `life` at `voice_db` -15.
 - **Measured** (before the pass, then after): 15 draws, 29 086 triangles, 0 lights, 0 particles, 9.3 MB; now 25 draws
-  (the roof 16, the city 1, the seats 2, the sky 3, the cat, the moths, the planes), 140 206 triangles (the city
+  (the roof 16, the city 1, the seats 2, the sky 3, the cat, the moths, the planes), 139 894 triangles (the city
   67k, the plants 31k), 0 lights, 0 particles, 8.4 MB. Sound at the slider's default (dBFS RMS): before -54.4 in the
   pre-show, -61.1 as the film starts, -70.0 in the film, -77.4 under a film at the reference level; now -54.2,
   -58.9, -69.1, -76.4.

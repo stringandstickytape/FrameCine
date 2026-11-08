@@ -1191,9 +1191,10 @@ static func _citadel(b: Builder, rng: RandomNumberGenerator) -> void:
 			var bh := hgt * 0.8
 			b.box(bc + Vector3(0, bh * 0.5, 0), Vector3(1.8, bh, 1.4), Basis(out.cross(Vector3.UP), Vector3.UP, out),
 					"b", bc.y)
-	# The temple: on the plateau, its long side to the roof, a little back from the edge.
+	# The temple: on the plateau, its long side to the roof, a little back from the edge. Six columns by thirteen, a
+	# plain classical plan of our own, not a copy of a real temple.
 	var tc := c + deep * 3.0 + long * 4.0 + Vector3(0, CITADEL_TOP, 0)
-	_temple(b, tc, long, deep, 31.0, 14.0, 8, 17, 10.2, rng, true)
+	_temple(b, tc, long, deep, 28.0, 12.5, 6, 13, 10.2, rng, true)
 	# A smaller temple with a porch at one side, a gateway at the plateau's west end.
 	_temple(b, c - long * 24.0 + deep * 4.0 + Vector3(0, CITADEL_TOP, 0), long, deep, 14.0, 8.0, 6, 0, 7.0, rng,
 			false)
