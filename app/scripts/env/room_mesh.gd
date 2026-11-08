@@ -88,6 +88,30 @@ func face(corners: Array, normal: Vector3) -> void:
 	_end_chart()
 
 
+## One flat face of any outline, concave too (a carved relief's front): its corners in order round it, the side it
+## faces; triangulated, one chart. Since 2026-11-08 (the Ice cinema's carvings).
+func polygon(corners: PackedVector3Array, normal: Vector3) -> void:
+	if corners.size() < 3:
+		return
+	var a := corners[0]
+	var u_axis := (corners[1] - a).normalized()
+	var v_axis := normal.cross(u_axis).normalized()
+	var flat := PackedVector2Array()
+	for p: Vector3 in corners:
+		flat.append(Vector2((p - a).dot(u_axis), (p - a).dot(v_axis)))
+	var tris := Geometry2D.triangulate_polygon(flat)
+	if tris.is_empty():
+		return
+	_begin_chart()
+	var base := _current.verts.size()
+	for i in corners.size():
+		_vertex(corners[i], normal, flat[i])
+	for k in range(0, tris.size(), 3):
+		_triangle(base + tris[k], base + tris[k + 1], base + tris[k + 2], corners[tris[k]], corners[tris[k + 1]],
+				corners[tris[k + 2]], normal)
+	_end_chart()
+
+
 ## A box: its six faces (outward normals; inward with inside true, for a room's shell), each a chart.
 func box(centre: Vector3, size: Vector3, basis := Basis(), skip: Array = [], inside := false) -> void:
 	var h := size * 0.5

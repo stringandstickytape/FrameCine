@@ -72,7 +72,7 @@ const MODELS := {
 		"frame": {"library": "corduroy", "color": [0.3, 0.2, 0.14]}, "fold": false, "segment": false,
 		"width": 0.62, "forms": [],
 		"boxes": [[Vector3(0.0, 0.075, -0.05), Vector3(0.56, 0.15, 0.56), 0.0]]},
-	"hide": {"upholstery": {"library": "plush_carpet", "color": [0.62, 0.55, 0.46]},
+	"hide": {"upholstery": {"library": "cream_carpet", "color": [0.86, 0.8, 0.72]},
 		"frame": {"library": "white_marble", "color": [0.72, 0.8, 0.86]}, "fold": false, "segment": false,
 		"width": 0.7, "forms": [],
 		"boxes": [[Vector3(0.0, 0.22, -0.05), Vector3(0.6, 0.44, 0.6), 0.0]]},
@@ -407,14 +407,67 @@ static func _hide(b: RoomMesh, u: Material, f: Material) -> void:
 	b.surface(f)
 	b.box(Vector3(0.0, 0.2, -0.05), Vector3(0.6, 0.4, 0.55), Basis(), [RoomMesh.DOWN])
 	b.surface(u)
-	b.rounded_box(Vector3(0.0, 0.418, -0.05), Vector3(0.68, 0.036, 0.66), 0.015, Transform3D(), 1, Vector3i(1, 0, 1),
-			0.0, [RoomMesh.DOWN])
-	b.rounded_box(Vector3.ZERO, Vector3(0.58, 0.3, 0.03), 0.012,
-			Transform3D(Basis(Vector3.RIGHT, deg_to_rad(-6.0)), Vector3(0.0, 0.28, -0.345)), 1, Vector3i.ZERO, 0.0, [])
-	for s: float in [-1.0, 1.0]:
-		b.rounded_box(Vector3.ZERO, Vector3(0.025, 0.24, 0.12), 0.01,
-				Transform3D(Basis(Vector3.BACK, deg_to_rad(s * 8.0)), Vector3(s * 0.335, 0.31, -0.24)), 1,
+	_pelt(b)
+
+
+## A reindeer's pelt over the block (since 2026-11-08, for the Ice cinema: "reindeer hides and furs on the benches
+## with real thickness and fur edges", the brief): its outline uneven, the forelegs' flaps hanging down the front and
+## the hind legs' at the back corners, thick as a pelt is, darker brown-grey along the spine and pale towards the
+## belly's edges, its fur tufted round the rim. Colours per vertex (the instance tint multiplies them).
+static func _pelt(b: RoomMesh) -> void:
+	const ACROSS := 9
+	const TOP := 0.4
+	const THICK := 0.03
+	# The path down the pelt, back to front: on the top, over the front edge and down the block's face.
+	var path: Array[Vector3] = []
+	var normals: Array[Vector3] = []
+	for k in 8:
+		var z := lerpf(0.27, -0.31, float(k) / 7.0)
+		path.append(Vector3(0.0, TOP, z))
+		normals.append(Vector3.UP)
+	for k in 3:
+		var t := (k + 1) / 3.0 * PI * 0.5
+		path.append(Vector3(0.0, TOP - 0.035 * (1.0 - cos(t)), -0.31 - 0.035 * sin(t)))
+		normals.append(Vector3(0.0, cos(t), -sin(t)))
+	for k in 4:
+		path.append(Vector3(0.0, TOP - 0.06 - 0.05 * (k + 1), -0.345 - 0.004 * k))
+		normals.append(Vector3(0.0, 0.05, -1.0).normalized())
+	var rows: Array = []
+	var ns: Array = []
+	var cols: Array = []
+	var spine := Color(0.6, 0.5, 0.4)
+	var belly := Color(0.93, 0.9, 0.84)
+	for i in path.size():
+		var s := float(i) / (path.size() - 1)
+		# The half width along the pelt: the neck narrower at the front, uneven all along.
+		var half := 0.36 + 0.025 * sin(s * 9.0 + 1.0) - 0.07 * smoothstep(0.75, 1.0, s)
+		var row := PackedVector3Array()
+		var nrow := PackedVector3Array()
+		var crow := PackedColorArray()
+		for j in ACROSS:
+			var u := lerpf(-1.0, 1.0, float(j) / (ACROSS - 1))
+			# The pelt rounds down at its sides, its thickness showing.
+			var drop := THICK * smoothstep(0.75, 1.0, absf(u))
+			var p := path[i] + Vector3(u * half, 0, 0) + normals[i] * (THICK - drop)
+			row.append(p)
+			nrow.append((normals[i] + Vector3(u * 0.35 * smoothstep(0.6, 1.0, absf(u)), 0, 0)).normalized())
+			var pale := smoothstep(0.35, 1.0, absf(u)) * 0.85 + 0.15 * s
+			crow.append(spine.lerp(belly, pale).srgb_to_linear())
+		rows.append(row)
+		ns.append(nrow)
+		cols.append(crow)
+	b.grid(rows, ns, cols)
+	var keep := b.colour
+	# The legs' flaps: the forelegs down the front corners, the hind legs off the back corners.
+	b.colour = (spine * 0.85).srgb_to_linear()
+	for sx: float in [-1.0, 1.0]:
+		b.rounded_box(Vector3.ZERO, Vector3(0.07, 0.2, 0.022), 0.009,
+				Transform3D(Basis(Vector3.BACK, deg_to_rad(sx * 10.0)), Vector3(sx * 0.27, 0.2, -0.36)), 1,
 				Vector3i.ZERO, 0.0, [])
+		b.rounded_box(Vector3.ZERO, Vector3(0.07, 0.16, 0.022), 0.009,
+				Transform3D(Basis(Vector3.BACK, deg_to_rad(sx * -8.0)), Vector3(sx * 0.25, 0.33, 0.285)), 1,
+				Vector3i.ZERO, 0.0, [])
+	b.colour = keep
 
 
 ## A bean bag: a squat round sack, taller at the back, with the dent where one sits.

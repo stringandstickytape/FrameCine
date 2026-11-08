@@ -12,7 +12,8 @@ extends "res://tests/env_builder_harness.gd"
 ##   puddle in the pit gives back the picture to the viewer's eyes; a loud bang scatters the birds; a quiet scene
 ##   may bring the deer down the side aisle, never into the sight line; broken seats, never the viewer's own.
 ## - Ice cinema: ice style, hides on every seat, the doorway behind the viewer towards the aurora; Aurora sets its
-##   base and a quiet scene swells it, slowly, and lets it go; breath fog; the ice takes the film's light.
+##   base and a quiet scene swells it, slowly, and lets it go; breath fog; the ice takes the film's light (its own
+##   test, test_room_ice_cinema.gd, checks the rest).
 ## Each room's sound (tests/room_sound.gd): its acoustics and beds on the room's bus, the Nave's candle on Candles, the
 ## Reclaimed's rain and drips on the weather, the ice's huskies and creaks now and then; its level under the target
 ## and far under a film.
@@ -324,8 +325,10 @@ func _ice() -> void:
 	check("ice: the window on the left, towards the aurora (%s, bearing %s), the sky beyond" % [p["window"],
 			sky.params["aurora_bearing"]], str(p["window"]) == "left"
 			and absf(left - float(sky.params["aurora_bearing"])) < 1.0 and str(dom.params["outside"]) == "none")
-	check("ice: the ice takes the film's light (spill %s)" % host.system("light").params["spill"],
-			float(host.system("light").params["spill"]) > 3.0)
+	# Since 2026-11-08 the film's light is inside the ice round the screen (kit/ice_hall.gd); its own test checks more.
+	var ice_m := (room.find_child("IceBlocks", true, false) as MeshInstance3D).mesh.surface_get_material(0)
+	check("ice: the ice takes the film's light round the screen (%s)" % ice_m.get_shader_parameter("ice_film"),
+			float(ice_m.get_shader_parameter("ice_film")) > 0.3)
 	var atm: Node = host.system("atmosphere")
 	check("ice: breath fog and a little ground fog", float(atm.params["breath"]) > 0.0 and atm.breath_node() != null
 			and float(atm.params["fog"]) > 0.0)

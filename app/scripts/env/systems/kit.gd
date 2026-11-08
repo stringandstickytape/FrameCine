@@ -145,6 +145,8 @@ class Ctx:
 	## Floodlights for the bake only: [from, towards, colour, energy, reach, half angle (degrees)] (a palace gate lit
 	## from the stage's lip).
 	var spots: Array = []
+	## The Ice cinema's hall (kit/ice_hall.gd, since 2026-11-08): its meshes and candles over its pieces, or null.
+	var ice: Object = null
 
 	## The floor's height under a point of the room (the piece's foot when the builder gives none).
 	func ground_at(p: Vector3, fallback: float) -> float:
@@ -417,6 +419,8 @@ func build() -> void:
 		l.spot_angle = float(sp[5])
 		_light.add_bake_light(l)
 	_add_courtyard_meshes()
+	if _ctx.ice != null:
+		_ctx.ice.finish(self)
 
 
 ## The courtyard's lit windows (baked: their glow lights the reveals, sills and shutters round them in the bake) and
@@ -455,6 +459,8 @@ func water_material() -> ShaderMaterial:
 ## the room's Flickering lights is off.
 func tick(delta: float) -> void:
 	super(delta)
+	if _ctx != null and _ctx.ice != null:
+		_ctx.ice.tick(delta)
 	if _water_m != null:
 		_water_t += delta * float(params["water_motion"])
 		_water_m.set_shader_parameter("clock", _water_t)
