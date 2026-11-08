@@ -175,8 +175,19 @@ Valve's Devkit Client is MIT (<https://gitlab.steamos.cloud/devkit/steamos-devki
 - The runtime is the setting `compat_tool`: `SteamLinuxRuntime_4-arm64`, `lepton`, `proton-stable` and others, or
   empty ("Not specified"). `steamos-delete` removes a title.
 
-So the first launch could register the installed player as a Devkit Game itself, with no compat tool, and need no
-Steam restart. To test on the device: does a title with an empty `compat_tool` run outside the container?
+Tested on the device 2026-11-09 with a probe title (a script that records where it runs), registered over ssh
+with Valve's `steam-client-create-shortcut` and `"compat_tool": ""`:
+
+- The game id must be letters and digits only. With a hyphen, Steam answers "missing/invalid arguments".
+- The title appears at once in the library under **Non-Steam**. No Steam restart.
+- Started from there, it runs **outside the container**: SteamOS, parent `reaper`, cwd its own folder,
+  `DISPLAY=:1`, `XDG_RUNTIME_DIR=/run/user/1000`, Valve's Vulkan layers on, `systemd-run` there. That is the same
+  start as the non-Steam shortcut the dev builds used.
+- `steamos-delete --delete-title <id>` removes it from the library at once. (Valve's tools print Steam's session
+  token in their debug output: never log that output.)
+
+So whatever installs the player (the first launch from FrameDrop, or a PC program) registers it as a Devkit Game
+with no compat tool, and the user starts it from Non-Steam. No Steam restart, no `shortcuts.vdf` edit.
 
 Still to find out with FrameDrop itself: which `compat_tool` and command line it writes (if it follows the Devkit
 Client, the files are executable).
