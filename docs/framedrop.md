@@ -131,10 +131,15 @@ extension `files[0].exe` names the program in a zip to run (for us `run.sh`), an
 - One report (not checked) says FrameDrop cannot download from GitHub at present. If so, Frame Control is the
   first link on the README until FrameDrop is fixed.
 
-The first launch can then turn its own entry into a native one: the container shares the home folder, so `run.sh`
-can write `compat_tool: ""` into `~/devkit-game/<id>-settings.json` (the id is its own folder's name) and call
-`create-shortcut` for the same id. Then there is one library entry, and from the next start it runs outside the
-container. To test on the device.
+**In practice there is no container (2026-11-09).** A probe registered over ssh with `compat_tool`
+`SteamLinuxRuntime_4-arm64` (as both tools do) started natively both times: parent `reaper`, no
+`_v2-entry-point` in Steam's launch line. Frame Control's own headset test found the same ("Steam records the
+mapping (`CompatToolMapping`) but launches the devkit title without the runtime's `_v2-entry-point` prefix",
+`docs/sideloading.md` there). So the player runs where the tool put it, `~/devkit-game/<id>/`, and needs no
+first-launch install step. Should Steam start to apply the runtime one day, `run.sh` can turn its own entry into a
+native one: the home folder is shared, so it can write `compat_tool: ""` into `~/devkit-game/<id>-settings.json`
+(the id is its own folder's name) and send `create-shortcut` for the same id through `~/.steam/steam.pipe`. That
+path is written but untested, because the container never ran.
 
 ## The problem: the runtime container
 
