@@ -73,7 +73,8 @@ static func spec() -> Dictionary:
 			"caustic_scale": {"type": "float", "min": 0.3, "max": 6.0, "default": 1.6,
 					"description": "metres a caustic cell spans"},
 			"caustic_speed": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true,
-					"motion": {"max": 1.0},
+					# "when": only a room whose caustics are on offers the Motion setting for them.
+					"motion": {"max": 1.0, "when": "caustics"},
 					"description": "how fast the caustics drift (1: a point changes about once in four seconds)"},
 		},
 		"provides": ["bake"],

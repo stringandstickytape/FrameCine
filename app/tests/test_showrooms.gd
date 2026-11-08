@@ -252,7 +252,8 @@ func _test_room_tab() -> void:
 	await _frames(1)
 	var box: VBoxContainer = tab._showroom_box
 	var rows: Array = tab._showrooms.get_children()
-	_check("a Showrooms group", box.visible and (box.get_child(0) as Label).text.to_lower() == "showrooms")
+	# The group's head is a button now (the Room tab's groups fold), its title in the "label" meta.
+	_check("a Showrooms group", box.visible and str(tab._groups["Showrooms"]["head"].get_meta("label", "")) == "Showrooms")
 	_check("one row per showroom", rows.map(func(b: Button) -> String: return b.text) == rooms.map(
 			func(r: Dictionary) -> String: return str(r["name"])))
 	_check("no showroom among the rooms' own rows", (tab._envs.get_children() as Array).all(func(b: Button) -> bool:

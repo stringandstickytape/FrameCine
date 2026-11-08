@@ -214,10 +214,19 @@ func common_applies(applies: String) -> bool:
 		"flicker", "motion":
 			for entry: Dictionary in _doc().get("systems", []):
 				var ps: Dictionary = Registry.spec(str(entry["system"])).get("params", {})
+				var given: Dictionary = entry.get("params", {})
 				for k: String in ps:
-					if (applies == "flicker" and bool(ps[k].get("flicker", false))) \
-							or (applies == "motion" and ps[k].has("motion")):
+					if applies == "flicker" and bool(ps[k].get("flicker", false)):
 						return true
+					if applies == "motion" and ps[k].has("motion"):
+						## A motion spec's "when" names the param that switches the motion on: the setting applies
+						## only where that param is on (the house light's caustics: the Bathysphere's alone).
+						var when := str(ps[k]["motion"].get("when", ""))
+						if when == "":
+							return true
+						var w: Variant = given.get(when, ps.get(when, {}).get("default"))
+						if EnvDoc.is_binding(w) or (w is bool and w) or ((w is float or w is int) and float(w) != 0.0):
+							return true
 			return false
 	return false
 

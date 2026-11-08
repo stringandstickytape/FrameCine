@@ -110,7 +110,9 @@ static func spec() -> Dictionary:
 - **`brightness`:** the parameter changes how bright something is. The comfort check keeps every change to it under
   the photosensitivity ceiling (`room_schema.gd MAX_HZ`).
 - **`motion`:** `{"max": x}` on a parameter that moves something the viewer sees (a sway, a tilt, gate weave): the
-  comfort check holds it to that limit, and the room's Motion setting scales it.
+  comfort check holds it to that limit, and the room's Motion setting scales it. `"when": "<param>"` names the
+  parameter that switches the motion on: a room offers the Motion setting for it only where that parameter is on
+  (the house light's `caustic_speed` with `caustics` above 0, so the cinema shows no Motion setting).
 - **`cost`:** an estimate, for the assistant. The budget check measures the built room.
 - **The assistant's schema and the docs come from the registry:** the `room_systems` command lists every spec.
 
