@@ -19,22 +19,24 @@ const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale
 		"projector", "wall_rumble", "cicadas", "moped", "train", "huskies", "hull_creak", "radiator", "rain_glass",
 		"rain_leaves", "gas_hiss", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain",
 		"clock", "tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load", "switch_clunk", "valve_hum",
-		"crt_off", "channel_clunk"]
+		"crt_off", "channel_clunk", "sonar", "bubbles"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
 		"hull_creak": 3.5, "radiator": 16.0, "rain_glass": 6.0, "rain_leaves": 6.0, "gas_hiss": 4.0, "bird": 1.2,
 		"purr": 4.0, "crickets": 6.0, "fire": 8.0, "drips": 8.0, "wind": 12.0, "hum": 4.0, "deep_hum": 8.0,
 		"fountain": 6.0, "clock": 4.0, "tube_whine": 2.0, "three_bells": 3.2, "candle": 0.9, "ice_creak": 2.6,
-		"vcr": 4.5, "tape_load": 8.0, "switch_clunk": 0.6, "valve_hum": 8.0, "crt_off": 1.4, "channel_clunk": 0.45}
+		"vcr": 4.5, "tape_load": 8.0, "switch_clunk": 0.6, "valve_hum": 8.0, "crt_off": 1.4, "channel_clunk": 0.45,
+		"sonar": 3.0, "bubbles": 6.0}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
-		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine"]
+		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles"]
 ## Sample rates below RATE for the far and low sounds (less to make, nothing lost above their band).
 const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiator": 22050, "moped": 32000,
 		"hull_creak": 32000, "purr": 22050, "crickets": 32000, "fire": 32000, "drips": 32000, "wind": 22050,
 		"hum": 22050, "deep_hum": 22050, "fountain": 32000, "candle": 32000, "ice_creak": 32000, "vcr": 32000,
-		"tape_load": 32000, "switch_clunk": 32000, "valve_hum": 22050, "crt_off": 32000, "channel_clunk": 32000}
+		"tape_load": 32000, "switch_clunk": 32000, "valve_hum": 22050, "crt_off": 32000, "channel_clunk": 32000,
+		"sonar": 32000, "bubbles": 32000}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -771,6 +773,41 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 					if d >= 0.0 and d < 0.004:
 						ex += x * exp(-d * 1500.0) * float(sp[1])
 				s[i] = puff + _res(st, 2, ex, spit) * 8.0
+		"sonar":
+			# A sonar's ping (the Bathysphere's pre-show, since 2026-11-08): a soft, round tone at 1.18 kHz that swells
+			# in over 15 ms and rings down slowly with a faint beat (two close partials), a lower octave under it, and
+			# 1.25 s later its echo off the sea floor: duller (low-passed), a third as loud, smeared. Our own.
+			var a_echo := _a(900.0, r)
+			for i in total:
+				var t := float(i) / r
+				var v := 0.0
+				for k: Array in [[0.0, 1.0, 1.0], [1.25, 0.33, 2.2]]:
+					var d := t - float(k[0])
+					if d < 0.0:
+						continue
+					var env := minf(d / 0.015, 1.0) * exp(-d * 3.2 / float(k[2]) * 1.6)
+					var tone := sin(TAU * 1180.0 * d) + 0.6 * sin(TAU * 1183.0 * d + 0.5) + 0.25 * sin(TAU * 590.0 * d)
+					var e := tone * env * float(k[1])
+					v += _lp(st, 0, e, a_echo) * 1.8 if k[0] > 0.0 else e
+				s[i] = v
+		"bubbles":
+			# A vent's bubbles streaming up through deep water: bursts of small bubbles (short tones that rise as they
+			# ring, low because they are large and far) between quiet spells, and the water's soft hiss round them.
+			var t_end := float(total - lead) / r
+			var tt := -float(lead) / r
+			while tt < t_end:
+				var burst := rng.randf_range(0.25, 0.9)
+				var t1 := tt + burst
+				while tt < t1:
+					var f0 := lerpf(180.0, 720.0, pow(rng.randf(), 1.4))
+					_plink(s, r, lead, tt, f0, rng.randf_range(0.15, 0.6), 6.0, rng.randf_range(35.0, 70.0), rng)
+					tt += rng.randf_range(0.01, 0.06)
+				tt += rng.randf_range(0.1, 0.7)
+			var a_hiss := _a(1200.0, r)
+			var a_low := _a(250.0, r)
+			for i in total:
+				var x := rng.randf_range(-1.0, 1.0)
+				s[i] += (_lp(st, 0, x, a_hiss) - _lp(st, 1, x, a_low)) * 0.25
 		"ice_creak":
 			# Ice settling: a crack that sings down (a high ping falling fast, as ice does), then a low groan of
 			# stick-slip pulses through the block's dull modes.

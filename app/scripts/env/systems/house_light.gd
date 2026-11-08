@@ -17,6 +17,7 @@ extends "res://scripts/env/systems/env_system.gd"
 ## house lights still go down when the film starts. Moved here from environments/cinema.gd (the room as code).
 
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
+const Procedural := preload("res://scripts/env/systems/kit/procedural.gd")
 const LAMP_SHADER := preload("res://shaders/room_lamp.gdshader")
 ## The shader takes at most this many stand-in lamps.
 const MAX_LAMPS := 8
@@ -62,6 +63,18 @@ static func spec() -> Dictionary:
 					+ "playback); -1: the app's own (the Room tab's Dimmed to)"},
 			"bake": {"type": "bool", "default": true,
 					"description": "the room is lit by a lightmap baked on the headset (its hidden bake lights)"},
+			# Caustics: since 2026-11-08, for the Bathysphere ("go nuts on the bathysphere", the user, 2026-11-08).
+			"caustics": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "brightness": true,
+					"description": "caustics: the light of a water's surface above, focused into a slowly drifting "
+					+ "web on whatever faces up (a dome under shallow water); 0: none. Light from outside: the house "
+					+ "lights do not dim it"},
+			"caustic_colour": {"type": "color", "default": [0.55, 0.85, 1.0], "live": true,
+					"description": "the caustics' light"},
+			"caustic_scale": {"type": "float", "min": 0.3, "max": 6.0, "default": 1.6,
+					"description": "metres a caustic cell spans"},
+			"caustic_speed": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true,
+					"motion": {"max": 1.0},
+					"description": "how fast the caustics drift (1: a point changes about once in four seconds)"},
 		},
 		"provides": ["bake"],
 		"cost": {"draws": 0, "triangles": 0, "lights": 0, "particles": 0, "texture_mb": 0},
@@ -123,8 +136,21 @@ func library(material_id: String, colour: Color, options := {}, instanced := fal
 	_set_fill(m, 1.0)
 	m.set_shader_parameter("house_reference", float(room.get("ambient_level")))
 	m.set_shader_parameter("contact_strength", 0.0)
+	_set_caustics(m)
 	(_seat_materials if instanced else _static_materials).append(m)
 	return m
+
+
+## The caustics' uniforms on a house material (only once a room asks for them: the map is made then).
+func _set_caustics(m: ShaderMaterial) -> void:
+	var k := float(params.get("caustics", 0.0))
+	m.set_shader_parameter("caustics", k)
+	if k <= 0.0 and m.get_shader_parameter("caustic_map") == null:
+		return
+	m.set_shader_parameter("caustic_map", Procedural.caustic_map())
+	m.set_shader_parameter("caustic_colour", color_param("caustic_colour"))
+	m.set_shader_parameter("caustic_scale", float(params["caustic_scale"]))
+	m.set_shader_parameter("caustic_speed", float(params["caustic_speed"]))
 
 
 ## A material parameter ({library, color, tiling, ...}) as a house material.
@@ -203,6 +229,9 @@ func _param_changed(param: String, _value: Variant) -> void:
 	elif param in ["glow_colour", "glow_mix"]:
 		for e: Array in _lamp_materials:
 			(e[0] as ShaderMaterial).set_shader_parameter("colour", _shown_colour(e[3], str(e[2])))
+	elif param in ["caustics", "caustic_colour", "caustic_speed"]:
+		for m in _static_materials + _seat_materials:
+			_set_caustics(m)
 
 
 ## A group's lamp colour as shown now (tests).
