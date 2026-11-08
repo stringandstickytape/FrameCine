@@ -12,6 +12,11 @@ const PcClock := preload("res://scripts/pc/pc_clock.gd")
 
 const BUFFER_SECONDS := 0.3
 const TOLERANCE := 0.03
+## A packet up to this late plays whole rather than being dropped, and the shared delay (picture and sound, so they
+## stay together) grows by its lateness, up to DELAY_MAX: a slow moment on the Wi-Fi or a busy PC costs a little more
+## delay, never a run of silence (seen on the headset 2026-11-08: packets ~40 ms past due were all dropped).
+const LATE_PLAY := 0.12
+const DELAY_MAX := 0.45
 const AHEAD := 1.2
 
 var clock: PcClock
@@ -61,21 +66,22 @@ func step() -> void:
 	var queued := int(BUFFER_SECONDS * _rate) - space
 	# The PC time of the next frame pushed now, when it will be heard.
 	var due := clock.now() + float(maxi(queued, 0)) / _rate + AudioServer.get_output_latency()
+	# The latest a packet was this frame: the delay grows once, by that.
+	var worst := 0.0
 	while not _pending.is_empty() and space > 0:
 		var c: Dictionary = _pending[0]
 		var frames: PackedVector2Array = c["frames"]
 		var start := float(c["time"]) / 1e6
-		var end := start + float(frames.size()) / _rate
-		if end < due - TOLERANCE:
+		var late := due - start
+		if late > LATE_PLAY:
+			# Too late to catch up: dropped whole, the delay grown for the next ones.
 			dropped += frames.size()
 			_pending.remove_at(0)
+			worst = maxf(worst, late)
 			continue
-		if start < due - TOLERANCE:
-			# Partly late: from the frame due now.
-			var skip := clampi(int((due - start) * _rate), 0, frames.size())
-			dropped += skip
-			frames = frames.slice(skip)
-			start += float(skip) / _rate
+		if late > TOLERANCE:
+			# A little late: played whole, a little behind; the delay grows so the next ones are on time again.
+			worst = maxf(worst, late)
 		elif start > due + TOLERANCE:
 			# Early: silence until it is due.
 			var gap := mini(int((start - due) * _rate), space)
@@ -99,8 +105,16 @@ func step() -> void:
 			_pending[0] = {"time": int(round((start + float(n) / _rate) * 1e6)), "frames": frames.slice(n)}
 			break
 		_pending.remove_at(0)
+	if worst > TOLERANCE:
+		_grow_delay(worst)
+
+
+func _grow_delay(late: float) -> void:
+	if clock != null and clock.delay < DELAY_MAX:
+		clock.delay = minf(clock.delay + minf(late, 0.05), DELAY_MAX)
 
 
 func status() -> Dictionary:
 	return {"pushed": pushed, "dropped": dropped, "silence": silence, "pending": _pending.size(),
+			"delay": clock.delay if clock != null else 0.0,
 			"at_screen": at_screen != null}
