@@ -50,7 +50,8 @@ public:
 
 private:
     struct Impl;
-    std::unique_ptr<Impl> impl_;
+    // Shared: Windows' handlers hold it weakly, so one that fires as the capture stops never touches freed memory.
+    std::shared_ptr<Impl> impl_;
 };
 
 }  // namespace pcw

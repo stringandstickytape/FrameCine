@@ -369,22 +369,54 @@ bool VideoEncoder::open(ID3D11Device* /*dev*/, IMFDXGIDeviceManager* manager, co
 }
 
 void VideoEncoder::close() {
+    // An async encoder is drained before it is shut down, so its own queued work ends first (2026-11-09: NVIDIA's
+    // HEVC encoder crashed pc-windows when a stream closed under a second after it opened: a work item it had
+    // queued on Windows' media work queue ran after the encoder was gone, in its own critical section).
+    const bool drain = mft_ && async_ && thread_.joinable() && !failed_;
+    if (drain) {
+        {
+            std::lock_guard g(drain_lock_);
+            drained_ = false;
+        }
+        mft_->ProcessMessage(MFT_MESSAGE_NOTIFY_END_OF_STREAM, 0);
+        if (SUCCEEDED(mft_->ProcessMessage(MFT_MESSAGE_COMMAND_DRAIN, 0))) {
+            std::unique_lock g(drain_lock_);
+            drain_cv_.wait_for(g, std::chrono::milliseconds(300), [this] { return drained_; });
+        }
+    }
     closing_ = true;
     if (mft_) {
-        mft_->ProcessMessage(MFT_MESSAGE_NOTIFY_END_OF_STREAM, 0);
+        if (!drain) mft_->ProcessMessage(MFT_MESSAGE_NOTIFY_END_OF_STREAM, 0);
         mft_->ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH, 0);
         ComPtr<IMFShutdown> sd;
         if (SUCCEEDED(mft_.As(&sd))) sd->Shutdown();  // wakes the event thread with MF_E_SHUTDOWN
     }
     if (thread_.joinable()) thread_.join();
     if (activate_) activate_->ShutdownObject();
+    if (alloc_) alloc_->UninitializeSampleAllocator();
+    // The last references go a few seconds later, on a thread of their own: anything the driver still has queued
+    // then finds the encoder whole (cheap; a shut-down encoder holds little).
+    std::vector<ComPtr<IUnknown>> last;
+    for (IUnknown* p : {static_cast<IUnknown*>(mft_.Get()), static_cast<IUnknown*>(activate_.Get()),
+                        static_cast<IUnknown*>(gen_.Get()), static_cast<IUnknown*>(codec_api_.Get()),
+                        static_cast<IUnknown*>(alloc_.Get())}) {
+        if (p) last.emplace_back(p);
+    }
     gen_.Reset();
     codec_api_.Reset();
-    if (alloc_) alloc_->UninitializeSampleAllocator();
     alloc_.Reset();
     mft_.Reset();
     activate_.Reset();
     need_input_ = 0;
+    if (!last.empty()) {
+        std::thread([objs = std::move(last)]() mutable {
+            name_thread(L"pcw encoder release");
+            CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+            Sleep(3000);
+            objs.clear();
+            CoUninitialize();
+        }).detach();
+    }
 }
 
 void VideoEncoder::events() {
@@ -402,7 +434,13 @@ void VideoEncoder::events() {
         }
         MediaEventType type = MEUnknown;
         ev->GetType(&type);
-        if (type == METransformNeedInput) {
+        if (type == METransformDrainComplete) {
+            {
+                std::lock_guard g(drain_lock_);
+                drained_ = true;
+            }
+            drain_cv_.notify_all();
+        } else if (type == METransformNeedInput) {
             ++need_input_;
             if (wake_) wake_();
         } else if (type == METransformHaveOutput) {

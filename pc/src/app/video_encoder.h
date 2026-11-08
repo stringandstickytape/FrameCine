@@ -9,6 +9,7 @@
 #include <strmif.h>
 
 #include <atomic>
+#include <condition_variable>
 #include <cstdint>
 #include <deque>
 #include <functional>
@@ -106,6 +107,10 @@ private:
     std::atomic<int> need_input_{0};
     std::atomic<bool> failed_{false};
     std::atomic<bool> closing_{false};
+    // close() drains an async encoder before shutting it down: the event thread says when the drain is done.
+    std::mutex drain_lock_;
+    std::condition_variable drain_cv_;
+    bool drained_ = false;
     std::thread thread_;
     Output out_;
     std::function<void()> wake_;

@@ -249,6 +249,32 @@ stream sends at most 60. Asked for 72 on this 60 Hz desktop (with `MinUpdateInte
 reaching pc-windows to its last byte handed to TLS, including the wait for its turn when the window changes faster
 than `fps`. A plain test pattern (large flat colours) at 60 fps needs only about 225 kbit/s.
 
+### The soak (2026-11-09)
+
+Asked by the user, 2026-11-08: "check the pc end of things is working well, not glitching or inefficient".
+`python tools/pc_windows_fake_headset.py --soak [--minutes N]` streams a moving window (sound on) and a still one for
+N minutes, and over and over does what a person does: a drag-resize (25 sizes in 5 s), minimise and restore, close
+both streams and open them again, and every third round the control link dropping. It samples pc-windows' memory,
+handles and GDI/USER objects, times each recovery, and measures what the still window costs.
+
+- **Twenty minutes (48 rounds, 144 recoveries):** every stream back within 1.25 s (median 0.2 s); the moving window
+  at 59 fps; the still window (painted once a second) at 2.4 frames a second, not 60; pc-windows at 0.28 % of the PC;
+  handles, GDI and USER objects flat. Private memory settles at 270 to 285 MB with two streams open.
+- **Overnight with the headset off:** 0 % of the PC and 48 MB, flat for 11 hours.
+- **A crash, found and fixed:** a stream opened and closed every second (`churn`, a scratch script over the same
+  classes) killed pc-windows in about one run in three: an access violation in a critical section inside NVIDIA's
+  HEVC encoder (`nvEncMFThevcx`), from a work item it had queued on Windows' media work queue that ran after the
+  encoder was released (caught under `cdbX64 -hd`; the debug heap hid it). `VideoEncoder::close()` now drains an
+  async encoder (end of stream, drain, wait for `METransformDrainComplete`, at most 300 ms) before it shuts it down,
+  and keeps the last references for 3 s on a thread of its own. 450 open-close rounds then ran clean. While streams
+  churn, the held encoders cost memory for those 3 s (about 230 MB at one close a second); normal use closes rarely.
+- **A race fixed in the capture:** Windows' frame and closed handlers could start just as the capture stopped (the old
+  "busy" count was taken inside the handler). Now each takes a lock and gives up once `stopped` is set, and holds the
+  capture's state through a weak reference, so the stream's `wake` is never called after `stop()`.
+- **The log thinned:** with the headset off, each failed dial was a line (3700 a night) and the numbers came every
+  5 s. A repeated dial failure is now logged once and then every ten minutes with the count; with nothing streaming
+  the numbers come every ten minutes (back to every 5 s the moment a stream opens); past 8 MB the log starts again.
+
 ### Only the real headset can tell
 
 - The headset's half reading this PC's streams at once (the fake headset checks the framing and decodes with ffmpeg).

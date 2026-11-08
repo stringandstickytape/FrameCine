@@ -7,6 +7,7 @@ pc-windows.exe runs with --only-titles, so the PC's own windows are not even lis
 
     python tools/pc_windows_fake_headset.py                 the end-to-end test (HEVC, then a short H.264 run)
     python tools/pc_windows_fake_headset.py --bench         latency, bitrate and CPU: 1 and 3 windows of 1920x1080
+    python tools/pc_windows_fake_headset.py --soak [--minutes N]   leaks, recoveries, a still window's cost
     options: --build DIR (pc/build)  --out DIR (a temporary folder)  --tls 1.2|1.3  --keep (keep the recordings)
 
 Needs ffmpeg/ffprobe on the PATH (Windows) or in WSL to check the recorded streams; without them the decode checks
@@ -91,7 +92,16 @@ class StreamRecord:
         self.first_flags = None
         self._f = None
 
+    # The soak counts packets but keeps no recording (ten minutes of streams would be gigabytes).
+    discard = False
+
+    class _Null:
+        def write(self, _b):
+            pass
+
     def file_for(self, kind, flags, codec):
+        if StreamRecord.discard:
+            return StreamRecord._Null()
         ext = ".aac" if kind == 2 else (".h264" if codec == "h264" else ".h265")
         if self._f is None or (kind == 1 and flags & 2):
             if self._f:
@@ -1101,6 +1111,174 @@ def run_bench(a, out):
         check(fps and sorted(fps)[len(fps) // 2] > 40, "bench %d window(s): the median stream above 40 fps" % count)
 
 
+# ---- The soak: minutes of the things a person does, watching for leaks and slow recoveries ----
+
+class ProcStats:
+    """pc-windows' own resources (memory, handles, GDI and USER objects, CPU time), read from outside."""
+
+    class PMC(ctypes.Structure):
+        _fields_ = [("cb", wt.DWORD), ("PageFaultCount", wt.DWORD), ("PeakWorkingSetSize", ctypes.c_size_t),
+                    ("WorkingSetSize", ctypes.c_size_t), ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+                    ("QuotaPagedPoolUsage", ctypes.c_size_t), ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+                    ("QuotaNonPagedPoolUsage", ctypes.c_size_t), ("PagefileUsage", ctypes.c_size_t),
+                    ("PeakPagefileUsage", ctypes.c_size_t), ("PrivateUsage", ctypes.c_size_t)]
+
+    def __init__(self, pid):
+        self.h = k32.OpenProcess(0x0400 | 0x1000, False, pid)  # QUERY_INFORMATION | QUERY_LIMITED_INFORMATION
+        self.psapi = ctypes.windll.psapi
+
+    def sample(self):
+        pmc = ProcStats.PMC()
+        pmc.cb = ctypes.sizeof(pmc)
+        self.psapi.GetProcessMemoryInfo(self.h, ctypes.byref(pmc), pmc.cb)
+        handles = wt.DWORD()
+        k32.GetProcessHandleCount(self.h, ctypes.byref(handles))
+        c, e, kt, ut = wt.FILETIME(), wt.FILETIME(), wt.FILETIME(), wt.FILETIME()
+        k32.GetProcessTimes(self.h, ctypes.byref(c), ctypes.byref(e), ctypes.byref(kt), ctypes.byref(ut))
+        v = lambda f: (f.dwHighDateTime << 32) | f.dwLowDateTime
+        return {"t": time.monotonic(), "private_mb": pmc.PrivateUsage / 1048576, "ws_mb": pmc.WorkingSetSize / 1048576,
+                "handles": handles.value, "gdi": u32.GetGuiResources(self.h, 0), "user": u32.GetGuiResources(self.h, 1),
+                "cpu_s": (v(kt) + v(ut)) / 1e7}
+
+
+def packets_between(hs, n, t0, t1):
+    return [p for r in hs.streams.get(n, []) for p in r.packets if t0 <= p[0] <= t1]
+
+
+def run_soak(a, out):
+    """A dozen minutes of what a person does with PC windows, over and over: a moving window and a still one, sound,
+    drag-resizes, minimising, closing and opening again, the link dropping. pc-windows must come back every time,
+    a still window must cost little, and its memory, handles and GDI objects must not climb (the user, 2026-11-08:
+    "check the pc end of things is working well, not glitching or inefficient")."""
+    StreamRecord.discard = True
+    exe = os.path.join(a.build, "pc-windows.exe")
+    twin = os.path.join(a.build, "pcw-testwin.exe")
+    cfg = os.path.join(out, "cfg_soak")
+    os.makedirs(cfg, exist_ok=True)
+    log = os.path.join(out, "soak.log")
+    hs = FakeHeadset(out, tls=a.tls)
+    hs.tag = "soak"
+    moving = TestWindow(twin, out, "pcw-test-soak-moving", (1280, 720), (60, 60), tone=True, vsync=True)
+    still = TestWindow(twin, out, "pcw-test-soak-still", (960, 540), (200, 200), popup=True, fps=1)
+    app = start_app(exe, out, cfg, log, code=CODE, codec=a.codec)
+    stats = ProcStats(app.pid)
+    samples, recoveries, still_fps, moving_fps = [], [], [], []
+    cycle = 0
+    next_stream = [0]
+
+    def open_both():
+        ids = []
+        for w in (moving, still):
+            next_stream[0] += 1
+            n = next_stream[0]
+            hs.stream_codec[n] = a.codec or "hevc"
+            hs.send({"t": "open", "id": w.id, "stream": n, "max": [1920, 1080], "fps": 60, "kbps": 6000})
+            ids.append(n)
+        hs.send({"t": "sound", "on": True})
+        return ids
+
+    def flowing(n, within, what):
+        """Seconds until stream n carries 10 packets in a row again, at most `within`."""
+        t0 = qpc_us()
+        end = time.monotonic() + within
+        while time.monotonic() < end:
+            time.sleep(0.1)
+            if len(packets_between(hs, n, t0, qpc_us())) >= 10:
+                s = (qpc_us() - t0) / 1e6
+                recoveries.append((what, s))
+                return s
+        recoveries.append((what, None))
+        return None
+
+    def sample():
+        if app.poll() is None:
+            samples.append(stats.sample())
+
+    try:
+        if not hs.wait("_connected", 20):
+            check(False, "soak: paired")
+            return
+        s_moving, s_still = open_both()
+        time.sleep(5)
+        end = time.monotonic() + a.minutes * 60
+        while time.monotonic() < end and app.poll() is None:
+            cycle += 1
+            # Steady: both streams, sound; the still window's cost.
+            for _ in range(3):
+                t0 = qpc_us()
+                time.sleep(5)
+                t1 = qpc_us()
+                moving_fps.append(len(packets_between(hs, s_moving, t0, t1)) / ((t1 - t0) / 1e6))
+                still_fps.append(len(packets_between(hs, s_still, t0, t1)) / ((t1 - t0) / 1e6))
+                sample()
+            # A drag-resize: 25 sizes in 5 s, as a mouse drag sends them.
+            for i in range(25):
+                w = 900 + int(400 * abs(math.sin(i / 4.0)))
+                u32.SetWindowPos(wt.HWND(moving.hwnd), None, 0, 0, w, int(w * 9 / 16), 0x0002 | 0x0004 | 0x0010)
+                time.sleep(0.2)
+            flowing(s_moving, 5, "after a drag-resize")
+            sample()
+            # Minimise and restore.
+            u32.ShowWindow(wt.HWND(moving.hwnd), 6)
+            time.sleep(3)
+            u32.ShowWindow(wt.HWND(moving.hwnd), 4)
+            flowing(s_moving, 5, "after minimise and restore")
+            sample()
+            # Close both streams and open them again; every third cycle the control link drops instead.
+            if cycle % 3 == 0:
+                hs.drop_control()
+                if not hs.wait("_connected", 15):
+                    recoveries.append(("the PC dials again after the link drops", None))
+                    break
+                time.sleep(0.5)
+            else:
+                hs.send({"t": "close", "stream": s_moving})
+                hs.send({"t": "close", "stream": s_still})
+                time.sleep(1)
+            s_moving, s_still = open_both()
+            flowing(s_moving, 6, "a stream opened again" if cycle % 3 else "after the link drops and comes back")
+            sample()
+            print("  cycle %d: private %.1f MB, working set %.1f MB, handles %d, GDI %d, USER %d" %
+                  (cycle, samples[-1]["private_mb"], samples[-1]["ws_mb"], samples[-1]["handles"], samples[-1]["gdi"],
+                   samples[-1]["user"]) if samples else "  cycle %d" % cycle)
+    finally:
+        check(app.poll() is None, "soak: pc-windows still running at the end")
+        stop_app(app)
+        moving.close()
+        still.close()
+        hs.close()
+
+    print("\n[soak results: %d cycles over %.1f min]" % (cycle, a.minutes))
+    slow = [(w, s) for w, s in recoveries if s is None or s > 2.5]
+    times = sorted(s for _, s in recoveries if s is not None)
+    print("  recoveries: %d, median %.2f s, slowest %.2f s" % (len(recoveries), pct(times, 0.5) if times else 0,
+                                                              times[-1] if times else 0))
+    for w, s in slow:
+        print("    slow: %s (%s)" % (w, "never" if s is None else "%.2f s" % s))
+    check(not slow, "soak: every recovery within 2.5 s (%d of %d slow)" % (len(slow), len(recoveries)))
+    print("  the moving window: %s packets/s; the still one (painted once a second): %s packets/s" %
+          (spread(moving_fps), spread(still_fps)))
+    check(moving_fps and sorted(moving_fps)[len(moving_fps) // 2] > 40, "soak: the moving window streams above 40 fps")
+    check(still_fps and sorted(still_fps)[len(still_fps) // 2] < 6,
+          "soak: a still window costs little (median %.1f packets/s)" % (sorted(still_fps)[len(still_fps) // 2]
+                                                                         if still_fps else -1))
+    if len(samples) >= 8:
+        # Growth: the first quarter after the first cycle (warmed up) against the last quarter.
+        q = max(2, len(samples) // 4)
+        warm = samples[3:3 + q] if len(samples) > 3 + 2 * q else samples[:q]
+        last = samples[-q:]
+        med = lambda xs, k: sorted(x[k] for x in xs)[len(xs) // 2]
+        for k, limit, unit in (("private_mb", 40, "MB"), ("handles", 60, ""), ("gdi", 20, ""), ("user", 20, "")):
+            g = med(last, k) - med(warm, k)
+            check(g <= limit, "soak: %s grows %.1f%s (warm %.1f, end %.1f; limit %s)" %
+                  (k, g, unit, med(warm, k), med(last, k), limit))
+        span = samples[-1]["t"] - samples[0]["t"]
+        cpu = 100.0 * (samples[-1]["cpu_s"] - samples[0]["cpu_s"]) / span / (os.cpu_count() or 1) if span else 0
+        print("  pc-windows CPU over the soak: %.2f %% of the PC (%d logical CPUs)" % (cpu, os.cpu_count() or 1))
+    else:
+        check(False, "soak: enough samples (%d)" % len(samples))
+
+
 SHOT_DIR = os.environ.get("PCW_SHOT_DIR", tempfile.gettempdir())
 
 
@@ -1112,6 +1290,9 @@ def main():
     ap.add_argument("--shots", default=None, help="where to save a decoded frame as PNG")
     ap.add_argument("--tls", choices=("1.2", "1.3"), default="1.3")
     ap.add_argument("--bench", action="store_true")
+    ap.add_argument("--soak", action="store_true", help="minutes of resizes, minimising, reopening and link drops: "
+                    "leaks, recoveries and a still window's cost")
+    ap.add_argument("--minutes", type=float, default=10, help="soak: how long")
     ap.add_argument("--codec", choices=("hevc", "h264"), default=None)
     ap.add_argument("--seconds", type=float, default=15)
     ap.add_argument("--busy", action="store_true", help="bench: a quarter of each window is new noise every frame")
@@ -1127,6 +1308,8 @@ def main():
     try:
         if a.bench:
             run_bench(a, out)
+        elif a.soak:
+            run_soak(a, out)
         else:
             run_e2e(a, out)
     finally:

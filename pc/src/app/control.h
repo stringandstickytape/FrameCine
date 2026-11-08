@@ -89,6 +89,10 @@ private:
 
     Options opt_;
     std::string pc_name_;
+    // The last connect failure logged, when, and how many like it since (session_once).
+    std::string last_fail_;
+    int64_t last_fail_logged_ = 0;
+    int fails_unlogged_ = 0;
     std::atomic<bool> stop_{false};
     std::unique_ptr<Discovery> discovery_;
 

@@ -251,7 +251,21 @@ bool Session::session_once(uint32_t addr, uint16_t port, const std::string& pin,
     auto c = std::make_shared<TlsClient>();
     std::string err;
     if (!c->connect(addr, port, pin, 5000, err)) {
-        logf("control: %s:%u: %s", format_ipv4(addr).c_str(), port, err.c_str());
+        // The headset off for a night: the same failure every few seconds. Logged the first time, then once every
+        // ten minutes with the count (2026-11-09: 3700 such lines in a night).
+        const std::string what = format_ipv4(addr) + ":" + std::to_string(port) + ": " + err;
+        const int64_t t = now_us();
+        if (what != last_fail_ || t - last_fail_logged_ >= 600'000'000LL) {
+            if (fails_unlogged_ > 0 && what == last_fail_)
+                logf("control: %s (%d more since)", what.c_str(), fails_unlogged_);
+            else
+                logf("control: %s", what.c_str());
+            last_fail_ = what;
+            last_fail_logged_ = t;
+            fails_unlogged_ = 0;
+        } else {
+            ++fails_unlogged_;
+        }
         std::lock_guard g(lock_);
         status_.message = err;
         return false;
@@ -351,6 +365,8 @@ bool Session::session_once(uint32_t addr, uint16_t port, const std::string& pin,
         status_.found = true;
         status_.headset = headset;
         status_.message = "connected (" + c->tls_version() + ")";
+        last_fail_.clear();
+        fails_unlogged_ = 0;
     }
     logf("control: connected to the headset (%s)", c->tls_version().c_str());
     changed();
@@ -653,8 +669,17 @@ void Session::watch_loop() {
             if (news) changed();
         }
 
+        bool busy;
+        {
+            std::lock_guard g(streams_lock_);
+            busy = !streams_.empty() || audio_ != nullptr;
+        }
+        // Nothing streaming: the numbers every ten minutes, not every few seconds (a night of idle lines); a stream
+        // starting brings them back to every few seconds at once.
+        const int64_t every = (busy ? opt_.stats_every_s : std::max(opt_.stats_every_s, 600)) * 1'000'000LL;
+        if (next_stats - now > every) next_stats = now + every;
         if (now >= next_stats) {
-            next_stats = now + opt_.stats_every_s * 1'000'000LL;
+            next_stats = now + every;
             FILETIME c1, e1, k1, u1;
             GetProcessTimes(GetCurrentProcess(), &c1, &e1, &k1, &u1);
             const double cpu_us = (ft(k1) - ft(k0) + ft(u1) - ft(u0)) / 10.0;

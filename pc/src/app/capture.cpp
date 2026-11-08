@@ -62,14 +62,23 @@ struct Capture::Impl {
     int64_t arrived_us = 0;
     winrt::Windows::Graphics::SizeInt32 pool_size{0, 0};
     std::atomic<bool> closed{false};
-    std::atomic<int> busy{0};  // handlers running now: stop() waits for them before the Impl can go
+    // Windows' handlers run on its own threads and may already be on their way in as the capture stops: each takes
+    // this lock and gives up when `stopped`, so once stop() has set it no handler is running or will run, and the
+    // stream's `wake` (its owner's) is never called after stop() (2026-11-09: a stream opened and closed every
+    // second crashed pc-windows within a minute; the earlier "busy" count let a handler in after stop had looked).
+    std::mutex handler_lock;
+    bool stopped = false;
+
+    void on_closed() {
+        std::lock_guard h(handler_lock);
+        if (stopped) return;
+        closed = true;
+        if (wake) wake();
+    }
 
     void on_frame() {
-        struct Busy {
-            std::atomic<int>& n;
-            explicit Busy(std::atomic<int>& b) : n(b) { ++n; }
-            ~Busy() { --n; }
-        } busy_guard(busy);
+        std::lock_guard h(handler_lock);
+        if (stopped || !pool) return;
         wgc::Direct3D11CaptureFrame f{nullptr};
         try {
             f = pool.TryGetNextFrame();
@@ -96,7 +105,7 @@ struct Capture::Impl {
     }
 };
 
-Capture::Capture() : impl_(std::make_unique<Impl>()) {}
+Capture::Capture() : impl_(std::make_shared<Impl>()) {}
 
 Capture::~Capture() {
     stop();
@@ -104,7 +113,11 @@ Capture::~Capture() {
 
 bool Capture::start(ID3D11Device* d3d, const Target& t, std::function<void()> wake, std::string& error) {
     Impl& m = *impl_;
-    m.wake = std::move(wake);
+    {
+        std::lock_guard h(m.handler_lock);
+        m.stopped = false;
+        m.wake = std::move(wake);
+    }
     try {
         ComPtr<IDXGIDevice> dxgi;
         d3d->QueryInterface(IID_PPV_ARGS(&dxgi));
@@ -146,10 +159,12 @@ bool Capture::start(ID3D11Device* d3d, const Target& t, std::function<void()> wa
             }
         } catch (...) {
         }
-        m.arrived = m.pool.FrameArrived(winrt::auto_revoke, [&m](auto&&, auto&&) { m.on_frame(); });
-        m.closed_revoker = m.item.Closed(winrt::auto_revoke, [&m](auto&&, auto&&) {
-            m.closed = true;
-            if (m.wake) m.wake();
+        std::weak_ptr<Impl> weak = impl_;
+        m.arrived = m.pool.FrameArrived(winrt::auto_revoke, [weak](auto&&, auto&&) {
+            if (auto s = weak.lock()) s->on_frame();
+        });
+        m.closed_revoker = m.item.Closed(winrt::auto_revoke, [weak](auto&&, auto&&) {
+            if (auto s = weak.lock()) s->on_closed();
         });
         m.session.StartCapture();
     } catch (const winrt::hresult_error& e) {
@@ -162,9 +177,14 @@ bool Capture::start(ID3D11Device* d3d, const Target& t, std::function<void()> wa
 
 void Capture::stop() {
     Impl& m = *impl_;
+    {
+        // Waits for a handler running now; none runs after this.
+        std::lock_guard h(m.handler_lock);
+        m.stopped = true;
+        m.wake = nullptr;
+    }
     m.arrived.revoke();
     m.closed_revoker.revoke();
-    while (m.busy.load()) Sleep(1);
     try {
         if (m.session) m.session.Close();
         if (m.pool) m.pool.Close();
