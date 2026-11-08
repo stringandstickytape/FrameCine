@@ -162,6 +162,10 @@ const PARAMS := {
 	"broken": {"type": "list", "of": {"type": "int", "min": 0, "max": 9999}, "max": 8, "default": [],
 			"description": "room seats drawn broken (their index in the room's seat list): chairs only"},
 	"fold_own": {"type": "bool", "default": true, "description": "the viewer's own chair folded away"},
+	# Since 2026-11-08, for Reclaimed (a ruin's stalls: some seats tipped up, as broken does for a builder's own).
+	"up": {"type": "list", "of": {"type": "int", "min": 0, "max": 9999}, "max": 24, "default": [],
+			"description": "room seats drawn tipped up (their index in the room's seat list), a builder's own too: "
+			+ "tip-up seats only"},
 }
 
 
@@ -688,7 +692,12 @@ func _tips() -> void:
 
 ## Broken seats: the room's seat list, system by system; ours take the broken form, a builder's own is covered.
 func _broken() -> void:
-	var wanted: Array = params["broken"]
+	_mark(params["broken"], "broken")
+	_mark(params["up"], "up")
+
+
+## Room seats (by index in the room's seat list) drawn in this form: ours take it, a builder's own is covered.
+func _mark(wanted: Array, form: String) -> void:
 	if wanted.is_empty():
 		return
 	var count := 0
@@ -701,43 +710,43 @@ func _broken() -> void:
 			if i < 0 or i >= list.size():
 				continue
 			if s == self:
-				_own_broken(i)
+				_own_broken(i, form)
 			elif s.has_method("seat_slots"):
-				_slot_broken(s, i)
+				_slot_broken(s, i, form)
 			else:
-				_cover(s, i, list[i])
+				_cover(s, i, list[i], form)
 		count += list.size()
 
 
-func _can_break(model: String) -> bool:
-	return "broken" in MODELS.get(model, {}).get("forms", [])
+func _can_break(model: String, form := "broken") -> bool:
+	return form in MODELS.get(model, {}).get("forms", [])
 
 
-func _own_broken(i: int) -> void:
+func _own_broken(i: int, form := "broken") -> void:
 	var k := 0
 	for e: Dictionary in _entries:
 		if bool(e["own"]):
-			if k == i and _can_break(e["model"]):
-				e["form"] = "broken"
+			if k == i and _can_break(e["model"], form):
+				e["form"] = form
 			k += 1
 
 
-func _slot_broken(builder: Node, i: int) -> void:
+func _slot_broken(builder: Node, i: int, form := "broken") -> void:
 	var k := 0
 	for e: Dictionary in _entries:
 		if e.has("slot") and e["slot"][0] == builder:
-			if k == i and _can_break(e["model"]):
-				e["form"] = "broken"
+			if k == i and _can_break(e["model"], form):
+				e["form"] = form
 			k += 1
 
 
-## A builder's own seat i (its MultiMesh "Seats") folded away, and a broken seat of the builder's model (or ours,
-## or the multiplex's) drawn in its place.
-func _cover(builder: Node, i: int, xf: Transform3D) -> void:
+## A builder's own seat i (its MultiMesh "Seats") folded away, and a broken (or tipped up) seat of the builder's
+## model (or ours, or the multiplex's) drawn in its place.
+func _cover(builder: Node, i: int, xf: Transform3D, form := "broken") -> void:
 	var m := str(params["model"])
 	if m == "auto":
 		m = str(builder.params.get("seat_model", "multiplex")) if builder.get("params") is Dictionary else "multiplex"
-	if not _can_break(m):
+	if not _can_break(m, form):
 		m = "multiplex"
 	var width := float(builder.params.get("seat_pitch", model_width(m))) if builder.get("params") is Dictionary \
 			else model_width(m)
@@ -746,7 +755,7 @@ func _cover(builder: Node, i: int, xf: Transform3D) -> void:
 		if n is MultiMeshInstance3D and n.name == &"Seats":
 			_covered.append([n, i])
 			under = n
-	var e := {"xf": xf, "model": m, "width": width, "form": "broken", "own": false, "run": "",
+	var e := {"xf": xf, "model": m, "width": width, "form": form, "own": false, "run": "",
 			"overlay": [builder, i]}
 	if under != null:
 		e["under"] = under

@@ -160,6 +160,10 @@ sky_bottom}})` makes one; the room sets the rest on its own copy:
   (`lamp_count`, `lamp_position` xyz and range in the world, `lamp_colour` rgb times energy, w > 0 for a light that
   shines only up and down: a wall sconce's scallops), added as emission. No light pass.
 - **`instance_tint`** multiplies the base colour by the MultiMesh instance's colour (the cinema's seats).
+- **`vertex_light`** (rgb; 0, nothing, by default) adds light worked out in code and carried in the vertex colours'
+  alpha: the surface's colour times it times the alpha, as bright as the house level, and in the bake as an emitter
+  so its light bounces on. Since 2026-11-08, for Reclaimed's Moon: its shadows through the open roof, the walls and
+  the trusses traced as the room is built (`kit/reclaimed.gd`), as the run-time lightmapper gave none.
 - **`bake_pass`** is what the lightmapper renders of the surface: its colour at level 1, no fill, spill or lamps
   (they would bake in as light).
 

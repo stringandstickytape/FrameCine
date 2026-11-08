@@ -282,7 +282,7 @@ func _levels() -> void:
 ## The sounds the rooms ask for (docs/environments.md, each room's "Sound wanted"; "Sound and music", "For the rooms").
 const WANTED := {
 	"Shopfront 1906": ["projector", "gas_hiss"], "Pink Palace": ["chime", "three_bells"],
-	"Nave": ["wind", "candle"], "Reclaimed": ["rain_leaves", "drips", "bird", "wind"],
+	"Nave": ["wind", "candle"], "Reclaimed": ["rain_leaves", "drips", "bird", "wind", "crickets", "tawny_owl"],
 	"Ice cinema": ["huskies", "wind", "ice_creak"], "Screen 3": ["wall_rumble"], "Drive-in": ["crickets", "train"],
 	"Screening room 1962": ["fire", "hum", "three_bells"], "Athens rooftop": ["cicadas", "moped", "purr"],
 	"Pillow Fort": ["radiator", "rain_glass"], "Bathysphere": ["hull_creak", "deep_hum", "whale"],

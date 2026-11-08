@@ -32,7 +32,9 @@ static func spec() -> Dictionary:
 				+ "a Mediterranean courtyard (houses with balconies, towers, loggias and lit windows, a palace gate "
 				+ "with drapes, lanterns, a lion on a pedestal, cypresses, palms and pines), a 1930s moderne hall (a "
 				+ "ceiling of glowing coves, faience and chrome speed bands, a stepped proscenium round a rising sun, "
-				+ "organ grilles, a clock, an illuminated organ console on its lift), a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
+				+ "organ grilles, a clock, an illuminated organ console on its lift), a ruined picture house open to the "
+				+ "moonlit sky (broken roof and trusses, fallen plaster, a gilt proscenium with a torn curtain, a fallen "
+				+ "chandelier, a birch, ivy, ferns and wildflowers), a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
 				+ "furniture: a desk, a computer, a video recorder flashing 12:00, a sideboard, a standard lamp, a rug, "
 				+ "a coffee table; dressing: bunting, a tea set, sandwiches, a stool, a channel dial, a soundbar, a "
 				+ "floor lamp, a glass table, a media unit.",
@@ -175,6 +177,8 @@ class Ctx:
 	var spots: Array = []
 	## The Ice cinema's hall (kit/ice_hall.gd, since 2026-11-08): its meshes and candles over its pieces, or null.
 	var ice: Object = null
+	## Reclaimed's ruined hall (kit/reclaimed.gd, since 2026-11-08): its meshes over its pieces, or null.
+	var ruin: Object = null
 	## The moderne hall's pieces (kit/streamline.gd, since 2026-11-08): the coves' plaster (vertex colour: its colour,
 	## alpha the cove's light on it), clock faces ([centre, half across, half up, facing]), footlights (stand-in lamps
 	## round the stage in the cove's colour, live: [at, cone cosine (-1 all round), strength]), and lights for the bake
@@ -494,6 +498,8 @@ func build() -> void:
 	_add_courtyard_meshes()
 	if _ctx.ice != null:
 		_ctx.ice.finish(self)
+	if _ctx.ruin != null:
+		_ctx.ruin.finish(self)
 
 
 ## The courtyard's lit windows (baked: their glow lights the reveals, sills and shutters round them in the bake) and
@@ -682,6 +688,8 @@ func tick(delta: float) -> void:
 	super(delta)
 	if _ctx != null and _ctx.ice != null:
 		_ctx.ice.tick(delta)
+	if _ctx != null and _ctx.ruin != null:
+		_ctx.ruin.tick(delta)
 	if _water_m != null:
 		_water_t += delta * float(params["water_motion"])
 		_water_m.set_shader_parameter("clock", _water_t)

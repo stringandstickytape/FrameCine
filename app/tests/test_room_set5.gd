@@ -8,7 +8,8 @@ extends "res://tests/env_builder_harness.gd"
 ##   (none, a few, many) rebuilds the stands; the candles flicker and Flickering lights holds them; the rose window
 ##   dims as the film starts and comes back after the end; the stone takes the film's light softly (its own test,
 ##   test_room_nave.gd, checks the rest).
-## - Reclaimed: a hall half open to the sky with the viewer under the open part; ivy and ferns placed; Weather maps
+## - Reclaimed: a hall half open to the sky with the viewer under the open part; the ruin and its growth built (its own
+##   test, test_room_reclaimed.gd, checks the ruin, the Moon's light and the seats tipped up); Weather maps
 ##   onto the weather's mode; rain wets the room, the mist and the clouds follow the wet, the fireflies hide; the
 ##   puddle in the pit gives back the picture to the viewer's eyes; a loud bang scatters the birds; a quiet scene
 ##   may bring the deer down the side aisle, never into the sight line; broken seats, never the viewer's own.
@@ -22,6 +23,9 @@ extends "res://tests/env_builder_harness.gd"
 
 ## Each room well inside the headset's budget (its figures in docs/environments.md).
 const MARGIN := {"draws": 32, "triangles": 200000, "lights": 0, "particles": 2000, "texture_mb": 32.0}
+## Reclaimed's ruin and its growth (the deep pass, 2026-11-08): more triangles, in few draws (its own test,
+## test_room_reclaimed.gd, holds its figures).
+const RECLAIMED_TRIANGLES := 260000
 
 
 func run_tests() -> void:
@@ -48,10 +52,10 @@ const RoomSound := preload("res://tests/room_sound.gd")
 
 ## The common part: built and checked, inside the margin, the default seat at the origin, something under every seat,
 ## the room dims during the film, a sound room.
-func _common(id: String, doc: Dictionary) -> Node3D:
+func _common(id: String, doc: Dictionary, margin := MARGIN) -> Node3D:
 	var room := await check_room(id, doc)
 	var stats: Dictionary = figures[-1][1]
-	var over := EnvChecks.budget(stats, MARGIN)
+	var over := EnvChecks.budget(stats, margin)
 	check("%s: well inside the budget %s %s" % [id, stats, over], over.is_empty())
 	room.host.auto = false
 	var seats: Array[Transform3D] = room.room_seat_transforms()
@@ -210,7 +214,7 @@ func _reclaimed() -> void:
 	var doc := _load("reclaimed")
 	if doc.is_empty():
 		return
-	var room := await _common("reclaimed", _sure(doc))
+	var room := await _common("reclaimed", _sure(doc), MARGIN.merged({"triangles": RECLAIMED_TRIANGLES}, true))
 	var host: Node = room.host
 	for sid: String in ["light", "hall", "screen_frame", "kit", "seats", "sky", "weather", "atmosphere", "birds",
 			"fireflies", "deer"]:
@@ -222,8 +226,8 @@ func _reclaimed() -> void:
 	check("reclaimed: half the roof gone, the viewer under the open sky (from z %.1f)" % open_from,
 			is_equal_approx(float(hall.params["ceiling_cover"]), 0.5) and open_from < -1.0)
 	var kit: Node = host.system("kit")
-	check("reclaimed: ivy and ferns all placed (%s)" % [kit.problems()], (kit.problems() as Array).is_empty()
-			and _has(room, "PieceSoft"))
+	check("reclaimed: the ruin and its growth all built (%s)" % [kit.problems()], (kit.problems() as Array).is_empty()
+			and _has(room, "RuinLeaves") and _has(room, "RuinBrick"))
 	check("reclaimed: the house lamps and signs dead", float(host.system("light").params["house_lamps"]) == 0.0
 			and float(host.system("light").params["signs"]) == 0.0)
 	# Broken seats, never the viewer's own.
@@ -286,10 +290,11 @@ func _reclaimed() -> void:
 	host.set_setting("life", false)
 	_steps(host, 2.0)
 	check("reclaimed: Ambient life off: they fade away", not deer.active and not host.system("birds").active)
-	# Sound: open air; rain on the leaves and the boards with the rain, drips with the wet, a soft wind; the birds'
-	# calls are the birds' own.
+	# Sound: open air; rain on the leaves and the boards with the rain, drips with the wet, a soft wind over the open
+	# roof, crickets outside the side door when it is dry, an owl far off now and then; the birds' calls are the birds'
+	# own.
 	RoomSound.check_beds(self, "reclaimed", room, {"rain": "rain_leaves", "rain_boards": "rain_leaves",
-			"drips": "drips", "wind": "wind"}, "outdoors")
+			"drips": "drips", "wind": "wind", "crickets": "crickets", "owl": "tawny_owl"}, "outdoors")
 	RoomSound.check_follows(self, "reclaimed", room, "rain", "weather.rain")
 	RoomSound.check_follows(self, "reclaimed", room, "rain_boards", "weather.rain")
 	RoomSound.check_follows(self, "reclaimed", room, "drips", "weather.wet")

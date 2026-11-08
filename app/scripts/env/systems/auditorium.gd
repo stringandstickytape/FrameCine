@@ -118,6 +118,11 @@ const PARAMS := {
 			"default": [-9.0, -3.5, 2.0], "description": "the acoustic clouds' z"},
 	"ceiling_cover": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0,
 			"description": "the ceiling's share from the front: under 1, the back is open to the sky"},
+	# Since 2026-11-08, for Reclaimed (kit/reclaimed.gd draws a ruined hall round the tiers); the other rooms keep
+	# "built".
+	"shell": {"type": "enum", "values": ["built", "kit"], "default": "built",
+			"description": "built: the walls, the ceiling, the stage, the drapes, the pit, the doors and the lamps drawn "
+			+ "here; kit: only the tiers, the side aisles, the rear walkway and the seats (a kit draws the rest)"},
 	"balcony_rows": {"type": "int", "min": 0, "max": 8, "default": 0, "description": "a balcony over the rear"},
 	"balcony_height": {"type": "float", "min": 2.0, "max": 20.0, "default": 3.4,
 			"description": "the balcony's floor over the rear walkway"},
@@ -235,6 +240,10 @@ func setup() -> void:
 	L = Layout.new(params)
 	_light = host.system_of_kind("light")
 	_build_floor()
+	if str(params["shell"]) == "kit":
+		# The tiers and the seats only: a kit draws the walls, the ceiling, the stage, the pit and every light.
+		_build_seats()
+		return
 	_build_shell()
 	if str(params["wall_treatment"]) == "panels":
 		_build_wall_panels()
@@ -430,7 +439,8 @@ func _build_floor() -> void:
 		walk_a.append(Vector3(x, top, L.arc_z(L.row_radius(-L.rows_back) + L.depth * 0.5, cx)))
 		walk_b.append(Vector3(x, top, L.hi.z))
 		ups.append(Vector3.UP)
-	b.strip(pit_a, pit_b, ups)
+	if str(params["shell"]) != "kit":
+		b.strip(pit_a, pit_b, ups)
 	b.strip(walk_a, walk_b, ups)
 	_add_static("Floor", b)
 

@@ -91,6 +91,11 @@ uniform float caustic_speed = 1.0;
 uniform sampler2D caustic_map : hint_default_black, filter_linear_mipmap, repeat_enable;
 uniform bool bake_pass = false;
 uniform bool instance_tint = false;
+// Light worked out in code and carried in the vertex colours' alpha (since 2026-11-08, Reclaimed's Moon: its shadows
+// traced against the ruin's open roof, walls and trusses as the room is built, kit/reclaimed.gd). The surface's colour
+// times this times the alpha, as bright as the house level; in the bake too, as an emitter, so its light bounces on.
+// 0 (every other room): nothing.
+uniform vec3 vertex_light = vec3(0.0);
 #endif
 #ifdef REFLECT
 // REFLECT (with LIT and HOUSE, room_material_house_reflect.gdshader; since 2026-11-08, for the drive-in's car: "chrome
@@ -590,6 +595,7 @@ void fragment() {
 	if (bake_pass) {
 		own = vec3(0.0);
 	}
+	own += diffuse * vertex_light * COLOR.a * (bake_pass ? 1.0 : level);
 #endif
 	EMISSION = own + emission;
 	AO = occlusion * ao;

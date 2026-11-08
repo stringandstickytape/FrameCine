@@ -426,6 +426,7 @@ and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider'
 | `proscenium` | `drapes` | `drapes` (velvet either side and a valance) or `none`; slots to come: castle gate, festoon |
 | `stage_depth`, `stage_top` | 1.9, -2.1 | the stage in front of the screen wall |
 | `ceiling_cover` | 1 | the ceiling's share from the front; under 1 opens it to the sky (the Atmospheric, the Reclaimed's broken roof) |
+| `shell` | `built` | `built`: the walls, the ceiling, the stage, the drapes, the pit, the doors and the lamps drawn here; `kit`: only the tiers, the side aisles, the rear walkway and the seats, a kit drawing the rest (Reclaimed's ruin, since 2026-11-08) |
 | `balcony_rows` | 0 | a balcony over the rear with this many rows |
 | `boxes_per_side` | 0 | boxes on the side walls |
 | `partition_z` | 0 | a plain wall across the hall here (a subdivided hall, Screen 3); 0: none |
@@ -480,6 +481,7 @@ hanging.
   MultiMesh "Seats" and draws a broken one of the builder's `seat_model` in its place. It does this again after every
   room move, so the seat stays away when the viewer has sat there and moved on. The broken seat takes the builder's
   seat materials (unless `upholstery` or `frame` is set). So it matches the seats next to it and adds no textures.
+  `up` does the same with the tipped-up form (since 2026-11-08, for Reclaimed's empty stalls).
 
 A builder can also draw any model itself: `seats.gd model_mesh(model, upholstery, frame, width, form)`. The
 auditorium's `seat_mesh()` does, for every `seat_model` but the stadium seat.
@@ -508,6 +510,7 @@ adds two draws. Pews' ends add one or two. Texture memory is the headset's, rend
 | `variation`, `seed` | 1, 1906 | the tint seat by seat |
 | `tipped` | 0 | the share of tip-up seats tipped up |
 | `broken` | [] | room seats drawn broken (at most 8) |
+| `up` | [] | room seats drawn tipped up, a builder's own too (at most 24; tip-up models only) |
 | `fold_own` | true | the viewer's own chair folded away |
 
 ## The motion system
@@ -991,6 +994,10 @@ moves it), `cove_film_colour` (their light in the film: bind it to `film.colour`
 | `moderne_hall` | an auditorium builder's hall as a 1930s moderne one (`kit/streamline.gd`, no slot): a ceiling of coves stepping up to the screen, ledges with their coves along the walls, speed bands of faience, jade and chrome round the hall and across a bowed circle front, rounded rear corners, a walnut dado, reeded pilasters, etched glass shell lights (stand-in lamps and bake lights), ventilators |
 | `ziggurat` | round the room's screen (no slot): three frames stepping out towards the seats, each lit from behind the next, gilt reveals, a glowing rising sun with gilt rays and chrome speed lines, two organ grilles lit from their chambers, a clock telling the real time (`PieceClock`), a speed-line roundel, footlights (stand-in lamps in the coves' colour) and the lift's chrome ring in the pit |
 | `organ_console` | an illuminated organ console on its lift platform, its foot at `at`: a skirt of glass panels in the coves' colour between gilt fins, an ivory horseshoe of stop tabs, three manuals, a lit music desk under a chrome hood, a bench. Put it in a kit of its own with `group` |
+| `ruin_shell` | a ruined picture house round an auditorium builder with `shell` `kit` (`kit/reclaimed.gd`, no slot): brick walls under fallen plaster with damp, pilasters and a cornice, the proscenium with faded gilt and lattice grilles, the stage, the stained sheet and its fallen masking, a torn curtain, the pit's broken boards, the booth's ports, two doorways |
+| `ruin_roof` | the ruin's roof: the front half's coffered plaster ceiling with holes, its broken edge (snapped joists, dangling laths), the trusses over the open half, purlins, rafters and slates, a hole through the front roof |
+| `ruin_stalls` | the ruin's stalls: the fallen chandelier and its crystals, rubble and fallen bricks, the aisles' rotted carpet, leaves on the seats |
+| `ruin_growth` | the ruin's nature: ivy masses and cascades, a birch, ferns and hart's-tongue, grass and wildflowers, moss, leaf litter |
 
 The furniture is drawn by `scripts/env/systems/kit/furniture.gd` (plain boxes and turned shapes of our own: no maker's
 shape, no badge, no lettering), which the domestic builder's telly stands use too. A piece stands with its foot at the
@@ -1012,6 +1019,12 @@ right, both with a lamp, a plant on the sill, inner shutters half closed, an org
 The windows' material is the light system's lamp material (house group), so they dim with the house lamps; `night`
 puts them out one by one, each at its own moment (each over a twentieth of `night`'s travel), down to `ember`. The
 windows bake as emitters: their glow lights the reveals, sills and shutters round them.
+
+**The ruin** (`kit/reclaimed.gd`, since 2026-11-08, for Reclaimed). Its four pieces read the auditorium's layout
+and draw into meshes of their own: `RuinBrick`, `RuinPlaster`, `RuinWood` and `RuinCloth` (baked, on the house
+shader with `vertex_light`: the Moon's light, traced per vertex as the room is built, in the vertex colours' alpha),
+`RuinBrass` and `RuinLeaves` (unbaked, the Moon in their vertex colours), `RuinCrystal` and `RuinPort` (emission).
+It also tints the auditorium's `Floor` and `Seats` by the same Moon. See "Room: Reclaimed".
 
 **The ice hall** (`kit/ice_hall.gd`, since 2026-11-08, for the Ice cinema). Its pieces read the room's domestic
 builder (its box, window, doorway, screen and seats) and draw into meshes of their own: `IceBlocks` (the walls' ice,
@@ -1890,7 +1903,7 @@ people.
 | 9 | Palace of Culture, 1974 | `auditorium`, board-marked concrete, ochre curtains | a mosaic wall that glitters in the screen's light (material, `film.colour`), snow and birches outside (`vista`, `weather`) | an echoey hall (`acoustics`) | | | snow |
 | 10 | Flagship | `auditorium`: steep rake, black walls | blue step lights (`light`) | | the ritual | a huge curved screen | seat choice |
 | 11 | Nave | `nave`, pews (`seats`) | a dim rose window, candles (`light`, flicker), the film's light climbing the stone | reverb (`acoustics`) | | in the chancel | candles |
-| 12 | Reclaimed | `auditorium` with `ceiling_cover` 0.5, ivy and ferns (`kit`) | stars (`sky`), dynamic `weather` (rain into a puddle that reflects the film) | birds, fireflies, an occasional deer (`life`) | | a patched sheet | weather |
+| 12 | Reclaimed | `auditorium` with `ceiling_cover` 0.5 and `shell` `kit`; the ruin, ivy, a birch, ferns and wildflowers (`kit`, `ruin_*`) | stars (`sky`), dynamic `weather` (rain into a puddle that reflects the film) | birds, fireflies, an occasional deer (`life`) | | a patched sheet | weather |
 | 13 | Ice cinema | `domestic` (`shell` `kit`) with the ice hall's pieces (`kit`: blocks, carvings, a vault with skylights, a snowfield outside), hides (`seats`) | candles inside the ice, the film's colours through the front wall, the aurora in the window and the skylights (`sky`), breath fog (`atmosphere`), snow outside (`weather`) | far huskies, ice creaks (`sound_bed`) | candles down and the aurora settles with the film | | aurora |
 | 14 | Bathysphere | `dome_hall` (glass; the sea floor, kelp, coral, a sunken bell, a vent, marine snow, floodlights; portholes, rivets, gauges, a sonar console) | the water by depth, Snell's window and shafts, caustics (`light`) | schools of fish, glowing creatures drawn to the screen, a manta overhead, a rare whale in a quiet scene (`life`, cue with `cooldown`), hull creaks, the vent's bubbles, a sonar ping, a far song (`sound_bed`) | floodlights down with the film, the scope dims, pings in the pre-show | | depth, lights outside, whale |
 | 15 | Crater | `terrace` (a lunar amphitheatre) under a `dome_hall` | Earth turning over the film (`sky`, film-time track), the Milky Way when the lights dim | silence (no bed) | | | Earth's speed |
@@ -2282,35 +2295,97 @@ the screen are where they were; the church is drawn by the nave builder's `gothi
 
 `app/environments/reclaimed.env.json`. *An old picture house taken back by nature: half its roof gone to the stars,
 ivy on the walls, ferns in the corners, rain into a puddle that gives back the film, birds on the broken roof,
-fireflies and now and then a deer.*
+fireflies and now and then a deer.* The deep pass (2026-11-08) answered "continue working on the environments
+one-by-one like you did with the bathysphere, really improving their quality, imagination, delight, detail, lighting
+and so on. Better to do a smaller number of incredible superb ones than a large number not so" (the user). Before it
+the room was the auditorium's own hall with half its ceiling taken away: plain painted brick, dark drapes, the
+picture on the black front wall, clumps of the kit's ivy and ferns, and the film's spill lighting it all. The seats,
+the eye height and the screen are where they were. The auditorium now draws only the tiers and the seats (`shell`
+`kit`); the ruin round them is `kit/reclaimed.gd`, in four pieces (`ruin_shell`, `ruin_roof`, `ruin_stalls`,
+`ruin_growth`).
 
-- **Systems:** `light` (a cold moonlit fill; the house lamps, step lights and signs dead; no bake: its lamps are
-  dead), `auditorium` (16 x 15.6 m, `ceiling_cover` 0.5: the roof open from z -2.2 back, over the viewer; the viewer
-  in the front row, 3 rows behind, 21 plush seats a row, faded and uneven; plain painted brick walls; no sconces, no
-  acoustic clouds; a low stage with dark drapes), `screen_frame` (no masking; the projector's beam from the booth),
-  `kit` (ivy on six places of the side walls, ferns in the pit's corners, by the stage and in the side aisles),
-  `seats` (8 broken seats over the hall's own), `sky` (a September night at 52 degrees north; clouds bound to
-  `weather.wet`), `weather` (the mode from the Weather setting; rain through the open roof and a few leaks over the
-  pit; a puddle in the pit in front of the viewer, its reflection bound to `weather.wet`), `atmosphere` (a little
-  haze in the beam; mist bound to `weather.wet`), `life` `birds` (8, perched on the broken roof's edge and the
-  walls' tops), `fireflies` (30, low; they dim while the film is bright and hide in the rain), `deer` (down the left
-  side aisle from the back, about every 8 minutes).
-- **The puddle:** the viewer sits in the front row so nothing hides the pit; the eye mirrored in the puddle's plane
-  sees the picture's middle 3.6 m ahead, in the puddle (the test works it out).
+- **The walls:** brick (laid in courses, each brick its own shade) under cream plaster fallen away in ragged holes
+  (the edges show the plaster's thickness and the brick behind), damp running down from the open roof with tide marks
+  and green stains, an oxblood dado, pilasters (broken off where the roof went), a cornice; the walls' broken tops
+  ragged against the sky, with their thickness. A doorway in the left wall by the stage (a leaf hanging open, the
+  night outside), the rear door to the foyer, three projection ports in the rear wall (one still lit: the booth).
+- **The proscenium:** a plastered arch with faded gilt mouldings, a cartouche and swags over the opening (no
+  figures), two lattice grilles either side where the organ spoke once, plaster fallen to brick here too. The screen:
+  an old sheet behind the picture, stained at its edges, in black masking whose top right end has come down; the
+  stains and the masking never cover the picture (the picture's frame is checked from every seat). A torn red curtain
+  on the left in tatters to the floor, a strip of it on the right with its heap below, the valance hanging in rags.
+  The stage of boards, some gone (joists and the dark below), a panelled riser, the pit's boards with holes.
+- **The roof:** the front half's ceiling, plaster on laths, coffered, with holes through to the dark roof space and
+  one right through the roof (stars show through it from the seats); its broken edge over the stalls: snapped joists,
+  some hanging, laths dangling, lumps of plaster. Over the open half three king-post trusses against the sky (the
+  rear one broken, a rafter down), purlins and the ridge, a patch of rafters and battens with slates on the right
+  slope, slates slid and caught, the gables' coping.
+- **The stalls:** the plush seats faded (velvet, walnut-veneer backs), 13 tipped up and 8 broken (the seats
+  system's `up` and `broken`, never the viewer's own), leaves and moss on some; the aisles' carpet rotted to the
+  boards in patches; rubble and fallen bricks along the walls, a heap under the left wall's break. The chandelier
+  lies where it fell, off to the right of the pit: a brass column, three rings, eight arms, a basket and festoons of
+  crystal drops and prisms scattered round it, catching the moonlight (fixed glints in their vertex colours).
+- **Nature:** ivy in heavy masses on the walls under the open roof and in cascades from the ceiling's edge; a young
+  birch through the stalls on the right (a white trunk with dark marks, weeping branches, its leaves above head
+  height turning); ferns in the pit's corners, by the stage, in the floor's holes and the doorways; hart's-tongue in
+  the brick's joints; patches of grass with wildflowers (white, pale yellow) and willowherb under the open sky; moss on
+  the boards, the steps and the seats; leaf litter everywhere it can lie, a few leaves floating on the puddle.
+- **The light:** the Moon, high in the west-south-west (`sky` `moon_bearing` 246, `moon_altitude` 45), comes through
+  the open roof as a cold pool on the stalls: the left wall's ragged top throws its shadow across the pit, the
+  trusses theirs across the right wall and the floor; a narrow shaft through the roof's hole lands on the stage's
+  apron before the picture's left half. The run-time lightmapper threw no shadows (a box under a spot, tested under
+  lavapipe), so the Moon's light is traced in code as the room is built: for each vertex of the baked meshes, the
+  ray to the Moon against the walls' tops, the gables, the trusses' members, the front roof (only through its hole)
+  and the slates; its light goes in the vertex colour's alpha and the house shader adds it (`vertex_light`, new,
+  additive: 0 in every other room). The bake takes it as an emitter, so the Moon's light bounces softly into the
+  shadow; the sky's light from the opening is a share beside it. The unbaked parts (the leaves, the brass, the seats'
+  instance colours) take the same light in their vertex colours. The film's light washes the ruin softly (`spill`
+  0.7; the brick 0.15, the plaster 0.22, the timber 0.18 of it), and the Moon drops to 2 % with the film
+  (`dimmed_level` 0.02): the screen is the star. No live light, no bake light; the house lamps, step lights and signs
+  dead; the booth's lit port and the crystals' glints are emission.
+- **Systems:** `light` (a cold fill, `baked_fill` 0.3, `bake` on), `auditorium` (`shell` `kit`, 16 x 15.6 m,
+  `ceiling_cover` 0.5, 3 rows of 21 plush seats behind the viewer's front row, `stage_depth` 1.5), `screen_frame`
+  (no masking: the ruin draws its own; the projector's beam), `kit` (the four ruin pieces), `seats` (`broken`, `up`),
+  `sky` (a September night at 52 degrees north, a Moon nearly full; clouds on `weather.wet`), `weather` (rain
+  through the open roof and a leak over the pit, the puddle), `atmosphere` (a little haze in the beam; one low mist
+  layer on `weather.wet`), `life` (`birds` on the trusses and the walls' tops, `fireflies`, `deer` from the rear
+  door down the left aisle and out by the side door), `acoustics` `outdoors`, `sound_bed` (rain, rain on the boards,
+  drips, wind, crickets, owl).
 - **Setting:** Weather (`weather`: changing, rain, mist, clear) maps onto `weather.mode` (changing, heavy, light,
   clear); mist is a drizzle, and the mist rises with the wet.
 - **Cues:** `birds_start` (a loud bang while playing: the birds scatter; chance 0.6, at most every 3 minutes),
   `deer_in_quiet` (6 s of a quiet scene: the deer comes; chance 0.5, at most every 15 minutes).
-- **Measured** (`tests/test_room_set5.gd`, headless): 30 draws, 116 858 triangles (the ivy and the plush seats),
-  no live light, 1 600 particles, 10.4 MB. Its update: about 0.2 ms a frame on the desktop.
+- **Comfort:** the creatures stay at the edges (the deer down the side aisle, never in the sight line; the birds
+  high on the trusses); the chandelier, the birch and the meadow stand clear of every seat's sight line (tested);
+  nothing in the ruin moves but the rain, the fireflies and the creatures; the Moon's pools never move.
+- **The puddle:** the viewer sits in the front row so nothing hides the pit; the eye mirrored in the puddle's plane
+  sees the picture's middle 3.6 m ahead, in the puddle (the test works it out).
+- **Measured** (`tests/test_room_reclaimed.gd`, headless, 2026-11-08): 25 draws, 256 076 triangles, no live light,
+  1 200 particles, 7.3 MB. Before the pass (`test_room_set5.gd`): 30 draws, 116 858 triangles, 1 600 particles,
+  10.4 MB. By part: the leaves (ivy, the birch, ferns, the meadow, moss, litter) 94.0k triangles in 1 draw, the seats
+  54.1k (2 draws), the plaster 44.3k, the timber 16.7k, the brick 12.4k, the tipped-up seats 8.4k, the cloth 5.8k,
+  the broken seats 5.2k, the crystal 4.2k, the stars 4.0k, the brass 3.7k, the sky 2.4k, the rest a few hundred. The
+  bake: five static meshes, 0.85 M texels in their atlases, the largest 676 x 580; the lightmap 1024 x 1024, two
+  layers (12.6 MB); about 15 s under lavapipe (before the texels were coarsened, 26 s).
+- **The costs to watch on the Frame:** fill is small: everything opaque on the house shader but the rain, the
+  fireflies, the beam's haze and one mist layer; the leaves are double-sided quads in one draw. Geometry is the most
+  of any room so far (256k triangles, the leaves 94k of it). The bake's time on the headset is the thing to judge,
+  then the frame time with the rain at full.
+- **The render** (lavapipe, `test_room_reclaimed.gd` with `RECL_BAKE`): from the seat, left, right, up, back, a
+  side seat and up behind, in the pre-show and with a film; close in the pre-show (`RECL_CLOSE`): the chandelier,
+  the proscenium, the ceiling's edge, the birch, the curtain, the meadow, the shaft on the stage, the roof's hole.
 - **Sound:** open air (`acoustics` `outdoors`); rain on the leaves round the viewer (`sound_bed` `rain_leaves`, four
   voices under the open roof) and on the boards behind (`rain_leaves` at `pitch` 0.7, `gain_db` -6), both with their
-  `level` on `weather.rain`; drips into the puddle after it (`drips`, `level` on `weather.wet`); a soft night wind
-  (`wind`, `gain_db` -6). The birds' calls are the birds' own (`life`). Measured (`test_room_set5.gd`, the slider's
-  default, rain and wet at full): -49.9 dBFS RMS in the pre-show, -64.0 under a film at the reference level.
-- **Gaps:** the auditorium has no screen surface of its own, so there is no patched sheet: the picture hangs on the
-  black front wall with no masking (a sheet like the shopfront's `sheet_frame` would need a parameter on the
-  auditorium). Its walls have no damp or stain parameter.
+  `level` on `weather.rain`; drips into the puddle after it (`drips`, `level` on `weather.wet`); a soft wind high
+  over the open roof (`wind`, two voices 8.5 m up, `gain_db` -6); crickets outside the side door by the stage when it
+  is dry (`crickets`, `gain_db` -12, 10 dB lower in the film, `level` on `weather.rain` inverted); a tawny owl far off
+  in the trees behind (`tawny_owl`, `every` 170, 32 m off, 14 dB lower in the film). The birds' calls are the birds'
+  own (`life`). Measured (`test_room_set5.gd`, the slider's default, rain and wet at full): -49.8 dBFS RMS in
+  the pre-show, -64.6 under a film at the reference level (before the pass -49.9 and -64.0).
+- **To judge on the Frame:** the bake's time and the frame time (256k triangles; the rain at full); the Moon's level
+  (`MOON_LIGHT` in `kit/reclaimed.gd`) and the film's 2 % of it; whether the lightmapper on the headset does throw
+  shadows (it should not matter: no light is baked, the Moon is emission); the crickets', the owl's and the wind's
+  levels by ear.
 
 ### Room: Ice cinema
 
