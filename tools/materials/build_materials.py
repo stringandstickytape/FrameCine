@@ -36,7 +36,7 @@ from PIL import Image
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MATERIALS = os.path.join(ROOT, "app", "materials")
 TEXTURES = os.path.join(MATERIALS, "textures")
-UA = {"User-Agent": "vr-video-player-material-library"}
+UA = {"User-Agent": "framevrvideo-material-library"}
 # The packed map (ambient occlusion, roughness, metallic) is always this size: it carries less detail.
 ORM_SIZE = 1024
 SITES = {

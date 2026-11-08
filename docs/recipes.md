@@ -20,7 +20,7 @@ Next time, pick the room in the pane's Room tab (it is in the environment list),
 ## What is saved
 
 `save_recipe` writes one scene, `user://recipes/<name>.tscn`. On the device that is
-`~/.local/share/godot/app_userdata/VR Video Player/recipes/`. The scene is:
+`~/.local/share/godot/app_userdata/Frame VR Video/recipes/`. The scene is:
 
 - **The root,** with `app/scripts/dev/recipe_environment.gd`. It extends the environment interface
   (`environments/vr_environment.gd`), and holds the room's light, `ambient_level` and `screen_glow`, as they were at

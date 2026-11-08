@@ -5,7 +5,7 @@
 #   tools/frame-reset.sh          # list only
 #   tools/frame-reset.sh --yes    # stop the player, remove, then restart Steam so the library entry goes
 #
-# Removed: the installs (release, dev and spike folders), the player's data (settings, resume, bakes, models,
+# Removed: the installs (release, dev and spike folders; old and new names), the player's data (settings, resume, bakes, models,
 # logs), its library entries (non-Steam shortcuts and Devkit Games that start it), its menu entries, the share
 # login (~/.smb-password), the Android side (~/Android, ~/.android, Lepton contexts), Claude Code and Codex.
 # Kept: ~/Videos (the library), ~/Downloads, ssh access, Steam and other apps, and command-line tools the agent
@@ -30,18 +30,20 @@ shopt -s nullglob
 
 paths=(
   # installs
-  vr-video-player vr-video-player.old vr-video-player.new vr-video-player.new.part
+  framevrvideo framevrvideo.old vr-video-player vr-video-player.old vr-video-player.new vr-video-player.new.part
   spike01 spike02 spike03 spike04 spike05 iris-module
   # the player's data, logs and dev leftovers
+  .local/share/godot/app_userdata/"Frame VR Video"
   .local/share/godot/app_userdata/"VR Video Player"
   .local/share/godot/app_userdata/"Frame VR Player"
   .local/share/godot/app_userdata/"Spike "*
   .local/share/godot/app_userdata/fovtest
   .local/share/vrvp-user-objects
-  .local/state/vr-video-player
+  .local/share/framevrvideo .local/state/framevrvideo .local/state/vr-video-player .local/share/vr-video-player
   q10c-out q10c-out-p010 vr-player-dump vr-player-snaps turn.start turn.wav whisper-bench-*.tsv
   Claude
   # menu entries
+  .local/share/applications/framevrvideo.desktop Desktop/framevrvideo.desktop
   .local/share/applications/vr-video-player.desktop Desktop/vr-video-player.desktop
   # the share login
   .smb-password
@@ -53,10 +55,13 @@ paths=(
   # Codex
   .local/bin/codex .codex
 )
-# Devkit Games that start the player (FrameDrop installs land here), with their argv/env/settings files.
+# Devkit Games that start the player (FrameDrop and Frame Control installs land here), with their argv/env/settings
+# files. Their library entries are removed through Steam (Valve's steamos-delete, in ~/devkit-utils once a PC tool
+# has paired).
+titles=()
 for d in devkit-game/*/; do
-  if [ -e "$d/run.sh" ] || [ -e "$d/bin/vr-video-player-engine" ]; then
-    g=$(basename "$d"); paths+=("devkit-game/$g" devkit-game/"$g"-*.json)
+  if [ -e "$d/bin/framevrvideo-engine" ] || [ -e "$d/bin/vr-video-player-engine" ]; then
+    g=$(basename "$d"); titles+=("$g"); paths+=("devkit-game/$g" devkit-game/"$g"-*.json)
   fi
 done
 paths+=(.local/share/Steam/userdata/*/config/shortcuts.vdf.bak-*)
@@ -71,7 +76,7 @@ for p in "${found[@]}"; do printf '%8s  ~/%s\n' "$(du -sh -- "$p" 2>/dev/null | 
 # Library entries: non-Steam shortcuts whose Exe is one of ours.
 SC=$(cat <<'PY'
 import glob, os, re, sys
-ours = re.compile(r'(spike0\d/|vr-video-player|devkit-game/.*/run\.sh|godot_player)')
+ours = re.compile(r'(spike0\d/|vr-video-player|framevrvideo|devkit-game/.*/run\.sh|godot_player)')
 for f in glob.glob(os.path.expanduser('~/.local/share/Steam/userdata/*/config/shortcuts.vdf')):
     b = open(f, 'rb').read()
     for name, exe in zip(re.findall(rb'\x01(?:AppName|appname)\x00([^\x00]*)\x00', b),
@@ -82,15 +87,25 @@ for f in glob.glob(os.path.expanduser('~/.local/share/Steam/userdata/*/config/sh
 PY
 )
 mapfile -t exes < <(python3 -c "$SC")
+echo "== Devkit titles to remove from the library: ${#titles[@]}"
+for g in "${titles[@]}"; do echo "  -> $g"; done
 echo "== library shortcuts to remove: ${#exes[@]}"
 for e in "${exes[@]}"; do echo "  -> ${e/#$HOME/~}"; done
 
 if [ "$YES" != 1 ]; then echo "(dry run: --yes removes these)"; exit 0; fi
 
 echo "== stopping the player"
-pkill -f -- '--path app --display-driver' 2>/dev/null; pkill -f 'spike0[0-9]/' 2>/dev/null; pkill -f 'vr-video-player' 2>/dev/null
+pkill -f -- '--path app --display-driver' 2>/dev/null; pkill -f 'spike0[0-9]/' 2>/dev/null; pkill -f 'vr-video-player' 2>/dev/null; pkill -f 'framevrvideo' 2>/dev/null
 pkill -f 'whisper-server' 2>/dev/null; sleep 2
 
+# Its output holds Steam's session token: never shown, only whether it worked.
+for g in "${titles[@]}"; do
+  if [ -f devkit-utils/steamos-delete ] && python3 devkit-utils/steamos-delete --delete-title "$g" 2>&1 | grep -q "deleted shortcut"; then
+    echo "  removed library entry $g"
+  else
+    echo "  library entry $g: not removed (no ~/devkit-utils, or Steam not running); remove it in Steam"
+  fi
+done
 for p in "${found[@]}"; do rm -rf -- "$p"; done
 rmdir .local/share/godot/app_userdata .local/share/godot 2>/dev/null
 # Claude Code's link handler, left in the MIME list after its menu entry is gone.
@@ -118,7 +133,7 @@ def wr(items):
         o.append(t); o += k.encode() + b'\0'
         o += (wr(v) + b'\x08') if t == 0 else (v + b'\0' if t == 1 else v)
     return bytes(o)
-ours = re.compile(r'(spike0\d/|vr-video-player|devkit-game/.*/run\.sh|godot_player)')
+ours = re.compile(r'(spike0\d/|vr-video-player|framevrvideo|devkit-game/.*/run\.sh|godot_player)')
 for f in glob.glob(os.path.expanduser('~/.local/share/Steam/userdata/*/config/shortcuts.vdf')):
     b = open(f, 'rb').read()
     root, _ = rd(b, 0)

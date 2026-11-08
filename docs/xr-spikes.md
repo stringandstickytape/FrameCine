@@ -19,7 +19,7 @@ profile, eye gaze, the refresh rates and the environment blend modes. The engine
 list only with its `--verbose` flag. To get it on the headset:
 
 ```
-./bin/vr-video-player-engine --path app --display-driver x11 --xr-mode on --verbose -- --quit-after=300 2>&1 \
+./bin/framevrvideo-engine --path app --display-driver x11 --xr-mode on --verbose -- --quit-after=300 2>&1 \
   | grep "Found OpenXR extension"
 ```
 

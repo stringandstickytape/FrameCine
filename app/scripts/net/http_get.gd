@@ -82,7 +82,7 @@ static func _once(url: String, method: int, headers: PackedStringArray, body: St
 		out["error"] = "can't connect to %s:%d (status %d)" % [p[1], p[2], c.get_status()]
 		return out
 	var all_headers := headers.duplicate()
-	all_headers.append("User-Agent: VRVideoPlayer/1 UPnP/1.0 DLNADOC/1.50")
+	all_headers.append("User-Agent: FrameVRVideo/1 UPnP/1.0 DLNADOC/1.50")
 	err = c.request(method, p[3], all_headers, body)
 	if err != OK:
 		out["error"] = "request failed: %s" % error_string(err)

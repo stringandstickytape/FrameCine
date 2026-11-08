@@ -25,12 +25,12 @@
 # the engine and the whisper programs by a neutral one of the same length (tools/neutralise_paths.py), so no user name
 # ships. VERSION keeps the engine's hash before (engine_build_sha256) and after (engine_sha256).
 #
-# Output: build/dist/vr-video-player-<version>-<arch>.tar.gz (and .zip with --zip), one top folder
-# vr-video-player-<version>-<arch>/ holding
-#   bin/vr-video-player-engine   the engine fork (template build with path overrides: it runs the app folder as is)
+# Output: build/dist/framevrvideo-<version>-<arch>.tar.gz (and .zip with --zip), one top folder
+# framevrvideo-<version>-<arch>/ holding
+#   bin/framevrvideo-engine   the engine fork (template build with path overrides: it runs the app folder as is)
 #   app/                         the project, as committed (no tests, docs or editor tools)
 #   run.sh                       the launcher (the known-good recipe: x11 display driver, XR on, DISPLAY / runtime dir)
-#   vr-video-player.desktop.in   the desktop entry; install-on-frame.sh fills in the folder
+#   framevrvideo.desktop.in   the desktop entry; install-on-frame.sh fills in the folder
 #   tools/steam_shortcuts.py     the library shortcut helper (install-on-frame.sh --steam)
 #   whisper/                     speech to text for the assistant (build/whisper/README.md): whisper-server from
 #                                build/out/whisper/<aarch64|x86_64> (build/whisper-build.sh); models/ggml-<model>.bin
@@ -97,7 +97,7 @@ neutralise() { "$PY" "$REPO/tools/neutralise_paths.py" "$@"; }
 cd "$REPO"
 [ -n "$VERSION" ] || VERSION=$(git describe --tags --always --dirty 2>/dev/null || git rev-parse --short HEAD)
 case "$VERSION" in ""|*[!A-Za-z0-9._+-]*) echo "--version: letters, digits and . _ + - only" >&2; exit 2 ;; esac
-NAME="vr-video-player-$VERSION-$ARCH"
+NAME="framevrvideo-$VERSION-$ARCH"
 STAGE="$OUT/$NAME"
 rm -rf "$STAGE"
 mkdir -p "$STAGE/bin" "$STAGE/LICENSES"
@@ -116,16 +116,16 @@ if [ "$ARCH" = arm64 ]; then
   [ -n "$ENGINE" ] && [ -f "$ENGINE_DIR/$ENGINE" ] || { echo "no engine $ENGINE_DIR/${ENGINE:-godot.linuxbsd.*.arm64*}" >&2; exit 1; }
   case "$ENGINE" in *PCWIN*) ENGINE_SRC=${ENGINE_SRC:-src/godot-pcwindows} ;; esac
   ENGINE_SRC=${ENGINE_SRC:-src/godot-player}
-  cp "$ENGINE_DIR/$ENGINE" "$STAGE/bin/vr-video-player-engine"
+  cp "$ENGINE_DIR/$ENGINE" "$STAGE/bin/framevrvideo-engine"
 else
   ENGINE=${ENGINE:-godot.linuxbsd.template_debug.x86_64}
   ENGINE_SRC=${ENGINE_SRC:-src/godot-player}
-  wsl_cat "$ENGINE_SRC/bin/$ENGINE" > "$STAGE/bin/vr-video-player-engine"
+  wsl_cat "$ENGINE_SRC/bin/$ENGINE" > "$STAGE/bin/framevrvideo-engine"
 fi
-chmod +x "$STAGE/bin/vr-video-player-engine"
-ENGINE_BUILD_SHA=$(sha256sum "$STAGE/bin/vr-video-player-engine" | cut -d' ' -f1)
-neutralise "$STAGE/bin/vr-video-player-engine"
-ENGINE_SHA=$(sha256sum "$STAGE/bin/vr-video-player-engine" | cut -d' ' -f1)
+chmod +x "$STAGE/bin/framevrvideo-engine"
+ENGINE_BUILD_SHA=$(sha256sum "$STAGE/bin/framevrvideo-engine" | cut -d' ' -f1)
+neutralise "$STAGE/bin/framevrvideo-engine"
+ENGINE_SHA=$(sha256sum "$STAGE/bin/framevrvideo-engine" | cut -d' ' -f1)
 
 # --- The app, as committed ------------------------------------------------------------------------------------------
 # With LF line ends whatever this checkout uses (Git for Windows' autocrlf would give CRLF JSON and SVG files), so the
@@ -196,10 +196,10 @@ fi
 cp tools/player-run.sh "$STAGE/run.sh"
 chmod +x "$STAGE/run.sh"
 
-cat > "$STAGE/vr-video-player.desktop.in" <<'EOF'
+cat > "$STAGE/framevrvideo.desktop.in" <<'EOF'
 [Desktop Entry]
 Type=Application
-Name=VR Video Player
+Name=Frame VR Video
 Comment=Play flat, 3D, 180 and 360 video in the headset
 Exec=@DIR@/run.sh
 Path=@DIR@
@@ -215,7 +215,7 @@ cat > "$STAGE/icon.svg" <<'EOF'
 EOF
 
 # --- Licences ------------------------------------------------------------------------------------------------------
-cp LICENSE "$STAGE/LICENSES/vr-video-player-MIT.txt"
+cp LICENSE "$STAGE/LICENSES/framevrvideo-MIT.txt"
 cp app/models/controllers/LICENSE-controller.md "$STAGE/LICENSES/controller-models-CC-BY-NC-SA-4.0.md"
 cp app/materials/CREDITS.md "$STAGE/LICENSES/material-textures-CC0-credits.md"
 wsl_cat "$ENGINE_SRC/LICENSE.txt" > "$STAGE/LICENSES/engine-LICENSE.txt"
@@ -233,8 +233,8 @@ cat > "$STAGE/LICENSES/THIRD-PARTY.md" <<EOF
 
 | Part | Licence | Version | Source |
 |---|---|---|---|
-| VR Video Player (app/, run.sh) | MIT (vr-video-player-MIT.txt) | $VERSION | this project's repository |
-| Engine (bin/vr-video-player-engine): a fork of the Godot engine with a video module | MIT and the notices in engine-COPYRIGHT.txt | source tree at packaging: $GODOT_REV | https://github.com/stringandstickytape/godot, branch $GODOT_BRANCH; built with build/build-player.sh |
+| Frame VR Video (app/, run.sh) | MIT (framevrvideo-MIT.txt) | $VERSION | this project's repository |
+| Engine (bin/framevrvideo-engine): a fork of the Godot engine with a video module | MIT and the notices in engine-COPYRIGHT.txt | source tree at packaging: $GODOT_REV | https://github.com/stringandstickytape/godot, branch $GODOT_BRANCH; built with build/build-player.sh |
 | FFmpeg (linked statically into the engine) | LGPL-2.1-or-later (FFmpeg-LGPL-2.1.txt); built without --enable-gpl or --enable-nonfree | $FFMPEG_REV | https://ffmpeg.org; configured by build/ffmpeg-build.sh |
 | dav1d, the AV1 decoder (linked statically into the engine, through FFmpeg) | BSD-2-Clause (dav1d-BSD-2-Clause.txt) | $DAV1D_REV | https://code.videolan.org/videolan/dav1d; built by build/dav1d-build.sh |
 | libsmb2 (linked statically into the engine) | LGPL-2.1-or-later (libsmb2-COPYING.txt) | $SMB_REV | https://github.com/sahlberg/libsmb2; patches in build/libsmb2-patches, built by build/libsmb2-build.sh |
@@ -260,19 +260,19 @@ app_commit $(git rev-parse HEAD)
 whisper $WHISPER_VERSION
 EOF
 cat > "$STAGE/README.txt" <<'EOF'
-VR Video Player, for the Steam Frame. Full install guide: docs/install.md in the project's repository
-(https://github.com/stringandstickytape/steam-frame-vr-video-player).
+Frame VR Video, for the Steam Frame. Full install guide: docs/install.md in the project's repository
+(https://github.com/stringandstickytape/FrameVRVideo).
 
 Install with Frame Control or FrameDrop (on a PC): turn on Developer Mode on the headset (Steam Settings > System),
   pair the headset once in the PC tool, then use the install link or drop the .zip on the tool. The player shows in
   the Steam library under Non-Steam. The tool puts this folder in ~/devkit-game/<id>/ on the headset.
 Install over ssh: tools/install-on-frame.sh <the .tar.gz> (from the repository, on the PC). It copies this folder to
-  ~/vr-video-player and adds "VR Video Player" to the desktop session's menu.
+  ~/framevrvideo and adds "Frame VR Video" to the desktop session's menu.
 By hand, on the headset: unpack anywhere, then run ./run.sh (arguments for the app after it; see USAGE.md).
 Updates: the player checks the project's GitHub releases and updates itself (System has a setting to stop this).
-Uninstall: remove the title in the PC tool (or delete its folder); for the ssh install, delete ~/vr-video-player
-  and ~/.local/share/applications/vr-video-player.desktop.
-Log: ~/.local/state/vr-video-player/last.log. Settings: ~/.local/share/godot/app_userdata/VR Video Player/.
+Uninstall: remove the title in the PC tool (or delete its folder); for the ssh install, delete ~/framevrvideo
+  and ~/.local/share/applications/framevrvideo.desktop.
+Log: ~/.local/state/framevrvideo/last.log. Settings: ~/.local/share/godot/app_userdata/Frame VR Video/.
 Licences: LICENSES/ (third-party parts in LICENSES/THIRD-PARTY.md).
 Speech to text: whisper/ holds whisper.cpp's server. The player starts it on this device only (127.0.0.1) when the
   assistant needs it; no audio leaves the headset for transcription.
@@ -293,7 +293,7 @@ out, name, want_zip = sys.argv[1], sys.argv[2], sys.argv[3] == "1"
 root = os.path.join(out, name)
 
 def mode_for(arcname, is_dir):
-    ex = (is_dir or arcname.endswith(".sh") or arcname == name + "/bin/vr-video-player-engine"
+    ex = (is_dir or arcname.endswith(".sh") or arcname == name + "/bin/framevrvideo-engine"
           or arcname.rsplit("/", 1)[-1] in ("whisper-server", "whisper-cli", "whisper-bench"))
     return 0o755 if ex else 0o644
 

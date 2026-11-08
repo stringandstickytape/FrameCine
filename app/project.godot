@@ -1,11 +1,11 @@
-; VR Video Player: the application. Runs on the headset with our engine fork (hardware video through
+; Frame VR Video: the application. Runs on the headset with our engine fork (hardware video through
 ; modules/hwvideo) and on any desktop build of the engine (4.7) with a generated test-pattern source. See README.md.
 
 config_version=5
 
 [application]
 
-config/name="VR Video Player"
+config/name="Frame VR Video"
 config/description="VR video player for a standalone headset."
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.7", "Mobile")

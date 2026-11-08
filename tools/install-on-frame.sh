@@ -4,8 +4,8 @@
 #
 #   tools/install-on-frame.sh [TARBALL] [--dir DIR] [--steam] [--uninstall]
 #
-#   TARBALL      default: the newest build/dist/vr-video-player-*-arm64.tar.gz
-#   --dir DIR    install folder on the headset, relative to the home folder or absolute (default vr-video-player)
+#   TARBALL      default: the newest build/dist/framevrvideo-*-arm64.tar.gz
+#   --dir DIR    install folder on the headset, relative to the home folder or absolute (default framevrvideo)
 #   --steam      also add a non-Steam shortcut to the Steam library (tools/steam_shortcuts.py, run on the headset;
 #                it backs up shortcuts.vdf first). Untested on the device. Restart Steam to see it.
 #   --uninstall  remove the folder, its .old backup, the menu entry and (with --steam) the shortcut
@@ -14,14 +14,14 @@
 # machine (for a test in WSL or on a Linux PC: HOME decides where it goes).
 #
 # What it does on the headset: unpacks into DIR (the previous install is kept as DIR.old, one level), writes
-# ~/.local/share/applications/vr-video-player.desktop (and a copy on ~/Desktop when that folder exists), and checks
+# ~/.local/share/applications/framevrvideo.desktop (and a copy on ~/Desktop when that folder exists), and checks
 # that the engine starts (--version). Settings and the log are outside DIR, so they survive an update.
 set -euo pipefail
 
 HOST=${FRAME_HOST:-frame}
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 TARBALL=""
-DIR=vr-video-player
+DIR=framevrvideo
 STEAM=0
 UNINSTALL=0
 while [ $# -gt 0 ]; do
@@ -43,15 +43,15 @@ remote() {  # runs stdin with bash on the headset (or here, for FRAME_HOST=local
 
 if [ "$UNINSTALL" = 0 ]; then
   if [ -z "$TARBALL" ]; then
-    TARBALL=$(ls -t "$REPO"/build/dist/vr-video-player-*-arm64.tar.gz 2>/dev/null | head -1 || true)
+    TARBALL=$(ls -t "$REPO"/build/dist/framevrvideo-*-arm64.tar.gz 2>/dev/null | head -1 || true)
   fi
   [ -n "$TARBALL" ] && [ -f "$TARBALL" ] || { echo "no tarball; run tools/package.sh first" >&2; exit 1; }
   echo "copying $(basename "$TARBALL") to $HOST"
   if [ "$HOST" = local ]; then
-    mkdir -p "$HOME/.cache/vr-video-player-install"
-    cp "$TARBALL" "$HOME/.cache/vr-video-player-install/package.tar.gz"
+    mkdir -p "$HOME/.cache/framevrvideo-install"
+    cp "$TARBALL" "$HOME/.cache/framevrvideo-install/package.tar.gz"
   else
-    ssh "$HOST" 'mkdir -p ~/.cache/vr-video-player-install && cat > ~/.cache/vr-video-player-install/package.tar.gz' \
+    ssh "$HOST" 'mkdir -p ~/.cache/framevrvideo-install && cat > ~/.cache/framevrvideo-install/package.tar.gz' \
       < "$TARBALL"
   fi
 fi
@@ -61,8 +61,8 @@ set -eu
 DIR=$1; STEAM=$2; UNINSTALL=$3
 case "$DIR" in /*) ;; *) DIR=$HOME/$DIR ;; esac
 APPS=$HOME/.local/share/applications
-ENTRY=vr-video-player.desktop
-PKG=$HOME/.cache/vr-video-player-install/package.tar.gz
+ENTRY=framevrvideo.desktop
+PKG=$HOME/.cache/framevrvideo-install/package.tar.gz
 
 if [ "$UNINSTALL" = 1 ]; then
   if [ "$STEAM" = 1 ]; then
@@ -86,7 +86,7 @@ TOP=$(ls "$STAGE")
 [ "$(printf '%s\n' "$TOP" | wc -l)" = 1 ] && [ -x "$STAGE/$TOP/run.sh" ] || { echo "not a player package" >&2; exit 1; }
 
 # The engine must start on this machine (right architecture, libraries present) before the old install is moved.
-VER=$(timeout 30 "$STAGE/$TOP/bin/vr-video-player-engine" --version 2>/dev/null) && VER=$(printf '%s\n' "$VER" | tail -1)
+VER=$(timeout 30 "$STAGE/$TOP/bin/framevrvideo-engine" --version 2>/dev/null) && VER=$(printf '%s\n' "$VER" | tail -1)
 if [ -z "$VER" ]; then
   echo "the engine does not start here (wrong architecture?): install stopped, nothing changed" >&2
   exit 1
@@ -100,7 +100,7 @@ mv "$STAGE/$TOP" "$DIR"
 rm -f "$PKG"
 
 mkdir -p "$APPS"
-sed "s|@DIR@|$DIR|g" "$DIR/vr-video-player.desktop.in" > "$APPS/$ENTRY"
+sed "s|@DIR@|$DIR|g" "$DIR/framevrvideo.desktop.in" > "$APPS/$ENTRY"
 chmod +x "$APPS/$ENTRY"
 if [ -d "$HOME/Desktop" ]; then
   cp "$APPS/$ENTRY" "$HOME/Desktop/$ENTRY"
@@ -109,7 +109,7 @@ fi
 command -v update-desktop-database > /dev/null 2>&1 && update-desktop-database "$APPS" 2>/dev/null || true
 
 if [ "$STEAM" = 1 ]; then
-  python3 "$DIR/tools/steam_shortcuts.py" --add --name "VR Video Player" --exe "$DIR/run.sh" --start-dir "$DIR" \
+  python3 "$DIR/tools/steam_shortcuts.py" --add --name "Frame VR Video" --exe "$DIR/run.sh" --start-dir "$DIR" \
     --icon "$DIR/icon.svg" || echo "shortcut not added (see above); the menu entry is in place"
   echo "restart Steam to see the shortcut"
 fi

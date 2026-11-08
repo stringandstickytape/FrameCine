@@ -94,7 +94,7 @@ func _make_model() -> void:
 
 
 func _test_units() -> void:
-	_check(ModelDownload.url() == "https://github.com/stringandstickytape/steam-frame-vr-video-player/releases/download/"
+	_check(ModelDownload.url() == "https://github.com/stringandstickytape/FrameVRVideo/releases/download/"
 			+ "models-1/ggml-small.en-q8_0.bin", "the default address: %s" % ModelDownload.url())
 	_check(ModelDownload.MODEL_SIZE == 264477561 and ModelDownload.MODEL_SHA256.length() == 64,
 			"the model's size and SHA-256 are constants")

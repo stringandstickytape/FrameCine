@@ -1,10 +1,10 @@
-# Install VR Video Player
+# Install Frame VR Video
 
 Draft, 2026-11-09, for release 0.1.0. The README does not link here yet. The steps with Frame Control and FrameDrop
 follow those tools' own documentation and our tests of the same install path over ssh; a full install through each
 tool on the headset is still to be done.
 
-VR Video Player runs on the Steam Frame. It is free, and all of it is on GitHub. Install it from a PC once; after
+Frame VR Video runs on the Steam Frame. It is free, and all of it is on GitHub. Install it from a PC once; after
 that it updates itself.
 
 - [With Frame Control or FrameDrop](#with-frame-control-or-framedrop) (the usual way)
@@ -13,7 +13,7 @@ that it updates itself.
 - [Uninstall](#uninstall)
 - [PC windows: your PC's windows in the headset](#pc-windows-your-pcs-windows-in-the-headset) (optional)
 
-All downloads are on the [releases page](https://github.com/stringandstickytape/steam-frame-vr-video-player/releases).
+All downloads are on the [releases page](https://github.com/stringandstickytape/FrameVRVideo/releases).
 
 ## With Frame Control or FrameDrop
 
@@ -36,12 +36,12 @@ The install:
 5. Do one of these:
    - Click the install link for your program (the PC program asks you to confirm):
      - Frame Control:
-       `frame-control://install?manifest=https%3A%2F%2Fgithub.com%2Fstringandstickytape%2Fsteam-frame-vr-video-player%2Freleases%2Flatest%2Fdownload%2Finstall-manifest.json`
+       `frame-control://install?manifest=https%3A%2F%2Fgithub.com%2Fstringandstickytape%2FFrameVRVideo%2Freleases%2Flatest%2Fdownload%2Finstall-manifest.json`
      - FrameDrop:
-       <https://framedropvr.com/install?manifest=https%3A%2F%2Fgithub.com%2Fstringandstickytape%2Fsteam-frame-vr-video-player%2Freleases%2Flatest%2Fdownload%2Finstall-manifest.json>
-   - Or download `vr-video-player-<version>-arm64.zip` from the releases page and drag it onto the PC program.
+       <https://framedropvr.com/install?manifest=https%3A%2F%2Fgithub.com%2Fstringandstickytape%2FFrameVRVideo%2Freleases%2Flatest%2Fdownload%2Finstall-manifest.json>
+   - Or download `framevrvideo-<version>-arm64.zip` from the releases page and drag it onto the PC program.
      Do not unzip it first.
-6. On the headset, open the Steam library. **VR Video Player** is under **Non-Steam**. Start it.
+6. On the headset, open the Steam library. **Frame VR Video** is under **Non-Steam**. Start it.
 
 The PC program copies the player to the headset (about 100 MB) and adds it to the library. You do not need to restart
 Steam. The player runs from the folder the program made for it (Frame Control: `~/devkit-game/VR_Video_Player/`).
@@ -56,16 +56,16 @@ For people who can already reach the headset with `ssh` from a PC (Windows with 
 No root on the headset is necessary.
 
 1. Make an entry `frame` in `~/.ssh/config` for the headset (or set `FRAME_HOST` to the ssh host name).
-2. Get this repository (`git clone https://github.com/stringandstickytape/steam-frame-vr-video-player`) and
-   download `vr-video-player-<version>-arm64.tar.gz` from the releases page.
+2. Get this repository (`git clone https://github.com/stringandstickytape/FrameVRVideo`) and
+   download `framevrvideo-<version>-arm64.tar.gz` from the releases page.
 3. Run:
 
    ```
-   tools/install-on-frame.sh vr-video-player-<version>-arm64.tar.gz --steam
+   tools/install-on-frame.sh framevrvideo-<version>-arm64.tar.gz --steam
    ```
 
-   This copies the player to `~/vr-video-player` on the headset, checks that it starts, and keeps the previous
-   install as `~/vr-video-player.old`. `--steam` also adds the player to the Steam library (as a non-Steam game);
+   This copies the player to `~/framevrvideo` on the headset, checks that it starts, and keeps the previous
+   install as `~/framevrvideo.old`. `--steam` also adds the player to the Steam library (as a non-Steam game);
    restart Steam to see it. Without `--steam` it is only in the desktop session's menu.
 
 To check a download first: put `SHA256SUMS` from the same release next to it and run `sha256sum -c SHA256SUMS
@@ -94,7 +94,7 @@ To update by hand instead, install the new release the same way as the first tim
   devkit tool `steamos-delete --delete-title <folder name>` removes the library entry, where it is installed.
 - **Over ssh:** `tools/install-on-frame.sh --uninstall --steam`.
 
-Settings stay in `~/.local/share/godot/app_userdata/VR Video Player/` and logs in `~/.local/state/vr-video-player/`.
+Settings stay in `~/.local/share/godot/app_userdata/Frame VR Video/` and logs in `~/.local/state/framevrvideo/`.
 Delete these folders too to remove everything.
 
 ## PC windows: your PC's windows in the headset
@@ -109,7 +109,7 @@ current GPUs have one); the PC and the headset on the same home network.
 
 ### Download and first run
 
-1. From the releases page, download `vr-video-player-pc-<version>-windows-x64.zip` and unzip it anywhere (for
+1. From the releases page, download `framevrvideo-pc-<version>-windows-x64.zip` and unzip it anywhere (for
    example in Documents). There is nothing to install: it is one program, `pc-windows.exe`.
 2. Start `pc-windows.exe`. Windows can show "Windows protected your PC", because the program is not signed: click
    **More info**, then **Run anyway**. If Windows asks whether it may use the network, allow **private networks**.

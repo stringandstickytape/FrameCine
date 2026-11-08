@@ -1,4 +1,4 @@
-# Simplified Chinese for the menus and the controller labels of VR Video Player (docs/i18n.md).
+# Simplified Chinese for the menus and the controller labels of Frame VR Video (docs/i18n.md).
 #
 # MACHINE DRAFT: written by a language model, not yet checked by a native reader. Corrections are welcome. The
 # entries are not marked fuzzy on purpose: Godot's loader skips fuzzy entries, and the draft is better than English.
@@ -15,7 +15,7 @@
 # Make it again from messages.pot with tools/i18n.py merge app/locale/zh_CN.po; check with tools/i18n.py check.
 msgid ""
 msgstr ""
-"Project-Id-Version: VR Video Player\n"
+"Project-Id-Version: Frame VR Video\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"

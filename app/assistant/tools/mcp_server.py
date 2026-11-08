@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""An MCP adapter for the VR Video Player's assistant service on the headset (docs/assistant.md, "Optional clients").
+"""An MCP adapter for the Frame VR Video's assistant service on the headset (docs/assistant.md, "Optional clients").
 Python 3.8+, standard library only. The headset serves this file at https://<headset>:47802/tools/mcp_server.py; it
 needs assistant.py (served beside it) in the same folder.
 
@@ -43,7 +43,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from assistant import Api  # noqa: E402
 
-SERVER_INFO = {"name": "vr-video-player-assistant", "title": "VR Video Player", "version": "2.0.0"}
+SERVER_INFO = {"name": "framevrvideo-assistant", "title": "Frame VR Video", "version": "2.0.0"}
 MODERN = ["2026-07-28"]
 LEGACY = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"]
 WAIT_DEFAULT = 120.0

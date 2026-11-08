@@ -55,17 +55,17 @@ class Format(unittest.TestCase):
                 s.parse(bad)
 
     def test_app_id_has_the_top_bit(self):
-        aid = s.app_id('"/home/steamos/vr-video-player/run.sh"', "VR Video Player")
+        aid = s.app_id('"/home/steamos/framevrvideo/run.sh"', "Frame VR Video")
         self.assertLess(aid, 0)  # top bit set, stored signed
-        self.assertEqual(aid, s.app_id('"/home/steamos/vr-video-player/run.sh"', "VR Video Player"))
+        self.assertEqual(aid, s.app_id('"/home/steamos/framevrvideo/run.sh"', "Frame VR Video"))
 
 
 class Edit(unittest.TestCase):
-    EXE = "/home/steamos/vr-video-player/run.sh"
+    EXE = "/home/steamos/framevrvideo/run.sh"
 
     def test_add_then_update_then_remove(self):
         root, tail = s.parse(sample())
-        self.assertEqual(s.add(root, "VR Video Player", self.EXE, "/home/steamos/vr-video-player"), "added")
+        self.assertEqual(s.add(root, "Frame VR Video", self.EXE, "/home/steamos/framevrvideo"), "added")
         sc = s.shortcuts_of(root)
         self.assertEqual([k for _t, k, _v in sc], ["0", "1"])
         first_id = s.get(sc[1][2], "appid")
@@ -74,7 +74,7 @@ class Edit(unittest.TestCase):
         root2, _ = s.parse(s.dump(root, tail))  # what we write, we can read
         self.assertEqual(len(s.shortcuts_of(root2)), 2)
 
-        self.assertEqual(s.add(root, "VR Video Player", self.EXE, "/x", launch_options="--env=cinema", openvr=True),
+        self.assertEqual(s.add(root, "Frame VR Video", self.EXE, "/x", launch_options="--env=cinema", openvr=True),
                          "updated")
         self.assertEqual(len(sc), 2)
         self.assertEqual(s.get(sc[1][2], "appid"), first_id)  # the slot keeps its id (and its library art)
@@ -114,7 +114,7 @@ class Edit(unittest.TestCase):
             path = os.path.join(d, "shortcuts.vdf")
             cli(["--add", "--exe", self.EXE, "--file", path])
             root, _ = s.load(path)
-            self.assertEqual(s.get(s.shortcuts_of(root)[0][2], "AppName"), "VR Video Player")
+            self.assertEqual(s.get(s.shortcuts_of(root)[0][2], "AppName"), "Frame VR Video")
 
 
 if __name__ == "__main__":

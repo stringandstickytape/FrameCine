@@ -12,7 +12,7 @@ The link is off by default. Turn it on with either of these:
 
 - the argument `--listener=HOST[:PORT]` after `--`;
 - `listener_host` (and optionally `listener_port`, default 47800) under `[dev]` in `settings.cfg`. On the device the
-  file is `~/.local/share/godot/app_userdata/VR Video Player/settings.cfg`.
+  file is `~/.local/share/godot/app_userdata/Frame VR Video/settings.cfg`.
 
 ```
 [dev]
@@ -69,7 +69,7 @@ Each message is one JSON object on one line, in UTF-8, ending with `\n`. The pro
 **hello**, sent first on every connection:
 
 ```
-{"type": "hello", "proto": 1, "session": "7016f2c9", "t": 1793420986.8, "app": "VR Video Player",
+{"type": "hello", "proto": 1, "session": "7016f2c9", "t": 1793420986.8, "app": "Frame VR Video",
  "engine": "4.7.2-stable (custom_build)", "os": "Linux", "model": "...", "pid": 1234,
  "app_dir": "/home/steamos/spike03/app/", "user_dir": "...", "hot_reload": true, "backlog": 3, "dropped": 0}
 ```

@@ -5,9 +5,9 @@ This is a compatibility helper: it lets the player be started from the Steam lib
 the per-user file userdata/<id>/config/shortcuts.vdf, after a time-stamped backup next to it. It needs no root.
 
     python3 steam_shortcuts.py --list [--file F]
-    python3 steam_shortcuts.py --add --name "VR Video Player" --exe ~/vr-video-player/run.sh [--start-dir D]
+    python3 steam_shortcuts.py --add --name "Frame VR Video" --exe ~/framevrvideo/run.sh [--start-dir D]
                                [--icon I] [--launch-options "..."] [--openvr] [--file F] [--dry-run]
-    python3 steam_shortcuts.py --remove --exe ~/vr-video-player/run.sh [--file F] [--dry-run]
+    python3 steam_shortcuts.py --remove --exe ~/framevrvideo/run.sh [--file F] [--dry-run]
 
 Without --file, every userdata/*/config/shortcuts.vdf under ~/.local/share/Steam and ~/.steam/steam is used (a
 config folder with no shortcuts.vdf gets a new one). Steam reads the file at start and can write it back when it
@@ -235,7 +235,7 @@ def main(argv=None):
     act.add_argument("--add", action="store_true")
     act.add_argument("--remove", action="store_true")
     ap.add_argument("--file", action="append", help="a shortcuts.vdf (default: every Steam user's)")
-    ap.add_argument("--name", default="VR Video Player")
+    ap.add_argument("--name", default="Frame VR Video")
     ap.add_argument("--exe")
     ap.add_argument("--start-dir")
     ap.add_argument("--icon", default="")

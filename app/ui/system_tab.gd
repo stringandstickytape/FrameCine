@@ -370,7 +370,7 @@ func bind(p_app: Node) -> void:
 
 	box.add_child(W.section("About"))
 	var version := str(ProjectSettings.get_setting("application/config/version", ""))
-	var about := W.label("VR Video Player%s" % ((" " + version) if version != "" else ""))
+	var about := W.label("Frame VR Video%s" % ((" " + version) if version != "" else ""))
 	W.content(about)
 	box.add_child(about)
 	box.add_child(W.ellipsis(W.live_label(func() -> String: return tr("Engine %s, %s") % [

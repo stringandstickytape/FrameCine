@@ -46,12 +46,12 @@ calls go through `$L send run '...'`, which also needs `--dev-allow=60 --dev-cod
       to `~/spike03/`, with no sudo. It ends with "All N files match." and the next step (C1). Any FAILED line: run
       it again. (Until 2026-11-02 it also copied the kernel module files; that step is gone.)
 - [ ] **A2 (optional, any time): the release package** (`docs/packaging.md`). On the PC: `tools/package.sh`, then
-      `tools/install-on-frame.sh`; it ends "installed in /home/steamos/vr-video-player (engine 4.7.2...)". In the
-      desktop session the menu (and the Desktop) has "VR Video Player" and it starts the player; the log is in
-      `~/.local/state/vr-video-player/last.log`. `~/vr-video-player/run.sh --file=<a film>` over ssh plays it. Install
-      again: the old one is in `~/vr-video-player.old` and the settings are kept. Read-only:
-      `python3 ~/vr-video-player/tools/steam_shortcuts.py --list` lists the shortcuts without an error. Then
-      `tools/install-on-frame.sh --steam`, restart Steam: the library has "VR Video Player" and it starts the player
+      `tools/install-on-frame.sh`; it ends "installed in /home/steamos/framevrvideo (engine 4.7.2...)". In the
+      desktop session the menu (and the Desktop) has "Frame VR Video" and it starts the player; the log is in
+      `~/.local/state/framevrvideo/last.log`. `~/framevrvideo/run.sh --file=<a film>` over ssh plays it. Install
+      again: the old one is in `~/framevrvideo.old` and the settings are kept. Read-only:
+      `python3 ~/framevrvideo/tools/steam_shortcuts.py --list` lists the shortcuts without an error. Then
+      `tools/install-on-frame.sh --steam`, restart Steam: the library has "Frame VR Video" and it starts the player
       (note whether it starts in VR, or needs `--openvr`); a backup `shortcuts.vdf.bak-*` is next to the file. Last,
       `tools/install-on-frame.sh --uninstall --steam` removes the folder, the menu entry and the shortcut.
 
@@ -226,7 +226,7 @@ section still apply to the panel.
 
 - [ ] **Resume per file** (#7): play a real film past a minute, open another, then the first again: it continues
       about 3 s before where it was, picture and sound in step. Quit mid-film (or kill it over ssh) and start with the
-      same `--file=`: it resumes (`~/.local/share/godot/app_userdata/VR Video Player/resume.cfg` has the entry). B
+      same `--file=`: it resumes (`~/.local/share/godot/app_userdata/Frame VR Video/resume.cfg` has the entry). B
       (previous) after a resume goes back to the start.
 - [ ] **Frame step and A-B loop** (#80), keyboard: period steps one frame (paused), comma steps back; note how long a
       step takes. Slash twice a few seconds apart loops between the marks (overlay "loop ..."); slash again stops it.
@@ -372,7 +372,7 @@ section still apply to the panel.
 
 - [ ] **New rooms** (#52): Home theatre, Drive-in, Planetarium, Dome. Scale right (car, sofa, seats)? Screen size and
       height comfortable? Frame drops in the overlay?
-- [ ] **Photo room** (#18): a phone 360 photo in `~/.local/share/godot/app_userdata/VR Video Player/skyboxes/`,
+- [ ] **Photo room** (#18): a phone 360 photo in `~/.local/share/godot/app_userdata/Frame VR Video/skyboxes/`,
       picked: horizon level at eye height, not mirrored (text reads right), room light dims it.
 - [ ] **glTF room** (#53): a .glb from Blender with an empty `ScreenAnchor` (X scale = screen width), per
       `app/docs/rooms.md`, in `.../rooms/`: it is listed and the screen is at the empty.
@@ -1095,7 +1095,7 @@ On the PC: `scp spikes/04-q10c-probe/q10c-probe frame:spike01/q10c-probe` (aarch
 
 ### Every format in software (engine-codecs; the PLAYER_CODECS engine; `docs/decisions.md` D18, `docs/features.md`, "Every format")
 
-On the PC: `wsl -d Ubuntu -- bash -c 'cp ~/src/godot-player-codecs/bin/godot.linuxbsd.template_debug.arm64 /mnt/c/path/to/steam-frame-vr-video-player/build/out/godot.linuxbsd.template_debug.arm64.PLAYER_CODECS'`,
+On the PC: `wsl -d Ubuntu -- bash -c 'cp ~/src/godot-player-codecs/bin/godot.linuxbsd.template_debug.arm64 /mnt/c/path/to/FrameVRVideo/build/out/godot.linuxbsd.template_debug.arm64.PLAYER_CODECS'`,
 then `tools/morning-deploy.sh --engine godot.linuxbsd.template_debug.arm64.PLAYER_CODECS`. The files are on the PC's
 SMB share. Open each from the Files tab with the overlay on (left stick click), a minute or two each, one seek.
 

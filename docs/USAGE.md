@@ -21,7 +21,7 @@ On a desktop the view is a flat camera: drag to look, and use the keys in "Contr
 godot --xr-mode off --path app -- --file=stub://360_tb --overlay
 ```
 
-Settings on Windows are in `%APPDATA%\Godot\app_userdata\VR Video Player\`. Use `--no-save` to start from the
+Settings on Windows are in `%APPDATA%\Godot\app_userdata\Frame VR Video\`. Use `--no-save` to start from the
 defaults and write nothing.
 
 ## Run on the headset
@@ -33,7 +33,7 @@ The headset is reached with `ssh frame`, an entry in the PC's `~/.ssh/config`; t
 Player" from the desktop session's menu, or over ssh:
 
 ```
-~/vr-video-player/run.sh --file=/home/steamos/Videos/film.mkv
+~/framevrvideo/run.sh --file=/home/steamos/Videos/film.mkv
 ```
 
 **From the repository, for development:** `tools/push-app.sh` copies `app/` to the headset (`--watch` keeps copying
@@ -47,8 +47,8 @@ The display driver must be x11, and XR must be on. The engine prints `ERROR: Cou
 once. That is harmless. Over ssh from PowerShell, inner double quotes are lost: put long command lines in a script
 file on the headset and run that.
 
-The log is the terminal output (with `run.sh`: `~/.local/state/vr-video-player/last.log`). Settings are in
-`~/.local/share/godot/app_userdata/VR Video Player/settings.cfg`.
+The log is the terminal output (with `run.sh`: `~/.local/state/framevrvideo/last.log`). Settings are in
+`~/.local/share/godot/app_userdata/Frame VR Video/settings.cfg`.
 
 ## Command-line flags
 

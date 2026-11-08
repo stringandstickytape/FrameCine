@@ -6,13 +6,13 @@ extends RefCounted
 ##
 ## Folders (the same in run.sh, written by tools/package.sh):
 ##   install  the folder that holds run.sh (the app is install/app, run with --path); never a fixed path
-##   staging  ${XDG_DATA_HOME:-~/.local/share}/vr-video-player/update: package.part (+ .json), unpack/, new/,
+##   staging  ${XDG_DATA_HOME:-~/.local/share}/framevrvideo/update: package.part (+ .json), unpack/, new/,
 ##            new.complete (written last), old/ (the install before the last swap)
-##   state    ${XDG_STATE_HOME:-~/.local/state}/vr-video-player: swapped (run.sh's swap record), started (the new
+##   state    ${XDG_STATE_HOME:-~/.local/state}/framevrvideo: swapped (run.sh's swap record), started (the new
 ##            version's first frame), bad-versions (one per line)
 
 ## The release's own folder of files: GitHub redirects /latest/download/<file> to the newest full release.
-const DEFAULT_BASE_URL := "https://github.com/stringandstickytape/steam-frame-vr-video-player/releases/latest/download/"
+const DEFAULT_BASE_URL := "https://github.com/stringandstickytape/FrameVRVideo/releases/latest/download/"
 const KEY_PATH := "res://update/release-key.pub.pem"
 const LATEST := "latest.json"
 const SIGNATURE := "latest.json.sig"
@@ -134,20 +134,20 @@ static func _home() -> String:
 	return OS.get_environment("HOME")
 
 
-## ${XDG_DATA_HOME:-~/.local/share}/vr-video-player/update (outside ~/devkit-game: Valve's tools treat each folder
+## ${XDG_DATA_HOME:-~/.local/share}/framevrvideo/update (outside ~/devkit-game: Valve's tools treat each folder
 ## there as a title).
 static func default_staging_dir() -> String:
 	var base := OS.get_environment("XDG_DATA_HOME")
 	if base == "":
 		base = _home().path_join(".local/share")
-	return base.path_join("vr-video-player/update")
+	return base.path_join("framevrvideo/update")
 
 
 static func default_state_dir() -> String:
 	var base := OS.get_environment("XDG_STATE_HOME")
 	if base == "":
 		base = _home().path_join(".local/state")
-	return base.path_join("vr-video-player")
+	return base.path_join("framevrvideo")
 
 
 ## The folder that holds run.sh: the parent of the app folder (res://). "" when the app does not run from an

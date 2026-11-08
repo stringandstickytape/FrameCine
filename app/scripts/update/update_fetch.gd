@@ -13,7 +13,7 @@ extends RefCounted
 ## and appends; a server that answers 200 instead starts the file again (restarted). 416 (the range is past the end)
 ## comes back as code 416, for the caller to check what it has.
 
-const USER_AGENT := "vr-video-player-updater"
+const USER_AGENT := "framevrvideo-updater"
 const MAX_REDIRECTS := 5
 const POLL_MSEC := 5
 

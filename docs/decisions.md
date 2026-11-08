@@ -122,7 +122,7 @@ The patched `iris.ko` (P010) passed every device test when loaded in memory (P01
 `build/iris-module/iris-setup.sh`, which the app runs: the user types the headset password once in the app, and from
 then on every step is automatic, also after a SteamOS kernel update (a later player release brings the module for the
 new kernel, and the app installs it with no question). Nothing in the OS image changes: the files go to a root-owned
-`/home/.vr-video-player-iris` (persistent; `/var` is per slot), plus a systemd unit, a sudoers rule and a keep list in
+`/home/.framevrvideo-iris` (persistent; `/var` is per slot), plus a systemd unit, a sudoers rule and a keep list in
 `/etc` that atomic updates keep. A start-up service swaps the module before user sessions start; a marker on disk
 skips the swap after a start-up that crashed or hung during it. A live swap kills only the processes that hold the
 decoder (Steam's web helper, which restarts by itself), because stopping `steam.service` would kill the player in its
@@ -631,7 +631,7 @@ from GitHub Releases (`docs/framedrop.md`). Not tested on the device.
 - **FrameDrop only delivers.** It runs ARM64 Linux builds in Steam Linux Runtime 4.0, a container with its own
   `/usr`. Android apps, the agent terminal and some smaller features start host programs that are not there, and
   hardware decode and OpenXR in the container are not known. So the first launch from FrameDrop installs the
-  player into `~/vr-video-player` (the steps of `tools/install-on-frame.sh`) and adds the normal library entry; the
+  player into `~/framevrvideo` (the steps of `tools/install-on-frame.sh`) and adds the normal library entry; the
   player then runs outside the container, as now.
 - **Our own updates.** FrameDrop has no update method. At start and once a day the player gets `latest.json` from
   the latest GitHub release (a file download, not the REST API, so no rate limit), checks its signature (a key that

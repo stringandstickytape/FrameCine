@@ -15,7 +15,7 @@ const KEY_PATH := "user://assistant_tls.key"
 const CERT_PATH := "user://assistant_tls.crt"
 ## Owner read and write: FileAccess.UNIX_READ_OWNER | UNIX_WRITE_OWNER (0600).
 const OWNER_ONLY := 256 | 128
-const ISSUER := "CN=vr-video-player,O=VR Video Player,C=US"
+const ISSUER := "CN=framevrvideo,O=Frame VR Video,C=US"
 
 ## Tests use other files.
 var key_path := KEY_PATH

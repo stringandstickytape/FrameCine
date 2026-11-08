@@ -71,7 +71,7 @@ func _test_versions() -> void:
 
 func _latest(fields: Dictionary) -> PackedByteArray:
 	var d := {"version": "0.2.0", "tag": "v0.2.0", "notes": "Faster menus.",
-			"package": {"url": "https://example.com/vr-video-player-0.2.0-arm64.tar.gz", "size": 61234567,
+			"package": {"url": "https://example.com/framevrvideo-0.2.0-arm64.tar.gz", "size": 61234567,
 					"sha256": "ab".repeat(32)}}
 	for k: String in fields:
 		if k.begins_with("package."):
@@ -188,7 +188,7 @@ func _test_relauncher() -> void:
 	var a := Updater.relauncher_args(4242, "12345678901234567890")
 	var joined := " ".join(a)
 	_check("relauncher: a collected user unit (%s)" % joined, a[0] == "--user" and "--collect" in a
-			and "--unit=vr-video-player-restart-4242" in a)
+			and "--unit=framevrvideo-restart-4242" in a)
 	_check("relauncher: waits for this process, then Steam's rungameid", joined.contains('kill -0 "$1"')
 			and joined.contains("steam://rungameid/$2") and a[a.size() - 2] == "4242"
 			and a[a.size() - 1] == "12345678901234567890")

@@ -6,7 +6,7 @@ it unattended. Kiosk mode loops it for ever, for a demo in a shop or at a show. 
 ## Start and stop
 
 - **At start:** `--tour=FILE`. FILE is a path, `~/path`, or a name in `user://tours/` (with or without `.json`). On the
-  headset that folder is `~/.local/share/godot/app_userdata/VR Video Player/tours/`. Add `--kiosk` to loop it for
+  headset that folder is `~/.local/share/godot/app_userdata/Frame VR Video/tours/`. Add `--kiosk` to loop it for
   ever, whatever the file says.
 - **Over the PC link or from the phone:** `tour file=NAME` starts a tour (and stops the one running), `tour stop=true`
   stops it, and `tour_status` returns the file, the step, the round and the last errors.

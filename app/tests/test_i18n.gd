@@ -690,7 +690,7 @@ func _plain_under(n: Node, skip: Array, out: Array[String]) -> void:
 			continue
 		# Content left as it is on purpose: the player's name, the languages' own names, an assistant service's own
 		# status line. (The lab's card names are keys since stage 2.)
-		if s.begins_with("VR Video Player") or s == "English":
+		if s.begins_with("Frame VR Video") or s == "English":
 			continue
 		var line := "%s '%s'" % [c.name, s]
 		if not out.has(line):

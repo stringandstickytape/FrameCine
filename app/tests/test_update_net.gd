@@ -67,14 +67,14 @@ func _write(path: String, data: PackedByteArray) -> void:
 ## A package as tools/package.sh makes it (one top folder), or flat. engine_ok: --version prints and exits 0.
 func _package(name: String, version: String, engine_ok: bool, top := true) -> String:
 	var src := _tmp.path_join("src-" + name)
-	var dir := src.path_join("vr-video-player-%s-x86_64" % version) if top else src
+	var dir := src.path_join("framevrvideo-%s-x86_64" % version) if top else src
 	DirAccess.make_dir_recursive_absolute(dir.path_join("bin"))
 	DirAccess.make_dir_recursive_absolute(dir.path_join("app"))
 	_write(dir.path_join("run.sh"), "#!/bin/bash\necho run\n".to_utf8_buffer())
 	_write(dir.path_join("VERSION"), ("version %s\narch x86_64\n" % version).to_utf8_buffer())
 	var engine := "#!/bin/bash\necho 4.7.2.fake\nexit 0\n" if engine_ok else "#!/bin/bash\nexit 1\n"
-	_write(dir.path_join("bin/vr-video-player-engine"), engine.to_utf8_buffer())
-	_sh("chmod 755 '%s/run.sh' '%s/bin/vr-video-player-engine' && head -c 1500000 /dev/urandom > '%s/app/blob.bin'"
+	_write(dir.path_join("bin/framevrvideo-engine"), engine.to_utf8_buffer())
+	_sh("chmod 755 '%s/run.sh' '%s/bin/framevrvideo-engine' && head -c 1500000 /dev/urandom > '%s/app/blob.bin'"
 			% [dir, dir, dir])
 	var out := _root.path_join(name + ".tar.gz")
 	if top:
@@ -280,7 +280,7 @@ func _staged_ok(what: String) -> void:
 	_check("%s: new.complete says 1.1.0" % what, Core.read_text(up.staging_dir.path_join("new.complete")) == "1.1.0\n")
 	_check("%s: new/ is the package, executable kept" % what,
 			Core.installed_version(Core.read_text(new_dir.path_join("VERSION"))) == "1.1.0"
-			and _sh("test -x '%s/run.sh' && test -x '%s/bin/vr-video-player-engine'" % [new_dir, new_dir]) == 0
+			and _sh("test -x '%s/run.sh' && test -x '%s/bin/framevrvideo-engine'" % [new_dir, new_dir]) == 0
 			and FileAccess.file_exists(new_dir.path_join("app/blob.bin")))
 	_check("%s: the .part and the unpack folder are gone" % what,
 			not FileAccess.file_exists(up.staging_dir.path_join("package.part"))

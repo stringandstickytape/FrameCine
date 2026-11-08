@@ -21,9 +21,9 @@
 # (privacy-check.sh --archive: every entry's name and contents).
 #
 # Writes build/dist/release-<VERSION>/:
-#   vr-video-player-<V>-arm64.tar.gz        the package (one top folder, vr-video-player-<V>-arm64/); the updater's
-#   vr-video-player-<V>-arm64.zip           the same files, for Frame Control and FrameDrop
-#   vr-video-player-pc-<V>-windows-x64.zip  the PC windows app: vr-video-player-pc-<V>-windows-x64/ with
+#   framevrvideo-<V>-arm64.tar.gz        the package (one top folder, framevrvideo-<V>-arm64/); the updater's
+#   framevrvideo-<V>-arm64.zip           the same files, for Frame Control and FrameDrop
+#   framevrvideo-pc-<V>-windows-x64.zip  the PC windows app: framevrvideo-pc-<V>-windows-x64/ with
 #                                           pc-windows.exe, README.txt, LICENSES/
 #   latest.json, latest.json.sig            the update file and its RSA-3072 PKCS#1 v1.5 SHA-256 signature
 #   install-manifest.json                   framedrop.install/v1 (FrameDrop and Frame Control): the zip
@@ -32,7 +32,7 @@
 set -euo pipefail
 
 REPO=$(cd "$(dirname "$0")/.." && pwd)
-GH_REPO=stringandstickytape/steam-frame-vr-video-player
+GH_REPO=stringandstickytape/FrameVRVideo
 BASE_URL="https://github.com/$GH_REPO/releases"
 KEY=${VRVP_RELEASE_KEY:-$HOME/.config/vrvp-release/release-key.pem}
 PUB="$REPO/app/update/release-key.pub.pem"
@@ -70,7 +70,7 @@ fi
 [ -z "$PC_ZIP" ] || [ -f "$PC_ZIP" ] || { echo "--pc-zip: no file $PC_ZIP" >&2; exit 2; }
 [ -z "$PC_ZIP" ] || PC_ZIP=$(cd "$(dirname "$PC_ZIP")" && pwd)/$(basename "$PC_ZIP")
 TAG="v$VERSION"
-[ -n "$NOTES" ] || NOTES="VR Video Player $VERSION."
+[ -n "$NOTES" ] || NOTES="Frame VR Video $VERSION."
 case "$NOTES" in *$'\n'*) echo "--notes: one line" >&2; exit 2 ;; esac
 
 PY=""
@@ -113,8 +113,8 @@ fi
 # --- The packages ------------------------------------------------------------------------------------------------
 DIST="$REPO/build/dist"
 REL="$DIST/release-$VERSION"
-PKG="vr-video-player-$VERSION-arm64"
-PCNAME="vr-video-player-pc-$VERSION-windows-x64"
+PKG="framevrvideo-$VERSION-arm64"
+PCNAME="framevrvideo-pc-$VERSION-windows-x64"
 rm -rf "$REL"
 mkdir -p "$REL"
 
@@ -139,7 +139,7 @@ if [ "$PC" = 1 ]; then
     mkdir -p "$PCSTAGE/LICENSES"
     cp "$EXE" "$PCSTAGE/pc-windows.exe"
     "$PY" tools/neutralise_paths.py "$PCSTAGE/pc-windows.exe"
-    cp LICENSE "$PCSTAGE/LICENSES/vr-video-player-MIT.txt"
+    cp LICENSE "$PCSTAGE/LICENSES/framevrvideo-MIT.txt"
     cat > "$PCSTAGE/LICENSES/THIRD-PARTY.txt" <<'EOF'
 Third-party parts of pc-windows.exe
 
@@ -161,7 +161,7 @@ compiled in under this licence:
   CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
   IN THE SOFTWARE.
 
-The rest of pc-windows.exe is this project's own code: MIT (vr-video-player-MIT.txt).
+The rest of pc-windows.exe is this project's own code: MIT (framevrvideo-MIT.txt).
 EOF
     { sed "s/@VERSION@/$VERSION/g" tools/release-pc-readme.txt; } > "$PCSTAGE/README.txt"
     "$PY" - "$DIST" "$PCNAME" <<'PYEOF'
@@ -200,7 +200,7 @@ if t != z:
     problems.append("the tarball and the zip differ: %s" % sorted(set(t.items()) ^ set(z.items()))[:5])
 if {n.split("/")[0] for n in t} != {pkg}:
     problems.append("not one top folder %s/" % pkg)
-for name, mode in ((pkg + "/run.sh", 0o755), (pkg + "/bin/vr-video-player-engine", 0o755), (pkg + "/VERSION", 0o644)):
+for name, mode in ((pkg + "/run.sh", 0o755), (pkg + "/bin/framevrvideo-engine", 0o755), (pkg + "/VERSION", 0o644)):
     if name not in t or t[name][0] != mode:
         problems.append("%s missing or not mode %o" % (name, mode))
 bad = [n for n, (m, s, d) in t.items() if m not in (0o644, 0o755)]
@@ -208,7 +208,7 @@ if bad:
     problems.append("odd modes: %s" % bad[:5])
 if zf.testzip() is not None:
     problems.append("the zip has a bad entry")
-engine = tar.extractfile(pkg + "/bin/vr-video-player-engine").read(20)
+engine = tar.extractfile(pkg + "/bin/framevrvideo-engine").read(20)
 if engine[:4] != b"\x7fELF" or int.from_bytes(engine[18:20], "little") != 183:  # EM_AARCH64
     problems.append("the engine is not an arm64 ELF")
 first = tar.extractfile(pkg + "/VERSION").read().decode().splitlines()[0]
@@ -217,7 +217,7 @@ if first != "version " + version:
 if pc == "1":
     p = zipfile.ZipFile(os.path.join(rel, pcname + ".zip"))
     names = set(p.namelist())
-    for need in ("pc-windows.exe", "README.txt", "LICENSES/vr-video-player-MIT.txt"):
+    for need in ("pc-windows.exe", "README.txt", "LICENSES/framevrvideo-MIT.txt"):
         if pcname + "/" + need not in names:
             problems.append("the PC zip has no %s/%s" % (pcname, need))
     exe = p.read(pcname + "/pc-windows.exe")
@@ -246,7 +246,7 @@ latest = {"version": version, "tag": tag,
           "package": {"url": tgz["url"], "size": tgz["size"], "sha256": tgz["sha256"]},
           "notes": notes}
 zp = info(pkg + ".zip")
-manifest = {"schema": "framedrop.install/v1", "name": "VR Video Player",
+manifest = {"schema": "framedrop.install/v1", "name": "Frame VR Video",
             "files": [{"url": zp["url"], "sha256": zp["sha256"], "size": zp["size"], "exe": "run.sh"}]}
 # UTF-8, no BOM, LF; signed byte for byte as written.
 for name, obj in (("latest.json", latest), ("install-manifest.json", manifest)):
@@ -265,7 +265,7 @@ FPR=$(openssl pkey -pubin -in "$PUB" -outform DER 2> /dev/null | sha256sum | cut
 {
   echo "$NOTES"
   echo
-  echo "VR Video Player for the Steam Frame. Install guide: [docs/install.md](https://github.com/$GH_REPO/blob/$TAG/docs/install.md)."
+  echo "Frame VR Video for the Steam Frame. Install guide: [docs/install.md](https://github.com/$GH_REPO/blob/$TAG/docs/install.md)."
   echo
   echo "| File | What |"
   echo "|---|---|"
@@ -289,7 +289,7 @@ echo "install-manifest.json:"
 sed 's/^/  /' "$REL/install-manifest.json"
 
 # gh runs in the release folder, with the assets by name.
-GH_ARGS=(release create "$TAG" --repo "$GH_REPO" --verify-tag --draft --title "VR Video Player $VERSION"
+GH_ARGS=(release create "$TAG" --repo "$GH_REPO" --verify-tag --draft --title "Frame VR Video $VERSION"
          --notes-file release-notes.md "${ASSETS[@]}")
 show() { local s; s=$(printf ' %q' "$@"); echo "  ${s# }"; }
 if [ "$PUBLISH" = 0 ]; then
@@ -300,7 +300,7 @@ if [ "$PUBLISH" = 0 ]; then
     echo "Not published (no --publish). To publish, after the user agrees: tools/release.sh $VERSION --publish"
   fi
   echo "which, after the checks and the build above, runs in the repository:"
-  show git tag -a "$TAG" -m "VR Video Player $VERSION" "$COMMIT"
+  show git tag -a "$TAG" -m "Frame VR Video $VERSION" "$COMMIT"
   show git push origin "refs/tags/$TAG"
   echo "  and in ${REL#"$REPO/"}/:"
   show gh "${GH_ARGS[@]}"
@@ -310,7 +310,7 @@ if [ "$PUBLISH" = 0 ]; then
 fi
 
 step "publish $TAG"
-git rev-parse -q --verify "refs/tags/$TAG" > /dev/null || git tag -a "$TAG" -m "VR Video Player $VERSION" "$COMMIT"
+git rev-parse -q --verify "refs/tags/$TAG" > /dev/null || git tag -a "$TAG" -m "Frame VR Video $VERSION" "$COMMIT"
 git push origin "refs/tags/$TAG"
 (cd "$REL" && gh "${GH_ARGS[@]}")
 # Published only once every asset is up, so no player sees a latest.json without its package.

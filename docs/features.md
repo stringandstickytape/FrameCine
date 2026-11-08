@@ -2502,7 +2502,7 @@ makes every request (`app/scripts/assistant/fab_store.gd`, `app/ui/fab_panel.gd`
   a row, at most 300 s, and the tab says "Fab is busy" with the seconds left. Searches are kept a day
   (`user://fab/search`), thumbnails until **Clear Fab's cache** (`user://fab/thumbs`, at most 16 MB: the oldest go
   first). No crawl and no bundled list.
-- **User-Agent.** `VRVideoPlayer/<version> (+https://github.com/stringandstickytape/steam-frame-vr-video-player)`, the
+- **User-Agent.** `FrameVRVideo/<version> (+https://github.com/stringandstickytape/FrameVRVideo)`, the
   version from the release's `VERSION` file, else `dev`. Fab accepted it on 2026-11-06: the search, the files, the
   link and the CDN's download all answered 200.
 - **Commands:** `fab_status`, `fab_search {query, cursor}`, `fab_import {uid}`, `fab_cancel` (`docs/assistant.md`,
