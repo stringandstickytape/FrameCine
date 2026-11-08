@@ -155,12 +155,32 @@ The FrameDrop zip is the normal release package. Its `run.sh` does a check befor
 After this, the user starts "VR Video Player" from the library entry, which runs outside the container. The
 FrameDrop entry ("VR Video Player (installer)") can stay (it installs again, which is harmless) or be removed.
 
-To find out on the device:
+Checked on the device 2026-11-09, without FrameDrop: the headset already has `SteamLinuxRuntime_4-arm64` (steamrt4
+4.0.20261021, pressure-vessel 0.20261007), and its `run -- <command>` starts a command in the same container.
 
-- Does the container have `python3`? (SLR images usually do.) If not, `steam_shortcuts.py` runs with the host's
-  Python through `/run/host/usr/bin/python3` and its libraries, or the shortcut is written by a small program in the
-  package.
-- Is the home folder writable from the container? (Usually yes.)
+- `python3` is there (3.13, with `zipfile`, `hashlib` and `ssl`), so `steam_shortcuts.py` runs as it is. Also
+  `bash`, `curl` and `xterm`; not `rsync`, `pactl`, `sqlite3`, `node`, `systemd-run`, `systemctl` or `kwin_wayland`.
+- The home folder is writable, and so is `shortcuts.vdf`.
+- `/dev/video-dec0` opens; `/dev/dri` is there. The host's programs are under `/run/host/usr/bin`. glibc is 2.43.
+- The OpenXR runtime file in `~/.config/openxr/1/` is visible (OpenXR itself not tried: the player runs outside).
+
+FrameDrop is closed source (no licence or repository on its site), but it uses Valve's SteamOS Devkit path, and
+Valve's Devkit Client is MIT (<https://gitlab.steamos.cloud/devkit/steamos-devkit>, read 2026-11-09):
+
+- The client copies with rsync `--chmod=Du=rwx,Dgo=rx,Fu=rwx,Fog=rx`: every file arrives executable.
+- The files go to `~/devkit-game/<gameid>/`. The command line, environment and settings go to
+  `~/devkit-game/<gameid>-argv.json`, `-env.json` and `-settings.json`.
+- `devkit-utils/steam-client-create-shortcut` registers the title with Steam at once, through `~/.steam/steam.pipe`
+  (`devkit-1 steam://devkit-1/<token from ~/.steam/steam.token>/create-shortcut?...`). No Steam restart.
+- The runtime is the setting `compat_tool`: `SteamLinuxRuntime_4-arm64`, `lepton`, `proton-stable` and others, or
+  empty ("Not specified"). `steamos-delete` removes a title.
+
+So the first launch could register the installed player as a Devkit Game itself, with no compat tool, and need no
+Steam restart. To test on the device: does a title with an empty `compat_tool` run outside the container?
+
+Still to find out with FrameDrop itself: which `compat_tool` and command line it writes (if it follows the Devkit
+Client, the files are executable).
+
 - Can a Devkit Game run without a compat tool (Steam > Properties > Compatibility)? If yes, the copy step is not
   necessary, but the updater (below) still needs an install folder that the player owns.
 - Is the `--steam` library entry correct on the Frame? It is not yet tested (`docs/packaging.md`).
