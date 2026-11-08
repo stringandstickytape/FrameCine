@@ -3077,8 +3077,8 @@ msgstr "雅典屋顶影院"
 msgid "Floodlights on the hill"
 msgstr "山上的泛光灯"
 
-msgid "How brightly the ruins on the hill are lit. At the bottom: dark."
-msgstr "山上的古迹被照亮的程度。拉到最低：熄灭。"
+msgid "How brightly the temple on the hill is lit. At the bottom: dark."
+msgstr "山上的神庙被照亮的程度。拉到最低：熄灭。"
 
 #. A room's name: a child's bedroom with a fort of pillows, 1993.
 msgid "Pillow Fort 1993"
@@ -3361,8 +3361,8 @@ msgstr "粉蓝两色的豪华电影宫：灯光变幻的放射状天花板、枝
 msgid "An old picture house taken back by nature: half its roof gone to the stars, ivy and ferns, rain into a puddle that gives back the film."
 msgstr "被大自然收回的老影院：半个屋顶已向星空敞开，常春藤和野草，雨水落进映着影片的水洼。"
 
-msgid "A summer cinema on a rooftop: director's chairs, bougainvillea, a floodlit acropolis on its hill, and a cat on the wall."
-msgstr "屋顶上的夏日露天影院：导演椅、三角梅、山上灯火通明的卫城，墙头一只猫。"
+msgid "A summer cinema on an Athens roof: director's chairs on terracotta tiles, bougainvillea, strings of bulbs, the picture painted on a blind wall, a floodlit temple on its hill, the city all round."
+msgstr "雅典屋顶上的夏日露天影院：赤陶地砖上的导演椅、三角梅、一串串灯泡、画在山墙上的银幕、山上灯火通明的神庙，四周是整座城市。"
 
 msgid "A tired multiplex screen, 1983: plasterboard, a swirly carpet, a broken seat, smoke in the beam and a worn print."
 msgstr "1983年一间疲惫的多厅影院放映厅：石膏板墙、旋涡花纹地毯、一个坏座位、光束里的烟雾和一卷磨损的拷贝。"
