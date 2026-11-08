@@ -117,6 +117,25 @@ Manifest (these are all the fields that the site documents):
 - HTTPS is necessary (HTTP only from `localhost`, for tests). The URL must end in a file name. `file://` URLs, LAN
   addresses and credentials in the URL are not permitted.
 
+## Frame Control, a second installer with the same links
+
+Frame Control (<https://github.com/saphid/frame-control>, MIT, read 2026-11-09) is an open-source PC app for the Frame
+(Windows, macOS, Linux, iPhone). It reads FrameDrop's manifest (`framedrop.install/v1`), so one manifest serves
+both. Its link is `frame-control://install?manifest=<URL-encoded manifest URL>` (`docs/web-install.md` there). Its
+extension `files[0].exe` names the program in a zip to run (for us `run.sh`), and `files[0].size` the size.
+
+- It installs a zip the same way as Valve's Devkit Client: `~/devkit-game/<id>/`, then `create-shortcut`. An ARM64
+  Linux build gets `compat_tool` `SteamLinuxRuntime_4-arm64`, like FrameDrop, and a link cannot choose another. So
+  the first launch is in the container with either tool.
+- Its rules: HTTPS only, public hosts only, at most 4 GiB, the sha256 checked, and the user confirms.
+- One report (not checked) says FrameDrop cannot download from GitHub at present. If so, Frame Control is the
+  first link on the README until FrameDrop is fixed.
+
+The first launch can then turn its own entry into a native one: the container shares the home folder, so `run.sh`
+can write `compat_tool: ""` into `~/devkit-game/<id>-settings.json` (the id is its own folder's name) and call
+`create-shortcut` for the same id. Then there is one library entry, and from the next start it runs outside the
+container. To test on the device.
+
 ## The problem: the runtime container
 
 FrameDrop runs ARM64 Linux builds in Steam Linux Runtime 4.0 (Debian 13). This is almost certainly a
