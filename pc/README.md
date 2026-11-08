@@ -83,3 +83,15 @@ stop). See the top of `src/app/main.cpp`.
   over the rounds.
 - `pc/tests/data/test_only_headset.*`: a throwaway self-signed certificate and key for the fake headset. Test only:
   they protect nothing.
+
+## Taking the PC back
+
+The PC's own mouse and keyboard always win. Move the PC's mouse or press a key and the headset's mouse and keys are
+ignored until the PC's have been still for about 4 seconds (the headset is told). Two keys work whatever has the focus:
+
+| Keys | What |
+|---|---|
+| Ctrl+Alt+F12 | Hands off: the headset's mouse and keys are ignored until pressed again |
+| Ctrl+Alt+Shift+F12 | Sending stopped as well: every window and the sound end, and the headset can't open more until pressed again |
+
+The window (Alt+Tab to "PC windows") works from the keyboard: Tab, Enter, Esc.

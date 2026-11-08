@@ -60,8 +60,16 @@ public:
     void forget();
     // Called (from any thread) when the status changed.
     void set_on_change(std::function<void()> f);
+    // A line for the headset to show the viewer (sent as an `error`, which the headset shows; nothing when not
+    // connected).
+    void notice(const std::string& what);
+    // Sending stopped at the PC (Ctrl+Alt+Shift+F12): every stream and the sound end, and the headset's `open` is
+    // refused until it is allowed again.
+    void set_sending(bool on);
+    bool sending() const { return sending_.load(); }
 
 private:
+    std::atomic<bool> sending_{true};
     struct Found {
         uint32_t address = 0;
         HereMessage here;

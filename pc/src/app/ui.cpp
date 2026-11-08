@@ -5,6 +5,7 @@
 
 #include <string>
 
+#include "input.h"
 #include "log.h"
 #include "util.h"
 
@@ -15,6 +16,10 @@ namespace {
 constexpr UINT kTrayMsg = WM_APP + 1;
 constexpr UINT kStatusMsg = WM_APP + 2;
 constexpr UINT kTrayId = 1;
+// Ctrl+Alt+F12: hands off (the headset's mouse and keys ignored); Ctrl+Alt+Shift+F12: sending stopped too.
+enum : int { HotHandsOff = 1, HotStopAll = 2 };
+constexpr UINT_PTR kWatchTimer = 1;
+
 enum : int { IdStatus = 100, IdMessage, IdCodeLabel, IdCode, IdPair, IdSendingLabel, IdSending, IdEncoder, IdForget,
              IdQuit, IdMenuShow = 200, IdMenuQuit };
 
@@ -150,7 +155,10 @@ void refresh() {
     SendMessageW(list, LB_RESETCONTENT, 0, 0);
     for (const auto& t : s.sending) SendMessageW(list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(t.c_str()));
     if (s.sound) SendMessageW(list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(L"(the PC's sound)"));
-    SetDlgItemTextW(g.wnd, IdEncoder, (L"Video encoder: " + s.encoder).c_str());
+    std::wstring enc = L"Video encoder: " + s.encoder;
+    if (!g.session->sending()) enc += L"   |   SENDING STOPPED (Ctrl+Alt+Shift+F12 to allow)";
+    else if (input::hands_off()) enc += L"   |   HANDS OFF: the headset's mouse and keys are ignored (Ctrl+Alt+F12)";
+    SetDlgItemTextW(g.wnd, IdEncoder, enc.c_str());
     EnableWindow(GetDlgItem(g.wnd, IdForget), s.paired);
     const std::wstring tip = std::wstring(L"PC windows: ") +
                              (s.connected ? L"connected" : s.paired ? L"waiting for the headset" : L"not paired");
@@ -198,8 +206,35 @@ LRESULT CALLBACK proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
             mk(L"BUTTON", L"Quit", WS_TABSTOP, IdQuit);
             set_font();
             layout();
+            // The way out when the headset's mouse is on the PC: hot keys that work whatever has the focus, and the
+            // PC's own mouse and keyboard always winning (input.h).
+            if (!RegisterHotKey(h, HotHandsOff, MOD_CONTROL | MOD_ALT | MOD_NOREPEAT, VK_F12))
+                logf("ui: Ctrl+Alt+F12 is taken by another program");
+            if (!RegisterHotKey(h, HotStopAll, MOD_CONTROL | MOD_ALT | MOD_SHIFT | MOD_NOREPEAT, VK_F12))
+                logf("ui: Ctrl+Alt+Shift+F12 is taken by another program");
+            input::watch_local_input(true);
+            SetTimer(h, kWatchTimer, 250, nullptr);
             return 0;
         }
+        case WM_HOTKEY:
+            if (wp == HotHandsOff) {
+                const bool on = !input::hands_off();
+                input::set_hands_off(on);
+                g.session->notice(on ? "hands off at the PC: its mouse and keys are its own (Ctrl+Alt+F12 to give "
+                                       "them back)"
+                                     : "the headset has the PC's mouse and keys again");
+            } else if (wp == HotStopAll) {
+                const bool on = !g.session->sending();
+                g.session->set_sending(on);
+                input::set_hands_off(!on);
+                g.session->notice(on ? "sending allowed again at the PC" : "sending stopped at the PC");
+            }
+            refresh();
+            return 0;
+        case WM_TIMER:
+            if (wp == kWatchTimer && input::take_local_takeover() && !input::hands_off())
+                g.session->notice("someone is using the PC's own mouse or keyboard: the headset's wait a moment");
+            return 0;
         case WM_DPICHANGED: {
             const RECT* r = reinterpret_cast<const RECT*>(lp);
             SetWindowPos(h, nullptr, r->left, r->top, r->right - r->left, r->bottom - r->top, SWP_NOZORDER);
@@ -252,7 +287,13 @@ LRESULT CALLBACK proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
         case WM_ENDSESSION:
             if (wp) quit();
             return 0;
-        case WM_DESTROY: PostQuitMessage(0); return 0;
+        case WM_DESTROY:
+            UnregisterHotKey(h, HotHandsOff);
+            UnregisterHotKey(h, HotStopAll);
+            KillTimer(h, kWatchTimer);
+            input::watch_local_input(false);
+            PostQuitMessage(0);
+            return 0;
     }
     return DefWindowProcW(h, msg, wp, lp);
 }

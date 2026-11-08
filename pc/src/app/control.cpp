@@ -147,6 +147,19 @@ void Session::send(const json::Value& m) {
     if (c && !c->send_line(m.dump())) c->close();
 }
 
+void Session::notice(const std::string& what) {
+    json::Value m = msg("error");
+    m.set("what", json::Value::string(what));
+    send(m);
+}
+
+void Session::set_sending(bool on) {
+    sending_ = on;
+    logf("control: sending %s at the PC", on ? "allowed again" : "stopped");
+    if (!on) stop_streams();
+    changed();
+}
+
 void Session::stop_streams() {
     std::map<int, std::unique_ptr<VideoStream>> s;
     std::unique_ptr<AudioStream> a;
@@ -385,6 +398,10 @@ void Session::handle(const json::Value& m) {
         list_wanted_ = true;
         wake_cv_.notify_all();
     } else if (t == "open") {
+        if (!sending_) {
+            notice("sending is stopped at the PC (Ctrl+Alt+Shift+F12 to allow it)");
+            return;
+        }
         StreamRequest r;
         r.stream = static_cast<int>(m.integer("stream", -1));
         r.id = m.str("id");
@@ -427,7 +444,7 @@ void Session::handle(const json::Value& m) {
             s->stop();
         }
     } else if (t == "sound") {
-        const bool on = m.flag("on");
+        const bool on = m.flag("on") && sending_;
         std::unique_ptr<AudioStream> old;
         {
             std::lock_guard g(streams_lock_);

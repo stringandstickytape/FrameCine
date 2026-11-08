@@ -23,6 +23,7 @@
 
 #include "capture.h"
 #include "control.h"
+#include "input.h"
 #include "log.h"
 #include "net.h"
 #include "ui.h"
@@ -68,6 +69,8 @@ int WINAPI wWinMain(HINSTANCE inst, HINSTANCE, PWSTR, int) {
             opt.port = static_cast<uint16_t>(std::wcstoul(args[++i].c_str(), nullptr, 10));
         } else if (a == L"--stats-every" && more) {
             opt.stats_every_s = std::max(1, _wtoi(args[++i].c_str()));
+        } else if (a == L"--no-local-yield") {
+            input::set_local_yield(false);
         } else if (a == L"--hidden") {
             hidden = true;
         } else if (a == L"--encoders") {

@@ -21,6 +21,9 @@ Status: phase 1 being built (2026-11-08). The headset's half is in (below, "The 
    (half a second) is highlighted and takes the keyboard and voice.
 6. The mouse paired with the headset moves a cursor round you; over a pane it is that window's mouse. Clicks, the
    wheel and keys go to the PC window. The controller's laser and trigger work as a mouse on a pane too.
+7. At the PC itself: its own mouse and keyboard always win (the headset's input waits until they have been still for
+   about 4 s). Ctrl+Alt+F12 is hands off (the headset's mouse and keys ignored until pressed again), Ctrl+Alt+Shift+F12
+   stops sending too (`pc/README.md`).
 
 ## Phase 1 (now)
 

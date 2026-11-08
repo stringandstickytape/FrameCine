@@ -1,6 +1,7 @@
 #include "input.h"
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <mutex>
 #include <set>
@@ -18,6 +19,43 @@ namespace {
 std::mutex g_lock;
 std::set<std::pair<uint16_t, uint32_t>> g_keys;  // held keys: (scan or vk, flags)
 std::set<std::string> g_buttons;                  // held mouse buttons, by the protocol's names
+
+// The PC's own input: the headset's is ignored until the PC's has been still this long.
+constexpr int64_t kLocalYieldMs = 4000;
+std::atomic<bool> g_hands_off{false};
+std::atomic<int64_t> g_local_until_ms{0};
+std::atomic<bool> g_takeover{false};
+std::atomic<bool> g_released{false};
+std::atomic<bool> g_local_yield{true};
+HHOOK g_mouse_hook = nullptr;
+HHOOK g_key_hook = nullptr;
+
+int64_t now_ms() { return static_cast<int64_t>(GetTickCount64()); }
+
+bool may_act();
+
+void local_input() {
+    const int64_t now = now_ms();
+    if (now >= g_local_until_ms.load()) g_takeover = true;
+    g_local_until_ms = now + kLocalYieldMs;
+}
+
+// Kept short: Windows drops a low-level hook that is slow to return.
+LRESULT CALLBACK mouse_hook(int code, WPARAM wp, LPARAM lp) {
+    if (code == HC_ACTION) {
+        const auto* m = reinterpret_cast<const MSLLHOOKSTRUCT*>(lp);
+        if (!(m->flags & (LLMHF_INJECTED | LLMHF_LOWER_IL_INJECTED))) local_input();
+    }
+    return CallNextHookEx(nullptr, code, wp, lp);
+}
+
+LRESULT CALLBACK key_hook(int code, WPARAM wp, LPARAM lp) {
+    if (code == HC_ACTION) {
+        const auto* k = reinterpret_cast<const KBDLLHOOKSTRUCT*>(lp);
+        if (!(k->flags & (LLKHF_INJECTED | LLKHF_LOWER_IL_INJECTED))) local_input();
+    }
+    return CallNextHookEx(nullptr, code, wp, lp);
+}
 
 bool button_flags(const std::string& b, bool down, DWORD& flags, DWORD& data) {
     data = 0;
@@ -73,6 +111,7 @@ void send(std::vector<INPUT>& v) {
 
 void mouse(const Target& t, MouseEvent ev, double x, double y, int sw, int sh, const std::string& button, double dx,
            double dy) {
+    if (!may_act()) return;
     if (is_minimised(t)) return;
     const auto rect = captured_rect(t);
     if (!rect) return;
@@ -120,6 +159,7 @@ void mouse(const Target& t, MouseEvent ev, double x, double y, int sw, int sh, c
 bool key(const std::string& name, bool down) {
     const auto k = keys::lookup(name);
     if (!k) return false;
+    if (!may_act()) return true;
     std::vector<INPUT> v{key_input(*k, !down)};
     {
         std::lock_guard g(g_lock);
@@ -132,6 +172,7 @@ bool key(const std::string& name, bool down) {
 }
 
 void text(const std::string& utf8) {
+    if (!may_act()) return;
     const std::wstring w = to_wide(utf8);
     std::vector<INPUT> v;
     auto vk = [&](WORD code) {
@@ -168,6 +209,7 @@ void text(const std::string& utf8) {
 }
 
 bool focus(const Target& t) {
+    if (!may_act()) return false;
     if (t.monitor) return true;
     HWND h = t.hwnd;
     if (!IsWindow(h)) return false;
@@ -253,5 +295,44 @@ std::string cursor_shape() {
     }
     return "other";
 }
+
+namespace {
+
+// The headset may act now. On the first refusal it lets go of anything the headset held, so nothing stays down while
+// the PC is used directly.
+bool may_act() {
+    if (g_hands_off || (g_local_yield && now_ms() < g_local_until_ms.load())) {
+        if (!g_released.exchange(true)) release_all();
+        return false;
+    }
+    g_released = false;
+    return true;
+}
+
+}  // namespace
+
+void set_hands_off(bool on) {
+    g_hands_off = on;
+    logf("input: hands off %s", on ? "on: the headset's mouse and keys are ignored" : "off");
+    if (on && !g_released.exchange(true)) release_all();
+}
+
+bool hands_off() { return g_hands_off; }
+
+void watch_local_input(bool on) {
+    if (on && !g_mouse_hook) {
+        g_mouse_hook = SetWindowsHookExW(WH_MOUSE_LL, mouse_hook, GetModuleHandleW(nullptr), 0);
+        g_key_hook = SetWindowsHookExW(WH_KEYBOARD_LL, key_hook, GetModuleHandleW(nullptr), 0);
+        if (!g_mouse_hook || !g_key_hook) logf("input: could not watch the PC's own mouse and keyboard");
+    } else if (!on) {
+        if (g_mouse_hook) UnhookWindowsHookEx(g_mouse_hook);
+        if (g_key_hook) UnhookWindowsHookEx(g_key_hook);
+        g_mouse_hook = g_key_hook = nullptr;
+    }
+}
+
+bool take_local_takeover() { return g_local_yield && g_takeover.exchange(false); }
+
+void set_local_yield(bool on) { g_local_yield = on; }
 
 }  // namespace pcw::input

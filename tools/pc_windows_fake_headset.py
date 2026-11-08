@@ -370,7 +370,9 @@ class TestWindow:
 
 
 def start_app(exe, out_dir, cfg, log, code=None, codec=None, extra=()):
+    # --no-local-yield: the person at this PC typing while the test runs must not hold back the headset's input.
     args = [exe, "--config-dir", cfg, "--log", log, "--headset", "127.0.0.1", "--only-titles", "pcw-test",
+            "--no-local-yield",
             "--hidden", "--stats-every", "2"]
     if code:
         args += ["--code", code]

@@ -22,6 +22,19 @@ bool focus(const Target& t);
 // Lets go of every key and button still held down (when the headset goes, so nothing stays stuck).
 void release_all();
 
+// Who has the PC's mouse and keyboard (the user, 2026-11-08: a way out when the headset's mouse is on the PC). The
+// PC's own mouse and keyboard always win: once either is used, the headset's input is ignored until it has been
+// still for a few seconds. Hands off (Ctrl+Alt+F12) ignores the headset's input until switched back.
+void set_hands_off(bool on);
+bool hands_off();
+// Watches the PC's own mouse and keyboard with low-level hooks (Windows marks injected input, ours, so the two are
+// told apart). Call on a thread with a message loop (the window's).
+void watch_local_input(bool on);
+// True once each time the PC's own input takes over after a quiet spell (to tell the headset).
+bool take_local_takeover();
+// Off: the PC's own input never holds back the headset's (tests, run while someone types at the PC).
+void set_local_yield(bool on);
+
 // The cursor's shape now, in the protocol's words (arrow, ibeam, hand, ...).
 std::string cursor_shape();
 
