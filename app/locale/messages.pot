@@ -2506,7 +2506,7 @@ msgstr ""
 msgid "Show"
 msgstr ""
 
-#: ui/picture_tab.gd:216
+#: ui/picture_tab.gd:216 environments/bathysphere.env.json
 msgid "Depth"
 msgstr ""
 
@@ -4234,7 +4234,7 @@ msgid "A picture palace built as a courtyard under a twilight sky: lit windows, 
 msgstr ""
 
 #: environments/bathysphere.env.json
-msgid "A glass dome on the sea floor: fish drift past, glowing creatures come to the screen, and now and then a whale passes in a quiet scene."
+msgid "A glass dome on the sea floor: kelp and coral in the floodlights, schools of fish, glowing creatures drawn to the screen, a manta overhead, and in a quiet scene now and then a whale."
 msgstr ""
 
 #: environments/cinema.env.json
@@ -4351,6 +4351,10 @@ msgstr ""
 
 #: environments/atmospheric_1928.env.json
 msgid "Clouds"
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Lights outside in the film"
 msgstr ""
 
 #: environments/bathysphere.env.json
@@ -4476,6 +4480,14 @@ msgstr ""
 
 #: environments/atmospheric_1928.env.json
 msgid "How much of the open sky the clouds cover. They catch the film's light."
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "How deep the dome lies: sunlit shallows with shafts of light and caustics, the blue twilight, or the black abyss where only the lamps and what glows show."
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "How bright the floodlights on the sea floor stay once the film has started. Before the film they are full."
 msgstr ""
 
 #: environments/bathysphere.env.json
@@ -4616,6 +4628,18 @@ msgstr ""
 
 #: environments/void.env.json
 msgid "A faint ring on the floor where you move. At the bottom: none."
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Sunlit shallows"
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Twilight"
+msgstr ""
+
+#: environments/bathysphere.env.json
+msgid "Abyss"
 msgstr ""
 
 #: environments/bathysphere.env.json

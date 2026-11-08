@@ -3159,6 +3159,25 @@ msgstr "鲸鱼"
 msgid "How often a whale swims past behind the screen in a quiet scene."
 msgstr "安静的场景中，鲸鱼从屏幕后方游过的频率。"
 
+#. The Bathysphere's settings: how deep the dome lies, and the floodlights in the film.
+msgid "How deep the dome lies: sunlit shallows with shafts of light and caustics, the blue twilight, or the black abyss where only the lamps and what glows show."
+msgstr "圆顶所在的深度：有光柱和焦散光纹的阳光浅海、蓝色的暮光层，或只有灯光和发光生物可见的漆黑深渊。"
+
+msgid "Sunlit shallows"
+msgstr "阳光浅海"
+
+msgid "Twilight"
+msgstr "暮光层"
+
+msgid "Abyss"
+msgstr "深渊"
+
+msgid "Lights outside in the film"
+msgstr "放映时的外部灯光"
+
+msgid "How bright the floodlights on the sea floor stay once the film has started. Before the film they are full."
+msgstr "影片开始后，照向海底的探照灯保持的亮度。影片开始前为全亮。"
+
 #. The Whale setting's choices.
 msgid "Never"
 msgstr "从不"
@@ -3303,8 +3322,8 @@ msgstr "电视就放在枕头堡入口外，正好填满入口；关闭时，它
 msgid "A picture palace built as a courtyard under a twilight sky: lit windows, iron balconies, cypresses over the walls and real stars."
 msgstr "一座建成庭院模样的电影宫，头顶是暮色天空：亮灯的窗户、铁艺阳台、墙头的柏树和真实的星空。"
 
-msgid "A glass dome on the sea floor: fish drift past, glowing creatures come to the screen, and now and then a whale passes in a quiet scene."
-msgstr "海底的玻璃圆顶：鱼群游过，发光的生物向屏幕靠近，安静的片段里偶尔有鲸鱼经过。"
+msgid "A glass dome on the sea floor: kelp and coral in the floodlights, schools of fish, glowing creatures drawn to the screen, a manta overhead, and in a quiet scene now and then a whale."
+msgstr "海底的玻璃圆顶：探照灯下的海带和珊瑚、成群的鱼、被屏幕吸引的发光生物、头顶游过的魔鬼鱼，安静的片段里偶尔还有鲸鱼。"
 
 msgid "The converted cinema: rows on a rake, curtains that part when the film starts, and the house lights going down."
 msgstr "改建的电影院：阶梯座位，影片开始时幕布拉开，场灯渐暗。"

@@ -41,15 +41,31 @@ func build() -> void:
 	length = path_length(path)
 	var sh := Shape.new()
 	var wave := func(p: Vector3) -> Vector4: return Vector4(0, 0, pow(clampf((p.z + 0.1) / 0.6, 0.0, 1.0), 1.5), 0)
-	sh.loft([[-0.5, 0.01, 0.01, 0.0], [-0.45, 0.06, 0.05, 0.0], [-0.3, 0.1, 0.085, 0.0], [-0.1, 0.11, 0.09, 0.0],
-			[0.1, 0.085, 0.07, 0.0], [0.3, 0.04, 0.035, 0.0], [0.42, 0.015, 0.015, 0.0]], 8, wave)
+	# A long, deep body with a broad flat head, the throat lower than the back, narrowing to a slim tail stock
+	# (2026-11-08: twelve rings of ten sides, where it was seven of eight).
+	sh.loft([[-0.5, 0.012, 0.01, -0.01], [-0.47, 0.05, 0.035, -0.012], [-0.42, 0.08, 0.06, -0.015],
+			[-0.34, 0.105, 0.085, -0.015], [-0.24, 0.12, 0.1, -0.012], [-0.12, 0.122, 0.102, -0.005],
+			[0.0, 0.112, 0.095, 0.0], [0.1, 0.09, 0.078, 0.005], [0.2, 0.062, 0.056, 0.008],
+			[0.3, 0.035, 0.034, 0.008], [0.38, 0.018, 0.02, 0.006], [0.44, 0.01, 0.012, 0.004]], 10, wave)
 	var fw := Vector4(0, 0, 1, 0)
 	for sx: float in [-1.0, 1.0]:
-		# Flukes, and a long fin each side.
-		sh.tri(Vector3(0, 0, 0.4), Vector3(sx * 0.13, 0, 0.5), Vector3(sx * 0.04, 0, 0.47), fw, fw, fw)
-		sh.tri(Vector3(0, 0, 0.4), Vector3(sx * 0.04, 0, 0.47), Vector3(0, 0, 0.45), fw, fw, fw)
-		sh.tri(Vector3(sx * 0.09, -0.04, -0.26), Vector3(sx * 0.32, -0.09, -0.12), Vector3(sx * 0.09, -0.04, -0.18))
-	var m := body_material(life.colour_or(COLOUR), {"sway": 0.035, "waves": 4.0, "sway_up": true, "spill": 0.6})
+		# Broad flukes, swept back, notched in the middle.
+		sh.tri(Vector3(0, 0, 0.42), Vector3(sx * 0.16, 0.0, 0.5), Vector3(sx * 0.11, 0.0, 0.53), fw, fw, fw)
+		sh.tri(Vector3(0, 0, 0.42), Vector3(sx * 0.11, 0.0, 0.53), Vector3(sx * 0.02, 0.0, 0.5), fw, fw, fw)
+		sh.tri(Vector3(0, 0, 0.42), Vector3(sx * 0.02, 0.0, 0.5), Vector3(0, 0, 0.48), fw, fw, fw)
+		# A long pectoral fin each side, a third of the body, swept back and down, with a scalloped leading edge.
+		var root_a := Vector3(sx * 0.1, -0.05, -0.27)
+		var root_b := Vector3(sx * 0.1, -0.05, -0.19)
+		var pts := [root_a, Vector3(sx * 0.18, -0.09, -0.25), Vector3(sx * 0.26, -0.13, -0.2),
+				Vector3(sx * 0.33, -0.16, -0.13), Vector3(sx * 0.38, -0.18, -0.07), Vector3(sx * 0.3, -0.15, -0.1),
+				Vector3(sx * 0.2, -0.1, -0.15), root_b]
+		for i in range(1, pts.size() - 2):
+			sh.tri(root_a, pts[i], pts[i + 1])
+		sh.tri(root_a, pts[-2], root_b)
+		# A small dorsal fin two thirds back.
+		sh.tri(Vector3(0, 0.08, 0.14), Vector3(0, 0.12, 0.2), Vector3(0, 0.065, 0.22))
+	var m := body_material(life.colour_or(COLOUR), {"sway": 0.035, "waves": 4.0, "sway_up": true, "spill": 0.6,
+			"belly": 0.7, "belly_colour": Color(0.62, 0.66, 0.68)})
 	single(sh.commit(), m, "Whale")
 	next_pass = _gap()
 	_place()

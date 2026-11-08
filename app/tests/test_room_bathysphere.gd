@@ -143,7 +143,7 @@ func run_tests() -> void:
 	check("no cue sound but the whale's (%s)" % [other], other.is_empty())
 	check("the whale sings at voice_db -4", is_equal_approx(float(host.system("whale").params["voice_db"]), -4.0))
 	RoomSound.check_beds(self, "bathysphere", room, {"creak_left": "hull_creak", "creak_right": "hull_creak",
-			"deep": "deep_hum"}, "hull")
+			"deep": "deep_hum", "vent": "bubbles", "sonar": "sonar", "far_song": "whale"}, "hull")
 	var reverb: Dictionary = host.system_of_kind("sound").values()
 	check("a small hard room of metal and glass (rt60 %.1f)" % float(reverb["rt60"]),
 			absf(float(reverb["rt60"]) - 0.9) < 0.01)
@@ -159,9 +159,146 @@ func run_tests() -> void:
 			left.plays - l0 >= 2 and right.plays - r0 >= 2 and left.plays - l0 + right.plays - r0 <= 8)
 	check("the deep's hum low (gain %.0f dB)" % float(host.system("deep").params["gain_db"]),
 			float(host.system("deep").params["gain_db"]) < 0.0 and host.system("deep").playing())
+	check("the vent's bubbles by the vent, outside the glass (%s)" % [host.system("vent").params["at"]],
+			not _inside_dome(p, Vector3(float(host.system("vent").params["at"][0]),
+			float(host.system("vent").params["at"][1]), float(host.system("vent").params["at"][2])), 0.0)
+			and host.system("vent").playing())
+	_second_pass(room, p)
 	await done(room)
 	await RoomSound.check_level(self, self, "bathysphere", doc)
 	await _render(doc)
+
+
+## The second pass (2026-11-08, "go nuts on the bathysphere", the user): the sea floor and what is in the water, the
+## Depth setting, the floodlights' ritual, the fittings, the manta, the schools, comfort, and the headset's figures.
+func _second_pass(room: Node3D, p: Dictionary) -> void:
+	var host: Node = room.host
+	var hall: Node = host.system("hall")
+	var stats := EnvChecks.measure(room)
+	check("the figures as documented: 20 to 36 draws, under 300k triangles, no live light, no particles, under 20 "
+			+ "MB (%s)" % [stats], int(stats["draws"]) >= 20 and int(stats["draws"]) <= 36
+			and int(stats["triangles"]) < 300000 and int(stats["lights"]) == 0 and int(stats["particles"]) == 0
+			and float(stats["texture_mb"]) < 20.0)
+	for n: String in ["Seabed", "Fronds", "MarineSnow", "Bubbles", "FloodBeams", "FloodLamps", "PortGlass", "Sonar",
+			"Needles", "GaugeFaces", "Rivets", "Fittings"]:
+		check("the room has its %s" % n, room.get_node_or_null(n) != null)
+	# The sea floor and the fronds lie outside the glass, under the water's edge, and are never baked.
+	var outside := true
+	for n: String in ["Seabed", "Fronds"]:
+		var mi := room.get_node(n) as MeshInstance3D
+		outside = outside and mi.gi_mode == GeometryInstance3D.GI_MODE_DISABLED
+		for v: Vector3 in mi.mesh.get_faces():
+			if _inside_dome(p, v, 0.05) or v.distance_to(_centre(p)) > _water_radius(p):
+				outside = false
+				break
+	check("the sea floor and its fronds lie outside the glass, inside the water, unbaked", outside)
+	var snow_out := 0
+	var snow := (room.get_node("MarineSnow") as MeshInstance3D).mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] \
+			as PackedVector3Array
+	for v: Vector3 in snow:
+		if not _inside_dome(p, v, 0.2):
+			snow_out += 1
+	check("marine snow starts outside the dome (%d of %d corners)" % [snow_out, snow.size()], snow_out == snow.size())
+	# The Depth setting: the shallows lit from the surface with caustics in the hall, the abyss black and glowing.
+	var water: ShaderMaterial = (room.get_node("Outside") as MeshInstance3D).mesh.surface_get_material(0)
+	check("Depth: twilight by default", str(host.setting("depth")) == "twilight")
+	var seen := {}
+	for d: String in ["shallow", "abyss", "twilight"]:
+		host.set_setting("depth", d)
+		for i in 60:
+			host.step(0.25)
+		seen[d] = [float(water.get_shader_parameter("sun")), float(host.param("light.caustics")),
+				float(water.get_shader_parameter("biolum")), (water.get_shader_parameter("water_top") as Color)]
+	check("Depth: the shallows lit from the surface, caustics full (%s)" % [seen["shallow"]],
+			seen["shallow"][0] > 0.9 and seen["shallow"][1] > 0.9)
+	check("Depth: the abyss dark, no sun, no caustics, the specks glowing (%s)" % [seen["abyss"]],
+			seen["abyss"][0] == 0.0 and seen["abyss"][1] == 0.0 and seen["abyss"][2] > 0.9
+			and (seen["abyss"][3] as Color).get_luminance() < 0.02)
+	check("Depth: twilight between (%s)" % [seen["twilight"]], seen["twilight"][0] > 0.0
+			and seen["twilight"][0] < seen["shallow"][0] and seen["twilight"][1] > 0.0
+			and seen["twilight"][1] < 1.0)
+	var floor_mat: ShaderMaterial = (room.get_node("Floor") as MeshInstance3D).mesh.surface_get_material(0)
+	check("the hall's floor takes the caustics (%.2f)" % float(floor_mat.get_shader_parameter("caustics")),
+			float(floor_mat.get_shader_parameter("caustics")) > 0.0
+			and floor_mat.get_shader_parameter("caustic_map") != null)
+	# The floodlights: full before the film, down to the setting with it, up again at the end.
+	host.timeline.state = ""
+	host.snapshot_override = {"open": false}
+	for i in 40:
+		host.step(0.25)
+	var before := float(hall.params["flood"])
+	host.snapshot_override = {"open": true, "playing": true, "position": 0.5, "duration": 7200.0}
+	for i in 60:
+		host.step(0.25)
+	var during := float(hall.params["flood"])
+	host.set_setting("flood_level", 0.6)
+	for i in 12:
+		host.step(0.25)
+	var moved := float(hall.params["flood"])
+	host.set_setting("flood_level", 0.3)
+	check("the floodlights full before the film (%.2f), to the setting with it (%.2f), following it (%.2f)" % [
+			before, during, moved], before > 0.95 and absf(during - 0.3) < 0.05 and absf(moved - 0.6) < 0.08)
+	check("the sonar scope dims with the film (%.2f)" % float(hall.params["sonar"]),
+			float(hall.params["sonar"]) < 0.5)
+	# The gauges' needles swing with the film's bass.
+	# (Headless the MultiMesh keeps no transforms: the readings are read from the builder.)
+	host.signals.fake("film.bass", 0.0)
+	for i in 12:
+		host.step(0.25)
+	var low: Array[float] = hall.needle_readings()
+	host.signals.fake("film.bass", 1.0)
+	for i in 12:
+		host.step(0.25)
+	var high: Array[float] = hall.needle_readings()
+	var swung := true
+	for i in low.size():
+		swung = swung and high[i] - low[i] > 0.1 and high[i] <= 1.0
+	check("the gauges' needles (%d) swing with the bass, never off the dial (%s to %s)" % [low.size(), low, high],
+			low.size() >= 6 and swung)
+	host.signals.fake("film.bass", 0.0)
+	host.snapshot_override = {"open": true, "playing": false, "ended": true, "position": 7200.0, "duration": 7200.0}
+	for i in 40:
+		host.step(0.25)
+	check("the floodlights and the scope come up at the end (%.2f, %.2f)" % [float(hall.params["flood"]),
+			float(hall.params["sonar"])], float(hall.params["flood"]) > 0.95 and float(hall.params["sonar"]) > 0.95)
+	# The pre-show's sonar pings now and then.
+	var sonar: Node = host.system("sonar")
+	var pings: int = sonar.plays
+	host.timeline.state = ""
+	host.snapshot_override = {"open": false}
+	for i in 240:
+		host.step(0.25)
+	check("the sonar pings in the pre-show (%d in a minute)" % (sonar.plays - pings), sonar.plays - pings >= 3
+			and sonar.plays - pings <= 6)
+	# The manta glides over, high outside the glass, never into the sight line.
+	var manta: Node = host.system("manta")
+	for i in 400:
+		if not manta.creature.passing:
+			break
+		host.step(0.25)
+	manta.act("pass", {"side": "left"})
+	var high_out := true
+	var in_view := false
+	var n := 0
+	for i in 160:
+		host.step(0.25)
+		for q: Vector3 in manta.positions():
+			n += 1
+			high_out = high_out and q.y > float(p["drum_height"]) + float(p["dome_height"]) + 1.5
+			in_view = in_view or manta.in_view(q, 1.0)
+	check("the manta glides over the dome (%d samples), high outside the glass, never in the sight line" % n,
+			n > 50 and high_out and not in_view)
+	check("the schools school (%.1f, %.1f)" % [float(host.system("fish").params["schooling"]),
+			float(host.system("shoal").params["schooling"])], float(host.system("fish").params["schooling"]) > 0.5
+			and float(host.system("shoal").params["schooling"]) > 0.5)
+	# Comfort: the Motion setting stills the water's light, the caustics and the fronds.
+	host.set_setting("motion", 0.0)
+	for i in 4:
+		host.step(0.25)
+	check("Motion off stills the water and the caustics (%.2f, %.2f)" % [float(hall.params["water_motion"]),
+			float(host.param("light.caustic_speed"))], float(hall.params["water_motion"]) == 0.0
+			and float(host.param("light.caustic_speed")) == 0.0)
+	host.set_setting("motion", 1.0)
 
 
 ## Quiet scenes one after another (or loud ones): the film's quiet signal held for 6 s, then 30 s of sound. Returns how
@@ -238,6 +375,15 @@ func _render(doc: Dictionary) -> void:
 	check("from the seat: the water beyond the glass is dark blue (%s)" % [water], water.b > water.r
 			and water.get_luminance() < 0.15)
 	await RoomRender.shot(self, vc, eye, eye + Vector3(-0.8, 0.15, -0.6), "bathysphere_left")
+	await RoomRender.shot(self, vc, eye, eye + Vector3(0.9, 0.25, -0.2), "bathysphere_right")
+	await RoomRender.shot(self, vc, eye, eye + Vector3(0.0, 1.0, -0.35), "bathysphere_up")
+	var side := Vector3(-4.5, 0, 1.5)
+	var best := Vector3.ZERO
+	for t: Transform3D in (vc[2] as Node).call("room_seat_transforms"):
+		if t.origin.distance_to(side) < best.distance_to(side):
+			best = t.origin
+	await RoomRender.shot(self, vc, best + Vector3(0, 1.2, 0), screen, "bathysphere_side_seat")
+	await RoomRender.shot(self, vc, Vector3(0.3, 1.5, 4.6), Vector3(0.0, 0.9, 7.3), "bathysphere_console")
 	host.do_action("whale.pass", {"side": "left"})
 	for i in 44:
 		host.step(0.25)
@@ -259,4 +405,18 @@ func _render(doc: Dictionary) -> void:
 	for i in 30:
 		host.step(0.25)
 	await RoomRender.shot(self, vc, Vector3(0, 2.4, 4.0), screen, "bathysphere_back")
+	# The sunlit shallows and the abyss, from the seat.
+	for d: String in ["shallow", "abyss"]:
+		host.set_setting("depth", d)
+		for i in 40:
+			host.step(0.25)
+		var shot: Image = await RoomRender.shot(self, vc, eye, eye + Vector3(-0.8, 0.3, -0.6), "bathysphere_" + d)
+		shot = await RoomRender.shot(self, vc, eye, eye + Vector3(-0.3, 1.0, 0.6), "bathysphere_%s_up" % d)
+		var top := RoomRender.mean(shot, Rect2(0.0, 0.0, 1.0, 0.25))
+		print("  render: %s, the water above %s" % [d, top])
+		if d == "shallow":
+			check("the shallows: bright blue water overhead (%s)" % [top], top.b > top.r and top.get_luminance() > 0.15)
+		else:
+			check("the abyss: near black overhead (%s)" % [top], top.get_luminance() < 0.06)
+	host.set_setting("depth", "twilight")
 	await RoomRender.close(self, vc)

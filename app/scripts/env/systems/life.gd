@@ -3,8 +3,8 @@ extends "res://scripts/env/systems/env_system.gd"
 ## Ambient life (docs/environments.md, "Ambient life"): animals, never people. One life system is one kind of creature
 ## (`creature`): moths in the projector's beam, birds roosting and flitting through an open roof, fireflies, a cat
 ## along a wall, an occasional deer, a school of fish outside the glass, glowing deep-sea creatures drawn to the
-## screen's light, a rare whale, plane lights crossing a night sky. A room with several kinds has several, each with
-## its own id ("moths", "whale"); a cue calls one by that id ("whale.pass").
+## screen's light, a manta ray gliding over, a rare whale, plane lights crossing a night sky. A room with several kinds
+## has several, each with its own id ("moths", "whale"); a cue calls one by that id ("whale.pass").
 ##
 ## Every creature keeps out of the viewer's face (`personal` metres from the eyes) and out of the sight line to the
 ## picture: the pyramid from the eyes to the screen's edges, `keep_out` metres wider (keep()). So nothing of it stands
@@ -27,6 +27,7 @@ const CREATURES := {
 	"jelly": preload("res://scripts/env/systems/life/jelly.gd"),
 	"whale": preload("res://scripts/env/systems/life/whale.gd"),
 	"plane": preload("res://scripts/env/systems/life/plane.gd"),
+	"ray": preload("res://scripts/env/systems/life/ray.gd"),
 }
 ## Seconds the creatures take to fade out (Ambient life off) or in again.
 const FADE_SECONDS := 1.5
@@ -43,16 +44,22 @@ static func spec() -> Dictionary:
 		"kind": "life",
 		"description": "Ambient life, one kind of creature each: moths in the projector's beam, birds that roost and "
 				+ "flit through an open roof, fireflies, a cat on a wall, an occasional deer, fish outside the glass, "
-				+ "glowing deep-sea creatures drawn to the screen, a rare whale, plane lights in a night sky. They keep "
-				+ "out of the viewer's face and out of the sight line to the picture. Never people.",
+				+ "glowing deep-sea creatures drawn to the screen, a manta gliding over, a rare whale, plane lights in "
+				+ "a night sky. They keep out of the viewer's face and out of the sight line to the picture. Never "
+				+ "people.",
 		"params": {
-			"creature": {"type": "enum", "values": ["moth", "bird", "firefly", "cat", "deer", "fish", "jelly",
+			"creature": {"type": "enum", "values": ["moth", "bird", "firefly", "cat", "deer", "fish", "jelly", "ray",
 					"whale", "plane"], "default": "moth",
 					"description": "which creature: moth, bird, firefly, cat, deer, fish, jelly (glowing deep-sea "
-					+ "creatures), whale, plane (a plane's lights)"},
+					+ "creatures), ray (a manta gliding over), whale, plane (a plane's lights)"},
 			"count": {"type": "int", "min": 0, "max": 200, "default": 0,
 					"description": "how many; 0: the creature's own (moths 40, birds 6, fireflies 60, fish 48, "
-					+ "jellies 18, one cat, deer or whale, planes 2 at once); the cat, deer and whale are one at most"},
+					+ "jellies 18, one cat, deer, ray or whale, planes 2 at once); the cat, deer, ray and whale are "
+					+ "one at most"},
+			"schooling": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0,
+					"description": "fish: how tightly they school; over 0 the school draws in, stretches along its "
+					+ "way and its turns ripple back through it from the leaders (each fish follows where the school "
+					+ "was a moment before, the later the further back it swims)"},
 			"region": {"type": "object", "nullable": true, "default": null,
 					"fields": {"min": {"type": "vec3", "min": -500.0, "max": 500.0},
 						"max": {"type": "vec3", "min": -500.0, "max": 500.0}},
@@ -80,7 +87,8 @@ static func spec() -> Dictionary:
 					+ "flitting by day, planes at night (time.of_day)"},
 			"every": {"type": "float", "min": 0.0, "max": 7200.0, "nullable": true, "default": null,
 					"description": "seconds between visits on average (the deer, a plane, a bird across the roof); "
-					+ "0: only when a cue calls pass; null: the creature's own (deer 300, planes 75, the whale 0)"},
+					+ "0: only when a cue calls pass; null: the creature's own (deer 300, planes 75, a ray 90, the "
+					+ "whale 0)"},
 			"keep_out": {"type": "float", "min": 0.1, "max": 3.0, "default": 0.4,
 					"description": "metres they keep from the sight line to the picture (the eyes to its edges)"},
 			"personal": {"type": "float", "min": 0.8, "max": 6.0, "default": 1.5,
@@ -95,9 +103,9 @@ static func spec() -> Dictionary:
 					"description": "the call's gain on the Environment bus"},
 		},
 		"actions": {
-			"pass": "one goes by now: the whale or the deer crosses, a plane flies over, a bird flits across the "
-					+ "roof, the cat walks its wall end to end, the school sweeps past (args: side left or right, "
-					+ "seconds)",
+			"pass": "one goes by now: the whale or the deer crosses, a manta glides over, a plane flies over, a bird "
+					+ "flits across the roof, the cat walks its wall end to end, the school sweeps past (args: side "
+					+ "left or right, seconds)",
 			"scatter": "they start away and settle again: birds take off and circle, fish dart, moths and fireflies "
 					+ "spread, the cat trots off (args: from [x, y, z])",
 			"settle": "they rest now: birds to their perches, the cat sits, fish and moths slow",
