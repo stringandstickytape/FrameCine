@@ -2,9 +2,12 @@
 rem Builds pc-windows.exe and its tests into pc\build (Release), then runs the unit tests.
 rem   pc\build.cmd            configure if needed, build, test
 rem   pc\build.cmd clean      start again from nothing
+rem PCW_BUILD_DIR sets another build folder (tools/release.sh uses pc\build-release, so a pc-windows.exe running
+rem from pc\build does not lock the link).
 setlocal
 set HERE=%~dp0
-if "%1"=="clean" rmdir /s /q "%HERE%build" 2>nul
+if not defined PCW_BUILD_DIR set "PCW_BUILD_DIR=%HERE%build"
+if "%1"=="clean" rmdir /s /q "%PCW_BUILD_DIR%" 2>nul
 
 rem A Visual Studio with C++ and its CMake (2022 or later), found by vswhere, which every install has.
 set VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe
@@ -19,10 +22,10 @@ rem VsDevCmd adds Visual Studio's own CMake and Ninja only when it finds vswhere
 where cmake >nul 2>nul || set "PATH=%VSDIR%\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin;%PATH%"
 where ninja >nul 2>nul || set "PATH=%VSDIR%\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja;%PATH%"
 
-if not exist "%HERE%build\build.ninja" (
-  cmake -S "%HERE%." -B "%HERE%build" -G Ninja -DCMAKE_BUILD_TYPE=Release || exit /b 1
+if not exist "%PCW_BUILD_DIR%\build.ninja" (
+  cmake -S "%HERE%." -B "%PCW_BUILD_DIR%" -G Ninja -DCMAKE_BUILD_TYPE=Release || exit /b 1
 )
-cmake --build "%HERE%build" || exit /b 1
-ctest --test-dir "%HERE%build" --output-on-failure || exit /b 1
+cmake --build "%PCW_BUILD_DIR%" || exit /b 1
+ctest --test-dir "%PCW_BUILD_DIR%" --output-on-failure || exit /b 1
 echo.
-echo Built: %HERE%build\pc-windows.exe
+echo Built: %PCW_BUILD_DIR%\pc-windows.exe

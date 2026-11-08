@@ -131,8 +131,8 @@ if [ "$PC" = 1 ]; then
   else
     command -v cmd.exe > /dev/null || { echo "building the PC app needs Windows (or pass --pc-zip / --no-pc)" >&2; exit 1; }
     # A clean Release build of the committed sources, with its unit tests (pc/build.cmd).
-    MSYS2_ARG_CONV_EXCL='*' cmd.exe /c "$(cygpath -w "$REPO/pc/build.cmd")" clean
-    EXE="$REPO/pc/build/pc-windows.exe"
+    PCW_BUILD_DIR="$(cygpath -w "$REPO/pc/build-release")" MSYS2_ARG_CONV_EXCL='*' cmd.exe /c "$(cygpath -w "$REPO/pc/build.cmd")" clean
+    EXE="$REPO/pc/build-release/pc-windows.exe"
     [ -f "$EXE" ] || { echo "no $EXE after the build" >&2; exit 1; }
     PCSTAGE="$DIST/$PCNAME"
     rm -rf "$PCSTAGE"

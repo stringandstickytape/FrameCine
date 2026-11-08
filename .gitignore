@@ -20,3 +20,4 @@ spikes/04-q10c-probe/q10c-probe-x86_64
 
 # pc-windows (pc/): CMake build folder
 pc/build/
+pc/build-release/
