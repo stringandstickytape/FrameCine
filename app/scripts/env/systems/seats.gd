@@ -411,9 +411,9 @@ static func _hide(b: RoomMesh, u: Material, f: Material) -> void:
 
 
 ## A reindeer's pelt over the block (since 2026-11-08, for the Ice cinema: "reindeer hides and furs on the benches
-## with real thickness and fur edges", the brief): its outline uneven, the forelegs' flaps hanging down the front and
-## the hind legs' at the back corners, thick as a pelt is, darker brown-grey along the spine and pale towards the
-## belly's edges, its fur tufted round the rim. Colours per vertex (the instance tint multiplies them).
+## with real thickness and fur edges", the brief): its outline uneven and narrower at the neck, which hangs down the
+## block's front, thick as a pelt is and rounded over at its edges, darker brown-grey along the spine and pale towards
+## the belly's edges. Colours per vertex (the instance tint multiplies them).
 static func _pelt(b: RoomMesh) -> void:
 	const ACROSS := 9
 	const TOP := 0.4
@@ -435,7 +435,7 @@ static func _pelt(b: RoomMesh) -> void:
 	var rows: Array = []
 	var ns: Array = []
 	var cols: Array = []
-	var spine := Color(0.6, 0.5, 0.4)
+	var spine := Color(0.68, 0.58, 0.47)
 	var belly := Color(0.93, 0.9, 0.84)
 	for i in path.size():
 		var s := float(i) / (path.size() - 1)
@@ -457,17 +457,6 @@ static func _pelt(b: RoomMesh) -> void:
 		ns.append(nrow)
 		cols.append(crow)
 	b.grid(rows, ns, cols)
-	var keep := b.colour
-	# The legs' flaps: the forelegs down the front corners, the hind legs off the back corners.
-	b.colour = (spine * 0.85).srgb_to_linear()
-	for sx: float in [-1.0, 1.0]:
-		b.rounded_box(Vector3.ZERO, Vector3(0.07, 0.2, 0.022), 0.009,
-				Transform3D(Basis(Vector3.BACK, deg_to_rad(sx * 10.0)), Vector3(sx * 0.27, 0.2, -0.36)), 1,
-				Vector3i.ZERO, 0.0, [])
-		b.rounded_box(Vector3.ZERO, Vector3(0.07, 0.16, 0.022), 0.009,
-				Transform3D(Basis(Vector3.BACK, deg_to_rad(sx * -8.0)), Vector3(sx * 0.25, 0.33, 0.285)), 1,
-				Vector3i.ZERO, 0.0, [])
-	b.colour = keep
 
 
 ## A bean bag: a squat round sack, taller at the back, with the dent where one sits.

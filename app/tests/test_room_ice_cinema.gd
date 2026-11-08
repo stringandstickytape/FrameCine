@@ -77,7 +77,8 @@ func _built(room: Node3D) -> void:
 			and largest.x <= MAX_ATLAS and largest.y <= MAX_ATLAS)
 	check("a sound room with walls, physics round the room and under the seats", room.get_sound_room().has("box")
 			and room.collision_shapes().size() > 20)
-	# The ice on its own shader, its carvings frosted (their alpha under a half), its blocks clear.
+	# The ice on its own shader, its carvings and the blocks' sawn edges frosted (their alpha under a half), the
+	# blocks' faces clear. The edges have many more vertices than the faces, so only both counts are checked.
 	var blocks := room.find_child("IceBlocks", true, false) as MeshInstance3D
 	var m := blocks.mesh.surface_get_material(0) as ShaderMaterial
 	check("the ice on the ice shader", m != null and m.shader == IceHall.ICE_SHADER)
@@ -88,7 +89,8 @@ func _built(room: Node3D) -> void:
 			frosted += 1
 		else:
 			clear += 1
-	check("carvings frosted (%d vertices), blocks clear (%d)" % [frosted, clear], frosted > 1000 and clear > frosted)
+	check("carvings and edges frosted (%d vertices), faces clear (%d)" % [frosted, clear], frosted > 1000
+			and clear > 1000)
 
 
 ## The candles: twelve, each a flame, a glow in the ice and a light in the bake only; the Moon's light through the
@@ -197,7 +199,7 @@ func _aurora(room: Node3D) -> void:
 	host.signals.fake("film.quiet", 0.0)
 	_steps(host, 20.0)
 	check("before the film the aurora is lively (%.2f)" % float(sky.params["aurora"]),
-			absf(float(sky.params["aurora"]) - 0.6) < 0.03)
+			absf(float(sky.params["aurora"]) - 0.75) < 0.03)
 	host.snapshot_override = {"open": true, "playing": true, "position": 0.5, "duration": 7200.0}
 	_steps(host, 16.0)
 	check("for the film it settles to a faint glow (%.2f)" % float(sky.params["aurora"]),

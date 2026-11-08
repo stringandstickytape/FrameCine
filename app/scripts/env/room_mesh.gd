@@ -12,6 +12,7 @@ extends RefCounted
 ##   var b := RoomMesh.new()
 ##   b.surface(material)                         the following faces go to this material's surface
 ##   b.face([a, b, c, d], normal)                one flat face (a chart), corners in order round it, either way
+##   b.polygon(corners, normal)                  one flat face of any outline, concave too (a chart, triangulated)
 ##   b.box(centre, size, basis, skip, inside)    a box's faces (each a chart); skip: faces left out, by outward normal
 ##   b.strip(line_a, line_b, normals)            a strip of quads between two polylines (one chart, unrolled)
 ##   b.rounded_box(centre, size, radius, ...)    a box with rounded edges and smooth normals (no chart: seats)

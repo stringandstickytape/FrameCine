@@ -40,6 +40,8 @@ const THICK := 0.7
 const PROUD := 0.035
 const BEVEL := 0.012
 const JOINT := 0.012
+## A block's chamfers and sides: frosted this much (alpha under a half: see the ice shader).
+const EDGE_FROST := 0.32
 ## The courses' height (five to the side walls' top).
 const COURSE := 0.44
 ## The vault's ribs (z in the room) and the bays between them with skylights (their index from the front).
@@ -52,10 +54,10 @@ const SKY_RIGHT := [2, 5]
 const SKY_BAYS := [2, 3, 4]
 ## The candles' flame colour, and the glow they give the ice (energy, metres to fall to a third).
 const FLAME := Color(1.0, 0.62, 0.3)
-const CANDLE_GLOW := 1.5
-const CANDLE_REACH := 0.5
+const CANDLE_GLOW := 2.4
+const CANDLE_REACH := 0.36
 ## A candle's light in the bake (a share of the kit's lamp), and the niches' size.
-const CANDLE_BAKE := 0.25
+const CANDLE_BAKE := 0.14
 const NICHE := Vector2(0.4, 0.44)
 const NICHE_DEPTH := 0.26
 ## Colours (linear): the ice's face, the snow, the wax.
@@ -69,6 +71,9 @@ const ICE_SPILL := 0.5
 const ICE_NIGHT := 0.035
 const SNOW_SPILL := 0.2
 const WAX := Color(0.92, 0.86, 0.72)
+## The wax lit through by the flame near its top, and how brightly.
+const WAX_GLOW := Color(1.0, 0.66, 0.36)
+const WAX_GLOW_ENERGY := 0.45
 
 
 ## The hall's meshes over its pieces (kept on the kit's ctx.ice), and what finish() adds.
@@ -82,6 +87,8 @@ class Hall:
 	## Flame quads by light group ({group: [[centre, half across, half up, facing]]}) and the candles [position,
 	## energy, group].
 	var flames := {}
+	## The candles' wax near the flame, glowing, by light group ({group: RoomMesh}).
+	var wax_lit := {}
 	var candles: Array = []
 	var p := {}
 	var rng := RandomNumberGenerator.new()
@@ -110,11 +117,13 @@ class Hall:
 			k._add_static("IceFurs", fur)
 		if wax.triangle_count() > 0:
 			k._add_unbaked("IceWax", wax)
+		for group: String in wax_lit:
+			k._add_lamps("IceWaxLit" if group == "accent" else "IceWaxLit_" + group, wax_lit[group])
 		if glass.triangle_count() > 0:
 			k._add_glass("IceGlass", glass, Color(0.7, 0.86, 0.95), 0.07)
 		for group: String in flames:
 			k._add_glow("IceFlames" if group == "accent" else "IceFlames_" + group, flames[group], Procedural.flame(),
-					FLAME, 1.6, group, false)
+					FLAME, 1.6, group, true)
 		if outside.triangle_count() > 0:
 			var mi: MeshInstance3D = k._add_unbaked("IceOutside", outside)
 			mi.material_override = outside_m
@@ -246,9 +255,9 @@ static func hall(c: Object) -> Hall:
 	h.snow_m = light.from_param({"library": "rough_plaster", "color": [SNOW.r, SNOW.g, SNOW.b], "tiling": 1.4,
 			"spill": SNOW_SPILL})
 	h.snow_m.set_shader_parameter("instance_tint", true)
-	h.wax_m = light.from_param({"library": "felt", "color": [1.0, 1.0, 1.0]}, true)
+	h.wax_m = light.from_param({"library": "smooth_plaster", "color": [1.0, 1.0, 1.0]}, true)
 	h.wax_m.set_shader_parameter("instance_tint", true)
-	h.wax_m.set_shader_parameter("emission", Color(0.16, 0.07, 0.02))
+	h.wax_m.set_shader_parameter("emission", Color(0.1, 0.045, 0.012))
 	h.fur_m = light.from_param({"library": "cream_carpet", "color": [1.0, 1.0, 1.0], "tiling": 0.6})
 	h.fur_m.set_shader_parameter("instance_tint", true)
 	h.outside_m = ShaderMaterial.new()
@@ -281,9 +290,9 @@ static func ice_map() -> ImageTexture:
 	g.resize(N * N)
 	# Bubbles: single ones and strings rising.
 	var dots: Array = []
-	for i in 70:
+	for i in 45:
 		dots.append([rng.randf() * N, rng.randf() * N, rng.randf_range(0.6, 2.0), rng.randf_range(0.4, 1.0)])
-	for s in 12:
+	for s in 6:
 		var x := rng.randf() * N
 		var y := rng.randf() * N
 		var drift := rng.randf_range(-0.3, 0.3)
@@ -397,6 +406,8 @@ static func _block(h: Hall, w: Array, poly: PackedVector2Array, proud := PROUD, 
 	for q: Vector2 in inner:
 		front.append(_on(w, q.x, q.y, proud))
 	h.ice.face(Array(front), n)
+	# The sawn edges and sides frosted (rough from the saw, snow from the joints): a pale rim round every block.
+	h.ice.colour = Color(colour.r, colour.g, colour.b, minf(colour.a, EDGE_FROST))
 	var count := pts.size()
 	for i in count:
 		var a := pts[i]
@@ -412,6 +423,7 @@ static func _block(h: Hall, w: Array, poly: PackedVector2Array, proud := PROUD, 
 		if proud - bevel > 0.004:
 			h.ice.face([_on(w, a.x, a.y, 0.0), _on(w, b.x, b.y, 0.0), _on(w, b.x, b.y, proud - bevel),
 					_on(w, a.x, a.y, proud - bevel)], o3)
+	h.ice.colour = colour
 
 
 ## A block's colour: the ice's tint, a little bluer or greener, milkier or clearer (alpha: clearness and the block's
@@ -653,8 +665,16 @@ static func _niche(h: Hall, w: Array, r: Rect2, group := "accent") -> void:
 ## A pillar candle standing at `at` (its foot), its flame above (crossed glow quads), its glow in the ice; group:
 ## the light group its flame and glow follow (accent, or house: lower for the film).
 static func _candle(h: Hall, at: Vector3, height: float, radius: float, energy := 1.0, group := "accent") -> void:
-	h.wax.colour = WAX.srgb_to_linear()
-	Shapes.cylinder(h.wax, at, radius, height, 10)
+	# The wax: darker low down, glowing near the flame at the top (the flame's light through the wax).
+	h.wax.colour = (WAX * 0.8).srgb_to_linear()
+	Shapes.cylinder(h.wax, at, radius, height * 0.55, 10, Basis(), false)
+	var lit: RoomMesh = h.wax_lit.get(group, null)
+	if lit == null:
+		lit = RoomMesh.new()
+		# The wax near the flame lit through by it: a glow of the candle's group (low for the film with it).
+		lit.surface(h.kit._lamp(WAX_GLOW, WAX_GLOW_ENERGY, 0.0, group))
+		h.wax_lit[group] = lit
+	Shapes.cylinder(lit, at + Vector3(0, height * 0.55, 0), radius, height * 0.45, 10)
 	# The well the flame has melted in its top: a darker ring.
 	h.wax.colour = (WAX * 0.6).srgb_to_linear()
 	Shapes.cylinder(h.wax, at + Vector3(0, height, 0), radius * 0.7, 0.004, 10)
@@ -951,7 +971,8 @@ static func _box(h: Hall, centre: Vector3, size: Vector3, basis: Basis, bevel: f
 			for k: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
 				corners.append(centre + basis * (c + u * hu * k.x + v * hv * k.y))
 			h.ice.face(corners, (basis * nrm).normalized())
-	# The chamfers: one along each edge.
+	# The chamfers: one along each edge, frosted as a block's edges are.
+	h.ice.colour = Color(colour.r, colour.g, colour.b, minf(colour.a, EDGE_FROST))
 	for ax in 3:
 		var u: Vector3 = axes[(ax + 1) % 3]
 		var v: Vector3 = axes[(ax + 2) % 3]

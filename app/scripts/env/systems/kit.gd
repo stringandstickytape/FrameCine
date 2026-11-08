@@ -111,6 +111,10 @@ const PARAMS := {
 			"description": "what a courtyard window that has gone out still shows (a lamp turned low behind a curtain)"},
 	"water_motion": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true, "motion": {"max": 1.0},
 			"description": "how fast a fountain's water runs and ripples (the Motion setting scales it)"},
+	# Since 2026-11-08, for the Ice cinema's candles (kit/ice_hall.gd); the other rooms' pieces keep steady.
+	"flicker": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "flicker": true,
+			"steady": 0.0, "brightness": true,
+			"description": "how much the pieces' candle flames waver (slowly; Flickering lights holds them)"},
 }
 ## Pieces that take their slot's size when the entry gives none (the others keep their own size).
 const FILLS: Array[String] = ["facade", "curves", "ivy", "bougainvillea", "balcony_front", "partition"]
