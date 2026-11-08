@@ -20,6 +20,7 @@ extends "res://scripts/env/systems/env_system.gd"
 ## one static mesh, "SeatEnds", at each run's two ends. Library materials only (all CC0).
 
 const RoomMesh := preload("res://scripts/env/room_mesh.gd")
+const Shapes := preload("res://scripts/env/systems/kit/shapes.gd")
 const PhysicsShapes := preload("res://scripts/play/physics_shapes.gd")
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const AUDITORIUM := "res://scripts/env/systems/auditorium.gd"
@@ -97,6 +98,12 @@ const MODELS := {
 	# flagship_rows: fixed arms with cupholders between the seats, so the viewer's own seat folds away and both of its
 	# arms stay). A deep cushion, a reclined back in two pads (the lumbar and a headrest), a sculpted shell behind them
 	# down to the floor (what the row behind sees). About 430 triangles, no arms of its own.
+	# Since 2026-11-08, the Screening room 1962: a 1962 club chair in saddle leather on tapered walnut legs.
+	"lounge": {"upholstery": {"library": "brown_leather", "color": [0.52, 0.29, 0.15]},
+		"frame": {"library": "walnut_veneer", "color": [0.22, 0.13, 0.08]}, "fold": true, "segment": false,
+		"width": 0.96, "forms": [],
+		"boxes": [[Vector3(0.0, 0.3, 0.0), Vector3(0.86, 0.6, 0.86), 0.0],
+				[Vector3(0.0, 0.75, 0.35), Vector3(0.86, 0.5, 0.2), 11.0]]},
 	"recliner": {"upholstery": {"library": "oxblood_leather", "color": [0.36, 0.06, 0.07]},
 		"frame": {"library": "black_leather", "color": [0.05, 0.05, 0.055]}, "fold": true, "segment": false,
 		"width": 0.62, "forms": [],
@@ -104,7 +111,7 @@ const MODELS := {
 				[Vector3(0.0, 0.84, 0.3), Vector3(0.46, 0.84, 0.14), 15.0]]},
 }
 const MODEL_NAMES: Array[String] = ["stadium", "folding_chair", "plush", "multiplex", "pew", "club_chair",
-		"director", "bench_seat", "cushion", "hide", "bean_bag", "settee", "civic", "recliner"]
+		"director", "bench_seat", "cushion", "hide", "bean_bag", "settee", "civic", "recliner", "lounge"]
 ## The models a hall of rows takes (auditorium.gd seat_model): single seats, not segments.
 const SINGLE_MODELS: Array[String] = ["stadium", "folding_chair", "plush", "multiplex", "club_chair", "director",
 		"cushion", "bean_bag", "civic", "recliner"]
@@ -129,7 +136,9 @@ static func spec() -> Dictionary:
 				+ "Models: stadium, folding_chair (1906), plush (tip-up, palaces), multiplex (1980s, a broken one), "
 				+ "pew, club_chair, director, bench_seat, cushion, hide, bean_bag, settee (two or three places in a "
 				+ "row, its arms at the ends), civic (1970s: a moulded oak back, fabric pads, oak arms), recliner (a "
-				+ "premium recliner without arms: a kit draws the shared armrests). Instanced, "
+				+ "premium recliner without arms: a kit draws the shared armrests), lounge (a 1962 club chair: "
+				+ "saddle leather, piped cushions, rolled arms, a curved back, tapered walnut legs with brass "
+				+ "ferrules). Instanced, "
 				+ "tinted seat by seat, "
 				+ "the viewer's own chair folded away, boxes for object physics.",
 		"params": PARAMS,
@@ -143,7 +152,7 @@ static func spec() -> Dictionary:
 const PARAMS := {
 	"model": {"type": "enum", "values": ["auto", "stadium", "folding_chair", "plush", "multiplex", "pew",
 			"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag", "settee", "civic",
-			"recliner"], "default": "auto",
+			"recliner", "lounge"], "default": "auto",
 			"description": "the seat; auto: by each slot's style (its own rows: folding chairs)"},
 	"from_builders": {"type": "bool", "default": true,
 			"description": "a seat in every seat slot of the room's builders"},
@@ -170,7 +179,7 @@ const PARAMS := {
 				"turn": {"type": "float", "min": -180.0, "max": 180.0, "description": "degrees (0: towards -z)"},
 				"model": {"type": "enum", "values": ["auto", "stadium", "folding_chair", "plush", "multiplex", "pew",
 						"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag", "settee", "civic",
-			"recliner"],
+			"recliner", "lounge"],
 						"description": "this one's model; auto: the system's"}}},
 			"description": "single seats of its own: {at, turn, model}"},
 	"upholstery": {"type": "material", "default": null, "nullable": true,
@@ -236,6 +245,8 @@ static func model_mesh(model: String, upholstery: Material, frame: Material, wid
 			_civic(b, upholstery, frame, w)
 		"recliner":
 			_recliner(b, upholstery, frame, w)
+		"lounge":
+			_lounge(b, upholstery, frame)
 		_:
 			_folding_chair(b, upholstery, frame, w)
 	return b.commit(false)
@@ -416,6 +427,51 @@ static func _club(b: RoomMesh, u: Material, f: Material) -> void:
 	for x: float in [-0.36, 0.36]:
 		for z: float in [-0.36, 0.36]:
 			b.box(Vector3(x, 0.05, z), Vector3(0.05, 0.1, 0.05), Basis(), [RoomMesh.DOWN, RoomMesh.UP])
+
+
+## A 1962 club chair (since 2026-11-08, the Screening room 1962: "leather with button tufting or smooth saddle
+## leather, piping, sheen", its brief): a low, deep body on a walnut frame and four tapered, splayed walnut legs,
+## a shoe at each foot; rolled arms whose tops curve down at the front; a loose seat cushion, piped along its
+## edges; a curved back that wraps the sitter a little, a loose back cushion in front of it. About 700 triangles
+## (a seat's limit is 800, `test_env_seats.gd`): each round box has one step of rounding, and the faces that the
+## arms, the back and the cushions hide are left out.
+static func _lounge(b: RoomMesh, u: Material, f: Material) -> void:
+	b.surface(u)
+	# The body under the cushion (only its top and front show: the arms hide its sides, the back its back), the
+	# arms (their backs against the back), the back.
+	b.rounded_box(Vector3(0.0, 0.3, 0.02), Vector3(0.84, 0.24, 0.8), 0.05, Transform3D(), 1, Vector3i.ZERO, 0.0,
+			[RoomMesh.DOWN, RoomMesh.LEFT, RoomMesh.RIGHT, RoomMesh.BACK])
+	for s: float in [-1.0, 1.0]:
+		b.rounded_box(Vector3(s * 0.36, 0.45, 0.02), Vector3(0.13, 0.54, 0.82), 0.065, Transform3D(), 1,
+				Vector3i.ZERO, 0.0, [RoomMesh.DOWN, RoomMesh.BACK])
+	b.rounded_box(Vector3.ZERO, Vector3(0.86, 0.56, 0.17), 0.07,
+			Transform3D(Basis(Vector3.RIGHT, deg_to_rad(11.0)), Vector3(0.0, 0.66, 0.34)), 1, Vector3i(2, 0, 0), -0.22,
+			[RoomMesh.DOWN])
+	# The loose cushions: the seat's, its front a little rounded over; the back's, leaning on the back.
+	b.rounded_box(Vector3(0.0, 0.485, -0.07), Vector3(0.58, 0.13, 0.66), 0.055, Transform3D(), 1, Vector3i.ZERO,
+			0.0, [RoomMesh.DOWN])
+	b.rounded_box(Vector3.ZERO, Vector3(0.56, 0.4, 0.11), 0.05,
+			Transform3D(Basis(Vector3.RIGHT, deg_to_rad(14.0)), Vector3(0.0, 0.76, 0.22)), 1, Vector3i(1, 0, 0), -0.18,
+			[RoomMesh.BACK])
+	# Piping: a fine cord along the seat cushion's front edges, top and bottom, and along its sides.
+	for y: float in [0.548, 0.422]:
+		b.box(Vector3(0.0, y, -0.398), Vector3(0.56, 0.014, 0.014), Basis(), [RoomMesh.BACK, RoomMesh.LEFT,
+				RoomMesh.RIGHT])
+	for s: float in [-1.0, 1.0]:
+		b.box(Vector3(s * 0.288, 0.548, -0.07), Vector3(0.014, 0.014, 0.64), Basis(), [RoomMesh.DOWN,
+				RoomMesh.FRONT, RoomMesh.BACK])
+	b.surface(f)
+	# The walnut frame under the body (a shadow line), the legs splayed out from its corners, a shoe at each foot.
+	b.box(Vector3(0.0, 0.17, 0.02), Vector3(0.8, 0.03, 0.76), Basis(), [RoomMesh.UP])
+	for x: float in [-0.34, 0.34]:
+		for z: float in [-0.32, 0.36]:
+			var top := Vector3(x, 0.17, z)
+			var foot := Vector3(x * 1.12, 0.0, z * 1.1)
+			var dir := (top - foot).normalized()
+			var across := dir.cross(Vector3.FORWARD).normalized()
+			var basis := Basis(across, dir, across.cross(dir))
+			Shapes.lathe(b, [Vector2(0.014, 0.0), Vector2(0.016, 0.03), Vector2(0.02, 0.032), Vector2(0.026, 0.17)], foot,
+					8, basis)
 
 
 ## A director's chair: crossed legs either side, seat rails, arms on short posts, a canvas seat and back band.

@@ -10,17 +10,21 @@ extends RefCounted
 ##   PATTERNS                    pressed_tin, ice_blocks, swirl_carpet, corrugated, plasterboard, roof_tiles, ashlar,
 ##                               lime_wash, quarry_tiles, deco_carpet (rising suns in rows: the Streamline's aisles),
 ##                               hex_pavers (sintered regolith: the Crater's floor), board_concrete (concrete cast in
-##                               timber formwork: the Palace of Culture 1974's walls)
+##                               timber formwork: the Palace of Culture 1974's walls), tufted (buttoned upholstery:
+##                               the Pink Palace's balcony front), shell_carpet (scallop shells in rows: its aisles)
 ##   maps(pattern) -> {albedo, normal, orm, mean}   the pattern's textures (mean: its albedo's mean, linear)
 ##   apply(material, pattern, colour)   a house material shows the pattern in this colour (on average)
 ##   glass(colour, alpha, room) -> ShaderMaterial   see-through glass that dims with the house lights
-##   rose_window(), letters(text, colour, back), gradient(top, bottom), abstract(seed, palette), flame()   pictures
+##   rose_window(), letters(text, colour, back), gradient(top, bottom), abstract(seed, palette), colour_field(aspect),
+##   flame()   pictures
 
 const PATTERNS: Array[String] = ["pressed_tin", "ice_blocks", "swirl_carpet", "corrugated", "plasterboard",
-		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles", "deco_carpet", "hex_pavers", "board_concrete"]
+		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles", "deco_carpet", "hex_pavers", "board_concrete",
+		"tufted", "shell_carpet"]
 const SIZE := 128
 ## Patterns drawn larger than SIZE (many tiles a repeat, each its own: since 2026-11-08, the Athens rooftop's floor).
-const SIZES := {"quarry_tiles": 256, "deco_carpet": 256, "hex_pavers": 256, "board_concrete": 256}
+const SIZES := {"quarry_tiles": 256, "deco_carpet": 256, "hex_pavers": 256, "board_concrete": 256,
+		"shell_carpet": 256}
 const GLASS_SHADER := preload("res://scripts/env/systems/kit/env_glass.gdshader")
 
 static var _maps := {}
@@ -303,6 +307,58 @@ static func _sample(pattern: String, u: float, v: float) -> Array:
 			h -= 0.3 * blow
 			c = c.lerp(c * 0.55, blow)
 			return [h, c, lerpf(0.82, 0.95, minf(joint + plug, 1.0))]
+		# Since 2026-11-08, the Pink Palace's balcony front: buttoned upholstery.
+		"tufted":
+			# A button at each corner and in the middle of a repeat; the velvet puffed up between them in diamonds,
+			# drawn in along the creases that run from button to button, dimpled round each button; a faint pile.
+			var d1 := absf(u - v)
+			d1 = minf(d1, 1.0 - d1)
+			var d2 := absf(u + v - 1.0)
+			d2 = minf(d2, 1.0 - d2)
+			var crease := minf(d1, d2) * 0.7071
+			var puff := smoothstep(0.0, 0.2, crease)
+			var bc := minf(Vector2(minf(u, 1.0 - u), minf(v, 1.0 - v)).length(), Vector2(u - 0.5, v - 0.5).length())
+			var dimple := 1.0 - smoothstep(0.0, 0.17, bc)
+			var button := 1.0 - smoothstep(0.03, 0.045, bc)
+			var pile := _noise(u, v, 32, 301)
+			var h := 0.2 + 0.6 * pow(puff, 0.7) - 0.2 * dimple + 0.3 * button + 0.03 * (pile - 0.5)
+			var shade := 0.8 + 0.2 * puff + 0.04 * (pile - 0.5)
+			var c := Color(shade, shade, shade)
+			c = c.lerp(Color(0.55, 0.55, 0.55), 0.6 * (1.0 - smoothstep(0.0, 0.035, crease)))
+			c = c.lerp(Color(0.62, 0.62, 0.62), button)
+			return [h, c, 0.9]
+		# Since 2026-11-08, the Pink Palace's aisles: scallop shells in rows.
+		"shell_carpet":
+			# Two rows a repeat, each half a shell along from the last: on a deep rose ground, a rose shell (a fan of
+			# eleven ribs with a scalloped rim, its hinge at the foot) outlined in powder blue, a cream pearl between
+			# the shells; woven: a fleck.
+			var row := int(floor(v * 2.0))
+			var cu := fposmod(u * 2.0 + 0.5 * float(row % 2), 1.0)
+			var cv := fposmod(v * 2.0, 1.0)
+			var p := Vector2(cu - 0.5, 0.8 - cv)
+			var r := p.length()
+			var ang := atan2(p.x, p.y)
+			var ground := Color(0.34, 0.1, 0.17)
+			var shell := Color(0.8, 0.4, 0.5)
+			var blue := Color(0.56, 0.68, 0.88)
+			var c := ground
+			var h := 0.45
+			if p.y > -0.03 and absf(ang) < 1.5:
+				var rib := 0.5 + 0.5 * cos(ang * 7.0)
+				var rim := 0.34 + 0.035 * rib
+				var inside := 1.0 - smoothstep(rim - 0.012, rim, r)
+				c = ground.lerp(shell * (0.82 + 0.25 * rib), inside)
+				var line := 1.0 - smoothstep(0.01, 0.022, absf(r - rim - 0.014))
+				c = c.lerp(blue, line * (1.0 - inside * 0.8))
+				h += 0.12 * inside * rib + 0.1 * line
+			var hinge := 1.0 - smoothstep(0.045, 0.06, Vector2(p.x, p.y + 0.02).length())
+			c = c.lerp(blue, hinge)
+			var pearl := 1.0 - smoothstep(0.03, 0.042, Vector2(minf(cu, 1.0 - cu), minf(cv, 1.0 - cv) - 0.12).length())
+			c = c.lerp(Color(0.92, 0.86, 0.76), pearl)
+			h += 0.15 * pearl
+			var fleck := _noise(u, v, 64, 307)
+			c = c * (0.9 + 0.18 * fleck)
+			return [h + 0.08 * fleck, c, 0.95]
 	return [0.5, Color(0.5, 0.5, 0.5), 0.8]
 
 
@@ -536,6 +592,54 @@ static func abstract(seed_value: int, palette: Array) -> Texture2D:
 				var a := 1.0 - smoothstep(-0.01, 0.01, d + 0.01 * _noise(p.x, p.y, 24, seed_value + 3))
 				c = c.lerp(bl[1], a * 0.85)
 			img.set_pixel(x, y, c)
+	img.generate_mipmaps()
+	var t := ImageTexture.create_from_image(img)
+	_pictures[key] = t
+	return t
+
+
+## A canvas of our own for a 1962 collector (since 2026-11-08, the Screening room 1962's painting): a hard-edged
+## composition on a warm ground: a deep teal field, a vermilion sun over its edge, an ochre bar, a black line and a
+## small black square; each colour laid on by hand (its edge wavers a little, the paint's strokes show in it), the
+## canvas's weave under all. aspect: the picture's width over its height.
+static func colour_field(aspect: float) -> Texture2D:
+	var key := "colour_field %.3f" % aspect
+	if _pictures.has(key):
+		return _pictures[key]
+	var w := 512
+	var h := maxi(64, roundi(w / maxf(aspect, 0.2)))
+	var img := Image.create_empty(w, h, false, Image.FORMAT_RGB8)
+	var ground := Color(0.86, 0.79, 0.64)
+	var teal := Color(0.06, 0.29, 0.31)
+	var vermilion := Color(0.86, 0.27, 0.1)
+	var ochre := Color(0.87, 0.6, 0.16)
+	var black := Color(0.07, 0.065, 0.06)
+	for y in h:
+		for x in w:
+			var u := (x + 0.5) / w
+			var v := (y + 0.5) / h
+			# The edges waver: each shape's boundary pushed by a slow noise.
+			var wob := (_noise(u, v, 9, 11) - 0.5) * 0.006
+			var strokes := _noise(u * 6.0, v * 0.7, 48, 5) * 0.06 - 0.03
+			var c := ground * (0.95 + 0.06 * _noise(u, v, 12, 3)) + Color(strokes, strokes, strokes) * 0.4
+			# The teal field.
+			var dt := maxf(maxf(0.07 - u, u - 0.47), maxf(0.09 - v, v - 0.91)) + wob
+			c = c.lerp(teal * (0.92 + 0.12 * _noise(u * 3.0, v, 20, 7)) + Color(strokes, strokes, strokes) * 0.3,
+					1.0 - smoothstep(-0.002, 0.002, dt))
+			# The ochre bar, under the sun.
+			var db := maxf(maxf(0.5 - u, u - 0.93), maxf(0.7 - v, v - 0.82)) + wob
+			c = c.lerp(ochre * (0.94 + 0.1 * _noise(u * 4.0, v, 24, 9)), 1.0 - smoothstep(-0.002, 0.002, db))
+			# The sun: round on the canvas (its width in u is its height over the aspect).
+			var ds := Vector2((u - 0.555) * aspect, v - 0.4).length() - 0.27 + wob
+			c = c.lerp(vermilion * (0.93 + 0.12 * _noise(u * 2.0, v * 2.0, 16, 13)) + Color(strokes, strokes, strokes)
+					* 0.3, 1.0 - smoothstep(-0.002, 0.002, ds))
+			# The black line and the small square.
+			var dl := maxf(maxf(0.8 - u, u - 0.812), maxf(0.1 - v, v - 0.6)) + wob * 0.5
+			var dq := maxf(maxf(0.86 - u, u - 0.915), maxf(0.13 - v, v - 0.23)) + wob
+			c = c.lerp(black, 1.0 - smoothstep(-0.0015, 0.0015, minf(dl, dq)))
+			# The canvas's weave.
+			var weave := 0.97 + 0.03 * sin(x * 2.2) * sin(y * 2.2)
+			img.set_pixel(x, y, c * weave)
 	img.generate_mipmaps()
 	var t := ImageTexture.create_from_image(img)
 	_pictures[key] = t

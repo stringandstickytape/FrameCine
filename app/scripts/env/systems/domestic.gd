@@ -62,6 +62,13 @@ const PARAMS := {
 			"description": "the picture's bottom edge over the floor (0: the style's)"},
 	"painting_open": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true,
 			"description": "the painting over the screen: 0 down over it, 1 risen into the ceiling (a cue fades it)"},
+	# Since 2026-11-08, for the Screening room 1962's deep pass: a bold canvas of its own, its frame the kit's (the
+	# shell "kit" draws the painting too). The defaults keep every other room as it was.
+	"painting_art": {"type": "enum", "values": ["abstract", "colour_field"], "default": "abstract",
+			"description": "the painting: soft blocks of colour, or a hard-edged composition of our own (a 1962 "
+			+ "collector's canvas: a teal field, a vermilion sun, ochre and black bars on a warm ground)"},
+	"painting_frame": {"type": "bool", "default": true,
+			"description": "the painting's own walnut frame (off: the kit frames the screen)"},
 	"opening_screen": {"type": "bool", "default": false,
 			"description": "the telly fills the pillow fort's opening (not live: the fort builds again)"},
 	"telly": {"type": "enum", "values": ["cabinet", "portable", "flat_panel", "mirror_lid", "console",
@@ -848,8 +855,16 @@ func build() -> void:
 				float(p.get("ceiling_light", 0.35)), color_param("lamp_colour"))
 
 
-## shell "kit": the shell is the kit's (an ice hall's blocks); the room keeps its lamps, its seats and its light.
+## shell "kit": the shell is the kit's (an ice hall's blocks); the room keeps its lamps, its seats and its light, and
+## a painting over the screen (since 2026-11-08, the Screening room 1962: the kit's walls round the painting that
+## still rises).
 func _build_rest(p: Dictionary) -> void:
+	if str(p["screen"]) == "painting":
+		var trim := RoomMesh.new()
+		_trim_m = _m("trim")
+		trim.surface(_trim_m)
+		_build_painting(trim)
+		_add_static("Trim", trim)
 	if str(p["fairy_lights"]) == "on":
 		_build_fairy_lights()
 	_build_lamps(_window(p))
@@ -988,6 +1003,8 @@ func _build_painting(trim: RoomMesh) -> void:
 	var half := s * 0.5 + Vector2(0.04, 0.04)
 	var z := float(_p["front_z"]) + 0.04
 	for sd: float in [-1.0, 1.0]:
+		if not bool(_p.get("painting_frame", true)):
+			break
 		trim.box(Vector3(sd * (half.x + t * 0.5), c.y, z), Vector3(t, half.y * 2.0 + t * 2.0, 0.08), Basis(),
 				[RoomMesh.FRONT])
 		trim.box(Vector3(0.0, c.y + sd * (half.y + t * 0.5), z), Vector3(half.x * 2.0, t, 0.08), Basis(),
@@ -1000,6 +1017,8 @@ func _build_painting(trim: RoomMesh) -> void:
 	_add_static("PaintingSlot", slot)
 	var art := Procedural.abstract(1962, [Color(0.82, 0.76, 0.62), Color(0.75, 0.32, 0.12), Color(0.12, 0.25, 0.35),
 			Color(0.85, 0.62, 0.2), Color(0.2, 0.2, 0.18)])
+	if str(_p.get("painting_art", "abstract")) == "colour_field":
+		art = Procedural.colour_field(half.x / half.y)
 	_painting = _add_picture("Painting", [[Vector3(c.x, c.y, c.z + 0.04), Vector3(half.x, 0, 0), Vector3(0, half.y, 0),
 			Vector3.BACK]], art, Color(1, 1, 1), 0.45, "house")
 	# Down, it stands in front of the picture: the film layer steps aside for it (film_layer.gd), up it is clear.

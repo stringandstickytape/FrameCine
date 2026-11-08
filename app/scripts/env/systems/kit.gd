@@ -12,7 +12,12 @@ extends "res://scripts/env/systems/kit/builder.gd"
 ## and the moderne hall's (kit/streamline.gd, since 2026-11-08): its walls and coved ceiling, a stepped proscenium, an
 ## organ console (its coves in PieceCove, its clock in PieceClock); and the Palace of Culture's (kit/palace_culture.gd,
 ## since 2026-11-08): its board-marked concrete hall, wall mosaics, coffered ceiling and field of globes; and the
-## Flagship's (kit/flagship.gd, since 2026-11-08): its faceted acoustic hall, starlight ceiling and the rows' arms.
+## Flagship's (kit/flagship.gd, since 2026-11-08): its faceted acoustic hall, starlight ceiling and the rows' arms; and
+## the Pink Palace's (kit/pink_palace.gd, since 2026-11-08): a hall inside a great shell, its fluted vault and
+## scalloped rings lit from hidden lamps (PieceCove), mirrors, a buttoned balcony, a sunburst dome with a chandelier;
+## and the Screening room 1962's (kit/screening_1962.gd, since 2026-11-08): its walnut room, coffered ceiling and
+## window, a floating hearth with a slow fire and a sunburst clock, its furniture, and the garden outside (Garden,
+## Glows: the hall's own meshes).
 ## All the pieces share a few meshes, one surface a material: a baked one (PieceStatic), an unbaked one for rounded
 ## shapes and leaves (PieceSoft), the lamp shades (PieceLamps), the glows (windows, a booth's window, the video
 ## recorders' clocks: PieceDisplay) and each neon sign. The builder's slots come
@@ -40,7 +45,13 @@ static func spec() -> Dictionary:
 				+ "concrete, wall mosaics of glass and gold tesserae, a coffered ceiling, a field of opal globes, oak "
 				+ "acoustic slats), a modern premium auditorium (faceted acoustic walls washed in amber, a ceiling of "
 				+ "baffles with starlight, a velvet-masked curved screen in a slatted proscenium, armrests with "
-				+ "cupholders, lit row letters, a glass balustrade), a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
+				+ "cupholders, lit row letters, a glass balustrade), a dream palace inside a great scallop shell (a "
+				+ "fluted vault fanning from a sunburst dome with a chandelier of glass shells, scalloped rings round "
+				+ "the screen, mirrors, a wave frieze, a buttoned velvet balcony), a 1962 screening room in a house "
+				+ "in the hills (walnut panels and slats, a coffered ceiling, a floating hearth with a slow fire and a "
+				+ "sunburst clock, a credenza, a bar cart, shelves of books and film cans, a terrace with a glowing "
+				+ "pool, agaves, palms and the city's lights below), "
+				+ "a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
 				+ "furniture: a desk, a computer, a video recorder flashing 12:00, a sideboard, a standard lamp, a rug, "
 				+ "a coffee table; dressing: bunting, a tea set, sandwiches, a stool, a channel dial, a soundbar, a "
 				+ "floor lamp, a glass table, a media unit.",
@@ -158,6 +169,12 @@ const PARAMS := {
 			"description": "a starlight ceiling's pinholes before the film (0: off); they fade with the house lamps"},
 	"starlight_film": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "brightness": true,
 			"description": "the share of the starlight kept while the film plays (the house lamps out)"},
+	# Since 2026-11-08, for the Pink Palace (kit/pink_palace.gd): the gilt and the mirrors see a rose hall, not the
+	# Streamline's walnut and jade. The defaults are the Streamline's.
+	"reflect_wall": {"type": "color", "default": [0.16, 0.12, 0.09],
+			"description": "what the reflecting materials see round their horizon (the walls), at full house light"},
+	"reflect_ground": {"type": "color", "default": [0.02, 0.03, 0.025],
+			"description": "what they see below (the floor), at full house light"},
 }
 ## Pieces that take their slot's size when the entry gives none (the others keep their own size).
 const FILLS: Array[String] = ["facade", "curves", "ivy", "bougainvillea", "balcony_front", "partition"]
@@ -650,7 +667,7 @@ func _update_reflect() -> void:
 		return
 	var house := _group_level("house")
 	var cove := cove_colour_now() * float(params["cove"]) * house
-	var wall := Color(0.16, 0.12, 0.09) * (0.15 + 0.85 * house)
+	var wall := color_param("reflect_wall") * (0.15 + 0.85 * house)
 	var screen: Dictionary = _ctx.screen
 	var xf: Transform3D = screen.get("xf", Transform3D())
 	var size: Vector2 = screen.get("size", Vector2(12, 5))
@@ -662,7 +679,7 @@ func _update_reflect() -> void:
 	for m: ShaderMaterial in _reflect:
 		m.set_shader_parameter("refl_zenith", cove * 0.35 + wall * 0.3)
 		m.set_shader_parameter("refl_horizon", wall)
-		m.set_shader_parameter("refl_ground", Color(0.02, 0.03, 0.025) * (0.3 + 0.7 * house))
+		m.set_shader_parameter("refl_ground", color_param("reflect_ground") * (0.3 + 0.7 * house))
 
 
 ## The pieces' meshes under one node when `group` is given (an organ console on its lift moves as one).

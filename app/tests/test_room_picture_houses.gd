@@ -295,40 +295,45 @@ func _streamline() -> void:
 func _pink_palace() -> void:
 	var room := await _room("pink_palace")
 	var hall := _system(room, "hall", "builder")
-	var kit := _system(room, "kit", "kit")
-	_system(room, "showing", "showing")
+	var kit := _system(room, "palace", "kit")
+	var sunburst := _system(room, "sunburst", "kit")
+	var festoon := _system(room, "festoon", "motion")
 	_system(room, "screen_frame", "screen")
 	_check("pink palace: a plush balcony", int(hall.params["balcony_rows"]) > 0 and hall.params["seat_model"] == "plush")
 	var pieces: Array = kit.params["pieces"]
-	_check("pink palace: pink and blue curves on the walls and the ceiling",
-			pieces.filter(func(p: Dictionary) -> bool: return p["piece"] == "curves" and p["slot"] == "side_walls").size() == 2
-			and pieces.filter(func(p: Dictionary) -> bool: return p["piece"] == "curves" and p["slot"] == "ceiling").size() >= 3)
-	_check("pink palace: the balcony's moulded front", kit.call("problems").is_empty()
-			and pieces.any(func(p: Dictionary) -> bool: return p["piece"] == "balcony_front" and p["slot"] == "balcony"))
+	# Since 2026-11-08 (the deep pass): the hall inside a shell (kit/pink_palace.gd), its dome a kit of its own.
+	_check("pink palace: the shell hall, its rings, its buttoned balcony, a dome of its own",
+			kit.call("problems").is_empty() and sunburst.call("problems").is_empty()
+			and ["pink_hall", "pink_proscenium", "pink_balcony"].all(func(n: String) -> bool:
+				return pieces.any(func(p: Dictionary) -> bool: return p["piece"] == n))
+			and (sunburst.params["pieces"] as Array).any(func(p: Dictionary) -> bool: return p["piece"] == "pink_dome"))
 	var balcony: Array = room.get_seats().filter(func(p: Vector3) -> bool: return p.y > 3.0)
 	_check("pink palace: seats in the balcony (%d)" % balcony.size(), balcony.size() >= 30)
-	_check("pink palace: no settings of its own; the pre-show applies", room.declared_settings().is_empty()
-			and room.common_applies("ritual") and room.has_curtains)
+	_check("pink palace: no settings of its own; the pre-show applies; a festoon, not the pre-show's curtains",
+			room.declared_settings().is_empty() and room.common_applies("ritual") and not room.has_curtains
+			and festoon.call("target") != null and festoon.call("target").is_in_group("env_in_front"))
 	_sound_systems("pink palace", room, ["bells"], "cinema", 0.7)
 	var bells: Node = room.host.system("bells")
 	_check("pink palace: the house bells by the stage, a one-shot", str(bells.params["sound"]) == "three_bells"
 			and not bells.is_loop() and float(bells.params["every"]) == 0.0)
-	# The sunburst's lamps swell and fall slowly in the pre-show.
+	# The sunburst's lamps (the dome's) swell and fall slowly in the pre-show; the house lamps hold.
 	var lo := 1.0
+	var house_lo := 1.0
 	var t := 0.0
 	while t < 22.0:
 		_play(room, DT, false, false, 0.0)
-		lo = minf(lo, _lamps(room))
+		lo = minf(lo, float(room.host.param("sunburst.cove")))
+		house_lo = minf(house_lo, _lamps(room))
 		t += DT
-	_check("pink palace: the ceiling's lamps cycle in the pre-show (down to %.2f)" % lo, lo < 0.75 and lo > 0.4)
+	_check("pink palace: the sunburst's lamps cycle in the pre-show (down to %.2f), the house's hold (%.2f)" % [lo,
+			house_lo], lo < 0.75 and lo > 0.4 and house_lo > 0.99)
 	_check("pink palace: no bells in the pre-show", bells.plays == 0)
-	# The ceremonial curtain parts, and the lamps stay down whatever the cycle was doing.
-	var pos := _play(room, 15.0, true, true, 0.0)
+	# The festoon rises, and the lamps stay down whatever the cycle was doing.
+	var pos := _play(room, 25.0, true, true, 0.0)
 	_check("pink palace: the ritual rings the house bells once, through their bed (%d; cue sounds %s)" % [bells.plays,
 			room.host.sounds], bells.plays == 1 and room.host.sounds.is_empty())
-	var log: Array = room.host.system("showing").log
-	_check("pink palace: the curtains part in the ritual %s" % [log],
-			log.any(func(a: Array) -> bool: return a[0] == "open_curtains"))
+	_check("pink palace: the festoon rises in the ritual (%.2f)" % festoon.call("progress"),
+			float(festoon.call("progress")) > 0.99)
 	_check("pink palace: lamps down in the film (%.2f)" % _lamps(room), _lamps(room) < 0.2)
 	pos = _play(room, 20.0, true, true, pos)
 	_check("pink palace: and they stay down (%.2f)" % _lamps(room), _lamps(room) < 0.2)

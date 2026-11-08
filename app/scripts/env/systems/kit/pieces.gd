@@ -24,6 +24,8 @@ const Streamline := preload("res://scripts/env/systems/kit/streamline.gd")
 const Reclaimed := preload("res://scripts/env/systems/kit/reclaimed.gd")
 const PalaceCulture := preload("res://scripts/env/systems/kit/palace_culture.gd")
 const Flagship := preload("res://scripts/env/systems/kit/flagship.gd")
+const PinkPalace := preload("res://scripts/env/systems/kit/pink_palace.gd")
+const Screening1962 := preload("res://scripts/env/systems/kit/screening_1962.gd")
 
 const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk", "column", "facade", "castle_gate",
 		"booth", "snack_bar", "screen_tower", "bougainvillea", "ivy", "ferns", "carpet", "partition", "curves",
@@ -34,7 +36,9 @@ const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk
 		"moderne_hall", "ziggurat", "organ_console",
 		"ruin_shell", "ruin_roof", "ruin_growth", "ruin_stalls",
 		"culture_hall", "globe_field",
-		"flagship_hall", "flagship_rows"]
+		"flagship_hall", "flagship_rows",
+		"pink_hall", "pink_proscenium", "pink_balcony", "pink_dome",
+		"screening_room", "screening_hearth", "screening_furniture", "screening_garden"]
 ## Each piece's size when neither the entry nor its slot gives one: [width, height, depth].
 const SIZES := {
 	"balcony_front": [6.0, 1.0, 0.25], "niche": [1.3, 2.6, 0.4], "urn": [0.5, 1.0, 0.5], "lion": [0.55, 0.9, 1.0],
@@ -57,6 +61,10 @@ const SIZES := {
 	"ruin_stalls": [0.0, 0.0, 0.0],
 	"culture_hall": [0.0, 0.0, 0.0], "globe_field": [0.0, 0.0, 0.0],
 	"flagship_hall": [0.0, 0.0, 0.0], "flagship_rows": [0.0, 0.0, 0.0],
+	"pink_hall": [0.0, 0.0, 0.0], "pink_proscenium": [0.0, 0.0, 0.0], "pink_balcony": [0.0, 0.0, 0.0],
+	"pink_dome": [0.0, 0.0, 0.0],
+	"screening_room": [0.0, 0.0, 0.0], "screening_hearth": [0.0, 0.0, 0.0], "screening_furniture": [0.0, 0.0, 0.0],
+	"screening_garden": [0.0, 0.0, 0.0],
 }
 ## The pieces that stand on a floor (their slot's origin is a floor point); the others hang on a wall.
 const STANDING: Array[String] = ["urn", "lion", "obelisk", "column", "booth", "snack_bar", "ferns", "partition",
@@ -133,6 +141,10 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			PalaceCulture.build(piece, c, xf, size, e)
 		"flagship_hall", "flagship_rows":
 			Flagship.build(piece, c, xf, size, e)
+		"pink_hall", "pink_proscenium", "pink_balcony", "pink_dome":
+			PinkPalace.build(piece, c, xf, size, e)
+		"screening_room", "screening_hearth", "screening_furniture", "screening_garden":
+			Screening1962.build(piece, c, xf, size, e)
 
 
 # --- Furniture (furniture.gd draws it) -----------------------------------------------------------------------------

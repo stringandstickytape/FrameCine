@@ -428,7 +428,8 @@ and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider'
 | `stage_depth`, `stage_top` | 1.9, -2.1 | the stage in front of the screen wall |
 | `ceiling_cover` | 1 | the ceiling's share from the front; under 1 opens it to the sky (the Atmospheric, the Reclaimed's broken roof) |
 | `shell` | `built` | `built`: the walls, the ceiling, the stage, the drapes, the pit, the doors and the lamps drawn here; `kit`: only the tiers, the side aisles, the rear walkway and the seats, a kit drawing the rest (Reclaimed's ruin, since 2026-11-08) |
-| `balcony_rows` | 0 | a balcony over the rear with this many rows |
+| `balcony_rows` | 0 | a balcony over the rear with this many rows (its seats are among the room's seats from the document alone too: `seat_transforms_for()`, since 2026-11-08) |
+| `balcony_parapet` | 1 | the balcony's parapet, metres over its floor (0.8 in the Pink Palace, under its buttoned front's roll; since 2026-11-08) |
 | `boxes_per_side` | 0 | boxes on the side walls |
 | `partition_z` | 0 | a plain wall across the hall here (a subdivided hall, Screen 3); 0: none |
 | `booth` | true | the projection booth's windows in the rear wall; `lens` is its lens |
@@ -461,6 +462,7 @@ origin, facing -Z. Each has two library materials (CC0), `upholstery` and `frame
 | `hide` | 462 | | no | a pelt over a low block (of ice) |
 | `bean_bag` | 196 | | no | a squat sack with a dent |
 | `civic` | 338 | | yes | a 1970s civic hall's seat: woven upholstery on a moulded oak shell, oak arms and standards (the Palace of Culture; since 2026-11-08) |
+| `lounge` | 730 | | yes | a 1962 club chair in saddle leather: a low, deep body on a walnut frame, four tapered and splayed walnut legs with a shoe at each foot, rolled arms with round ends standing proud at the front, a loose seat cushion piped along its edges, a curved back wrapping the sitter a little and a loose back cushion leaning on it (the Screening room 1962; since 2026-11-08) |
 | `recliner` | 428 | | yes | a premium recliner without arms: a deep cushion, a reclined back in two pads (lumbar and headrest), a shell to the floor; the room draws the armrests between the seats (the Flagship's kit, `flagship_rows`), so the viewer's own seat folds away and both its arms stay (since 2026-11-08) |
 | `settee` | 276 a place, 106 an end | | no | a segment a place wide: the base, a seat cushion and a back cushion each; the padded arms and the feet are its ends. Two or three places in a row make a settee; its places take no tint of their own, so they match |
 
@@ -531,6 +533,8 @@ One motion system moves one thing. Give each its own id: the id names its action
   screen's top (0.5 m by default), in the `curtain` material. Fully up, its swags hang about a seventh of its drop
   and up to 0.66 m more under its top: hung higher, behind a proscenium's head, it clears the picture (since
   2026-11-08, the Streamline 1937: `festoon_top` 2.3, a drop of 8.05 m from over the proscenium's head to the stage).
+  `festoon_fringe` (since 2026-11-08, the Pink Palace; 0 by default: none): a bullion fringe this deep along the
+  hem, following the swags, its foot in little tassels, in the `fringe` material (the festoon's second surface).
 
 ### Modes
 
@@ -603,7 +607,10 @@ Six more builders of kind `builder`, and the `kit`. They keep the auditorium's c
   2026-11-08): square terracotta tiles in mortar, each its own shade and wear, at 256 x 256 (`SIZES`: a pattern can
   have its own size; the others keep theirs). `board_concrete` (since 2026-11-08, the Palace of Culture): concrete
   cast against boards, ten to a repeat, each its own tone and depth, butt joints, grain, the fins between boards,
-  tie holes and blowholes, at 256 x 256.
+  tie holes and blowholes, at 256 x 256. `tufted` (since 2026-11-08, the Pink Palace's balcony front): buttoned
+  upholstery, a button at each corner and the middle of a repeat, the cloth puffed up between them in diamonds and
+  drawn in along the creases. `shell_carpet` (since 2026-11-08, its aisles): rose scallop shells outlined in powder
+  blue on a deep rose ground, two rows a repeat, a cream pearl between them, at 256 x 256.
 - **Text** is our own stroke font (`kit/strokes.gd`): Latin capitals and figures, and since 2026-11-08 the Greek
   capitals that differ from Latin ones (Γ Δ Θ Λ Ξ Π Σ Φ Ψ Ω; the others, Α Β Ε and so on, draw as their Latin
   look-alikes through `ALIASES`).
@@ -824,6 +831,11 @@ for a count that can be 0, `{}` for a material, `[0, 0]` for the screen's size. 
   `screen_size`, `screen_bottom`.
 - `painting_open` (live, 0 to 1): 1 is risen (the screen shows), 0 is down over the screen. A cue fades it for the
   ritual (the `motion` system can move the `Painting` node too).
+- `painting_art` (`abstract`, the default: soft blocks of colour; or `colour_field`: a hard-edged canvas of our own,
+  a deep teal field, a vermilion sun over its edge, an ochre bar, a black line and a small square on a warm ground,
+  the paint's strokes and the canvas's weave in it; since 2026-11-08) and `painting_frame` (true: the painting's own
+  walnut frame; false: the kit frames the screen). With `shell` `kit` the builder still draws the painting and its
+  ceiling slot (the Screening room 1962).
 - `opening_screen` (not live: the room builds again): the telly fills the pillow fort's opening. The picture is as
   big as fits in the opening, just beyond it.
 - The telly (`telly`): `cabinet` (a deep box, wider at the bottom for its buttons; the default), `portable` (a small
@@ -882,7 +894,8 @@ for a count that can be 0, `{}` for a material, `[0, 0]` for the screen's size. 
 - `door` (`none`, `left`, `right`, `back`). In ice it is an open doorway with the night's glow beyond.
 - `shell` (`drawn` by default, or `kit`, since 2026-11-08): with `kit` the builder lays out the room (its box, the
   window, the doorway, the screen, the seats' places and slots) and draws only the seats, the lamps and the fairy
-  lights; the walls, floor, ceiling, window and doorway are a kit piece's (the Ice cinema's `ice_shell`).
+  lights; the walls, floor, ceiling, window and doorway are a kit piece's (the Ice cinema's `ice_shell`, the
+  Screening room 1962's `screening_room`). A `painting` screen is still the builder's (it rises on `painting_open`).
 - `heater` (`none`, `fireplace`, `radiator`). The fireplace is on the wall across from the window. The radiator is
   under the window. Live: `fire`, `flicker`.
 - `lamps` (on each side wall), `lamp_colour`; `fort`, `fairy_lights` (`auto`, `on`, `off`), `fairy_colour`; live:
@@ -971,7 +984,7 @@ the pieces. The kit must come after its builder in the document. A room may have
 | `colour`, `accent` | the piece's main colour, and a second one (a rug's border, a lamp's pole) |
 | `text` | a neon sign's words in our own letters: A B C D E F I K L N O P R S T U W and the space |
 | `target` | the node the carpet goes on (the builder's `Floor` by default) |
-| `pattern` | the carpet's pattern, one of `procedural.gd`'s (`swirl_carpet` by default; `deco_carpet`: rising suns in rows, since 2026-11-08) |
+| `pattern` | the carpet's pattern, one of `procedural.gd`'s (`swirl_carpet` by default; `deco_carpet`: rising suns in rows, since 2026-11-08; `shell_carpet`: scallop shells in rows, since 2026-11-08) |
 
 Other parameters: `builder` (the builder's id; empty: the room's first builder); materials `stone`, `plaster`,
 `wood`, `tin`, `roof`, `iron`, `plastic` (a computer), `fabric` (a rug), `china` (a tea set, plates), `cloth`
@@ -994,7 +1007,10 @@ mosaic's tesserae; `white_marble` by default), `mosaic_glint` (how much gold and
 `starlight` (a starlight ceiling's pinholes before the film; 0, the default: none) and `starlight_film` (the share of it
 kept while the film plays, the house lamps out; 0 by default); the hall eases the stars to their level over about a
 second, so a setting never makes them jump. The Flagship's wash uses `cove`, `cove_colour` (and `cove_film`) as the
-moderne hall's coves do.
+moderne hall's coves do. For the Pink Palace (since 2026-11-08): `reflect_wall` and `reflect_ground`, what the
+reflecting materials (gilt, chrome, glaze, mirrors) see round their horizon and below at full house light (the
+Streamline's walnut [0.16, 0.12, 0.09] and jade-black by default; the Pink Palace's a rose hall, so its gilt reads
+gold and its mirrors rose).
 
 | Piece | What |
 |---|---|
@@ -1039,6 +1055,14 @@ moderne hall's coves do.
 | `ziggurat` | round the room's screen (no slot): three frames stepping out towards the seats, each lit from behind the next, gilt reveals, a glowing rising sun with gilt rays and chrome speed lines, two organ grilles lit from their chambers, a clock telling the real time (`PieceClock`), a speed-line roundel, footlights (stand-in lamps in the coves' colour) and the lift's chrome ring in the pit |
 | `culture_hall` | an auditorium builder's hall as a 1970s palace of culture (`kit/palace_culture.gd`, no slot; set the auditorium's `side_walls` false and `ceiling_cover` 0): board-marked concrete walls, a wall mosaic either side (`kit/mosaics.gd`, the cosmos and the earth, on the house shader's `MOSAIC`) in a bronze frame under a cornice with its lamp line, a coffered ceiling with a roof light over the back rows (snow on its ledges), a stepped concrete proscenium with ribs and a bronze edge, oak slats on the rear wall, the booth's band and a 1970s clock (`PieceClock` `style` 1) |
 | `globe_field` | 60 opal globes on rods from a `culture_hall`'s coffers, hung in a bell (`PieceLamps`, `house` group, `rim`); each lights the coffer over it (`PieceCove`) |
+| `pink_hall` | an auditorium builder's hall as the inside of a great scallop shell (`kit/pink_palace.gd`, no slot; set the auditorium's `side_walls` false and `ceiling_cover` 0): rose marble dado, tall round-headed mirrors with gilt glazing bars and bevels, fluted pilasters with gilt shell capitals and pink glass shell sconces (bake lights), a frieze of breaking waves white on blue, a cornice whose hidden lamps light the shell vault (`PieceCove`: forty ribs fanning from the dome's rim, pink crests, blue troughs, a gilt line on each crest), gilt shell hoods over the front exits, a great blue and gilt shell on the rear wall |
+| `pink_proscenium` | round the room's screen (no slot): five fluted, scalloped rings stepping towards the seats (a superellipse round the picture's middle, each wider and higher), each lit from behind the next, blue and pink in turn, gilt reveals and beads; a blue and gilt shell crest; thirteen gilt shell footlights on the stage's lip and four stand-in lamps in the coves' colour for the festoon |
+| `pink_balcony` | the balcony's front (`balcony_rows`): buttoned pink velvet (`fabric` with `tufted`) rolled over the parapet under the front row's sight line, gilt beads, seven pink glass fans; a soffit with ten downlights and their pools (three bake spots) |
+| `pink_dome` | an oval dome in the vault's crown over the stalls (put it in a kit of its own: its coves have their own colour): a gilt lip hiding the lamps that light the drum and the dome from its foot (rose by the rim, deepening blue to the apex), a gilt sunburst of 32 rays, a rosette, and a chandelier of 24 pink glass shells in three tiers round a glass drop (a stand-in lamp and a bake light) |
+| `screening_room` | the Screening room 1962's room round a domestic builder with `shell` `kit` (`kit/screening_1962.gd`, no slot): walnut panels standing off the walls with shadow gaps between them (two cuts of the veneer in turn, each its own shade), a screen wall of walnut slats over black felt with the picture in a deep walnut frame and a brass bead, a coffered ceiling of walnut beams over cedar boards with brass downlights and two wall-washers, a floor-to-ceiling window in slim bronze frames (its own faint glass, `WindowGlass`), linen curtains in deep folds at its ends, a flush door with a brass pull, floor-to-ceiling shelves of books and film cans round the projection port, three brass up-and-down sconces, a dark carpet and a burnt-orange rug |
+| `screening_hearth` | the chimney breast in brick on the right wall, a floating slate hearth running past it either side with logs stacked under its ends, the firebox (firebrick, a grate, three logs, embers, slow flames: the hall's `Glows`), a steel lintel, fire tools, a sunburst clock with walnut and brass whose hands keep the real time (`ClockHour`, `ClockMinute`) |
+| `screening_furniture` | a floating walnut credenza under the screen (film cans, a glazed bottle, a walnut bowl on it), a brass bar cart with two crystal decanters, tumblers, a siphon, an ice bucket, lemons and bottles, a surfboard coffee table (a cigar box, a bowl, a book), a tripod floor lamp with a linen drum shade, a sheepskin before the hearth |
+| `screening_garden` | outside the window (one unshaded mesh, `Garden`, `shaders/env_screening_outside.gdshader`, its light worked out per vertex): the eaves running on over the terrace, big concrete pavers, a pool glowing turquoise right outside the glass (its light rippling on the coping, the eaves and, in `Glows`, the ceiling inside), agaves in concrete bowls, palms down the slope, a low wall at the terrace's edge, the city's lights far below to the horizon (in `Glows`) |
 | `flagship_hall` | an auditorium builder's hall as a modern premium auditorium (`kit/flagship.gd`, no slot; set the auditorium's `side_walls` false, `ceiling_cover` 0, `proscenium` none, `handrails` false): folded acoustic walls in charcoal felt with bronze fins over a walnut dado, a light slot between them washing up the folds (per vertex, the house shader's `vertex_light`), a handrail with a warm line under it, cove ledges with a cool wash on the ceiling's edges, long baffles with starlight between them (`starlight`), black velvet masking on the picture's curve in a slim bronze frame, a proscenium of walnut slats, a perforated grille on the stage's front, surround speakers, walnut slats and a band round the projection port on the rear wall |
 | `flagship_rows` | the rows' furniture round the `recliner` seats: fixed leather armrests between the seats and at the rows' ends, a brushed-steel cupholder ring on each, the seat's number engraved on a plate (`SeatNumbers`), lit row letters A to N on the end arms (`RowLetters`, the steps' group), steel nosings on the aisle steps, a frameless glass balustrade with a lit cap rail at the front row |
 | `organ_console` | an illuminated organ console on its lift platform, its foot at `at`: a skirt of glass panels in the coves' colour between gilt fins, an ivory horseshoe of stop tabs, three manuals, a lit music desk under a chrome hood, a bench. Put it in a kit of its own with `group` |
@@ -1966,7 +1990,7 @@ people.
 | 5 | Drive-in, 1958 | `terrace` (the lot), a convertible's bench seat (`vehicle`), a screen tower, a neon snack bar (`kit`) | dusk to stars over the film (`sky`, film-time tracks), mesas (`vista`) | moths in the beam (`life`), a far freight train (`sound_bed`, `every`) | | the window speaker (`presentation`) | tinny speaker |
 | 6 | Screening room, 1962 | `domestic` (walnut), club chairs (`seats`), a bar cart (objects) | a pool glowing through the window (`vista`) | | a painting slides up to show the screen (`motion`, ritual) | | |
 | 7 | Rooftop summer cinema, Athens | `terrace` (`city`: the roof by hand), director's chairs | the city all round and a floodlit temple on its hill (`terrace` `city`), plane lights, moths (`life`) | cicadas, the city's murmur, mopeds, a church bell (`sound_bed`), a cat on the wall (`life`) | | a screen painted on a wall | |
-| 8 | Pink Palace | `auditorium` with pink and blue curves (`kit`), a plush balcony (`balcony_rows`) | a sunburst ceiling with cycling lights, chandeliers (`light`) | | a ceremonial curtain (`showing`) | | |
+| 8 | Pink Palace | `auditorium` dressed by the shell kit (`kit/pink_palace.gd`): a fluted shell vault, five scalloped rings round the screen, mirrors, pilasters, a wave frieze, a buttoned balcony, a shell carpet | troughs that drift pink to blue and then follow the film at a glow (`kit` `cove_*`, `film.colour`); a sunburst dome whose lamps swell and fall (a kit of its own), a chandelier of glass shells | the house bells (`sound_bed`) | the bells, the festoon rises (`motion`) | a festoon with a gold fringe (`motion` `festoon_fringe`) | |
 | 9 | Palace of Culture, 1974 | `auditorium`, board-marked concrete, ochre curtains | a mosaic wall that glitters in the screen's light (material, `film.colour`), snow and birches outside (`vista`, `weather`) | an echoey hall (`acoustics`) | | | snow |
 | 10 | Flagship | `auditorium`: steep rake, black walls | blue step lights (`light`) | | the ritual | a huge curved screen | seat choice |
 | 11 | Nave | `nave`, pews (`seats`) | a dim rose window, candles (`light`, flicker), the film's light climbing the stone | reverb (`acoustics`) | | in the chancel | candles |
@@ -2384,26 +2408,100 @@ seats, doors and screen is new in it (`kit/streamline.gd`).
 
 ### Room: Pink Palace
 
-`app/environments/pink_palace.env.json`. A picture palace in pink: pink and blue waves on the walls and across the
-ceiling, a plush balcony, lamps that swell and fall before the film, and a ceremonial curtain. Its test:
-`tests/test_room_picture_houses.gd`.
+`app/environments/pink_palace.env.json`. *A dream palace in sugared almond colours: the hall is the inside of a great
+scallop shell.* The deep pass (2026-11-08) answered "continue working on the environments one-by-one like you did with
+the bathysphere, really improving their quality, imagination, delight, detail, lighting and so on. Better to do a
+smaller number of incredible superb ones than a large number not so" (the user). Before it the room was plain
+dusty-pink walls with flat pink and blue `curves` bands on them and across a flat ceiling, a moulded balcony front,
+the pre-show's two flat curtain panels, and the whole house's lamps breathing every 10 s. Everything but the hall's
+floor, seats, balcony tiers, stage, doors and screen is new (`kit/pink_palace.gd`). Its tests:
+`tests/test_room_pink_palace.gd` (the room's own) and `tests/test_room_picture_houses.gd` (with the Shopfront and the
+Streamline).
 
-- **Systems:** `light`; `auditorium` (id `hall`): plain dusty-pink walls, a pale pink ceiling with its panels, a rose
-  carpet, pink drapes, plush seats in rose velvet (25 a row), rows 0.85 m deep, a balcony of 3 rows; `kit`: a long
-  `curves` piece on each side wall (pink and blue), four across the ceiling between its panels, a pink `balcony_front`
-  on the balcony; `screen_frame`; `showing` (the pre-show's curtains).
-- **The screen** is 0.3 m higher than the cinema's (centre 1.9 m) and the rows 0.85 m deep: the balcony's front row
-  then sees the bottom of the picture over the balcony's parapet. The `balcony_front` piece is 0.8 m high for the
-  same reason.
-- **Cues:** `sunburst` (every 10 s in the pre-show): the ceiling's lamps fall to 55 % over 4 s and rise again over 4 s.
-  `ritual` (starting): the house bells (`bells.play`), the lamps to half, the curtains part over 5 s, then after 6.5 s
-  (after any `sunburst` still running) the lamps to 15 % over 5 s. `dim` (Pre-show off): the same wait, then 15 %
-  over 3 s. `lights_up`.
+- **The vault** (`pink_hall`): the hall's cross-section a flat crown at 10 m, 9.2 m wide, falling in quarter ellipses
+  to the walls at 6.7 m. Over it forty ribs fan out from the dome's rim to the cornices, the proscenium's last ring and
+  the rear wall, deepening outward to 0.34 m and easing out at the edges so the vault meets the walls in a clean line:
+  pink on every crest, powder blue in every trough, a thin gilt line along each crest (the sunburst's rays). Hidden
+  lamps lie on both cornices behind a lip; their light rakes up the vault, so each crest's flank towards the wall
+  glows and each trough holds a soft coloured shadow, bright by the cornice and fading towards the crown; a little of
+  the chandelier's light round the dome. `PieceCove`: the light per vertex, its colour live.
+- **The walls:** a dado of rose marble with a moulded cap and a gilt bead, following the rake; five fluted pilasters a
+  side (cream, five flutes, a gilt shell for a capital), a pink glass shell sconce on four of them (bake lights: their
+  pools on the pilasters and the walls); between them three tall round-headed mirrors a side (their heads level at
+  5.15 m, their feet following the rake: 6.5 m tall by the stage, 3.6 m at the back), old glass that reflects softly
+  (the reflecting shader at 0.3 roughness: the dark stalls below the eye's level, the rose hall above, faintly the
+  picture in the film), bevelled edges that catch the light, gilt glazing bars, a cream architrave, a gilt shell over
+  each head. Over the front exits a cream arch with a gilt shell hood. Under the cornice a frieze of breaking waves
+  running towards the screen, white on powder blue in relief (2.5 cm), between gilt beads, from the proscenium to the
+  balcony's line; over it a moulded cornice with a ledge and lip the length of the hall. Over the balcony on the rear
+  wall a great shell, powder blue with gilt ribs, lit from a lamp behind the back row.
+- **The proscenium** (`pink_proscenium`): the shell's growth rings round the picture: five rings 0.4 m apart stepping
+  towards the seats, each opening a superellipse round the picture's middle (6.95 m half wide and 5.3 m high at the
+  first, 0.6 and 0.88 m more a ring), their inner edges scalloped, their faces fluted with 21 ribs that run on from
+  ring to ring, blue and pink in turn; each lit by a lamp hidden behind the next ring's edge (bright there, fading
+  towards its own opening, the crests catching it), gilt reveals and a gilt bead round each edge. The fifth reaches
+  the walls and the vault; a blue and gilt shell crests it. Thirteen gilt shell footlights stand on the stage's lip,
+  each with its glow. Nothing of it is in front of the picture.
+- **The festoon** (`motion` `festoon`): pink velvet in seven swags with a gold bullion fringe (`festoon_fringe` 0.16 m),
+  from 6.6 m (2.2 m over the screen's top, behind the second ring's head) to the stage (`festoon_size` [13.8, 8.7]),
+  0.1 m in front of the screen inside the first ring. Fully up, its lowest swag and fringe hang at 4.56 m, over the
+  picture's top, inside the first ring's arch. Lit from below by the footlights (four stand-in lamps in the troughs'
+  colour). It rises at the motion limits (0.5 m/s): about 17 s.
+- **The balcony** (`pink_balcony`): its front buttoned pink velvet (`tufted`, 0.34 m diamonds) from below the slab's
+  edge (4.0 m) to 5.28 m, rolled over the builder's parapet (lowered to 0.8 m: `balcony_parapet`), every point under
+  the front row's sight line to the picture's foot; gilt beads along its top and foot; seven pink glass fans on it.
+  Under it a rose soffit with ten round downlights and their pools on the rear walkway in the bake (three spots).
+- **The dome** (`pink_dome`, its own kit `sunburst`, so its light has its own colour and level): an oval 8.6 x 6.6 m
+  in the vault's crown over the stalls (centre 3 m in front of the viewer), a gilt lip round the opening hiding the
+  lamps on the ledge behind it, a rose drum, the dome rising to 11.05 m, pale blue at its foot deepening to the apex;
+  32 gilt rays, long and short, round a gilt rosette; from it a chandelier of 24 pink glass shells in three tiers on
+  gilt rings round a gilt stem and a glass drop (8.4 m at its foot, over every sight line), a stand-in lamp and a bake
+  light at its heart. The hall's ceiling is raised to 11.2 m for it (`room_max`); the seats, the eye height and the
+  screen are where they were.
+- **The carpet:** scallop shells in rows (`shell_carpet`, rose shells outlined in powder blue on deep rose, a cream
+  pearl between).
+- **The light:** baked, from the sconces (8), the balcony's fans (7), the vault's glow down the walls (cornice lights
+  every 3.6 m a side, two down the rear wall), the rear shell's lamp, the downlights (3 spots) and the chandelier; the
+  vault, the rings and the dome are `PieceCove` (their light per vertex, live). The fill is rosy and low (`fill_top`
+  [0.62, 0.46, 0.5], `baked_fill` 0.2), the spill 0.3 (the coves take 0.6 of it): pale pink walls would otherwise
+  glow in the picture's colours. The gilt and the mirrors see a rose hall (`reflect_wall`, `reflect_ground`). The
+  walls' plaster is baked at 14 cm a texel. No live light.
+- **Cues:** `troughs` (every 48 s in the pre-show, paused, at the end, the intermission): the troughs' light drifts
+  from pink to powder blue over 16 s (in and out eased), holds, and back over 16 s; `troughs_settle` lets go of it as
+  the film starts. In the film the troughs take the film's colour (`cove_film_colour` on `film.colour`, strength
+  0.85) at half their level (`cove` on `playback.playing`) times the house lamps' 15 %: a faint glow. `sunburst`
+  (every 16 s in the pre-show only): the dome's lamps (`sunburst.cove`) fall to 60 % over 5 s and rise again; the
+  house lamps hold (they no longer breathe). `ritual` (starting, Pre-show on): the house bells, the lamps to half, the
+  festoon rises, then the lamps to 15 % over 5 s. `dim` (Pre-show off): the festoon rises, the lamps to 15 % over
+  3 s. `lights_up` (the pre-show, the end): the lamps up over 4 s, the festoon down.
 - **Sound:** `acoustics` `cinema` (rt60 0.7); `sound_bed` `bells` (`three_bells` by the stage, `at` [0, 3, -12],
-  `reach` 12, `film_db` -4), a one-shot the ritual plays in place of the cue's chime (it was a `sound` step at -6).
+  `reach` 12, `film_db` -4), a one-shot in the ritual. Otherwise the hall keeps its quiet (an orchestra tuning far off
+  was considered: not something we could make tasteful from the synth's voices).
 - **Settings:** none of its own (the common ones).
-- **Measured** (headless): 22 draws, 234 504 triangles, no lights, no particles, 9.0 MB; 356 seats. Sound at the
-  slider's default (dBFS RMS): -57.6 as the film starts (the bells), silent in the pre-show and the film.
+- **Comfort:** every colour change at least 16 s, the sunburst's swell 5 s each way (0.06 Hz), the festoon at the
+  motion limits; nothing crosses the sight line (the festoon is `in_front` until it rises; the balcony's roll keeps
+  4 to 9 cm under the front row's line to the picture's foot). In the film the mirrors show the picture at the kit's
+  third, soft, and the chrome-and-gilt picture glint likewise.
+- **Measured** (`test_room_pink_palace.gd`, headless, 2026-11-08): 29 draws, 282 576 triangles (229 264 of them the
+  356 seats: the room's own 53 312), no lights, no particles, 10.4 MB of textures. By part: the vault and rings
+  (`PieceCove`) 17 240, the gilt and mirrors (`PieceSoft`) 15 330, the dome 5 184, the walls, frieze, cornice and
+  balcony (`PieceStatic`, 4 materials) 4 818, the dome's gilt and chandelier 4 956, the lamps' glass 2 020, the
+  festoon 1 680. Before the pass: 22 draws, 234 504 triangles, no lights, no particles, 9.0 MB.
+- **Sound measured:** in the pre-show -55.6 dBFS RMS (peak -43.2: the bells as the ritual starts), silent under the
+  film. Before: -57.6 as the film started, silent otherwise.
+- **The render** (lavapipe, `test_room_pink_palace.gd`; `PINK_BAKE=1` bakes it first): baked, from the seat in the
+  film the walls 0.151, the proscenium 0.194, the picture 0.604 (the Streamline's walls 0.143); in the pre-show the
+  walls 0.317 and the proscenium 0.460. Before the pass, not baked: the walls 0.389 in the film. The bake: about 10 s
+  under lavapipe, a 512 x 512 atlas in 3 layers (4.7 MB).
+- **The costs to watch on the Frame** (not measured on the headset): the triangles (282k: the seats are four fifths;
+  the room's own 53k); one opaque layer everywhere (the vault, the rings and the dome are `PieceCove`, opaque, one
+  noise fetch); the only see-through surface is the projector's beam. The reflecting materials (gilt, mirrors) run the
+  reflect shader (no probe): the mirrors are six large surfaces, worth watching. Every frame the two kits set their
+  coves' colour and level and the reflections' world; the footlights' stand-ins at most ten times a second.
+- **To judge on the Frame:** the frame time; the bake's time; whether the vault's stripes are too busy close to the
+  walls (the ribs' contrast is `RIB_DEPTH` and the crest/trough colours); the mirrors (do they read as old glass?);
+  the troughs' drift to blue and the sunburst's swell (subtle enough?); the festoon's 17 s rise over the film's first
+  seconds; the bells' level by ear.
 
 ### Room: Nave
 
@@ -2841,29 +2939,105 @@ height and the screen did not move.
 
 ### Room: Screening room 1962
 
-`app/environments/screening_room_1962.env.json` (Cinemas). A private screening room in a house: walnut panelling, a
-deep carpet, a brick fireplace with a slow fire, brass wall lamps, six club chairs in two rows, and a pool glowing in
-the garden beyond the picture window. Before the film a painting hangs over the screen; it slides up into the ceiling
-as the film starts.
+`app/environments/screening_room_1962.env.json` (Cinemas). *A collector's private cinema in the hills, 1962: walnut
+and brass, a slow fire on a floating hearth, the pool glowing outside the glass, the city's lights below, a painting
+that rises off the screen.* The deep pass (2026-11-08) answered "continue working on the environments one-by-one like
+you did with the bathysphere, really improving their quality, imagination, delight, detail, lighting and so on.
+Better to do a smaller number of incredible superb ones than a large number not so" (the user). Before it the room
+was the domestic builder's `walnut_1962` box: flat walnut walls, a plaster ceiling, a brick breast, a framed window
+onto a vista's pool, six blocky club chairs.
 
-- **Systems:** `light`; `domestic` (`walnut_1962`, `outside` none so the vista shows through the window); `seats`
-  (`club_chair` in the builder's six slots, brown leather on walnut); `sky` (a clear night, latitude 34, `dusk` 0.9);
-  `vista` (the pool 11 m out at -58 degrees, seen through the window from the viewer's seat; hills on the horizon).
-- **The ritual** (cues on `room.painting_open` and `light.house_lamps`): in the pre-show and after the end the lamps
-  come up over 4 s and the painting comes down over 6 s (`painting_down`, with the Pre-show on). As the film starts
-  from its start (`ritual`), the lamps go to half over 1.5 s, the painting rises over 7 s (1.84 m, at most about 0.4 m/s,
-  under the motion limit), and the lamps go down to the setting over 4 s. A film resumed later (`painting_away`, on
-  playing, intermission, credits) takes the painting up over 4 s whatever the Pre-show. With the Pre-show off the
-  painting stays up and `dim` takes the lamps down over 3 s.
+- **The room** (`screening_room`, `kit/screening_1962.gd`; the domestic builder keeps the 6.4 x 8.2 x 2.7 m box, the
+  seats' places, the painting and its slot, and gives its shell to the kit with `shell` `kit`): walnut panels about
+  0.62 m wide standing 2 cm off the walls, 8 mm shadow gaps between them, floating over a dark gap at the floor and
+  under one at the ceiling; every other panel the veneer's other cut (another part of the flitch, turned), each its own
+  shade. The screen wall is walnut slats (4.2 cm, 7.2 cm apart) over black felt from corner to corner; the picture
+  sits 6 cm back in a deep walnut frame with a brass bead round its opening. A coffered ceiling: walnut beams 13 cm
+  deep on a 5 x 6 grid over narrow cedar boards (`wood_slats`), a flat soffit over the screen wall where the painting
+  rises into its slot, brass downlights in eight coffers and two wall-washers in the soffit. The left wall is glass
+  from the floor to the beam between slim bronze mullions, its own faint glass (`WindowGlass`, no bright rim, so the
+  garden is not veiled), linen curtains in deep folds stacked at its ends (their troughs shaded in the vertex
+  colours: the folds are finer than the lightmap). At the back: a flush walnut door with a long brass pull, and
+  shelves from the door to the right wall, floor to ceiling, of books (each its own height, depth, colour and a title
+  band) and stacks of film cans, a ceramic or two, cupboards under them; in their fascia the projection port, a
+  bronze-framed opening onto the booth, its lens a warm glow (the booth group). Three brass sconces (open cylinders)
+  throw their light up and down the walnut. A dark carpet, a burnt-orange wool rug with a cream border under the
+  chairs.
+- **The hearth** (`screening_hearth`): a brick chimney breast to the ceiling on the right wall; a floating slate
+  hearth 3.1 m long running past it either side, logs stacked under its ends; the firebox low in the breast
+  (firebrick, a grate, three charred logs with pale ends, a bed of embers, eleven slow tongues of flame licking up
+  between them, their glow on the firebrick, the hearth and the floor; a steel lintel); fire tools on a brass stand.
+  Over it a sunburst clock: a walnut disc, 24 brass rays long and short in turn, hour marks, brass hands that keep the
+  real time (`ClockHour`, `ClockMinute`, set each second).
+- **The furniture** (`screening_furniture`): a floating walnut credenza under the screen, four doors with brass pulls,
+  film cans, a tall teal bottle, an orange vase and a walnut bowl on it, all under every seat's view of the picture; a
+  brass bar cart by the right wall under a sconce (walnut trays with brass galleries, two wheels: two crystal
+  decanters with whisky and brandy in them, tumblers, a soda siphon, an ice bucket, a bowl of lemons, bottles lying);
+  a surfboard coffee table on splayed legs before the front row's right (a cigar box, a bowl, a book); a tripod lamp
+  with a linen drum shade in the corner by the window; a sheepskin before the hearth.
+- **The chairs:** the seats system's new `lounge` (a 1962 club chair in saddle leather: a low, deep body, rolled arms,
+  piped loose cushions, a curved back, tapered splayed walnut legs), cognac brown leather on walnut.
+- **The garden** (`screening_garden`, one unshaded mesh, `shaders/env_screening_outside.gdshader`): the eaves running
+  on over the terrace (the beams pass through the glass), big concrete pavers, the pool right outside the glass (3.2
+  x 6.2 m, 1.45 m out) glowing turquoise from two lamps in its far wall, a pale stone coping, agaves in concrete bowls,
+  a low wall at the terrace's edge, five palms down the slope against the sky, and the city's lights far below in the
+  valley to the horizon (a band 150 m out from 6 degrees under the horizon, its own picture: streets of lamps,
+  sodium and white, denser and finer towards the horizon, a warm haze over them). Its light is worked out as it is
+  built (the night's cool light, the room's warm light through the glass, the pool's glow by distance). The pool's
+  light ripples (a web drifting slowly, `water_motion` 0.6: the Motion setting slows it) on the coping, the eaves'
+  underside and, faintly, the ceiling inside by the glass. The sky (`sky`): a clear August night at latitude 34, a
+  waxing gibbous Moon low in the east-south-east (11 degrees up), seen through the window; `vista`: the hills.
+- **The beam** (`screen_frame`, `beam_style` `volume`, `beam_strength` 0.001, from the port's lens [0, 2.25, 2.98]):
+  a cone of the picture's light from the port over the seats, seen looking up or back; from the seat it does not
+  show over the picture.
+- **Light:** in the bake only, none live: the downlights' pools (eight spots, two of them washing the shelves), the
+  wall-washers down the slats either side of the frame, the sconces' scallops up and down (six spots), the tripod
+  lamp, the fire (two omnis), the pool's cool light up through the glass onto the ceiling and the window's reveal, a
+  faint cold light from the night; eight stand-in lamps for the chairs and the soft parts (the fire, the sconces, the
+  lamp, over each row, by the shelves). `light`: `spill` 0.2, a low warm fill (0.16, 0.13, 0.1; `baked_fill` 0.5).
+  The lamps' glow is the house group's, the fire and the city's the accent's and the kit's.
+- **The ritual** (cues on `room.painting_open`, `light.house_lamps`, `light.accent`, `kit.glow`): in the pre-show and
+  after the end the lamps come up over 4 s, the fire and the pool up over 6 s (`fire_up`) and the painting comes down
+  over 6 s (`painting_down`, with the Pre-show on). As the film starts from its start (`ritual`), the house bells, the
+  lamps to half over 1.5 s, the painting rises over 7 s (1.84 m, at most about 0.4 m/s, under the motion limit), the
+  lamps go down to the setting over 4 s; with the film (`embers`) the fire settles to an ember glow (accent 0.25 over
+  8 s) and the pool's lamps to 12 % (over 10 s): "the pool still faintly there". A film resumed later
+  (`painting_away`) takes the painting up over 4 s whatever the Pre-show. With the Pre-show off the painting stays up
+  and `dim` takes the lamps down over 3 s.
 - **Settings:** `house_level`, "Wall lamps in the film" (0..1, 15 %).
-- **Default seat:** the middle of the front row (the origin), 5.1 m from a 2.6 m picture.
-- **Sound:** `acoustics` `small_room` (rt60 0.45); `sound_bed` `fire` at the hearth (`reach` 2.5); `sound_bed`
-  `pump` (`hum`: the pool's filter pump beyond the window, `at` [-3.6, 0.6, -2.2], `reach` 3); `sound_bed` `bells`
-  (`three_bells`, `film_db` -4), played first in the ritual (`bells.play`) before the painting rises.
-- **Measured:** 18 draws, 9 600 triangles, 0 lights, 0 particles, 10.4 MB. Sound at the slider's default (dBFS RMS):
-  -58.1 in the pre-show, -53.9 as the film starts (the bells), -65.2 in the film, -72.9 under a film at the reference
-  level.
-- **Not yet:** a bar cart (the object library has none, and a room that ships as a document places no objects).
+- **Default seat:** the middle of the front row (the origin), 5.1 m from a 2.6 m picture (unchanged).
+- **Sound:** `acoustics` `small_room` (rt60 0.45); `sound_bed` `fire` at the hearth ([2.98, 0.62, -1.9], `reach`
+  2.5); `pump` (`hum`: the pool's filter pump beyond the glass, [-4.9, 0, -3], `reach` 3); `crickets` in the garden
+  ([-9, 0.3, -4], `reach` 7, `gain_db` -4); `owl` (`scops_owl` every 280 s, far down the slope); `bells`
+  (`three_bells`, `film_db` -4), first in the ritual. Measured (`test_room_screening_room_1962.gd`, the slider's
+  default, dBFS RMS): -58.9 in the pre-show, -53.9 as the film starts (the bells), -65.9 in the film, -73.8 under a
+  film at the reference level.
+- **Comfort:** the fire wavers under 3 Hz and only a little (`flicker` 0.5, 12 % at most); the flames lick at a walking
+  pace; the ripples change about once in four seconds at the Motion setting's pace; the painting rises under the
+  motion limit; nothing stands between a seat and the picture (the sight line from every seat is tested); the
+  painting is in front of the picture on purpose (`env_in_front`) only while it is down.
+- **Measured** (`tests/test_room_screening_room_1962.gd`, headless, 2026-11-08): 28 draws (29 with the beam, which is
+  built with the app's screen), 33 632 triangles, no live light, no particles, 14.5 MB. Before the pass: 18 draws,
+  9 600 triangles, 10.4 MB. By part: the six chairs 4.4k triangles (2 draws), the baked room 11.0k (9 draws: two cuts
+  of walnut, the felt and the books' cloth, the cedar, the brick, the slate, the carpet and rug, the tins, the bronze),
+  the soft parts 5.9k (3: the brass, the ceramics and spirits, the sheepskin), the garden 5.1k (1), the stars 2.6k, the
+  sky dome 2.4k, the glows 0.9k (1), the vista 0.7k, the lamps' glow 0.3k (2), the glass 0.3k (2), the clock's hands
+  (2), the painting and its slot (2). The bake: one static mesh atlas, 1024 x 1024 (6.3 MB), 4.7 s under lavapipe; 17
+  spots and 3 omnis, all hidden. From the seat under the test's picture (lavapipe, baked): the walls 0.14 in the
+  pre-show and 0.13 in the film (the picture 0.41).
+- **The costs to watch on the Frame:** fill. The glass is one faint layer over the window (a fifth of the view
+  looking left); the glows are one added mesh (the flames, small; the ripples on the ceiling by the window, about a
+  square metre and a half seen at a slant; the city's band, far and thin); the beam's volume covers the picture's
+  area from the seat (it adds nothing there but its cost). The garden is unshaded and opaque (a few multiplies, two
+  texture reads near the pool). If the frame time is short: the beam first (`beam` false), then the ceiling's ripples.
+- **The render** (lavapipe, `test_room_screening_room_1962.gd` with `SR62_BAKE`, `SR62_RENDER_ONLY`, `SR62_ONLY`):
+  from the seat, left, right, up, back, a side seat, the back row towards the window; close: the hearth, the bar cart,
+  the pool, the shelves, the credenza, the valley, the port, the ceiling by the window; in the pre-show and in the
+  film.
+- **To judge on the Frame:** the frame time (the glass, the beam, the glows); the pool's brightness in the film (12 %)
+  and whether its ripples on the ceiling read as light or as a stain; the beam's strength looking back; the chairs'
+  brightness (lit live by the stand-in lamps, not the lightmap); the fire's level in the film; the crickets', the
+  pump's and the owl's levels by ear.
 
 ### Room: Athens rooftop
 

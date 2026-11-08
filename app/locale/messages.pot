@@ -4360,7 +4360,7 @@ msgid "A pillow fort in a bedroom, 1993: cushions and a bedsheet, fairy lights, 
 msgstr ""
 
 #: environments/pink_palace.env.json
-msgid "A plush picture palace in pink and blue: a sunburst ceiling with cycling lights, chandeliers, a balcony and a ceremonial curtain."
+msgid "A dream palace in sugared almond colours: inside a great shell, its ribs glowing pink and blue round a sunburst dome, scalloped arches, mirrors, a buttoned balcony, a festoon with a gold fringe."
 msgstr ""
 
 #: environments/reclaimed.env.json
@@ -4376,7 +4376,7 @@ msgid "A tired multiplex screen, 1983: plasterboard, a swirly carpet, a broken s
 msgstr ""
 
 #: environments/screening_room_1962.env.json
-msgid "A private screening room, 1962: walnut walls, club chairs, a pool glowing through the window, and a painting that slides up to show the screen."
+msgid "A collector's private cinema in the hills, 1962: walnut and brass, a slow fire on a floating hearth, the pool glowing outside the glass, the city's lights below, a painting that rises off the screen."
 msgstr ""
 
 #: environments/shopfront_1906.env.json
