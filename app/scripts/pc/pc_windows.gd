@@ -8,7 +8,7 @@ extends Node3D
 ##              Its bar: Close, Show on the big screen (the window becomes the big screen's source, a film's place
 ##              and the room's presentation: pc_window_source.gd) and back.
 ##   focus      the pane looked at for DWELL seconds (eye gaze, else the head) is highlighted and takes the keyboard
-##              and the voice. It and the big screen ask the PC for the full rate (FULL_FPS, FULL_KBPS), the others
+##              and the voice. It and the big screen ask the PC for the full rate (full_fps(): the headset's refresh rate; FULL_KBPS), the others
 ##              for a few frames a second. The PC window comes to the front (`focus`) only before its first click or
 ##              key after it gained the focus.
 ##   cursor     a mouse paired with the headset: once a PC is connected and the mouse moves, the mouse is captured
@@ -41,6 +41,7 @@ const Transcriber := preload("res://scripts/voice/transcriber.gd")
 
 const SECTION := "pc_windows"
 const DWELL := 0.5
+## The full rate when the headset's own refresh rate can't be read (a desktop run).
 const FULL_FPS := 60
 const FULL_KBPS := 20000
 const LOW_FPS := 5
@@ -48,6 +49,18 @@ const LOW_KBPS := 1500
 ## The most a stream should be (the PC scales a larger window down).
 const MAX_SIZE := Vector2i(3840, 2160)
 const PANE_DISTANCE := 1.0
+
+
+## The full rate asked of the PC: the headset's refresh rate, so nothing is captured, encoded or sent that the
+## headset can't show (a 144 Hz monitor gives every other frame at 72), and below it the PC's monitor sets the rate
+## (the user, 2026-11-08: capture at the headset's frame rate).
+static func full_fps() -> int:
+	var xr := XRServer.find_interface("OpenXR")
+	if xr != null and xr.is_initialized() and "display_refresh_rate" in xr:
+		var r := float(xr.get("display_refresh_rate"))
+		if r > 0.0:
+			return roundi(r)
+	return FULL_FPS
 ## The cursor's sphere round the head where it is over nothing (metres), and the mouse's degrees per count.
 const CURSOR_RADIUS := 2.0
 const MOUSE_DEG := 0.05
@@ -241,7 +254,7 @@ func open_window(client_id: String, window_id: String) -> PcPane:
 	pane.set_width(PcPane.natural_width(pane.pixels.x, PANE_DISTANCE))
 	_place_new(pane)
 	pane.attach(PcVideo.new())
-	pane.stream = s.open_stream(window_id, MAX_SIZE, FULL_FPS, FULL_KBPS)
+	pane.stream = s.open_stream(window_id, MAX_SIZE, full_fps(), FULL_KBPS)
 	panes.append(pane)
 	set_focus(pane)
 	_update_sound()
@@ -338,7 +351,7 @@ func _update_quality() -> void:
 		if s == null:
 			continue
 		var full := pane == focused or pane == screen_pane
-		s.set_quality(pane.stream, FULL_FPS if full else LOW_FPS, FULL_KBPS if full else LOW_KBPS)
+		s.set_quality(pane.stream, full_fps() if full else LOW_FPS, FULL_KBPS if full else LOW_KBPS)
 
 
 ## Asks for the pane's stream again from a key frame: the old one closes, a new number opens.
@@ -354,7 +367,7 @@ func _restart_stream(pane: PcPane, why: String) -> void:
 	s.close_stream(pane.stream)
 	pane.video.reset()
 	var full := pane == focused or pane == screen_pane
-	pane.stream = s.open_stream(pane.window_id, MAX_SIZE, FULL_FPS if full else LOW_FPS,
+	pane.stream = s.open_stream(pane.window_id, MAX_SIZE, full_fps() if full else LOW_FPS,
 			FULL_KBPS if full else LOW_KBPS)
 
 
