@@ -1043,7 +1043,7 @@ Cue sounds (`env_audio.play`, the chime) and the thud still go straight to Envir
 
 | Param | Default | What |
 |---|---|---|
-| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`; `silence` plays nothing (the sounds: below) |
+| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`; `silence` plays nothing (the sounds: below) |
 | `gain_db` | 0 | dB from the designed level (-30 to +6) |
 | `level` | 1 | 0 to 1, live. Bind it: `film.bass` for a rumble through the wall, `weather.rain` or `weather.wet` for rain, a setting |
 | `film_db` | -8 | dB lower in `starting`, `playing` and `credits`. Up again in the pre-show, paused, the intermission and the end |
@@ -1084,6 +1084,8 @@ tones and swells divide its length, so it has no seam.
 | `clock` | loop 4 | a tick and a slightly duller, slightly early tock each second, through a wooden case | a mantel, a shelf |
 | `tube_whine` | loop 2 | a picture tube's line whine at 15 625 Hz and its valves' faint hum. `pitch` 0.648: a 405-line set's 10 125 Hz; 1.007: 15 734 Hz | a CRT telly, very low |
 | `noise` | loop 4 | pink noise | under other beds |
+| `bubbles` | loop 6 | a vent's bubbles in deep water: bursts of low bubbles (tones that rise as they ring) between quiet spells, the water's soft hiss (since 2026-11-08) | a vent outside the glass |
+| `sonar` | one-shot 3 | a sonar's ping: a soft round tone at 1.18 kHz with a faint beat, swelling in over 15 ms and ringing down, a lower octave under it, and 1.25 s later its echo off the sea floor, duller and a third as loud (since 2026-11-08) | a bathysphere's pre-show (a cue's `do`); a cue sound too |
 | `moped` | one-shot 8 | a small two-stroke passing, 15 m away at its closest; with `to` it travels | a street below |
 | `train` | one-shot 40 | a freight train far off: the roll, the rail joints, the horn's two notes early on | far off, `every` |
 | `huskies` | one-shot 7 | three far howls and a few yips, an echo | snow |
@@ -1102,7 +1104,7 @@ tones and swells divide its length, so it has no seam.
 
 Cue sounds (`EnvDoc.SOUNDS`, for a cue's `sound` step and ambient life's calls): the foundation's seven, `moped`,
 `train`, `huskies`, `hull_creak`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `switch_clunk`, `crt_off`,
-`channel_clunk` (not `valve_hum`: 8 s, too long to make on the main thread). A cue's `sound` step plays at
+`channel_clunk`, `sonar` (not `valve_hum`: 8 s, too long to make on the main thread). A cue's `sound` step plays at
 the reference level less its `gain_db`: at 0 dB it reaches the level check's target, so give it -10 or lower. A
 `sound_bed` with `play` is the levelled way: it plays at the sound's designed level.
 
@@ -1177,9 +1179,11 @@ second.
 | `hum` | -58 | -58.0 | -66.0 | -73.1 | -47.7 |
 | `deep_hum` | -54 | -54.0 | -63.1 | -68.4 | -41.0 |
 | `fountain` | -56 | -56.0 | -64.2 | -71.1 | -41.8 |
+| `bubbles` (2026-11-08) | -57 | -57.0 | -64.7 | -72.4 | -36.2 |
 | `clock` | -56 | -56.0 | -64.0 | -71.1 | -19.9 |
 | `tube_whine` | -62 | -62.0 | -70.0 | -77.2 | -55.0 |
 | `noise` | -54 | -54.0 | -62.0 | -69.1 | -41.2 |
+| `sonar` (2026-11-08) | -56 | -56.0 | -64.0 | | -39.7 |
 | `moped` | -52 | -52.0 | -60.0 | | -42.9 |
 | `train` | -52 | -52.0 | -60.0 | | -40.6 |
 | `huskies` | -54 | -54.0 | -62.0 | | -46.0 |
@@ -2179,10 +2183,11 @@ answered "go nuts on the bathysphere - I think that has a lot of potential that 
   well under 1 Hz at any point; the sonar's sweep brightens a point once in 6 s; the manta glides at 1.4 m/s at most,
   more than 11 m up; the floodlights' level changes over 5 and 6 s. The Motion setting scales `water_motion` (shafts,
   caustics in the water, fronds, snow, bubbles) and `light.caustic_speed`; at 0 the water stands still.
-- **Measured** (`test_room_bathysphere.gd`, headless, 2026-11-08): 29 draws, 104 027 triangles, no live lights, no
+- **Measured** (`test_room_bathysphere.gd`, headless, 2026-11-08): 29 draws, 105 755 triangles, no live lights, no
   particles (the specks are vertex-animated quads), 6.1 MB. Before the second pass: 12 draws, 79 078 triangles. By
   part: the seats 79k triangles (2 draws), the sea floor with its rocks, coral, bell and chimney 8.7k (1), the fronds
-  4.1k (1), the rivets 4.4k (1), the marine snow 3.6k (1), the brass fittings 2.5k (1), the whale 240, the manta 35.
+  4.1k (1), the rivets 4.4k (1), the marine snow 3.6k (1), the brass fittings 2.5k (1), the water sphere 2.3k (1;
+  24 rings of 48 sides, where it was 12 of 24, so its rim is round against the banks), the whale 240, the manta 35.
 - **The costs to watch on the Frame** (not measured on the headset yet): fill, not geometry. The water sphere
   covers the whole view behind the glass, as before, its shader now a few dozen ALU and one texture read for the
   window's waves (shallows only); the sea floor is opaque and drawn behind the glass (early depth rejects most of it);
@@ -2197,7 +2202,7 @@ answered "go nuts on the bathysphere - I think that has a lot of potential that 
   the deep's low hum (`deep_hum`, `gain_db` -4); the vent's `bubbles` outside behind on the right (`gain_db` -3,
   `reach` 8); the console's `sonar` ping (`gain_db` -2, by the `ping` cue); a far whale's song (`far_song`, the
   synthesiser's `whale`, `gain_db` -6, 22 m off); the passing whale's song is `life`'s (`voice_db` -4). Measured
-  (`test_room_bathysphere.gd`, the slider's default): -51.4 dBFS RMS in the pre-show, -72.5 under a film at the
+  (`test_room_bathysphere.gd`, the slider's default): -51.4 dBFS RMS in the pre-show, -72.3 under a film at the
   reference level.
 - **To judge on the Frame:** the frame time with the water, the beams and the caustics (fill); whether the
   floodlights' beams and the Snell's window are too bright beside the film at 30 %; the shallows' brightness in the
