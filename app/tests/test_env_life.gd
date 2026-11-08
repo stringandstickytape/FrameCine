@@ -19,8 +19,8 @@ const Registry := preload("res://scripts/env/systems/registry.gd")
 const Life := preload("res://scripts/env/systems/life.gd")
 const Creature := preload("res://scripts/env/systems/life/creature.gd")
 
-const FLOCKS := ["moths", "birds", "fireflies", "fish", "jellies", "planes"]
-const WALKERS := ["cat", "deer", "whale"]
+const FLOCKS := ["moths", "birds", "fireflies", "fish", "school", "jellies", "planes"]
+const WALKERS := ["cat", "deer", "whale", "rays"]
 
 var _failures := 0
 var _checks := 0
@@ -52,6 +52,9 @@ static func test_doc() -> Dictionary:
 				"colour": {"bind": "film.colour", "strength": 0.5, "base": "#59bfff", "smooth": 1.0}}},
 			{"system": "life", "id": "whale", "params": {"creature": "whale"}},
 			{"system": "life", "id": "planes", "params": {"creature": "plane", "every": 0}},
+			{"system": "life", "id": "rays", "params": {"creature": "ray", "every": 0}},
+			{"system": "life", "id": "school", "params": {"creature": "fish", "schooling": 1.0, "count": 30,
+				"region": {"min": [-9.0, 4.0, -12.0], "max": [9.0, 8.5, 2.0]}}},
 		],
 		"cues": [{"name": "whale", "when": {"signal": "film.quiet", "above": 0.9, "for": 4},
 			"states": ["playing"], "chance": 1.0, "cooldown": 900, "steps": [{"do": "whale.pass"}]}]}
@@ -97,6 +100,7 @@ func _run() -> void:
 	_fireflies(h)
 	await _whale_level()
 	_fish(h)
+	_schooling(h)
 	_birds(h)
 	_cat_deer_planes(h)
 	_life_off(h)
@@ -109,7 +113,7 @@ func _run() -> void:
 func _spec() -> void:
 	_check("life is registered, of kind life", Registry.has("life") and Registry.spec("life")["kind"] == "life")
 	var s: Dictionary = Registry.spec("life")
-	_check("nine creatures", (s["params"]["creature"]["values"] as Array).size() == 9)
+	_check("ten creatures", (s["params"]["creature"]["values"] as Array).size() == 10)
 	_check("its actions: pass, scatter, settle, call", (s["actions"] as Dictionary).has_all(["pass", "scatter",
 			"settle", "call"]))
 	for p: String in ["glow", "colour"]:
@@ -314,6 +318,28 @@ func _fish(h: Node) -> void:
 	var bright := _mean(f.positions()).distance_to(light)
 	_check("fish: drawn to the screen in a bright scene (%.1f m -> %.1f m)" % [dark, bright], bright < dark - 1.0)
 	h.signals.fake("film.brightness", 0.0)
+
+
+## A schooling school (schooling 1): longer along its way than across it, and its turns reach the back later than the
+## front (the back follows where the school was a moment before).
+func _schooling(h: Node) -> void:
+	var s: Node = h.system("school")
+	var fish: RefCounted = s.creature
+	_steps(h, 20.0)
+	var along_sum := 0.0
+	var across_sum := 0.0
+	for o: Vector3 in fish.slot:
+		along_sum += absf(o.z)
+		across_sum += absf(o.x)
+	var plain: RefCounted = h.system("fish").creature
+	_check("school: drawn in and longer along its way than across it (%.1f, %.1f; plain %.2f m apart, schooling "
+			% [along_sum, across_sum, plain._spread] + "%.2f)" % fish._spread, along_sum > across_sum * 1.8
+			and fish._spread < plain._spread)
+	_check("school: its history reaches back over the lag (%d samples)" % fish._history.size(),
+			fish._history.size() >= int(fish.LAG / fish.HISTORY_STEP))
+	var then: Array = fish._recall(fish.LAG)
+	_check("school: the back follows where the school was (%.2f m behind now)" % (then[0] as Vector3).distance_to(
+			fish.centre), (then[0] as Vector3).distance_to(fish.centre) > 0.05)
 
 
 func _mean(ps: Array) -> Vector3:

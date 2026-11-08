@@ -36,12 +36,17 @@ uniform vec3 pivot_neck = vec3(0.0);
 uniform bool single = false;
 uniform vec4 single_custom = vec4(0.0);
 uniform vec4 single_tint = vec4(1.0);
+// A paler underside (a ray's, a whale's throat and belly): mixed in by how much a face looks down (its model-space
+// normal), times belly.
+uniform float belly = 0.0;
+uniform vec3 belly_colour : source_color = vec3(0.8);
 
 #include "res://shaders/env_spill.gdshaderinc"
 
 varying vec3 world_pos;
 varying vec4 tint;
 varying float lit;
+varying float under;
 
 vec3 rotate_x(vec3 v, vec3 pivot, float a) {
 	vec3 p = v - pivot;
@@ -53,6 +58,7 @@ vec3 rotate_x(vec3 v, vec3 pivot, float a) {
 void vertex() {
 	vec4 d = single ? single_custom : INSTANCE_CUSTOM;
 	tint = single ? single_tint : COLOR;
+	under = clamp(-NORMAL.y, 0.0, 1.0) * belly;
 	lit = d.z;
 	float ph = d.x * TAU;
 	vec3 v = VERTEX;
@@ -107,5 +113,5 @@ void fragment() {
 		}
 	}
 	vec3 light = room_light_at(world_pos, spill) + lit_colour * spill_tint(screen_center) * lit;
-	ALBEDO = colour * tint.rgb * light;
+	ALBEDO = mix(colour, belly_colour, under) * tint.rgb * light;
 }
