@@ -15,6 +15,7 @@ extends RefCounted
 ##   b.polygon(corners, normal)                  one flat face of any outline, concave too (a chart, triangulated)
 ##   b.box(centre, size, basis, skip, inside)    a box's faces (each a chart); skip: faces left out, by outward normal
 ##   b.strip(line_a, line_b, normals)            a strip of quads between two polylines (one chart, unrolled)
+##   b.sheet(rows, normals, colours, u, v)       a grid of points as one chart, laid out along two axes
 ##   b.rounded_box(centre, size, radius, ...)    a box with rounded edges and smooth normals (no chart: seats)
 ##   b.commit(with_uv2) -> ArrayMesh
 
@@ -236,6 +237,26 @@ func grid(rows: Array, normals: Array, colours: Array = []) -> void:
 			var fn := (n0[j] + n0[j + 1] + n1[j] + n1[j + 1]).normalized()
 			_triangle(a, a + 1, a + w + 1, r0[j], r0[j + 1], r1[j + 1], fn)
 			_triangle(a, a + w + 1, a + w, r0[j], r1[j + 1], r1[j], fn)
+
+
+## A grid as grid() draws it, as one chart for a bake: its chart coordinates the points' places along u_axis and
+## v_axis (a nearly flat surface: a floor of uneven snow, a pelt on it). Since 2026-11-08 (the Ice cinema).
+func sheet(rows: Array, normals: Array, colours: Array, u_axis: Vector3, v_axis: Vector3) -> void:
+	if rows.size() < 2:
+		return
+	_begin_chart()
+	var base := _current.verts.size()
+	grid(rows, normals, colours)
+	var origin: Vector3 = (rows[0] as PackedVector3Array)[0]
+	_chart_min = Vector2(INF, INF)
+	_chart_max = Vector2(-INF, -INF)
+	for i in range(base, _current.verts.size()):
+		var d := _current.verts[i] - origin
+		var uv := Vector2(d.dot(u_axis), d.dot(v_axis))
+		_current.uvs[i] = uv
+		_chart_min = _chart_min.min(uv)
+		_chart_max = _chart_max.max(uv)
+	_end_chart()
 
 
 ## Every vertex's colour so far multiplied by f(position, normal) -> float (occlusion baked into the colours of parts

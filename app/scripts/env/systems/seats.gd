@@ -413,16 +413,18 @@ static func _hide(b: RoomMesh, u: Material, f: Material) -> void:
 ## A reindeer's pelt over the block (since 2026-11-08, for the Ice cinema: "reindeer hides and furs on the benches
 ## with real thickness and fur edges", the brief): its outline uneven and narrower at the neck, which hangs down the
 ## block's front, thick as a pelt is and rounded over at its edges, darker brown-grey along the spine and pale towards
-## the belly's edges. Colours per vertex (the instance tint multiplies them).
+## the belly's edges. Colours per vertex (the instance tint multiplies them). Since the second pass (2026-11-08, the
+## coordinator: "make them reindeer pelts: lighter cream-grey-brown with a darker spine, a soft fur edge ... a
+## natural ragged outline"): the reindeer's colours, a ragged edge, and a fringe of tufts all round it.
 static func _pelt(b: RoomMesh) -> void:
 	const ACROSS := 9
 	const TOP := 0.4
-	const THICK := 0.03
+	const THICK := 0.02
 	# The path down the pelt, back to front: on the top, over the front edge and down the block's face.
 	var path: Array[Vector3] = []
 	var normals: Array[Vector3] = []
-	for k in 8:
-		var z := lerpf(0.27, -0.31, float(k) / 7.0)
+	for k in 11:
+		var z := lerpf(0.27, -0.31, float(k) / 10.0)
 		path.append(Vector3(0.0, TOP, z))
 		normals.append(Vector3.UP)
 	for k in 3:
@@ -435,28 +437,91 @@ static func _pelt(b: RoomMesh) -> void:
 	var rows: Array = []
 	var ns: Array = []
 	var cols: Array = []
-	var spine := Color(0.68, 0.58, 0.47)
-	var belly := Color(0.93, 0.9, 0.84)
+	var spine := Color(0.52, 0.46, 0.4)
+	var flank := Color(0.8, 0.76, 0.7)
+	var belly := Color(0.96, 0.94, 0.9)
 	for i in path.size():
 		var s := float(i) / (path.size() - 1)
-		# The half width along the pelt: the neck narrower at the front, uneven all along.
-		var half := 0.36 + 0.025 * sin(s * 9.0 + 1.0) - 0.07 * smoothstep(0.75, 1.0, s)
+		# The half width along the pelt: the neck narrower at the front, uneven all along, each side its own way.
+		var wave := 0.026 * sin(s * 9.0 + 1.0) + 0.012 * sin(s * 23.0 + 0.5) + 0.008 * sin(s * 47.0 + 2.0)
+		var half := 0.3 + wave - 0.06 * smoothstep(0.75, 1.0, s)
+		var skew := 0.012 * sin(s * 17.0 + 2.0)
 		var row := PackedVector3Array()
 		var nrow := PackedVector3Array()
 		var crow := PackedColorArray()
 		for j in ACROSS:
 			var u := lerpf(-1.0, 1.0, float(j) / (ACROSS - 1))
 			# The pelt rounds down at its sides, its thickness showing.
-			var drop := THICK * smoothstep(0.75, 1.0, absf(u))
-			var p := path[i] + Vector3(u * half, 0, 0) + normals[i] * (THICK - drop)
+			var drop := (THICK - 0.004) * smoothstep(0.82, 1.0, absf(u))
+			var p := path[i] + Vector3(u * half + skew * absf(u), 0, 0) + normals[i] * (THICK - drop)
 			row.append(p)
-			nrow.append((normals[i] + Vector3(u * 0.35 * smoothstep(0.6, 1.0, absf(u)), 0, 0)).normalized())
-			var pale := smoothstep(0.35, 1.0, absf(u)) * 0.85 + 0.15 * s
-			crow.append(spine.lerp(belly, pale).srgb_to_linear())
+			nrow.append((normals[i] + Vector3(u * 0.2 * smoothstep(0.75, 1.0, absf(u)), 0, 0)).normalized())
+			# The dark back down the spine, the grey-brown flanks, the cream belly at the edges.
+			var c := flank.lerp(spine, 1.0 - smoothstep(0.0, 0.22, absf(u)))
+			c = c.lerp(belly, smoothstep(0.6, 1.0, absf(u)) * 0.9 + 0.1 * s)
+			# The hair lying in patches, a little lighter or darker.
+			c *= 0.9 + 0.2 * fposmod(sin(float(i * 31 + j * 7) * 12.9898) * 43758.5453, 1.0)
+			crow.append(c.srgb_to_linear())
 		rows.append(row)
 		ns.append(nrow)
 		cols.append(crow)
 	b.grid(rows, ns, cols)
+	# The fringe: tufts of the belly's long hair round the edge, out from the sides and the back, down from the front.
+	var edge_colour := belly.srgb_to_linear() * 0.95
+	var last := path.size() - 1
+	for side: int in [0, ACROSS - 1]:
+		var line: Array[Vector3] = []
+		var outs: Array[Vector3] = []
+		var up: Array[Vector3] = []
+		for i in path.size():
+			line.append((rows[i] as PackedVector3Array)[side])
+			outs.append(Vector3(-1.0 if side == 0 else 1.0, 0, 0))
+			up.append(normals[i])
+		_fringe(b, line, outs, up, edge_colour)
+	for end: int in [0, last]:
+		var line: Array[Vector3] = []
+		var outs: Array[Vector3] = []
+		var up: Array[Vector3] = []
+		for j in ACROSS:
+			line.append((rows[end] as PackedVector3Array)[j])
+			outs.append(Vector3(0, 0, 1) if end == 0 else Vector3(0, -1, -0.15).normalized())
+			up.append(normals[end])
+		_fringe(b, line, outs, up, edge_colour)
+
+
+## Tufts along an edge (points in order), each pointing `outs` from it: every centimetre and a half one, its length and lean
+## random and longer in clumps, its tip darker (a soft, ragged edge, not a saw's); facing `up` (the side they are seen
+## from).
+static func _fringe(b: RoomMesh, line: Array[Vector3], outs: Array[Vector3], up: Array[Vector3],
+		colour: Color) -> void:
+	var a := PackedVector3Array()
+	var c := PackedVector3Array()
+	var ns := PackedVector3Array()
+	var k := 0
+	for i in line.size() - 1:
+		var along := (line[i + 1] - line[i]).normalized()
+		var steps := maxi(1, ceili(line[i].distance_to(line[i + 1]) / 0.014))
+		for j in steps:
+			var t := float(j) / steps
+			var p := line[i].lerp(line[i + 1], t)
+			var out := outs[i].lerp(outs[i + 1], t).normalized()
+			# By a hash of the place, so every hide is ragged the same way (the mesh is shared).
+			var r1 := fposmod(sin(float(k) * 12.9898) * 43758.5453, 1.0)
+			var r2 := fposmod(sin(float(k) * 78.233 + 1.7) * 43758.5453, 1.0)
+			var clump := 0.55 + 0.45 * sin(float(k) * 0.37 + r2 * 0.8)
+			var tuft := 0.002 if k % 2 == 0 else (0.006 + 0.03 * r1 * r1) * clump
+			a.append(p)
+			c.append(p + out * tuft + along * (r2 - 0.5) * tuft * 0.6)
+			ns.append(up[i].lerp(up[i + 1], t).normalized())
+			k += 1
+	if a.size() < 2:
+		return
+	var base := PackedColorArray()
+	var tips := PackedColorArray()
+	for i in a.size():
+		base.append(colour)
+		tips.append(colour * 0.7)
+	b.grid([a, c], [ns, ns], [base, tips])
 
 
 ## A bean bag: a squat round sack, taller at the back, with the dent where one sits.
@@ -723,6 +788,9 @@ func _material(part: String, model: String) -> ShaderMaterial:
 		out = shared.duplicate() as ShaderMaterial if shared != null else ShaderMaterial.new()
 	if part == "upholstery":
 		out.set_shader_parameter("instance_tint", true)
+		if model == "hide":
+			# Fur's soft sheen at a glancing look (since 2026-11-08: "a little sheen", the coordinator).
+			out.set_shader_parameter("sheen", 0.2)
 	return out
 
 

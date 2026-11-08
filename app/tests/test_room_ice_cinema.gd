@@ -56,8 +56,8 @@ func _built(room: Node3D) -> void:
 			+ "under 16 MB (%s)" % [stats], int(stats["draws"]) >= 15 and int(stats["draws"]) <= 22
 			and int(stats["triangles"]) < 120000 and int(stats["lights"]) == 0 and int(stats["particles"]) < 400
 			and float(stats["texture_mb"]) < 16.0)
-	for n: String in ["IceBlocks", "IceSnow", "IceWax", "IceFurs", "IceGlass", "IceFlames", "IceFlames_house",
-			"IceOutside"]:
+	for n: String in ["IceBlocks", "IceSnow", "IceVault", "IceFloor", "IceCandles", "IceCandles_house", "IceFurs",
+			"IceGlass", "IceFlames", "IceFlames_house", "IceOutside"]:
 		check("the room has its %s" % n, room.find_child(n, true, false) != null)
 	for n: String in ["Walls", "Floor", "Ceiling", "Trim", "Doorway", "Screen"]:
 		check("the room's own %s left to the kit's ice" % n, room.get_node_or_null(n) == null)
@@ -129,7 +129,7 @@ func _views(room: Node3D) -> void:
 	var eye := Vector3(0.0, 1.2, 0.0)
 	var dom: Node = room.host.system("room")
 	var p: Dictionary = Registry.script_of("domestic").call("resolved", dom.params)
-	var inside := ["IceBlocks", "IceSnow", "IceFurs"]
+	var inside := ["IceBlocks", "IceSnow", "IceVault", "IceFloor", "IceFurs"]
 	# Through the window's middle and the doorway's: nothing of the room in the way, the night's snow beyond.
 	var win: Array = Registry.script_of("domestic").call("_window", p)
 	var door: Array = Registry.script_of("domestic").call("_door", p)
@@ -352,10 +352,14 @@ func _render(doc: Dictionary) -> void:
 		var p := "ice_%s%s_" % ["baked_" if baked else "", phase]
 		var img: Image = await RoomRender.shot(self, vc, eye, screen, p + "seat")
 		# How lit the walls are beside the screen against the picture (printed for the docs).
-		var walls := (RoomRender.mean(img, Rect2(0.05, 0.4, 0.12, 0.2)).get_luminance()
-				+ RoomRender.mean(img, Rect2(0.83, 0.4, 0.12, 0.2)).get_luminance()) * 0.5
+		# (The left side is the window's night, unlit by the house: the right wall only.)
+		var walls := RoomRender.mean(img, Rect2(0.83, 0.4, 0.12, 0.2)).get_luminance()
 		var picture := RoomRender.mean(img, Rect2(0.45, 0.45, 0.1, 0.08)).get_luminance()
-		print("  render: %s from the seat: the walls %.3f, the picture %.3f" % [phase, walls, picture])
+		# The far room: the vault over the seats and the floor between the front row and the screen.
+		var vault := RoomRender.mean(img, Rect2(0.3, 0.02, 0.4, 0.08)).get_luminance()
+		var floor_l := RoomRender.mean(img, Rect2(0.2, 0.68, 0.15, 0.08)).get_luminance()
+		print("  render: %s from the seat: the walls %.3f, the vault %.3f, the floor %.3f, the picture %.3f"
+				% [phase, walls, vault, floor_l, picture])
 		await RoomRender.shot(self, vc, eye, eye + Vector3(-1.0, 0.1, -0.2), p + "left")
 		await RoomRender.shot(self, vc, eye, eye + Vector3(1.0, 0.1, -0.3), p + "right")
 		await RoomRender.shot(self, vc, eye, eye + Vector3(-0.35, 1.0, -0.15), p + "up")
@@ -374,5 +378,6 @@ func _render(doc: Dictionary) -> void:
 		await RoomRender.shot(self, vc, Vector3(0.0, 1.5, -3.2), Vector3(0.0, 3.0, -6.0), p + "owl")
 		await RoomRender.shot(self, vc, Vector3(1.2, 1.2, -3.9), Vector3(2.45, 1.2, -6.0), p + "fox")
 		await RoomRender.shot(self, vc, Vector3(1.6, 1.2, -1.0), Vector3(2.9, 1.06, -0.6), p + "niche")
+		await RoomRender.shot(self, vc, Vector3(1.9, 1.15, -0.2), Vector3(0.4, 0.35, -1.25), p + "hides")
 		(vc[1] as Camera3D).fov = 90.0
 		await RoomRender.close(self, vc)

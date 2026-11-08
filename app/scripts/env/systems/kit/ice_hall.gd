@@ -3,7 +3,7 @@ extends RefCounted
 ## The Ice cinema's pieces (docs/environments.md, "The kit" and "Room: Ice cinema"; since 2026-11-08, "continue
 ## working on the environments one-by-one ... really improving their quality, imagination, delight, detail, lighting
 ## and so on", the user, 2026-11-08). An ice hotel's cinema far in the Arctic: walls of sawn ice blocks you can read
-## (each its own clearness, bubbles and cracks frozen deep inside, snow in the joints), a vault of packed snow on ribs
+## (each its own clearness, bubbles and cracks frozen deep inside, snow in the joints), a vault of ice blocks on ribs
 ## of clear ice with clear-ice skylights in its haunches where the aurora shows, candles in niches whose glow sits
 ## inside the ice round them, the screen in a carved frame with animals in relief round it (a polar bear, a whale, a
 ## fox, a hare, a snowy owl), benches of ice under the hides, and outside the window and the doorway a moonlit
@@ -18,11 +18,13 @@ extends RefCounted
 ##   ice_outside  the night outside: snowfield, drifts, the path from the doorway, spruces, the fells, a cabin
 ##
 ## Materials: the ice is the light system's house material on shaders/room_material_house_ice.gdshader (fake depth,
-## the candles' glow inside, the film seeping through round the screen; per-vertex tint and clearness); the snow
-## (joints, vault, floor) a house material; the outside its own unshaded shader (env_ice_outside.gdshader), not dimmed
-## by the house lights. The candles' flames are the light system's accent group: the ritual takes them low for the
-## film and the glow inside the ice follows them.
-## Cost: IceBlocks (baked, the ice), IceSnow (baked), IceWax (unbaked), IceFlames, IceGlass (the panes), IceOutside.
+## the candles' glow inside, the film seeping through round the screen; per-vertex tint and clearness), the vault on
+## it with its courses drawn by the shader, the floor on its snow form; the joints a house material; the outside its
+## own unshaded shader (env_ice_outside.gdshader), not dimmed by the house lights. The candles (their wax, their
+## flames) are the light system's accent group: the ritual takes them low for the film and the glow inside the ice
+## follows them.
+## Cost: IceBlocks (baked, the walls' ice), IceVault (baked, its courses the shader's), IceSnow (baked, the joints),
+## IceFloor (baked, the snow form), IceFurs (baked), IceCandles (per group, emission), IceFlames, IceGlass, IceOutside.
 
 const RoomMesh := preload("res://scripts/env/room_mesh.gd")
 const Shapes := preload("res://scripts/env/systems/kit/shapes.gd")
@@ -66,42 +68,68 @@ const SNOW := Color(0.8, 0.86, 0.95)
 ## What the fill shows deep in the ice (sRGB), and how much of the screen's spill the ice and the snow take (the
 ## light system's is for the whole room; the ice takes the film's colour inside it instead, round the screen).
 const ICE_DEEP := Color(0.5, 0.78, 0.9)
-const ICE_SPILL := 0.5
+const ICE_SPILL := 0.15
 ## The night's light through the walls (the snow and the Moon outside): a faint cold glow in the clear ice.
-const ICE_NIGHT := 0.035
+const ICE_NIGHT := 0.02
 const SNOW_SPILL := 0.2
-const WAX := Color(0.92, 0.86, 0.72)
-## The wax lit through by the flame near its top, and how brightly.
-const WAX_GLOW := Color(1.0, 0.66, 0.36)
-const WAX_GLOW_ENERGY := 0.45
+## The vault's and the floor's share of the film's light: little, so the far room stays dim in the film, only
+## tinted (the coordinator, 2026-11-08, on the first pass: "the whole room ... turns strongly yellow/blue").
+const VAULT_SPILL := 0.03
+const FLOOR_SPILL := 0.02
+## The ice's gloss (the candles' glints, the picture mirrored at a glancing look): the walls', and the vault's, which
+## overhead mirrors the picture over much of the view, so faint.
+const WALL_GLOSS := 0.8
+const VAULT_GLOSS := 0.3
+## The picture's part of that gloss: its colours in the side walls at a glancing look, faint.
+const ICE_SHINE := 0.3
+## The vault's courses in the shader: their height along the arch and the blocks' length down the room (metres).
+const VAULT_COURSE := 0.46
+const VAULT_BLOCK := 0.92
+## The candles' light on the ice's faces round them (a niche glowing warm inside), over the glow within the ice.
+const ICE_GLOW_FACE := 0.55
+## The candles' wax (linear emission: lit by their own flames, so as bright as their group): the foot in the
+## niche's shadow, the shoulders lit through near the flame, the molten pool; the dish of frosted ice under each.
+const WAX_FOOT := Color(0.2, 0.15, 0.1)
+const WAX_TOP := Color(0.95, 0.62, 0.3)
+const WAX_POOL := Color(1.0, 0.7, 0.36)
+const DISH := Color(0.16, 0.12, 0.085)
+## The flame's picture: half its quad's side (metres) and its brightness.
+const FLAME_HALF := 0.075
+const FLAME_ENERGY := 1.8
 
 
 ## The hall's meshes over its pieces (kept on the kit's ctx.ice), and what finish() adds.
 class Hall:
 	var ice := RoomMesh.new()
 	var snow := RoomMesh.new()
-	var wax := RoomMesh.new()
+	var vault := RoomMesh.new()
+	var ground := RoomMesh.new()
 	var glass := RoomMesh.new()
 	var outside := RoomMesh.new()
 	var fur := RoomMesh.new()
 	## Flame quads by light group ({group: [[centre, half across, half up, facing]]}) and the candles [position,
 	## energy, group].
 	var flames := {}
-	## The candles' wax near the flame, glowing, by light group ({group: RoomMesh}).
+	## The candles (their wax, its well, their dishes), by light group ({group: RoomMesh}): lit by their own flames,
+	## so all emission in vertex colours, as bright as the group.
 	var wax_lit := {}
 	var candles: Array = []
 	var p := {}
 	var rng := RandomNumberGenerator.new()
 	var ice_m: ShaderMaterial
 	var snow_m: ShaderMaterial
-	var wax_m: ShaderMaterial
+	var vault_m: ShaderMaterial
+	var ground_m: ShaderMaterial
 	var outside_m: ShaderMaterial
+	var flame_tex: Texture2D
 	var fur_m: ShaderMaterial
 	var screen := {}
 	var kit: Node
 	var sky: Node
 	## The niches already cut, per wall: [Rect2 (along, up)].
 	var niches := {}
+	## Where the doorway is across the back wall (x in the room): the trodden path starts there.
+	var door_x := -2.0
 	## The kit's lamps (ctx.lamps): each candle's light in the bake.
 	var kit_lamps: Array = []
 	## The kit's floodlights for the bake (ctx.spots): the Moon's light through the window.
@@ -113,17 +141,25 @@ class Hall:
 			k._add_static("IceBlocks", ice)
 		if snow.triangle_count() > 0:
 			k._add_static("IceSnow", snow)
+		if vault.triangle_count() > 0:
+			k._add_static("IceVault", vault)
+		if ground.triangle_count() > 0:
+			k._add_static("IceFloor", ground)
 		if fur.triangle_count() > 0:
 			k._add_static("IceFurs", fur)
-		if wax.triangle_count() > 0:
-			k._add_unbaked("IceWax", wax)
 		for group: String in wax_lit:
-			k._add_lamps("IceWaxLit" if group == "accent" else "IceWaxLit_" + group, wax_lit[group])
+			k._add_lamps("IceCandles" if group == "accent" else "IceCandles_" + group, wax_lit[group])
 		if glass.triangle_count() > 0:
-			k._add_glass("IceGlass", glass, Color(0.7, 0.86, 0.95), 0.07)
+			var g: MeshInstance3D = k._add_glass("IceGlass", glass, Color(0.7, 0.86, 0.95), 0.07)
+			# Clear ice against the night: a faint rim, the dark sky in it at a glancing look rather than the film's
+			# light (overhead the skylights are seen at a slant, where the stock rim would show the picture's colour).
+			var gm := g.material_override as ShaderMaterial
+			gm.set_shader_parameter("rim", 0.08)
+			gm.set_shader_parameter("sky_colour", Color(0.02, 0.03, 0.06))
+			gm.set_shader_parameter("sky_mix", 1.0)
 		for group: String in flames:
-			k._add_glow("IceFlames" if group == "accent" else "IceFlames_" + group, flames[group], Procedural.flame(),
-					FLAME, 1.6, group, true)
+			k._add_glow("IceFlames" if group == "accent" else "IceFlames_" + group, flames[group], flame_tex,
+					Color.WHITE, FLAME_ENERGY, group, true)
 		if outside.triangle_count() > 0:
 			var mi: MeshInstance3D = k._add_unbaked("IceOutside", outside)
 			mi.material_override = outside_m
@@ -144,10 +180,15 @@ class Hall:
 			pos.append(Vector4(at.x, at.y, at.z, CANDLE_REACH))
 		while pos.size() < 12:
 			pos.append(Vector4.ZERO)
-		ice_m.set_shader_parameter("ice_glow_pos", pos)
-		ice_m.set_shader_parameter("ice_glow_count", mini(candles.size(), 12))
-		ice_m.set_shader_parameter("ice_glow_level", 1.0)
+		for m: ShaderMaterial in _ice_materials():
+			m.set_shader_parameter("ice_glow_pos", pos)
+			m.set_shader_parameter("ice_glow_count", mini(candles.size(), 12))
+			m.set_shader_parameter("ice_glow_level", 1.0)
 		_glow_levels.clear()
+
+	## The materials with the candles' glow in them: the walls' ice and the vault's.
+	func _ice_materials() -> Array:
+		return [ice_m, vault_m].filter(func(m: Variant) -> bool: return m != null)
 
 	## The candles' light in the ice, each as bright as its group is now (accent: the niches; house: the front
 	## wall's, which go lower for the film). Set only when a level changes.
@@ -166,7 +207,8 @@ class Hall:
 			col.append(Vector4(c.r, c.g, c.b, 0.0))
 		while col.size() < 12:
 			col.append(Vector4.ZERO)
-		ice_m.set_shader_parameter("ice_glow_col", col)
+		for m: ShaderMaterial in _ice_materials():
+			m.set_shader_parameter("ice_glow_col", col)
 
 	## The glow in the ice now, candle by candle (tests): [colour x energy].
 	func glow_colours() -> PackedVector4Array:
@@ -217,7 +259,7 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			_benches(h, c, e)
 		"ice_outside":
 			_outside(h, e)
-	for b: RoomMesh in [h.ice, h.snow, h.wax, h.fur, h.outside]:
+	for b: RoomMesh in [h.ice, h.snow, h.vault, h.ground, h.fur, h.outside]:
 		b.colour = Color.WHITE
 
 
@@ -237,39 +279,94 @@ static func hall(c: Object) -> Hall:
 	h.kit_lamps = c.lamps
 	h.kit_spots = c.spots
 	var light: Node = c.kit._light
-	h.ice_m = light.from_param({"library": "smooth_plaster", "color": [ICE_TINT.r, ICE_TINT.g, ICE_TINT.b],
-			"tiling": 1.6, "spill": ICE_SPILL})
-	h.ice_m.shader = ICE_SHADER
-	h.ice_m.set_shader_parameter("instance_tint", true)
-	h.ice_m.set_shader_parameter("normal_strength", 0.35)
-	h.ice_m.set_shader_parameter("ice_map", ice_map())
-	h.ice_m.set_shader_parameter("ice_deep", ICE_DEEP)
-	h.ice_m.set_shader_parameter("ice_scale", 0.9)
-	var sc: Transform3D = h.screen.get("xf", Transform3D())
-	var ss: Vector2 = h.screen.get("size", Vector2(3.2, 1.8))
-	h.ice_m.set_shader_parameter("ice_screen_c", sc.origin)
-	h.ice_m.set_shader_parameter("ice_screen_half", ss * 0.5)
+	h.ice_m = _ice_material(h, light, ICE_SPILL)
 	h.ice_m.set_shader_parameter("ice_film", 0.75)
-	h.ice_m.set_shader_parameter("ice_fill", 0.25)
-	h.ice_m.set_shader_parameter("ice_night", ICE_NIGHT)
-	h.snow_m = light.from_param({"library": "rough_plaster", "color": [SNOW.r, SNOW.g, SNOW.b], "tiling": 1.4,
+	h.ice_m.set_shader_parameter("ice_gloss", WALL_GLOSS)
+	# The vault: the same ice, laid in courses by the shader over its smooth strips; the film's light on it fainter
+	# (the coordinator, 2026-11-08: "the far vault and floor should stay dim, just tinted").
+	h.vault_m = _ice_material(h, light, VAULT_SPILL)
+	h.vault_m.set_shader_parameter("ice_vault", Vector4(float(h.p["half_width"]), float(h.p["height"]),
+			float(h.p["vault_rise"]), VAULT_COURSE))
+	h.vault_m.set_shader_parameter("ice_vault_block", VAULT_BLOCK)
+	h.vault_m.set_shader_parameter("ice_gloss", VAULT_GLOSS)
+	h.snow_m =light.from_param({"library": "rough_plaster", "color": [SNOW.r, SNOW.g, SNOW.b], "tiling": 1.4,
 			"spill": SNOW_SPILL})
 	h.snow_m.set_shader_parameter("instance_tint", true)
-	h.wax_m = light.from_param({"library": "smooth_plaster", "color": [1.0, 1.0, 1.0]}, true)
-	h.wax_m.set_shader_parameter("instance_tint", true)
-	h.wax_m.set_shader_parameter("emission", Color(0.1, 0.045, 0.012))
-	h.fur_m = light.from_param({"library": "cream_carpet", "color": [1.0, 1.0, 1.0], "tiling": 0.6})
+	# The floor: packed snow on the ice shader's snow form (footprints, a sparkle).
+	h.ground_m = light.from_param({"library": "rough_plaster", "color": [SNOW.r, SNOW.g, SNOW.b], "tiling": 1.4,
+			"spill": FLOOR_SPILL})
+	h.ground_m.shader = ICE_SHADER
+	h.ground_m.set_shader_parameter("instance_tint", true)
+	h.ground_m.set_shader_parameter("ice_snow", 1.0)
+	h.ground_m.set_shader_parameter("ice_fill", 1.0)
+	h.fur_m = light.from_param({"library": "cream_carpet", "color": [0.9, 0.87, 0.82], "tiling": 0.3, "spill": 0.04})
 	h.fur_m.set_shader_parameter("instance_tint", true)
+	h.fur_m.set_shader_parameter("sheen", 0.2)
 	h.outside_m = ShaderMaterial.new()
 	h.outside_m.shader = OUTSIDE_SHADER
+	h.flame_tex = flame_picture()
 	h.ice.surface(h.ice_m)
 	h.snow.surface(h.snow_m)
-	h.wax.surface(h.wax_m)
+	h.vault.surface(h.vault_m)
+	h.ground.surface(h.ground_m)
 	h.fur.surface(h.fur_m)
 	h.glass.surface(c.kit.GLASS)
 	h.outside.surface(h.outside_m)
 	c.ice = h
 	return h
+
+
+## A house material of the light system's (so it follows the house level and the bake) on the ice shader.
+static func _ice_material(h: Hall, light: Node, spill: float) -> ShaderMaterial:
+	var m: ShaderMaterial = light.from_param({"library": "smooth_plaster", "color": [ICE_TINT.r, ICE_TINT.g,
+			ICE_TINT.b], "tiling": 1.6, "spill": spill})
+	m.shader = ICE_SHADER
+	m.set_shader_parameter("instance_tint", true)
+	m.set_shader_parameter("normal_strength", 0.35)
+	m.set_shader_parameter("ice_map", ice_map())
+	m.set_shader_parameter("ice_deep", ICE_DEEP)
+	m.set_shader_parameter("ice_scale", 0.9)
+	var sc: Transform3D = h.screen.get("xf", Transform3D())
+	var ss: Vector2 = h.screen.get("size", Vector2(3.2, 1.8))
+	m.set_shader_parameter("ice_screen_c", sc.origin)
+	m.set_shader_parameter("ice_screen_half", ss * 0.5)
+	m.set_shader_parameter("ice_fill", 0.25)
+	m.set_shader_parameter("ice_night", ICE_NIGHT)
+	m.set_shader_parameter("ice_glow_face", ICE_GLOW_FACE)
+	m.set_shader_parameter("ice_shine", ICE_SHINE)
+	return m
+
+
+static var _flame_picture: ImageTexture
+
+## A candle's flame and the halo round it in one picture (the quad 2 * FLAME_HALF a side, the flame's middle at its
+## centre), sRGB: a white-yellow core over a dimmer blue foot at the wick, the orange body and tip, a warm halo
+## fading out round it (the coordinator, 2026-11-08: "a flame with a bright core and a warm halo").
+static func flame_picture() -> ImageTexture:
+	if _flame_picture != null:
+		return _flame_picture
+	const N := 64
+	var img := Image.create_empty(N, N, false, Image.FORMAT_RGB8)
+	for y in N:
+		for x in N:
+			# Metres from the flame's middle (y up).
+			var q := Vector2((x + 0.5) / N - 0.5, 0.5 - (y + 0.5) / N) * FLAME_HALF * 2.0
+			# The teardrop: widest a third of the way up, round at the foot, drawn out to a point.
+			var t := clampf((q.y + 0.016) / 0.05, 0.0, 1.0)
+			var half := 0.0075 * sin(PI * pow(t, 0.65)) if q.y > -0.016 and q.y < 0.034 else 0.0
+			var body := 1.0 - smoothstep(half * 0.55, half + 0.0008, absf(q.x)) if half > 0.0 else 0.0
+			var core := 1.0 - smoothstep(0.0, 1.0, Vector2(q.x / 0.0035, (q.y + 0.002) / 0.011).length())
+			var foot := 1.0 - smoothstep(0.0, 1.0, Vector2(q.x / 0.004, (q.y + 0.013) / 0.004).length())
+			var r := q.length()
+			var halo := 0.16 * exp(-r * r / (0.03 * 0.03)) + 0.05 * exp(-r * r / (0.07 * 0.07))
+			var c := Color(0.95, 0.42, 0.1) * body * (1.0 - 0.4 * t) + Color(1.0, 0.72, 0.3) * body * (1.0 - t)
+			c += Color(1.0, 0.95, 0.82) * core * 0.9 + Color(0.15, 0.2, 0.55) * foot * 0.5
+			c += Color(1.0, 0.55, 0.22) * halo
+			# Worked out in linear light; the picture is read as sRGB.
+			img.set_pixel(x, y, Color(minf(c.r, 1.0), minf(c.g, 1.0), minf(c.b, 1.0)).linear_to_srgb())
+	img.generate_mipmaps()
+	_flame_picture = ImageTexture.create_from_image(img)
+	return _flame_picture
 
 
 # --- The ice map --------------------------------------------------------------------------------------------------
@@ -567,11 +664,12 @@ static func _shell(h: Hall, e: Dictionary) -> void:
 	var fz := float(p["front_z"])
 	var bz := float(p["back_z"])
 	var wh := float(p["height"])
-	# The floor: packed snow.
-	h.snow.colour = Color(0.94, 0.95, 0.97)
-	h.snow.face([Vector3(-hw, 0, fz), Vector3(hw, 0, fz), Vector3(hw, 0, bz), Vector3(-hw, 0, bz)], Vector3.UP)
 	var win := Domestic._window(p)
 	var door := Domestic._door(p)
+	if not door.is_empty():
+		var dr: Rect2 = door[1]
+		h.door_x = _on(_wall(h, str(door[0])), dr.get_center().x, 0.0, 0.0).x
+	_floor(h)
 	# The niches with their candles: along each side wall clear of the window, and either side of the doorway.
 	var niches := {"left": [], "right": [], "back": [], "front": []}
 	var y0 := COURSE * 2.0
@@ -662,30 +760,90 @@ static func _niche(h: Hall, w: Array, r: Rect2, group := "accent") -> void:
 	_candle(h, _on(w, (a0 + a1) * 0.5, y0, d * 0.5), 0.15, 0.045, 1.0, group)
 
 
-## A pillar candle standing at `at` (its foot), its flame above (crossed glow quads), its glow in the ice; group:
-## the light group its flame and glow follow (accent, or house: lower for the film).
+## A pillar candle of ivory wax in a dish of frosted ice, standing at `at` (the dish's foot): the wax lit through
+## near the flame, a drip or two down its side, the molten pool in its top; its flame above (crossed quads of the
+## flame and its halo), its glow in the ice. group: the light group they all follow (accent, or house: lower for
+## the film). The coordinator, 2026-11-08, on the first pass: "the candles read as AA batteries".
 static func _candle(h: Hall, at: Vector3, height: float, radius: float, energy := 1.0, group := "accent") -> void:
-	# The wax: darker low down, glowing near the flame at the top (the flame's light through the wax).
-	h.wax.colour = (WAX * 0.8).srgb_to_linear()
-	Shapes.cylinder(h.wax, at, radius, height * 0.55, 10, Basis(), false)
 	var lit: RoomMesh = h.wax_lit.get(group, null)
 	if lit == null:
 		lit = RoomMesh.new()
-		# The wax near the flame lit through by it: a glow of the candle's group (low for the film with it).
-		lit.surface(h.kit._lamp(WAX_GLOW, WAX_GLOW_ENERGY, 0.0, group))
+		# Light and colour in the vertices: the wax and the dish lit by the flame, wavering with it.
+		var m: ShaderMaterial = h.kit._lamp(Color.WHITE, 1.0, 0.0, group, true)
+		m.set_shader_parameter("use_vertex_colour", true)
+		lit.surface(m)
 		h.wax_lit[group] = lit
-	Shapes.cylinder(lit, at + Vector3(0, height * 0.55, 0), radius, height * 0.45, 10)
-	# The well the flame has melted in its top: a darker ring.
-	h.wax.colour = (WAX * 0.6).srgb_to_linear()
-	Shapes.cylinder(h.wax, at + Vector3(0, height, 0), radius * 0.7, 0.004, 10)
-	var f := at + Vector3(0, height + 0.035, 0)
+	# The dish: a shallow bowl, its rim catching the flame's light.
+	var d := radius * 1.9
+	_turned(lit, at, [[Vector2(d * 0.82, 0.0), DISH * 0.45], [Vector2(d, 0.013), DISH * 0.8],
+			[Vector2(d * 0.92, 0.019), DISH * 1.5], [Vector2(d * 0.8, 0.011), DISH * 1.1],
+			[Vector2(0.0, 0.011), DISH]], [], 16, 0.0)
+	# The wax: rings up the side (two drips running down from the rim), over the uneven rim, down into the pool.
+	var foot := at + Vector3(0, 0.011, 0)
+	var drips: Array = []
+	for k in 1 + h.rng.randi_range(0, 1):
+		drips.append([h.rng.randf() * TAU, height * h.rng.randf_range(0.25, 0.65)])
+	var rings: Array = []
+	for k in 11:
+		var y := height * float(k) / 10.0
+		var t := pow(float(k) / 10.0, 1.7)
+		rings.append([Vector2(radius, y), WAX_FOOT.lerp(WAX_TOP, t)])
+	rings.append([Vector2(radius * 0.93, height + 0.004), WAX_TOP * 1.08])
+	rings.append([Vector2(radius * 0.72, height - 0.007), WAX_POOL])
+	rings.append([Vector2(radius * 0.3, height - 0.011), WAX_POOL * 1.15])
+	rings.append([Vector2(0.0, height - 0.011), WAX_POOL * 1.2])
+	_turned(lit, foot, rings, drips, 12, h.rng.randf() * TAU)
+	var f := foot + Vector3(0, height + 0.006, 0)
 	var quads: Array = h.flames.get(group, [])
 	for k in 2:
 		var t := Vector3(1, 0, 0) if k == 0 else Vector3(0, 0, 1)
-		quads.append([f, t * 0.022, Vector3(0, 0.04, 0), t.cross(Vector3.UP)])
+		quads.append([f, t * FLAME_HALF, Vector3(0, FLAME_HALF, 0), t.cross(Vector3.UP)])
 	h.flames[group] = quads
 	h.candles.append([f, energy, group])
 	h.kit_lamps.append([f, FLAME, CANDLE_BAKE * energy])
+
+
+## A turned shape (a dish, a candle) round the vertical through `at`: rings [Vector2(radius, height), colour] in order
+## up its outside and in across its top, a colour each (linear emission, smooth between rings); drips [angle, length
+## from the top] swell the side a little down from the rim; the rim waves a few millimetres (phase).
+static func _turned(b: RoomMesh, at: Vector3, rings: Array, drips: Array, sides: int, phase: float) -> void:
+	var top := 0.0
+	for r: Array in rings:
+		top = maxf(top, (r[0] as Vector2).y)
+	var rows: Array = []
+	var ns: Array = []
+	var cols: Array = []
+	for i in rings.size():
+		var p: Vector2 = rings[i][0]
+		var a: Vector2 = rings[maxi(i - 1, 0)][0]
+		var c: Vector2 = rings[mini(i + 1, rings.size() - 1)][0]
+		var slope := (c - a).normalized()
+		var out := Vector2(slope.y, -slope.x)
+		var row := PackedVector3Array()
+		var nrow := PackedVector3Array()
+		var crow := PackedColorArray()
+		for k in sides + 1:
+			var ang := TAU * float(k % sides) / sides
+			var dir := Vector3(sin(ang), 0.0, cos(ang))
+			var radius := p.x
+			var y := p.y
+			var colour: Color = rings[i][1]
+			# The rim and the shoulder near it wave a little; the drips swell the side under it.
+			if p.x > 0.0 and y > top - 0.012:
+				y += 0.003 * sin(ang * 3.0 + phase) * (1.0 if y >= top - 0.002 else 0.4)
+			for dr: Array in drips:
+				var da := absf(wrapf(ang - float(dr[0]), -PI, PI))
+				var along := smoothstep(top - float(dr[1]), top - float(dr[1]) + 0.012, y)
+				var swell := (1.0 - smoothstep(0.0, 0.42, da)) * along * float(p.x > 0.0 and y <= top)
+				radius += 0.0035 * swell
+				colour = colour.lerp(WAX_TOP, 0.25 * swell)
+			row.append(at + dir * radius + Vector3(0, y, 0))
+			nrow.append((dir * out.x + Vector3.UP * out.y).normalized())
+			crow.append(colour)
+		rows.append(row)
+		ns.append(nrow)
+		cols.append(crow)
+	b.grid(rows, ns, cols)
 
 
 ## The window: its reveal through the wall's thickness in ice, a sill reaching into the room, a clear pane of ice
@@ -802,49 +960,147 @@ static func _cornices(h: Hall) -> void:
 		_block(h, w, _rect_poly(Rect2(0.0, wh - 0.1, length, 0.14)), PROUD + 0.07, 0.02, Color(1.02, 1.04, 1.06, 0.8))
 
 
-## A reindeer's pelt flat on the floor (its right half, metres: neck to tail along +z, legs out at the sides).
+## A reindeer's pelt flat on the floor (its right half, metres: neck to tail along +z, legs out at the sides). Every
+## point further round from the middle than the last, so the pelt's rings (scaled copies) never fold over each other
+## in its lightmap.
 const PELT_HALF := [[0.0, -0.72], [0.09, -0.7], [0.12, -0.6], [0.18, -0.5], [0.36, -0.49], [0.43, -0.43],
-		[0.31, -0.36], [0.32, -0.2], [0.35, 0.0], [0.33, 0.2], [0.3, 0.3], [0.42, 0.35], [0.47, 0.45], [0.34, 0.44],
+		[0.33, -0.31], [0.32, -0.2], [0.35, 0.0], [0.33, 0.2], [0.36, 0.27], [0.45, 0.36], [0.47, 0.45], [0.34, 0.44],
 		[0.22, 0.5], [0.12, 0.6], [0.05, 0.67], [0.0, 0.68]]
 ## Pelts on the floor: [x, z, turn (degrees)]: one before the front row, below the screen; one in the right aisle.
 const FLOOR_PELTS := [[0.15, -2.75, 84.0], [2.42, -2.3, 8.0]]
 
 
+## The floor: packed snow, a little uneven, banked up against the walls, trodden firmer and greyer along the path
+## from the doorway down the left aisle (the coordinator, 2026-11-08: "packed snow with subtle unevenness, footprint
+## dimples and sparkle"; the prints and the sparkle are the shader's, ice_snow). One sheet, one chart.
+static func _floor(h: Hall) -> void:
+	var hw := float(h.p["half_width"])
+	var fz := float(h.p["front_z"])
+	var bz := float(h.p["back_z"])
+	var nx := ceili(hw * 2.0 / 0.25)
+	var nz := ceili((bz - fz) / 0.25)
+	var rows: Array = []
+	var ns: Array = []
+	var cols: Array = []
+	for i in nz + 1:
+		var z := lerpf(fz, bz, float(i) / nz)
+		var row := PackedVector3Array()
+		var nrow := PackedVector3Array()
+		var crow := PackedColorArray()
+		for j in nx + 1:
+			var x := lerpf(-hw, hw, float(j) / nx)
+			var y := _floor_height(h, x, z)
+			row.append(Vector3(x, y, z))
+			var e := 0.05
+			nrow.append(Vector3(_floor_height(h, x - e, z) - _floor_height(h, x + e, z), 2.0 * e,
+					_floor_height(h, x, z - e) - _floor_height(h, x, z + e)).normalized())
+			var trod := _trodden(h, x, z)
+			var drift := 1.0 - smoothstep(0.0, 0.45, minf(hw - absf(x), minf(z - fz, bz - z)))
+			crow.append(Color(1.0, 1.0, 1.0).lerp(Color(0.84, 0.86, 0.9), trod) * (1.0 + 0.04 * drift))
+		rows.append(row)
+		ns.append(nrow)
+		cols.append(crow)
+	h.ground.sheet(rows, ns, cols, Vector3.RIGHT, Vector3.BACK)
+
+
+## The floor's height at (x, z): a few centimetres of drift against the walls (not in the doorway), gentle swells,
+## the trodden path a little lower; flat under the pelts on the floor.
+static func _floor_height(h: Hall, x: float, z: float) -> float:
+	var hw := float(h.p["half_width"])
+	var fz := float(h.p["front_z"])
+	var bz := float(h.p["back_z"])
+	var back := bz - z
+	if absf(x - h.door_x) < 0.65:
+		back = 9.0
+	var wall := minf(hw - absf(x), minf(z - fz, back))
+	var drift := 0.05 * pow(1.0 - smoothstep(0.0, 0.5, wall), 2.0)
+	var swell := 0.007 * sin(x * 2.3 + z * 1.1) * sin(z * 1.7 - x * 0.6) + 0.004 * sin(x * 5.1 + 1.0) * sin(z * 4.3 + 2.0)
+	var flat := 1.0
+	for fp: Array in FLOOR_PELTS:
+		flat = minf(flat, smoothstep(0.75, 1.05, Vector2(x - float(fp[0]), z - float(fp[1])).length()))
+	return drift + (swell + 0.006 - 0.012 * _trodden(h, x, z)) * flat - 0.006 * (1.0 - flat)
+
+
+## How trodden the snow is at (x, z), 0 to 1: the path from the doorway into the left aisle and down it.
+static func _trodden(h: Hall, x: float, z: float) -> float:
+	var bz := float(h.p["back_z"])
+	var fz := float(h.p["front_z"])
+	var hw := float(h.p["half_width"])
+	var aisle := -(hw + 1.92) * 0.5
+	var px := lerpf(h.door_x, aisle, smoothstep(bz, bz - 1.2, z))
+	var along := smoothstep(fz + 0.8, fz + 2.2, z)
+	return (1.0 - smoothstep(0.18, 0.45, absf(x - px))) * along
+
+
+## Reindeer's colours (sRGB): the dark back along the spine, the grey-brown flanks, the cream belly at the edges.
+const PELT_SPINE := Color(0.5, 0.44, 0.38)
+const PELT_FLANK := Color(0.78, 0.73, 0.66)
+const PELT_BELLY := Color(0.94, 0.92, 0.87)
+
+
+## The pelts on the floor: domed a little (thick in the middle, thin at the edge), the dark back shading out through
+## the flanks to the pale belly, and round the edge a fringe of tufts lying on the snow. The coordinator, 2026-11-08,
+## on the first pass: "the floor pelts read as flat 2D cut-outs; give them thickness and fur edges".
 static func _floor_hides(h: Hall) -> void:
 	for fp: Array in FLOOR_PELTS:
-		var xf := Transform3D(Basis(Vector3.UP, deg_to_rad(float(fp[2]))), Vector3(float(fp[0]), 0.0, float(fp[1])))
-		var outline := PackedVector2Array()
+		var xf := Transform3D(Basis(Vector3.UP, deg_to_rad(float(fp[2]))), Vector3(float(fp[0]), 0.004, float(fp[1])))
+		var outline: Array[Vector2] = []
 		for q: Array in PELT_HALF:
 			outline.append(Vector2(float(q[0]), float(q[1])))
 		for k in range(PELT_HALF.size() - 2, 0, -1):
 			outline.append(Vector2(-float(PELT_HALF[k][0]), float(PELT_HALF[k][1])))
-		# The pale belly's edge, then the darker back over it, then a darker stripe down the spine: each a little
-		# higher, so the pelt has its thickness.
-		var layers := [[0.0, 0.012, Color(0.9, 0.86, 0.78)], [0.07, 0.018, Color(0.62, 0.52, 0.42)],
-				[0.17, 0.021, Color(0.4, 0.32, 0.25)]]
-		for layer: Array in layers:
-			var pts := outline if float(layer[0]) == 0.0 else _inset(_clean(outline), float(layer[0]))
-			if float(layer[0]) > 0.0 and Geometry2D.triangulate_polygon(pts).is_empty():
-				continue
-			h.fur.colour = (layer[2] as Color).srgb_to_linear()
-			var top := PackedVector3Array()
-			for q: Vector2 in pts:
-				top.append(xf * Vector3(q.x, float(layer[1]), q.y))
-			h.fur.polygon(top, Vector3.UP)
-			if float(layer[0]) == 0.0:
-				# The rim: the pelt's edge down to the snow.
-				var a := PackedVector3Array()
-				var b := PackedVector3Array()
-				var ns := PackedVector3Array()
-				for i in pts.size() + 1:
-					var q := pts[i % pts.size()]
-					a.append(xf * Vector3(q.x, float(layer[1]), q.y))
-					b.append(xf * Vector3(q.x * 1.02, 0.001, q.y * 1.02))
-					ns.append((xf.basis * Vector3(q.x, 0.3, q.y)).normalized())
-				h.fur.strip(a, b, ns)
+		var rows: Array = []
+		var ns: Array = []
+		var cols: Array = []
+		for s: float in [0.03, 0.3, 0.55, 0.75, 0.9, 1.0]:
+			var row := PackedVector3Array()
+			var nrow := PackedVector3Array()
+			var crow := PackedColorArray()
+			for i in outline.size() + 1:
+				var q := outline[i % outline.size()] * s
+				var y := 0.026 * (1.0 - pow(s, 4.0))
+				row.append(xf * Vector3(q.x, y, q.y))
+				nrow.append((xf.basis * Vector3(q.x * 0.25 * s, 1.0, q.y * 0.25 * s)).normalized())
+				crow.append(_pelt_colour(absf(q.x), s))
+			rows.append(row)
+			ns.append(nrow)
+			cols.append(crow)
+		h.fur.sheet(rows, ns, cols, xf.basis.x, xf.basis.z)
+		# The fringe: tufts every centimetre and a half round the edge, lying out over the snow.
+		var a := PackedVector3Array()
+		var b := PackedVector3Array()
+		var fn := PackedVector3Array()
+		var k := 0
+		for i in outline.size():
+			var p0 := outline[i]
+			var p1 := outline[(i + 1) % outline.size()]
+			var steps := maxi(1, ceili(p0.distance_to(p1) / 0.01))
+			var side := (p1 - p0).normalized()
+			for j in steps:
+				var q := p0.lerp(p1, float(j) / steps)
+				var out := Vector2(q.x, q.y).normalized()
+				# Random lengths, longer in clumps, each tuft leaning its own way.
+				var clump := 0.55 + 0.45 * sin(float(k) * 0.37)
+				var tuft := 0.002 if k % 2 == 0 else h.rng.randf_range(0.006, 0.036) * clump
+				var lean := side * h.rng.randf_range(-0.3, 0.3) * tuft
+				a.append(xf * Vector3(q.x, 0.0, q.y))
+				b.append(xf * Vector3(q.x + out.x * tuft + lean.x, -0.003, q.y + out.y * tuft + lean.y))
+				fn.append(Vector3.UP)
+				k += 1
+		a.append(a[0])
+		b.append(b[0])
+		fn.append(Vector3.UP)
+		h.fur.colour = PELT_BELLY.srgb_to_linear() * 0.92
+		h.fur.strip(a, b, fn)
 
 
-## The vault: packed snow sprayed over arched forms (each bay sags a little between its ribs), ribs of clear ice
+## A reindeer pelt's colour (linear) at `across` metres from its spine and `s` of the way out to its edge.
+static func _pelt_colour(across: float, s: float) -> Color:
+	var c := PELT_FLANK.lerp(PELT_SPINE, 1.0 - smoothstep(0.0, 0.11, across))
+	return c.lerp(PELT_BELLY, smoothstep(0.62, 1.0, s)).srgb_to_linear()
+
+
+## The vault: ice blocks laid in courses over arched forms (each bay sags a little between its ribs), ribs of clear ice
 ## blocks, and in the haunches between some ribs skylights of clear ice: a reveal through the vault's thickness and a
 ## pane at its outer end (the aurora over the east shows in the left ones).
 static func _vault(h: Hall) -> void:
@@ -907,8 +1163,9 @@ static func _vault_strip(h: Hall, i0: int, i1: int, z0: float, z1: float) -> voi
 		a.append(_vault_point(h, i, z0))
 		b.append(_vault_point(h, i, z1))
 		ns.append(_vault_normal(h, i))
-	h.snow.colour = Color(0.9, 0.93, 0.97)
-	h.snow.strip(a, b, ns)
+	# Ice, its courses and joints the shader's (ice_vault): the alpha is replaced block by block there.
+	h.vault.colour = Color(1.0, 1.0, 1.0, 0.8)
+	h.vault.strip(a, b, ns)
 
 
 ## A skylight: the reveal through the vault (ice) and the pane at its outer end.
