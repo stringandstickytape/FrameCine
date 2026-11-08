@@ -222,71 +222,137 @@ Client, the files are executable).
 
 ## Our own updates
 
-When the player runs from `~/vr-video-player`, it can update itself. FrameDrop has no update method, so this is
-also the only way that users get new versions without the button again. It also replaces the update path for
+Built 2026-11-08 (`app/scripts/update/`, `tools/player-run.sh`). Tested in WSL only; see "Not yet tested on the
+device" below.
+
+The player updates itself from GitHub Releases, wherever it is installed. FrameDrop has no update method, so this
+is the only way that users get new versions without the install link again. It also replaces the update path for
 installs made with `tools/install-on-frame.sh`.
 
-1. **Check.** At start, then once a day while the player runs, get
-   `https://github.com/stringandstickytape/steam-frame-vr-video-player/releases/latest/download/latest.json`.
-   This is a file download that GitHub redirects to the newest release that is not a draft or a pre-release. It
-   is not the REST API, so the API's limit (60 requests an hour without a token) does not apply, and a change to the
-   API's JSON cannot break the check. `latest.json` is small:
+### Folders
+
+- **The install folder** is the folder that holds `run.sh`, wherever the PC tool put it: usually
+  `~/devkit-game/<id>/`, or `~/vr-video-player/` after an ssh install. Nothing has it as a fixed path. The app
+  finds it as the parent of its own `app/` folder, and it updates only when `run.sh` and `VERSION` are there. A run
+  from the repository has neither, so it never checks.
+- **The staging folder** is `${XDG_DATA_HOME:-~/.local/share}/vr-video-player/update/`, not in `~/devkit-game/`
+  (Valve's tools treat each folder there as a title). It is on the same file system as the home folder, so a swap
+  is a `mv`. It holds `package.part` and `package.part.json` (the download and the version it is for), `unpack/`
+  while tar runs, `new/` (the staged version), `new.complete` (written last) and `old/` (the install before the
+  last swap, one level).
+- **The state folder** is `${XDG_STATE_HOME:-~/.local/state}/vr-video-player/`, with the logs. `run.sh` writes
+  `swapped` and `bad-versions` there, and `update.log` (one line for each swap or rollback). The new version writes
+  `started`.
+
+Settings (`~/.local/share/godot/app_userdata/VR Video Player/`) and logs are outside the install folder, so an
+update keeps them.
+
+### The steps
+
+1. **Check** (`updater.gd`, a feature: `main.features.update`). 8 s after the first frame, then once a day while
+   the player runs. It gets `latest.json` and `latest.json.sig` from
+   `https://github.com/stringandstickytape/steam-frame-vr-video-player/releases/latest/download/`. GitHub redirects
+   this to the newest release that is not a draft or a pre-release. It is not the REST API, so the API's limit
+   does not apply. `--update-url=URL` sets another base address, for tests. The format (shared with
+   `tools/release.sh`):
 
    ```json
-   { "version": "1.4.0", "tag": "v1.4.0",
-     "package": { "url": "https://github.com/.../releases/download/v1.4.0/vr-video-player-1.4.0-arm64.tar.gz",
-                  "size": 61234567, "sha256": "<sha256>" },
+   { "version": "0.1.0", "tag": "v0.1.0",
+     "package": { "url": "https://github.com/stringandstickytape/steam-frame-vr-video-player/releases/download/v0.1.0/vr-video-player-0.1.0-arm64.tar.gz",
+                  "size": 61234567, "sha256": "<64 lowercase hex>" },
      "notes": "One line for the update prompt." }
    ```
 
-   Compare `version` with `VERSION` in the install folder. If the network or GitHub is not available, do nothing
-   and try again at the next check (no error on the screen). Only the user's IP address goes to GitHub. A setting
-   in System stops the check. A flag (`--update-url=URL`) sets another address, for tests.
-2. **Download** the package from `package.url` to `~/vr-video-player.new.part`, with a progress bar. Continue after
-   an interruption (HTTP range requests). Stop if the size is not `package.size`.
-3. **Verify.**
-   - `latest.json` has a signature (`latest.json.sig`, in the same release). The player has the public key and
-     checks the signature with Godot's `Crypto` before it uses the file. Without this, a person who gets access to
-     the GitHub account can send code to each headset. The private key stays off GitHub. One key for all releases;
-     if the key changes, the release with the new key is signed with the old key too.
-   - The SHA-256 of the package must agree with `package.sha256`. The signature covers this hash, so it covers the
-     package too.
-   - `SHA256SUMS` stays in each release, for people who download by hand.
-4. **Stage.** Unpack to `~/vr-video-player.new`. Start the new engine with `--version`; stop if it does not start.
-5. **Swap at the next start, not during a session.** The engine reads files from `app/` when it needs them, so the
-   folder must not move while the player runs. `run.sh` does the swap before it starts the engine: move the current
-   install to `~/vr-video-player.old` (one level), and `.new` to `~/vr-video-player`.
-6. **Roll back if the new version fails.** The new version writes a "started" marker in
-   `~/.local/state/vr-video-player/` when its first frame shows. If `run.sh` finds a swap without the marker at the
-   next launch, it moves `.old` back and records the version as bad, so the check does not download it again.
-7. **Restart.** The player asks "Restart now to update?". On yes, it writes the resume state (file, position, room)
-   and restarts, as after a deploy. It does not ask during a film; it asks at the end, or at the next start.
+   Versions are plain `MAJOR.MINOR.PATCH`. The installed version is the `version` line of `VERSION` (a leading `v`
+   and a `git describe` tail are allowed). A package named by a commit has no release number, so it never updates.
+2. **Verify the signature first.** `latest.json.sig` is the raw RSA PKCS#1 v1.5 signature over the SHA-256 of the
+   exact bytes of `latest.json` (`openssl dgst -sha256 -sign key.pem`). The public key is
+   `app/update/release-key.pub.pem`; without it, the check does not run. Without the signature, a person who gets
+   access to the GitHub account could send code to each headset. The signature covers `package.sha256`, so it
+   covers the package too. Then the version must be newer than the installed one and not in `bad-versions`.
+3. **Download** the package to `package.part`, on the updater's thread. After a break it asks for the rest (an HTTP
+   Range request). A `.part` for another version is deleted first. It stops after 30 s with no bytes and keeps what
+   it has. Then the size and the SHA-256 must agree with `latest.json`; a wrong hash deletes the file.
+4. **Stage.** The host's `tar` unpacks it into `unpack/` (the modes are kept). The package's one top folder
+   (`vr-video-player-<version>-<arch>/`) becomes `new/`; a package without a top folder works too. Its `VERSION`
+   must say the version of `latest.json`, and `bin/vr-video-player-engine --version` must start and print. Then
+   `new.complete` (the version) is written, last. A `new/` without it is deleted.
+5. **Ask.** "Restart now to update to 0.2.0?" with the release's one-line notes, in the menu's footer, with Restart
+   and Later. Never during a film: the question shows when the menu opens with nothing open, or when the film ends
+   (the end opens the menu). A paused film is still a film. Later means no more questions in this run. The System
+   tab (Updates) shows the version, the download's progress and "Version 0.2.0 is ready. It goes in at the next
+   start", with Restart now. The swap happens at the next start in any case, with no question.
+6. **Restart.** On yes, the player writes what is open to `user://update_restart.cfg` (file, position, paused,
+   room), saves the settings and the resume positions, and quits. A unit of the user's service manager
+   (`systemd-run --user`, outside Steam's process tree, because Steam waits for every descendant of the title) waits
+   for the player to end, then runs `steam steam://rungameid/$SteamGameId`. When Steam did not start the player
+   (no `SteamGameId`), the question says "Quit now to update to 0.2.0? Then start the player again." The next start
+   reads the file (only if it is less than 15 minutes old, and only if no `--file` was given), deletes it, opens the
+   room and the file, and seeks to the position.
+7. **Swap** (`run.sh`, before the engine starts; no network). If `new.complete` is there: the install folder moves to
+   `old/`, `new/` moves into its place, `swapped` records the two versions, and the new `run.sh` runs. That first
+   launch adds `launched` to `swapped`. Only forwards: a stage that is not newer than the install (it was installed
+   again by hand since), or an install named by a commit, is deleted instead.
+8. **Keep or roll back.** The new version writes `started` at its second frame. At the next launch, `run.sh` finds
+   `swapped`: with `started`, the update is kept and both files go. Without it (the version was launched and showed no
+   frame), it puts `old/` back into the install folder, deletes the failed version and adds its version to
+   `bad-versions`, so the check skips it.
 
-Settings (`~/.local/share/godot/app_userdata/VR Video Player/`) and logs (`~/.local/state/vr-video-player/`) are
-outside the install folder, so an update keeps them.
+`run.sh` is made of functions that bash reads in full before the last line runs them. So moving its folder (and the
+file) during the swap cannot change what bash reads next; after the move it runs the new `run.sh` with `exec`.
+`tools/package.sh` copies `tools/player-run.sh` into the package as `run.sh`.
 
 ### Offline: never wait for the network
 
 The player is often used with no network or a bad one. The updater must not delay or stop anything:
 
-- **Nothing waits for the check.** Start-up, playback and the menus never wait for it. The check starts some
-  seconds after the first frame, in the background (`HTTPRequest` with a thread; the name lookup does not block
-  the main thread). `run.sh` uses no network: the swap and the rollback are local file moves.
-- **Short timeouts.** `latest.json`: 10 s in total, including the name lookup and the redirect. The package
-  download: no total limit, but it stops if no bytes come for 30 s.
+- **Nothing waits for the check.** Start-up, playback and the menus never wait for it. The check starts 8 s after
+  the first frame, on a thread of its own (`HTTPClient`, polled, so the name lookup, the connection, TLS and each
+  read have a limit). The hash, tar and the engine check run on the thread too. `run.sh` uses no network: the swap
+  and the rollback are local file moves.
+- **Short timeouts.** `latest.json` and its signature: 10 s in total, including the name lookup and the redirect.
+  The package download: no total limit, but it stops if no bytes come for 30 s.
 - **A failure is quiet.** No error on the screen; one log line. The next check is at the next start, or in a day.
   No fast retries.
-- **A download that stops is kept.** The `.part` file continues at the next check (range request). If
+- **A download that stops is kept.** The `.part` file continues at the next check (a Range request). If
   `latest.json` names a different version, the `.part` file is deleted first.
-- **No half updates.** `.new` is used only when it is complete and verified (a marker file written last). A
-  `.new` without the marker is deleted.
+- **No half updates.** `new/` is used only when `new.complete` is there. A `new/` without it is deleted (by the
+  player before it stages, and by `run.sh`).
 - **The speech model too.** With no network, voice says that it needs a one-time download of 264 MB and the
-  network, and the rest of the player works as usual. The same timeouts and continuation apply.
-- **Tests:** no network, a name that does not resolve, a server that accepts the connection and sends nothing, a
-  download cut at half. In each test the player starts and plays at its usual speed.
+  network, and the rest of the player works as usual. The same timeouts and continuation apply (not built yet).
 
 Later, if the downloads are too large: publish the package in parts (engine, app, whisper), each with its hash, and
 download only the parts that changed.
+
+### Tests
+
+- `app/tests/test_update.gd`: versions, `VERSION`, the checks of `latest.json`, the signature against a real openssl
+  signature (another key, a changed byte, a cut signature, junk, no key), the bad-version list, the prompt rule,
+  the question in the real menu (not over a playing or a paused film; with nothing open; Later), the restart state
+  and its restore, the relauncher's command, the `started` marker, the System row.
+- `app/tests/test_update_net.gd`: a local server (`app/tests/update_server.py`, with Range support) and a test film
+  that plays the whole time. No network (a closed port), an address that does not answer, a name that does not
+  resolve, a server that accepts and sends nothing (10 s), a wrong signature, a changed `latest.json`, a bad
+  version, no newer version, a download cut at half and then continued from that byte, a stall, a `.part` of
+  another version, a wrong hash, a redirect, a package without a top folder, an engine that does not start, a
+  `new/` left half way. In each case the frames keep coming (no gap of 0.25 s), and the film plays at its speed.
+- `tools/test_player_run.sh`: the swap, the next start that keeps it, a crash before the first frame (rolled back,
+  recorded as bad), a `new/` without `new.complete`, a staged bad version, the `run.sh` file rewritten in place
+  while its folder moves, a start with a relative `./run.sh`, a rollback with no `old/`, a stage older than the
+  install, 0.10.0 after 0.9.0, an install named by a commit.
+- Checked once by hand in WSL: the TLS connection to GitHub and the redirect to a real release asset work with the
+  engine's own HTTPClient and the system's CA certificates (our repository has no release yet, so `latest.json` is a
+  404, which is a quiet failure).
+
+### Not yet tested on the device
+
+- The whole path on the headset: the check over the headset's network, the CA certificates there, and the download
+  speed.
+- The restart through Steam: whether `steam steam://rungameid/$SteamGameId` from a `systemd-run --user` unit starts a
+  Devkit Game again, whether `SteamGameId` holds the id that `rungameid` wants for a Devkit title, and the wait that
+  Steam needs after the title ends (3 s now).
+- The swap in `~/devkit-game/<id>/` while Steam knows the title: that the entry still starts the new folder.
+- That the next start reopens the film where it was, in the headset.
 
 ## The speech model
 
@@ -376,8 +442,10 @@ The release itself does not exist yet: until `tools/upload-model.sh --publish` r
    other files 644). FrameDrop unzips on Windows, so the execute bit can be lost; the test finds out.
 2. `tools/package.sh`: no model by default (above); `SHA256SUMS`, `latest.json` and `latest.json.sig` for the
    release. The signing step runs on the PC that has the private key, not on GitHub.
-3. `run.sh`: the container check and the first-launch install; the swap and the rollback for updates.
-4. The player: the update check, download, verify and stage; the model download; the setting to stop the check.
+3. `run.sh`: the container check and the first-launch install; the swap and the rollback for updates (done
+   2026-11-08, `tools/player-run.sh`).
+4. The player: the update check, download, verify and stage, and the setting to stop the check (done 2026-11-08,
+   `app/scripts/update/`); the model download.
 5. The release: the zip, the tarball, `SHA256SUMS`, `latest.json`, `latest.json.sig`, the manifest. The README:
    the user's steps (above), the FrameDrop link, the ssh install as a second method, and a normal download link.
 6. Before each publish: no personal data in the package (library titles, user paths, LAN addresses, logs).

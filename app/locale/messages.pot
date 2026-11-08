@@ -6,15 +6,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: scripts/main.gd:781
+#: scripts/main.gd:790
 msgid "PC window"
 msgstr ""
 
-#: scripts/main.gd:1374
+#: scripts/main.gd:1404
 msgid "TALK"
 msgstr ""
 
-#: scripts/main.gd:1421
+#: scripts/main.gd:1451
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
@@ -890,6 +890,57 @@ msgstr ""
 msgid "CIPIC subject 003"
 msgstr ""
 
+#: scripts/update/updater.gd:169
+msgid "This copy does not run from an install: no updates."
+msgstr ""
+
+#: scripts/update/updater.gd:170
+#, c-format
+msgid "Version %s"
+msgstr ""
+
+#: scripts/update/updater.gd:173
+#, c-format
+msgid "Downloading version %s: %d %%"
+msgstr ""
+
+#: scripts/update/updater.gd:175
+#, c-format
+msgid "Preparing version %s..."
+msgstr ""
+
+#: scripts/update/updater.gd:177
+#, c-format
+msgid "Version %s is ready. It goes in at the next start."
+msgstr ""
+
+#: scripts/update/updater.gd:394
+#, c-format
+msgid "Updated to version %s"
+msgstr ""
+
+#: scripts/update/updater.gd:426
+#, c-format
+msgid "Restart now to update to %s?"
+msgstr ""
+
+#: scripts/update/updater.gd:427
+#, c-format
+msgid "Quit now to update to %s? Then start the player again."
+msgstr ""
+
+#: scripts/update/updater.gd:430
+msgid "Restart"
+msgstr ""
+
+#: scripts/update/updater.gd:430
+msgid "Quit"
+msgstr ""
+
+#: scripts/update/updater.gd:430
+msgid "Later"
+msgstr ""
+
 #: scripts/video/browser_dictation.gd:180 scripts/video/browser_dictation.gd:359
 msgid "That is a password field. Voice never types into one."
 msgstr ""
@@ -1117,7 +1168,7 @@ msgstr ""
 msgid "Carbon fibre"
 msgstr ""
 
-#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/system_tab.gd:328 ui/ui_layer.gd:437
+#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/system_tab.gd:332 ui/ui_layer.gd:437
 msgid "Assistant"
 msgstr ""
 
@@ -1398,7 +1449,7 @@ msgid_plural "%d items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/files_tab.gd:556 ui/files_tab.gd:403 ui/pc_windows_row.gd:32 ui/system_tab.gd:333
+#: ui/files_tab.gd:556 ui/files_tab.gd:403 ui/pc_windows_row.gd:32 ui/system_tab.gd:337
 msgid "PC windows"
 msgstr ""
 
@@ -1645,7 +1696,7 @@ msgstr ""
 msgid "Repeat: all"
 msgstr ""
 
-#: ui/files_tab.gd:395 ui/system_tab.gd:176
+#: ui/files_tab.gd:395 ui/system_tab.gd:180
 msgid "Test patterns"
 msgstr ""
 
@@ -2092,7 +2143,7 @@ msgstr ""
 msgid "%s deleted"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:655 ui/ui_layer.gd:226
+#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:664 ui/ui_layer.gd:226
 #: ui/ui_layer.gd:407 ui/ui_layer.gd:952 ui/ui_layer.gd:956 ui/ui_layer.gd:990
 msgid "Undo"
 msgstr ""
@@ -2610,11 +2661,11 @@ msgstr ""
 msgid "3D"
 msgstr ""
 
-#: ui/picture_tab.gd:213 ui/system_tab.gd:169
+#: ui/picture_tab.gd:213 ui/system_tab.gd:173
 msgid "Left eye"
 msgstr ""
 
-#: ui/picture_tab.gd:213 ui/system_tab.gd:169
+#: ui/picture_tab.gd:213 ui/system_tab.gd:173
 msgid "Right eye"
 msgstr ""
 
@@ -2922,7 +2973,7 @@ msgstr ""
 msgid "Polynomial"
 msgstr ""
 
-#: ui/picture_tab.gd:31 ui/room_tab.gd:22 ui/system_tab.gd:42 environments/flagship.env.json
+#: ui/picture_tab.gd:31 ui/room_tab.gd:22 ui/system_tab.gd:44 environments/flagship.env.json
 #: environments/ice_cinema.env.json
 msgid "Off"
 msgstr ""
@@ -3325,7 +3376,7 @@ msgstr ""
 msgid "Live delay"
 msgstr ""
 
-#: ui/sound_tab.gd:90 ui/system_tab.gd:543
+#: ui/sound_tab.gd:90 ui/system_tab.gd:552
 msgid "Speed"
 msgstr ""
 
@@ -3731,291 +3782,295 @@ msgstr ""
 msgid "words in English, such as brick or oak floor"
 msgstr ""
 
-#: ui/system_tab.gd:127
+#: ui/system_tab.gd:131
 msgid "Views"
 msgstr ""
 
-#: ui/system_tab.gd:128
+#: ui/system_tab.gd:132
 msgid "Info overlay"
 msgstr ""
 
-#: ui/system_tab.gd:129
+#: ui/system_tab.gd:133
 msgid "Stats"
 msgstr ""
 
-#: ui/system_tab.gd:141
+#: ui/system_tab.gd:145
 msgid "Panel"
 msgstr ""
 
-#: ui/system_tab.gd:145
+#: ui/system_tab.gd:149
 msgid "Hold menu to recentre"
 msgstr ""
 
-#: ui/system_tab.gd:146
+#: ui/system_tab.gd:150
 #, c-format
 msgid "%.2f s"
 msgstr ""
 
-#: ui/system_tab.gd:149
+#: ui/system_tab.gd:153
 msgid "Left-handed"
 msgstr ""
 
-#: ui/system_tab.gd:150
+#: ui/system_tab.gd:154
 msgid "Reset layout"
 msgstr ""
 
-#: ui/system_tab.gd:158
+#: ui/system_tab.gd:162
 msgid "Language"
 msgstr ""
 
-#: ui/system_tab.gd:162
+#: ui/system_tab.gd:166
 msgid "The menus and the controller labels. Names of films and files stay as they are."
 msgstr ""
 
-#: ui/system_tab.gd:164
+#: ui/system_tab.gd:168
 msgid "Accessibility"
 msgstr ""
 
-#: ui/system_tab.gd:165
+#: ui/system_tab.gd:169
 msgid "Larger panel"
 msgstr ""
 
-#: ui/system_tab.gd:168
+#: ui/system_tab.gd:172
 msgid "One eye for 3D"
 msgstr ""
 
-#: ui/system_tab.gd:171
+#: ui/system_tab.gd:175
 msgid "Subtitles always on"
 msgstr ""
 
-#: ui/system_tab.gd:175
+#: ui/system_tab.gd:179
 msgid "Test and setup"
 msgstr ""
 
-#: ui/system_tab.gd:177
+#: ui/system_tab.gd:181
 msgid "Network hosts"
 msgstr ""
 
-#: ui/system_tab.gd:184
+#: ui/system_tab.gd:188
 msgid "Calibration cards"
 msgstr ""
 
-#: ui/system_tab.gd:194
+#: ui/system_tab.gd:198
 msgid "Measure bandwidth"
 msgstr ""
 
-#: ui/system_tab.gd:199
+#: ui/system_tab.gd:203
 msgid "Run benchmark"
 msgstr ""
 
-#: ui/system_tab.gd:210
+#: ui/system_tab.gd:214
 msgid "Stop tour"
 msgstr ""
 
-#: ui/system_tab.gd:218
+#: ui/system_tab.gd:222
 msgid "Hardware video"
 msgstr ""
 
-#: ui/system_tab.gd:224
+#: ui/system_tab.gd:228
 msgid "Rendering"
 msgstr ""
 
-#: ui/system_tab.gd:226
+#: ui/system_tab.gd:230
 msgid "Foveation"
 msgstr ""
 
-#: ui/system_tab.gd:229
+#: ui/system_tab.gd:233
 msgid "Sharp while the panel shows"
 msgstr ""
 
-#: ui/system_tab.gd:234
+#: ui/system_tab.gd:238
 msgid "Film drawn by the headset"
 msgstr ""
 
-#: ui/system_tab.gd:237
+#: ui/system_tab.gd:241
 msgid "Curved screen too"
 msgstr ""
 
-#: ui/system_tab.gd:247
+#: ui/system_tab.gd:251
 msgid "Controllers"
 msgstr ""
 
-#: ui/system_tab.gd:250
+#: ui/system_tab.gd:254
 msgid "Haptic ticks"
 msgstr ""
 
-#: ui/system_tab.gd:252
+#: ui/system_tab.gd:256
 msgid "Tick strength"
 msgstr ""
 
-#: ui/system_tab.gd:257
+#: ui/system_tab.gd:261
 msgid "Jog wheel"
 msgstr ""
 
-#: ui/system_tab.gd:261
+#: ui/system_tab.gd:265
 msgid "One turn"
 msgstr ""
 
-#: ui/system_tab.gd:266
+#: ui/system_tab.gd:270
 msgid "Seek bar pictures"
 msgstr ""
 
-#: ui/system_tab.gd:270
+#: ui/system_tab.gd:274
 msgid "Zoom lens"
 msgstr ""
 
-#: ui/system_tab.gd:275
+#: ui/system_tab.gd:279
 msgid "Magnification"
 msgstr ""
 
-#: ui/system_tab.gd:281
+#: ui/system_tab.gd:285
 msgid "Laser on the browser"
 msgstr ""
 
-#: ui/system_tab.gd:285 ui/system_tab.gd:286
+#: ui/system_tab.gd:289 ui/system_tab.gd:290
 msgid "Phone remote"
 msgstr ""
 
-#: ui/system_tab.gd:294
+#: ui/system_tab.gd:298
 msgid "Unpair phones"
 msgstr ""
 
-#: ui/system_tab.gd:307
+#: ui/system_tab.gd:311
 msgid "Share files"
 msgstr ""
 
-#: ui/system_tab.gd:308
+#: ui/system_tab.gd:312
 msgid "Share this headset's files"
 msgstr ""
 
-#: ui/system_tab.gd:317
+#: ui/system_tab.gd:321
 msgid "Phones and computers on this network can download and upload files. Scan the code: it holds the pairing code, which is shown nowhere else."
 msgstr ""
 
-#: ui/system_tab.gd:340
+#: ui/system_tab.gd:342
+msgid "Updates"
+msgstr ""
+
+#: ui/system_tab.gd:349
 msgid "Dev tools"
 msgstr ""
 
-#: ui/system_tab.gd:344
+#: ui/system_tab.gd:353
 msgid "Reload theme"
 msgstr ""
 
-#: ui/system_tab.gd:345
+#: ui/system_tab.gd:354
 msgid "Remote changes"
 msgstr ""
 
-#: ui/system_tab.gd:350
+#: ui/system_tab.gd:359
 msgid "Allow for an hour"
 msgstr ""
 
-#: ui/system_tab.gd:354 ui/ui_layer.gd:793
+#: ui/system_tab.gd:363 ui/ui_layer.gd:793
 msgid "Revoke"
 msgstr ""
 
-#: ui/system_tab.gd:362
+#: ui/system_tab.gd:371
 msgid "About"
 msgstr ""
 
-#: ui/system_tab.gd:367
+#: ui/system_tab.gd:376
 #, c-format
 msgid "Engine %s, %s"
 msgstr ""
 
-#: ui/system_tab.gd:513
+#: ui/system_tab.gd:522
 msgid "Look"
 msgstr ""
 
-#: ui/system_tab.gd:630
+#: ui/system_tab.gd:639
 msgid "hot-reload on"
 msgstr ""
 
-#: ui/system_tab.gd:630
+#: ui/system_tab.gd:639
 msgid "hot-reload off"
 msgstr ""
 
-#: ui/system_tab.gd:632
+#: ui/system_tab.gd:641
 #, c-format
 msgid "%s; remote changes allowed for %d more min"
 msgstr ""
 
-#: ui/system_tab.gd:665
+#: ui/system_tab.gd:674
 #, c-format
 msgid "Measuring %s ..."
 msgstr ""
 
-#: ui/system_tab.gd:669
+#: ui/system_tab.gd:678
 #, c-format
 msgid "Can't measure: %s"
 msgstr ""
 
-#: ui/system_tab.gd:671
+#: ui/system_tab.gd:680
 #, c-format
 msgid "%.0f Mbit/s average, %.0f peak, opened in %d ms, %.0f MB read"
 msgstr ""
 
-#: ui/system_tab.gd:682
+#: ui/system_tab.gd:691
 msgid "This engine build can't run the benchmark."
 msgstr ""
 
-#: ui/system_tab.gd:704
+#: ui/system_tab.gd:713
 #, c-format
 msgid "Tour %s (kiosk): round %d, step %d of %d"
 msgstr ""
 
-#: ui/system_tab.gd:705
+#: ui/system_tab.gd:714
 #, c-format
 msgid "Tour %s: round %d, step %d of %d"
 msgstr ""
 
-#: ui/system_tab.gd:193
+#: ui/system_tab.gd:197
 msgid "a file on a share, e.g. smb://host/share/film.mkv"
 msgstr ""
 
-#: ui/system_tab.gd:240
+#: ui/system_tab.gd:244
 msgid "A curved screen as the headset's cylinder layer; off: drawn in the room, where things in front of it cover it"
 msgstr ""
 
-#: ui/system_tab.gd:273
+#: ui/system_tab.gd:277
 msgid "In 180 and 360: hold the grip and pull the trigger for a magnifier"
 msgstr ""
 
-#: ui/system_tab.gd:282
+#: ui/system_tab.gd:286
 msgid "The laser points and clicks on the page too, as well as the stick"
 msgstr ""
 
-#: ui/system_tab.gd:40
+#: ui/system_tab.gd:42
 msgid "Ask"
 msgstr ""
 
-#: ui/system_tab.gd:40
+#: ui/system_tab.gd:42
 msgid "Allow"
 msgstr ""
 
-#: ui/system_tab.gd:40
+#: ui/system_tab.gd:42
 msgid "Deny"
 msgstr ""
 
-#: ui/system_tab.gd:42
+#: ui/system_tab.gd:44
 msgid "Low"
 msgstr ""
 
-#: ui/system_tab.gd:42
+#: ui/system_tab.gd:44
 msgid "Medium"
 msgstr ""
 
-#: ui/system_tab.gd:42
+#: ui/system_tab.gd:44
 msgid "High"
 msgstr ""
 
-#: ui/system_tab.gd:43
+#: ui/system_tab.gd:45
 msgid "Saves GPU time at the edges of your view. High can look blocky."
 msgstr ""
 
-#: ui/system_tab.gd:44
+#: ui/system_tab.gd:46
 msgid "Foveation isn't available: this build starts without it."
 msgstr ""
 
-#: ui/system_tab.gd:47
+#: ui/system_tab.gd:49
 msgid "Both controllers. The labels change ink, or get a dark outline, to stay readable."
 msgstr ""
 
@@ -4148,6 +4203,18 @@ msgstr ""
 
 #: ui/ui_layer.gd:1009
 msgid "Seat"
+msgstr ""
+
+#: ui/update_row.gd:25
+msgid "Check for updates"
+msgstr ""
+
+#: ui/update_row.gd:28
+msgid "Restart now"
+msgstr ""
+
+#: ui/update_row.gd:36
+msgid "Once a day the player asks GitHub for a new version and downloads it in the background. Only your IP address goes to GitHub."
 msgstr ""
 
 #: ui/url_form.gd:32
