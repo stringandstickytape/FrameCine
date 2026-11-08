@@ -122,10 +122,10 @@ const FLAT_EYE_HEIGHT := 1.2
 ## The room is lifted by the viewer's real eye height less this, so their eyes are where the room's seat puts them
 ## and a telly, a screen's frame or a stage lines up with the picture (lift_room()).
 const ROOM_EYE_HEIGHT := 1.2
-## Every room's seat as the viewer sits in it: the room (and its screen with it) 0.3 m nearer and 0.1 m lower than its
+## Every room's seat as the viewer sits in it: the room (and its screen with it) 0.25 m nearer and 0.1 m lower than its
 ## seat puts the eyes, in all rooms alike (the user, 2026-11-07: "in every case ... maybe 30 cm too far back and 10 cm
 ## too low"). Applied with the lift; the screen keeps its place in the room.
-const SEAT_SHIFT := Vector3(0.0, -0.1, 0.3)
+const SEAT_SHIFT := Vector3(0.0, -0.1, 0.25)
 ## The SEAT_SHIFT in use (zero where the room is not lifted).
 var room_shift := Vector3.ZERO
 ## A grip shorter than this, with the hand turned less than GRIP_TAP_ANGLE, is a tap (screen to gaze).
