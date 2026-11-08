@@ -307,22 +307,67 @@ We can bundle whisper and its models, and we can host them ourselves:
 `app/scripts/voice/whisper_backend.gd` already continues without it: one log line, and voice is not available.
 `tools/package.sh --no-whisper` already makes a package without it.
 
-### The plan
+### What the player does (built 2026-11-08)
 
-The default model (`ggml-small.en-q8_0.bin`) is 264 MB, which is most of the package. `whisper-server` (CPU build)
-is 4 MB.
+The default model (`ggml-small.en-q8_0.bin`) is 264 MB (264477561 bytes, SHA-256
+`67a179f608ea6114bd3fdb9060e762b588a3fb3bd00c4387971be4d177958067`), which is most of the package.
+`whisper-server` (CPU build) is 4 MB and stays in the package.
 
-1. **Bundle `whisper-server`** in the package. It is small, and it agrees with the build.
-2. **Download the model** the first time voice is used (or in the background after the first start), to
-   `user://whisper-models/`. Show the size and the progress. No step for the user.
-3. **Host it as a GitHub release asset** (one release for the models, which does not change), with its SHA-256 in
-   the app. A change on Hugging Face cannot break the player then.
-4. **`whisper_backend.gd` looks in `user://whisper-models/` too**, after the folders it uses now. A model in the
-   package (from `--whisper-bench`, or an old package) still works.
-5. **`tools/package.sh`** puts no model in the release package by default. `--whisper-model` puts one in, for
-   offline installs and the benchmark kit.
+- **Where the model is looked for** (`app/scripts/voice/whisper_backend.gd`): `whisper/models/` next to the server
+  first, as before (a package made with `--whisper-model`, the benchmark kit, an old package), then
+  `user://whisper-models/`. A file there of the wrong size is deleted and downloaded again.
+- **When it downloads:** the first time voice is used (push-to-talk in the assistant, the browser, an agent pane or
+  a PC window) with the server there and no model. Nothing happens at start-up: the backend only notes that the
+  model is missing. Only the default model downloads; another `[voice] whisper_model` that is missing stays off,
+  with the log line as before.
+- **No confirmation.** Pressing the talk button is the request, as the app does its own setup elsewhere (no step for
+  the user). Before any byte comes, the notice says what it is and how big: "Voice needs a one-time download of
+  about 264 MB. Downloaded: 0 %. The rest of the player works as usual." It comes 1.2 s after the button is let
+  go, so it does not hide "Listening". The assistant's card line for the clip says the same.
+- **Progress:** a notice at 25, 50 and 75 %, the same line again at each use of voice while it downloads, and "Voice
+  is ready." when the server answers with the new model. Notices go through `ui_layer.notify()`: the panel's footer
+  when it is open, else the quiet line in the world. The assistant's status (`describe()`) shows the percentage.
+- **From where:** `https://github.com/stringandstickytape/steam-frame-vr-video-player/releases/download/models-1/ggml-small.en-q8_0.bin`.
+  The address, the size and the SHA-256 are constants in `app/scripts/voice/model_download.gd` (`RELEASES`,
+  `MODEL_RELEASE`, `MODEL_FILE`, `MODEL_SIZE`, `MODEL_SHA256`); the rename to FrameVRVideo changes `RELEASES` only.
+  `--model-url=URL` takes it from elsewhere (tests, a mirror).
+- **How** (`model_download.gd`, one worker thread; the main thread only reads the progress): the bytes go to
+  `ggml-small.en-q8_0.bin.part`; a part from an earlier try continues with `Range: bytes=N-` (206 appends; a 200
+  starts over; 416 means the part is complete). Up to 5 redirects (GitHub sends the download to its asset host).
+  Timeouts: 15 s for the name lookup, the connection and TLS together, then it stops when no bytes come for 30 s; no
+  total limit. When the part is complete, its size and SHA-256 are checked, and only then is it renamed into
+  place; a wrong hash deletes the part. 200 MB must stay free on the disk. HTTPS is used without the certificate
+  check: the SHA-256 in the app is the trust, the file is public, and a headset without the engine's CA list can
+  still download it.
+- **Offline:** a failure is one log line and one notice. No network, no answer or a cut connection: "Voice needs
+  the network once, for a download of about 264 MB. The rest of the player works as usual." Anything else (HTTP
+  404, a wrong hash, a full disk): "The speech model did not download. Voice tries again when you use it next." The
+  next use of voice tries again, but not sooner than 60 s after the failure (`RETRY_SECONDS`); uses before that
+  repeat the line at most every 6 s. There are no retries of its own. Start-up, playback and the menus never wait
+  for it.
+- **When the assistant goes off mid-download** (the backend node leaves the tree), the download stops at once and
+  the part stays for the next try.
+- **The release:** `tools/upload-model.sh` makes the `models-1` release with the model, `SHA256SUMS` and the
+  model's MIT notice. It reads the repository, tag, name, size and hash from `model_download.gd` and checks the file
+  against them. The release is a pre-release and `--latest=false`, so `releases/latest`, which the updater reads,
+  never returns it; the script checks that after publishing. Dry run by default; `--publish` does it. Not yet
+  published.
+- **Tests:** `app/tests/test_model_download.gd` with `app/tests/model_server.py` (a local server with range
+  requests and faults): the lookup order, the size and hash check, a redirect, a download cut at half and
+  continued, a server that ignores the range, a wrong hash, HTTP 404, no listener, a name that does not resolve, an
+  address with no route, a server that accepts and sends nothing, one that stops in the body; frames go on in each.
+  Then the backend: it waits, downloads at the first use, one offline notice, no new try before 60 s, the notice's
+  text, the node leaving mid-download, and (with `WHISPER_TEST_DIR` and `WHISPER_TEST_MODEL`) the real server
+  started on a downloaded model.
 
 The model is outside the install folder, so updates do not download it again.
+
+**Not yet tested on the headset:** the download over the headset's network from GitHub (the redirect to the asset
+host, TLS with the engine, the speed), the notices in the world and on the card while a film plays, playback
+smoothness while it downloads and while the hash is computed (about 1 s of one core), the disk space check on the
+headset's file system, and the whole first-use flow after `user://whisper-models/` is removed (test plan step 7).
+The release itself does not exist yet: until `tools/upload-model.sh --publish` runs, the download fails with HTTP
+404 ("did not download").
 
 ## Changes to make
 

@@ -80,6 +80,7 @@ talks on the LAN; each is off unless given (or switched on in the pane).
 | `--benchmark[=PATH]` | Decode the biggest video in a folder (or PATH) for 10 s and log what the device can do. Also runs once by itself on the first run. | `docs/benchmark.md` |
 | `--tour=FILE`, `--kiosk` | Run a tour from a JSON file (a path, or a name in `user://tours`). `--kiosk` loops it. | `docs/tours.md` |
 | `--whisper-dir=DIR`, `--whisper-model=NAME`, `--whisper-threads=N`, `--whisper-backend=cpu\|vulkan` | On-device speech to text for the assistant (started only when the assistant needs it): the folder with `whisper-server` and `models/` (default: `whisper/` next to the engine, one folder up, or next to the app folder), the model (`base.en`, a stem such as `small.en-q5_1`, or a `.bin` path), threads, and the CPU or Vulkan build. Also `[voice]`. | `build/whisper/README.md` |
+| `--model-url=URL` | Where the one-time speech model download comes from (default: the project's `models-1` release); for tests and mirrors. The model goes to `whisper-models/` in the data folder. | `docs/framedrop.md` |
 | **`--remote`** | The phone remote: a web page on the LAN, address and pairing QR code in the pane. | `docs/remote.md` |
 | **`--share`** | The headset's folders on the LAN: downloads, uploads to Drop, screenshots. | `docs/share.md` |
 | **`--pc-audio=HOST[:PORT]`** | Connect out to `tools/audio_sink.py`; the film's sound plays on the PC and the headset is silent. | `docs/pc-audio.md` |
