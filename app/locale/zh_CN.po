@@ -2982,6 +2982,12 @@ msgstr "云"
 msgid "How much of the open sky the clouds cover. They catch the film's light."
 msgstr "露天天空中云的多少。云会映出影片的光。"
 
+msgid "Organ before the film"
+msgstr "影片开始前的管风琴"
+
+msgid "The theatre organ behind the grilles plays for a minute or so when the room opens and between films, and finishes as the film starts."
+msgstr "格栅后的剧院管风琴会在放映厅开场时和两部影片之间演奏一分钟左右，并在影片开始时收尾。"
+
 msgid "Snow"
 msgstr "雪"
 
@@ -3319,8 +3325,8 @@ msgstr "电视填满入口"
 msgid "The telly stands just beyond the fort's opening and fills it; off, it is back on its chest of drawers across the room."
 msgstr "电视就放在枕头堡入口外，正好填满入口；关闭时，它回到房间另一头的抽屉柜上。"
 
-msgid "A picture palace built as a courtyard under a twilight sky: lit windows, iron balconies, cypresses over the walls and real stars."
-msgstr "一座建成庭院模样的电影宫，头顶是暮色天空：亮灯的窗户、铁艺阳台、墙头的柏树和真实的星空。"
+msgid "A picture palace built as a Mediterranean courtyard at dusk: lit windows, iron balconies, a palace gate with an organ, a crescent moon and real stars."
+msgstr "一座建成地中海庭院模样的电影宫，正值黄昏：亮灯的窗户、铁艺阳台、带管风琴的宫门、一弯新月和真实的星空。"
 
 msgid "A glass dome on the sea floor: kelp and coral in the floodlights, schools of fish, glowing creatures drawn to the screen, a manta overhead, and in a quiet scene now and then a whale."
 msgstr "海底的玻璃圆顶：探照灯下的海带和珊瑚、成群的鱼、被屏幕吸引的发光生物、头顶游过的魔鬼鱼，安静的片段里偶尔还有鲸鱼。"

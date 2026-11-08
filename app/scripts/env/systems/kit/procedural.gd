@@ -13,7 +13,8 @@ extends RefCounted
 ##   glass(colour, alpha, room) -> ShaderMaterial   see-through glass that dims with the house lights
 ##   rose_window(), letters(text, colour, back), gradient(top, bottom), abstract(seed, palette), flame()   pictures
 
-const PATTERNS: Array[String] = ["pressed_tin", "ice_blocks", "swirl_carpet", "corrugated", "plasterboard"]
+const PATTERNS: Array[String] = ["pressed_tin", "ice_blocks", "swirl_carpet", "corrugated", "plasterboard",
+		"roof_tiles", "ashlar", "lime_wash"]
 const SIZE := 128
 const GLASS_SHADER := preload("res://scripts/env/systems/kit/env_glass.gdshader")
 
@@ -116,6 +117,49 @@ static func _sample(pattern: String, u: float, v: float) -> Array:
 				h -= 0.15 * (1.0 - smoothstep(0.004, 0.008, d))
 			var s := 0.9 - 0.04 * _noise(u, v, 16, 5)
 			return [h, Color(s, s * 0.99, s * 0.96), 0.85]
+		# The atmospheric courtyard's (since 2026-11-08): kit/courtyard.gd.
+		"roof_tiles":
+			# Barrel tiles: four rounded columns a repeat (u across the slope), two courses down it (v), each
+			# course's lower lip lapping the next; each tile its own fired shade, the grooves darker, a little lichen.
+			var col := int(floor(u * 4.0))
+			var cu := fposmod(u * 4.0, 1.0)
+			var course := int(floor(v * 2.0))
+			var cv := fposmod(v * 2.0, 1.0)
+			var round_ := sqrt(maxf(1.0 - pow(cu * 2.0 - 1.0, 2.0), 0.0))
+			# Each course rises from its top (under the lap) to its lip.
+			var h := round_ * (0.55 + 0.45 * cv) - 0.25 * (1.0 - smoothstep(0.0, 0.08, cv))
+			var shade := _hash(col, course, 41)
+			var c := Color(0.62, 0.3, 0.18).lerp(Color(0.78, 0.46, 0.28), shade).lerp(Color(0.45, 0.22, 0.14),
+					0.25 * _hash(col, course, 43))
+			c = c.lerp(Color(0.2, 0.12, 0.09), (1.0 - round_) * 0.7 + (1.0 - smoothstep(0.0, 0.1, cv)) * 0.4)
+			c = c.lerp(Color(0.52, 0.5, 0.36), smoothstep(0.72, 0.9, _noise(u, v, 8, 17)) * 0.35)
+			return [clampf(h, 0.0, 1.0), c, lerpf(0.9, 0.7, round_)]
+		"ashlar":
+			# Dressed stone in courses: two a repeat, each block its own length and shade, the joints recessed,
+			# the faces a little worked.
+			var row := int(floor(v * 2.0))
+			var rv := fposmod(v * 2.0, 1.0)
+			var shift := 0.5 * float(row % 2) + 0.17 * _hash(row, 0, 5)
+			var bu := u * 2.0 + shift
+			var block := posmod(int(floor(bu)), 2)
+			var fu := fposmod(bu, 1.0)
+			var edge := minf(minf(fu, 1.0 - fu) * 1.0, minf(rv, 1.0 - rv) * 0.5)
+			var h := smoothstep(0.0, 0.03, edge) * (0.92 + 0.08 * _noise(u, v, 32, 21))
+			var tone := _hash(block, row, 23)
+			var c := Color(0.8, 0.74, 0.62).lerp(Color(0.9, 0.85, 0.74), tone)
+			c = c.lerp(Color(0.6, 0.55, 0.47), 0.25 * _noise(u, v, 16, 29))
+			c = c.lerp(Color(0.42, 0.38, 0.33), 1.0 - smoothstep(0.0, 0.025, edge))
+			return [h, c, 0.85]
+		"lime_wash":
+			# Lime wash over old plaster: soft blotches of thicker and thinner wash, faint streaks run down by
+			# rain, a few patches where it has flaked to the plaster under it.
+			var blot := _noise(u, v, 4, 31) * 0.6 + _noise(u, v, 8, 37) * 0.4
+			var streak := _noise(u, 0.37, 16, 41)
+			var flake := smoothstep(0.84, 0.9, _noise(u, v, 8, 47))
+			var s := 0.94 + 0.06 * blot - 0.03 * streak
+			var c := Color(s, s * 0.985, s * 0.96).lerp(Color(0.84, 0.78, 0.7), flake * 0.5)
+			var h := 0.6 + 0.12 * blot - 0.2 * flake + 0.05 * _noise(u, v, 64, 53)
+			return [h, c, 0.9]
 	return [0.5, Color(0.5, 0.5, 0.5), 0.8]
 
 

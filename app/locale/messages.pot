@@ -10,11 +10,11 @@ msgstr ""
 msgid "PC window"
 msgstr ""
 
-#: scripts/main.gd:1368
+#: scripts/main.gd:1374
 msgid "TALK"
 msgstr ""
 
-#: scripts/main.gd:1415
+#: scripts/main.gd:1421
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
@@ -514,32 +514,32 @@ msgstr[1] ""
 msgid "Can't make the certificate: %s."
 msgstr ""
 
-#: scripts/pc/pc_windows.gd:254
+#: scripts/pc/pc_windows.gd:267
 msgid "Close"
 msgstr ""
 
-#: scripts/pc/pc_windows.gd:254
+#: scripts/pc/pc_windows.gd:267
 msgid "Back to a pane"
 msgstr ""
 
-#: scripts/pc/pc_windows.gd:254
+#: scripts/pc/pc_windows.gd:267
 msgid "Show on the big screen"
 msgstr ""
 
-#: scripts/pictures/picture_keeper.gd:197
+#: scripts/pictures/picture_keeper.gd:198
 msgid "No picture under the pointer"
 msgstr ""
 
-#: scripts/pictures/picture_keeper.gd:198 scripts/pictures/picture_keeper.gd:373
+#: scripts/pictures/picture_keeper.gd:199 scripts/pictures/picture_keeper.gd:374
 msgid "That picture could not be kept"
 msgstr ""
 
-#: scripts/pictures/picture_keeper.gd:376
+#: scripts/pictures/picture_keeper.gd:377
 #, c-format
 msgid "Picture kept: %s"
 msgstr ""
 
-#: scripts/pictures/picture_keeper.gd:378
+#: scripts/pictures/picture_keeper.gd:379
 #, c-format
 msgid "Already in your pictures: %s"
 msgstr ""
@@ -2066,11 +2066,11 @@ msgid "%s deleted"
 msgstr ""
 
 #: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:655 ui/ui_layer.gd:226
-#: ui/ui_layer.gd:407 ui/ui_layer.gd:950 ui/ui_layer.gd:954 ui/ui_layer.gd:988
+#: ui/ui_layer.gd:407 ui/ui_layer.gd:952 ui/ui_layer.gd:956 ui/ui_layer.gd:990
 msgid "Undo"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:918
+#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:920
 msgid "The headset's cameras can't show here."
 msgstr ""
 
@@ -2446,31 +2446,31 @@ msgstr ""
 msgid "General"
 msgstr ""
 
-#: ui/pc_place.gd:43
+#: ui/pc_place.gd:64
 msgid "PC windows is off. Turn it on in System, PC windows, and add your PC there."
 msgstr ""
 
-#: ui/pc_place.gd:60
+#: ui/pc_place.gd:81
 msgid "No windows yet."
 msgstr ""
 
-#: ui/pc_place.gd:85
+#: ui/pc_place.gd:106
 msgid "Monitor"
 msgstr ""
 
-#: ui/pc_place.gd:101
+#: ui/pc_place.gd:122
 msgid "Type into the window in focus"
 msgstr ""
 
-#: ui/pc_place.gd:104
+#: ui/pc_place.gd:125
 msgid "Text to type"
 msgstr ""
 
-#: ui/pc_place.gd:106
+#: ui/pc_place.gd:127
 msgid "Send"
 msgstr ""
 
-#: ui/pc_place.gd:106
+#: ui/pc_place.gd:127
 msgid "Keyboard"
 msgstr ""
 
@@ -3880,7 +3880,7 @@ msgstr ""
 msgid "Allow for an hour"
 msgstr ""
 
-#: ui/system_tab.gd:354 ui/ui_layer.gd:791
+#: ui/system_tab.gd:354 ui/ui_layer.gd:793
 msgid "Revoke"
 msgstr ""
 
@@ -4044,81 +4044,81 @@ msgstr ""
 msgid "Controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:791
+#: ui/ui_layer.gd:793
 msgid "Remote changes allowed for an hour"
 msgstr ""
 
-#: ui/ui_layer.gd:804
+#: ui/ui_layer.gd:806
 msgid "Connecting..."
 msgstr ""
 
-#: ui/ui_layer.gd:814
+#: ui/ui_layer.gd:816
 msgid "Starting the browser..."
 msgstr ""
 
-#: ui/ui_layer.gd:828
+#: ui/ui_layer.gd:830
 msgid "Point at a seat and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:838
+#: ui/ui_layer.gd:840
 msgid "Seat unchanged"
 msgstr ""
 
-#: ui/ui_layer.gd:864
+#: ui/ui_layer.gd:866
 msgid "That can't be applied here"
 msgstr ""
 
-#: ui/ui_layer.gd:868
+#: ui/ui_layer.gd:870
 msgid "Point at a part and pull the trigger. Stick: size and turn the pattern. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:869
+#: ui/ui_layer.gd:871
 msgid "Point at a part and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:881
+#: ui/ui_layer.gd:883
 msgid "That object can't be placed here"
 msgstr ""
 
-#: ui/ui_layer.gd:885
+#: ui/ui_layer.gd:887
 msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:919
+#: ui/ui_layer.gd:921
 msgid "That's as many areas as there can be: delete one first."
 msgstr ""
 
-#: ui/ui_layer.gd:936 ui/ui_layer.gd:947
+#: ui/ui_layer.gd:938 ui/ui_layer.gd:949
 msgid "Nothing marked"
 msgstr ""
 
-#: ui/ui_layer.gd:950
+#: ui/ui_layer.gd:952
 #, c-format
 msgid "%s added: the cameras show there"
 msgstr ""
 
-#: ui/ui_layer.gd:954
+#: ui/ui_layer.gd:956
 #, c-format
 msgid "%s changed"
 msgstr ""
 
-#: ui/ui_layer.gd:972
+#: ui/ui_layer.gd:974
 msgid "Nothing changed"
 msgstr ""
 
-#: ui/ui_layer.gd:972
+#: ui/ui_layer.gd:974
 msgid "Nothing placed"
 msgstr ""
 
-#: ui/ui_layer.gd:991
+#: ui/ui_layer.gd:993
 msgid "Not placed"
 msgstr ""
 
-#: ui/ui_layer.gd:1005
+#: ui/ui_layer.gd:1007
 msgid "No seat there"
 msgstr ""
 
-#: ui/ui_layer.gd:1007
+#: ui/ui_layer.gd:1009
 msgid "Seat"
 msgstr ""
 
@@ -4319,7 +4319,7 @@ msgid "TV today - the present"
 msgstr ""
 
 #: environments/atmospheric_1928.env.json
-msgid "A picture palace built as a courtyard under a twilight sky: lit windows, iron balconies, cypresses over the walls and real stars."
+msgid "A picture palace built as a Mediterranean courtyard at dusk: lit windows, iron balconies, a palace gate with an organ, a crescent moon and real stars."
 msgstr ""
 
 #: environments/bathysphere.env.json
@@ -4440,6 +4440,10 @@ msgstr ""
 
 #: environments/atmospheric_1928.env.json
 msgid "Clouds"
+msgstr ""
+
+#: environments/atmospheric_1928.env.json
+msgid "Organ before the film"
 msgstr ""
 
 #: environments/bathysphere.env.json
@@ -4569,6 +4573,10 @@ msgstr ""
 
 #: environments/atmospheric_1928.env.json
 msgid "How much of the open sky the clouds cover. They catch the film's light."
+msgstr ""
+
+#: environments/atmospheric_1928.env.json
+msgid "The theatre organ behind the grilles plays for a minute or so when the room opens and between films, and finishes as the film starts."
 msgstr ""
 
 #: environments/bathysphere.env.json

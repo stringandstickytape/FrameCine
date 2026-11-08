@@ -4,9 +4,10 @@ extends "res://tests/env_builder_harness.gd"
 ## "Room: Flagship"), each its document alone. Each is built headless from app/environments/<id>.env.json and checked
 ## as a room that ships (schema, comfort, licences, names, no people, the headset's budget, a clear sight line from
 ## every seat) and for what makes it that room:
-##   Atmospheric 1928    open to the sky (no ceiling), the courtyard's façades and niches (urns, lions, obelisks), the
-##                       castle gate, cypresses, a twilight sky whose clouds follow the Clouds setting and take the
-##                       film's colour; the ritual parts the curtains and deepens the dusk; Pre-show off: dim only
+##   Atmospheric 1928    open to the sky (no ceiling), the courtyard's houses with their lit windows, the palace gate,
+##                       lions, trees over the walls, a twilight sky whose clouds follow the Clouds setting and take
+##                       the film's colour; the ritual parts the curtains and deepens the dusk; Pre-show off: dim only
+##                       (its own test, test_room_atmospheric_1928.gd, checks the rest)
 ##   Palace of Culture   board-marked concrete, mosaic panels that take more of the screen's light, ochre drapes,
 ##                       straight rows; the Snow setting drives the snowfall, the clouds and the birches' snow; the
 ##                       snow falls only under the open back of the roof
@@ -150,7 +151,7 @@ func _atmospheric() -> void:
 	var id := "atmospheric_1928"
 	var room := await _built(id)
 	var h: Node = room.host
-	for sid: String in ["light", "hall", "screen_frame", "showing", "kit", "sky", "vista"]:
+	for sid: String in ["light", "hall", "screen_frame", "showing", "kit", "sky"]:
 		check("%s: has %s" % [id, sid], h.system(sid) != null)
 	check("%s: open to the sky: no ceiling" % id, float(h.system("hall").params["ceiling_cover"]) == 0.0
 			and room.get_node_or_null("Ceiling") == null)
@@ -162,11 +163,9 @@ func _atmospheric() -> void:
 		kinds[str(p["piece"])] = true
 		if p.has("holds"):
 			kinds[str(p["holds"])] = true
-	check("%s: the castle gate, façades, niches with urns, lions and obelisks (%s)" % [id, kinds.keys()],
-			kinds.has_all(["castle_gate", "facade", "niche", "urn", "lion", "obelisk"]))
-	check("%s: the courtyard's lit windows" % id, room.get_node_or_null("PieceWindows") != null)
-	var shapes: Array = (h.system("vista").params["items"] as Array).map(func(i: Dictionary) -> String: return i["shape"])
-	check("%s: cypresses round the courtyard" % id, shapes.count("cypresses") >= 2)
+	check("%s: the palace gate, houses, lions, cypresses, palms and a pine (%s)" % [id, kinds.keys()],
+			kinds.has_all(["palace_gate", "house", "pedestal", "lion", "cypress", "palm", "pine"]))
+	check("%s: the courtyard's lit windows" % id, room.get_node_or_null("PieceRoomWindows") != null)
 	var sky: Node = h.system("sky")
 	check("%s: a twilight sky, no constellation lines (dusk %.2f)" % [id, h.param("sky.dusk")],
 			float(h.param("sky.dusk")) < 0.6 and float(sky.params["lines"]) == 0.0)
@@ -200,13 +199,13 @@ func _atmospheric() -> void:
 	check("%s: the acoustics cinema %s" % [id, ac], ac.is_empty())
 	var fountain: Node = h.system("fountain")
 	var spouts: Array = fountain.players()
-	check("%s: the fountain plays in a niche on the left wall, 4 dB under its level" % id, fountain.is_loop()
+	check("%s: the fountain plays at the wall fountain on the left wall, 4 dB under its level" % id, fountain.is_loop()
 			and fountain.playing() and spouts.size() == 1 and (spouts[0] as Node3D).position.x < -9.0
 			and is_equal_approx(float(fountain.params["gain_db"]), -4.0))
-	await _ritual(id, room, 0.12, 0.5, {"sky.dusk": 0.8})
+	await _ritual(id, room, 0.12, 0.5, {"sky.dusk": 0.85, "kit.night": 0.7, "sky.moon": 0.6})
 	_steps(h, 1.0)
 	check("%s: the pre-show: the dusk back to twilight (%.2f)" % [id, h.param("sky.dusk")],
-			absf(float(h.param("sky.dusk")) - 0.4) < 0.02)
+			absf(float(h.param("sky.dusk")) - 0.45) < 0.02)
 	await _seat_picking(id, room)
 	var r: Dictionary = await SoundChecks.levels(self, room, id)
 	for v: Array in SoundChecks.verdicts(id, r):

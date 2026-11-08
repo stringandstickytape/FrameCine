@@ -428,6 +428,8 @@ and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider'
 | `boxes_per_side` | 0 | boxes on the side walls |
 | `partition_z` | 0 | a plain wall across the hall here (a subdivided hall, Screen 3); 0: none |
 | `booth` | true | the projection booth's windows in the rear wall; `lens` is its lens |
+| `house_spots` | true | the bake's four house lights high over the seats (a ceiling's cans); off for a hall open to the sky (since 2026-11-08) |
+| `handrails` | true | brass handrails along the side walls; off where a kit's house fronts stand along the walls (since 2026-11-08) |
 | `doors` | true | the four exits with signs |
 | materials | the cinema's | `floor`, `walls`, `front_wall`, `ceiling`, `panel_fabric`, `panel_wood`, `stage`, `curtains`, `door_leaf`, `door_metal`, `brass` |
 
@@ -892,9 +894,14 @@ the pieces. The kit must come after its builder in the document. A room may have
 
 Other parameters: `builder` (the builder's id; empty: the room's first builder); materials `stone`, `plaster`,
 `wood`, `tin`, `roof`, `iron`, `plastic` (a computer), `fabric` (a rug), `china` (a tea set, plates), `cloth`
-(bunting, sandwiches; the last two coloured per vertex); `glass_colour` (a glass table's top); colours `leaves`, `flowers`, `neon`,
-`window_colour`, `lamp_colour` (a standard lamp's shade), `display_colour` (a video recorder's clock); live: `glow`
-(lit windows, the booth's window, neon, the clocks).
+(bunting, sandwiches; the last two coloured per vertex), `gilt` (a palace gate's mouldings, the organ's grilles),
+`drapes` (a palace gate's drapes and swags); `glass_colour` (a glass table's top); colours `leaves`, `flowers`, `neon`,
+`window_colour`, `lamp_colour` (a standard lamp's shade), `display_colour` (a video recorder's clock); `bake_lamps`
+(how many of the pieces' lamps light the room, 4 by default: a stand-in lamp while there is room for one, a hidden
+light in the bake); live: `glow` (lit windows, the booth's window, neon, the clocks), `night` and `ember` (the
+courtyard's windows going out one by one, and what one that has gone out still shows), `water_motion` (a fountain's
+water; the Motion setting scales it). Two more entry keys for the courtyard's pieces: `features` (a house's
+features, below) and `seed` (its own variation).
 
 | Piece | What |
 |---|---|
@@ -926,11 +933,32 @@ Other parameters: `builder` (the builder's id; empty: the room's first builder);
 | `floor_lamp` | a flat base, a slim pole, a tall column shade that glows in the entry's colour (`house` group) and gives a dim stand-in lamp |
 | `glass_table` | a low coffee table: a steel frame (`tin`), a glass top (the kit's glass mesh `PieceGlass`, `glass_colour`, in `env_see_through`) |
 | `media_unit` | a long low cabinet on a dark plinth set back under it, three doors without handles (`wood`) |
+| `house` | a courtyard's house front along a wall (`kit/courtyard.gd`): `size` [width, the eave's height, how far its face stands out]; its wash `colour`, its shutters' `accent`, `seed`, `features`. Two or three storeys of windows lit from inside, a socle on the ground, string courses, quoins, an eave of tiles on rafters |
+| `palace_gate` | round the room's screen: two towers (a rusticated base, an organ's grille in a tall arch, a belfry with a bell, a pyramid roof with a gilt finial), a great segmental arch over the picture with a balustrade and urns against the sky, gilt mouldings, a keystone cartouche, velvet drapes and three swags with gilt fringe; four floodlights for the bake. `size` [the room's width, 0, depth] |
+| `cypress`, `palm`, `pine` | trees beyond the walls: `size` [spread, height, spread]. A cypress of jittered rings, a palm with feather fronds, a stone pine's umbrella of clumps |
+| `lantern` | a wall lantern on an iron bracket, its glass glowing (`house` group; a stand-in lamp and a bake light) |
+| `pedestal` | a stone pedestal; `holds` `lion` (lying, head up) or `urn` |
 
 The furniture is drawn by `scripts/env/systems/kit/furniture.gd` (plain boxes and turned shapes of our own: no maker's
 shape, no badge, no lettering), which the domestic builder's telly stands use too. A piece stands with its foot at the
 slot's point and its front towards the slot's +z; the domestic builder's `telly_stand` and `telly_shelf` slots are
 made for it (the computer on a desk beside a portable, the video recorder in a tv unit's shelf).
+
+**The courtyard's houses** (`kit/courtyard.gd`, since 2026-11-08). Each house samples the ground under it (the
+stage, the aisle's rake), so its socle meets the floor and its storeys stand level. Its `features`: `balcony` (an
+iron balcony with real depth on brackets), `balconettes` (one at each upper window), `loggia` (an open top storey on
+columns), `tower` (a belvedere with arches and a pyramid roof), `pergola` (beams and leaves for a roof), `gable`
+(a pediment instead of an eave), `oriel` (a Moorish bay on corbels, its lattice lit), `exit` (an arched way out with
+the room's sign), `door`, `niche` (an urn in a shell niche), `lion_niche`, `fountain` (a wall fountain: blue and
+white tiles, a lion's mask, a basin with moving water), `lanterns`, `vines` (bougainvillea up the wall and over the
+balconies), `rug` (a rug hung over a balcony rail), `geraniums` (pots on the sills), `grilles` (iron grilles on the
+ground floor's windows), `booth` (the projection ports with the lens glowing), `arcade` (an open ground floor of
+arches) and `dark` (no one home: every window dark). Each window is one of six rooms behind (a curtain drawn left,
+right, both with a lamp, a plant on the sill, inner shutters half closed, an organ's pipes) drawn by
+`shaders/env_courtyard_window.gdshader` from the window's own coordinates, never from a picture; a few are dark.
+The windows' material is the light system's lamp material (house group), so they dim with the house lamps; `night`
+puts them out one by one, each at its own moment (each over a twentieth of `night`'s travel), down to `ember`. The
+windows bake as emitters: their glow lights the reveals, sills and shutters round them.
 
 **The video recorder's clock.** 12:00 in seven segments of our own (quads, no font, no texture of letters), in
 `display_colour`, all the room's clocks one mesh (`PieceDisplay`, accent group). It flashes once a second: lit half a
@@ -949,8 +977,8 @@ room's Flickering lights off holds it lit. `clock_level()` gives its level now (
   (`collision_shapes()`); there is no static form.
 - **Problems:** a slot the builder lacks, or an index past its places, is reported by `problems()` and the piece is
   not placed.
-- Measured: bougainvillea along the rooftop's 14 parapet places: 2 draws, 23k triangles. The atmospheric hall's
-  pieces: 11 draws.
+- Measured: bougainvillea along the rooftop's 14 parapet places: 2 draws, 23k triangles. The Atmospheric 1928's
+  courtyard (since 2026-11-08): 16 draws, about 77k triangles (its room section has the parts).
 
 ## Atmosphere and weather
 
@@ -1120,6 +1148,7 @@ tones and swells divide its length, so it has no seam.
 | `far_car` | one-shot 34 | a big old car on a highway 78 m off at its closest, 25 m/s: tyres on concrete (the slabs' joints a soft double knock), a V8's low, uneven burble, its pitch riding the passing, duller when far; the level by distance is the 3D player's (`reach` the closest distance), only the far ends fade in it (since 2026-11-08; designed level -56) | the drive-in's highway, with `to` and a cue (`far_car.play` with `car_passes`) |
 | `train` | one-shot 40 | a freight train far off: the roll, the rail joints, the horn's two notes early on | far off, `every` |
 | `huskies` | one-shot 7 | three far howls and a few yips, an echo | snow |
+| `scops_owl` | one-shot 9 | a scops owl's call over the roofs: four soft whistled "tew"s 2.5 s apart, each gliding down from 1.25 to 1.17 kHz, a breath of air, softened by distance (since 2026-11-08) | a warm night, `every` |
 | `hull_creak` | one-shot 3.5 | steel under pressure: stick-slip pulses through a low groan and bright partials | a hull |
 | `ice_creak` | one-shot 2.6 | a crack that sings down, then a low groan | ice, `every` |
 | `candle` | one-shot 0.9 | a candle's flame puffs and wavers, three or four sputters of wax | `every`, very low |
@@ -1218,6 +1247,7 @@ second.
 | `moped` | -52 | -52.0 | -60.0 | | -42.9 |
 | `train` | -52 | -52.0 | -60.0 | | -40.6 |
 | `huskies` | -54 | -54.0 | -62.0 | | -46.0 |
+| `scops_owl` (2026-11-08) | -58 | -58.0 | -66.0 | | -41.2 |
 | `hull_creak` | -52 | -52.0 | -60.0 | | -39.3 |
 | `ice_creak` | -55 | -55.0 | -63.0 | | -31.0 |
 | `candle` | -58 | -58.0 | -66.0 | | -37.5 |
@@ -1281,7 +1311,7 @@ at 8 m they are 19 dB under their "in film" level even at -12. Without the filte
 | Shopfront 1906 | `acoustics` `shopfront`; `sound_bed` `projector` behind, `gas_hiss`; `music` `piano`, `drive` on `film.transient`, `on` on a setting |
 | Streamline 1937 | `acoustics` `cinema`; `music` `organ`, `flourish` in the ritual |
 | Pink Palace | `acoustics` `cinema`; `sound_bed` `three_bells` (`play` in the ritual) or the foundation's `chime` |
-| Atmospheric 1928 | `acoustics` `cinema`; `sound_bed` `fountain` `at` a niche, `reach` 3, `gain_db` -4 |
+| Atmospheric 1928 | `acoustics` `cinema`; `sound_bed` `fountain` `at` the wall fountain, `reach` 8, `gain_db` -4; `crickets` around the courtyard (three voices, `film_db` -18); a `scops_owl` from the stone pine, `every` 55, `film_db` -40; the theatre organ (`music`) before the film |
 | Screen 3, 1983 | `acoustics` `small_room` (`rt60` 0.6); `sound_bed` `wall_rumble`, `level` on `film.bass`, `film_db` 0 |
 | Drive-in | `acoustics` `outdoors`; `sound_bed` `crickets` around (`radius` 8); `train` far off, `every` 900, `reach` 300 (its horn is in it) |
 | Rooftop, Athens | `acoustics` `outdoors` (`rt60` 0.25, `wet` 0.15); `sound_bed` `cicadas` around, `film_db` -14 (they fade as the film starts); `moped` with `to` and `every`; the cat's purr from `life` (`voice_db` -15 within 2 m) |
@@ -1471,6 +1501,9 @@ Way, clouds, an aurora, shooting stars, and Earth as seen from the Moon.
 | `earth`, `earth_bearing`, `earth_altitude`, `earth_size`, `earth_phase` | off, 180, 35, 2, 0.65 | Earth in the sky: where, how high, how big (degrees), how much of it is lit |
 | `earth_angle` | 0 | how far Earth has turned on its axis (degrees). Live: a track can turn it over the film |
 | `earth_turn` | 1 | Earth's own turning in times its real speed (motion, at most 60: once in 24 minutes) |
+| `moon` | 0 | the Moon seen from the Earth (`mode` `sky`): its brightness. Live, a brightness. 0 draws nothing (the layer is made only when it is over 0) |
+| `moon_bearing`, `moon_altitude`, `moon_size`, `moon_phase` | 220, 45, 1.6, 0.22 | where it hangs, how high, how big (degrees; the real Moon is 0.5, drawn larger as the eye sees it low), how much of it is lit (0.22: a crescent). It is lit from the sunset's side (`glow_bearing`), the dark part a faint earthshine; a halo round it; clouds dim it |
+| `cloud_glow`, `cloud_glow_level` | warm orange, 0 | a town's lamps lighting the clouds from below, strongest low over the walls; a silver edge near the Moon. Live, a brightness |
 
 Action: `shooting_star` (no args).
 
@@ -1551,7 +1584,7 @@ covers them, as the screen would.
 
 | Room | Use |
 |---|---|
-| Atmospheric 1928 | `auditorium` with `ceiling_cover` 0; `sky` at twilight (`dusk` 0.4..0.6), `lines` off, `clouds` 0.3 with `cloud_colour` bound to `film.colour`; `vista` cypresses over the walls (as `test_env_vista.gd`'s courtyard) |
+| Atmospheric 1928 | `auditorium` with `ceiling_cover` 0; `sky` at a deep blue dusk (`dusk` 0.45, 0.85 in the film), `lines` off, `twinkle` 0.35, a crescent `moon`, clouds lit from below by the town (`cloud_glow`) with `cloud_colour` bound to `film.colour`; the trees over the walls are the kit's (`cypress`, `palm`, `pine`), no `vista` |
 | Drive-in 1958 | `sky` with a dusk track by `film.minutes`, `milky_way` bound to `playback.playing`; `vista` mesas all round |
 | Rooftop, Athens | `sky` (`latitude` 38, a summer night); `vista` acropolis ahead, a little to one side |
 | Palace of Culture | `vista` birches in snow outside the windows; `snow` bound to the room's snow setting |
@@ -1751,7 +1784,7 @@ people.
 | # | Room | Builders and kits | Light, sky, atmosphere | Life, sound, music | Timeline and cues | Screen | Settings |
 |---|---|---|---|---|---|---|---|
 | 1 | Shopfront picture house, 1906 | `shopfront` (pressed tin), folding chairs (`seats`), a tin booth (`kit`) | gas lamps (`light`, flicker), a dusty beam (`screen_frame`, `atmosphere`) | projector clatter behind (`sound_bed`), a player piano that plays along (`music`, `film.transient`) | the piano starts in `starting` | a framed sheet | piano on or off |
-| 2 | Atmospheric, 1928 | `auditorium` with `ceiling_cover` 0, courtyard façades, niches with statues, a castle gate (`kit`, `proscenium` slot) | open twilight `sky` with real constellations, clouds lit by the screen (`film.colour`), cypresses (`vista`) | | curtains part (`showing`) | | clouds |
+| 2 | Atmospheric, 1928 | `auditorium` with `ceiling_cover` 0, thirteen courtyard houses (balconies, towers, a loggia, an oriel, an arcade, lit windows), a palace gate with organ grilles and drapes, lions, cypresses, palms, a stone pine (`kit`) | an open dusk `sky` with real stars, a crescent moon, clouds lit by the town and the screen (`film.colour`); lanterns and floods baked | a wall fountain, crickets, a scops owl (`sound_bed`), a theatre organ before the film (`music`) | the courtyard goes to bed with the film (windows out one by one), curtains part (`showing`) | | clouds, organ |
 | 3 | Streamline, 1937 | `auditorium` with cream faience bands (`wall_treatment` slot), brass ashtrays (objects) | cove lights that cycle colours and then follow the film (`light`, `film.colour`) | an organ (`music`) | the organ rises from the pit (`motion`) as the ritual | a festoon curtain (`proscenium` slot) | cove colours |
 | 4 | Screen 3, 1983 | `auditorium` with `partition_z` (a subdivided balcony), plasterboard, swirly carpet, one broken seat, a water stain (picture) | smoke haze in the beam (`atmosphere`), a flickering exit sign (`flicker`) | rumble through the wall (`sound_bed`, `film.bass`) | | gate weave, a slight tilt (`presentation`) | weave and tilt |
 | 5 | Drive-in, 1958 | `terrace` (the lot), a convertible's bench seat (`vehicle`), a screen tower, a neon snack bar (`kit`) | dusk to stars over the film (`sky`, film-time tracks), mesas (`vista`) | moths in the beam (`life`), a far freight train (`sound_bed`, `every`) | | the window speaker (`presentation`) | tinny speaker |
@@ -1770,27 +1803,98 @@ people.
 
 ### Room: Atmospheric 1928
 
-`app/environments/atmospheric_1928.env.json`. A picture palace built as a courtyard under a twilight sky: plaster
-houses with lit windows and iron balconies along both walls, niches with lions, urns and obelisks between them, a
-castle gate round the screen, cypresses over the walls.
+`app/environments/atmospheric_1928.env.json`. A picture palace built as a Mediterranean town square at dusk, as the
+atmospheric theatres of the late 1920s were: the seats stand in a courtyard of plastered houses under an open sky,
+and the screen is in a palace's gate. The quality pass (2026-11-08) answered "you may be able to do a large number of
+superb ones, see how it goes, but aim for incredible quality plz!" (the user, 2026-11-08); the houses, the gate, the
+trees, the windows, the Moon, the owl and the organ are new in it.
 
-- **Systems:** `light`; `auditorium` (`ceiling_cover` 0, walls 7.5 m, `proscenium` none, plain plaster walls, plush
-  seats 0.6 m apart, 25 a row); `screen_frame`; `showing`; `kit` (the castle gate, columns in the front corners, and
-  on the 14 side-wall places, in turn: niches with lions, façades the walls' full height, niches with urns,
-  façades, niches with obelisks, façades, niches with urns); `sky` (latitude 37, mid July, 21:30, `dusk` 0.4, no
-  constellation lines, the Milky Way at 0.5); `vista` (cypresses 15 m out at the front corners and behind, hills).
-- **Setting:** Clouds (0 to 100 %, 40 % by default): `sky.clouds` by `range` [0, 0.8]. The clouds' own colour
-  follows `film.colour` (strength 0.4, smooth 1 s), and `cloud_screen` 1.2 lets the ones towards the screen catch
-  its light.
+- **The houses** (`kit` `house`, `kit/courtyard.gd`): thirteen fronts, five along each side wall and three across
+  the back, each its own wash (rose, ochre, cream, sage, terracotta; lime over plaster with a faint blotch), shutter
+  colour, height (7 to 9.6 m to the eave) and depth (0.005 to 0.9 m out from the wall). Each stands on the stepped
+  floor (its socle follows the aisle's rake) and rises in two or three storeys of windows to a tiled eave or a gable.
+  Between them: long iron balconies with real depth on stone consoles (one with a striped rug over its rail),
+  balconettes, a loggia, two belvedere towers, two pergola terraces, two Moorish oriels with their lattices lit, an
+  arcade on the left wall and another across the back (the projection booth's ports over it, the projector's lens
+  glowing), a front door, niches with an urn and a lion, a wall fountain behind the seats on the left (blue and white
+  tiles, a lion's mask, a basin with moving water), geraniums on the sills, bougainvillea climbing to the balconies,
+  iron grilles on the ground floors. The four exits are arched ways out in the houses at the corners.
+- **The windows** (`PieceRoomWindows`, `shaders/env_courtyard_window.gdshader`): 54 lit rooms behind the glass,
+  each one of six kinds (a curtain drawn left or right, both drawn with a lamp, a plant on the sill, inner shutters
+  half closed with light through the slats, the organ's pipes), and 10 dark. They are lamps of the `house` group, so
+  they dim with the house lamps, and with the film the courtyard goes to bed: `kit.night` to 0.7 puts each window out
+  at its own moment, down to `ember` 0.2 (a lamp turned low), 37 of the 54 over 9 s. They bake as
+  emitters: their glow lights their reveals, sills and shutters.
+- **The palace gate** (`kit` `palace_gate`): two towers reach from the screen to the walls, each with a rusticated
+  base, the organ's grille (a tall arch with a gilt lattice over the pipes' warm chamber, a gilt balconette), a lit
+  window, a belfry with its bell and a pyramid roof with a gilt finial. Between them a great segmental arch over the
+  picture with gilt mouldings, a keystone's cartouche under a shell, rosettes in the soffit, medallions in the
+  spandrels, a frieze, and a balustrade with five urns against the sky. Velvet drapes tied back in the jambs with
+  gilt cords and three swags with gilt fringe along the arch. Nothing of it is in front of the picture. Two stone
+  lions lie on pedestals at the stage's corners (`kit` `pedestal`, `scale` 1.3).
+- **Beyond the walls:** six cypresses, three palms and a stone pine (`kit` `cypress`, `palm`, `pine`) over the roofs.
+  No `vista`: the trees are the kit's, drawn round the room's own corners.
+- **The sky** (`sky`): latitude 37, mid July, 21:30, `dusk` 0.45 (a deep blue vault, the sunset's last glow low in
+  the west-south-west), the real stars with a slow `twinkle` 0.35, the Milky Way at 0.5, no constellation lines, a
+  crescent `moon` (bearing 218, 47 degrees up, phase 0.28, lit from the sunset's side), clouds lit warm from below by
+  the town (`cloud_glow`), their own colour after `film.colour` (strength 0.4) and the ones towards the screen
+  catching its light (`cloud_screen` 1.2).
+- **The light** (`light`): a cool blue fill from above, a warm one from below (`fill_top` [0.13, 0.16, 0.27],
+  `fill_bottom` [0.11, 0.08, 0.06]), `baked_fill` 0.6, `spill` 0.5 (the default is 3, on dark walls: these pale
+  washes near the screen took too much of a bright scene). 15 lanterns on iron brackets (`PieceLamps`, the `house` group); with the
+  organ chambers' glow that is 17 lamps, of which the first 16 (`bake_lamps` 16) are stand-in lamps and hidden bake
+  lights, so each lays a warm pool on its wall. Four hidden floodlights at the stage's lip light the towers and the
+  arch in the bake. The hall's own house spots are off (`house_spots` false: there is no ceiling), and so are its
+  handrails (`handrails` false: they would run through the house fronts). No live light.
+- **Settings:**
+
+  | Setting | Choices | Default | What it moves |
+  |---|---|---|---|
+  | Clouds (`clouds`) | 0 to 100 % | 40 % | `sky.clouds` by `range` [0, 0.8] |
+  | Organ before the film (`organ`) | on, off | on | the organ's `on`; the `prelude` and `postlude` cues' `requires` |
+
 - **Cues:** `ritual` (starting, Pre-show on): the house lamps to half over 1.5 s, the curtains part over 4 s, the
-  dusk deepens from 0.4 to 0.8 over 10 s, then the lamps to 12 % and the steps to half over 5 s. `dim` (Pre-show
-  off): the same without the curtains. `lights_up` (pre-show, ended): the lamps, the steps and the twilight back.
-- **Sound:** `acoustics` `cinema` (rt60 0.7); a `sound_bed` `fountain` in the urn niche on the left wall behind the
-  viewer (`at` [-9.3, 1.5, 3.5], `reach` 8, `gain_db` -4: about 10 m from the default seat, so `reach` 3 left it
-  60 dB under the film's reference).
-- **Default seat:** the middle of row 0 (7 rows in front, 3 behind).
-- **Measured** (`test_room_set2.gd`): 26 draws, 199 724 triangles, no live light, no particles, 9.4 MB. Sound at the
-  slider's default (dBFS RMS): -64.5 in the pre-show, -72.4 in the film, -79.8 under a film at the reference level.
+  dusk deepens to 0.85 over 10 s, the courtyard goes to bed (`kit.night` 0.7 over 9 s), the clouds lose the town's
+  glow (0.25 over 8 s), the Moon pales to 0.6 over 8 s; then the lamps to 12 % and the steps to half over 5 s.
+  `dim` (Pre-show off): the same without the curtains, over 3 to 6 s. `lights_up` (pre-show, ended): all of it back,
+  over 4 to 8 s. `prelude` (pre-show, ended; Organ on): 5 s after the room opens, the organ plays for 80 s.
+  `postlude` (starting; Organ on): the organ plays its cadence and rests as the film starts.
+- **Sound:** `acoustics` `cinema` (rt60 0.7); the wall fountain (`sound_bed` `fountain` at its basin, [-9.05, 2.4,
+  4.3], `reach` 8, `gain_db` -4); crickets round the courtyard (`crickets`, three voices on a 9 m ring, `gain_db` -9,
+  `film_db` -18); a scops owl in the stone pine over the right-hand roofs (`scops_owl`, a new synthesised call,
+  [11.5, 11, -3], `every` 55 s with `jitter` 0.45, `gain_db` -3, `film_db` -40: it all but stops in the film); the
+  theatre organ behind the left tower's grille (`music` `organ`, stop `theatre`, [-8.1, 1.2, -13.7], `gain_db` -7,
+  major), heard only before the film and between films (`plays_in` intermission; the `prelude` cue plays it).
+- **Comfort:** nothing moves fast or crosses the sight line. The windows go out each over a twentieth of `night`'s
+  travel (0.45 s at the ritual's 9 s), slower than the photosensitivity ceiling's fade; the twinkle and the water are
+  under 1 Hz at any point; the clouds drift at `wind` 0.2. The Motion setting scales the clouds and `kit.water_motion`
+  (at 0 the fountain's water stands still).
+- **Default seat:** the middle of row 0 (7 rows in front, 3 behind). The seats, the eye height and the screen are as
+  before the pass.
+- **Measured** (`test_room_atmospheric_1928.gd`, headless, 2026-11-08): 31 draws, 262 756 triangles, no live light,
+  no particles, 11.0 MB. Before the pass: 26 draws, 199 724 triangles, 9.4 MB. By part: the seats 177 100 triangles
+  (2 draws, the hall's, unchanged), the kit's unbaked parts 71 390 (7 draws: stone, gilt, iron, leaves, wood,
+  cloth, velvet), its baked parts 5 426 (4: plaster, stone, roofs, joinery), the windows 329 (1), the lanterns' glass
+  180 (1), the water 41 (1), the booth's ports (2), the Moon (1); the sky's dome and stars 6 390 (2). The triangles
+  are 13k over the brief's ~250k; the seats are two thirds of them. By piece: the gate 10.4k, a house about 1.7k to
+  7k (the fountain's is the most), a lion about 3k, the pine 3.4k, a palm 0.8k, a cypress 0.3k. The bake under
+  lavapipe: about 13 s, one 1024² atlas, 6.3 MB.
+- **The costs to watch on the Frame** (not measured on the headset): the draws (31, from 26) and the triangles (the
+  seats' 177k as before); the bake's time on the Frame (13 s under lavapipe on the desktop). Fill: nothing large is
+  transparent; the sky is the same dome and stars as before plus one small quad for the Moon; the windows' shader is
+  a few dozen ALU on small faces.
+- **Sound measured** (`test_room_atmospheric_1928.gd`, the slider's default): -59.0 dBFS RMS in the pre-show with
+  the organ playing and the owl calling (peak -42.1), -75.3 under a film at the reference level. Before the pass:
+  -64.5 in the pre-show, -79.8 under a film.
+- **The render** (lavapipe, `test_room_atmospheric_1928.gd`; `ATMO_BAKE=1` bakes it first): from the seat, left,
+  right, up, back, a side seat and its wall, in the pre-show and in the film; closer: the gate, the left houses, the
+  Moon, the rear, the lions, the right houses, a lion, the fountain. From the seat, baked (mean luminance of the
+  image, 0 to 1): in the pre-show the houses beside the screen 0.22 and the gate 0.24; in the film, under the test's
+  bright picture (0.60), the houses 0.12 and the gate 0.14, of which 0.05 and 0.08 without the picture's spill.
+- **To judge on the Frame:** the frame time with 31 draws and 263k triangles; the bake's time; the organ's, the
+  owl's, the crickets' and the fountain's levels by ear; the Moon's brightness beside the film; whether the
+  courtyard is dim enough in the film (the façades take the film's spill: `spill` 0.5 on washes about four times as
+  pale as a dark-walled cinema's walls at 3, so about two thirds of its light).
 
 ### Room: Palace of Culture 1974
 

@@ -29,6 +29,12 @@ uniform float aurora_time = 0.0;
 // A shooting star: from, to (unit directions) and how far along it is (w < 0: none).
 uniform vec4 meteor_from = vec4(0.0, 1.0, 0.0, -1.0);
 uniform vec3 meteor_to = vec3(0.0, 1.0, 0.0);
+// The town's light on the clouds' undersides, strongest low over the walls (cloud_glow x cloud_glow_level), and the
+// Moon's: the clouds near it silvered, most where they are thin (moon_light 0: no Moon). Both 0 by default.
+uniform vec3 cloud_glow : source_color = vec3(1.0, 0.6, 0.32);
+uniform float cloud_glow_level = 0.0;
+uniform vec3 moon_dir = vec3(0.0, 0.7, -0.7);
+uniform float moon_light = 0.0;
 
 const float MILKY_GAIN = 0.05;
 const float AURORA_GAIN = 0.22;
@@ -118,6 +124,14 @@ void fragment() {
 						* spill_tint(CAMERA_POSITION_WORLD + normalize(wdir) * 20.0);
 			}
 			lit *= mix(1.0, 0.65, cover);
+			if (cloud_glow_level > 0.0) {
+				lit += cloud_glow * cloud_glow_level * 0.3 * (1.0 - smoothstep(0.02, 0.75, d.y)) * mix(1.0, 0.7, cover);
+			}
+			if (moon_light > 0.0) {
+				float m = max(dot(d, normalize(moon_dir)), 0.0);
+				lit += vec3(0.78, 0.8, 0.88) * moon_light * (pow(m, 90.0) * 1.2 + pow(m, 12.0) * 0.07)
+						* (1.25 - cover);
+			}
 			c = mix(c, lit, cover);
 		}
 	}

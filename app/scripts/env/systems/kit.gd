@@ -17,14 +17,18 @@ extends "res://scripts/env/systems/kit/builder.gd"
 ## Its physics boxes exist once it is built (they follow the builder's slots): collision_shapes(), no static form.
 
 const Pieces := preload("res://scripts/env/systems/kit/pieces.gd")
+const Courtyard := preload("res://scripts/env/systems/kit/courtyard.gd")
 const Auditorium := preload("res://scripts/env/systems/auditorium.gd")
+const WINDOW_SHADER := preload("res://shaders/env_courtyard_window.gdshader")
+const WATER_SHADER := preload("res://shaders/env_fountain_water.gdshader")
 
 static func spec() -> Dictionary:
 	return {
 		"kind": "kit",
 		"description": "Modular pieces along a builder's slots: balcony fronts, niches with an urn, a lion or an "
 				+ "obelisk, columns, courtyard façades, a castle gate round the screen, a tin booth, a neon snack bar, "
-				+ "a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
+				+ "a Mediterranean courtyard (houses with balconies, towers, loggias and lit windows, a palace gate "
+				+ "with drapes, lanterns, a lion on a pedestal, cypresses, palms and pines), a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
 				+ "furniture: a desk, a computer, a video recorder flashing 12:00, a sideboard, a standard lamp, a rug, "
 				+ "a coffee table; dressing: bunting, a tea set, sandwiches, a stool, a channel dial, a soundbar, a "
 				+ "floor lamp, a glass table, a media unit.",
@@ -51,6 +55,11 @@ const PIECE_FIELDS := {
 	"text": {"type": "string", "max": 12,
 			"description": "a neon sign's words (our letters: A B C D E F I K L N O P R S T U W, space)"},
 	"target": {"type": "string", "max": 32, "description": "the carpet's node (the builder's Floor by default)"},
+	# Since 2026-11-08, for the courtyard's pieces (kit/courtyard.gd): which of a piece's parts it has, and its own
+	# seed so two houses of one recipe differ.
+	"features": {"type": "list", "max": 16, "of": {"type": "enum", "values": Courtyard.FEATURES},
+			"description": "a courtyard piece's parts (a house: balcony, loggia, tower, pergola, oriel, exit, ...)"},
+	"seed": {"type": "int", "min": 0, "max": 100000, "description": "the piece's own variation (a house's windows)"},
 }
 const PARAMS := {
 	"builder": {"type": "string", "max": 32, "default": "",
@@ -87,6 +96,21 @@ const PARAMS := {
 	"window_colour": {"type": "color", "default": [1.0, 0.72, 0.42], "description": "lit windows' colour"},
 	"glow": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
 			"description": "how bright the lit windows, the booth's window and neon signs are"},
+	# Since 2026-11-08, for the Atmospheric 1928's courtyard (kit/courtyard.gd); the other rooms keep their defaults.
+	"gilt": {"type": "material", "default": {"library": "brass", "color": [0.78, 0.6, 0.3]},
+			"description": "gilding: a palace gate's mouldings, an organ's grille, finials"},
+	"drapes": {"type": "material", "default": {"library": "velvet", "color": [0.42, 0.06, 0.07], "pleats": 3.0,
+			"pleat_depth": 0.6}, "description": "a palace gate's drapes and swags"},
+	"bake_lamps": {"type": "int", "min": 0, "max": 24, "default": 4,
+			"description": "how many of the pieces' lamps light the room (a stand-in lamp while there is room for one, "
+			+ "a hidden light for the bake)"},
+	"night": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "brightness": true,
+			"description": "the courtyard's houses going to bed: 0 every window lit, 1 most of them down to an ember; "
+			+ "each window goes out at its own moment (a cue moves it over some seconds)"},
+	"ember": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.15, "live": true, "brightness": true,
+			"description": "what a courtyard window that has gone out still shows (a lamp turned low behind a curtain)"},
+	"water_motion": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true, "motion": {"max": 1.0},
+			"description": "how fast a fountain's water runs and ripples (the Motion setting scales it)"},
 }
 ## Pieces that take their slot's size when the entry gives none (the others keep their own size).
 const FILLS: Array[String] = ["facade", "curves", "ivy", "bougainvillea", "balcony_front", "partition"]
@@ -111,6 +135,51 @@ class Ctx:
 	var room: Node3D
 	var rng := RandomNumberGenerator.new()
 	var _mats := {}
+	## The courtyard's pieces (kit/courtyard.gd, since 2026-11-08): the floor under a point of the room (the builder's
+	## stage, pit and stepped aisles; an invalid Callable: the piece's own foot), the builder's parameters, the lit
+	## windows of the houses (a baked mesh: their glow lights the reveals and sills in the bake) and a fountain's water.
+	var ground := Callable()
+	var builder_params := {}
+	var windows: RefCounted
+	var water: RefCounted
+	## Floodlights for the bake only: [from, towards, colour, energy, reach, half angle (degrees)] (a palace gate lit
+	## from the stage's lip).
+	var spots: Array = []
+
+	## The floor's height under a point of the room (the piece's foot when the builder gives none).
+	func ground_at(p: Vector3, fallback: float) -> float:
+		return float(ground.call(p)) if ground.is_valid() else fallback
+
+	## An unbaked part's material: it keeps the fill and the stand-in lamps once a lightmap is on (the light system's
+	## instanced materials), coloured per vertex (RoomMesh.colour, linear; white: the parameter's own colour) when
+	## tinted. pattern: procedural.gd's, over the library's maps.
+	func soft(key: String, tinted := true, pattern := "") -> Material:
+		return _variant(key, true, tinted, pattern)
+
+	## A baked part's material coloured per vertex (RoomMesh.colour, linear), with a pattern of procedural.gd.
+	func tinted(key: String, pattern := "") -> Material:
+		return _variant(key, false, true, pattern)
+
+	func _variant(key: String, unbaked: bool, tinted_: bool, pattern: String) -> Material:
+		var k := "%s %s %s %s" % ["soft" if unbaked else "baked", key, tinted_, pattern]
+		if _mats.has(k):
+			return _mats[k]
+		var d: Dictionary
+		if key == "leaves":
+			d = {"library": "felt", "color": [1.0, 1.0, 1.0]}
+		else:
+			d = (kit.params[key] as Dictionary).duplicate()
+		if tinted_:
+			d["color"] = [1.0, 1.0, 1.0]
+		var m: ShaderMaterial = kit._light.from_param(d, unbaked)
+		# Tinted: the maps' mean is white (the library's colour option, Procedural.apply's), so the vertex colour is
+		# the colour shown on average, the pattern's detail kept.
+		if pattern != "":
+			Proc.apply(m, pattern, Color(1, 1, 1) if tinted_ else RoomSchemaRef.to_color(d.get("color", "#b0b0b0")))
+		if tinted_:
+			m.set_shader_parameter("instance_tint", true)
+		_mats[k] = m
+		return m
 
 	## A material of the kit's (a material parameter, or a colour parameter for leaves and flowers), in this colour
 	## (null: the parameter's), with a pattern of procedural.gd; made once each.
@@ -155,6 +224,11 @@ var _problems: Array[String] = []
 var _display_m: ShaderMaterial
 var _blink_t := 0.0
 var _blink := 1.0
+## The courtyard's windows and a fountain's water (kit/courtyard.gd), when a piece has drawn them.
+var _window_m: ShaderMaterial
+var _water_m: ShaderMaterial
+## The water's own clock (seconds x water_motion x the Motion setting), so a still setting stops it where it is.
+var _water_t := 0.0
 ## The clock flashes once a second, each change eased over about a fifth of a second (slower than the
 ## photosensitivity ceiling's fade, env_checks.gd MIN_FADE).
 const BLINK_HZ := 1.0
@@ -265,6 +339,19 @@ func build() -> void:
 	_ctx.glass = RoomMesh.new()
 	_ctx.room = room
 	_ctx.rng.seed = 1928
+	_ctx.windows = RoomMesh.new()
+	_ctx.water = RoomMesh.new()
+	_window_m = null
+	_water_m = null
+	var b := _builder()
+	if b != null:
+		_ctx.builder_params = b.params
+		if b.get_script() == Auditorium:
+			var l := Auditorium.layout(b.params)
+			var stage_end := l.lo.z + float(b.params["stage_depth"])
+			var stage_top := float(b.params["stage_top"])
+			_ctx.ground = func(p: Vector3) -> float:
+				return stage_top if p.z < stage_end else l.aisle_floor(p.z)
 	var slots := builder_slots()
 	_ctx.screen = _screen_info(slots)
 	for i in (params["pieces"] as Array).size():
@@ -294,24 +381,83 @@ func build() -> void:
 		var mi := _add_picture("PieceBooth", _ctx.glows["booth"], Procedural.gradient(Color(0.9, 0.85, 0.7),
 				Color(0.5, 0.45, 0.35)), Color(1, 1, 1), 1.2 * glow, "booth")
 		_glow_m.append([mi.mesh.surface_get_material(0), 1.2])
+	# A projection booth's ports in a courtyard house (kit/courtyard.gd): the projector's, its lens glowing in the dark
+	# booth, and the viewing ports beside it, dim (the booth group: the signs' level).
+	if _ctx.glows.has("port"):
+		var mi := _add_picture("PiecePort", _ctx.glows["port"], Auditorium.port_picture(true), Color(1, 1, 1),
+				1.3 * glow, "booth")
+		_glow_m.append([mi.mesh.surface_get_material(0), 1.3])
+	if _ctx.glows.has("port_dim"):
+		var mi := _add_picture("PiecePortDim", _ctx.glows["port_dim"], Auditorium.port_picture(false), Color(1, 1, 1),
+				1.3 * glow, "booth")
+		_glow_m.append([mi.mesh.surface_get_material(0), 1.3])
 	var neon := color_param("neon")
 	for k in _ctx.signs.size():
 		var sg: Array = _ctx.signs[k]
 		var mi := _add_picture("Sign%d" % k, [sg[0]], Procedural.letters(str(sg[1]), neon, Color(0.02, 0.02, 0.03)),
 				Color(1, 1, 1), 1.8 * glow, "signs")
 		_glow_m.append([mi.mesh.surface_get_material(0), 1.8])
-	for k in mini(_ctx.lamps.size(), 4):
+	for k in mini(_ctx.lamps.size(), int(params["bake_lamps"])):
 		var l: Array = _ctx.lamps[k]
 		var strength := float(l[2]) if l.size() > 2 else 1.0
 		_light.add_lamp(l[0], (l[1] as Color) * float(_light.params["lamp_energy"]) * 0.5 * strength, -1.0)
 		_bake_omni("KitLamp%d" % k if id == "kit" else "KitLamp%d_%s" % [k, id], l[0], 5.0 * sqrt(strength),
 				0.6 * strength, l[1])
+	for k in _ctx.spots.size():
+		var sp: Array = _ctx.spots[k]
+		var l := SpotLight3D.new()
+		l.name = "KitSpot%d" % k if id == "kit" else "KitSpot%d_%s" % [k, id]
+		var from: Vector3 = sp[0]
+		var dir: Vector3 = (sp[1] as Vector3) - from
+		l.transform = Transform3D(Basis.looking_at(dir, Vector3.UP if absf(dir.normalized().y) < 0.99
+				else Vector3.FORWARD), from)
+		l.light_color = sp[2]
+		l.light_energy = float(sp[3])
+		l.spot_range = float(sp[4])
+		l.spot_angle = float(sp[5])
+		_light.add_bake_light(l)
+	_add_courtyard_meshes()
+
+
+## The courtyard's lit windows (baked: their glow lights the reveals, sills and shutters round them in the bake) and
+## a fountain's water (kit/courtyard.gd). Each window's size, kind and moment of going out ride in its vertex colour.
+func _add_courtyard_meshes() -> void:
+	if _window_m != null:
+		_add_static("PieceRoomWindows", _ctx.windows)
+	if _water_m != null:
+		_add_unbaked("PieceWater", _ctx.water)
+
+
+## The windows' material (the light system's lamp material, house group, on the courtyard window shader), made when
+## a piece first draws a window.
+func window_material() -> ShaderMaterial:
+	if _window_m == null:
+		_window_m = _light.lamp_material(color_param("window_colour"), 1.0, 0.0, "house")
+		_window_m.shader = WINDOW_SHADER
+		_window_m.set_shader_parameter("house_reference", float(room.get("ambient_level")))
+		_window_m.set_shader_parameter("night", float(params["night"]))
+		_window_m.set_shader_parameter("ember", float(params["ember"]))
+		_window_m.set_shader_parameter("glow", float(params["glow"]))
+	return _window_m
+
+
+## A fountain's water (its own shader: dark water, ripples, the jet's streaks), made when a piece first draws water.
+func water_material() -> ShaderMaterial:
+	if _water_m == null:
+		_water_m = ShaderMaterial.new()
+		_water_m.shader = WATER_SHADER
+		_water_m.set_shader_parameter("house_reference", float(room.get("ambient_level")))
+		_water_m.set_shader_parameter("motion", float(params["water_motion"]))
+	return _water_m
 
 
 ## The clocks flash 12:00: lit half a second, dark half a second, each change eased (no hard cut); held lit while
 ## the room's Flickering lights is off.
 func tick(delta: float) -> void:
 	super(delta)
+	if _water_m != null:
+		_water_t += delta * float(params["water_motion"])
+		_water_m.set_shader_parameter("clock", _water_t)
 	if _display_m == null:
 		return
 	_blink_t += delta
@@ -334,7 +480,7 @@ func _placements(i: int, e: Dictionary, piece: String, slots: Dictionary) -> Arr
 	var turn := Transform3D(Basis(Vector3.UP, deg_to_rad(float(e.get("yaw", 0.0)))), at)
 	var k := float(e.get("scale", 1.0))
 	var slot_name := str(e.get("slot", ""))
-	if slot_name == "" or piece in ["castle_gate", "screen_tower", "carpet"]:
+	if slot_name == "" or piece in ["castle_gate", "screen_tower", "carpet", "palace_gate"]:
 		var size := Vector3(given.x if given.x > 0.0 else own.x, given.y if given.y > 0.0 else own.y,
 				given.z if given.z > 0.0 else own.z)
 		out.append([turn.scaled_local(Vector3.ONE * k), size])
@@ -362,3 +508,14 @@ func _param_changed(param: String, value: Variant) -> void:
 	if param == "glow":
 		for g: Array in _glow_m:
 			(g[0] as ShaderMaterial).set_shader_parameter("energy", float(g[1]) * float(value))
+	if _window_m != null and param in ["night", "ember", "glow"]:
+		_window_m.set_shader_parameter(param, float(value))
+
+
+## The courtyard's windows now (tests): {night, ember, glow, energy}.
+func window_state() -> Dictionary:
+	if _window_m == null:
+		return {}
+	return {"night": float(_window_m.get_shader_parameter("night")),
+			"ember": float(_window_m.get_shader_parameter("ember")),
+			"energy": float(_window_m.get_shader_parameter("energy"))}
