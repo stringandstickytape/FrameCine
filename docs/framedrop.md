@@ -12,6 +12,47 @@ The plan in short:
 4. **The speech model is not in the package.** The player downloads it once, the first time voice is used, into
    its data folder. The package is about 264 MB smaller, and updates do not carry the model.
 
+## What the user does
+
+The FrameDrop steps are from its site; the steps marked "not seen" are not confirmed.
+
+Once, on the PC (Windows only; a Linux FrameDrop is planned, a Mac one "possibly"):
+
+1. Download `FrameDrop-Setup-<version>.exe` from <https://framedropvr.com/> and run it. FrameDrop needs the
+   Microsoft Edge WebView2 Runtime (Windows 11 has it; the site tells Windows 10 users how to get it). Not seen:
+   whether SmartScreen shows an "unknown publisher" warning.
+2. Start FrameDrop once. This registers `framedrop://`, so that the install link can open it.
+
+Once, on the headset:
+
+3. Steam Settings > System: turn on Developer Mode.
+4. Settings > Developer > Pair new host, then Pair in FrameDrop. The PC and the headset must be on the same
+   network.
+
+The install:
+
+5. Start Steam on the headset.
+6. On the README, click "Install with FrameDrop". FrameDrop opens and asks for a confirmation.
+7. FrameDrop downloads the zip from our release (well under 100 MB without the model), copies it to the headset
+   and adds "VR Video Player (installer)" to the Steam library.
+8. On the headset, start "VR Video Player (installer)". It installs the player into the home folder and adds
+   "VR Video Player" to the library (some seconds), then tells the user to restart Steam.
+9. Restart Steam (or the headset). Not known: whether the installer can restart Steam itself.
+10. Start "VR Video Player". After this: updates come in the player ("Restart now to update?"), and voice
+    downloads its model when it is first used.
+
+About five steps once, then six to install. The rough parts:
+
+- **The Steam restart (step 9).** If a Devkit Game can run without the container, steps 8 and 9 are not
+  necessary (see "To find out on the device"). This is the first thing to test.
+- **Two library entries.** The manifest's `name` is "VR Video Player (installer)", so that the two entries are
+  different. The installer can offer to remove its own entry after the install, if a Devkit Game entry can be
+  removed from the headset (not known; it is not in `shortcuts.vdf`).
+- **The order on the README.** If FrameDrop is not installed, the link only opens the FrameDrop site, and the user
+  must come back and click it again. The README gives steps 1 to 4 above the button.
+- **No Windows PC, or no Developer Mode:** the README gives the ssh install (`tools/install-on-frame.sh`) as a
+  second method, step by step.
+
 ## What FrameDrop is
 
 FrameDrop is a free Windows program from an independent XR developer (CadeXR) that sideloads software onto the
@@ -65,7 +106,7 @@ Manifest (these are all the fields that the site documents):
 ```json
 {
   "schema": "framedrop.install/v1",
-  "name": "VR Video Player",
+  "name": "VR Video Player (installer)",
   "files": [ { "url": "https://github.com/stringandstickytape/steam-frame-vr-video-player/releases/download/<tag>/vr-video-player-<version>-arm64.zip",
                "sha256": "<sha256 of the zip>" } ]
 }
@@ -112,7 +153,7 @@ The FrameDrop zip is the normal release package. Its `run.sh` does a check befor
    restarts by itself (find out if the Devkit service or `steam://` can do this).
 
 After this, the user starts "VR Video Player" from the library entry, which runs outside the container. The
-FrameDrop entry can stay (it installs again, which is harmless) or the user can remove it.
+FrameDrop entry ("VR Video Player (installer)") can stay (it installs again, which is harmless) or be removed.
 
 To find out on the device:
 
@@ -130,18 +171,32 @@ When the player runs from `~/vr-video-player`, it can update itself. FrameDrop h
 also the only way that users get new versions without the button again. It also replaces the update path for
 installs made with `tools/install-on-frame.sh`.
 
-1. **Check.** At start and once a day:
-   `GET https://api.github.com/repos/stringandstickytape/steam-frame-vr-video-player/releases/latest` (no account;
-   the limit without a token is 60 requests an hour for each address, which is sufficient). Compare the tag with
-   `VERSION` in the install folder. Only the user's IP address goes to GitHub. A setting in System stops the check.
-2. **Download** the release package to `~/vr-video-player.new.part`, with a progress bar. Continue after an
-   interruption (HTTP range requests).
+1. **Check.** At start, then once a day while the player runs, get
+   `https://github.com/stringandstickytape/steam-frame-vr-video-player/releases/latest/download/latest.json`.
+   This is a file download that GitHub redirects to the newest release that is not a draft or a pre-release. It
+   is not the REST API, so the API's limit (60 requests an hour without a token) does not apply, and a change to the
+   API's JSON cannot break the check. `latest.json` is small:
+
+   ```json
+   { "version": "1.4.0", "tag": "v1.4.0",
+     "package": { "url": "https://github.com/.../releases/download/v1.4.0/vr-video-player-1.4.0-arm64.tar.gz",
+                  "size": 61234567, "sha256": "<sha256>" },
+     "notes": "One line for the update prompt." }
+   ```
+
+   Compare `version` with `VERSION` in the install folder. If the network or GitHub is not available, do nothing
+   and try again at the next check (no error on the screen). Only the user's IP address goes to GitHub. A setting
+   in System stops the check. A flag (`--update-url=URL`) sets another address, for tests.
+2. **Download** the package from `package.url` to `~/vr-video-player.new.part`, with a progress bar. Continue after
+   an interruption (HTTP range requests). Stop if the size is not `package.size`.
 3. **Verify.**
-   - The SHA-256 of the package must agree with `SHA256SUMS` in the same release. This finds a bad download.
-   - `SHA256SUMS` has a signature (`SHA256SUMS.sig`). The player has the public key and checks the signature with
-     Godot's `Crypto`. Without this, a person who gets access to the GitHub account can send code to each headset.
-     The private key stays off GitHub. One key for all releases; if the key changes, the release with the new
-     key is signed with the old key too.
+   - `latest.json` has a signature (`latest.json.sig`, in the same release). The player has the public key and
+     checks the signature with Godot's `Crypto` before it uses the file. Without this, a person who gets access to
+     the GitHub account can send code to each headset. The private key stays off GitHub. One key for all releases;
+     if the key changes, the release with the new key is signed with the old key too.
+   - The SHA-256 of the package must agree with `package.sha256`. The signature covers this hash, so it covers the
+     package too.
+   - `SHA256SUMS` stays in each release, for people who download by hand.
 4. **Stage.** Unpack to `~/vr-video-player.new`. Start the new engine with `--version`; stop if it does not start.
 5. **Swap at the next start, not during a session.** The engine reads files from `app/` when it needs them, so the
    folder must not move while the player runs. `run.sh` does the swap before it starts the engine: move the current
@@ -154,6 +209,26 @@ installs made with `tools/install-on-frame.sh`.
 
 Settings (`~/.local/share/godot/app_userdata/VR Video Player/`) and logs (`~/.local/state/vr-video-player/`) are
 outside the install folder, so an update keeps them.
+
+### Offline: never wait for the network
+
+The player is often used with no network or a bad one. The updater must not delay or stop anything:
+
+- **Nothing waits for the check.** Start-up, playback and the menus never wait for it. The check starts some
+  seconds after the first frame, in the background (`HTTPRequest` with a thread; the name lookup does not block
+  the main thread). `run.sh` uses no network: the swap and the rollback are local file moves.
+- **Short timeouts.** `latest.json`: 10 s in total, including the name lookup and the redirect. The package
+  download: no total limit, but it stops if no bytes come for 30 s.
+- **A failure is quiet.** No error on the screen; one log line. The next check is at the next start, or in a day.
+  No fast retries.
+- **A download that stops is kept.** The `.part` file continues at the next check (range request). If
+  `latest.json` names a different version, the `.part` file is deleted first.
+- **No half updates.** `.new` is used only when it is complete and verified (a marker file written last). A
+  `.new` without the marker is deleted.
+- **The speech model too.** With no network, voice says that it needs a one-time download of 264 MB and the
+  network, and the rest of the player works as usual. The same timeouts and continuation apply.
+- **Tests:** no network, a name that does not resolve, a server that accepts the connection and sends nothing, a
+  download cut at half. In each test the player starts and plays at its usual speed.
 
 Later, if the downloads are too large: publish the package in parts (engine, app, whisper), each with its hash, and
 download only the parts that changed.
@@ -199,11 +274,12 @@ The model is outside the install folder, so updates do not download it again.
 1. `tools/package.sh`: a `--zip` output. Write it with Python `zipfile` and set the Unix mode of each entry in
    `external_attr`, with the same rules as the tarball (folders, the engine, `*.sh` and the whisper programs 755;
    other files 644). FrameDrop unzips on Windows, so the execute bit can be lost; the test finds out.
-2. `tools/package.sh`: no model by default (above); `SHA256SUMS` and its signature for the release.
+2. `tools/package.sh`: no model by default (above); `SHA256SUMS`, `latest.json` and `latest.json.sig` for the
+   release. The signing step runs on the PC that has the private key, not on GitHub.
 3. `run.sh`: the container check and the first-launch install; the swap and the rollback for updates.
 4. The player: the update check, download, verify and stage; the model download; the setting to stop the check.
-5. The release: the zip, the tarball, `SHA256SUMS`, `SHA256SUMS.sig`, the manifest. The README: the FrameDrop link
-   and a normal download link.
+5. The release: the zip, the tarball, `SHA256SUMS`, `latest.json`, `latest.json.sig`, the manifest. The README:
+   the user's steps (above), the FrameDrop link, the ssh install as a second method, and a normal download link.
 6. Before each publish: no personal data in the package (library titles, user paths, LAN addresses, logs).
 
 The launch file name must have no space (FrameDrop's troubleshooting: Steam cannot find it). `run.sh` has none.
@@ -219,8 +295,10 @@ The launch file name must have no space (FrameDrop's troubleshooting: Steam cann
    `docs/research-device.md`.
 5. The first-launch install: the library entry, the Steam restart, then play an HEVC file and an AV1 file from the
    library entry. Confirm hardware decode, XR, passthrough, audio and the assistant link.
-6. Updates: install an older package, publish a test release (a draft or a test repository), and let the player
-   update itself. Then a bad release (an engine that does not start) to test the rollback, and a bad signature.
+6. Updates: install an older package, serve a test `latest.json` and package (`--update-url`, a test repository
+   or a local server), and let the player update itself. Then a bad release (an engine that does not start) to
+   test the rollback, a bad signature, a wrong hash, and the offline tests ("Offline: never wait for the
+   network").
 7. The model: remove `user://whisper-models/`, use voice, and confirm the download and the transcription.
 8. Result:
    - If it all works: publish the zip and the manifest with each release, and add the link to the README.
@@ -235,6 +313,7 @@ The launch file name must have no space (FrameDrop's troubleshooting: Steam cann
 - FrameDrop, How to use (pairing, zips, Steam shortcut): <https://framedropvr.com/how-to>
 - PC Guide, FrameDrop launch: <https://www.pcguide.com/news/steam-frame-sideloader-is-already-available-as-xr-developer-launches-easy-to-pair-and-use-framedrop/>
 - Steam Deck HQ, FrameDrop announced: <https://steamdeckhq.com/framedrop-sideloader-announced/>
-- GitHub REST API, latest release: <https://docs.github.com/en/rest/releases/releases#get-the-latest-release>
+- GitHub, linking to the latest release's assets (`/releases/latest/download/<file>`):
+  <https://docs.github.com/en/repositories/releasing-projects-on-github/linking-to-releases>
 - This repository: `tools/package.sh`, `tools/install-on-frame.sh`, `docs/packaging.md`, `docs/research-device.md`
   (section 4 and question 6), `build/whisper/README.md`, `app/scripts/voice/whisper_backend.gd`

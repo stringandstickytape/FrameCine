@@ -626,16 +626,21 @@ from GitHub Releases (`docs/framedrop.md`). Not tested on the device.
   hardware decode and OpenXR in the container are not known. So the first launch from FrameDrop installs the
   player into `~/vr-video-player` (the steps of `tools/install-on-frame.sh`) and adds the normal library entry; the
   player then runs outside the container, as now.
-- **Our own updates.** FrameDrop has no update method. The player checks the latest GitHub release, downloads it,
-  checks its SHA-256 and the signature of `SHA256SUMS` (a key that is not on GitHub), and unpacks it beside the
+- **Our own updates.** FrameDrop has no update method. At start and once a day the player gets `latest.json` from
+  the latest GitHub release (a file download, not the REST API, so no rate limit), checks its signature (a key that
+  is not on GitHub), downloads the package it names, checks the package's SHA-256, and unpacks it beside the
   install. `run.sh` swaps it in at the next start (never while the engine runs, because it reads `app/` as it
   needs files), and puts the old install back if the new one does not start. A setting stops the check.
+  Nothing waits for the network: the check runs in the background after the first frame with short timeouts, a
+  failure is one log line, and a stopped download continues at the next check.
 - **The speech model is downloaded, not bundled.** whisper.cpp and the Whisper weights are MIT, so bundling is
   permitted; but the default model is 264 MB of a package that each update carries again. `whisper-server` (4 MB)
   stays in the package; the model downloads once, on first voice use, from our own release asset (hash in the app)
   into the data folder, outside the install folder.
 - **Rejected:** FrameDrop as the update path (users would click the button for each release, and it has no
-  rollback); the player in the container (features lost); a store (the player is free and all on GitHub).
+  rollback); the player in the container (features lost); a store (the player is free and all on GitHub); the
+  REST API for the check (a rate limit and a response format we don't control); a manual "Check for updates" only
+  (most users would never update).
 - **Would change if:** a Devkit Game can run without a compat tool (then no copy step, but the updater stays);
   the container cannot write the home folder or add the library entry (then `tools/install-on-frame.sh` stays the
   first install); FrameDrop adds updates or a launch-file field.
