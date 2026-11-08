@@ -122,6 +122,12 @@ const FLAT_EYE_HEIGHT := 1.2
 ## The room is lifted by the viewer's real eye height less this, so their eyes are where the room's seat puts them
 ## and a telly, a screen's frame or a stage lines up with the picture (lift_room()).
 const ROOM_EYE_HEIGHT := 1.2
+## Every room's seat as the viewer sits in it: the room (and its screen with it) 0.3 m nearer and 0.1 m lower than its
+## seat puts the eyes, in all rooms alike (the user, 2026-11-07: "in every case ... maybe 30 cm too far back and 10 cm
+## too low"). Applied with the lift; the screen keeps its place in the room.
+const SEAT_SHIFT := Vector3(0.0, -0.1, 0.3)
+## The SEAT_SHIFT in use (zero where the room is not lifted).
+var room_shift := Vector3.ZERO
 ## A grip shorter than this, with the hand turned less than GRIP_TAP_ANGLE, is a tap (screen to gaze).
 const GRIP_TAP_MSEC := 350
 const GRIP_TAP_ANGLE := deg_to_rad(4.0)
@@ -993,13 +999,19 @@ func lift_room() -> void:
 	var lying := features != null and features.get("pose") != null and bool(features.pose.get("lying"))
 	if use_xr and env_id != "passthrough" and not lying:
 		lift = eye_height - ROOM_EYE_HEIGHT
-	env_root.position.y = lift
+	var shift := SEAT_SHIFT if use_xr and env_id != "passthrough" and not lying else Vector3.ZERO
+	env_root.position = Vector3(0.0, lift, 0.0) + shift
+	if shift != room_shift:
+		# Lying down or sitting up: the screen goes with the room.
+		room_shift = shift
+		if screen != null and env != null:
+			_place_screen()
 
 
 ## Puts the flat screen at screen_yaw / screen_distance / eye height + offset, facing the viewer; the overlay with it.
 func _place_screen() -> void:
 	var pos := Vector3(sin(screen_yaw) * screen_distance, eye_height + screen_height_offset,
-			-cos(screen_yaw) * screen_distance)
+			-cos(screen_yaw) * screen_distance) + room_shift
 	var t := Transform3D(Basis(Vector3.UP, -screen_yaw if is_nan(screen_turn) or mode.is_spherical() else screen_turn),
 			pos)
 	if screen_pose_override.is_valid():
@@ -1246,7 +1258,7 @@ func _update_grab(delta: float) -> void:
 	var hand: XRHand = _grab.get("hand")
 	if hand != null:
 		_grab["distance"] = clampf(float(_grab["distance"]) * (1.0 + hand.get_stick().y * delta * 1.5), 0.5, 30.0)
-	var p := origin + dir * float(_grab["distance"])
+	var p := origin + dir * float(_grab["distance"]) - room_shift
 	screen_yaw = atan2(p.x, -p.z)
 	screen_distance = clampf(Vector2(p.x, p.z).length(), 0.5, 30.0)
 	screen_height_offset = clampf(p.y - eye_height, -3.0, 6.0)
