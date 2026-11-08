@@ -7,16 +7,22 @@
 #   tools/privacy-check.sh A..B           the lines added from A to B, and the commit messages of A..B
 #   tools/privacy-check.sh --pre-push     what `git push` is about to send (reads the pre-push hook's stdin;
 #                                         see tools/pre-push.sample)
+#   tools/privacy-check.sh --archive F... every entry of each .tar.gz or .zip (a release package): its name and its
+#                                         contents (tools/release.sh runs this)
 #
 # Generic patterns (always on):
 #   release   a scene release name: a year, then a source tag (BluRay, WEB-DL, WEBRip, HDTV, DVDRip, ...)
 #   path      /home/<name>/, /Users/<name>/, C:\Users\<name>\ (example names such as user, you, steamos, and
 #             dot folders such as /home/.cache, are fine)
 #   address   a private IPv4 address outside the example ranges 192.168.0.x, 192.168.1.x, 10.0.x.x, 172.16.0.x
-#   email     an e-mail address, except noreply ones and example.com/org/net
+#   email     an e-mail address, except noreply ones, example.com/org/net and the public addresses of the projects
+#             whose notices ship in a release (godotengine.org, nongnu.org, ffmpeg.org)
 # Private patterns: one Python regular expression per line (case-insensitive; # starts a comment) in
 # $VRVP_PRIVATE_PATTERNS, default ~/.config/vrvp/private-patterns. Keep your own titles, share names, host names and
 # so on there. That file is never in the repository.
+# Private exceptions: the same format in $VRVP_PRIVATE_ALLOW, default ~/.config/vrvp/private-allow. A hit is skipped
+# when one of them matches the line (or binary string) it is in: for third-party text that a private pattern happens
+# to match, such as a name in the engine's credits. Also never in the repository (it would hint at the patterns).
 # Binary files are checked too, as their printable strings (path, address, email and private patterns).
 # A line that contains "privacy-check: allow" is skipped. Hits are printed as file:line, the kind, and the hit with
 # its middle masked. Exit 0: nothing found; 1: hits; 2: usage or git error.
@@ -30,8 +36,18 @@ for c in python3 python py; do  # Windows has a python3 that only offers the Sto
   fi
 done
 [ -n "$PY" ] || { echo "privacy-check: needs Python 3" >&2; exit 2; }
+if [ "${1:-}" = --archive ]; then  # archive paths are given from here: make them absolute before the cd below
+  ARGS=(--archive)
+  shift
+  for f in "$@"; do
+    [ -f "$f" ] || { echo "privacy-check: no file $f" >&2; exit 2; }
+    ARGS+=("$(cd "$(dirname "$f")" && pwd)/$(basename "$f")")
+  done
+  set -- "${ARGS[@]}"
+fi
 cd "$(git rev-parse --show-toplevel)"
 export VRVP_PRIVATE_PATTERNS=${VRVP_PRIVATE_PATTERNS:-$HOME/.config/vrvp/private-patterns}
+export VRVP_PRIVATE_ALLOW=${VRVP_PRIVATE_ALLOW:-$HOME/.config/vrvp/private-allow}
 # The program goes in as -c, so stdin stays the hook's.
 PROGRAM=$(cat <<'PYTHON'
 import os
@@ -53,9 +69,11 @@ RELEASE = re.compile(
 EPISODE = re.compile(
     r"(?:" + WORD + r"[ ._]){1,10}?s\d{1,2}e\d{1,3}[ ._](?:" + WORD + r"[ ._]){0,10}?"
     r"(?:" + SOURCE + r"|x26[45]|xvid|h\.?26[45])\b", re.I)
-EXAMPLE_USERS = r"(?:user|users|username|you|your-?name|name|me|example|steamos|deck|runner|public|default|all users|<[^>]*>|\$\w+|%\w+%|\*)"
+# build: the neutral name tools/package.sh puts in place of the builder's in a binary's build paths.
+EXAMPLE_USERS = r"(?:user|users|username|you|your-?name|name|me|example|steamos|deck|runner|public|default|build|all users|<[^>]*>|\$\w+|%\w+%|\*)"
+# (?<!/input): OpenXR's input paths (/input/home/click) are not home folders.
 PATH = re.compile(
-    r"(?:/home/|/Users/|[A-Za-z]:[\\/]+Users[\\/]+|\\\\wsl[^\\]*\\[^\\]+\\home\\|/mnt/[a-z]/Users/)"
+    r"(?<!/input)(?:/home/|/Users/|[A-Za-z]:[\\/]+Users[\\/]+|\\\\wsl[^\\]*\\[^\\]+\\home\\|/mnt/[a-z]/Users/)"
     r"(?!" + EXAMPLE_USERS + r"(?:[\\/\s\"'`)]|$))[A-Za-z0-9_][A-Za-z0-9._-]+", re.I)
 IPV4 = re.compile(r"(?<![\d.])(10|172|192)\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(?![\d.]*\d)")
 EMAIL = re.compile(r"(?<![\w:/.%+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}\b")
@@ -71,13 +89,18 @@ def private_address(m: re.Match) -> bool:
     return b != 0 and (b, c, int(m.group(4))) not in ((1, 2, 3), (255, 255, 1))
 
 
+# Upstream projects' public addresses, in the licence notices and the engine binary of a release.
+PUBLIC_DOMAINS = ("godotengine.org", "nongnu.org", "ffmpeg.org")
+
+
 def email_ok(s: str) -> bool:
     local, _, domain = s.partition("@")
-    return "noreply" in local.lower() or "no-reply" in local.lower() or domain.lower().split(".")[-2:-1] == ["example"]
+    return ("noreply" in local.lower() or "no-reply" in local.lower() or domain.lower().split(".")[-2:-1] == ["example"]
+            or domain.lower() in PUBLIC_DOMAINS)
 
 
-def load_private() -> list:
-    path = os.path.expanduser(os.environ.get("VRVP_PRIVATE_PATTERNS", ""))
+def load_private(var: str = "VRVP_PRIVATE_PATTERNS") -> list:
+    path = os.path.expanduser(os.environ.get(var, ""))
     out = []
     if path and os.path.isfile(path):
         for n, line in enumerate(open(path, encoding="utf-8", errors="replace"), 1):
@@ -93,6 +116,7 @@ def load_private() -> list:
 
 
 PRIVATE = load_private()
+PRIVATE_ALLOW = load_private("VRVP_PRIVATE_ALLOW")
 
 
 def mask(s: str) -> str:
@@ -104,7 +128,7 @@ def mask(s: str) -> str:
 
 
 def hits_in(line: str, binary: bool) -> list:
-    if ALLOW in line:
+    if ALLOW in line or any(rx.search(line) for rx in PRIVATE_ALLOW):
         return []
     found = []
     if not binary and SOURCE_ANY.search(line):
@@ -192,8 +216,30 @@ def check_commits(revs: list) -> None:
         check_messages([rev])
 
 
+def check_archive(path: str) -> None:
+    """Each entry's name, and each file's contents, of a .tar.gz or .zip."""
+    import tarfile
+    import zipfile
+    label = os.path.basename(path)
+    if zipfile.is_zipfile(path):
+        with zipfile.ZipFile(path) as z:
+            for info in z.infolist():
+                report("%s: name %s" % (label, info.filename), info.filename, False)
+                if not info.is_dir():
+                    check_blob("%s: %s" % (label, info.filename), z.read(info))
+    else:
+        with tarfile.open(path) as t:
+            for member in t:
+                report("%s: name %s" % (label, member.name), member.name, False)
+                if member.isfile():
+                    check_blob("%s: %s" % (label, member.name), t.extractfile(member).read())
+
+
 def main(argv: list) -> int:
-    if not argv:
+    if argv and argv[0] == "--archive" and len(argv) > 1:
+        for path in argv[1:]:
+            check_archive(path)
+    elif not argv:
         check_worktree()
     elif argv[0] == "--tree" and len(argv) == 2:
         check_tree(argv[1])

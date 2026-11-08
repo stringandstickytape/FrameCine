@@ -21,3 +21,4 @@ tools/pre-push.sample text eol=lf
 *.jpg binary
 *.gdshaderinc text eol=lf
 *.cpp text eol=lf
+*.pem text eol=lf
