@@ -19,7 +19,7 @@ const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale
 		"projector", "wall_rumble", "cicadas", "moped", "train", "huskies", "hull_creak", "radiator", "rain_glass",
 		"rain_leaves", "gas_hiss", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain",
 		"clock", "tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load", "switch_clunk", "valve_hum",
-		"crt_off", "channel_clunk", "sonar", "bubbles", "far_car", "scops_owl"]
+		"crt_off", "channel_clunk", "sonar", "bubbles", "far_car", "scops_owl", "church_bell", "city"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
@@ -27,16 +27,17 @@ const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise
 		"purr": 4.0, "crickets": 6.0, "fire": 8.0, "drips": 8.0, "wind": 12.0, "hum": 4.0, "deep_hum": 8.0,
 		"fountain": 6.0, "clock": 4.0, "tube_whine": 2.0, "three_bells": 3.2, "candle": 0.9, "ice_creak": 2.6,
 		"vcr": 4.5, "tape_load": 8.0, "switch_clunk": 0.6, "valve_hum": 8.0, "crt_off": 1.4, "channel_clunk": 0.45,
-		"sonar": 3.0, "bubbles": 6.0, "far_car": 34.0, "scops_owl": 9.0}
+		"sonar": 3.0, "bubbles": 6.0, "far_car": 34.0, "scops_owl": 9.0, "church_bell": 14.0, "city": 12.0}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
-		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles"]
+		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles",
+		"city"]
 ## Sample rates below RATE for the far and low sounds (less to make, nothing lost above their band).
 const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiator": 22050, "moped": 32000,
 		"hull_creak": 32000, "purr": 22050, "crickets": 32000, "fire": 32000, "drips": 32000, "wind": 22050,
 		"hum": 22050, "deep_hum": 22050, "fountain": 32000, "candle": 32000, "ice_creak": 32000, "vcr": 32000,
 		"tape_load": 32000, "switch_clunk": 32000, "valve_hum": 22050, "crt_off": 32000, "channel_clunk": 32000,
-		"sonar": 32000, "bubbles": 32000, "far_car": 22050, "scops_owl": 32000}
+		"sonar": 32000, "bubbles": 32000, "far_car": 22050, "scops_owl": 32000, "church_bell": 22050, "city": 22050}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -1052,6 +1053,81 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 				var d := t - 0.09
 				if d >= 0.0:
 					v += _lp(st, 6, x, a_knock) * 1.5 * exp(-d * 100.0)
+				s[i] = v
+		"church_bell":
+			# A church's bell across the roofs (the Athens rooftop's pre-show, since 2026-11-08): three strokes four
+			# seconds apart, each a cast bell's partials (the hum an octave under, the prime, a minor third's tierce,
+			# the quint, the nominal an octave over, two higher), the higher dying first, each partial a hair out of
+			# tune with itself so it beats slowly; the clapper's knock; the far roofs' echo; softened by the distance.
+			# Our own; no recording.
+			var f0 := 233.0
+			# [ratio, amplitude, decay per second]; the nominal and the prime each with a twin 0.7 Hz off (the beat).
+			var partials := [[0.5, 0.55, 0.28], [1.0, 0.8, 0.45], [1.003, 0.3, 0.45], [1.19, 0.6, 0.6], [1.5, 0.3, 0.8],
+					[2.0, 0.9, 0.9], [2.0015, 0.32, 0.9], [2.52, 0.35, 1.4], [3.01, 0.22, 1.9]]
+			var strokes := [0.15, 4.35, 8.55]
+			var a_far := _a(2600.0, r)
+			var a_knock := _a(1800.0, r)
+			# One stroke, rung by damped oscillators (each partial a two-pole filter's ring: cheap), then laid down
+			# three times.
+			var ring := PackedFloat32Array()
+			ring.resize(int(r * 9.0))
+			for p: Array in partials:
+				var w := TAU * f0 * float(p[0]) / r
+				var rr := exp(-float(p[2]) / r)
+				var c1 := 2.0 * rr * cos(w)
+				var c2 := rr * rr
+				var amp := float(p[1])
+				var y1 := sin(w) * amp
+				var y2 := 0.0
+				for i in range(1, ring.size()):
+					ring[i] += y1
+					var y := c1 * y1 - c2 * y2
+					y2 = y1
+					y1 = y
+			for i in mini(int(r * 0.12), ring.size()):
+				ring[i] += _lp(st, 0, rng.randf_range(-1.0, 1.0), a_knock) * exp(-float(i) / r * 60.0) * 1.6
+			var dry := PackedFloat32Array()
+			dry.resize(total)
+			for k in strokes.size():
+				var start := int(float(strokes[k]) * r)
+				var strike := 1.0 - 0.06 * k
+				for j in ring.size():
+					if start + j >= total:
+						break
+					dry[start + j] += ring[j] * strike
+			for i in total:
+				dry[i] = _lp(st, 1, dry[i], a_far)
+			# The echo off the roofs a quarter second on, softer and duller.
+			var lag := int(0.27 * r)
+			for i in total:
+				var e := dry[i - lag] * 0.32 if i >= lag else 0.0
+				s[i] = dry[i] + _lp(st, 2, e, a_far * 0.6)
+		"city":
+			# A city at night heard from a roof (the Athens rooftop, since 2026-11-08): the low murmur of traffic in
+			# the streets round about, swelling and easing (every swell divides the loop), the hiss of far tyres over
+			# it, and now and then a distant engine rising and falling away. Pink-ish noise through soft filters;
+			# nothing in the speech band stands out.
+			var a_low := _a(320.0, r)
+			var a_low2 := _a(140.0, r)
+			var a_hiss_hi := _a(2200.0, r)
+			var a_hiss_lo := _a(700.0, r)
+			var span := float(total - lead) / r
+			var passes := [[1.5, 3.2, 92.0], [6.8, 3.8, 74.0], [10.2, 2.6, 110.0]]
+			var ph := 0.0
+			for i in total:
+				var t := float(i - lead) / r
+				var x := rng.randf_range(-1.0, 1.0)
+				var swell := 0.8 + 0.12 * sin(TAU * t / span) + 0.08 * sin(TAU * 3.0 * t / span + 1.1)
+				var low := _lp(st, 1, _lp(st, 0, x, a_low), a_low2) * 6.0
+				var hiss := (_lp(st, 2, x, a_hiss_hi) - _lp(st, 3, x, a_hiss_lo)) * 0.3
+				var v := (low + hiss) * swell
+				for p: Array in passes:
+					var d := t - float(p[0])
+					if d > 0.0 and d < float(p[1]):
+						var u := d / float(p[1])
+						var env := sin(PI * u) * sin(PI * u)
+						ph = fmod(ph + float(p[2]) * (0.9 + 0.2 * u) / r, 1.0)
+						v += (sin(TAU * ph) * 0.5 + _lp(st, 4, x, a_low)) * env * 0.35
 				s[i] = v
 	return s
 

@@ -144,7 +144,8 @@ static func sight_line(tree: SceneTree, room: Node3D, max_reports := 8) -> Array
 		var mesh_faces := (mm as MultiMeshInstance3D).multimesh.mesh.get_faces()
 		# Things placed by their own instances, not seats (the cars parked round a drive-in's: since 2026-11-08):
 		# each where it stands, its transform in the meta env_placed (a headless MultiMesh keeps none).
-		var placed: Variant = mm.get_meta("env_placed", null)
+		# (has_meta first: get_meta with a null default still prints an error when the key is missing.)
+		var placed: Variant = mm.get_meta("env_placed") if mm.has_meta("env_placed") else null
 		if placed is Array:
 			var mxf: Transform3D = inv * (mm as MultiMeshInstance3D).global_transform
 			for t: Transform3D in placed:

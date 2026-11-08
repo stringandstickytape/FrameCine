@@ -588,8 +588,13 @@ Six more builders of kind `builder`, and the `kit`. They keep the auditorium's c
 - **Static parts** are meshes with their own UV2, baked by the light system's hooks. Rounded parts (seats, statues,
   leaves) are not baked.
 - **Materials** are library materials on the house shader, from the light system. Patterns (pressed tin, ice blocks,
-  a swirling carpet, corrugated tin, plasterboard) are our own maps, drawn in `procedural.gd` and put on a library
-  material. The library material is CC0, so the licence check still holds.
+  a swirling carpet, corrugated tin, plasterboard, quarry tiles) are our own maps, drawn in `procedural.gd` and put on
+  a library material. The library material is CC0, so the licence check still holds. `quarry_tiles` (since
+  2026-11-08): square terracotta tiles in mortar, each its own shade and wear, at 256 x 256 (`SIZES`: a pattern can
+  have its own size; the others keep theirs).
+- **Text** is our own stroke font (`kit/strokes.gd`): Latin capitals and figures, and since 2026-11-08 the Greek
+  capitals that differ from Latin ones (Γ Δ Θ Λ Ξ Π Σ Φ Ψ Ω; the others, Α Β Ε and so on, draw as their Latin
+  look-alikes through `ALIASES`).
 - **Lamps** use the light system's groups: `house` (the ritual takes them down), `accent`, `signs`, `booth`. A flame
   or a candle flickers with the builder's `flicker` parameter. Every frequency is under 3 Hz. The room's Flickering
   lights setting holds it steady.
@@ -717,6 +722,20 @@ document sets them.
   `bulb_colour`, materials.
 - Slots: `parapet` (along the parapets' tops), `screen`, `proscenium`, `floor`, `corners`.
 - Measured: rooftop 8 draws, 12k triangles, 7 MB; lot 5 draws, 3k triangles; amphitheatre 4 draws, 2k triangles.
+- **The Athens roof and its city** (`rooftop` with `city` on, since 2026-11-08; `kit/athens_roof.gd`,
+  `kit/athens_city.gd`; off, the rooftop is as it was). The roof made by hand: quarry tiles, the parapet with its
+  coping and spouts, the screen building's weathered wall with ghost signs, the projection hut, the kiosk, the plants,
+  the bulb strings. Its pieces share a few materials, one mesh each (ironwork, wood, painted wood, plaster, pots,
+  leaves, canvas, three lamp glows by group), their own colours in vertex colours: 16 draws for the whole roof. The
+  city round it is one mesh on one unshaded shader (`shaders/env_city.gdshader`): streets, blocks of flats with
+  balconies, water tanks, solar heaters and aerials on the roofs, a church with a dome and two bell towers, a floodlit
+  temple on a hill, a chapel on another, far hills with their lights. Its windows are drawn in the shader from each
+  wall's bay and seed (lit, shuttered, curtained, louvred; faded to their average far off, so they do not shimmer);
+  the Moon lights the walls from its side in the sky, the haze thickens with distance. The bulbs' halos are one
+  mesh of quads that face the eye (`shaders/env_halo.gdshader`), dimmed with the house lights. Live parameters:
+  `windows` (0..1, the share of lit windows' brightness; a film-time track turns it down through the night),
+  `floodlight` (0..2, the temple's floodlights; a setting), `city_lights` (0..2, the streets' lamps and the church's
+  light). The kiosk, the hut and the lemon tree's pot have collision boxes.
 - **The whole drive-in** (`lot` with `drive_in` on, since 2026-11-08; `kit/drive_in_lot.gd`; off, the lot is as it
   was). Rows of bays on arcs fanned round the screen (`DriveInLot.bays()`), the ground as one fan grid with the
   lanes, ruts, oil and the parked cars' shadows in its vertex colours (unbaked, so it costs no lightmap), the posts
@@ -1103,7 +1122,7 @@ Cue sounds (`env_audio.play`, the chime) and the thud still go straight to Envir
 
 | Param | Default | What |
 |---|---|---|
-| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`; `silence` plays nothing (the sounds: below) |
+| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`; `silence` plays nothing (the sounds: below) |
 | `gain_db` | 0 | dB from the designed level (-30 to +6) |
 | `level` | 1 | 0 to 1, live. Bind it: `film.bass` for a rumble through the wall, `weather.rain` or `weather.wet` for rain, a setting |
 | `film_db` | -8 | dB lower in `starting`, `playing` and `credits`. Up again in the pre-show, paused, the intermission and the end |
@@ -1152,6 +1171,8 @@ tones and swells divide its length, so it has no seam.
 | `huskies` | one-shot 7 | three far howls and a few yips, an echo | snow |
 | `scops_owl` | one-shot 9 | a scops owl's call over the roofs: four soft whistled "tew"s 2.5 s apart, each gliding down from 1.25 to 1.17 kHz, a breath of air, softened by distance (since 2026-11-08) | a warm night, `every` |
 | `hull_creak` | one-shot 3.5 | steel under pressure: stick-slip pulses through a low groan and bright partials | a hull |
+| `church_bell` | one-shot 14 | a parish church's bell across the roofs: three strokes 3.2 s apart, each a struck bell's partials (hum, prime, minor third, fifth, octave; damped oscillators, the hum ringing longest), a faint echo off the houses, softened by distance (since 2026-11-08) | before the show (a cue's `do`), far off |
+| `city` | loop 12 | a summer city at night from a roof: a low murmur of traffic that swells and settles, a faint hiss, three far engines passing in the loop (since 2026-11-08) | round a roof, from the streets below |
 | `ice_creak` | one-shot 2.6 | a crack that sings down, then a low groan | ice, `every` |
 | `candle` | one-shot 0.9 | a candle's flame puffs and wavers, three or four sputters of wax | `every`, very low |
 | `three_bells` | one-shot 3.2 | a soft house bell: three struck-bar tones, up a fifth, down a minor third (our own call) | before the show |
@@ -1242,6 +1263,7 @@ second.
 | `deep_hum` | -54 | -54.0 | -63.1 | -68.4 | -41.0 |
 | `fountain` | -56 | -56.0 | -64.2 | -71.1 | -41.8 |
 | `bubbles` (2026-11-08) | -57 | -57.0 | -64.7 | -72.4 | -36.2 |
+| `city` (2026-11-08) | -58 | -58.0 | -66.6 | -73.6 | -45.3 |
 | `clock` | -56 | -56.0 | -64.0 | -71.1 | -19.9 |
 | `tube_whine` | -62 | -62.0 | -70.0 | -77.2 | -55.0 |
 | `noise` | -54 | -54.0 | -62.0 | -69.1 | -41.2 |
@@ -1250,6 +1272,7 @@ second.
 | `train` | -52 | -52.0 | -60.0 | | -40.6 |
 | `huskies` | -54 | -54.0 | -62.0 | | -46.0 |
 | `scops_owl` (2026-11-08) | -58 | -58.0 | -66.0 | | -41.2 |
+| `church_bell` (2026-11-08) | -54 | -54.0 | -62.0 | | -42.5 |
 | `hull_creak` | -52 | -52.0 | -60.0 | | -39.3 |
 | `ice_creak` | -55 | -55.0 | -63.0 | | -31.0 |
 | `candle` | -58 | -58.0 | -66.0 | | -37.5 |
@@ -1316,7 +1339,7 @@ at 8 m they are 19 dB under their "in film" level even at -12. Without the filte
 | Atmospheric 1928 | `acoustics` `cinema`; `sound_bed` `fountain` `at` the wall fountain, `reach` 8, `gain_db` -4; `crickets` around the courtyard (three voices, `film_db` -18); a `scops_owl` from the stone pine, `every` 55, `film_db` -40; the theatre organ (`music`) before the film |
 | Screen 3, 1983 | `acoustics` `small_room` (`rt60` 0.6); `sound_bed` `wall_rumble`, `level` on `film.bass`, `film_db` 0 |
 | Drive-in | `acoustics` `outdoors`; `sound_bed` `crickets` around (`radius` 8); `train` far off, `every` 900, `reach` 300 (its horn is in it) |
-| Rooftop, Athens | `acoustics` `outdoors` (`rt60` 0.25, `wet` 0.15); `sound_bed` `cicadas` around, `film_db` -14 (they fade as the film starts); `moped` with `to` and `every`; the cat's purr from `life` (`voice_db` -15 within 2 m) |
+| Rooftop, Athens | `acoustics` `outdoors` (`rt60` 0.25, `wet` 0.15); `sound_bed` `cicadas` around, `film_db` -14 (they fade as the film starts); `city` around from 6 m below, `gain_db` -2, `film_db` -10; `moped` with `to` and `every`; `church_bell` at the church, `film_db` -30, played by the pre-show's cue; the cat's purr from `life` (`voice_db` -15 within 2 m) |
 | Palace of Culture | `acoustics` `concrete_hall`; `sound_bed` `three_bells` before the show |
 | Nave | `acoustics` `stone_nave` (`rt60` 3); `sound_bed` `wind` high up, `gain_db` -4; `candle`, `every` 120, `gain_db` -4. No organ, no bells |
 | Reclaimed | `acoustics` `outdoors`; `sound_bed` `rain_leaves` around, `level` on `weather.rain`; `drips`, `level` on `weather.wet`; `wind`, `gain_db` -6; the birds' calls from `life` |
@@ -1791,7 +1814,7 @@ people.
 | 4 | Screen 3, 1983 | `auditorium` with `partition_z` (a subdivided balcony), plasterboard, swirly carpet, one broken seat, a water stain (picture) | smoke haze in the beam (`atmosphere`), a flickering exit sign (`flicker`) | rumble through the wall (`sound_bed`, `film.bass`) | | gate weave, a slight tilt (`presentation`) | weave and tilt |
 | 5 | Drive-in, 1958 | `terrace` (the lot), a convertible's bench seat (`vehicle`), a screen tower, a neon snack bar (`kit`) | dusk to stars over the film (`sky`, film-time tracks), mesas (`vista`) | moths in the beam (`life`), a far freight train (`sound_bed`, `every`) | | the window speaker (`presentation`) | tinny speaker |
 | 6 | Screening room, 1962 | `domestic` (walnut), club chairs (`seats`), a bar cart (objects) | a pool glowing through the window (`vista`) | | a painting slides up to show the screen (`motion`, ritual) | | |
-| 7 | Rooftop summer cinema, Athens | `terrace`, director's chairs, bougainvillea (`kit`) | a floodlit acropolis on its hill (`vista`), plane lights (`life`) | cicadas and mopeds (`sound_bed`), a cat on the wall (`life`) | | a screen painted on a wall | |
+| 7 | Rooftop summer cinema, Athens | `terrace` (`city`: the roof by hand), director's chairs | the city all round and a floodlit temple on its hill (`terrace` `city`), plane lights, moths (`life`) | cicadas, the city's murmur, mopeds, a church bell (`sound_bed`), a cat on the wall (`life`) | | a screen painted on a wall | |
 | 8 | Pink Palace | `auditorium` with pink and blue curves (`kit`), a plush balcony (`balcony_rows`) | a sunburst ceiling with cycling lights, chandeliers (`light`) | | a ceremonial curtain (`showing`) | | |
 | 9 | Palace of Culture, 1974 | `auditorium`, board-marked concrete, ochre curtains | a mosaic wall that glitters in the screen's light (material, `film.colour`), snow and birches outside (`vista`, `weather`) | an echoey hall (`acoustics`) | | | snow |
 | 10 | Flagship | `auditorium`: steep rake, black walls | blue step lights (`light`) | | the ritual | a huge curved screen | seat choice |
@@ -2253,23 +2276,61 @@ as the film starts.
 `app/environments/rooftop_athens.env.json` (Cinemas). An open-air summer cinema on a roof in Athens (the name is short:
 a longer one, "Athens rooftop summer cinema", made its button wider than the Room tab in the pseudo-locale): director's
 chairs in rows on the tiles, a low whitewashed wall with bougainvillea over it, strings of bulbs, the screen painted on
-the next building's blind wall. Beside the wall the acropolis stands floodlit on its hill under a summer night's
-stars; planes cross now and then, and a cat walks along the wall top.
+the next building's blind wall. Beside the wall a temple stands floodlit on its hill under a summer night's stars;
+planes cross now and then, and a cat walks along the wall top.
 
-- **Systems:** `light`; `terrace` (`rooftop`, a wall 8 m high, seven rows of nine); `seats` (`director`); `kit`
-  (bougainvillea on four of the right wall's places, clear of the cat's way); `sky` (latitude 38, day 200, 21:30, the
-  screen facing 200 degrees, the sunset's glow at 300); `vista` (the acropolis at 52 degrees, 150 m, size 2: clear
-  of the screen wall's edge and over the low wall from the seat; hills); `life` `planes` (plane lights) and `cat`
-  (its way along the left wall's top, 6.65 m out: never in the sight line, measured over 4 minutes).
-- **Film-time track:** `sky.dusk` from 0.75 to full night over the first 20 minutes of the film.
-- **Settings:** `floodlights`, "Floodlights on the hill" (0..1, full): `vista.floodlight`.
+The deep pass (2026-11-08) made the city round the roof and the roof itself by hand (the terrace's `city`: above).
+
+- **The city:** blocks of four to seven floors on a grid of streets 12 m below, white, cream, ochre and rose, with
+  balconies, shutters, shops at street level; on the roofs water tanks, solar heaters, aerials, a pergola, washing.
+  Their windows are lit in the shader: some warm, some blue with a television, some shuttered, curtained or louvred,
+  fewer as the night goes on. Near the roof the buildings are made one by one: the screen's building (tanks on a stand
+  over its top), two lower neighbours to the left with heaters and washing, a tall block front left, a roof garden
+  with fairy lights to the right. A church 40 m off on the left: a cross-in-square with its dome on a drum and two
+  bell towers, lit from the square below. A chapel on a far hill behind with zig-zag lamps up its path. Far hills
+  166 m out with a thousand lights. A warm haze thickens with distance.
+- **The hill:** an invented temple on a rock beside the screen building (52 degrees, 150 m; its plateau 13 m up):
+  its walls with buttresses, a ruined temple of eight by seventeen columns, a smaller one, a gateway, pines, white
+  houses round its foot; floodlit honey-gold from below (stylised: not a copy of any real building).
+- **The roof:** terracotta quarry tiles (`quarry_tiles`), the whitewashed parapet with its coping, stains and spouts;
+  the screen painted on the next building's weathered wall, the ghost of an older roof's gable on it, two ghost
+  signs for invented shops (a coffee house, a soap maker) in Greek letters, the speakers, a drainpipe, a fire
+  escape's ladder with its cage, tanks over the top; the projection hut behind the seats (whitewashed, a blue door, a
+  vent, its port glowing cool, the projectionist's small window warm; tonight's poster in a case; jasmine up its
+  corner); the kiosk in the back right corner ("ΚΥΛΙΚΕΙΟ", a striped awning, bottles, cups, basil, a lit fridge,
+  next week's poster on its side); bougainvillea over the right parapet from three big pots; a lemon tree in the
+  back left corner; geraniums in old oil tins; the bulb strings sagging between steel poles on both sides, across
+  behind the seats and on to the hut and the kiosk. The posters are our own: a moon over the sea, a sun over hills.
+- **Light:** the bulbs (house group, down to 0.12 for the film) with their halos, five stand-in lamps
+  before a bake and bake lights along each string; the kiosk's bulb and fridge (accent, to 0.3 for the film); the
+  hut's ports (booth). The sky's light and the Moon on the city; the floodlit temple.
+- **Systems:** `light`; `terrace` (`rooftop`, `city`, a wall 8 m high, seven rows of nine); `seats` (`director`,
+  navy linen on oak); `sky` (latitude 38, day 200, 21:30, the screen facing 200 degrees, the sunset's glow at 300, a
+  nearly full Moon low at 112 degrees); `life` `planes` (plane lights), `moths` (nine, round the bulbs behind the
+  seats) and `cat` (its way along the left wall's top, 6.65 m out: never in the sight line, measured over 4
+  minutes). The `vista` and the `kit` (bougainvillea) went: the city and the roof draw their own.
+- **Cues:** `evening` (the pre-show and the end): the bulbs and the kiosk up over 4 s; 20 s later the church bell.
+  `lights_down` (starting, playing): the kiosk to 0.3 over 5 s, the bulbs to 0.12 over 7 s.
+- **Film-time tracks:** `sky.dusk` from 0.75 to full night over the first 20 minutes; `terrace.windows` from 1 to 0.85
+  at 45 minutes and 0.55 at two hours (the city goes to bed).
+- **Settings:** `floodlights`, "Floodlights on the hill" (0..1, full): `terrace.floodlight`.
 - **Default seat:** the middle of the third row from the back (the origin), 11.9 m from a 6.4 m picture.
 - **Sound:** `acoustics` `outdoors` (rt60 0.25, wet 0.15); `sound_bed` `cicadas` around the roof (four voices,
-  `radius` 9, `reach` 9), `film_db` -14: they fade as the film starts; `sound_bed` `moped` passing in the street
-  12 m below (`at` [-45, -12, 12] `to` [45, -12, 12], `reach` 20, `every` 240, `jitter` 0.5); the cat's purr as it
-  sits, from `life` at `voice_db` -15.
-- **Measured:** 15 draws, 29 086 triangles, 0 lights, 0 particles, 9.3 MB. Sound at the slider's default (dBFS RMS):
-  -54.4 in the pre-show, -70.0 in the film, -77.4 under a film at the reference level.
+  `radius` 9, `reach` 9), `film_db` -14: they fade as the film starts; `city` (new) around the roof from 6 m below
+  (four voices, `radius` 16, `reach` 14, `gain_db` -2, `film_db` -10); `moped` passing in the street 12 m below
+  (`at` [-45, -12, 12] `to` [45, -12, 12], `reach` 20, `every` 240, `jitter` 0.5); `bell` (`church_bell`, new) at
+  the church, `reach` 30, `gain_db` -4, `film_db` -30, played by the `evening` cue; the cat's purr as it sits, from
+  `life` at `voice_db` -15.
+- **Measured** (before the pass, then after): 15 draws, 29 086 triangles, 0 lights, 0 particles, 9.3 MB; now 25 draws
+  (the roof 16, the city 1, the seats 2, the sky 3, the cat, the moths, the planes), 140 206 triangles (the city
+  67k, the plants 31k), 0 lights, 0 particles, 8.4 MB. Sound at the slider's default (dBFS RMS): before -54.4 in the
+  pre-show, -61.1 as the film starts, -70.0 in the film, -77.4 under a film at the reference level; now -54.2,
+  -58.9, -69.1, -76.4.
+- **Fill rate:** the city is unshaded (no lights, no shadows) and drawn front to back by its mesh order only roughly;
+  its windows are a few hash lookups a pixel, faded to an average where they would shimmer. The halos are additive
+  quads, small. The sky dome fills what the city does not.
+- **To judge on the headset:** the frame time with the city (140k triangles), the levels of the city's murmur and
+  the bell by ear, the halos' size, the windows' shimmer at a distance.
 
 ### Room: Pillow Fort 1993
 

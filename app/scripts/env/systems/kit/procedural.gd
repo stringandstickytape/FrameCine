@@ -14,8 +14,10 @@ extends RefCounted
 ##   rose_window(), letters(text, colour, back), gradient(top, bottom), abstract(seed, palette), flame()   pictures
 
 const PATTERNS: Array[String] = ["pressed_tin", "ice_blocks", "swirl_carpet", "corrugated", "plasterboard",
-		"roof_tiles", "ashlar", "lime_wash"]
+		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles"]
 const SIZE := 128
+## Patterns drawn larger than SIZE (many tiles a repeat, each its own: since 2026-11-08, the Athens rooftop's floor).
+const SIZES := {"quarry_tiles": 256}
 const GLASS_SHADER := preload("res://scripts/env/systems/kit/env_glass.gdshader")
 
 static var _maps := {}
@@ -160,40 +162,70 @@ static func _sample(pattern: String, u: float, v: float) -> Array:
 			var c := Color(s, s * 0.985, s * 0.96).lerp(Color(0.84, 0.78, 0.7), flake * 0.5)
 			var h := 0.6 + 0.12 * blot - 0.2 * flake + 0.05 * _noise(u, v, 64, 53)
 			return [h, c, 0.9]
+		# The Athens rooftop's (since 2026-11-08): kit/athens_roof.gd.
+		"quarry_tiles":
+			# Square terracotta tiles, eight by eight a repeat, in grey grout: each tile fired its own shade (a few
+			# paler, a few darker, now and then one a replacement of another clay), its face a little dished and worn
+			# at the edges, a fleck or a chip; salt bloom in faint patches.
+			var tx := int(floor(u * 8.0))
+			var ty := int(floor(v * 8.0))
+			var fx := fposmod(u * 8.0, 1.0)
+			var fy := fposmod(v * 8.0, 1.0)
+			var edge := minf(minf(fx, 1.0 - fx), minf(fy, 1.0 - fy))
+			var grout := 1.0 - smoothstep(0.022, 0.04, edge)
+			var shade := _hash(tx, ty, 61)
+			var odd := _hash(tx, ty, 67)
+			var c := Color(0.66, 0.36, 0.24).lerp(Color(0.76, 0.48, 0.32), shade)
+			if odd > 0.93:
+				c = Color(0.6, 0.42, 0.32)
+			elif odd < 0.06:
+				c = Color(0.56, 0.28, 0.2)
+			var wear := _noise(u, v, 32, 71)
+			c = c.lerp(c * 1.12, smoothstep(0.55, 0.85, wear) * 0.6)
+			c = c.lerp(Color(0.8, 0.72, 0.64), smoothstep(0.78, 0.95, _noise(u, v, 8, 73)) * 0.25)
+			c = c.lerp(Color(0.32, 0.2, 0.15), smoothstep(0.86, 0.95, _noise(u, v, 64, 79)) * 0.5)
+			var dish := 0.92 - 0.06 * pow(1.0 - minf(edge * 4.0, 1.0), 2.0) + 0.04 * wear
+			var chip := smoothstep(0.9, 0.97, _hash(tx * 7 + int(fx * 6.0), ty * 7 + int(fy * 6.0), 83)) \
+					* (1.0 - smoothstep(0.04, 0.1, edge))
+			c = c.lerp(Color(0.5, 0.4, 0.34), chip * 0.6)
+			c = c.lerp(Color(0.4, 0.38, 0.36), grout)
+			var h := lerpf(dish - chip * 0.25, 0.25, grout)
+			return [h, c, lerpf(0.72, 0.95, grout)]
 	return [0.5, Color(0.5, 0.5, 0.5), 0.8]
 
 
-## The pattern's maps, made once (SIZE square, mipmapped).
+## The pattern's maps, made once (SIZE square, or the pattern's own in SIZES; mipmapped).
 static func maps(pattern: String) -> Dictionary:
 	if _maps.has(pattern):
 		return _maps[pattern]
+	var size: int = SIZES.get(pattern, SIZE)
 	var heights := PackedFloat32Array()
-	heights.resize(SIZE * SIZE)
-	var albedo := Image.create_empty(SIZE, SIZE, false, Image.FORMAT_RGB8)
-	var normal := Image.create_empty(SIZE, SIZE, false, Image.FORMAT_RGBA8)
-	var orm := Image.create_empty(SIZE, SIZE, false, Image.FORMAT_RGB8)
+	heights.resize(size * size)
+	var albedo := Image.create_empty(size, size, false, Image.FORMAT_RGB8)
+	var normal := Image.create_empty(size, size, false, Image.FORMAT_RGBA8)
+	var orm := Image.create_empty(size, size, false, Image.FORMAT_RGB8)
 	var rough := PackedFloat32Array()
-	rough.resize(SIZE * SIZE)
+	rough.resize(size * size)
 	var mean := Color(0, 0, 0)
-	for y in SIZE:
-		for x in SIZE:
-			var s := _sample(pattern, (x + 0.5) / SIZE, (y + 0.5) / SIZE)
-			heights[y * SIZE + x] = float(s[0])
-			rough[y * SIZE + x] = float(s[2])
+	for y in size:
+		for x in size:
+			var s := _sample(pattern, (x + 0.5) / size, (y + 0.5) / size)
+			heights[y * size + x] = float(s[0])
+			rough[y * size + x] = float(s[2])
 			var c: Color = s[1]
 			albedo.set_pixel(x, y, c)
 			var lin := c.srgb_to_linear()
-			mean += Color(lin.r, lin.g, lin.b) / float(SIZE * SIZE)
+			mean += Color(lin.r, lin.g, lin.b) / float(size * size)
 	# Relief: the height's slope over a texel, a few millimetres deep.
 	var depth := 3.0
-	for y in SIZE:
-		for x in SIZE:
-			var hx := heights[y * SIZE + (x + 1) % SIZE] - heights[y * SIZE + (x - 1 + SIZE) % SIZE]
-			var hy := heights[((y + 1) % SIZE) * SIZE + x] - heights[((y - 1 + SIZE) % SIZE) * SIZE + x]
+	for y in size:
+		for x in size:
+			var hx := heights[y * size + (x + 1) % size] - heights[y * size + (x - 1 + size) % size]
+			var hy := heights[((y + 1) % size) * size + x] - heights[((y - 1 + size) % size) * size + x]
 			var n := Vector3(-hx * depth, hy * depth, 1.0).normalized()
 			normal.set_pixel(x, y, Color(0.5, n.x * 0.5 + 0.5, 0.5, n.y * 0.5 + 0.5))
-			var h := heights[y * SIZE + x]
-			orm.set_pixel(x, y, Color(clampf(0.65 + 0.35 * h, 0.0, 1.0), rough[y * SIZE + x],
+			var h := heights[y * size + x]
+			orm.set_pixel(x, y, Color(clampf(0.65 + 0.35 * h, 0.0, 1.0), rough[y * size + x],
 					0.35 if pattern in ["pressed_tin", "corrugated"] else 0.0))
 	for img: Image in [albedo, normal, orm]:
 		img.generate_mipmaps()

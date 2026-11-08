@@ -103,10 +103,27 @@ const PARAMS := {
 			"description": "drive_in: the marquee's bulbs chasing round its board (slowly; 0 holds them steady)"},
 	"ramp_lights": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true, "brightness": true,
 			"description": "drive_in: the posts' small amber ramp lights"},
+	# The whole Athens roof and its city (kit/athens_roof.gd, kit/athens_city.gd): since 2026-11-08, the Athens
+	# rooftop's quality pass. Off: the rooftop as before.
+	"city": {"type": "bool", "default": false,
+			"description": "rooftop: the whole summer cinema on an Athens roof: terracotta tiles, a whitewashed "
+			+ "parapet, the screen painted on a weathered blind wall with ghost signs, a projection hut, a kiosk, "
+			+ "bougainvillea, jasmine, geraniums in tins and a lemon tree, bulbs on poles; round it a city at night "
+			+ "(roofs with their heaters and aerials, lit windows, a church, a floodlit citadel on its hill, a "
+			+ "chapel on a hill behind, hills with their lights)"},
+	"windows": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true, "brightness": true,
+			"description": "city: how many of the city's windows are lit (1: as designed; lower, they go out one by "
+			+ "one)"},
+	"floodlight": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
+			"description": "city: the floodlights on the citadel's walls and temples"},
+	"city_lights": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
+			"description": "city: the street lamps, the far lights on the hills, the churches' floodlights"},
 }
 
 const DriveInLot := preload("res://scripts/env/systems/kit/drive_in_lot.gd")
 const Reflect := preload("res://scripts/env/systems/kit/reflect.gd")
+const AthensRoof := preload("res://scripts/env/systems/kit/athens_roof.gd")
+const AthensCity := preload("res://scripts/env/systems/kit/athens_city.gd")
 
 ## Each style's recommended parameters (a room document sets these; the docs list them).
 const STYLES := {
@@ -230,6 +247,9 @@ static func collision_shapes_for(p: Dictionary, with_seats := true) -> Array:
 						Vector3(chord, h, float(t[2])), Basis(Vector3.UP, a)))
 	for post in _posts(p):
 		out.append(PhysicsShapes.box(post + Vector3(0, 0.7, 0), Vector3(0.12, 1.4, 0.12)))
+	if roof and bool(p.get("city", false)):
+		for e: Array in AthensRoof.collision_boxes(hw, bz, gy):
+			out.append(PhysicsShapes.box(e[0], e[1]))
 	if str(p["style"]) == "lot" and bool(p.get("drive_in", false)):
 		out.append(PhysicsShapes.box(Vector3(0, gy + DriveInLot.SNACK_H * 0.5, DriveInLot.SNACK_Z
 				+ DriveInLot.SNACK_D * 0.5), Vector3(DriveInLot.SNACK_W, DriveInLot.SNACK_H, DriveInLot.SNACK_D)))
@@ -293,6 +313,9 @@ func build() -> void:
 			"frame":
 				_build_frame(gy)
 		_bake_spot("Sky", Vector3(0, gy + 14.0, (fz + bz) * 0.5), true, 80.0, 30.0, 0.4, Color(0.6, 0.65, 0.85))
+		return
+	if style == "rooftop" and bool(params["city"]):
+		_build_city(hw, fz, bz, gy)
 		return
 	# The terrace's own floor is baked; the ground beyond it (an open lot, a plain: up to hundreds of metres) is a
 	# ring round it left out of the bake, so the lightmap's atlas stays small.
@@ -779,6 +802,8 @@ func on_screen_changed(local: Transform3D, size: Vector2) -> void:
 
 func tick(delta: float) -> void:
 	super.tick(delta)
+	if _city != null:
+		_city_tick()
 	if _di_reflect.is_empty() and _di_bulbs == null and _di_road == null:
 		return
 	if not _di_reflect.is_empty():
@@ -805,6 +830,79 @@ func tick(delta: float) -> void:
 const NEON_GLINT := Color(1.0, 0.3, 0.5) * 0.9
 
 
+# --- The Athens roof (rooftop with city on) ------------------------------------------------------------------------
+
+## The city's material (its live parameters, the sky's light each frame), the bulbs' halos.
+var _city: ShaderMaterial
+var _city_halos: ShaderMaterial
+var _city_sky: Node
+var _city_light: Array = []
+var _city_house := -1.0
+
+
+## The whole roof (kit/athens_roof.gd) and the city round it (kit/athens_city.gd); the seats when no seats system
+## draws them; the open sky's soft light for the bake.
+func _build_city(hw: float, fz: float, bz: float, gy: float) -> void:
+	var refs := AthensRoof.build(self, hw, fz, bz, gy)
+	_city = refs["city"]
+	_city_halos = refs["halos"]
+	_city_sky = host.system_of_kind("sky") if host != null else null
+	_city_apply()
+	if bool(params["seating"]):
+		_build_seat_multimesh(str(params["seat_model"]), _mat("seat_cover", true), _mat("seat_frame", true),
+				seat_slots_for(params), 1955)
+	_bake_spot("Sky", Vector3(0, gy + 14.0, (fz + bz) * 0.5), true, 80.0, 30.0, 0.25, Color(0.55, 0.62, 0.9))
+
+
+func _city_apply() -> void:
+	if _city == null:
+		return
+	_city.set_shader_parameter("windows", float(params["windows"]))
+	_city.set_shader_parameter("floodlight", float(params["floodlight"]))
+	var l := float(params["city_lights"])
+	_city.set_shader_parameter("street_light", l)
+	_city.set_shader_parameter("lamps", l)
+	_city.set_shader_parameter("church_light", l)
+	# The Moon's side: its bearing and height from the sky (a compass bearing; the room's front is the sky's facing).
+	if _city_sky != null and is_instance_valid(_city_sky):
+		var sp: Dictionary = _city_sky.get("params")
+		var az := deg_to_rad(float(sp.get("moon_bearing", 220.0)) - float(sp.get("facing", 180.0)))
+		var alt := deg_to_rad(float(sp.get("moon_altitude", 45.0)))
+		var flat := Vector3(sin(az), 0.0, -cos(az))
+		_city.set_shader_parameter("moon_dir", flat * cos(alt) + Vector3.UP * sin(alt))
+		var moon := clampf(float(sp.get("moon", 0.0)), 0.0, 1.0)
+		_city.set_shader_parameter("moon_colour", Color(0.2, 0.24, 0.32) * moon)
+	_city_sky_light(true)
+
+
+## The sky's light on the city (overhead and at the horizon), only when it changed.
+func _city_sky_light(force := false) -> void:
+	var top := Color(0.03, 0.04, 0.08)
+	var low := Color(0.08, 0.07, 0.08)
+	if _city_sky != null and is_instance_valid(_city_sky) and _city_sky.has_method("sky_light"):
+		var l: Dictionary = _city_sky.call("sky_light")
+		top = l["zenith"]
+		low = l["horizon"]
+	if force or _city_light.is_empty() or not (_city_light[0] as Color).is_equal_approx(top) \
+			or not (_city_light[1] as Color).is_equal_approx(low):
+		_city_light = [top, low]
+		_city.set_shader_parameter("sky_top", top)
+		_city.set_shader_parameter("sky_low", low)
+
+
+func _city_tick() -> void:
+	_city_sky_light()
+	var house := _group_level("house")
+	if not is_equal_approx(house, _city_house):
+		_city_house = house
+		_city_halos.set_shader_parameter("energy", AthensRoof.HALO_ENERGY * house)
+
+
+## The city's material (tests).
+func city_material() -> ShaderMaterial:
+	return _city
+
+
 ## The picture's level in the cars' paint: the film's while it plays (the playback state), dim before.
 func _screen_level() -> float:
 	if host == null:
@@ -814,6 +912,8 @@ func _screen_level() -> float:
 
 
 func _param_changed(param: String, value: Variant) -> void:
+	if param in ["windows", "floodlight", "city_lights"]:
+		_city_apply()
 	match param:
 		"neon":
 			for e: Array in _di_neon:

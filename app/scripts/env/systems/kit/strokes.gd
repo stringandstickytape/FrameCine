@@ -52,12 +52,28 @@ const GLYPHS := {
 	"'": [[2, 6, 2, 4.8]],
 	"*": [[2, 1, 2, 5], [0.3, 2, 3.7, 4], [0.3, 4, 3.7, 2]],
 	" ": [],
+	# Greek capitals that have no Latin twin (since 2026-11-08: the Athens rooftop's painted signs); the others are
+	# drawn as their Latin twins (ALIASES).
+	"Γ": [[0, 0, 0, 6, 4, 6]],
+	"Δ": [[0, 0, 2, 6, 4, 0, 0, 0]],
+	"Θ": [[1, 0, 0, 1, 0, 5, 1, 6, 3, 6, 4, 5, 4, 1, 3, 0, 1, 0], [1.2, 3, 2.8, 3]],
+	"Λ": [[0, 0, 2, 6, 4, 0]],
+	"Ξ": [[0, 6, 4, 6], [0.8, 3, 3.2, 3], [0, 0, 4, 0]],
+	"Π": [[0, 0, 0, 6, 4, 6, 4, 0]],
+	"Σ": [[4, 6, 0, 6, 2, 3, 0, 0, 4, 0]],
+	"Φ": [[2, 0, 2, 6], [1, 1.2, 0, 2, 0, 4, 1, 4.8, 3, 4.8, 4, 4, 4, 2, 3, 1.2, 1, 1.2]],
+	"Ψ": [[2, 0, 2, 6], [0, 6, 0, 3.5, 1, 2.5, 3, 2.5, 4, 3.5, 4, 6]],
+	"Ω": [[0, 0, 1.2, 0, 0.2, 1.6, 0, 3, 0.4, 4.6, 1.4, 5.7, 2.6, 5.7, 3.6, 4.6, 4, 3, 3.8, 1.6, 2.8, 0, 4, 0]],
 }
+## Greek capitals drawn as the Latin letter of the same shape.
+const ALIASES := {"Α": "A", "Β": "B", "Ε": "E", "Ζ": "Z", "Η": "H", "Ι": "I", "Κ": "K", "Μ": "M", "Ν": "N",
+		"Ο": "O", "Ρ": "P", "Τ": "T", "Υ": "Y", "Χ": "X"}
 ## A glyph's advance, in the glyph box's units (4 wide).
 const ADVANCE := 5.6
 
 
 static func _advance(ch: String) -> float:
+	ch = ALIASES.get(ch, ch)
 	return 4.4 if ch == "I" or ch == "1" else (3.0 if ch == "." or ch == "'" else ADVANCE)
 
 
@@ -68,7 +84,7 @@ static func lines(text: String, height: float, spacing := 1.0) -> Array[PackedVe
 	var k := height / 6.0
 	var x := 0.0
 	for ch in text.to_upper():
-		var g: Array = GLYPHS.get(ch, [])
+		var g: Array = GLYPHS.get(ALIASES.get(ch, ch), [])
 		var shift := (ADVANCE - _advance(ch)) * 0.5
 		for poly: Array in g:
 			var line := PackedVector2Array()
