@@ -520,7 +520,10 @@ One motion system moves one thing. Give each its own id: the id names its action
 - a node the document names: `node` (its name, or the plain name it had before `own()` gave it its system's id),
   among the nodes of the system `system` (an id), or anywhere in the room when `system` is empty;
 - or a festoon curtain it builds itself: `build` "festoon". It hangs over the screen (`festoon_size` 0: the
-  screen's size with a margin) in `festoon_swags` swags, `festoon_depth` in front, in the `curtain` material.
+  screen's size with a margin) in `festoon_swags` swags, `festoon_depth` in front, its top `festoon_top` over the
+  screen's top (0.5 m by default), in the `curtain` material. Fully up, its swags hang about a seventh of its drop
+  and up to 0.66 m more under its top: hung higher, behind a proscenium's head, it clears the picture (since
+  2026-11-08, the Streamline 1937: `festoon_top` 2.3, a drop of 8.05 m from over the proscenium's head to the stage).
 
 ### Modes
 
@@ -912,6 +915,7 @@ the pieces. The kit must come after its builder in the document. A room may have
 | `colour`, `accent` | the piece's main colour, and a second one (a rug's border, a lamp's pole) |
 | `text` | a neon sign's words in our own letters: A B C D E F I K L N O P R S T U W and the space |
 | `target` | the node the carpet goes on (the builder's `Floor` by default) |
+| `pattern` | the carpet's pattern, one of `procedural.gd`'s (`swirl_carpet` by default; `deco_carpet`: rising suns in rows, since 2026-11-08) |
 
 Other parameters: `builder` (the builder's id; empty: the room's first builder); materials `stone`, `plaster`,
 `wood`, `tin`, `roof`, `iron`, `plastic` (a computer), `fabric` (a rug), `china` (a tea set, plates), `cloth`
@@ -922,7 +926,12 @@ Other parameters: `builder` (the builder's id; empty: the room's first builder);
 light in the bake); live: `glow` (lit windows, the booth's window, neon, the clocks), `night` and `ember` (the
 courtyard's windows going out one by one, and what one that has gone out still shows), `water_motion` (a fountain's
 water; the Motion setting scales it). Two more entry keys for the courtyard's pieces: `features` (a house's
-features, below) and `seed` (its own variation).
+features, below) and `seed` (its own variation). For the moderne hall's pieces (since 2026-11-08): materials
+`faience` (glazed tiles: it shines, a clear glaze) and `chrome` (it reflects the room: `kit/reflect.gd`), `group` (the
+pieces' meshes under one node of that name, so a motion system moves them together: an organ console on its lift),
+and live: `cove` (the coves' lamps, times the house lamps' level), `cove_colour` (their light: a setting or a cue
+moves it), `cove_film_colour` (their light in the film: bind it to `film.colour`) and `cove_film` (0: `cove_colour`,
+1: `cove_film_colour`).
 
 | Piece | What |
 |---|---|
@@ -935,7 +944,7 @@ features, below) and `seed` (its own variation).
 | `snack_bar` | a counter, shelves, a canopy, a neon sign (`signs` group) |
 | `screen_tower` | a drive-in's tower behind the room's screen: the face, posts and braces |
 | `bougainvillea`, `ivy`, `ferns` | leaves (unbaked): bougainvillea over a parapet's top and down its face, ivy up a wall, ferns in a clump on the floor |
-| `carpet` | the builder's floor takes the swirling carpet pattern |
+| `carpet` | the builder's floor takes a carpet's pattern (`pattern`; the swirls by default) |
 | `partition` | a plasterboard wall with taped joints and a skirting |
 | `curves` | two bands in waves along a wall (pink and blue by default) |
 | `desk` | a top, a pedestal of three drawers on its right, legs on its left, a modesty panel (`wood`, handles in `iron`). 1.2 x 0.74 x 0.65 m |
@@ -959,6 +968,9 @@ features, below) and `seed` (its own variation).
 | `cypress`, `palm`, `pine` | trees beyond the walls: `size` [spread, height, spread]. A cypress of jittered rings, a palm with feather fronds, a stone pine's umbrella of clumps |
 | `lantern` | a wall lantern on an iron bracket, its glass glowing (`house` group; a stand-in lamp and a bake light) |
 | `pedestal` | a stone pedestal; `holds` `lion` (lying, head up) or `urn` |
+| `moderne_hall` | an auditorium builder's hall as a 1930s moderne one (`kit/streamline.gd`, no slot): a ceiling of coves stepping up to the screen, ledges with their coves along the walls, speed bands of faience, jade and chrome round the hall and across a bowed circle front, rounded rear corners, a walnut dado, reeded pilasters, etched glass shell lights (stand-in lamps and bake lights), ventilators |
+| `ziggurat` | round the room's screen (no slot): three frames stepping out towards the seats, each lit from behind the next, gilt reveals, a glowing rising sun with gilt rays and chrome speed lines, two organ grilles lit from their chambers, a clock telling the real time (`PieceClock`), a speed-line roundel, footlights (stand-in lamps in the coves' colour) and the lift's chrome ring in the pit |
+| `organ_console` | an illuminated organ console on its lift platform, its foot at `at`: a skirt of glass panels in the coves' colour between gilt fins, an ivory horseshoe of stop tabs, three manuals, a lit music desk under a chrome hood, a bench. Put it in a kit of its own with `group` |
 
 The furniture is drawn by `scripts/env/systems/kit/furniture.gd` (plain boxes and turned shapes of our own: no maker's
 shape, no badge, no lettering), which the domestic builder's telly stands use too. A piece stands with its foot at the
@@ -980,6 +992,21 @@ right, both with a lamp, a plant on the sill, inner shutters half closed, an org
 The windows' material is the light system's lamp material (house group), so they dim with the house lamps; `night`
 puts them out one by one, each at its own moment (each over a twentieth of `night`'s travel), down to `ember`. The
 windows bake as emitters: their glow lights the reveals, sills and shutters round them.
+
+**The moderne hall's coves** (`kit/streamline.gd`, `shaders/env_cove.gdshader`, since 2026-11-08: "the coves are the
+star: soft graded colour washing up curved surfaces, not flat fog quads", the brief). Every surface a hidden lamp
+washes (the ceiling's bands, the ledges' rounds, the proscenium's frames, the organ grilles' chambers, the rising
+sun, the console's glass) is one mesh, `PieceCove`, on its own opaque shader. The light on it is worked out when the
+mesh is built, per vertex (the alpha of its colour): each lamp a line along its trough, its light the cosine
+(softened: plaster scatters) over a fall-off to half at a metre or so. The shader adds it in the cove's colour (and
+a whiter core where it is strongest) to the house shader's own light (the fill at the house level, the screen's
+spill at 0.6 of the room's) and a faint mottle of the plaster; one noise fetch, no loop, no light pass, nothing
+transparent. Its colour and energy are live (`cove_colour` toward `cove_film_colour` by `cove_film`; `cove` times
+the house lamps), so a setting, a cue or the film moves it without building the room again. It is not baked: the
+bake takes the slots' light from a hidden lamp in each (`KitGlow*`). Footlights at the stage's lip and two battens
+behind the first frame's head are stand-in lamps in the coves' colour (they light the festoon's folds and the
+console, which are never baked). `cove_state()`, `cove_colour_now()` and `clock_hands()` give the coves and the
+clock now (tests).
 
 **The video recorder's clock.** 12:00 in seven segments of our own (quads, no font, no texture of letters), in
 `display_colour`, all the room's clocks one mesh (`PieceDisplay`, accent group). It flashes once a second: lit half a
@@ -1810,7 +1837,7 @@ people.
 |---|---|---|---|---|---|---|---|
 | 1 | Shopfront picture house, 1906 | `shopfront` (pressed tin), folding chairs (`seats`), a tin booth (`kit`) | gas lamps (`light`, flicker), a dusty beam (`screen_frame`, `atmosphere`) | projector clatter behind (`sound_bed`), a player piano that plays along (`music`, `film.transient`) | the piano starts in `starting` | a framed sheet | piano on or off |
 | 2 | Atmospheric, 1928 | `auditorium` with `ceiling_cover` 0, thirteen courtyard houses (balconies, towers, a loggia, an oriel, an arcade, lit windows), a palace gate with organ grilles and drapes, lions, cypresses, palms, a stone pine (`kit`) | an open dusk `sky` with real stars, a crescent moon, clouds lit by the town and the screen (`film.colour`); lanterns and floods baked | a wall fountain, crickets, a scops owl (`sound_bed`), a theatre organ before the film (`music`) | the courtyard goes to bed with the film (windows out one by one), curtains part (`showing`) | | clouds, organ |
-| 3 | Streamline, 1937 | `auditorium` with cream faience bands (`wall_treatment` slot), brass ashtrays (objects) | cove lights that cycle colours and then follow the film (`light`, `film.colour`) | an organ (`music`) | the organ rises from the pit (`motion`) as the ritual | a festoon curtain (`proscenium` slot) | cove colours |
+| 3 | Streamline, 1937 | `auditorium` dressed by the moderne kit (`kit/streamline.gd`): a stepped ceiling of coves, faience, jade and chrome bands round the hall and a bowed circle front, reeded pilasters, shell lights, a rising-sun carpet; a stepped proscenium round a rising sun, organ grilles, a clock | coves that cycle colours and then follow the film at a glow (`kit` `cove_*`, `film.colour`) | an organ (`music`) | the console rises lit from the pit and the organ plays as the room opens and at the end, a cadence and the console down as the film starts (`motion`) | a festoon curtain up behind the proscenium's head (`motion`) | cove colours |
 | 4 | Screen 3, 1983 | `auditorium` with `partition_z` (a subdivided balcony), plasterboard, swirly carpet, one broken seat, a water stain (picture) | smoke haze in the beam (`atmosphere`), a flickering exit sign (`flicker`) | rumble through the wall (`sound_bed`, `film.bass`) | | gate weave, a slight tilt (`presentation`) | weave and tilt |
 | 5 | Drive-in, 1958 | `terrace` (the lot), a convertible's bench seat (`vehicle`), a screen tower, a neon snack bar (`kit`) | dusk to stars over the film (`sky`, film-time tracks), mesas (`vista`) | moths in the beam (`life`), a far freight train (`sound_bed`, `every`) | | the window speaker (`presentation`) | tinny speaker |
 | 6 | Screening room, 1962 | `domestic` (walnut), club chairs (`seats`), a bar cart (objects) | a pool glowing through the window (`vista`) | | a painting slides up to show the screen (`motion`, ritual) | | |
@@ -1994,39 +2021,94 @@ lamps, the film on a framed sheet. Its test: `tests/test_room_picture_houses.gd`
 
 ### Room: Streamline 1937
 
-`app/environments/streamline_1937.env.json`. A streamline cinema: warm plaster with cream faience bands, jade drapes,
-a gold festoon curtain, an organ console that rises from the pit, and cove lights that change colour. Its test:
-`tests/test_room_picture_houses.gd`.
+`app/environments/streamline_1937.env.json`. A 1937 streamline (moderne) picture house: horizontal speed and curves,
+a ceiling of coves glowing in changing colours, a stepped proscenium round a rising sun, a gold festoon, and an
+illuminated organ console that rises from the pit. Its tests: `tests/test_room_streamline_1937.gd` (the room's own)
+and `tests/test_room_picture_houses.gd` (with the Shopfront and the Pink Palace). The quality pass (2026-11-08)
+answered "continue working on the environments one-by-one like you did with the bathysphere, really improving their
+quality, imagination, delight, detail, lighting and so on" (the user, 2026-11-08); everything but the hall's floor,
+seats, doors and screen is new in it (`kit/streamline.gd`).
 
-- **Systems:** `light`; `auditorium` (id `hall`): the cinema's hall with plain walls, plush seats (25 a row, 0.6 m),
-  a jade-green carpet, jade drapes, a black marble stage, the house lamps and the step and stage lights in the cove
-  colour; `kit` (id `console`): three moulded panels below the pit's floor, the organ console; `kit` (id `bands`):
-  three `curves` pieces a wall, flattened into long bands of cream with jade and gold, 3 to 4.4 m up; `motion` (id
-  `organ`): the console 2.15 m up out of the pit (0.25 m/s); `motion` (id `festoon`): a gold festoon of 6 swags over
-  the screen, at the motion limits (0.5 m/s, 0.3 m/s²); `screen_frame`; `atmosphere` (id `cove`): `beam_haze` 0.2 and
-  two thin fog layers under the ceiling, the cove's glow in the setting's colour, shown out of the film; `atmosphere`
-  (id `cove_film`): the same layers in the film's colour (`film.colour`, strength 0.85), shown in the film.
-- **The console** is the `console` kit's mesh, so this kit comes before `bands` in the document: the kit's mesh is
-  named `PieceStatic`, and a second kit's mesh of that name is renamed when it is added. The console's top stays
-  under the sight line to the picture's bottom from the front row when it is up (the test checks the sight line with
-  it up).
-- **Setting:** `cove` (Cove colours: Changing, Gold, Rose, Jade, Blue). It sets the house lamps' and the step lights'
-  colour (the room builds again) and the cove's glow. With Changing, the glow goes gold, rose, jade, blue in turn
-  (`cove_cycle`, every 20 s in the pre-show, paused, at the end and in the intermission).
-- **Sound:** `acoustics` `cinema` (rt60 0.7); `music` (id `pipes`) `organ` with the `theatre` stop at the console
-  (`at` [0, -1.5, -11.7], `reach` 12), `plays_in` `starting` only, `on` on the common Pre-show setting: with the
-  Pre-show off the console stays down and the organ silent. It plays from the ritual (`pipes.play`, as the console
-  rises) through the film's first half-minute, 6 dB lower in the film and ducked under it, and closes with a cadence
-  (`pipes.flourish`, 38 s into the ritual) as the console sinks, then rests for the rest of the film. `lights_up`
-  stops it (`pipes.stop`, 3 s) if the film is closed before.
-- **Cues:** `ritual` (starting): the lamps to half, the console rises over 10 s and the organ plays, the festoon
-  rises, the lamps to 15 % over 5 s; 38 s in, the organ's closing cadence. `organ_down` (playing; stops in the
-  pre-show and at the end): 30 s on, the console goes back into the pit. `dim` (Pre-show off). `lights_up`
-  (pre-show, end): lamps up, the festoon and the console down, the organ stopped. With Pre-show off the festoon rises
-  by itself 4 s into the film (the motion system's in-front rule).
-- **Measured** (headless): 27 draws, 182 676 triangles, no lights, no particles, 8.0 MB; 275 seats. Sound at the
-  slider's default (dBFS RMS): silent in the pre-show, -57.3 as the console rises, -59.4 in the film, -68.5 under a
-  film at the reference level.
+- **The ceiling** (`moderne_hall`): five bands across the hall, from 8.8 m over the proscenium down to 6.4 m at the
+  back, each stepping 0.6 m over the next (steps at z -8.6, -4.2, 0.2 and 4.0). In each step's slot a lamp lies on
+  the lower band's back and washes the higher band's plaster, so from the seats every band glows brightest by its
+  slot and fades over a couple of metres towards the screen; a faint broad glow goes on further. Along both walls each
+  band rounds down in a quarter round of 0.9 m into a ledge whose lamp washes the round (the coves along the walls).
+  Over the proscenium a drop beam with a chrome edge hides a lamp that washes the proscenium's head. A gilt
+  ventilator (twenty fins round a boss over a dark throat) in the middle of each of the first four bands.
+- **The walls:** speed bands of cream faience, jade and cream between four chrome beads (4.1 to 4.85 m) run from
+  over the organ grilles on the proscenium's face along both walls, round the rounded rear corners, along the rear
+  wall and across a bowed circle front (a jade faience parapet with a chrome handrail and three downlights in its
+  soffit over the rear walkway; the projection box's ports behind it). A walnut dado with a chrome bead and joints
+  follows the rake; reeded pilasters (five reeds, a stepped faience capital, a chrome base) stand under the ceiling's
+  steps; eight etched glass shell lights (a fan of frosted glass, eleven ribs, on a stepped chrome bracket) between
+  them, each a stand-in lamp and a bake light that lays its pool on the wall. The aisles' carpet: rising suns in rows
+  (`deco_carpet`, jade, gold and cream).
+- **The proscenium** (`ziggurat`): three frames stepping out towards the seats (0.5, 0.8 and 1.1 m in front of the
+  screen, each opening 0.4 m wider and higher than the last, shoulders rounded from 1.0 to 1.8 m), each lit by a lamp
+  hidden behind the next one's edge, so every face glows at its outer edge and fades towards the picture; gilt
+  reveals with a gilt bead on each edge. The outermost face reaches the walls and the ceiling. Over the opening a
+  rising sun: a glowing half disc, two gilt half rings, thirteen gilt rays long and short, three chrome speed lines
+  either side. Two organ grilles (a chamber lit from below seen through gilt bars, a sunburst in the round head, a
+  stepped gilt surround, a dark jade plinth); over the left one a clock whose hands tell the real time (chevrons at
+  the quarters, faint rays, a chrome bezel, gilt rays round it: `shaders/env_clock.gdshader`), over the right a
+  roundel of glowing glass with three chrome speed lines through it. Nothing of it is in front of the picture.
+- **The festoon** (`motion` `festoon`): gold velvet in six swags with folds (`pleats` 2.4), from 2.3 m over the
+  screen's top to the stage (`festoon_top`, `festoon_size` [12.8, 8.05]); fully up its lowest swag is at 4.6 m, behind
+  the first frame's head (4.45 m) and clear of the picture. Lit from the footlights below and two battens behind the
+  head, in the coves' colour. It rises at the motion limits (0.5 m/s): about 15 s, so the first seconds of the film
+  land on its rising hem, as they did.
+- **The organ console** (kit `console`, `group` "Console"; `motion` `organ`): on a round lift platform (black lacquer,
+  a chrome rim, a skirt that fills the well when it is up) an illuminated console: sixteen glass panels between gilt
+  fins in the coves' colour, an ivory horseshoe of stop tabs in three tiers (white, red, amber, black), three manuals,
+  a lit music desk under a chrome hood (accent group), a pedalboard of thirty-two pedals under a jade bench. It rests 1.3 m under the pit's floor and rises
+  1.85 m (0.25 m/s): up, its top (1.22 m over the platform) stays under every seat's sight line to the picture. A
+  chrome ring on the pit's floor marks the well.
+- **The light:** baked, from the shell lights' pools (8 lamps), the circle's downlights (3 spots), the wall coves (10
+  hidden lamps under the rounds, one a band a side, that lay the coves' glow down the upper walls) and the hall's
+  house spots; the coves, the frames, the grilles' chambers, the sun and the console's
+  glass are `PieceCove` (their light per vertex, live in colour: "The moderne hall's coves" in "The kit"). The fill
+  is low (`fill_top` [0.62, 0.5, 0.4], `baked_fill` 0.2) and the spill too (0.35; the coves take 0.6 of it): a pale
+  hall would otherwise glow in the picture's colours. No live light.
+- **Setting:** Cove colours (`cove`: Changing, Gold, Rose, Jade, Blue; Changing by default). It moves only live
+  parameters (the kits' `cove_colour` by `map`), so the room is not built again and the console stays where it is.
+  With Changing the coves go gold, rose, jade, blue in turn (`cove_cycle`, every 20 s in the pre-show, paused, at the
+  end and in the intermission; each change over 4 s). In the film the coves take the film's colour (`cove_film`,
+  `cove_film_colour` on `film.colour`, strength 0.85) at half their level (`cove` on `playback.playing`), times the
+  house lamps' 15 %: a glow.
+- **Cues:** `prelude` (pre-show, end, intermission; Pre-show on): 3 s after the room opens the console rises over
+  10 s, lit, and the organ plays (`pipes.play`, 80 s), then sinks. `ritual` (starting; Pre-show on): the lamps to half
+  over 2 s, the organ's closing cadence (`pipes.flourish`), the festoon rises, the console sinks 3 s later, the lamps
+  to 15 % over 5 s. `dim` (starting; Pre-show off): the lamps to 15 %, the console down. `lights_up` (pre-show, end):
+  the lamps up over 4 s, the festoon down. At the end the console rises again and the organ plays the house out.
+  `cove_cycle` and `cove_settles` as above.
+- **Sound:** `acoustics` `cinema`; `music` (id `pipes`) `organ` with the `theatre` stop at the console (`at` [0, -1.5,
+  -11.35], `reach` 12), `plays_in` the intermission and when the prelude plays it, `on` on the common Pre-show
+  setting. No beds: the hall is quiet but for the organ.
+- **Comfort:** the colours change over 4 s, the clock's hands as a clock's, the console and the festoon at the motion
+  limits (the Motion setting snaps them); nothing crosses the sight line (the festoon is `in_front` until it rises).
+  The chrome shows the picture at a third in the film, so it does not glint with every cut at the edge of vision.
+- **Default seat:** the middle of row 0 (7 rows in front, 3 behind, 25 seats a row). The seats, the eye height and
+  the screen are as before the pass; the stage's top is 0.5 m higher (-1.6 m), so the festoon meets it.
+- **Measured** (`test_room_streamline_1937.gd`, headless, 2026-11-08): 27 draws, 201 342 triangles (177 100 of them
+  the seats), no lights, no particles, 8.2 MB of textures; 275 seats. Before the pass: 27 draws, 182 676 triangles,
+  no lights, no particles, 8.0 MB.
+- **The costs to watch on the Frame** (not measured on the headset): the fill is one opaque layer everywhere (the
+  coves are `PieceCove`, opaque, over the ceiling; the two fog layers of the old room are gone); the only transparent
+  surface is the air's beam haze in the film. Every frame the kit sets the coves' colour and level (two uniforms), the
+  clock's hands once a second and the footlights' stand-in lamps ten times a second; the reflections' level only as
+  the lamps change. The bake: 6.1 s under lavapipe, a 1024 x 512 atlas (3.1 MB).
+- **Sound measured:** in the pre-show -54.4 dBFS RMS (peak -38.7: the organ playing as the console rises), under a
+  film at the reference level -68.4. Before the pass: silent in the pre-show, -57.3 as the console rose, -59.4 in the
+  film, -68.5 under a film.
+- **The render** (lavapipe, `test_room_streamline_1937.gd`; `STREAM_BAKE=1` bakes it first, `STREAM_ONLY` takes one
+  phase): baked, from the seat in the film the walls 0.143, the proscenium 0.205, the picture 0.603 (the hall a
+  quarter of the picture or less); in the pre-show, not baked (the stand-in lamps only), the walls 0.371 and the
+  proscenium 0.485.
+- **To judge on the Frame:** the frame time and the bake's time; the organ's level and its tremulant by ear, against
+  the film's; whether the festoon's 15 s rise over the film's first seconds pleases or should start in the ritual's
+  dark sooner; the film's brightness in the hall (the coves at half of 15 % in the film's colour); the eight stand-in
+  lamps (the shell lights at the back have none, so their glass lights only in the bake).
 
 ### Room: Pink Palace
 

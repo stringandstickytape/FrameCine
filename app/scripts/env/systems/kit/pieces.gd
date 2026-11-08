@@ -555,10 +555,12 @@ static func _carpet(c: Object, e: Dictionary) -> void:
 	if node == null:
 		return
 	var colour := _colour(e, Color(0.4, 0.12, 0.2))
+	# Its pattern: the swirls by default (since 2026-11-08 an entry may name another of procedural.gd's).
+	var pattern := str(e.get("pattern", "swirl_carpet"))
 	for s in node.mesh.get_surface_count():
 		var m := node.mesh.surface_get_material(s) as ShaderMaterial
 		if m != null and m.shader != null and m.get_shader_parameter("albedo_map") != null:
-			Procedural.apply(m, "swirl_carpet", colour)
+			Procedural.apply(m, pattern, colour)
 			c.carpeted.append(m)
 		break
 

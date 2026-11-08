@@ -289,7 +289,6 @@ static func _ceiling(c: Object, l: Auditorium.Layout, w: float, pros: float) -> 
 			var s := STEPS[i]
 			var lower := BAND_Y[i + 1]
 			# The slot: the trough's floor on the lower band and its back, both close to the lamp.
-			var lamp := Vector3(0.0, lower + 0.3, s + 0.12)
 			var fa := PackedVector3Array()
 			var fb := PackedVector3Array()
 			for x in xs:
@@ -298,7 +297,6 @@ static func _ceiling(c: Object, l: Auditorium.Layout, w: float, pros: float) -> 
 			b.colour = _lin(CREAM, 0.35)
 			_pair(b, fa, fb, Vector3.UP)
 			_x_face(b, xs, w, s + 0.4, lower + 0.22, y, Vector3.FORWARD, _lin(CREAM, 0.85))
-			c.glow_lights.append([lamp + Vector3(0, 0, 0), Color(1.0, 0.8, 0.55), 0.35, 6.0])
 	# The drop beam over the proscenium: it hides the lamp that washes the proscenium's head.
 	var beam_z := pros + 0.5
 	_x_face(b, xs, w, beam_z, BAND_Y[0] - 0.42, BAND_Y[0], Vector3.BACK, _lin(CREAM, 0.03))
@@ -434,6 +432,8 @@ static func _ledges(c: Object, l: Auditorium.Layout, w: float, pros: float) -> v
 			_sweep_round(c.u, path, outs, Vector2(0.3, -0.14), 0.025, -PI * 0.5, PI * 0.5, 4)
 			c.shapes.append(PhysicsShapes.box(Vector3(s * (w - 0.15), y - 0.02, (z0 + z1) * 0.5),
 					Vector3(0.3, 0.24, absf(z1 - z0)), Basis()))
+			# For the bake: the glowing round over the ledge throws a soft light down the upper wall.
+			c.glow_lights.append([Vector3(s * (w - 0.9), y - 0.5, (z0 + z1) * 0.5), Color(1.0, 0.8, 0.56), 0.35, 4.0])
 
 
 ## The speed bands' path: from over the organ grille on the proscenium's face, along the side wall, round the rear
@@ -951,8 +951,9 @@ static func _edge_bead(b: RoomMesh, pts: PackedVector2Array, ns: PackedVector2Ar
 ## shining down, stand-in lamps in the cove's colour (they light the festoon's folds and the console; never baked: the
 ## festoon and the console are not).
 static func _footlights(c: Object, pros: float, foot: float, hw: float, top: float, screen_z: float) -> void:
-	for x: float in [-hw * 0.6, 0.0, hw * 0.6]:
-		c.footlights.append([Vector3(x, foot + 0.12, pros + 0.15), 0.35, 1.0])
+	# Two and two: the light system has eight stand-in lamps, and the shell lights take the other four in pairs.
+	for x: float in [-hw * 0.42, hw * 0.42]:
+		c.footlights.append([Vector3(x, foot + 0.12, pros + 0.15), 0.35, 1.25])
 	for x: float in [-hw * 0.45, hw * 0.45]:
 		c.footlights.append([Vector3(x, top + 0.35, screen_z + FRAME_Z[0] - 0.05), -1.0, 0.35])
 
@@ -1365,8 +1366,19 @@ static func _console(c: Object, xf: Transform3D, _e: Dictionary) -> void:
 	c.u.colour = _lin(Color(0.86, 0.86, 0.88))
 	_box(c.u, desk, Vector3(0.0, 0.185, 0.05), Vector3(0.66, 0.022, 0.12))
 	_box(c.u, desk, Vector3(0.0, 0.085, -0.015), Vector3(0.64, 0.21, 0.02), [RoomMesh.BACK])
-	# The bench: jade leather on an ivory base, chrome feet.
+	# The pedalboard in the horseshoe's open front, under the bench: a walnut frame, thirty-two pedals (the sharps
+	# black and raised), so the console's front reads as an organ's and not as a hole into the lift.
 	c.u.surface(ivory)
+	c.u.colour = _lin(WALNUT)
+	_box(c.u, xf, Vector3(0.0, 0.03, 0.5), Vector3(0.9, 0.06, 0.5), [RoomMesh.DOWN])
+	var pedals := 32
+	for k in pedals:
+		var x := -0.4 + (float(k) + 0.5) * 0.8 / pedals
+		var sharp: bool = k % 12 in [1, 3, 6, 8, 10]
+		c.u.colour = _lin(Color(0.04, 0.035, 0.03) if sharp else Color(0.72, 0.56, 0.36))
+		_box(c.u, xf, Vector3(x, 0.075 if sharp else 0.065, 0.48 if sharp else 0.52),
+				Vector3(0.014, 0.03 if sharp else 0.012, 0.18 if sharp else 0.42), [RoomMesh.DOWN])
+	# The bench: jade leather on an ivory base, chrome feet.
 	c.u.colour = _lin(Color(0.1, 0.32, 0.26))
 	_box(c.u, xf, Vector3(0.0, 0.5, 0.84), Vector3(1.0, 0.07, 0.36), [RoomMesh.DOWN])
 	c.u.colour = _lin(IVORY)

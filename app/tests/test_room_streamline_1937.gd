@@ -3,7 +3,7 @@ extends "res://tests/env_builder_harness.gd"
 ## Streamline 1937 (app/environments/streamline_1937.env.json; docs/environments.md, "Room: Streamline 1937"): a 1937
 ## moderne picture house. Built headless from its document and checked as every shipped room is (schema, budget, sight
 ## lines from every seat, comfort, licences, names, no people); then what makes it this room: its figures and parts,
-## light only in the bake (the shell lights' pools, the circle's downlights, the coves' slots), the coves (their light
+## light only in the bake (the shell lights' pools, the circle's downlights, the coves' glow down the walls), the coves (their light
 ## graded from the slots, gold by default, a setting's colour, cycling before the film, the film's colour at a glow in
 ## it), the stepped proscenium round the picture, the festoon (down to the stage, up behind the first frame's head,
 ## clear of the picture), the organ console on its lift (it rises lit and the organ plays as the room opens and between
@@ -72,8 +72,9 @@ func _built(room: Node3D) -> void:
 	var hidden := true
 	for l: Node in lamps + spots + glows:
 		hidden = hidden and not (l as Light3D).visible
-	check("the shells' pools (%d), the downlights (%d) and the slots (%d) light the bake, hidden" % [lamps.size(),
-			spots.size(), glows.size()], lamps.size() == 8 and spots.size() == 3 and glows.size() == 4 and hidden)
+	check("the shells' pools (%d), the downlights (%d) and the coves' glow down the walls (%d) light the bake, hidden"
+			% [lamps.size(), spots.size(), glows.size()], lamps.size() == 8 and spots.size() == 3 and glows.size() == 10
+			and hidden)
 	# The cove's light is graded: bright by the slots, gone a few metres off.
 	var cove := room.find_child("PieceCove", true, false) as MeshInstance3D
 	var lit := 0
@@ -347,6 +348,9 @@ func _render(doc: Dictionary) -> void:
 		await RoomRender.shot(self, vc, eye, Vector3(0.0, 9.0, -6.0), p + "ceiling")
 		await RoomRender.shot(self, vc, Vector3(-2.0, -0.6, -8.0), Vector3(0.0, -1.7, -11.35), p + "console_close")
 		await RoomRender.shot(self, vc, eye, Vector3(0.0, 3.0, 6.2), p + "circle")
+		(vc[1] as Camera3D).fov = 70.0
+		await RoomRender.shot(self, vc, Vector3(8.8, 1.7, 0.6), Vector3(8.6, -2.2, -8.0), p + "aisle")
+		await RoomRender.shot(self, vc, Vector3(-6.0, -1.2, -9.4), Vector3(-9.0, 1.0, -12.0), p + "grille")
 		(vc[1] as Camera3D).fov = 90.0
 		if phase == "preshow":
 			# The coves in jade and in rose (the Changing cycle's other colours).

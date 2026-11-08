@@ -8,7 +8,9 @@ extends "res://scripts/env/systems/kit/builder.gd"
 ## ivy, ferns, a swirling carpet over the builder's floor, a plasterboard partition, curved bands on a wall; and
 ## furniture (kit/furniture.gd): a desk, a computer, a video recorder whose clock flashes 12:00, a sideboard, a
 ## standard lamp, a rug, a coffee table; and the TV rooms' dressing (kit/dressing.gd): bunting, a tea set, sandwiches,
-## a stool, a channel dial, a soundbar, a floor lamp, a glass table (its top in PieceGlass, see-through), a media unit.
+## a stool, a channel dial, a soundbar, a floor lamp, a glass table (its top in PieceGlass, see-through), a media unit;
+## and the moderne hall's (kit/streamline.gd, since 2026-11-08): its walls and coved ceiling, a stepped proscenium, an
+## organ console (its coves in PieceCove, its clock in PieceClock).
 ## All the pieces share a few meshes, one surface a material: a baked one (PieceStatic), an unbaked one for rounded
 ## shapes and leaves (PieceSoft), the lamp shades (PieceLamps), the glows (windows, a booth's window, the video
 ## recorders' clocks: PieceDisplay) and each neon sign. The builder's slots come
@@ -28,7 +30,9 @@ static func spec() -> Dictionary:
 		"description": "Modular pieces along a builder's slots: balcony fronts, niches with an urn, a lion or an "
 				+ "obelisk, columns, courtyard façades, a castle gate round the screen, a tin booth, a neon snack bar, "
 				+ "a Mediterranean courtyard (houses with balconies, towers, loggias and lit windows, a palace gate "
-				+ "with drapes, lanterns, a lion on a pedestal, cypresses, palms and pines), a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
+				+ "with drapes, lanterns, a lion on a pedestal, cypresses, palms and pines), a 1930s moderne hall (a "
+				+ "ceiling of glowing coves, faience and chrome speed bands, a stepped proscenium round a rising sun, "
+				+ "organ grilles, a clock, an illuminated organ console on its lift), a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
 				+ "furniture: a desk, a computer, a video recorder flashing 12:00, a sideboard, a standard lamp, a rug, "
 				+ "a coffee table; dressing: bunting, a tea set, sandwiches, a stool, a channel dial, a soundbar, a "
 				+ "floor lamp, a glass table, a media unit.",
@@ -60,6 +64,8 @@ const PIECE_FIELDS := {
 	"features": {"type": "list", "max": 16, "of": {"type": "enum", "values": Courtyard.FEATURES},
 			"description": "a courtyard piece's parts (a house: balcony, loggia, tower, pergola, oriel, exit, ...)"},
 	"seed": {"type": "int", "min": 0, "max": 100000, "description": "the piece's own variation (a house's windows)"},
+	# Since 2026-11-08 (the Streamline 1937's aisles): which pattern a carpet shows (the swirls by default).
+	"pattern": {"type": "enum", "values": Procedural.PATTERNS, "description": "a carpet's pattern (swirl_carpet if none)"},
 }
 const PARAMS := {
 	"builder": {"type": "string", "max": 32, "default": "",

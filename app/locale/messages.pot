@@ -4367,7 +4367,7 @@ msgid "An old picture house taken back by nature: half its roof gone to the star
 msgstr ""
 
 #: environments/rooftop_athens.env.json
-msgid "A summer cinema on a rooftop: director's chairs, bougainvillea, a floodlit acropolis on its hill, and a cat on the wall."
+msgid "A summer cinema on an Athens roof: director's chairs on terracotta tiles, bougainvillea, strings of bulbs, the picture painted on a blind wall, a floodlit temple on its hill, the city all round."
 msgstr ""
 
 #: environments/screen_3_1983.env.json
@@ -4383,7 +4383,7 @@ msgid "A shopfront picture house, 1906: a pressed tin ceiling, folding chairs, g
 msgstr ""
 
 #: environments/streamline_1937.env.json
-msgid "A streamline cinema, 1937: cream faience bands, cove lights that change colour, an organ that rises from the pit, and a festoon curtain."
+msgid "A streamline cinema, 1937: coves that glow and change colour, a stepped proscenium round a rising sun, faience bands round the hall, an organ that rises from the pit, a festoon."
 msgstr ""
 
 #: environments/tv_1930.env.json
@@ -4632,7 +4632,7 @@ msgid "Rain through the broken roof, a misty drizzle, a clear night, or each in 
 msgstr ""
 
 #: environments/rooftop_athens.env.json
-msgid "How brightly the ruins on the hill are lit. At the bottom: dark."
+msgid "How brightly the temple on the hill is lit. At the bottom: dark."
 msgstr ""
 
 #: environments/screen_3_1983.env.json
