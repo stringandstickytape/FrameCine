@@ -16,7 +16,8 @@ Status: phase 1 being built (2026-11-08). The headset's half is in (below, "The 
 4. In the headset: the PC's windows and monitors are listed with their thumbnails (Files tab, the PC's place). Pick
    one: it opens as a pane in front of you. **Show on the big screen** puts it where the film goes, with the room's
    presentation.
-5. Squeeze and hold on a pane to move it; the stick while holding makes it bigger or smaller. The pane looked at
+5. Squeeze and hold on a pane to move it; the stick while holding: left / right smaller or bigger, up / down
+   further or nearer (as for the big screen). The pane looked at
    (half a second) is highlighted and takes the keyboard and voice.
 6. The mouse paired with the headset moves a cursor round you; over a pane it is that window's mouse. Clicks, the
    wheel and keys go to the PC window. The controller's laser and trigger work as a mouse on a pane too.
@@ -338,7 +339,7 @@ path changes:
   (20 pixels a degree), turned round the head by a pane's width from the panes already open. On the private render
   layer only (`VideoScreen.PRIVATE_LAYER`).
 - Squeeze and hold with the laser on a pane: it follows the laser at the distance it was taken and faces the head;
-  the stick up / down while holding makes it bigger or smaller.
+  the stick while holding: left / right smaller or bigger, up / down further or nearer.
 - The bar under it: **Close**, **Show on the big screen** (the window becomes the screen's source, `pcwindow://`, the
   pane's picture hides and its bar says **Back to a pane**). Another file opened, or Stop, gives the window back too.
 - Focus: the pane looked at (the calibrated eye gaze, else the head) for 0.5 s gets a thin outline in the accent

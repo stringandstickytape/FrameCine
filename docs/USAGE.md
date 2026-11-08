@@ -225,7 +225,7 @@ While a form with the keyboard is open, it has the whole main pane.
 | Menu (right) or view (left); right stick click | Open the panel in front; this controller points. With the browser's cursor on an image: keep the picture (below) | Short press: close it. Hold 0.6 s: move it to the front of the head again | M, F3 (hold: recentre); Esc closes |
 | Left stick click | Info overlay on or off | Same | Tab, F1 |
 | Grip, hold, pointing at an object or in one | Pick it up (`docs/physics.md`): stick up or down nearer or farther, left or right turns it, let go to drop it or throw it, B puts it back where it was picked up; the trigger does nothing meanwhile | Same, with the laser off the panel | |
-| Grip, hold and point | Move the flat screen (stick: nearer or farther); in 180 and 360, turn the sphere | Held 2 s with the laser on the panel, in dev mode: allow remote changes for an hour | G held and mouse |
+| Grip, hold and point | Move the flat screen (stick: up / down farther or nearer, left / right bigger or smaller); in 180 and 360, turn the sphere | Held 2 s with the laser on the panel, in dev mode: allow remote changes for an hour | G held and mouse |
 | Grip, tap | Screen (or the sphere's front) to where you look | Same | R (also recenters) |
 | Pointer hand's bumper, hold | Push to talk, when the dev link is on (`docs/dev/voice.md`), an assistant is paired, or an agent runs on the headset. With the browser on the big screen and a text field selected: speak into that field | | F8 held |
 | Pointer hand's bumper, quick tap | With an agent's pane showing: hide it | | |

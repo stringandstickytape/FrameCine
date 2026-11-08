@@ -1286,7 +1286,13 @@ func _update_grab(delta: float) -> void:
 		return
 	var hand: XRHand = _grab.get("hand")
 	if hand != null:
-		_grab["distance"] = clampf(float(_grab["distance"]) * (1.0 + hand.get_stick().y * delta * 1.5), 0.5, 30.0)
+		# The stick while gripping (the user, 2026-11-08): left / right smaller or bigger, up / down further or nearer;
+		# the stronger direction only, so a diagonal push does one thing.
+		var stick := hand.get_stick()
+		if absf(stick.x) > 0.25 and absf(stick.x) >= absf(stick.y):
+			screen_width = clampf(screen_width * (1.0 + stick.x * delta * 1.2), 0.2, 40.0)
+		elif absf(stick.y) > 0.25:
+			_grab["distance"] = clampf(float(_grab["distance"]) * (1.0 + stick.y * delta * 1.5), 0.5, 30.0)
 	var p := origin + dir * float(_grab["distance"]) - room_shift
 	screen_yaw = atan2(p.x, -p.z)
 	screen_distance = clampf(Vector2(p.x, p.z).length(), 0.5, 30.0)

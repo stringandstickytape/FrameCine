@@ -2770,7 +2770,7 @@ The PC's windows and whole monitors as panes in the headset, used with a mouse a
 - **Pairing.** System, **PC windows**: on, then **Add a PC** shows a six-digit code for 10 minutes; the PC app asks
   for it. The PC then connects by itself whenever both are on. Forget a PC there.
 - **Panes.** Files, **PC windows** lists each PC's windows and monitors as thumbnails; one click opens a pane in front
-  of you, about one PC pixel per headset pixel. Squeeze and hold to move it, the stick while holding to resize it.
+  of you, about one PC pixel per headset pixel. Squeeze and hold to move it; the stick while holding: left / right smaller or bigger, up / down further or nearer.
   Its bar: Close, and **Show on the big screen** (the window where the film goes, with the room's presentation) and
   back. Several at once.
 - **Focus.** The pane you look at for half a second gets a thin outline and the keyboard and voice. It and the big

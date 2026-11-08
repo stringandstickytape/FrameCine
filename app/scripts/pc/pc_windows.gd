@@ -4,7 +4,7 @@ extends Node3D
 ## service while System, PC windows is on (pc_service.gd), and owns what the viewer sees and uses:
 ##   panes      a window opened from the Files tab (or `pc_open`) becomes a pane in front of the viewer (pc_pane.gd),
 ##              its picture decoded by pc_video.gd; several at once. Squeeze and hold on a pane to move it (it follows
-##              the laser at the distance it was taken), the stick up / down while holding makes it bigger or smaller.
+##              the laser at the distance it was taken), the stick while holding: left / right smaller or bigger, up / down further or nearer.
 ##              Its bar: Close, Show on the big screen (the window becomes the big screen's source, a film's place
 ##              and the room's presentation: pc_window_source.gd) and back.
 ##   focus      the pane looked at for DWELL seconds (eye gaze, else the head) is highlighted and takes the keyboard
@@ -810,13 +810,16 @@ func on_grip(hand: Node, pressed: bool) -> bool:
 	return true
 
 
-## The stick while holding a pane: up bigger, down smaller. True when used.
+## The stick while holding a pane, as for the big screen (the user, 2026-11-08): right bigger, left smaller; up
+## further, down nearer. The stronger direction only, so a diagonal push does one thing. True when used.
 func on_stick(hand: Node, stick: Vector2, delta: float) -> bool:
 	if not _holds.has(hand):
 		return false
-	if absf(stick.y) > STICK_DEAD:
-		var pane: PcPane = _holds[hand]["pane"]
-		pane.set_width(pane.width * (1.0 + stick.y * RESIZE_RATE * delta))
+	var pane: PcPane = _holds[hand]["pane"]
+	if absf(stick.x) > STICK_DEAD and absf(stick.x) >= absf(stick.y):
+		pane.set_width(pane.width * (1.0 + stick.x * RESIZE_RATE * delta))
+	elif absf(stick.y) > STICK_DEAD:
+		_holds[hand]["distance"] = clampf(float(_holds[hand]["distance"]) * (1.0 + stick.y * 1.5 * delta), 0.3, 6.0)
 	return true
 
 
