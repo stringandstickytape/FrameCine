@@ -3498,3 +3498,68 @@ msgstr "声音和房间在一分钟内渐弱，影片暂停并记住位置，然
 
 msgid "The sound and the room fade out over a minute, the film pauses with its place kept, then the headset turns itself off."
 msgstr "声音和房间在一分钟内渐弱，影片暂停并记住位置，然后头显自动关机。"
+
+#. PC windows (scripts/pc/, ui/pc_windows_row.gd, ui/pc_place.gd).
+msgid "PC window"
+msgstr "电脑窗口"
+
+msgid "On the PC, run the PC windows app and type this code (%d min left)."
+msgstr "在电脑上运行电脑窗口程序，并输入此代码（还剩 %d 分钟）。"
+
+msgid "No PC yet. Press Add a PC, then run the PC windows app on the PC."
+msgstr "还没有电脑。按“添加电脑”，然后在电脑上运行电脑窗口程序。"
+
+msgid "Waiting for a paired PC on this network."
+msgstr "正在等待此网络上已配对的电脑。"
+
+msgid "%d PC connected."
+msgid_plural "%d PCs connected."
+msgstr[0] "已连接 %d 台电脑。"
+
+msgid "Can't make the certificate: %s."
+msgstr "无法生成证书：%s。"
+
+msgid "Close"
+msgstr "关闭"
+
+msgid "Back to a pane"
+msgstr "回到窗格"
+
+msgid "Show on the big screen"
+msgstr "在大屏幕上显示"
+
+msgid "PC windows"
+msgstr "电脑窗口"
+
+msgid "PC windows is off. Turn it on in System, PC windows, and add your PC there."
+msgstr "电脑窗口已关闭。请在“系统”的“电脑窗口”中打开，并在那里添加你的电脑。"
+
+msgid "No windows yet."
+msgstr "还没有窗口。"
+
+msgid "Monitor"
+msgstr "显示器"
+
+msgid "Type into the window in focus"
+msgstr "输入到当前焦点窗口"
+
+msgid "Text to type"
+msgstr "要输入的文字"
+
+msgid "Send"
+msgstr "发送"
+
+msgid "Keyboard"
+msgstr "键盘"
+
+msgid "Your PC's windows as panes here, used with a mouse and keyboard paired with the headset. Run the PC windows app on the PC."
+msgstr "把电脑的窗口作为窗格显示在这里，用与头显配对的鼠标和键盘操作。请在电脑上运行电脑窗口程序。"
+
+msgid "Add a PC"
+msgstr "添加电脑"
+
+msgid "Type this code on the PC when it asks. Five wrong codes stop it."
+msgstr "电脑要求时，在电脑上输入此代码。输错五次即停止。"
+
+msgid "connected"
+msgstr "已连接"

@@ -4,7 +4,7 @@ The PC's windows (and whole monitors) as panes in the headset, used with a mouse
 headset. Decision D31 (`docs/decisions.md`) has the why. This file is the design and the protocol both halves follow:
 the PC app (`pc/`, C++) and the headset (`app/`, GDScript, with the engine's stream decoder).
 
-Status: phase 1 being built (2026-11-08).
+Status: phase 1 being built (2026-11-08). The headset's half is in (below, "The headset"); the PC app is being built.
 
 ## What the viewer does
 
@@ -137,11 +137,124 @@ window: the headset found, the code to pair, the windows being sent, Quit.
 
 ## The headset (`app/`)
 
-- The service: `app/scripts/pc/` (the discovery reply, TLS on 47803 with the assistant's certificate, pairing,
-  control, streams), System tab's **PC windows** section, the PC's place in Files with the window list.
-- The stream decoder: the engine (`~/src/godot-binaural`) takes packets (Annex B access units with a time) and decodes
-  them in hardware on the Frame (V4L2, as films do), in software on a desktop, into the textures a pane draws.
-- Panes: `app/scripts/pc/pc_pane.gd`: the picture on a quad on the private render layer, moved by squeeze and hold,
-  resized by the stick, highlighted when looked at; one may be the big screen's source instead.
-- The cursor: captured mouse mode, relative motion on a sphere round the head; over a pane, its pixel; drawn in the
-  headset in the shape the PC said.
+Built 2026-11-08 (phase 1). Tested on the desktop against a fake PC; not yet on the device.
+
+| File | What |
+|---|---|
+| `app/scripts/pc/pc_windows.gd` | the feature (`main.features.pc_windows`): the service on or off, panes, focus, quality, the cursor, keys, text, voice, the big screen, the sound, the commands |
+| `app/scripts/pc/pc_service.gd` | discovery, the TLS listener, pairing, the first line of every connection |
+| `app/scripts/pc/pc_session.gd` | one connected PC: its control connection, window list, clock and streams |
+| `app/scripts/pc/pc_stream.gd` | one stream connection, read and split on a thread of its own |
+| `app/scripts/pc/pc_protocol.gd` | the numbers, the PCW1 header, JSON lines, key names |
+| `app/scripts/pc/pc_clock.gd` | the PC's clock as the headset sees it, and the delay |
+| `app/scripts/pc/pc_video.gd` | one window's decoder: an HWVideoTexture on a MediaSource in stream mode |
+| `app/scripts/pc/pc_sound.gd` | the PC's sound in an AudioStreamGenerator, at its time |
+| `app/scripts/pc/pc_pane.gd`, `app/shaders/pc_pane.gdshader` | a pane: the picture, the outline, the bar (Close, Show on the big screen) |
+| `app/scripts/pc/pc_cursor.gd` | the cursor and its shapes |
+| `app/scripts/pc/pc_window_source.gd` | a pane's picture as the big screen's source (`pcwindow://<pc>/<window>`) |
+| `app/ui/pc_windows_row.gd` | System, **PC windows**: on / off, Add a PC with the code and the minutes left, the paired PCs and Forget |
+| `app/ui/pc_place.gd` | Files, **PC windows**: each PC's windows and monitors as thumbnails; a line and the on-pane keyboard to type into the pane in focus |
+| `tools/pc_windows_fake_pc.py`, `app/tests/test_pc_windows.gd` | the fake PC and the test |
+
+### The service
+
+- Off until System, **PC windows** is on (`[pc_windows] enabled`). With it on, UDP and TCP 47803 open only while
+  **Add a PC** runs or once a PC is paired; a connection or a datagram from an address that is not private is ignored.
+- Discovery: a `pcw_find` gets an answer while **Add a PC** runs, or when its `pc` name is a paired PC's.
+- TLS: the assistant service's key and certificate (`user://assistant_tls.key` / `.crt`, `assistant_tls.gd`, made on
+  a thread the first time either service needs them). The pin in discovery is `cert_sha256`: the SHA-256 of the
+  certificate's DER, hex.
+- Pairing: **Add a PC** makes a code of six random digits for 10 minutes. The hello's `code` is compared in constant
+  time; five wrong codes end pairing; the right one ends it too and answers with a token. The token's SHA-256, the
+  PC's name, when it paired and its address go to `user://pc_clients.cfg` (owner read and write only;
+  `assistant_clients.gd`, which the assistant uses too). Codes and tokens are never printed.
+- Every connection is polled in `_process()` until its first line (10 s for the handshake, 10 s for the line). A
+  hello makes a session (a second one from the same PC replaces the first) and asks for `list`. A stream line is
+  taken only for a stream number that PC was asked for, with its token; the connection then belongs to a reader
+  thread.
+- `ping` every 5 s on the control connection; no `pong` for 15 s and the PC counts as gone.
+
+### The stream decoder (engine branch `frame/pc-windows`)
+
+Fork commit `42bab8c0bf` on PLAYER_ASTC's `95e9090166`, built in the worktree `~/src/godot-pcwindows`; the headset's
+build is `PLAYER_PCWIN` (`docs/BUILD.md`). The fork's `MediaSource` has a stream mode, so a PC window decodes exactly as a film does and nothing of the film
+path changes:
+
+- `MediaSource.open_stream(codec, width, height, bit_depth)`: H.264 or HEVC, no file and no demux thread. With 0 x 0
+  the size and bit depth come from the first SPS.
+- `push_video_packet(data, time_usec, keyframe)`: one Annex B access unit at `time_usec / 1e6` media seconds, into the
+  same video queue a film's demuxer fills. Any thread. Before the first key frame, and after a drop, everything up to
+  a key frame is dropped (the decoder would have no reference). More than 120 access units queued counts as a decoder
+  that is behind: the unit is dropped and `is_keyframe_wanted()` turns true.
+- `end_stream()`: the queue drains and the decoder ends.
+- A seek on a stream (the V4L2 decoder after a resolution change, a switch to software) drops what is queued and
+  waits for the next key frame.
+- `HWVideoTexture.open_source()` takes the source as it takes a film's: V4L2 in hardware on the Frame (NV12, or P010
+  or Q10C for Main 10), FFmpeg's decoders on a desktop. Its `update(delta, clock)` shows the newest frame whose time
+  is at or before the clock, so the clock passed in sets the pacing.
+- `AudioPacketDecoder`: `open("aac", rate)`, `decode(adts_frame)`: stereo float frames at the AudioServer's rate
+  (FFmpeg's AAC decoder reads the ADTS header itself), `flush()`.
+- No FFmpeg rebuild: the full build (`ffmpeg-<arch>-all`) already has the H.264, HEVC and AAC decoders.
+
+### Clock, pictures, sound
+
+- Each PC has one clock (`pc_clock.gd`): every packet's arrival gives "headset ticks minus PC time"; the smallest is
+  the offset (the packet that waited least). The PC time to show now is the headset's ticks minus the offset minus
+  the delay (`[pc_windows] delay`, 0.15 s). Drift moves the offset by at most 2 ms each 5 s; a jump of more than a
+  second (the PC restarted) resets it.
+- A stream's reader starts a new MediaSource at its first key frame and at every key frame with the config-change
+  flag (the codec is read from the first NAL unit). The pane's `pc_video.gd` opens a second HWVideoTexture on it, and
+  once that has a frame it takes over the plane textures (`swap_planes_with()`): no black between sizes.
+- `is_keyframe_wanted()` or a decoder error, or a stream connection that ends while its window is still listed: the
+  headset closes the stream and opens it again with a new number (at most every 2 s).
+- The sound: one PC's stream 0 while one of its panes is open (the pane in focus decides which PC). Each AAC frame is
+  decoded on the reader thread; `pc_sound.gd` pushes the frames into an AudioStreamGenerator so each is heard at its
+  time on the same clock: late frames are dropped, a gap before an early one is filled with silence, slips under 30 ms
+  are left alone. It plays on the Film bus, from the big screen while a window is there, else just in front of the
+  head.
+
+### Panes
+
+- Opened from Files, **PC windows** (or `pc_open`): in front of the head at 1 m, about one PC pixel per headset pixel
+  (20 pixels a degree), turned round the head by a pane's width from the panes already open. On the private render
+  layer only (`VideoScreen.PRIVATE_LAYER`).
+- Squeeze and hold with the laser on a pane: it follows the laser at the distance it was taken and faces the head;
+  the stick up / down while holding makes it bigger or smaller.
+- The bar under it: **Close**, **Show on the big screen** (the window becomes the screen's source, `pcwindow://`, the
+  pane's picture hides and its bar says **Back to a pane**). Another file opened, or Stop, gives the window back too.
+- Focus: the pane looked at (the calibrated eye gaze, else the head) for 0.5 s gets a thin outline in the accent
+  colour and takes the keyboard and the voice. The pane in focus and the one on the big screen ask for 60 fps and
+  20 Mbit/s (`quality`), the others 5 fps and 1.5 Mbit/s.
+
+### The cursor, the keys, the text
+
+- With a PC connected, the first motion of a mouse paired with the headset captures it
+  (`Input.MOUSE_MODE_CAPTURED`). Its relative motion turns the cursor round the head (0.05 degrees a count); the
+  cursor is drawn with no depth test at 1.6 degrees, in the shape the PC said for the window under it. Over a pane it
+  is on the private layer and is that window's mouse: `move` each frame it moves, `down` / `up` with the button,
+  `wheel` in notches; an `up` goes where its `down` went. Over the menu panel it is the menu's mouse. Over nothing it
+  does nothing. The PCs gone: the mouse is let go.
+- The controller's laser on a pane (when the menu, an object or a captured window doesn't have it): `move` at the
+  laser's pixel, the trigger the left button, the bar's buttons pressed.
+- Keys: while a pane has the focus and the menu isn't taking the text, each key goes as `key` with
+  `OS.get_keycode_string(physical_keycode)`, down and up (and down again while held, as a keyboard repeats).
+- `text`: the talk button while a pane has the focus (the headset's speech to text, what was said never logged), and
+  the line with the on-pane keyboard in Files, **PC windows**.
+- `focus` goes before the first click, key or text after a pane gained the focus, once.
+
+### Privacy and the assistant
+
+- The panes and the cursor over them are on the private render layer; the big screen is private while a PC window is
+  there, and the header calls it "PC window". Titles and thumbnails stay in the session and the Files tab: never in a
+  log, a command's result or the settings.
+- Commands (`docs/dev/assistant-coverage/room-system.md`): `pc_status`, `pc_list` (read: ids, kinds, the program's
+  name and size, never titles or pictures, PCs by id not name); `pc_open`, `pc_close`, `pc_screen`, `pc_pane_size`
+  (control). On / off, **Add a PC** and **Forget** have no command, as for the phone remote and the assistant's own
+  pairing: a paired PC receives the keys typed into its panes.
+
+### Only the device can tell
+
+- V4L2 decoding of several streams at once beside a film (sessions, memory, the decoder's latency).
+- The captured mouse under the Frame's compositor, and a Bluetooth keyboard's key names.
+- The latency end to end (the 150 ms delay may go down), and text sharpness at one PC pixel per headset pixel.
+- The sound's slips against the PC's clock over an hour.

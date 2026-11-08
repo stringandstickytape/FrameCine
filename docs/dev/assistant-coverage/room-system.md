@@ -98,6 +98,7 @@ The whole tab in one read: `room_settings` (read).
 | Assistant: on or off, Let an assistant find me, the pairing prompt, Paired assistants and Forget | excluded: the assistant's own pairing |
 | Assistant: Let the assistant ... (every permission switch) | excluded: an assistant must never raise its own permissions |
 | Assistant: Voice goes to | excluded: where the viewer's voice goes is the viewer's choice |
+| PC windows: on or off, Add a PC (the code, Cancel), the paired PCs and Forget | excluded: it opens a service with its own pairing, and a paired PC receives what is typed into its panes; `pc_status` (read) says whether it is on, pairing, and how many are paired and connected |
 | Dev tools: Reload theme, Remote changes, Allow for an hour, Revoke, Undo | excluded: dev only |
 | About: the version | `system_settings` version (read) |
 
@@ -115,6 +116,13 @@ The whole tab in one read: `system_settings` (read).
 | Director: the lines around now | `script_lines` (read) |
 | Director: jump to a line | `jump_to_line` {query or i} (control) |
 | Scene recipes in the Environment list | `set_environment` (room) |
+| PC windows: the window list (Files, PC windows) | `pc_list` {pc} (read): ids, kinds, the program's name and size; never titles or thumbnails |
+| PC windows: a window's tile (opens a pane) | `pc_open` {id, pc} (control) |
+| PC windows: a pane's Close | `pc_close` {id} (control) |
+| PC windows: a pane's Show on the big screen, Back to a pane | `pc_screen` {id, on} (control) |
+| PC windows: squeeze and hold to move a pane, the stick to resize it | `pc_pane_size` {id, width} (control); moving: excluded (where the viewer puts a pane is the viewer's) |
+| PC windows: the panes, the focus, the big screen | `pc_status` (read) |
+| PC windows: the mouse, the keys, the laser on a pane, the talk button and the typing line | excluded: the viewer's own input to their PC |
 | Scene recipes: save, delete, load | excluded: dev only (a recipe packs what the dev link built); a saved one is opened with `set_environment` |
 
 ## Safety
@@ -123,3 +131,6 @@ The whole tab in one read: `system_settings` (read).
   `call`, `set_prop` and `run` stay untagged: the `[assistant]` section can't be written by a consumer command. The
   test checks both, and checks that the `[assistant]` section is the same after every command here.
 - `bandwidth_test` reads only a file on the headset or on a share of a host saved in the player.
+- PC windows (`docs/pc-windows.md`): the panes are on the private render layer, so an assistant's snapshot never
+  shows them; `pc_status` names PCs by their id, never their name, and `pc_list` gives no titles or pictures. An
+  assistant may open, close, size and move a window to the big screen; it can't pair a PC, type into one or see one.

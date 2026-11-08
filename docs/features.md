@@ -2761,3 +2761,34 @@ the Environment list by itself, and `tools/i18n.py` takes its words.
 Untested: on the headset (the ritual's timing, the duck through the earbuds, the colour read-back's cost, the
 ripple in the lenses, the kept lightmap after the conversion: the room's meshes are the same, so its stamp should
 still match).
+
+## PC windows
+
+The PC's windows and whole monitors as panes in the headset, used with a mouse and keyboard paired with the headset
+(decision D31; the design, the protocol and the headset's parts in `docs/pc-windows.md`). The PC app is `pc/`.
+
+- **Pairing.** System, **PC windows**: on, then **Add a PC** shows a six-digit code for 10 minutes; the PC app asks
+  for it. The PC then connects by itself whenever both are on. Forget a PC there.
+- **Panes.** Files, **PC windows** lists each PC's windows and monitors as thumbnails; one click opens a pane in front
+  of you, about one PC pixel per headset pixel. Squeeze and hold to move it, the stick while holding to resize it.
+  Its bar: Close, and **Show on the big screen** (the window where the film goes, with the room's presentation) and
+  back. Several at once.
+- **Focus.** The pane you look at for half a second gets a thin outline and the keyboard and voice. It and the big
+  screen get the full frame rate; the others a few frames a second.
+- **Mouse and keys.** A mouse paired with the headset moves a cursor round you (captured once a PC is connected and
+  the mouse moves); over a pane it is that window's mouse, with the shape the PC says. Keys go to the pane in focus.
+  The controller's laser and trigger work as a mouse on a pane too. The talk button types what you say into the pane
+  in focus; Files, PC windows has a line and the on-pane keyboard for the same.
+- **Decoding.** The engine fork's `MediaSource` takes pushed packets (`open_stream()`, `push_video_packet()`, branch
+  `frame/pc-windows`), so a window decodes as a film does: V4L2 in hardware on the Frame. Pictures and sound play at
+  their time on the PC's clock plus 150 ms.
+- **Private.** Panes and the cursor over them are on the private render layer, so room snapshots for assistants
+  never show them; titles and thumbnails never reach a log or an assistant.
+- **Commands:** `pc_status`, `pc_list` (read; no titles), `pc_open`, `pc_close`, `pc_screen`, `pc_pane_size`
+  (control). Pairing has none, on purpose.
+- **Files:** `scripts/pc/`, `ui/pc_windows_row.gd`, `ui/pc_place.gd`, `shaders/pc_pane.gdshader`.
+- **Tested:** `tests/test_pc_windows.gd` against `tools/pc_windows_fake_pc.py` (HEVC, H.264, a config change, a stream
+  that ends, AAC), under lavapipe on the desktop.
+
+Untested: on the headset (several hardware decoders beside a film, the captured mouse under the compositor, the
+latency end to end), and against the real PC app.

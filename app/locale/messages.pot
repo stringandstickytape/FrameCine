@@ -6,11 +6,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: scripts/main.gd:1350
+#: scripts/main.gd:781
+msgid "PC window"
+msgstr ""
+
+#: scripts/main.gd:1368
 msgid "TALK"
 msgstr ""
 
-#: scripts/main.gd:1397
+#: scripts/main.gd:1415
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
@@ -265,7 +269,7 @@ msgstr ""
 msgid "Can't make the HTTPS certificate: %s."
 msgstr ""
 
-#: scripts/assistant/assistant_service.gd:51
+#: scripts/assistant/assistant_service.gd:51 scripts/pc/pc_service.gd:42
 #, c-format
 msgid "Can't listen on port %d: %s."
 msgstr ""
@@ -485,6 +489,43 @@ msgstr ""
 msgid "Library"
 msgstr ""
 
+#: scripts/pc/pc_service.gd:180
+#, c-format
+msgid "On the PC, run the PC windows app and type this code (%d min left)."
+msgstr ""
+
+#: scripts/pc/pc_service.gd:182
+msgid "No PC yet. Press Add a PC, then run the PC windows app on the PC."
+msgstr ""
+
+#: scripts/pc/pc_service.gd:185
+msgid "Waiting for a paired PC on this network."
+msgstr ""
+
+#: scripts/pc/pc_service.gd:186
+#, c-format
+msgid "%d PC connected."
+msgid_plural "%d PCs connected."
+msgstr[0] ""
+msgstr[1] ""
+
+#: scripts/pc/pc_service.gd:41
+#, c-format
+msgid "Can't make the certificate: %s."
+msgstr ""
+
+#: scripts/pc/pc_windows.gd:254
+msgid "Close"
+msgstr ""
+
+#: scripts/pc/pc_windows.gd:254
+msgid "Back to a pane"
+msgstr ""
+
+#: scripts/pc/pc_windows.gd:254
+msgid "Show on the big screen"
+msgstr ""
+
 #: scripts/pictures/picture_keeper.gd:197
 msgid "No picture under the pointer"
 msgstr ""
@@ -591,7 +632,7 @@ msgstr ""
 msgid "%d:%02d left"
 msgstr ""
 
-#: scripts/play/end_time.gd:58 ui/assistant_row.gd:240
+#: scripts/play/end_time.gd:58 ui/assistant_row.gd:240 ui/pc_windows_row.gd:110
 #, c-format
 msgid "%d min left"
 msgstr ""
@@ -1049,7 +1090,7 @@ msgstr ""
 msgid "Carbon fibre"
 msgstr ""
 
-#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/system_tab.gd:325 ui/ui_layer.gd:430
+#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/system_tab.gd:328 ui/ui_layer.gd:437
 msgid "Assistant"
 msgstr ""
 
@@ -1057,8 +1098,8 @@ msgstr ""
 msgid "An AI assistant on a computer on this network sees what plays, answers you on a card, and hears you while you hold the bumper. No program to install."
 msgstr ""
 
-#: ui/assistant_row.gd:80 ui/fab_panel.gd:104 ui/files_tab.gd:850 ui/host_form.gd:60
-#: ui/search_form.gd:42 ui/url_form.gd:59
+#: ui/assistant_row.gd:80 ui/fab_panel.gd:104 ui/files_tab.gd:861 ui/host_form.gd:60
+#: ui/pc_windows_row.gd:55 ui/search_form.gd:42 ui/url_form.gd:59
 msgid "Cancel"
 msgstr ""
 
@@ -1091,12 +1132,12 @@ msgstr ""
 msgid "%s on this headset"
 msgstr ""
 
-#: ui/assistant_row.gd:217
+#: ui/assistant_row.gd:217 ui/pc_windows_row.gd:93
 #, c-format
 msgid "%s, paired %s"
 msgstr ""
 
-#: ui/assistant_row.gd:220
+#: ui/assistant_row.gd:220 ui/pc_windows_row.gd:98
 msgid "Forget"
 msgstr ""
 
@@ -1266,7 +1307,7 @@ msgstr ""
 msgid "Search Fab's free Megascans"
 msgstr ""
 
-#: ui/fab_panel.gd:120 ui/files_tab.gd:1329 ui/files_tab.gd:396 ui/picture_panel.gd:75
+#: ui/fab_panel.gd:120 ui/files_tab.gd:1340 ui/files_tab.gd:399 ui/picture_panel.gd:75
 #: ui/search_form.gd:16 ui/surface_panel.gd:125
 msgid "Search"
 msgstr ""
@@ -1275,341 +1316,345 @@ msgstr ""
 msgid "words in English, such as rock or chair"
 msgstr ""
 
-#: ui/files_tab.gd:149
+#: ui/files_tab.gd:152
 msgid "Add host"
 msgstr ""
 
-#: ui/files_tab.gd:151 ui/files_tab.gd:536
+#: ui/files_tab.gd:154 ui/files_tab.gd:540
 msgid "Edit hosts"
 msgstr ""
 
-#: ui/files_tab.gd:165
+#: ui/files_tab.gd:168
 msgid "Favourite"
 msgstr ""
 
-#: ui/files_tab.gd:171
+#: ui/files_tab.gd:174
 msgid "In corner"
 msgstr ""
 
-#: ui/files_tab.gd:174
+#: ui/files_tab.gd:177
 msgid "Shuffle"
 msgstr ""
 
-#: ui/files_tab.gd:175 ui/files_tab.gd:65
+#: ui/files_tab.gd:178 ui/files_tab.gd:68
 msgid "Repeat: off"
 msgstr ""
 
-#: ui/files_tab.gd:178
+#: ui/files_tab.gd:181
 msgid "Play on"
 msgstr ""
 
-#: ui/files_tab.gd:179
+#: ui/files_tab.gd:182
 msgid "Gapless"
 msgstr ""
 
-#: ui/files_tab.gd:187
+#: ui/files_tab.gd:190
 msgid "Clear upcoming"
 msgstr ""
 
-#: ui/files_tab.gd:523
+#: ui/files_tab.gd:527
 #, c-format
 msgid "%d folders, %d items"
 msgstr ""
 
-#: ui/files_tab.gd:525
+#: ui/files_tab.gd:529
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/files_tab.gd:526
+#: ui/files_tab.gd:530
 #, c-format
 msgid "%d item"
 msgid_plural "%d items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/files_tab.gd:564
+#: ui/files_tab.gd:556 ui/files_tab.gd:403 ui/pc_windows_row.gd:32 ui/system_tab.gd:333
+msgid "PC windows"
+msgstr ""
+
+#: ui/files_tab.gd:575
 msgid "Test patterns (generated, no decoder)"
 msgstr ""
 
-#: ui/files_tab.gd:570
+#: ui/files_tab.gd:581
 msgid "Network: pick a host to edit"
 msgstr ""
 
-#: ui/files_tab.gd:570
+#: ui/files_tab.gd:581
 msgid "Network (SMB)"
 msgstr ""
 
-#: ui/files_tab.gd:580 ui/files_tab.gd:610
+#: ui/files_tab.gd:591 ui/files_tab.gd:621
 #, c-format
 msgid "Edit: %s"
 msgstr ""
 
-#: ui/files_tab.gd:582
+#: ui/files_tab.gd:593
 msgid "+ Add host..."
 msgstr ""
 
-#: ui/files_tab.gd:584
+#: ui/files_tab.gd:595
 msgid "Looking for hosts on this network..."
 msgstr ""
 
-#: ui/files_tab.gd:586
+#: ui/files_tab.gd:597
 msgid "Find hosts on this network"
 msgstr ""
 
-#: ui/files_tab.gd:589
+#: ui/files_tab.gd:600
 #, c-format
 msgid "Found: %s   (%s)"
 msgstr ""
 
-#: ui/files_tab.gd:592
+#: ui/files_tab.gd:603
 msgid "(simulated: this engine build has no MediaBrowser yet)"
 msgstr ""
 
-#: ui/files_tab.gd:604
+#: ui/files_tab.gd:615
 msgid "Browser: pick a page to edit"
 msgstr ""
 
-#: ui/files_tab.gd:604
+#: ui/files_tab.gd:615
 msgid "Browser (web pages and desktop windows)"
 msgstr ""
 
-#: ui/files_tab.gd:606
+#: ui/files_tab.gd:617
 #, c-format
 msgid "Stop showing: %s"
 msgstr ""
 
-#: ui/files_tab.gd:608
+#: ui/files_tab.gd:619
 msgid "+ Open a web page or a stream..."
 msgstr ""
 
-#: ui/files_tab.gd:612
+#: ui/files_tab.gd:623
 msgid "Desktop windows"
 msgstr ""
 
-#: ui/files_tab.gd:618
+#: ui/files_tab.gd:629
 msgid "(no windows)"
 msgstr ""
 
-#: ui/files_tab.gd:620
+#: ui/files_tab.gd:631
 msgid "(untitled)"
 msgstr ""
 
-#: ui/files_tab.gd:644 ui/files_tab.gd:664
+#: ui/files_tab.gd:655 ui/files_tab.gd:675
 #, c-format
 msgid "%s   (loading...)"
 msgstr ""
 
-#: ui/files_tab.gd:646
+#: ui/files_tab.gd:657
 msgid "Looking for media servers on this network..."
 msgstr ""
 
-#: ui/files_tab.gd:647
+#: ui/files_tab.gd:658
 msgid "Loading..."
 msgstr ""
 
-#: ui/files_tab.gd:741 ui/files_tab.gd:393
+#: ui/files_tab.gd:752 ui/files_tab.gd:396
 msgid "Media servers"
 msgstr ""
 
-#: ui/files_tab.gd:742
+#: ui/files_tab.gd:753
 #, c-format
 msgid "%s   (simulated)"
 msgstr ""
 
-#: ui/files_tab.gd:751
+#: ui/files_tab.gd:762
 msgid "Look again for media servers"
 msgstr ""
 
-#: ui/files_tab.gd:763
+#: ui/files_tab.gd:774
 msgid "(no folders, videos or pictures here)"
 msgstr ""
 
-#: ui/files_tab.gd:813
+#: ui/files_tab.gd:824
 msgid "No such agent"
 msgstr ""
 
-#: ui/files_tab.gd:817
+#: ui/files_tab.gd:828
 msgid "Running in its terminal"
 msgstr ""
 
-#: ui/files_tab.gd:817
+#: ui/files_tab.gd:828
 msgid "Not running"
 msgstr ""
 
-#: ui/files_tab.gd:819
+#: ui/files_tab.gd:830
 msgid "Not installed"
 msgstr ""
 
-#: ui/files_tab.gd:822
+#: ui/files_tab.gd:833
 msgid "Show on the controller"
 msgstr ""
 
-#: ui/files_tab.gd:823
+#: ui/files_tab.gd:834
 msgid "Restart, briefed on the player"
 msgstr ""
 
-#: ui/files_tab.gd:824
+#: ui/files_tab.gd:835
 msgid "Restart plain, no briefing"
 msgstr ""
 
-#: ui/files_tab.gd:826
+#: ui/files_tab.gd:837
 msgid "Start, briefed on the player"
 msgstr ""
 
-#: ui/files_tab.gd:827
+#: ui/files_tab.gd:838
 msgid "Start plain, no briefing"
 msgstr ""
 
-#: ui/files_tab.gd:829
+#: ui/files_tab.gd:840
 msgid "Hide from the controller (it keeps working)"
 msgstr ""
 
-#: ui/files_tab.gd:830
+#: ui/files_tab.gd:841
 msgid "Put it on the big screen"
 msgstr ""
 
-#: ui/files_tab.gd:838 ui/files_tab.gd:399
+#: ui/files_tab.gd:849 ui/files_tab.gd:402
 msgid "Android apps"
 msgstr ""
 
-#: ui/files_tab.gd:852
+#: ui/files_tab.gd:863
 #, c-format
 msgid "Stop %s"
 msgstr ""
 
-#: ui/files_tab.gd:859
+#: ui/files_tab.gd:870
 #, c-format
 msgid "%s: its APK's file name has spaces, so it can't run yet"
 msgstr ""
 
-#: ui/files_tab.gd:960
+#: ui/files_tab.gd:971
 #, c-format
 msgid "PICTURE %s"
 msgstr ""
 
-#: ui/files_tab.gd:960
+#: ui/files_tab.gd:971
 msgid "PICTURE"
 msgstr ""
 
-#: ui/files_tab.gd:962
+#: ui/files_tab.gd:973
 msgid "MUSIC"
 msgstr ""
 
-#: ui/files_tab.gd:978
+#: ui/files_tab.gd:989
 msgid "FISHEYE"
 msgstr ""
 
-#: ui/files_tab.gd:980
+#: ui/files_tab.gd:991
 msgid "DUAL 360"
 msgstr ""
 
-#: ui/files_tab.gd:983 ui/picture_tab.gd:22
+#: ui/files_tab.gd:994 ui/picture_tab.gd:22
 msgid "SBS"
 msgstr ""
 
-#: ui/files_tab.gd:985 ui/picture_tab.gd:22
+#: ui/files_tab.gd:996 ui/picture_tab.gd:22
 msgid "TB"
 msgstr ""
 
-#: ui/files_tab.gd:1280
+#: ui/files_tab.gd:1291
 msgid "Queue: pick a file to remove"
 msgstr ""
 
-#: ui/files_tab.gd:1280 ui/files_tab.gd:395
+#: ui/files_tab.gd:1291 ui/files_tab.gd:398
 msgid "Queue"
 msgstr ""
 
-#: ui/files_tab.gd:1293
+#: ui/files_tab.gd:1304
 msgid "(nothing queued: open a file from a folder)"
 msgstr ""
 
-#: ui/files_tab.gd:1299
+#: ui/files_tab.gd:1310
 #, c-format
 msgid "Playing: %s"
 msgstr ""
 
-#: ui/files_tab.gd:1301 ui/files_tab.gd:1322
+#: ui/files_tab.gd:1312 ui/files_tab.gd:1333
 #, c-format
 msgid "Remove: %s"
 msgstr ""
 
-#: ui/files_tab.gd:1310
+#: ui/files_tab.gd:1321
 msgid "Favourites: pick one to remove"
 msgstr ""
 
-#: ui/files_tab.gd:1310 ui/files_tab.gd:395
+#: ui/files_tab.gd:1321 ui/files_tab.gd:398
 msgid "Favourites"
 msgstr ""
 
-#: ui/files_tab.gd:1314
+#: ui/files_tab.gd:1325
 msgid "+ Add the playing file"
 msgstr ""
 
-#: ui/files_tab.gd:1317
+#: ui/files_tab.gd:1328
 msgid "(no favourites yet: open a folder and press Favourite)"
 msgstr ""
 
-#: ui/files_tab.gd:1329 ui/files_tab.gd:1330
+#: ui/files_tab.gd:1340 ui/files_tab.gd:1341
 #, c-format
 msgid "Search: %s"
 msgstr ""
 
-#: ui/files_tab.gd:1330
+#: ui/files_tab.gd:1341
 msgid "type a name..."
 msgstr ""
 
-#: ui/files_tab.gd:1341
+#: ui/files_tab.gd:1352
 msgid "(nothing found yet)"
 msgstr ""
 
-#: ui/files_tab.gd:65
+#: ui/files_tab.gd:68
 msgid "Repeat: one"
 msgstr ""
 
-#: ui/files_tab.gd:65
+#: ui/files_tab.gd:68
 msgid "Repeat: all"
 msgstr ""
 
-#: ui/files_tab.gd:392 ui/system_tab.gd:173
+#: ui/files_tab.gd:395 ui/system_tab.gd:176
 msgid "Test patterns"
 msgstr ""
 
-#: ui/files_tab.gd:393
+#: ui/files_tab.gd:396
 msgid "Network"
 msgstr ""
 
-#: ui/files_tab.gd:394
+#: ui/files_tab.gd:397
 msgid "Browser"
 msgstr ""
 
-#: ui/files_tab.gd:405
+#: ui/files_tab.gd:409
 msgid "Home"
 msgstr ""
 
-#: ui/files_tab.gd:406
+#: ui/files_tab.gd:410
 msgid "Device home"
 msgstr ""
 
-#: ui/files_tab.gd:407
+#: ui/files_tab.gd:411
 msgid "Videos"
 msgstr ""
 
-#: ui/files_tab.gd:408
+#: ui/files_tab.gd:412
 msgid "Downloads"
 msgstr ""
 
-#: ui/files_tab.gd:535
+#: ui/files_tab.gd:539
 msgid "Edit pages"
 msgstr ""
 
-#: ui/files_tab.gd:535
+#: ui/files_tab.gd:539
 msgid "Edit queue"
 msgstr ""
 
-#: ui/files_tab.gd:536
+#: ui/files_tab.gd:540
 msgid "Edit favourites"
 msgstr ""
 
@@ -2020,12 +2065,12 @@ msgstr ""
 msgid "%s deleted"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:646 ui/ui_layer.gd:226
-#: ui/ui_layer.gd:400 ui/ui_layer.gd:943 ui/ui_layer.gd:947 ui/ui_layer.gd:981
+#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:655 ui/ui_layer.gd:226
+#: ui/ui_layer.gd:407 ui/ui_layer.gd:950 ui/ui_layer.gd:954 ui/ui_layer.gd:988
 msgid "Undo"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:911
+#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:918
 msgid "The headset's cameras can't show here."
 msgstr ""
 
@@ -2324,7 +2369,7 @@ msgstr ""
 msgid "battery %d %%"
 msgstr ""
 
-#: ui/pane_ui.gd:626 ui/pane_ui.gd:665 ui/ui_layer.gd:466
+#: ui/pane_ui.gd:626 ui/pane_ui.gd:665 ui/ui_layer.gd:473
 msgid "Listening"
 msgstr ""
 
@@ -2399,6 +2444,50 @@ msgstr ""
 
 #: ui/pane_widgets.gd:12
 msgid "General"
+msgstr ""
+
+#: ui/pc_place.gd:43
+msgid "PC windows is off. Turn it on in System, PC windows, and add your PC there."
+msgstr ""
+
+#: ui/pc_place.gd:60
+msgid "No windows yet."
+msgstr ""
+
+#: ui/pc_place.gd:85
+msgid "Monitor"
+msgstr ""
+
+#: ui/pc_place.gd:101
+msgid "Type into the window in focus"
+msgstr ""
+
+#: ui/pc_place.gd:104
+msgid "Text to type"
+msgstr ""
+
+#: ui/pc_place.gd:106
+msgid "Send"
+msgstr ""
+
+#: ui/pc_place.gd:106
+msgid "Keyboard"
+msgstr ""
+
+#: ui/pc_windows_row.gd:37
+msgid "Your PC's windows as panes here, used with a mouse and keyboard paired with the headset. Run the PC windows app on the PC."
+msgstr ""
+
+#: ui/pc_windows_row.gd:45
+msgid "Add a PC"
+msgstr ""
+
+#: ui/pc_windows_row.gd:58
+msgid "Type this code on the PC when it asks. Five wrong codes stop it."
+msgstr ""
+
+#: ui/pc_windows_row.gd:95
+msgid "connected"
 msgstr ""
 
 #: ui/picture_panel.gd:48 ui/picture_panel.gd:75
@@ -2494,11 +2583,11 @@ msgstr ""
 msgid "3D"
 msgstr ""
 
-#: ui/picture_tab.gd:213 ui/system_tab.gd:166
+#: ui/picture_tab.gd:213 ui/system_tab.gd:169
 msgid "Left eye"
 msgstr ""
 
-#: ui/picture_tab.gd:213 ui/system_tab.gd:166
+#: ui/picture_tab.gd:213 ui/system_tab.gd:169
 msgid "Right eye"
 msgstr ""
 
@@ -2806,7 +2895,7 @@ msgstr ""
 msgid "Polynomial"
 msgstr ""
 
-#: ui/picture_tab.gd:31 ui/room_tab.gd:22 ui/system_tab.gd:41 environments/ice_cinema.env.json
+#: ui/picture_tab.gd:31 ui/room_tab.gd:22 ui/system_tab.gd:42 environments/ice_cinema.env.json
 msgid "Off"
 msgstr ""
 
@@ -3208,7 +3297,7 @@ msgstr ""
 msgid "Live delay"
 msgstr ""
 
-#: ui/sound_tab.gd:90 ui/system_tab.gd:534
+#: ui/sound_tab.gd:90 ui/system_tab.gd:543
 msgid "Speed"
 msgstr ""
 
@@ -3614,291 +3703,291 @@ msgstr ""
 msgid "words in English, such as brick or oak floor"
 msgstr ""
 
-#: ui/system_tab.gd:124
+#: ui/system_tab.gd:127
 msgid "Views"
 msgstr ""
 
-#: ui/system_tab.gd:125
+#: ui/system_tab.gd:128
 msgid "Info overlay"
 msgstr ""
 
-#: ui/system_tab.gd:126
+#: ui/system_tab.gd:129
 msgid "Stats"
 msgstr ""
 
-#: ui/system_tab.gd:138
+#: ui/system_tab.gd:141
 msgid "Panel"
 msgstr ""
 
-#: ui/system_tab.gd:142
+#: ui/system_tab.gd:145
 msgid "Hold menu to recentre"
 msgstr ""
 
-#: ui/system_tab.gd:143
+#: ui/system_tab.gd:146
 #, c-format
 msgid "%.2f s"
 msgstr ""
 
-#: ui/system_tab.gd:146
+#: ui/system_tab.gd:149
 msgid "Left-handed"
 msgstr ""
 
-#: ui/system_tab.gd:147
+#: ui/system_tab.gd:150
 msgid "Reset layout"
 msgstr ""
 
-#: ui/system_tab.gd:155
+#: ui/system_tab.gd:158
 msgid "Language"
 msgstr ""
 
-#: ui/system_tab.gd:159
+#: ui/system_tab.gd:162
 msgid "The menus and the controller labels. Names of films and files stay as they are."
 msgstr ""
 
-#: ui/system_tab.gd:161
+#: ui/system_tab.gd:164
 msgid "Accessibility"
 msgstr ""
 
-#: ui/system_tab.gd:162
+#: ui/system_tab.gd:165
 msgid "Larger panel"
 msgstr ""
 
-#: ui/system_tab.gd:165
+#: ui/system_tab.gd:168
 msgid "One eye for 3D"
 msgstr ""
 
-#: ui/system_tab.gd:168
+#: ui/system_tab.gd:171
 msgid "Subtitles always on"
 msgstr ""
 
-#: ui/system_tab.gd:172
+#: ui/system_tab.gd:175
 msgid "Test and setup"
 msgstr ""
 
-#: ui/system_tab.gd:174
+#: ui/system_tab.gd:177
 msgid "Network hosts"
 msgstr ""
 
-#: ui/system_tab.gd:181
+#: ui/system_tab.gd:184
 msgid "Calibration cards"
 msgstr ""
 
-#: ui/system_tab.gd:191
+#: ui/system_tab.gd:194
 msgid "Measure bandwidth"
 msgstr ""
 
-#: ui/system_tab.gd:196
+#: ui/system_tab.gd:199
 msgid "Run benchmark"
 msgstr ""
 
-#: ui/system_tab.gd:207
+#: ui/system_tab.gd:210
 msgid "Stop tour"
 msgstr ""
 
-#: ui/system_tab.gd:215
+#: ui/system_tab.gd:218
 msgid "Hardware video"
 msgstr ""
 
-#: ui/system_tab.gd:221
+#: ui/system_tab.gd:224
 msgid "Rendering"
 msgstr ""
 
-#: ui/system_tab.gd:223
+#: ui/system_tab.gd:226
 msgid "Foveation"
 msgstr ""
 
-#: ui/system_tab.gd:226
+#: ui/system_tab.gd:229
 msgid "Sharp while the panel shows"
 msgstr ""
 
-#: ui/system_tab.gd:231
+#: ui/system_tab.gd:234
 msgid "Film drawn by the headset"
 msgstr ""
 
-#: ui/system_tab.gd:234
+#: ui/system_tab.gd:237
 msgid "Curved screen too"
 msgstr ""
 
-#: ui/system_tab.gd:244
+#: ui/system_tab.gd:247
 msgid "Controllers"
 msgstr ""
 
-#: ui/system_tab.gd:247
+#: ui/system_tab.gd:250
 msgid "Haptic ticks"
 msgstr ""
 
-#: ui/system_tab.gd:249
+#: ui/system_tab.gd:252
 msgid "Tick strength"
 msgstr ""
 
-#: ui/system_tab.gd:254
+#: ui/system_tab.gd:257
 msgid "Jog wheel"
 msgstr ""
 
-#: ui/system_tab.gd:258
+#: ui/system_tab.gd:261
 msgid "One turn"
 msgstr ""
 
-#: ui/system_tab.gd:263
+#: ui/system_tab.gd:266
 msgid "Seek bar pictures"
 msgstr ""
 
-#: ui/system_tab.gd:267
+#: ui/system_tab.gd:270
 msgid "Zoom lens"
 msgstr ""
 
-#: ui/system_tab.gd:272
+#: ui/system_tab.gd:275
 msgid "Magnification"
 msgstr ""
 
-#: ui/system_tab.gd:278
+#: ui/system_tab.gd:281
 msgid "Laser on the browser"
 msgstr ""
 
-#: ui/system_tab.gd:282 ui/system_tab.gd:283
+#: ui/system_tab.gd:285 ui/system_tab.gd:286
 msgid "Phone remote"
 msgstr ""
 
-#: ui/system_tab.gd:291
+#: ui/system_tab.gd:294
 msgid "Unpair phones"
 msgstr ""
 
-#: ui/system_tab.gd:304
+#: ui/system_tab.gd:307
 msgid "Share files"
 msgstr ""
 
-#: ui/system_tab.gd:305
+#: ui/system_tab.gd:308
 msgid "Share this headset's files"
 msgstr ""
 
-#: ui/system_tab.gd:314
+#: ui/system_tab.gd:317
 msgid "Phones and computers on this network can download and upload files. Scan the code: it holds the pairing code, which is shown nowhere else."
 msgstr ""
 
-#: ui/system_tab.gd:332
+#: ui/system_tab.gd:340
 msgid "Dev tools"
 msgstr ""
 
-#: ui/system_tab.gd:336
+#: ui/system_tab.gd:344
 msgid "Reload theme"
 msgstr ""
 
-#: ui/system_tab.gd:337
+#: ui/system_tab.gd:345
 msgid "Remote changes"
 msgstr ""
 
-#: ui/system_tab.gd:342
+#: ui/system_tab.gd:350
 msgid "Allow for an hour"
 msgstr ""
 
-#: ui/system_tab.gd:346 ui/ui_layer.gd:784
+#: ui/system_tab.gd:354 ui/ui_layer.gd:791
 msgid "Revoke"
 msgstr ""
 
-#: ui/system_tab.gd:354
+#: ui/system_tab.gd:362
 msgid "About"
 msgstr ""
 
-#: ui/system_tab.gd:359
+#: ui/system_tab.gd:367
 #, c-format
 msgid "Engine %s, %s"
 msgstr ""
 
-#: ui/system_tab.gd:504
+#: ui/system_tab.gd:513
 msgid "Look"
 msgstr ""
 
-#: ui/system_tab.gd:621
+#: ui/system_tab.gd:630
 msgid "hot-reload on"
 msgstr ""
 
-#: ui/system_tab.gd:621
+#: ui/system_tab.gd:630
 msgid "hot-reload off"
 msgstr ""
 
-#: ui/system_tab.gd:623
+#: ui/system_tab.gd:632
 #, c-format
 msgid "%s; remote changes allowed for %d more min"
 msgstr ""
 
-#: ui/system_tab.gd:656
+#: ui/system_tab.gd:665
 #, c-format
 msgid "Measuring %s ..."
 msgstr ""
 
-#: ui/system_tab.gd:660
+#: ui/system_tab.gd:669
 #, c-format
 msgid "Can't measure: %s"
 msgstr ""
 
-#: ui/system_tab.gd:662
+#: ui/system_tab.gd:671
 #, c-format
 msgid "%.0f Mbit/s average, %.0f peak, opened in %d ms, %.0f MB read"
 msgstr ""
 
-#: ui/system_tab.gd:673
+#: ui/system_tab.gd:682
 msgid "This engine build can't run the benchmark."
 msgstr ""
 
-#: ui/system_tab.gd:695
+#: ui/system_tab.gd:704
 #, c-format
 msgid "Tour %s (kiosk): round %d, step %d of %d"
 msgstr ""
 
-#: ui/system_tab.gd:696
+#: ui/system_tab.gd:705
 #, c-format
 msgid "Tour %s: round %d, step %d of %d"
 msgstr ""
 
-#: ui/system_tab.gd:190
+#: ui/system_tab.gd:193
 msgid "a file on a share, e.g. smb://host/share/film.mkv"
 msgstr ""
 
-#: ui/system_tab.gd:237
+#: ui/system_tab.gd:240
 msgid "A curved screen as the headset's cylinder layer; off: drawn in the room, where things in front of it cover it"
 msgstr ""
 
-#: ui/system_tab.gd:270
+#: ui/system_tab.gd:273
 msgid "In 180 and 360: hold the grip and pull the trigger for a magnifier"
 msgstr ""
 
-#: ui/system_tab.gd:279
+#: ui/system_tab.gd:282
 msgid "The laser points and clicks on the page too, as well as the stick"
 msgstr ""
 
-#: ui/system_tab.gd:39
+#: ui/system_tab.gd:40
 msgid "Ask"
 msgstr ""
 
-#: ui/system_tab.gd:39
+#: ui/system_tab.gd:40
 msgid "Allow"
 msgstr ""
 
-#: ui/system_tab.gd:39
+#: ui/system_tab.gd:40
 msgid "Deny"
 msgstr ""
 
-#: ui/system_tab.gd:41
+#: ui/system_tab.gd:42
 msgid "Low"
 msgstr ""
 
-#: ui/system_tab.gd:41
+#: ui/system_tab.gd:42
 msgid "Medium"
 msgstr ""
 
-#: ui/system_tab.gd:41
+#: ui/system_tab.gd:42
 msgid "High"
 msgstr ""
 
-#: ui/system_tab.gd:42
+#: ui/system_tab.gd:43
 msgid "Saves GPU time at the edges of your view. High can look blocky."
 msgstr ""
 
-#: ui/system_tab.gd:43
+#: ui/system_tab.gd:44
 msgid "Foveation isn't available: this build starts without it."
 msgstr ""
 
-#: ui/system_tab.gd:46
+#: ui/system_tab.gd:47
 msgid "Both controllers. The labels change ink, or get a dark outline, to stay readable."
 msgstr ""
 
@@ -3920,116 +4009,116 @@ msgstr ""
 msgid "Remote: %s"
 msgstr ""
 
-#: ui/ui_layer.gd:400 ui/ui_layer.gd:405
+#: ui/ui_layer.gd:407 ui/ui_layer.gd:412
 #, c-format
 msgid "Assistant: %s"
 msgstr ""
 
-#: ui/ui_layer.gd:443
+#: ui/ui_layer.gd:450
 #, c-format
 msgid "Left controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:445
+#: ui/ui_layer.gd:452
 #, c-format
 msgid "Right controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:446
+#: ui/ui_layer.gd:453
 #, c-format
 msgid "Controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:453
+#: ui/ui_layer.gd:460
 #, c-format
 msgid "Left controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:455
+#: ui/ui_layer.gd:462
 #, c-format
 msgid "Right controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:456
+#: ui/ui_layer.gd:463
 #, c-format
 msgid "Controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:784
+#: ui/ui_layer.gd:791
 msgid "Remote changes allowed for an hour"
 msgstr ""
 
-#: ui/ui_layer.gd:797
+#: ui/ui_layer.gd:804
 msgid "Connecting..."
 msgstr ""
 
-#: ui/ui_layer.gd:807
+#: ui/ui_layer.gd:814
 msgid "Starting the browser..."
 msgstr ""
 
-#: ui/ui_layer.gd:821
+#: ui/ui_layer.gd:828
 msgid "Point at a seat and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:831
+#: ui/ui_layer.gd:838
 msgid "Seat unchanged"
 msgstr ""
 
-#: ui/ui_layer.gd:857
+#: ui/ui_layer.gd:864
 msgid "That can't be applied here"
 msgstr ""
 
-#: ui/ui_layer.gd:861
+#: ui/ui_layer.gd:868
 msgid "Point at a part and pull the trigger. Stick: size and turn the pattern. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:862
+#: ui/ui_layer.gd:869
 msgid "Point at a part and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:874
+#: ui/ui_layer.gd:881
 msgid "That object can't be placed here"
 msgstr ""
 
-#: ui/ui_layer.gd:878
+#: ui/ui_layer.gd:885
 msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:912
+#: ui/ui_layer.gd:919
 msgid "That's as many areas as there can be: delete one first."
 msgstr ""
 
-#: ui/ui_layer.gd:929 ui/ui_layer.gd:940
+#: ui/ui_layer.gd:936 ui/ui_layer.gd:947
 msgid "Nothing marked"
 msgstr ""
 
-#: ui/ui_layer.gd:943
+#: ui/ui_layer.gd:950
 #, c-format
 msgid "%s added: the cameras show there"
 msgstr ""
 
-#: ui/ui_layer.gd:947
+#: ui/ui_layer.gd:954
 #, c-format
 msgid "%s changed"
 msgstr ""
 
-#: ui/ui_layer.gd:965
+#: ui/ui_layer.gd:972
 msgid "Nothing changed"
 msgstr ""
 
-#: ui/ui_layer.gd:965
+#: ui/ui_layer.gd:972
 msgid "Nothing placed"
 msgstr ""
 
-#: ui/ui_layer.gd:984
+#: ui/ui_layer.gd:991
 msgid "Not placed"
 msgstr ""
 
-#: ui/ui_layer.gd:998
+#: ui/ui_layer.gd:1005
 msgid "No seat there"
 msgstr ""
 
-#: ui/ui_layer.gd:1000
+#: ui/ui_layer.gd:1007
 msgid "Seat"
 msgstr ""
 

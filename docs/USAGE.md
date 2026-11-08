@@ -184,6 +184,7 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 | `[pc_audio]` | `host` ("") | The PC for PC audio |
 | `[card]` | `place` ("hand": held above the pointer controller; "screen": beside the screen) | Where the card with the conversation and notes shows. A card that offers choices always shows beside the screen, where the laser reaches it. |
 | `[assistant]` | `enabled` (false), `guide_port` (47801, plain HTTP: the guide only), `port` (47802, HTTPS: the API), `allow_control` (false), `allow_room` (false), `voice_to` ("dev": where push-to-talk goes when the dev link is connected too; "assistant" for the assistant) | The assistant service on the headset (`docs/assistant.md`). The paired assistants (token hashes) are not here: they are in `assistant_clients.cfg`; the HTTPS key in `assistant_tls.key` and `.crt` (all owner-only, never logged). Also in System, Assistant. |
+| `[pc_windows]` | `enabled` (false), `port` (47803), `delay` (0.15: seconds behind the PC's own time that its pictures and sound play) | PC windows (`docs/pc-windows.md`). The paired PCs (token hashes) are in `pc_clients.cfg` (owner-only, never logged); the TLS key and certificate are the assistant's. Also in System, PC windows. |
 | `[dev]` | `listener_host` (""), `listener_port` (47800), `hot_reload` (false), `remote_changes` ("ask"; or "allow", "deny"), `remote_code` (false) | `docs/dev/permission-ring.md` |
 | `[benchmark]` | `auto` (true), `result`, `tries`, `last_error` | `docs/benchmark.md` |
 | `[hwvideo]` | `hw_vp9` (true) | VP9 in hardware, one video at a time (a second VP9 video, such as picture in picture, decodes in software); false: VP9 always in software. Read at start. The removed setup's `iris_bundle` and `iris_setup_prompt` are ignored if still there. 10-bit needs no setting (`docs/features.md`, "Hardware 10-bit video"). |
@@ -512,6 +513,7 @@ Ports (all LAN):
 |---|---|---|
 | TCP 47800 | headset to PC | Dev link (`listener.py serve`); its control port for `send` is TCP 47802 on 127.0.0.1 only |
 | TCP 47801, 47802 | PC to headset | The assistant service, when switched on: 47801 plain HTTP for the guide only, 47802 HTTPS for the API; open while "Let an assistant find me" runs or once an assistant is paired; private addresses only |
+| TCP and UDP 47803 | PC to headset | PC windows, when switched on (`docs/pc-windows.md`): UDP for discovery, TCP with TLS for the control and stream connections; open while "Add a PC" runs or once a PC is paired; private addresses only |
 | TCP 47820 | headset to PC | PC audio (`audio_sink.py`) |
 | TCP 47880 | phone or PC to headset | Phone remote and file sharing, when switched on |
 

@@ -25,6 +25,8 @@ const AREA := {
 	"zoom_lens": "settings", "open_test_card": "control", "lab_cards": "read", "bandwidth_test": "control",
 	"hwvideo_status": "read", "gaze_status": "read", "gaze_calibrate": "control", "gaze_pip": "control",
 	"find_line": "read", "jump_to_line": "control", "script_lines": "read",
+	"pc_status": "read", "pc_list": "read", "pc_open": "control", "pc_close": "control", "pc_screen": "control",
+	"pc_pane_size": "control",
 }
 ## Words that would mark a command reaching the assistant's own permissions or its pairing.
 const FORBIDDEN_WORDS := ["allow", "pair", "forget", "permission", "token"]
