@@ -14,7 +14,11 @@ extends Node
 ## Anything the user does during the fade (play/pause, a seek, opening a file) cancels it and puts everything back.
 ## End of file: while armed, a --dir playlist doesn't go on to the next file (main.auto_advance is held off).
 ## The timer counts wall-clock time, also while paused; during a pause it doesn't fade or pause (nothing to do).
-## Settings: [sleep] fade_seconds (default 60), [sleep] last_minutes (the last choice, for the pane's default).
+## Then (the user, 2026-11-08: say what it does, give a choice): "pause" (the film pauses, the room stays dim),
+## "close" (the app closes after the pause) or "off" (the headset turns itself off: the app closes and asks the system
+## to power off; only in the headset). Each keeps the film's place first. set_then(what).
+## Settings: [sleep] fade_seconds (default 60), [sleep] last_minutes (the last choice, for the pane's default),
+## [sleep] then.
 ## Desktop key (menu hidden): Z cycles.
 
 signal changed(active: bool, remaining: float)
@@ -22,6 +26,8 @@ signal fade_started
 signal slept
 
 const CHOICES: Array[int] = [15, 30, 60, 90]
+## What happens once the film has paused.
+const THENS: Array[String] = ["pause", "close", "off"]
 const FADE_SECONDS := 60.0
 ## The room and the picture dim to these at the end of the fade.
 const ROOM_DIM := 0.15
@@ -32,6 +38,7 @@ var active := false
 var end_of_file := false
 var fading := false
 var fade_seconds := FADE_SECONDS
+var then := "pause"
 ## Seconds of wall-clock time until the pause (timer mode).
 var _left := 0.0
 var _fade_t := 0.0
@@ -45,6 +52,9 @@ var _held_advance: Variant = null
 
 func _ready() -> void:
 	fade_seconds = maxf(float(main.settings.get_value("sleep", "fade_seconds", FADE_SECONDS)), 1.0)
+	then = str(main.settings.get_value("sleep", "then", "pause"))
+	if not then in THENS:
+		then = "pause"
 	main.player.playing_changed.connect(_on_playing_changed)
 	main.player.seeked.connect(func(_t: float) -> void:
 		if fading and not _own:
@@ -52,6 +62,15 @@ func _ready() -> void:
 	main.file_opened.connect(func(_p: String) -> void:
 		if fading and not _own:
 			_undo_fade())
+
+
+## What happens once the film has paused: "pause", "close" or "off" (THENS); remembered.
+func set_then(what: String) -> void:
+	if not what in THENS or what == then:
+		return
+	then = what
+	main.settings.set_value("sleep", "then", what)
+	changed.emit(active, remaining())
 
 
 func start(minutes: float) -> void:
@@ -117,6 +136,19 @@ func status_text(localised := false) -> String:
 	return (tr("sleep in %d min") if localised else "sleep in %d min") % ceili(_left / 60.0)
 
 
+## One line for what the timer does with the choice made (the Room tab, under the choices).
+func then_text() -> String:
+	match then:
+		"close":
+			return tr("The sound and the room fade out over a minute, the film pauses with its place kept, then the "
+					+ "app closes.")
+		"off":
+			return tr("The sound and the room fade out over a minute, the film pauses with its place kept, then the "
+					+ "headset turns itself off.")
+	return tr("The sound and the room fade out over a minute, then the film pauses with its place kept; the room "
+			+ "stays dim until you play again.")
+
+
 func _process(delta: float) -> void:
 	if not active:
 		return
@@ -163,6 +195,20 @@ func _sleep() -> void:
 	print("Sleep timer: paused and saved")
 	slept.emit()
 	changed.emit(false, 0.0)
+	if then != "pause" and main.settings.has_method("save_if_dirty"):
+		main.settings.save_if_dirty()
+	match then:
+		"close":
+			print("Sleep timer: closing the app")
+			main.get_tree().quit.call_deferred()
+		"off":
+			# Only the headset turns off; a desktop run (tests, development) closes the app at most.
+			if bool(main.get("use_xr")) and OS.get_name() == "Linux":
+				print("Sleep timer: turning the headset off")
+				OS.create_process("systemctl", ["poweroff"])
+			else:
+				print("Sleep timer: would turn the headset off (not in the headset)")
+			main.get_tree().quit.call_deferred()
 
 
 func _undo_fade() -> void:

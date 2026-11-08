@@ -121,9 +121,13 @@ func register_all() -> void:
 				{"name": "video_seconds", "type": "float", "description": "Between films, 0 to 10 seconds."}],
 		"level": "change", "returns": "{music_seconds, video_seconds}", "assistant": "room"})
 	R.register("sleep_timer", _cmd_sleep, {
-		"description": "The sleep timer: playback fades out and pauses after a time, or at the end of the file.",
-		"params": [{"name": "set", "type": "string", "required": true, "enum": SLEEP_CHOICES,
-				"description": "off, a number of minutes (15, 30, 60 or 90), or end_of_file."}],
+		"description": "The sleep timer: playback fades out and pauses after a time, or at the end of the file; then "
+				+ "the film stays paused, the app closes, or the headset turns off (then).",
+		"params": [{"name": "set", "type": "string", "enum": SLEEP_CHOICES,
+				"description": "off, a number of minutes (15, 30, 60 or 90), or end_of_file (default: as it is)."},
+				{"name": "then", "type": "string", "enum": ["pause", "close", "off"],
+				"description": "What happens once the film has paused: pause (stays paused), close (the app closes) "
+				+ "or off (the headset turns off); remembered."}],
 		"level": "control", "returns": "{active, end_of_file, remaining, status}", "assistant": "control"})
 	R.register("time_travel", _cmd_time_travel, {
 		"description": "Time travel through television: while the film plays, the room moves forward through the "
@@ -209,7 +213,8 @@ static func _seat_state(m: Node) -> Dictionary:
 static func _sleep_state(m: Node) -> Dictionary:
 	var sleep: Node = m.features.sleep
 	return {"active": bool(sleep.active), "end_of_file": bool(sleep.end_of_file),
-			"remaining": snappedf(float(sleep.remaining()), 1.0), "status": sleep.status_text()}
+			"remaining": snappedf(float(sleep.remaining()), 1.0), "status": sleep.status_text(),
+			"then": str(sleep.then)}
 
 
 static func _time_travel_state(m: Node) -> Dictionary:
@@ -315,7 +320,7 @@ func _cmd_seat(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 						index = i
 			if index < 0:
 				return ctx.fail("no seat %s here (the seats: %s)" % [to, ", ".join(names)])
-	# What Previous seat, Next seat, Room's own spot and the laser's pick do: the fade, then the move.
+	# What the seat plan, Default seat and the laser's pick do: the fade, then the move.
 	seat.go_to_seat(index)
 	_sync_tab()
 	ctx.summary = "seat: %s" % (names[index] if index >= 0 else "the room's own spot")
@@ -559,9 +564,15 @@ func _cmd_time_travel(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 func _cmd_sleep(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 	var m := _main()
 	var sleep: Node = m.features.sleep
-	var was := [bool(sleep.active), bool(sleep.end_of_file), float(sleep.remaining())]
+	var was := [bool(sleep.active), bool(sleep.end_of_file), float(sleep.remaining()), str(sleep.then)]
+	if not args.has("set") and not args.has("then"):
+		return ctx.fail("give set, then or both")
+	if args.has("then"):
+		sleep.set_then(str(args["then"]))
 	# What the tab's choices do.
-	match str(args["set"]):
+	match str(args.get("set", "")):
+		"":
+			pass
 		"off":
 			sleep.cancel()
 		"end_of_file":
@@ -571,7 +582,10 @@ func _cmd_sleep(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 	_sync_tab()
 	ctx.summary = "sleep timer: %s" % (sleep.status_text() if sleep.active else "off")
 	ctx.undo = func() -> void:
-		if not was[0]:
+		sleep.set_then(str(was[3]))
+		if not args.has("set"):
+			pass
+		elif not was[0]:
 			sleep.cancel()
 		elif was[1]:
 			sleep.start_end_of_file()

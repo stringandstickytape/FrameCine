@@ -269,6 +269,10 @@ back by then.
 
 - **Choices:** 15, 30, 60 or 90 minutes, or "end of file": the fade runs over the file's last minute and it pauses at
   the end. While end-of-file is armed, a `--dir` playlist does not go on to the next file.
+- **Then** (the user, 2026-11-08): what happens once the film has paused, said under the choice in the Room tab:
+  **Pause the film** (as above), **Close the app**, or **Turn the headset off** (the app closes and asks the system to
+  power off, `systemctl poweroff`, which the headset allows without a password; only in the headset). The film's
+  place and the settings are saved first. `[sleep] then`; the assistant's `sleep_timer` {then}.
 - **Cancel:** anything the user does during the fade (play or pause, a seek, another file) undoes the fade; the timer
   stays armed. The timer counts wall-clock time, also while paused. If it runs out while paused, it just disarms.
 - **Levels:** room light to 15 % of the user's setting, picture to 25 % (the shader's `brightness`), sound to silence
@@ -2739,7 +2743,7 @@ the Environment list by itself, and `tools/i18n.py` takes its words.
 - **Timeline and cues:** states (pre-show, starting, playing, paused, intermission, credits, ended); cues on a state,
   on a signal held long enough or on a period, with the settings they require, a chance and a cooldown; film-time
   tracks. The cinema's ritual: a chime, the lamps down to half, the curtains part, the lamps to the room's setting.
-- **Room settings:** every room has its own (Room, This room): the common ones and the document's. Kept as
+- **Room settings:** every room has its own (Room, Current): the common ones and the document's. Kept as
   `[room:<env>]`. Commands: `room_settings` (`this_room`) and `room_setting`.
 - **Audio buses:** Film, Environment, Interface. The Environment sound slider (Sound tab, default -18 dB), the room's
   offset, the duck under the film (measured: 7 dB at the film's reference level, 19 dB under a loud scene), the pause

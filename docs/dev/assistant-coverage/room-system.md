@@ -27,10 +27,11 @@ Objects tab calls the same functions (`app/ui/object_section.gd`, `app/ui/object
 |---|---|
 | Environment: a row of the list | `set_environment` {id} (room). The list: `room_settings` environments (read) |
 | Use this picture as the room | `use_picture_as_room` (room) |
-| This room: each setting (a toggle, a slider, a row of choices, built from the room's declarations) | `room_setting` {name, value} (room). The declarations, their JSON Schemas and values: `room_settings` this_room (read) |
-| This room: Back to defaults | `room_setting` {reset: true} (room) |
+| Current: each setting (a toggle, a slider, a row of choices, built from the room's declarations) | `room_setting` {name, value} (room). The declarations, their JSON Schemas and values: `room_settings` this_room (read) |
+| Current: Back to defaults | `room_setting` {reset: true} (room) |
 | Seat: the label | `room_settings` seat (read) |
-| Previous seat, Next seat, Room's own spot | `seat` {to: previous, next or own} (control) |
+| Current: the seat plan (a seat clicked), Default seat | `seat` {to: an index, or own} (control); the seats: `room_settings` (read) |
+| Room list: the groups folding open and shut | excluded: panel navigation |
 | Pick a seat (the laser) | `seat` {to: the seat's name} (control) |
 | Go to (a seat moved by an assistant's change) | `seat` {to: the seat's name} (control) |
 | Floor reflection, Reflection | `floor_reflection` {on, strength} (room) |
@@ -64,6 +65,7 @@ Objects tab calls the same functions (`app/ui/object_section.gd`, `app/ui/object
 | Intermission, its minutes | `intermission` {on, minutes} (room) |
 | Crossfade music, Crossfade films | `crossfade` {music_seconds, video_seconds} (room) |
 | Sleep timer (Off, 15, 30, 60, 90 min, End of file), its countdown | `sleep_timer` {set} (control); the countdown: `room_settings` sleep (read) |
+| Sleep timer's Then (Pause the film, Close the app, Turn the headset off) | `sleep_timer` {then} (control) |
 | Time travel under Television (on, Over the film, Every 5, 10, 15 minutes) | `time_travel` {on, minutes, advance} (room); its state: `room_settings` time_travel (read) |
 
 The whole tab in one read: `room_settings` (read).

@@ -15,8 +15,13 @@ const W := preload("res://ui/pane_widgets.gd")
 const EnvLibrary := preload("res://scripts/env/env_library.gd")
 const Recipes := preload("res://scripts/dev/recipes.gd")
 const Showrooms := preload("res://scripts/env/showrooms.gd")
+const Icons := preload("res://ui/icons.gd")
+const PaneStyle := preload("res://ui/pane_style.gd")
+const SeatPlan := preload("res://ui/seat_plan.gd")
 
 const SLEEP_WORDS := ["Off", "15 min", "30 min", "60 min", "90 min", "End of file"] # i18n
+## What the sleep timer does at the end, in sleep_timer.gd THENS' order.
+const SLEEP_THENS := ["Pause the film", "Close the app", "Turn the headset off"] # i18n
 ## The names of the rooms that ship (main.gd ENVIRONMENTS, scripts/env/env_library.gd BUILT_IN; a room that ships as a
 ## document alone has its name extracted from its .env.json by tools/i18n.py), as keys: their rows
 ## translate them. test_i18n.gd checks that each built-in room's name is here.
@@ -40,10 +45,16 @@ var _cinema_box: VBoxContainer
 var _cinemas: HFlowContainer
 var _tv_box: VBoxContainer
 var _tvs: HFlowContainer
-var _built_in_label: Label
+var _built_in_label: Button
 ## The showrooms (scripts/env/showrooms.gd), the list's last rows: their own group under the rooms, one row each.
 var _showroom_box: VBoxContainer
 var _showrooms: HFlowContainer
+var _built_in_box: VBoxContainer
+## The rooms' groups fold: closed when the app starts, one open at a time (the user, 2026-11-08: "less
+## impenetrable"). Title -> {head: Button, body: VBoxContainer, rows: HFlowContainer}; _open_group: the open one's.
+const GROUP_TITLES: Array[String] = ["Cinemas", "Television", "Built in", "Yours", "Showrooms"] # i18n
+var _groups := {}
+var _open_group := ""
 ## Every environment row, the rooms' then the showrooms', in _env_ids' order.
 var _env_rows: Array[Button] = []
 var _use_picture: Button
@@ -58,6 +69,7 @@ var _this_room: VBoxContainer
 var _this_room_controls := {}
 var _this_room_key := ""
 var _seat_box: VBoxContainer
+var _seat_plan: Control
 var _seat_label: Label
 var _point_seat: Button
 ## An assistant moved the viewer's seat: goes there (faded).
@@ -87,6 +99,8 @@ var _light: VBoxContainer
 var _follow: Button
 var _play_level: VBoxContainer
 var _sleep: HFlowContainer
+var _sleep_then: HFlowContainer
+var _sleep_then_help: Label
 var _sleep_status: Label
 
 
@@ -102,47 +116,36 @@ func _init() -> void:
 func bind(p_app: Node) -> void:
 	app = p_app
 	box.add_child(W.section("Environment"))
-	_cinema_box = W.vbox()
-	box.add_child(_cinema_box)
-	_cinema_box.add_child(W.label("Cinemas", &"MutedLabel"))
-	_cinemas = W.flow()
-	_cinema_box.add_child(_cinemas)
-	_tv_box = W.vbox()
-	box.add_child(_tv_box)
-	_tv_box.add_child(W.label("Television", &"MutedLabel"))
-	_tvs = W.flow()
-	_tv_box.add_child(_tvs)
+	_cinema_box = _group("Cinemas")
+	_cinemas = _groups["Cinemas"]["rows"]
+	_tv_box = _group("Television")
+	_tvs = _groups["Television"]["rows"]
+	var tv_body: VBoxContainer = _groups["Television"]["body"]
 	_time_travel = W.toggle("Time travel", _on_time_travel)
-	_tv_box.add_child(W.hbox([_time_travel]))
+	tv_body.add_child(W.hbox([_time_travel]))
 	_time_travel_every = W.choices(["Over the film", "Every 5 minutes", "Every 10 minutes", "Every 15 minutes"],
 			_on_time_travel_every)
-	_tv_box.add_child(_time_travel_every)
-	_tv_box.add_child(W.help("One film, and the room moves forward through the history of television, "
+	tv_body.add_child(_time_travel_every)
+	tv_body.add_child(W.help("One film, and the room moves forward through the history of television, "
 			+ "an era at a time while it plays."))
 	app.features.time_travel.changed.connect(func(_on: bool) -> void: _sync_time_travel())
-	_built_in_label = W.label("Built in", &"MutedLabel")
-	box.add_child(_built_in_label)
-	_envs = W.flow()
-	box.add_child(_envs)
-	_yours_box = W.vbox()
-	box.add_child(_yours_box)
-	_yours_box.add_child(W.label("Yours", &"MutedLabel"))
-	_yours = W.flow()
-	_yours_box.add_child(_yours)
+	_built_in_box = _group("Built in")
+	_built_in_label = _groups["Built in"]["head"]
+	_envs = _groups["Built in"]["rows"]
+	_yours_box = _group("Yours")
+	_yours = _groups["Yours"]["rows"]
 	_use_picture = W.button("Use this picture as the room", _use_picture_as_room)
 	box.add_child(W.hbox([_use_picture]))
-	_showroom_box = W.vbox()
-	box.add_child(_showroom_box)
-	_showroom_box.add_child(W.section("Showrooms"))
-	_showrooms = W.flow()
+	_showroom_box = _group("Showrooms")
+	_showrooms = _groups["Showrooms"]["rows"]
 	_showrooms.add_theme_constant_override("separation", 0)
-	_showroom_box.add_child(_showrooms)
 
 	# This room (docs/environments.md, "Room settings"): built from the room's declarations, the common ones and the
 	# room's own; their labels and descriptions are keys (env_doc.gd COMMON_TEXTS, the documents' settings).
 	_this_room_box = W.vbox()
 	box.add_child(_this_room_box)
-	_this_room_box.add_child(W.section("This room"))
+	# Current: the room in use: its line, its settings, its seats on a plan and the placement (the user, 2026-11-08).
+	_this_room_box.add_child(W.section("Current"))
 	_about = W.help("")
 	_this_room_box.add_child(_about)
 	_this_room = W.vbox()
@@ -152,26 +155,33 @@ func bind(p_app: Node) -> void:
 		_sync_this_room())]))
 	app.features.room_settings.changed.connect(_sync_this_room)
 
-	# Seats (#19): rooms that have them.
+	# Seats (#19), under Current: the room's plan from above (ui/seat_plan.gd), pointing at a seat sits there.
 	_seat_box = W.vbox()
 	box.add_child(_seat_box)
-	_seat_box.add_child(W.section("Seat"))
 	var seat: Node = app.features.seat
+	_seat_plan = SeatPlan.new()
+	_seat_plan.app = app
+	_seat_box.add_child(_seat_plan)
 	_seat_label = W.label("", &"MutedLabel")
 	W.content(_seat_label)
 	# Wraps: a seat's name and a longer language fit the card.
 	_seat_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_seat_box.add_child(_seat_label)
-	_seat_box.add_child(W.flow([W.button("Previous seat", func() -> void: seat.next_seat(-1)),
-			W.button("Next seat", func() -> void: seat.next_seat(1)),
-			W.button("Room's own spot", func() -> void: seat.go_to_seat(-1))]))
-	# In the headset: the laser picks one (the layer's seat picking).
+	# In the headset: the laser picks one in the room (the layer's seat picking).
 	_point_seat = W.button("Pick a seat", func() -> void: app.ui.start_seat_pick())
 	_seat_moved = W.button("", func() -> void: seat.go_to_seat(int(seat.seat)))
 	_seat_moved.visible = false
 	W.content(_seat_moved)
-	_seat_box.add_child(W.hbox([_point_seat, _seat_moved]))
+	_seat_box.add_child(W.flow([W.button("Default seat", func() -> void: seat.go_to_seat(-1)), _point_seat,
+			_seat_moved]))
 	seat.changed.connect(func(_s: int) -> void: _sync_room_parts())
+
+	# Placement, under Current: "Reset room" replaces "Recentre", which recentred the view and turned the screen to the
+	# gaze in the same frame, before the recentre had moved the camera: the screen swung away from the room, into a
+	# wall (headset, 2026-10-31).
+	box.add_child(W.flow([W.button("Reset room", func() -> void: app.reset_room()),
+			W.button("Reset screen", func() -> void: app.reset_screen())]))
+	box.add_child(W.help("Reset room: back to the room's own seat, facing the screen, view recentred."))
 
 	# Floor reflection (#62): rooms with a floor for it.
 	_reflection_box = W.vbox()
@@ -234,13 +244,6 @@ func bind(p_app: Node) -> void:
 			func(v: float) -> void: follow.set_play_level(v))
 	box.add_child(_play_level)
 
-	box.add_child(W.section("Placement"))
-	# "Reset room" replaces "Recentre", which recentred the view and turned the screen to the gaze in the same frame,
-	# before the recentre had moved the camera: the screen swung away from the room, into a wall (headset, 2026-10-31).
-	box.add_child(W.flow([W.button("Reset room", func() -> void: app.reset_room()),
-			W.button("Reset screen", func() -> void: app.reset_screen())]))
-	box.add_child(W.help("Reset room: back to the room's own seat, facing the screen, view recentred."))
-
 	box.add_child(W.section("The showing"))
 	var preshow: Node = app.features.preshow
 	_curtains = W.toggle("Curtains", func(on: bool) -> void: preshow.set_enabled(on))
@@ -289,6 +292,14 @@ func bind(p_app: Node) -> void:
 	_sleep_status = W.label("", &"MutedLabel")
 	W.content(_sleep_status)
 	box.add_child(_sleep_status)
+	box.add_child(W.label("Then"))
+	_sleep_then = W.choices(SLEEP_THENS, func(i: int) -> void:
+		sleep.set_then(str(sleep.THENS[i]))
+		_sync_sleep())
+	box.add_child(_sleep_then)
+	_sleep_then_help = W.help("")
+	W.content(_sleep_then_help)
+	box.add_child(_sleep_then_help)
 	sleep.changed.connect(func(_a: bool, _r: float) -> void: _sync_sleep())
 	app.environment_changed.connect(func(_id: String, _l: float) -> void: sync())
 	sync()
@@ -319,6 +330,8 @@ func _sync_sleep() -> void:
 			choice = maxi(1, (sleep.CHOICES as Array).find(minutes) + 1)
 	W.set_choice(_sleep, choice)
 	_sleep_status.text = sleep.status_text(true) if sleep.active else ""
+	W.set_choice(_sleep_then, (sleep.THENS as Array).find(sleep.then))
+	_sleep_then_help.text = sleep.then_text()
 
 
 ## A few times a second while the tab shows: the countdowns.
@@ -392,12 +405,57 @@ func _sync_envs() -> void:
 		_showroom_box.visible = _showrooms.get_child_count() > 0
 		_cinema_box.visible = _cinemas.get_child_count() > 0
 		_tv_box.visible = _tvs.get_child_count() > 0
-		_built_in_label.visible = _envs.get_child_count() > 0
+		_built_in_box.visible = _envs.get_child_count() > 0
 	for i in _env_rows.size():
 		_env_rows[i].set_pressed_no_signal(_env_ids[i] == str(app.env_id))
 		if _env_rows[i].has_meta("photo"):
 			_env_rows[i].text = tr("%s (photo)") % _env_rows[i].get_meta("photo")
 	_use_picture.visible = bool(app.features.slideshow.is_picture()) and not str(app.current_path).begins_with("smb://")
+	_sync_groups()
+
+
+## A folding group of rooms under the box: its heading (a button with a chevron) and its body (the rows, then what
+## the caller adds), closed until opened. Returns the group's own box.
+func _group(title: String) -> VBoxContainer:
+	var outer := W.vbox()
+	box.add_child(outer)
+	var head := W.button("", func() -> void: open_group("" if _open_group == title else title))
+	W.content(head)
+	head.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	head.set_meta("group", title)
+	head.set_meta("label", title)
+	outer.add_child(head)
+	var body := W.vbox()
+	body.visible = false
+	outer.add_child(body)
+	var rows := W.flow()
+	body.add_child(rows)
+	_groups[title] = {"head": head, "body": body, "rows": rows}
+	return outer
+
+
+## Opens one group of rooms and closes the rest ("": all closed).
+func open_group(title: String) -> void:
+	_open_group = title if _groups.has(title) else ""
+	_sync_groups()
+
+
+## The groups' headings and bodies: the open one's body shown; a closed heading names the room in use when it is in
+## that group ("Television · TV 1953"), so the list says where the viewer is with every group closed.
+func _sync_groups() -> void:
+	var px := roundi(PaneStyle.constant(&"button_height") * 0.5)
+	for title: String in _groups:
+		var g: Dictionary = _groups[title]
+		var open := title == _open_group
+		(g["body"] as Control).visible = open
+		var head: Button = g["head"]
+		var here := ""
+		if not open:
+			for row: Node in (g["rows"] as Node).get_children():
+				if row is Button and (row as Button).button_pressed:
+					here = (row as Button).atr((row as Button).text)
+		head.text = tr(title) + ("  ·  " + here if here != "" else "")
+		head.icon = Icons.texture("chevron-open" if open else "chevron-closed", px, PaneStyle.color(&"text"))
 
 
 ## "This room": a toggle for a bool, a slider for a range, a row of choices for a choice, each with its description
@@ -476,6 +534,8 @@ func _sync_room_parts() -> void:
 	var seat: Node = app.features.seat
 	var seats: Array = seat.seats()
 	_seat_box.visible = not seats.is_empty()
+	if _seat_box.visible:
+		_seat_plan.refresh()
 	_point_seat.visible = bool(app.use_xr)
 	var names: Array = seat.names()
 	var at := int(seat.seat)

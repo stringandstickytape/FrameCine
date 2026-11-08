@@ -6,128 +6,128 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: scripts/main.gd:1306
+#: scripts/main.gd:1350
 msgid "TALK"
 msgstr ""
 
-#: scripts/main.gd:1353
+#: scripts/main.gd:1397
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
 
-#: scripts/main.gd:138
+#: scripts/main.gd:152
 msgid "PLAY / PAUSE"
 msgstr ""
 
-#: scripts/main.gd:138 scripts/main.gd:157 scripts/main.gd:166
+#: scripts/main.gd:152 scripts/main.gd:171 scripts/main.gd:180
 msgid "CLICK"
 msgstr ""
 
-#: scripts/main.gd:140
+#: scripts/main.gd:154
 msgid "SEEK / DIST"
 msgstr ""
 
-#: scripts/main.gd:140
+#: scripts/main.gd:154
 msgid "SCROLL"
 msgstr ""
 
-#: scripts/main.gd:141 scripts/main.gd:143
+#: scripts/main.gd:155 scripts/main.gd:157
 msgid "MENU"
 msgstr ""
 
-#: scripts/main.gd:141 scripts/main.gd:143
+#: scripts/main.gd:155 scripts/main.gd:157
 msgid "CLOSE"
 msgstr ""
 
-#: scripts/main.gd:144
+#: scripts/main.gd:158
 msgid "INFO"
 msgstr ""
 
-#: scripts/main.gd:145
+#: scripts/main.gd:159
 msgid "NEXT"
 msgstr ""
 
-#: scripts/main.gd:146
+#: scripts/main.gd:160
 msgid "PREV"
 msgstr ""
 
-#: scripts/main.gd:147
+#: scripts/main.gd:161
 msgid "LABELS"
 msgstr ""
 
-#: scripts/main.gd:149
+#: scripts/main.gd:163
 msgid "CHAPTER -"
 msgstr ""
 
-#: scripts/main.gd:150
+#: scripts/main.gd:164
 msgid "CHAPTER +"
 msgstr ""
 
-#: scripts/main.gd:151
+#: scripts/main.gd:165
 msgid "REPLAY"
 msgstr ""
 
-#: scripts/main.gd:158
+#: scripts/main.gd:172
 msgid "R-CLICK"
 msgstr ""
 
-#: scripts/main.gd:159 scripts/main.gd:186
+#: scripts/main.gd:173 scripts/main.gd:200
 msgid "SCROLL / KEYS"
 msgstr ""
 
-#: scripts/main.gd:160 scripts/main.gd:169 scripts/main.gd:187 scripts/main.gd:199
+#: scripts/main.gd:174 scripts/main.gd:183 scripts/main.gd:201 scripts/main.gd:213
 msgid "SPACE"
 msgstr ""
 
-#: scripts/main.gd:161 scripts/main.gd:170 scripts/main.gd:188
+#: scripts/main.gd:175 scripts/main.gd:184 scripts/main.gd:202
 msgid "BACK"
 msgstr ""
 
-#: scripts/main.gd:167 scripts/main.gd:197
+#: scripts/main.gd:181 scripts/main.gd:211
 msgid "HOLD: SCROLL"
 msgstr ""
 
-#: scripts/main.gd:168
+#: scripts/main.gd:182
 msgid "POINTER"
 msgstr ""
 
-#: scripts/main.gd:175
+#: scripts/main.gd:189
 msgid "KEEP PICTURE"
 msgstr ""
 
-#: scripts/main.gd:178
+#: scripts/main.gd:192
 msgid "APPLY"
 msgstr ""
 
-#: scripts/main.gd:179
+#: scripts/main.gd:193
 msgid "SIZE / TURN"
 msgstr ""
 
-#: scripts/main.gd:180 scripts/main.gd:209
+#: scripts/main.gd:194 scripts/main.gd:223
 msgid "CANCEL"
 msgstr ""
 
-#: scripts/main.gd:196
+#: scripts/main.gd:210
 msgid "ENTER"
 msgstr ""
 
-#: scripts/main.gd:198
+#: scripts/main.gd:212
 msgid "ARROWS"
 msgstr ""
 
-#: scripts/main.gd:200
+#: scripts/main.gd:214
 msgid "ESC"
 msgstr ""
 
-#: scripts/main.gd:204
+#: scripts/main.gd:218
 msgid "GRAB"
 msgstr ""
 
-#: scripts/main.gd:207
+#: scripts/main.gd:221
 msgid "LET GO: THROW"
 msgstr ""
 
-#: scripts/main.gd:208
+#: scripts/main.gd:222
 msgid "NEAR-FAR / TURN"
 msgstr ""
 
@@ -369,13 +369,25 @@ msgstr ""
 msgid "In bed"
 msgstr ""
 
-#: scripts/comfort/sleep_timer.gd:116
+#: scripts/comfort/sleep_timer.gd:135
 msgid "sleep at end of file"
 msgstr ""
 
-#: scripts/comfort/sleep_timer.gd:117
+#: scripts/comfort/sleep_timer.gd:136
 #, c-format
 msgid "sleep in %d min"
+msgstr ""
+
+#: scripts/comfort/sleep_timer.gd:143
+msgid "The sound and the room fade out over a minute, the film pauses with its place kept, then the app closes."
+msgstr ""
+
+#: scripts/comfort/sleep_timer.gd:146
+msgid "The sound and the room fade out over a minute, the film pauses with its place kept, then the headset turns itself off."
+msgstr ""
+
+#: scripts/comfort/sleep_timer.gd:148
+msgid "The sound and the room fade out over a minute, then the film pauses with its place kept; the room stays dim until you play again."
 msgstr ""
 
 #: scripts/env/env_doc.gd:69
@@ -450,7 +462,7 @@ msgstr ""
 msgid "An open geodesic dome on a wide plain at dusk, the first stars coming out overhead."
 msgstr ""
 
-#: scripts/env/room_settings.gd:204 ui/room_tab.gd:269 ui/sound_tab.gd:76
+#: scripts/env/room_settings.gd:204 ui/room_tab.gd:272 ui/sound_tab.gd:76
 msgid "off"
 msgstr ""
 
@@ -464,7 +476,7 @@ msgstr ""
 msgid "%.1f s"
 msgstr ""
 
-#: scripts/env/room_settings.gd:213 ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:260
+#: scripts/env/room_settings.gd:213 ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:263
 #, c-format
 msgid "%d min"
 msgstr ""
@@ -491,7 +503,7 @@ msgstr ""
 msgid "Already in your pictures: %s"
 msgstr ""
 
-#: scripts/pictures/picture_library.gd:85 ui/object_section.gd:499 ui/pane_ui.gd:55 ui/picture_tab.gd:288
+#: scripts/pictures/picture_library.gd:85 ui/object_section.gd:499 ui/pane_ui.gd:54 ui/picture_tab.gd:288
 msgid "Picture"
 msgstr ""
 
@@ -1058,7 +1070,7 @@ msgstr ""
 msgid "Let an assistant find me"
 msgstr ""
 
-#: ui/assistant_row.gd:97 ui/pane_ui.gd:54
+#: ui/assistant_row.gd:97 ui/pane_ui.gd:53
 msgid "Stop"
 msgstr ""
 
@@ -1891,7 +1903,7 @@ msgstr ""
 msgid "optional"
 msgstr ""
 
-#: ui/hw_video_row.gd:25 ui/pane_ui.gd:65
+#: ui/hw_video_row.gd:25 ui/pane_ui.gd:64
 msgid "Details"
 msgstr ""
 
@@ -1924,7 +1936,7 @@ msgstr ""
 msgid "Specials"
 msgstr ""
 
-#: ui/library_view.gd:237 ui/library_view.gd:241 ui/pane_ui.gd:54 ui/pane_ui.gd:701
+#: ui/library_view.gd:237 ui/library_view.gd:241 ui/pane_ui.gd:53 ui/pane_ui.gd:700
 msgid "Play"
 msgstr ""
 
@@ -2289,99 +2301,99 @@ msgstr ""
 msgid "abc"
 msgstr ""
 
-#: ui/pane_ui.gd:237
+#: ui/pane_ui.gd:236
 msgid "Steady detail"
 msgstr ""
 
-#: ui/pane_ui.gd:241 ui/picture_tab.gd:28
+#: ui/pane_ui.gd:240 ui/picture_tab.gd:28
 msgid "Smooth banding"
 msgstr ""
 
-#: ui/pane_ui.gd:619
+#: ui/pane_ui.gd:618
 #, c-format
 msgid "%s, %s"
 msgstr ""
 
-#: ui/pane_ui.gd:622
+#: ui/pane_ui.gd:621
 #, c-format
 msgid "battery %d %%, charging"
 msgstr ""
 
-#: ui/pane_ui.gd:623
+#: ui/pane_ui.gd:622
 #, c-format
 msgid "battery %d %%"
 msgstr ""
 
-#: ui/pane_ui.gd:627 ui/pane_ui.gd:666 ui/ui_layer.gd:466
+#: ui/pane_ui.gd:626 ui/pane_ui.gd:665 ui/ui_layer.gd:466
 msgid "Listening"
 msgstr ""
 
-#: ui/pane_ui.gd:743
+#: ui/pane_ui.gd:742
 #, c-format
 msgid "Chapter %s"
 msgstr ""
 
-#: ui/pane_ui.gd:240
+#: ui/pane_ui.gd:239
 msgid "Fine detail filtered where the picture is shrunk, so it doesn't shimmer."
 msgstr ""
 
-#: ui/pane_ui.gd:244
+#: ui/pane_ui.gd:243
 msgid "Hides the steps in dark gradients (8-bit video)."
 msgstr ""
 
-#: ui/pane_ui.gd:54
+#: ui/pane_ui.gd:53
 msgid "Previous"
 msgstr ""
 
-#: ui/pane_ui.gd:54
+#: ui/pane_ui.gd:53
 msgid "−10 s"
 msgstr ""
 
-#: ui/pane_ui.gd:54
+#: ui/pane_ui.gd:53
 msgid "+10 s"
 msgstr ""
 
-#: ui/pane_ui.gd:54
+#: ui/pane_ui.gd:53
 msgid "Next"
 msgstr ""
 
-#: ui/pane_ui.gd:55
+#: ui/pane_ui.gd:54
 msgid "Source"
 msgstr ""
 
-#: ui/pane_ui.gd:55
+#: ui/pane_ui.gd:54
 msgid "Sound"
 msgstr ""
 
-#: ui/pane_ui.gd:55
+#: ui/pane_ui.gd:54
 msgid "Subtitles"
 msgstr ""
 
-#: ui/pane_ui.gd:55
+#: ui/pane_ui.gd:54
 msgid "Room"
 msgstr ""
 
-#: ui/pane_ui.gd:55 environments/showrooms/index.json
+#: ui/pane_ui.gd:54 environments/showrooms/index.json
 msgid "Objects"
 msgstr ""
 
-#: ui/pane_ui.gd:55
+#: ui/pane_ui.gd:54
 msgid "Mixed reality"
 msgstr ""
 
-#: ui/pane_ui.gd:56
+#: ui/pane_ui.gd:55
 msgid "System"
 msgstr ""
 
-#: ui/pane_ui.gd:65
+#: ui/pane_ui.gd:64
 msgid "List"
 msgstr ""
 
-#: ui/pane_ui.gd:65
+#: ui/pane_ui.gd:64
 msgid "Grid"
 msgstr ""
 
-#: ui/pane_ui.gd:701
+#: ui/pane_ui.gd:700
 msgid "Pause"
 msgstr ""
 
@@ -2506,7 +2518,7 @@ msgstr ""
 msgid "Soft edges"
 msgstr ""
 
-#: ui/picture_tab.gd:229
+#: ui/picture_tab.gd:229 ui/seat_plan.gd:128
 msgid "Screen"
 msgstr ""
 
@@ -2637,7 +2649,7 @@ msgstr ""
 msgid "Each picture"
 msgstr ""
 
-#: ui/picture_tab.gd:337 ui/room_tab.gd:257 ui/room_tab.gd:269
+#: ui/picture_tab.gd:337 ui/room_tab.gd:260 ui/room_tab.gd:272
 #, c-format
 msgid "%d s"
 msgstr ""
@@ -2794,7 +2806,7 @@ msgstr ""
 msgid "Polynomial"
 msgstr ""
 
-#: ui/picture_tab.gd:31 ui/room_tab.gd:19 ui/system_tab.gd:41 environments/ice_cinema.env.json
+#: ui/picture_tab.gd:31 ui/room_tab.gd:22 ui/system_tab.gd:41 environments/ice_cinema.env.json
 msgid "Off"
 msgstr ""
 
@@ -2841,314 +2853,314 @@ msgstr ""
 msgid "%s (the folder's rule)"
 msgstr ""
 
-#: ui/room_tab.gd:104
+#: ui/room_tab.gd:118
 msgid "Environment"
 msgstr ""
 
-#: ui/room_tab.gd:107
-msgid "Cinemas"
-msgstr ""
-
-#: ui/room_tab.gd:112
-msgid "Television"
-msgstr ""
-
-#: ui/room_tab.gd:115
+#: ui/room_tab.gd:124
 msgid "Time travel"
 msgstr ""
 
-#: ui/room_tab.gd:117
+#: ui/room_tab.gd:126
 msgid "Over the film"
 msgstr ""
 
-#: ui/room_tab.gd:117
+#: ui/room_tab.gd:126
 msgid "Every 5 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:117
+#: ui/room_tab.gd:126
 msgid "Every 10 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:117
+#: ui/room_tab.gd:126
 msgid "Every 15 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:120
+#: ui/room_tab.gd:129
 msgid "One film, and the room moves forward through the history of television, an era at a time while it plays."
 msgstr ""
 
-#: ui/room_tab.gd:123
-msgid "Built in"
-msgstr ""
-
-#: ui/room_tab.gd:129 ui/surface_panel.gd:27
-msgid "Yours"
-msgstr ""
-
-#: ui/room_tab.gd:132
+#: ui/room_tab.gd:137
 msgid "Use this picture as the room"
 msgstr ""
 
-#: ui/room_tab.gd:136
-msgid "Showrooms"
+#: ui/room_tab.gd:148
+msgid "Current"
 msgstr ""
 
-#: ui/room_tab.gd:145
-msgid "This room"
-msgstr ""
-
-#: ui/room_tab.gd:150
+#: ui/room_tab.gd:153
 msgid "Back to defaults"
 msgstr ""
 
-#: ui/room_tab.gd:158 ui/ui_layer.gd:1000
-msgid "Seat"
-msgstr ""
-
-#: ui/room_tab.gd:165
-msgid "Previous seat"
-msgstr ""
-
-#: ui/room_tab.gd:166
-msgid "Next seat"
-msgstr ""
-
-#: ui/room_tab.gd:167
-msgid "Room's own spot"
-msgstr ""
-
-#: ui/room_tab.gd:169
+#: ui/room_tab.gd:171
 msgid "Pick a seat"
 msgstr ""
 
-#: ui/room_tab.gd:180
-msgid "Floor reflection"
+#: ui/room_tab.gd:175 ui/seat_plan.gd:183
+msgid "Default seat"
 msgstr ""
 
 #: ui/room_tab.gd:182
-msgid "Reflection"
-msgstr ""
-
-#: ui/room_tab.gd:188
-msgid "Effects"
-msgstr ""
-
-#: ui/room_tab.gd:190 ui/room_tab.gd:202
-msgid "Bias light"
-msgstr ""
-
-#: ui/room_tab.gd:194
-msgid "React to the film"
-msgstr ""
-
-#: ui/room_tab.gd:198
-msgid "Projector beam"
-msgstr ""
-
-#: ui/room_tab.gd:205
-msgid "Reaction"
-msgstr ""
-
-#: ui/room_tab.gd:219
-msgid "Time of day"
-msgstr ""
-
-#: ui/room_tab.gd:220
-msgid "Night"
-msgstr ""
-
-#: ui/room_tab.gd:220
-msgid "Now"
-msgstr ""
-
-#: ui/room_tab.gd:220
-msgid "Dusk"
-msgstr ""
-
-#: ui/room_tab.gd:220
-msgid "Day"
-msgstr ""
-
-#: ui/room_tab.gd:224
-msgid "Latitude"
-msgstr ""
-
-#: ui/room_tab.gd:227
-msgid "Room light"
-msgstr ""
-
-#: ui/room_tab.gd:231
-msgid "Dim while playing"
-msgstr ""
-
-#: ui/room_tab.gd:233
-msgid "Dimmed to"
-msgstr ""
-
-#: ui/room_tab.gd:237
-msgid "Placement"
-msgstr ""
-
-#: ui/room_tab.gd:240
 msgid "Reset room"
 msgstr ""
 
-#: ui/room_tab.gd:241
+#: ui/room_tab.gd:183
 msgid "Reset screen"
 msgstr ""
 
-#: ui/room_tab.gd:242
+#: ui/room_tab.gd:184
 msgid "Reset room: back to the room's own seat, facing the screen, view recentred."
 msgstr ""
 
-#: ui/room_tab.gd:244
+#: ui/room_tab.gd:190
+msgid "Floor reflection"
+msgstr ""
+
+#: ui/room_tab.gd:192
+msgid "Reflection"
+msgstr ""
+
+#: ui/room_tab.gd:198
+msgid "Effects"
+msgstr ""
+
+#: ui/room_tab.gd:200 ui/room_tab.gd:212
+msgid "Bias light"
+msgstr ""
+
+#: ui/room_tab.gd:204
+msgid "React to the film"
+msgstr ""
+
+#: ui/room_tab.gd:208
+msgid "Projector beam"
+msgstr ""
+
+#: ui/room_tab.gd:215
+msgid "Reaction"
+msgstr ""
+
+#: ui/room_tab.gd:229
+msgid "Time of day"
+msgstr ""
+
+#: ui/room_tab.gd:230
+msgid "Night"
+msgstr ""
+
+#: ui/room_tab.gd:230
+msgid "Now"
+msgstr ""
+
+#: ui/room_tab.gd:230
+msgid "Dusk"
+msgstr ""
+
+#: ui/room_tab.gd:230
+msgid "Day"
+msgstr ""
+
+#: ui/room_tab.gd:234
+msgid "Latitude"
+msgstr ""
+
+#: ui/room_tab.gd:237
+msgid "Room light"
+msgstr ""
+
+#: ui/room_tab.gd:241
+msgid "Dim while playing"
+msgstr ""
+
+#: ui/room_tab.gd:243
+msgid "Dimmed to"
+msgstr ""
+
+#: ui/room_tab.gd:247
 msgid "The showing"
 msgstr ""
 
-#: ui/room_tab.gd:246
+#: ui/room_tab.gd:249
 msgid "Curtains"
 msgstr ""
 
-#: ui/room_tab.gd:248
+#: ui/room_tab.gd:251
 msgid "Up next countdown"
 msgstr ""
 
-#: ui/room_tab.gd:250 ui/room_tab.gd:259
+#: ui/room_tab.gd:253 ui/room_tab.gd:262
 msgid "Intermission"
 msgstr ""
 
-#: ui/room_tab.gd:256
+#: ui/room_tab.gd:259
 msgid "Up next in"
 msgstr ""
 
-#: ui/room_tab.gd:270
+#: ui/room_tab.gd:273
 msgid "Crossfade music"
 msgstr ""
 
-#: ui/room_tab.gd:273
+#: ui/room_tab.gd:276
 msgid "Crossfade films"
 msgstr ""
 
-#: ui/room_tab.gd:277
+#: ui/room_tab.gd:280
 msgid "Sleep timer"
 msgstr ""
 
-#: ui/room_tab.gd:383 ui/room_tab.gd:399
+#: ui/room_tab.gd:295
+msgid "Then"
+msgstr ""
+
+#: ui/room_tab.gd:396 ui/room_tab.gd:412
 #, c-format
 msgid "%s (photo)"
 msgstr ""
 
-#: ui/room_tab.gd:468
+#: ui/room_tab.gd:526
 msgid "This picture can't be a room (only local pictures)."
 msgstr ""
 
-#: ui/room_tab.gd:484
+#: ui/room_tab.gd:544
 #, c-format
 msgid "%s (moved) (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:484
+#: ui/room_tab.gd:544
 #, c-format
 msgid "%s (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:487
+#: ui/room_tab.gd:547
 #, c-format
 msgid "Where %s was (%d seat)"
 msgid_plural "Where %s was (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:489
+#: ui/room_tab.gd:549
 #, c-format
 msgid "The room's own spot (%d seat)"
 msgid_plural "The room's own spot (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:491
+#: ui/room_tab.gd:551
 #, c-format
 msgid "Go to %s"
 msgstr ""
 
-#: ui/room_tab.gd:504
+#: ui/room_tab.gd:564
 msgid "Flashes only in rooms that react, such as the drive-in; the room pulses with the bass."
 msgstr ""
 
-#: ui/room_tab.gd:518
+#: ui/room_tab.gd:578 ui/seat_plan.gd:186
 #, c-format
 msgid "Seat %d"
 msgstr ""
 
-#: ui/room_tab.gd:526
+#: ui/room_tab.gd:586
 msgid "Curtains: in the cinema and the home theatre, flat screen."
 msgstr ""
 
-#: ui/room_tab.gd:536
+#: ui/room_tab.gd:596
 #, c-format
 msgid "Intermission: %s left. Play ends it."
 msgstr ""
 
-#: ui/room_tab.gd:539
+#: ui/room_tab.gd:599
 #, c-format
 msgid "This film stops at %s."
 msgstr ""
 
-#: ui/room_tab.gd:540
+#: ui/room_tab.gd:600
 #, c-format
 msgid "Films over %d min with chapters stop once, near the middle."
 msgstr ""
 
-#: ui/room_tab.gd:19
+#: ui/room_tab.gd:22
 msgid "15 min"
 msgstr ""
 
-#: ui/room_tab.gd:19
+#: ui/room_tab.gd:22
 msgid "30 min"
 msgstr ""
 
-#: ui/room_tab.gd:19
+#: ui/room_tab.gd:22
 msgid "60 min"
 msgstr ""
 
-#: ui/room_tab.gd:19
+#: ui/room_tab.gd:22
 msgid "90 min"
 msgstr ""
 
-#: ui/room_tab.gd:19
+#: ui/room_tab.gd:22
 msgid "End of file"
 msgstr ""
 
-#: ui/room_tab.gd:24 environments/void.env.json
+#: ui/room_tab.gd:24
+msgid "Pause the film"
+msgstr ""
+
+#: ui/room_tab.gd:24
+msgid "Close the app"
+msgstr ""
+
+#: ui/room_tab.gd:24
+msgid "Turn the headset off"
+msgstr ""
+
+#: ui/room_tab.gd:29 environments/void.env.json
 msgid "Void"
 msgstr ""
 
-#: ui/room_tab.gd:24
+#: ui/room_tab.gd:29
 msgid "Dim room"
 msgstr ""
 
-#: ui/room_tab.gd:24 environments/cinema.env.json
+#: ui/room_tab.gd:29 environments/cinema.env.json
 msgid "Cinema"
 msgstr ""
 
-#: ui/room_tab.gd:24
+#: ui/room_tab.gd:29
 msgid "Passthrough"
 msgstr ""
 
-#: ui/room_tab.gd:24
+#: ui/room_tab.gd:29
 msgid "Home theatre"
 msgstr ""
 
-#: ui/room_tab.gd:24
+#: ui/room_tab.gd:29
 msgid "Drive-in"
 msgstr ""
 
-#: ui/room_tab.gd:24
+#: ui/room_tab.gd:29
 msgid "Planetarium"
 msgstr ""
 
-#: ui/room_tab.gd:25
+#: ui/room_tab.gd:30
 msgid "Dome"
+msgstr ""
+
+#: ui/room_tab.gd:55
+msgid "Cinemas"
+msgstr ""
+
+#: ui/room_tab.gd:55
+msgid "Television"
+msgstr ""
+
+#: ui/room_tab.gd:55
+msgid "Built in"
+msgstr ""
+
+#: ui/room_tab.gd:55 ui/surface_panel.gd:27
+msgid "Yours"
+msgstr ""
+
+#: ui/room_tab.gd:55
+msgid "Showrooms"
 msgstr ""
 
 #: ui/search_form.gd:14
@@ -4015,6 +4027,10 @@ msgstr ""
 
 #: ui/ui_layer.gd:998
 msgid "No seat there"
+msgstr ""
+
+#: ui/ui_layer.gd:1000
+msgid "Seat"
 msgstr ""
 
 #: ui/url_form.gd:32

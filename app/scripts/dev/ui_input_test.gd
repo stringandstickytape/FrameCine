@@ -88,6 +88,9 @@ func _run() -> void:
 	_check("dragging the size slider widens the screen (%.2f -> %.2f m)" % [before, main.screen_width],
 			main.screen_width > before + 0.5)
 	await _rail(ui, PaneUI.Tab.ROOM)
+	# The room groups start closed: open Cinemas first.
+	await _click(ui.room._groups["Cinemas"]["head"])
+	await _frames(2)
 	await _click(_find_button(ui, "Cinema"))
 	_check("environment button loads the cinema", main.env_id == "cinema" and main.env.display_name == "Cinema")
 
@@ -1180,17 +1183,43 @@ func _room_batch_checks(ui: PaneUI) -> void:
 	# The rows: the rooms that ship, then the viewer's own and the showrooms under their own headings.
 	_check("Room: one row per environment (%d of %d)" % [room._env_rows.size(), main.get_environment_list().size()],
 			room._env_rows.size() == main.get_environment_list().size() and room._envs.get_child_count() > 0)
+	# The groups fold, all closed at first; opening one closes the others.
+	room.open_group("")
+	await _frames(2)
+	var closed := true
+	for t: String in room._groups:
+		closed = closed and not (room._groups[t]["body"] as Control).visible
+	_check("Room: the room groups are all closed", closed)
+	await _click(room._groups["Cinemas"]["head"])
+	await _frames(2)
+	_check("Room: clicking Cinemas opens it", (room._groups["Cinemas"]["body"] as Control).is_visible_in_tree())
 	await _click(_find_button(ui, "Cinema"))
 	await _frames(2)
 	_check("Room: the Cinema row opens the cinema, marked", str(main.env_id) == "cinema"
 			and room._env_rows[room._env_ids.find("cinema")].button_pressed)
+	room.open_group("Television")
+	await _frames(2)
+	_check("Room: opening Television closes Cinemas, whose heading names the room in use (%s)"
+			% (room._groups["Cinemas"]["head"] as Button).text, not (room._groups["Cinemas"]["body"] as Control).visible
+			and (room._groups["Television"]["body"] as Control).visible
+			and (room._groups["Cinemas"]["head"] as Button).text.contains("·"))
+	room.open_group("")
 	await _reveal(ui, room._seat_box)
 	_check("Room: the cinema has seats (%s)" % room._seat_label.text, room._seat_box.is_visible_in_tree())
-	await _click(_find_button(ui, "Next seat"))
-	_check("Room: Next seat sits in one (%s)" % room._seat_label.text, int(f.seat.seat) >= 0
-			and room._seat_label.text.begins_with("Seat "))
-	await _click(_find_button(ui, "Room's own spot"))
-	_check("Room: the room's own spot again", int(f.seat.seat) == -1)
+	# The plan: a click on a seat's dot sits there; Default seat goes back to the room's own spot.
+	var plan: Control = room._seat_plan
+	await _frames(2)
+	var dot: Vector2 = plan.point_of(3)
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	press.position = dot
+	plan._gui_input(press)
+	await _seconds(0.6)
+	_check("Room: a seat on the plan sits there (%s)" % room._seat_label.text, int(f.seat.seat) == 3)
+	await _click(_find_button(ui, "Default seat"))
+	await _seconds(0.6)
+	_check("Room: Default seat, the room's own spot again", int(f.seat.seat) == -1)
 	# Pointing at a seat (the layer's seat picking): a ray towards seat 5 aims at it; the trigger takes it.
 	var seat5: Vector3 = main.env.global_transform * (f.seat.seats()[5] as Vector3)
 	var from := seat5 + Vector3(0.3, 1.2, 2.0)

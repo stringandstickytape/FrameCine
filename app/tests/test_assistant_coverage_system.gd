@@ -270,6 +270,16 @@ func _test_sleep() -> void:
 	_check("sleep_timer: undo back to minutes", sleep.active and not sleep.end_of_file)
 	r = await _run_cmd("sleep_timer", {"set": "off"})
 	_check("sleep_timer: off", r["ok"] and not sleep.active)
+	r = await _run_cmd("sleep_timer", {"then": "close"})
+	_check("sleep_timer: then close", r["ok"] and sleep.then == "close" and (r["result"] as Dictionary)["then"] == "close")
+	if room_tab != null:
+		var picked := -1
+		for i in (room_tab._sleep_then as Node).get_child_count():
+			if ((room_tab._sleep_then as Node).get_child(i) as Button).button_pressed:
+				picked = i
+		_check("sleep_timer: the tab's Then follows (%d)" % picked, picked == 1)
+	_check("sleep_timer: then back to pause", (await _run_cmd("sleep_timer", {"then": "pause"}))["ok"]
+			and sleep.then == "pause")
 	r = await _run_cmd("sleep_timer", {"set": "45"})
 	_check("sleep_timer: a choice outside the list refused", not r["ok"])
 

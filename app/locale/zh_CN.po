@@ -1010,15 +1010,6 @@ msgstr "展示厅"
 msgid "Seat"
 msgstr "座位"
 
-msgid "Previous seat"
-msgstr "上一个座位"
-
-msgid "Next seat"
-msgstr "下一个座位"
-
-msgid "Room's own spot"
-msgstr "房间默认位置"
-
 msgid "Pick a seat"
 msgstr "选择座位"
 
@@ -1069,9 +1060,6 @@ msgstr "播放时调暗"
 
 msgid "Dimmed to"
 msgstr "调暗到"
-
-msgid "Placement"
-msgstr "位置"
 
 msgid "Reset room"
 msgstr "重置房间"
@@ -2944,9 +2932,6 @@ msgstr "房间里物体的运动幅度：摇摆、倾斜、抖动。"
 msgid "%+d dB"
 msgstr "%+d dB"
 
-msgid "This room"
-msgstr "本房间"
-
 msgid "Back to defaults"
 msgstr "恢复默认"
 
@@ -3486,3 +3471,30 @@ msgstr "左右颠倒"
 
 msgid "The picture as the mirror shows it, left and right swapped. Off: the set turns it round."
 msgstr "画面如镜中所见，左右互换。关闭：由电视机把它转回来。"
+
+msgid "Current"
+msgstr "当前"
+
+msgid "Default seat"
+msgstr "默认座位"
+
+msgid "Then"
+msgstr "然后"
+
+msgid "Pause the film"
+msgstr "暂停影片"
+
+msgid "Close the app"
+msgstr "关闭应用"
+
+msgid "Turn the headset off"
+msgstr "关闭头显"
+
+msgid "The sound and the room fade out over a minute, then the film pauses with its place kept; the room stays dim until you play again."
+msgstr "声音和房间在一分钟内渐弱，然后影片暂停并记住位置；房间保持昏暗，直到你再次播放。"
+
+msgid "The sound and the room fade out over a minute, the film pauses with its place kept, then the app closes."
+msgstr "声音和房间在一分钟内渐弱，影片暂停并记住位置，然后应用关闭。"
+
+msgid "The sound and the room fade out over a minute, the film pauses with its place kept, then the headset turns itself off."
+msgstr "声音和房间在一分钟内渐弱，影片暂停并记住位置，然后头显自动关机。"
