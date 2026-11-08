@@ -93,6 +93,8 @@ pkill -f 'whisper-server' 2>/dev/null; sleep 2
 
 for p in "${found[@]}"; do rm -rf -- "$p"; done
 rmdir .local/share/godot/app_userdata .local/share/godot 2>/dev/null
+# Claude Code's link handler, left in the MIME list after its menu entry is gone.
+[ -f .config/mimeapps.list ] && sed -i '/x-scheme-handler\/claude-cli=/d' .config/mimeapps.list
 
 if [ ${#exes[@]} -gt 0 ]; then
   RM=$(cat <<'PY'
