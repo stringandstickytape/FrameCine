@@ -23,6 +23,7 @@ extends RefCounted
 ##   downloads() -> [{path, id, name}]   the Fab zips in the Downloads folder not yet in the library
 
 const ObjectLibrary := preload("res://scripts/assistant/object_library.gd")
+const SystemDirs := preload("res://scripts/system_dirs.gd")
 
 ## The largest side kept for a map (the Frame's memory; Fab's Medium is 2K, High 4K).
 const MAX_TEXTURE := 2048
@@ -126,7 +127,7 @@ static func import_zip(path: String, again := false, listing := "") -> Dictionar
 
 ## The Fab zips in the Downloads folder whose asset isn't in the library yet.
 static func downloads() -> Array:
-	var dir := OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+	var dir := SystemDirs.get_dir(OS.SYSTEM_DIR_DOWNLOADS)
 	var out: Array = []
 	if dir == "" or not DirAccess.dir_exists_absolute(dir):
 		return out

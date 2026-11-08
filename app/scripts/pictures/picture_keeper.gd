@@ -27,6 +27,7 @@ const FabHttp := preload("res://scripts/assistant/fab_http.gd")
 const FabStore := preload("res://scripts/assistant/fab_store.gd")
 const XRHand := preload("res://scripts/xr/xr_hand.gd")
 const WindowVideoSource := preload("res://scripts/video/window_video_source.gd")
+const SystemDirs := preload("res://scripts/system_dirs.gd")
 
 ## The cursor held this long around the stick click (seconds).
 const FREEZE := 0.15
@@ -331,7 +332,7 @@ func _check_clipboard() -> void:
 # --- 3. Downloads ----------------------------------------------------------------------------------------------------
 
 func _downloads() -> String:
-	return downloads_dir if downloads_dir != "" else OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)
+	return downloads_dir if downloads_dir != "" else SystemDirs.get_dir(OS.SYSTEM_DIR_DOWNLOADS)
 
 
 ## Picture files in Downloads: path -> modified time.

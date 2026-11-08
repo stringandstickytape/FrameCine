@@ -44,6 +44,7 @@ const SAMPLE_S := 0.5
 ## Files tried when the biggest one does not open (an unsupported codec).
 const MAX_CANDIDATES := 3
 const WorkerTask := preload("res://scripts/dev/worker_task.gd")
+const SystemDirs := preload("res://scripts/system_dirs.gd")
 
 ## Sizes the estimate is given for: [label, width, height, fps]. Same codec and decode path as the file measured.
 const TARGETS: Array = [
@@ -246,7 +247,7 @@ func _folders() -> Array[String]:
 	if last != "" and not last.contains("://"):
 		out.append(last.get_base_dir())
 	var home := OS.get_environment("HOME")
-	for p: String in [OS.get_system_dir(OS.SYSTEM_DIR_MOVIES), OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS),
+	for p: String in [SystemDirs.get_dir(OS.SYSTEM_DIR_MOVIES), SystemDirs.get_dir(OS.SYSTEM_DIR_DOWNLOADS),
 			"/home/steamos/Videos", "/home/steamos", home.path_join("Videos"), home]:
 		if p != "" and p not in out:
 			out.append(p)

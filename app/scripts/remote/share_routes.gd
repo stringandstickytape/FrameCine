@@ -1,6 +1,7 @@
 extends RefCounted
 
 const Uri := preload("res://scripts/net/uri.gd")
+const SystemDirs := preload("res://scripts/system_dirs.gd")
 
 ## The headset as a media server (idea #89; docs/share.md): the phone remote's server (remote_server.gd) also serves
 ## the Frame's own folders on the LAN when sharing is on. Off by default: --share, [share] enabled = true, or the pane
@@ -36,7 +37,7 @@ static func roots(settings: RefCounted) -> Array[Dictionary]:
 	if home == "":
 		home = OS.get_environment("USERPROFILE").replace("\\", "/")
 	var folders: Array = listed if listed is Array and not (listed as Array).is_empty() else \
-			[OS.get_system_dir(OS.SYSTEM_DIR_MOVIES), OS.get_system_dir(OS.SYSTEM_DIR_DOWNLOADS)]
+			[SystemDirs.get_dir(OS.SYSTEM_DIR_MOVIES), SystemDirs.get_dir(OS.SYSTEM_DIR_DOWNLOADS)]
 	for f: Variant in folders:
 		var p := str(f)
 		if p != "" and DirAccess.dir_exists_absolute(p):
@@ -49,7 +50,7 @@ static func roots(settings: RefCounted) -> Array[Dictionary]:
 static func drop_folder(settings: RefCounted) -> String:
 	var d := str(settings.get_value("share", "drop", ""))
 	if d == "":
-		var movies := OS.get_system_dir(OS.SYSTEM_DIR_MOVIES)
+		var movies := SystemDirs.get_dir(OS.SYSTEM_DIR_MOVIES)
 		if movies == "":
 			movies = OS.get_environment("HOME").path_join("Videos")
 		d = movies.path_join("Drop")
