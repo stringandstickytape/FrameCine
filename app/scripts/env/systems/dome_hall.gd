@@ -125,6 +125,22 @@ const PARAMS := {
 			"description": "the sonar scope's glow (its sweep turns once in 6 s)"},
 	"hatch": {"type": "bool", "default": false,
 			"description": "a round hatch with a wheel in the floor behind the last row"},
+	# A Moon base's dome (kit/lunar_dome.gd): since 2026-11-08, the Crater's quality pass. Each off by default: the
+	# dome as before.
+	"lattice": {"type": "enum", "values": ["ribs", "geodesic"], "default": "ribs",
+			"description": "a glass dome's frame: ribs and rings, or a geodesic lattice of steel struts and bolted "
+			+ "hubs with flat glass in every triangle"},
+	"frequency": {"type": "int", "min": 2, "max": 8, "default": 6,
+			"description": "geodesic: how finely the lattice is split (even; 6: struts about a fifth of the radius)"},
+	"airlocks": {"type": "int", "min": 0, "max": 4, "default": 0,
+			"description": "airlock doors in the dome's foot, a pair either side of the screen, then a pair behind: "
+			+ "a steel portal, a door with a lit window, a green status lamp, a lit panel"},
+	"trays": {"type": "bool", "default": false,
+			"description": "a cable tray along the drum on brackets, broken at the doors"},
+	"glass_reflect": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0,
+			"description": "the picture faintly mirrored in the glass where it faces the screen (0: none)"},
+	"glass_dust": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0,
+			"description": "dust on the glass, thickest at its foot and gone a couple of metres up (0: clean)"},
 }
 
 
@@ -261,13 +277,20 @@ func build() -> void:
 		# A ledge round the drum's top, under the dome.
 		Shapes.lathe(drum, [Vector2(r, drum_h), Vector2(r - 0.25, drum_h), Vector2(r - 0.25, drum_h + 0.12),
 				Vector2(r, drum_h + 0.12)], c, SIDES)
-		_add_static("Drum", drum)
+		# A geodesic dome's drum is left out of the bake: its one long strip round the hall (over a thousand texels
+		# for a large dome) would double the lightmap's atlas for a low wall the fill and the lamps light well enough.
+		if str(params["lattice"]) == "geodesic":
+			_add_unbaked("Drum", drum)
+		else:
+			_add_static("Drum", drum)
 	var base := c + Vector3(0, drum_h, 0)
 	if str(params["dome"]) == "solid":
 		var shell := RoomMesh.new()
 		shell.surface(_mat("shell"))
 		_dome_lathe(shell, base, r, dome_h, true)
 		_add_static("Dome", shell)
+	elif str(params["lattice"]) == "geodesic":
+		_build_geodesic(c, base, r, drum_h, dome_h)
 	else:
 		var panes := RoomMesh.new()
 		panes.surface(GLASS)
@@ -302,6 +325,49 @@ func build() -> void:
 				seat_slots_for(params), 1960)
 	_bake_spot("DomeTop", base + Vector3(0, dome_h - 0.5, 0), true, 70.0, drum_h + dome_h + 3.0, 1.0,
 			color_param("lamp_colour"))
+
+
+## A Moon base's dome (kit/lunar_dome.gd): the geodesic lattice and its flat glass, the airlocks' doors and lamps,
+## the cable trays. Unbaked (many small faces); the glass one thin layer, see-through.
+func _build_geodesic(c: Vector3, base: Vector3, r: float, drum_h: float, dome_h: float) -> void:
+	var panes := RoomMesh.new()
+	panes.surface(GLASS)
+	var frame := RoomMesh.new()
+	frame.surface(_mat("frame"))
+	var turn := TAU / 5.0 * float(params["rib_phase"])
+	LunarDome.lattice(frame, panes, base, r, dome_h, int(params["frequency"]) / 2 * 2, turn, c.y)
+	var glass := _add_glass("Panes", panes, color_param("glass_colour"), float(params["glass_alpha"]))
+	if glass != null:
+		var gm := glass.material_override as ShaderMaterial
+		gm.set_shader_parameter("screen_reflect", float(params["glass_reflect"]))
+		gm.set_shader_parameter("dust", float(params["glass_dust"]))
+		gm.set_shader_parameter("dust_floor", base.y)
+	var doors := int(params["airlocks"])
+	if doors > 0:
+		var steel := RoomMesh.new()
+		steel.surface(_mat("frame"))
+		var leaf := RoomMesh.new()
+		leaf.surface(_light.library("painted_wall", Color(0.62, 0.63, 0.64), {"tiling": 0.6}))
+		var status := RoomMesh.new()
+		status.surface(_lamp(Color(0.25, 1.0, 0.45), 1.1, 0.0, "signs"))
+		var panels := RoomMesh.new()
+		panels.surface(_lamp(Color(0.45, 0.75, 1.0), 0.7, 0.0, "signs"))
+		var windows := RoomMesh.new()
+		windows.surface(_lamp(Color(1.0, 0.75, 0.48), 0.9, 0.0, "signs"))
+		for at: Vector3 in LunarDome.airlocks(doors, c, r, steel, leaf, status, panels, windows):
+			_bake_omni("Airlock", at + Vector3.UP * 2.6 - (at - c).normalized() * 0.6, 3.0, 0.25,
+					Color(0.5, 1.0, 0.6))
+		_add_unbaked("AirlockFrames", steel)
+		_add_unbaked("AirlockDoors", leaf)
+		_add_lamps("AirlockLamps", status)
+		_add_lamps("AirlockPanels", panels)
+		_add_lamps("AirlockWindows", windows)
+	if bool(params["trays"]):
+		var cables := RoomMesh.new()
+		cables.surface(_light.library("black_leather", Color(0.06, 0.06, 0.065)))
+		LunarDome.trays(frame, cables, c, r, minf(drum_h * 0.55, 0.5), doors)
+		_add_unbaked("Cables", cables)
+	_add_unbaked("Ribs", frame)
 
 
 ## A dome's shell as a lathe of an ellipse's quarter (radius across, height up), seen from inside.
@@ -595,6 +661,7 @@ static func _basis_facing(n: Vector3) -> Basis:
 
 
 const Fittings := preload("res://scripts/env/systems/kit/dome_fittings.gd")
+const LunarDome := preload("res://scripts/env/systems/kit/lunar_dome.gd")
 const SONAR_SHADER := preload("res://shaders/env_sonar.gdshader")
 var _gauges: Array = []
 var _needles: MultiMeshInstance3D

@@ -3145,8 +3145,8 @@ msgstr "冰雪影院"
 msgid "Aurora"
 msgstr "极光"
 
-msgid "The northern lights in the window: they swell in quiet scenes, glow all the time, or stay away."
-msgstr "窗外的北极光：在安静的场景中增强、一直发光，或不出现。"
+msgid "The northern lights in the window and the skylights: lively before the film and swelling in its quiet scenes, glowing all the time, or staying away."
+msgstr "窗外和天窗里的北极光：影片开始前活跃，在安静的场景中增强；或一直发光，或不出现。"
 
 msgid "In quiet scenes"
 msgstr "安静场景中"
@@ -3194,7 +3194,7 @@ msgstr "很少"
 msgid "Sometimes"
 msgstr "有时"
 
-#. The Room tab: a room, a lunar amphitheatre under a glass dome.
+#. The Room tab: a room, a Moon base's cinema under a geodesic glass dome.
 msgid "Crater"
 msgstr "环形山"
 
@@ -3334,8 +3334,8 @@ msgstr "海底的玻璃圆顶：探照灯下的海带和珊瑚、成群的鱼、
 msgid "The converted cinema: rows on a rake, curtains that part when the film starts, and the house lights going down."
 msgstr "改建的电影院：阶梯座位，影片开始时幕布拉开，场灯渐暗。"
 
-msgid "An amphitheatre on the Moon under a glass dome: Earth turns slowly over the film, and the Milky Way comes out when the lights go down."
-msgstr "月球上玻璃圆顶下的圆形剧场：地球在影片上方缓缓转动，灯光暗下时银河显现。"
+msgid "A Moon base's cinema under a geodesic glass dome: Earth turns slowly over the screen, the crater's peaks catch the sun, and the Milky Way comes out when the lights go down."
+msgstr "月球基地里网格玻璃圆顶下的影院：地球在银幕上方缓缓转动，环形山的峰顶映着阳光，灯光暗下时银河显现。"
 
 msgid "A drive-in lot at dusk, seen from a convertible's bench seat: the stars come out over the film, moths in the beam, mesas on the horizon."
 msgstr "黄昏时的汽车影院，从敞篷车的长椅上观看：星星在影片上方出现，光束里有飞蛾，地平线上是平顶山。"
@@ -3343,8 +3343,8 @@ msgstr "黄昏时的汽车影院，从敞篷车的长椅上观看：星星在影
 msgid "A big modern cinema: a steep rake, black walls, blue step lights and a huge curved screen."
 msgstr "大型现代影院：陡峭的阶梯、黑色墙面、蓝色台阶灯和一块巨大的弧形银幕。"
 
-msgid "A cinema of ice blocks with seats on hides: the walls glow in the film's colours, and an aurora swells outside in quiet scenes."
-msgstr "冰块砌成的影院，座位铺着兽皮：墙壁映着影片的颜色，安静的片段里窗外极光涌动。"
+msgid "An ice hotel's cinema of sawn blocks and carvings under an ice vault: candles glowing inside the ice, hides on ice benches, the polar night and the northern lights outside."
+msgstr "冰酒店里的影院，由切割的冰块和冰雕砌成，顶上也是冰：烛光在冰中闪烁，冰凳上铺着兽皮，窗外是极夜和北极光。"
 
 msgid "A stone nave with the screen in the chancel: pews, candles, a dim rose window and the film's light climbing the stone."
 msgstr "石砌的中殿，银幕在圣坛里：长椅、烛光、昏暗的玫瑰窗，影片的光沿着石墙向上爬。"

@@ -4331,7 +4331,7 @@ msgid "The converted cinema: rows on a rake, curtains that part when the film st
 msgstr ""
 
 #: environments/crater.env.json
-msgid "An amphitheatre on the Moon under a glass dome: Earth turns slowly over the film, and the Milky Way comes out when the lights go down."
+msgid "A Moon base's cinema under a geodesic glass dome: Earth turns slowly over the screen, the crater's peaks catch the sun, and the Milky Way comes out when the lights go down."
 msgstr ""
 
 #: environments/drive_in_1958.env.json
@@ -4343,7 +4343,7 @@ msgid "A big modern cinema: a steep rake, black walls, blue step lights and a hu
 msgstr ""
 
 #: environments/ice_cinema.env.json
-msgid "A cinema of ice blocks with seats on hides: the walls glow in the film's colours, and an aurora swells outside in quiet scenes."
+msgid "An ice hotel's cinema of sawn blocks and carvings under an ice vault: candles glowing inside the ice, hides on ice benches, the polar night and the northern lights outside."
 msgstr ""
 
 #: environments/nave.env.json
@@ -4604,7 +4604,7 @@ msgid "The film's sound from the little speaker hung on the car's window: tinny,
 msgstr ""
 
 #: environments/ice_cinema.env.json
-msgid "The northern lights in the window: they swell in quiet scenes, glow all the time, or stay away."
+msgid "The northern lights in the window and the skylights: lively before the film and swelling in its quiet scenes, glowing all the time, or staying away."
 msgstr ""
 
 #: environments/nave.env.json
