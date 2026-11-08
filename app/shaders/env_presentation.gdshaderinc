@@ -206,16 +206,38 @@ vec3 pr_source_marks(vec3 rgb, vec2 p, float time) {
 	if (pr_source == 1) {
 		vec2 c = (p - 0.5) * vec2(pr_aspect, 1.0);
 		rgb *= 1.0 - pr_hotspot * 0.3 * dot(c, c);
-		// Dust: now and then a speck in a cell, a new pattern every film frame; most dark, some light.
+		// Dust: now and then a speck in a cell, a new pattern every film frame; most dark, a few light. Dirt in the gate
+		// is in focus, so the edges are sharp (about a pixel), the outlines ragged, most specks small and now and then
+		// a clump (round soft dots read as noise, not dirt: the user, 2026-11-08, Screen 3).
 		vec2 g = p * vec2(36.0 * pr_aspect, 36.0);
 		vec2 cell = floor(g);
 		float h = pr_hash(cell + pr_frame * 17.31);
-		float present = step(h, pr_dust * 0.012);
+		float present = step(h, pr_dust * 0.016);
 		vec2 at = vec2(pr_hash(cell + 3.7 + pr_frame), pr_hash(cell + 9.1 + pr_frame));
-		float r = 0.08 + 0.22 * pr_hash(cell + 5.3 + pr_frame);
-		float d = length(fract(g) - (0.25 + 0.5 * at));
-		float speck = present * (1.0 - smoothstep(r * 0.55, r, d));
-		rgb = mix(rgb, vec3(h < pr_dust * 0.003 ? 0.85 : 0.04), speck * 0.85);
+		float sz = pr_hash(cell + 5.3 + pr_frame);
+		float r = 0.08 + 0.42 * sz * sz * sz;
+		vec2 q = fract(g) - (0.3 + 0.4 * at);
+		float seed = pr_hash(cell + 7.7 + pr_frame) * 6.2832;
+		float ang = atan(q.y, q.x);
+		float ragged = 1.0 + 0.32 * sin(ang * 3.0 + seed) + 0.18 * sin(ang * 5.0 - seed * 1.7)
+				+ 0.1 * sin(ang * 9.0 + seed * 2.3);
+		float d = length(q) / max(ragged, 0.35);
+		float edge = max(fwidth(g.y) * 0.7, 0.004);
+		float speck = present * (1.0 - smoothstep(r - edge, r + edge, d));
+		rgb = mix(rgb, vec3(h < pr_dust * 0.002 ? 0.9 : 0.015), speck * 0.94);
+		// Hairs: a fine curled fibre in a bigger cell, one frame each, a couple a second at this print's dust.
+		vec2 g2 = p * vec2(6.0 * pr_aspect, 6.0);
+		vec2 c2 = floor(g2);
+		float hair_on = step(pr_hash(c2 + pr_frame * 7.13 + 41.0), pr_dust * 0.0025);
+		vec2 v = fract(g2) - (0.4 + 0.2 * vec2(pr_hash(c2 + pr_frame + 1.3), pr_hash(c2 + pr_frame + 2.9)));
+		float rad = 0.12 + 0.23 * pr_hash(c2 + pr_frame + 4.1);
+		float mid = pr_hash(c2 + pr_frame + 6.7) * 6.2832;
+		float off = abs(mod(atan(v.y, v.x) - mid + 3.1416, 6.2832) - 3.1416);
+		float span = 0.6 + 1.4 * pr_hash(c2 + pr_frame + 8.3);
+		float w2 = max(fwidth(g2.y) * 0.8, 0.0015);
+		float hair = hair_on * (1.0 - smoothstep(w2 * 0.5, w2 * 1.5, abs(length(v) - rad)))
+				* (1.0 - smoothstep(span * 0.85, span, off));
+		rgb = mix(rgb, vec3(0.02), hair * 0.85);
 		// Scratches: thin lines running down the film, broken here and there.
 		float px = max(fwidth(p.x), 1e-5);
 		for (int i = 0; i < 4; i++) {
