@@ -2895,7 +2895,8 @@ msgstr ""
 msgid "Polynomial"
 msgstr ""
 
-#: ui/picture_tab.gd:31 ui/room_tab.gd:22 ui/system_tab.gd:42 environments/ice_cinema.env.json
+#: ui/picture_tab.gd:31 ui/room_tab.gd:22 ui/system_tab.gd:42 environments/flagship.env.json
+#: environments/ice_cinema.env.json
 msgid "Off"
 msgstr ""
 
@@ -4339,7 +4340,7 @@ msgid "A drive-in lot at dusk, seen from a convertible's bench seat: the stars c
 msgstr ""
 
 #: environments/flagship.env.json
-msgid "A big modern cinema: a steep rake, black walls, blue step lights and a huge curved screen."
+msgid "A big modern cinema: a steep rake, folded acoustic walls washed in amber, recliners, a starlit ceiling of baffles and a huge curved screen in velvet."
 msgstr ""
 
 #: environments/ice_cinema.env.json
@@ -4464,6 +4465,10 @@ msgstr ""
 
 #: environments/drive_in_1958.env.json
 msgid "Window speaker"
+msgstr ""
+
+#: environments/flagship.env.json
+msgid "Starlight ceiling"
 msgstr ""
 
 #: environments/ice_cinema.env.json
@@ -4601,6 +4606,10 @@ msgstr ""
 
 #: environments/drive_in_1958.env.json
 msgid "The film's sound from the little speaker hung on the car's window: tinny, mono, a little rattle."
+msgstr ""
+
+#: environments/flagship.env.json
+msgid "Pinholes of light in the ceiling between the baffles."
 msgstr ""
 
 #: environments/ice_cinema.env.json
@@ -4749,6 +4758,14 @@ msgstr ""
 
 #: environments/bathysphere.env.json
 msgid "Sometimes"
+msgstr ""
+
+#: environments/flagship.env.json
+msgid "Before the film"
+msgstr ""
+
+#: environments/flagship.env.json
+msgid "Always (faint in the film)"
 msgstr ""
 
 #: environments/ice_cinema.env.json

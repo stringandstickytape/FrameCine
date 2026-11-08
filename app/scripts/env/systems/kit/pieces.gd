@@ -23,6 +23,7 @@ const IceHall := preload("res://scripts/env/systems/kit/ice_hall.gd")
 const Streamline := preload("res://scripts/env/systems/kit/streamline.gd")
 const Reclaimed := preload("res://scripts/env/systems/kit/reclaimed.gd")
 const PalaceCulture := preload("res://scripts/env/systems/kit/palace_culture.gd")
+const Flagship := preload("res://scripts/env/systems/kit/flagship.gd")
 const PinkPalace := preload("res://scripts/env/systems/kit/pink_palace.gd")
 
 const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk", "column", "facade", "castle_gate",
@@ -34,6 +35,7 @@ const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk
 		"moderne_hall", "ziggurat", "organ_console",
 		"ruin_shell", "ruin_roof", "ruin_growth", "ruin_stalls",
 		"culture_hall", "globe_field",
+		"flagship_hall", "flagship_rows",
 		"pink_hall", "pink_proscenium", "pink_balcony", "pink_dome"]
 ## Each piece's size when neither the entry nor its slot gives one: [width, height, depth].
 const SIZES := {
@@ -56,6 +58,7 @@ const SIZES := {
 	"ruin_shell": [0.0, 0.0, 0.0], "ruin_roof": [0.0, 0.0, 0.0], "ruin_growth": [0.0, 0.0, 0.0],
 	"ruin_stalls": [0.0, 0.0, 0.0],
 	"culture_hall": [0.0, 0.0, 0.0], "globe_field": [0.0, 0.0, 0.0],
+	"flagship_hall": [0.0, 0.0, 0.0], "flagship_rows": [0.0, 0.0, 0.0],
 	"pink_hall": [0.0, 0.0, 0.0], "pink_proscenium": [0.0, 0.0, 0.0], "pink_balcony": [0.0, 0.0, 0.0],
 	"pink_dome": [0.0, 0.0, 0.0],
 }
@@ -132,6 +135,8 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			Reclaimed.build(piece, c, xf, size, e)
 		"culture_hall", "globe_field":
 			PalaceCulture.build(piece, c, xf, size, e)
+		"flagship_hall", "flagship_rows":
+			Flagship.build(piece, c, xf, size, e)
 		"pink_hall", "pink_proscenium", "pink_balcony", "pink_dome":
 			PinkPalace.build(piece, c, xf, size, e)
 

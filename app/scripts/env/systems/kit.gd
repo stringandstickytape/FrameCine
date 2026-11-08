@@ -11,9 +11,10 @@ extends "res://scripts/env/systems/kit/builder.gd"
 ## a stool, a channel dial, a soundbar, a floor lamp, a glass table (its top in PieceGlass, see-through), a media unit;
 ## and the moderne hall's (kit/streamline.gd, since 2026-11-08): its walls and coved ceiling, a stepped proscenium, an
 ## organ console (its coves in PieceCove, its clock in PieceClock); and the Palace of Culture's (kit/palace_culture.gd,
-## since 2026-11-08): its board-marked concrete hall, wall mosaics, coffered ceiling and field of globes; and the Pink
-## Palace's (kit/pink_palace.gd, since 2026-11-08): a hall inside a great shell, its fluted vault and scalloped rings
-## lit from hidden lamps (PieceCove), mirrors, a buttoned balcony, a sunburst dome with a chandelier of glass shells.
+## since 2026-11-08): its board-marked concrete hall, wall mosaics, coffered ceiling and field of globes; and the
+## Flagship's (kit/flagship.gd, since 2026-11-08): its faceted acoustic hall, starlight ceiling and the rows' arms; and
+## the Pink Palace's (kit/pink_palace.gd, since 2026-11-08): a hall inside a great shell, its fluted vault and
+## scalloped rings lit from hidden lamps (PieceCove), mirrors, a buttoned balcony, a sunburst dome with a chandelier.
 ## All the pieces share a few meshes, one surface a material: a baked one (PieceStatic), an unbaked one for rounded
 ## shapes and leaves (PieceSoft), the lamp shades (PieceLamps), the glows (windows, a booth's window, the video
 ## recorders' clocks: PieceDisplay) and each neon sign. The builder's slots come
@@ -39,9 +40,11 @@ static func spec() -> Dictionary:
 				+ "moonlit sky (broken roof and trusses, fallen plaster, a gilt proscenium with a torn curtain, a fallen "
 				+ "chandelier, a birch, ivy, ferns and wildflowers), a 1970s palace of culture's hall (board-marked "
 				+ "concrete, wall mosaics of glass and gold tesserae, a coffered ceiling, a field of opal globes, oak "
-				+ "acoustic slats), a dream palace inside a great scallop shell (a fluted vault fanning from a "
-				+ "sunburst dome with a chandelier of glass shells, scalloped rings round the screen, mirrors, a wave "
-				+ "frieze, a buttoned velvet balcony), "
+				+ "acoustic slats), a modern premium auditorium (faceted acoustic walls washed in amber, a ceiling of "
+				+ "baffles with starlight, a velvet-masked curved screen in a slatted proscenium, armrests with "
+				+ "cupholders, lit row letters, a glass balustrade), a dream palace inside a great scallop shell (a "
+				+ "fluted vault fanning from a sunburst dome with a chandelier of glass shells, scalloped rings round "
+				+ "the screen, mirrors, a wave frieze, a buttoned velvet balcony), "
 				+ "a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
 				+ "furniture: a desk, a computer, a video recorder flashing 12:00, a sideboard, a standard lamp, a rug, "
 				+ "a coffee table; dressing: bunting, a tea set, sandwiches, a stool, a channel dial, a soundbar, a "
@@ -155,6 +158,11 @@ const PARAMS := {
 			"description": "how much the mosaics' tesserae glint (the lamps' and the picture's light, as the head moves)"},
 	"mosaic_wash": {"type": "float", "min": 0.0, "max": 4.0, "default": 1.6,
 			"description": "the lamp line's wash down the mosaics (times the house lamps' level)"},
+	# Since 2026-11-08, for the Flagship's starlight ceiling (kit/flagship.gd); the other rooms have none (0).
+	"starlight": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "brightness": true,
+			"description": "a starlight ceiling's pinholes before the film (0: off); they fade with the house lamps"},
+	"starlight_film": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "brightness": true,
+			"description": "the share of the starlight kept while the film plays (the house lamps out)"},
 	# Since 2026-11-08, for the Pink Palace (kit/pink_palace.gd): the gilt and the mirrors see a rose hall, not the
 	# Streamline's walnut and jade. The defaults are the Streamline's.
 	"reflect_wall": {"type": "color", "default": [0.16, 0.12, 0.09],
