@@ -112,7 +112,7 @@ class Hall:
 
 	func finish(k: Node) -> void:
 		if glass.triangle_count() > 0:
-			var gi: MeshInstance3D = k._add_glass("Balustrade", glass, Color(0.35, 0.4, 0.42), 0.025)
+			var gi: MeshInstance3D = k._add_glass("Balustrade", glass, Color(0.2, 0.23, 0.25), 0.025)
 			# Clear glass: only a faint edge where the view grazes it (the kit's rim greyed it from the aisles).
 			(gi.material_override as ShaderMaterial).set_shader_parameter("rim", 0.07)
 		if not stars.is_empty():
@@ -868,8 +868,10 @@ static func _ceiling(c: Object, h: Hall, l: Auditorium.Layout, a: Dictionary) ->
 			continue
 		var zf := ap(a, phi_at(a, x, 0.08), top, 0.08).z + 0.4
 		var z := rng.randf_range(zf, z1 - LEDGE_D - 0.3)
-		var r := lerpf(0.012, 0.032, pow(rng.randf(), 3.0))
-		var bright := lerpf(0.35, 1.0, pow(rng.randf(), 2.0)) * (r / 0.032 * 0.5 + 0.5)
+		# Never under 1.8 cm: a smaller point is under two pixels in the headset from the seats and would crawl as
+		# the head moves.
+		var r := lerpf(0.018, 0.035, pow(rng.randf(), 3.0))
+		var bright := lerpf(0.35, 1.0, pow(rng.randf(), 2.0)) * (r / 0.035 * 0.5 + 0.5)
 		var col := Color(0.82, 0.9, 1.0).lerp(Color(1.0, 0.88, 0.7), 1.0 if rng.randf() < 0.15 else 0.0) * bright
 		var centre := Vector3(x, top - 0.003, z)
 		for k in 4:

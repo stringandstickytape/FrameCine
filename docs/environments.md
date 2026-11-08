@@ -2194,8 +2194,8 @@ room's dark quiet are where they were; the hall round them is the kit's `flagshi
   to the screen), a 1.1 m band clear along each wall. Over the walls a cove ledge (a fascia and soffit 0.4 m out)
   hides a cool line washing the ceiling's edges and the wall above it (per vertex, the `plaster` material's cool
   `vertex_light`); a little of that light is on the baffles so they read as fins. Between them, 1100 pinholes of
-  starlight (`Starlight`: a soft point each, 1.2 to 3.2 cm, mostly cool white, one in seven warm; static, never
-  twinkling).
+  starlight (`Starlight`: a soft point each, 1.8 to 3.5 cm, never smaller: under two pixels in the headset a point
+  would crawl as the head moves; mostly cool white, one in seven warm; static, never twinkling).
 - **The screen:** the picture's curve carried into the room: black velvet masking (0.65 m round the picture, on the
   picture's own arc 8 cm behind it, `Flagship.arc()`: the document's curve over the seat's distance, as
   `curved_screen.gd` makes it), a slim frame round it (7 cm, standing 12 cm out, dark bronze: a bright one read as a
@@ -2227,6 +2227,14 @@ room's dark quiet are where they were; the hall round them is the kit's `flagshi
   warm lamps by the walls (stand-ins until the bake: they light the seats too), 13 glows (the slots' light every 5.5 m
   along each wall, the coves' cool light), 2 spots up the proscenium's wings from the stage's lip, and the builder's
   step and exit lights.
+- **Systems:** `light` (a low neutral fill, `baked_fill` 0.12, spill 2); `auditorium` (unchanged layout: 26 x 27 m;
+  7 rows in front and 6 behind, 1.25 m deep and 0.55 m higher each: a 24 degree rake; rows curving round a point 30 m
+  ahead; 25 seats a row, 0.62 m apart; `seat_model` `recliner`; `side_walls` false, `ceiling_cover` 0, `proscenium`
+  none, `handrails` false, `house_spots` false: the kit draws them; the stage 2.2 m deep; `step_colour` blue); `kit`
+  (id `fittings`: `flagship_hall`, `flagship_rows`, `bake_lamps` 8, `cove_colour` amber); `screen_frame` (masking, no
+  beam); `showing`; `acoustics`.
+- **Screen:** 20 x 8.4 m, its middle at the seated eyes' height, 18.2 m from the default seat (0.9 of its width),
+  `curve` 0.3: as before.
 - **Setting:** Starlight ceiling (off, before the film, always; "before the film" by default): the kit's `starlight`
   and `starlight_film` by `map` (0/0, 1/0, 1/0.18): always keeps 18 % of the stars in the film. The stars ease to their
   level over about a second.
