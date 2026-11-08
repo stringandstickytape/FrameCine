@@ -18,9 +18,19 @@ extends Node
 ##   whisper_threads  --whisper-threads=N     4 (default; the server runs at nice 10)
 ##   whisper_backend  --whisper-backend=B     "cpu" (default) or "vulkan" (the GPU build in whisper/vulkan/)
 ## The server's own output goes to user://whisper-server.log.
+##
+## The model: whisper/models/ next to the server first (a package made with a model, the benchmark kit), then
+## user://whisper-models/. The release package has none (docs/framedrop.md "The speech model"): with the server there
+## but no model, the backend waits (Transcriber.waiting) and downloads the default model (scripts/voice/
+## model_download.gd, about 264 MB) the first time voice is used, then starts the server. The viewer sees a notice
+## when it starts, at each quarter, and when voice is ready; with no network, one notice says so, and the next use of
+## voice tries again, not sooner than RETRY_SECONDS later. Nothing else waits for it. Only the default model is
+## downloaded: another whisper_model that is missing stays off with the line as before.
+## Flag: --model-url=URL takes the model from URL (tests, a mirror).
 
 const Transcriber := preload("res://scripts/voice/transcriber.gd")
 const WorkerTask := preload("res://scripts/dev/worker_task.gd")
+const ModelDownload := preload("res://scripts/voice/model_download.gd")
 
 const SELF_PATH := "res://scripts/voice/whisper_backend.gd"
 const NODE_NAME := "WhisperBackend"
@@ -38,6 +48,25 @@ const FINAL_BEAM := 5
 ## whisper.cpp skips input shorter than 1 s; shorter clips are padded with silence.
 const MIN_SAMPLES := 16800
 
+## Where a downloaded model goes (outside the install folder: updates keep it).
+const USER_MODELS := "user://whisper-models"
+## The setting values that mean the model the player downloads (ModelDownload.MODEL_FILE).
+const DOWNLOADABLE: Array[String] = ["small.en", "small.en-q8_0", "ggml-small.en-q8_0.bin"]
+## After a failed download, voice tries again at its next use, but not sooner than this (no retry storm).
+const RETRY_SECONDS := 60.0
+## A notice for a press comes when voice has not been asked for this long: push-to-talk asks every second while the
+## button is held (live partials) and once at the release, and the "Listening" line goes at the release.
+const NOTICE_DELAY := 1.2
+## The same notice is not shown again within this time.
+const NOTICE_REPEAT := 6.0
+## What the viewer sees (the notices, translated; why() in English for the assistant's card).
+const TEXT_DOWNLOADING := "Voice needs a one-time download of about %d MB. Downloaded: %d %%. The rest of the player works as usual."  # i18n
+const TEXT_PROGRESS := "Speech model download: %d %%"  # i18n
+const TEXT_OFFLINE := "Voice needs the network once, for a download of about %d MB. The rest of the player works as usual."  # i18n
+const TEXT_FAILED := "The speech model did not download. Voice tries again when you use it next."  # i18n
+const TEXT_STARTING := "Voice is starting."  # i18n
+const TEXT_READY := "Voice is ready."  # i18n
+
 ## Words the speaker uses that a small model mishears without a hint (copied from tools/voice.py).
 const VOCABULARY := ("Talking to Claude about the VR video player on the Steam Frame headset: the listener on port "
 		+ "47800, the pane, the dev link, SMB, HEVC, HDR, pairing.")
@@ -49,6 +78,20 @@ var threads := DEFAULT_THREADS
 var backend_kind := "cpu"
 ## Start the server when the node enters the tree (tests set false and call start() themselves).
 var autostart := true
+## The model download (tests change these): the folder, the address ("" is ModelDownload.url()), size, SHA-256 and
+## the timeouts (connect, then no bytes).
+var model_store := USER_MODELS
+var model_url := ""
+var model_size := ModelDownload.MODEL_SIZE
+var model_sha256 := ModelDownload.MODEL_SHA256
+var connect_timeout := 15.0
+var stall_timeout := 30.0
+## "" (the model is there, or can't be downloaded), "needed", "running", "failed" or "done" (then the server starts).
+var download_state := ""
+var download_error := ""
+var download_offline := false
+## Notices shown, newest last (for the tests).
+var notices: PackedStringArray = []
 
 ## State, for describe(), the tests and the dev link.
 var server_path := ""
@@ -66,6 +109,17 @@ var _ready_flag := false
 var _starting := false
 var _watch_pid := -1
 var _check_left := 1.0
+var _need_download := false
+var _download: RefCounted = null
+var _download_t0 := 0
+var _failed_at := -1
+var _quarter := 0
+var _announce_ready := false
+var _notice := ""
+var _notice_left := 0.0
+var _notice_pending := false
+var _shown := ""
+var _shown_at := -100000
 static var _instance: Node = null
 
 
@@ -92,6 +146,7 @@ func configure(settings: Dictionary, args: Dictionary) -> void:
 	model = str(args.get("whisper-model", settings.get("whisper_model", DEFAULT_MODEL)))
 	threads = maxi(1, int(str(args.get("whisper-threads", settings.get("whisper_threads", DEFAULT_THREADS)))))
 	backend_kind = str(args.get("whisper-backend", settings.get("whisper_backend", "cpu"))).to_lower()
+	model_url = str(args.get("model-url", ""))
 	if model == "":
 		model = DEFAULT_MODEL
 
@@ -107,7 +162,15 @@ func ready() -> bool:
 
 
 func describe() -> String:
-	return "whisper.cpp %s, %s, %d threads" % [model_name(), backend_kind, threads]
+	var s := "whisper.cpp %s, %s, %d threads" % [model_name(), backend_kind, threads]
+	match download_state:
+		"needed":
+			s += " (no model yet: it downloads, %d MB, the first time voice is used)" % (model_size / 1000000)
+		"running":
+			s += " (downloading the model: %d %%)" % _percent()
+		"failed":
+			s += " (the model download failed: %s; the next use of voice tries again)" % download_error
+	return s
 
 
 ## The model's file stem, such as base.en-q8_0 (the setting as given while no file is found).
@@ -130,12 +193,16 @@ func start() -> bool:
 
 func _start() -> bool:
 	last_error = ""
-	if not _resolve():
-		_fail(last_error)
-		return false
-	var cpu_problem := cpu_missing_features()
+	var found := _resolve()
+	var cpu_problem := cpu_missing_features() if found or _need_download else ""
 	if cpu_problem != "":
 		_fail("this CPU lacks %s, which the bundled whisper-server needs" % cpu_problem)
+		return false
+	if not found and _need_download:
+		_wait_for_model()
+		return false
+	if not found:
+		_fail(last_error)
 		return false
 	port = free_port()
 	if port <= 0:
@@ -175,10 +242,16 @@ func _start() -> bool:
 	load_ms = Time.get_ticks_msec() - t0
 	_ready_flag = true
 	Transcriber.backend = self
+	if Transcriber.waiting == self:
+		Transcriber.waiting = null
+	download_state = ""
 	_check_left = 1.0
 	set_process(true)
 	print("Voice: whisper-server ready: model %s, %s, %d threads, loaded in %d ms (%s:%d, pid %d)" % [
 			model_name(), backend_kind, threads, load_ms, HOST, port, pid])
+	if _announce_ready:
+		_announce_ready = false
+		_queue(tr(TEXT_READY), 0.0)
 	return true
 
 
@@ -358,15 +431,154 @@ func _resolve() -> bool:
 		if FileAccess.file_exists(d.path_join(exe)):
 			server_path = d.path_join(exe)
 			break
+	_need_download = false
 	if server_path == "":
 		last_error = "no %s in %s" % [exe, ", ".join(dirs)]
 		return false
-	model_path = find_model(model, server_path.get_base_dir().trim_suffix("/vulkan"))
+	var server_dir := server_path.get_base_dir().trim_suffix("/vulkan")
+	model_path = find_model(model, server_dir)
 	if model_path == "":
-		last_error = "no model %s in %s/models (build/whisper-models.sh downloads them)" % [model,
-				server_path.get_base_dir().trim_suffix("/vulkan")]
+		model_path = store_model()
+	if model_path == "":
+		_need_download = model in DOWNLOADABLE
+		last_error = "no model %s in %s/models or %s (%s)" % [model, server_dir, model_store,
+				"it downloads the first time voice is used" if _need_download
+				else "build/whisper-models.sh downloads them"]
 		return false
 	return true
+
+
+## The model in model_store ("" when it is not there). A downloaded model of the wrong size is deleted (the
+## download writes it only after its check, so that is damage, and a new download replaces it).
+func store_model() -> String:
+	var dir := ProjectSettings.globalize_path(model_store)
+	var p := find_model(model, dir)
+	if p != "" and p.get_file() == ModelDownload.MODEL_FILE and model_size > 0 and FileAccess.get_size(p) != model_size:
+		print("Voice: %s has %d bytes, not %d; deleted" % [p, FileAccess.get_size(p), model_size])
+		DirAccess.remove_absolute(p)
+		return ""
+	return p
+
+
+# --- The model download ------------------------------------------------------------------------------------------
+
+## Voice was used and is not available (Transcriber.available() calls this while Transcriber.waiting is this node):
+## the first time the download starts; while it runs, the progress; after a failure, the reason, or another try
+## once RETRY_SECONDS have passed.
+func wanted() -> void:
+	match download_state:
+		"needed":
+			_begin_download()
+		"failed":
+			if Time.get_ticks_msec() - _failed_at >= int(RETRY_SECONDS * 1000.0):
+				_begin_download()
+	if why() != "":
+		_queue("", NOTICE_DELAY)  # why(true) then, as it is at that moment
+
+
+## The viewer's line for now: English (for the assistant's card), or translated for the menus. "" when voice works
+## or the backend knows no help.
+func why(localised := false) -> String:
+	var mb := model_size / 1000000
+	match download_state:
+		"needed", "running":
+			return _t(TEXT_DOWNLOADING, localised) % [mb, _percent()]
+		"failed":
+			return _t(TEXT_OFFLINE, localised) % mb if download_offline else _t(TEXT_FAILED, localised)
+		"done":
+			return _t(TEXT_STARTING, localised)
+	return ""
+
+
+func _t(text: String, localised: bool) -> String:
+	return tr(text) if localised else text
+
+
+func _wait_for_model() -> void:
+	if download_state in ["running", "failed"]:
+		return
+	download_state = "needed"
+	Transcriber.waiting = self
+	print("Voice: no speech model yet (%s, %d MB); it downloads the first time voice is used" % [
+			ModelDownload.MODEL_FILE, model_size / 1000000])
+
+
+func _begin_download() -> void:
+	if _download == null:
+		_download = ModelDownload.new()
+	_download.connect_timeout = connect_timeout
+	_download.stall_timeout = stall_timeout
+	var from := model_url if model_url != "" else ModelDownload.url()
+	var dir := ProjectSettings.globalize_path(model_store)
+	if not _download.start(from, dir, ModelDownload.MODEL_FILE, model_size, model_sha256):
+		return
+	download_state = "running"
+	download_error = ""
+	download_offline = false
+	_quarter = 0
+	_download_t0 = Time.get_ticks_msec()
+	var kept := FileAccess.get_size(dir.path_join(ModelDownload.MODEL_FILE + ".part")) \
+			if FileAccess.file_exists(dir.path_join(ModelDownload.MODEL_FILE + ".part")) else 0
+	print("Voice: downloading the speech model (%d MB%s) from %s" % [model_size / 1000000,
+			", %d MB already here" % (kept / 1000000) if kept > 0 else "", from])
+	set_process(true)
+
+
+func _percent() -> int:
+	if _download == null or model_size <= 0:
+		return 0
+	var p: Dictionary = _download.progress()
+	return clampi(int(p.get("bytes", 0)) * 100 / model_size, 0, 100)
+
+
+func _poll_download() -> void:
+	var p: Dictionary = _download.progress()
+	if str(p["state"]) == "running":
+		var q := int(p["bytes"]) * 4 / model_size if model_size > 0 else 0
+		if q > _quarter and q < 4:
+			_quarter = q
+			_queue(tr(TEXT_PROGRESS) % (q * 25), 0.0)
+		return
+	_download.finish()
+	_download = null
+	var secs := (Time.get_ticks_msec() - _download_t0) / 1000.0
+	if str(p["state"]) == "done":
+		print("Voice: speech model downloaded and checked in %.0f s" % secs)
+		download_state = "done"
+		_announce_ready = true
+		start()
+		return
+	download_state = "failed"
+	download_error = str(p["error"])
+	download_offline = bool(p["offline"])
+	_failed_at = Time.get_ticks_msec()
+	var line := "Voice: speech model download failed after %.0f s: %s" % [secs, download_error]
+	var part := ProjectSettings.globalize_path(model_store).path_join(ModelDownload.MODEL_FILE + ".part")
+	var kept := FileAccess.get_size(part) if FileAccess.file_exists(part) else 0
+	print(line + " (%d of %d bytes kept; the next use of voice tries again)" % [kept, model_size])
+	_queue(why(true), 0.0)
+
+
+## Shows `text` (translated) as a notice after `delay` s; a newer one replaces it, and each call starts the delay
+## again. "" shows why(true) as it is when the delay ends (nothing if voice works by then).
+func _queue(text: String, delay: float) -> void:
+	_notice = text
+	_notice_left = delay
+	_notice_pending = true
+	set_process(true)
+
+
+func _show(text: String) -> void:
+	var now := Time.get_ticks_msec()
+	if text == _shown and now - _shown_at < int(NOTICE_REPEAT * 1000.0):
+		return
+	_shown = text
+	_shown_at = now
+	notices.append(text)
+	var main := get_tree().current_scene if is_inside_tree() else null
+	var ui: Object = main.get("ui") if main != null else null
+	if ui != null and ui.has_method("notify"):
+		ui.notify(text)
 
 
 ## Where whisper/ is looked for: the setting or flag, then next to the engine, one folder up from it (a release's
@@ -452,6 +664,19 @@ func _start_watchdog() -> void:
 
 
 func _process(delta: float) -> void:
+	if _download != null:
+		_poll_download()
+	if _notice_pending:
+		_notice_left -= delta
+		if _notice_left <= 0.0:
+			_notice_pending = false
+			var line := _notice if _notice != "" else why(true)
+			if line != "":
+				_show(line)
+	if not _ready_flag:
+		if _download == null and not _notice_pending:
+			set_process(false)
+		return
 	_check_left -= delta
 	if _check_left > 0.0:
 		return
@@ -474,20 +699,30 @@ func _on_server_died() -> void:
 	start()
 
 
-func _fail(why: String) -> void:
-	last_error = why
+func _fail(reason: String) -> void:
+	last_error = reason
 	_ready_flag = false
 	if Transcriber.backend == self:
 		Transcriber.backend = null
-	print("Voice: on-device transcription unavailable: " + why)
+	if Transcriber.waiting == self:
+		Transcriber.waiting = null
+	download_state = ""
+	print("Voice: on-device transcription unavailable: " + reason)
 
 
-## Stops the server (also on exit).
+## Stops the server and a model download (also on exit; the download's part stays for the next try).
 func stop() -> void:
 	set_process(false)
 	_ready_flag = false
 	if Transcriber.backend == self:
 		Transcriber.backend = null
+	if Transcriber.waiting == self:
+		Transcriber.waiting = null
+	if _download != null:
+		_download.stop()
+		_download = null
+		if download_state == "running":
+			download_state = "needed"
 	_kill_server()
 
 
@@ -507,6 +742,8 @@ func _exit_tree() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		_kill_server()
+		if _download != null:
+			_download.stop()
 
 
 static func _read_settings(tree: SceneTree) -> Dictionary:
@@ -526,7 +763,7 @@ static func _read_settings(tree: SceneTree) -> Dictionary:
 static func _read_args() -> Dictionary:
 	var out := {}
 	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--whisper-"):
+		if arg.begins_with("--whisper-") or arg.begins_with("--model-url="):
 			var kv := arg.trim_prefix("--").split("=", true, 1)
 			if kv.size() == 2:
 				out[kv[0]] = kv[1]

@@ -97,9 +97,12 @@ government, so in the public domain.
 - `WhisperBackend.ensure(get_tree())` adds the node under the root once, configured from `[voice]` settings and
   `--whisper-*` flags (`docs/USAGE.md`). The assistant calls it when it needs speech; nothing starts at launch.
 - It finds `whisper-server` (in `whisper/`, or `whisper/vulkan/` for `whisper_backend = "vulkan"`) next to the engine,
-  one folder up (a release's `bin/`), next to the app folder, or in `whisper_dir`; and the model in `whisper/models/`.
-  Missing either, or a CPU without dotprod/i8mm/fp16: `Transcriber.available()` stays false and one line says what and
-  where (`Voice: on-device transcription unavailable: no whisper-server in ...`).
+  one folder up (a release's `bin/`), next to the app folder, or in `whisper_dir`; and the model in `whisper/models/`,
+  then in `user://whisper-models/`. Missing either, or a CPU without dotprod/i8mm/fp16: `Transcriber.available()` stays
+  false and one line says what and where (`Voice: on-device transcription unavailable: no whisper-server in ...`).
+- With the server there but no default model (the release package has none), the backend waits and downloads
+  `ggml-small.en-q8_0.bin` from the project's `models-1` release the first time voice is used, checks its SHA-256,
+  and then starts the server (`app/scripts/voice/model_download.gd`; `docs/framedrop.md` "The speech model").
 - It starts the server with `OS.create_process` on 127.0.0.1, a free port, and a random route prefix
   (`--request-path`; any local program or web page could otherwise reach it, and the server allows any origin and can
   swap its model through `/load`), waits on `/health` from a worker thread, then sets `Transcriber.backend = self` and

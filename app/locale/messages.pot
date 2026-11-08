@@ -1018,6 +1018,33 @@ msgstr ""
 msgid "Dual fisheye 360° (front and back lens)"
 msgstr ""
 
+#: scripts/voice/whisper_backend.gd:63
+#, c-format
+msgid "Voice needs a one-time download of about %d MB. Downloaded: %d %%. The rest of the player works as usual."
+msgstr ""
+
+#: scripts/voice/whisper_backend.gd:64
+#, c-format
+msgid "Speech model download: %d %%"
+msgstr ""
+
+#: scripts/voice/whisper_backend.gd:65
+#, c-format
+msgid "Voice needs the network once, for a download of about %d MB. The rest of the player works as usual."
+msgstr ""
+
+#: scripts/voice/whisper_backend.gd:66
+msgid "The speech model did not download. Voice tries again when you use it next."
+msgstr ""
+
+#: scripts/voice/whisper_backend.gd:67
+msgid "Voice is starting."
+msgstr ""
+
+#: scripts/voice/whisper_backend.gd:68
+msgid "Voice is ready."
+msgstr ""
+
 #: scripts/xr/controller_look.gd:48
 msgid "Black"
 msgstr ""
