@@ -240,11 +240,14 @@ static func _materials(h: Hall) -> void:
 	# Unbaked parts keep the fill and the stand-in lamps after a bake (the instanced form of a material).
 	h.mats["brass"] = L.from_param(h.p["brass"], true)
 	h.mats["gilt"] = L.library("brass", Color(0.8, 0.6, 0.28), {"spill": 0.6}, true)
-	# The small painted and dyed things (the iron, the fire bucket, the lamp's shade, the bowler, the coat, the pointer,
-	# the clock's hands): one material, each its own colour by vertex. One draw for them all (the headset's budget).
+	# The small painted and dyed things (the iron, the fire bucket, the lamp's shade, the pointer, the umbrella's
+	# handle, the clock's hands): one material, each its own colour by vertex. One draw for them all (the budget).
 	var dull: ShaderMaterial = L.library("smooth_plaster", Color(1, 1, 1), {"spill": 0.5}, true)
 	dull.set_shader_parameter("instance_tint", true)
 	dull.set_shader_parameter("normal_strength", 0.0)
+	# Matte: cloth, paint and black iron, no sheen.
+	dull.set_shader_parameter("orm_map", _orm(0.9))
+	dull.set_shader_parameter("specular", 0.25)
 	h.mats["dull"] = dull
 	h.mats["ivory"] = L.library("smooth_plaster", Color(0.9, 0.87, 0.78), {"spill": 0.8}, true)
 	(h.mats["ivory"] as ShaderMaterial).set_shader_parameter("instance_tint", true)
@@ -1382,40 +1385,49 @@ static func _wall_things(h: Hall) -> void:
 	for z: float in [hz0 + 0.05, hz1 - 0.05]:
 		Shapes.beam(h.joinery, Vector3(-h.hw + 0.01, 1.8, z), Vector3(-h.hw + 0.22, 1.965, z), Vector2(0.025, 0.03))
 	h.joinery.colour = Color.WHITE
-	h.fittings.surface(h.mats["dull"])
-	h.fittings.colour = _lin(Color(0.12, 0.11, 0.1))
+	# The bowler, the coat and the umbrella in the bake with the walls they hang by (felt, wool and silk: the velvet
+	# by vertex colour). Unbaked, they rendered nearly white once the room was baked (the renders of 2026-11-08).
+	h.joinery.surface(h.mats["velvet"])
+	h.joinery.colour = _lin(Color(0.07, 0.065, 0.06))
 	var hat := Vector3(-h.hw + 0.17, 1.993, hooks[1].z + 0.05)
-	Shapes.lathe(h.fittings, [Vector2(0.0, 0.0), Vector2(0.15, 0.0), Vector2(0.155, 0.01), Vector2(0.15, 0.018),
+	Shapes.lathe(h.joinery, [Vector2(0.0, 0.0), Vector2(0.15, 0.0), Vector2(0.155, 0.01), Vector2(0.15, 0.018),
 			Vector2(0.1, 0.022), Vector2(0.098, 0.07), Vector2(0.085, 0.115), Vector2(0.05, 0.135), Vector2(0.0, 0.14)],
 			hat, 16)
-	# The coat: a heavy overcoat hanging from the third hook, its shoulders and its fall.
+	# The coat: a heavy overcoat hanging from the third hook, its shoulders and its fall; its front and its two sides
+	# each a sheet (a chart of the bake's atlas laid along the axis it faces).
 	var coat_top := hooks[2] + Vector3(0.05, -0.04, 0)
-	var coat_rows: Array = []
-	var coat_n: Array = []
-	var coat_c: Array = []
-	for i in 7:
-		var t := float(i) / 6.0
-		var y := coat_top.y - t * 1.05
-		var half := lerpf(0.06, 0.24, minf(t * 3.0, 1.0)) + 0.03 * t
-		var row := PackedVector3Array()
-		var nr := PackedVector3Array()
-		var cr := PackedColorArray()
-		for j in 9:
-			var a := lerpf(-PI * 0.9, PI * 0.9, j / 8.0)
-			row.append(Vector3(-h.hw + 0.05 + (0.06 + 0.1 * minf(t * 3.0, 1.0)) * (1.0 + cos(a)) * 0.5 + 0.02 * sin(j
-					* 1.7 + i), y, coat_top.z + half * sin(a)))
-			nr.append(Vector3(cos(a), 0.0, sin(a)).normalized())
-			cr.append(_lin(Color(0.19, 0.17, 0.145) * (0.8 + 0.2 * cos(a * 3.0))))
-		coat_rows.append(row)
-		coat_n.append(nr)
-		coat_c.append(cr)
-	h.fittings.grid(coat_rows, coat_n, coat_c)
-	# The umbrella: furled, its handle on the last hook.
-	h.fittings.colour = IRON
+	for part: Vector2 in [Vector2(-0.9, -0.5), Vector2(-0.5, 0.5), Vector2(0.5, 0.9)]:
+		var front := absf(part.x + part.y) < 0.01
+		var cols := 6 if front else 2
+		var rows: Array = []
+		var normals: Array = []
+		var colours: Array = []
+		for i in 7:
+			var t := float(i) / 6.0
+			var y := coat_top.y - t * 1.05
+			var half := lerpf(0.06, 0.24, minf(t * 3.0, 1.0)) + 0.03 * t
+			var row := PackedVector3Array()
+			var nr := PackedVector3Array()
+			var cr := PackedColorArray()
+			for j in cols + 1:
+				var a := lerpf(part.x, part.y, float(j) / cols) * PI
+				row.append(Vector3(-h.hw + 0.05 + (0.06 + 0.1 * minf(t * 3.0, 1.0)) * (1.0 + cos(a)) * 0.5
+						+ 0.02 * sin(a * 2.9 + i), y, coat_top.z + half * sin(a)))
+				nr.append(Vector3(cos(a), 0.0, sin(a)).normalized())
+				cr.append(_lin(Color(0.16, 0.14, 0.115) * (0.8 + 0.2 * cos(a * 3.0))))
+			rows.append(row)
+			normals.append(nr)
+			colours.append(cr)
+		h.joinery.sheet(rows, normals, colours, Vector3.BACK if front else Vector3.RIGHT, Vector3.DOWN)
+	# The umbrella: furled black silk, its crook handle (dark wood) on the last hook.
 	var um := hooks[3] + Vector3(0.0, 0.02, 0)
-	Shapes.arch(h.fittings, um + Vector3(0.0, -0.03, 0), 0.025, 0.035, 0.012, 6, Basis(Vector3.UP, PI * 0.5), 0.0, PI)
-	Shapes.lathe(h.fittings, [Vector2(0.0, -0.95), Vector2(0.008, -0.9), Vector2(0.035, -0.55), Vector2(0.03, -0.2),
+	h.joinery.colour = _lin(Color(0.05, 0.05, 0.055))
+	Shapes.lathe(h.joinery, [Vector2(0.0, -0.95), Vector2(0.008, -0.9), Vector2(0.035, -0.55), Vector2(0.03, -0.2),
 			Vector2(0.008, -0.08), Vector2(0.008, -0.03)], um + Vector3(0.035, 0.0, 0), 8)
+	h.joinery.colour = Color.WHITE
+	h.fittings.surface(h.mats["dull"])
+	h.fittings.colour = _lin(Color(0.2, 0.12, 0.07))
+	Shapes.arch(h.fittings, um + Vector3(0.0, -0.03, 0), 0.025, 0.035, 0.012, 6, Basis(Vector3.UP, PI * 0.5), 0.0, PI)
 	h.fittings.colour = Color.WHITE
 	h.fittings.surface(h.mats["brass"])
 
@@ -1657,7 +1669,7 @@ static func _cart(h: Hall) -> void:
 	gs.set_color(Color.WHITE)
 	for q: Array in [[Vector3(0.38, 1.55, -0.05), Vector2(0.07, 0.1)], [Vector3(0.38, 1.55, 0.7), Vector2(0.06, 0.09)]]:
 		_glow_quad(gs, q[0], Vector3(q[1].x, 0, 0), Vector3(0, q[1].y, 0))
-	gs.set_color(Color(0.18, 0.16, 0.14))
+	gs.set_color(Color(0.1, 0.09, 0.08))
 	_glow_quad(gs, Vector3(0.38, 0.01, 1.3), Vector3(0.12, 0, 0), Vector3(0, 0, 1.3))
 	var gmesh := gs.commit()
 	gmesh.surface_set_material(0, glow)

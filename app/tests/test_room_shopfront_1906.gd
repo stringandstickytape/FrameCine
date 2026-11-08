@@ -396,10 +396,8 @@ func _render(doc: Dictionary) -> void:
 		for i in 160:
 			host.step(0.25)
 		var globes := ((vc[2] as Node).find_child("GasLamps", true, false) as MeshInstance3D).mesh.surface_get_material(0)
-		print("  render: %s, the house lamps %.2f, the globes %.2f %s (glow %s by %s; fired %s)" % [phase,
-				float(host.param("light.house_lamps")), float(globes.get_shader_parameter("energy")),
-				globes.get_shader_parameter("colour"), host.param("light.glow_colour"), host.param("light.glow_mix"),
-				host.timeline.fired])
+		print("  render: %s, the house lamps %.2f, the globes %.2f %s" % [phase, float(host.param("light.house_lamps")),
+				float(globes.get_shader_parameter("energy")), globes.get_shader_parameter("colour")])
 		var eye := Vector3(0, 1.2, 0)
 		var p := "shopfront_%s%s%s_" % [tag, "baked_" if baked else "", phase]
 		var side := Vector3(-1.8, 0, 1.0)

@@ -664,6 +664,14 @@ flicker, folding chairs in rows.
 - Live: `street_glow`, `flicker`. Lamps: `lamps_per_side`, `lamp_height`, `lamp_colour`.
 - Slots: `booth` (the back corner's floor), `side_walls`, `screen`, `proscenium`, `rear_wall`, `ceiling`, `floor`.
 - Measured: 13 draws, 12k triangles, 7 MB.
+- **`style`** (since 2026-11-08, Shopfront 1906's deep pass): `plain` (the default: the hall above, unchanged) or
+  `edwardian` (`kit/shopfront_edwardian.gd`, its maps and pictures `kit/shopfront_pictures.gd`): pressed tin in relief
+  (the ceiling's plates, the walls' lattice, a cornice, roses), a matchboard dado, a worn floor, a gilt-framed sheet
+  under a pelmet and drapes, a stage with a lectern, a drawn player piano (its keys and roll follow the room's
+  `music` piano), its own tin booth over the door (the lens at `lens()`), gas brackets and pendants, bills and a clock,
+  the shop window onto a street drawn in code, and a horse and cart. Its seats, screen, sound room and collision are
+  the plain style's. The parts: "Room: Shopfront 1906". Action: `cart` (args: `seconds`): the cart passes outside the
+  window (the room's `cart` cue plays the `hooves` sound_bed with it); ignored while one is passing.
 
 ### `nave`
 
@@ -1291,7 +1299,7 @@ Cue sounds (`env_audio.play`, the chime) and the thud still go straight to Envir
 
 | Param | Default | What |
 |---|---|---|
-| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`; `silence` plays nothing (the sounds: below) |
+| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`, `hooves`; `silence` plays nothing (the sounds: below) |
 | `gain_db` | 0 | dB from the designed level (-30 to +6) |
 | `level` | 1 | 0 to 1, live. Bind it: `film.bass` for a rumble through the wall, `weather.rain` or `weather.wet` for rain, a setting |
 | `film_db` | -8 | dB lower in `starting`, `playing` and `credits`. Up again in the pre-show, paused, the intermission and the end |
@@ -1336,6 +1344,7 @@ tones and swells divide its length, so it has no seam.
 | `sonar` | one-shot 3 | a sonar's ping: a soft round tone at 1.18 kHz with a faint beat, swelling in over 15 ms and ringing down, a lower octave under it, and 1.25 s later its echo off the sea floor, duller and a third as loud (since 2026-11-08) | a bathysphere's pre-show (a cue's `do`); a cue sound too |
 | `moped` | one-shot 8 | a small two-stroke passing, 15 m away at its closest; with `to` it travels | a street below |
 | `far_car` | one-shot 34 | a big old car on a highway 78 m off at its closest, 25 m/s: tyres on concrete (the slabs' joints a soft double knock), a V8's low, uneven burble, its pitch riding the passing, duller when far; the level by distance is the 3D player's (`reach` the closest distance), only the far ends fade in it (since 2026-11-08; designed level -56) | the drive-in's highway, with `to` and a cue (`far_car.play` with `car_passes`) |
+| `hooves` | one-shot 16 | a horse and cart passing on setts: a walk's four-beat iron knocks on stone (each ringing a little in the stones and the shoes), the iron tyres' rumble with a bump at each joint, the harness's small tinks, fading in and out at the ends; with `to` it travels (since 2026-11-08; designed level -56) | Shopfront 1906's street, with `to` and the `cart` cue |
 | `train` | one-shot 40 | a freight train far off: the roll, the rail joints, the horn's two notes early on | far off, `every` |
 | `huskies` | one-shot 7 | three far howls and a few yips, an echo | snow |
 | `scops_owl` | one-shot 9 | a scops owl's call over the roofs: four soft whistled "tew"s 2.5 s apart, each gliding down from 1.25 to 1.17 kHz, a breath of air, softened by distance (since 2026-11-08) | a warm night, `every` |
@@ -1392,6 +1401,8 @@ over it.
 ### `music`
 
 `scripts/env/systems/music.gd`. An instrument that plays itself. No player is shown: the keys move by themselves.
+`held_notes()` gives the notes held down now (MIDI numbers) and `sounding()` whether it plays: a drawn instrument shows
+them (since 2026-11-08: Shopfront 1906's player piano, its keys going down with the notes and its roll turning).
 It writes its own music as it goes, from the room's seed: a key, two common chord progressions, the form A A2 B A,
 and a tune of its own from short rhythms. Never a melody we don't own.
 
@@ -1443,6 +1454,7 @@ second.
 | `huskies` | -54 | -54.0 | -62.0 | | -46.0 |
 | `scops_owl` (2026-11-08) | -58 | -58.0 | -66.0 | | -41.2 |
 | `church_bell` (2026-11-08) | -54 | -54.0 | -62.0 | | -42.5 |
+| `hooves` (2026-11-08) | -56 | -56.0 | -64.0 | | -35.7 |
 | `hull_creak` | -52 | -52.0 | -60.0 | | -39.3 |
 | `ice_creak` | -55 | -55.0 | -63.0 | | -31.0 |
 | `candle` | -58 | -58.0 | -66.0 | | -37.5 |
@@ -1503,7 +1515,7 @@ at 8 m they are 19 dB under their "in film" level even at -12. Without the filte
 
 | Room | Use |
 |---|---|
-| Shopfront 1906 | `acoustics` `shopfront`; `sound_bed` `projector` behind, `gas_hiss`; `music` `piano`, `drive` on `film.transient`, `on` on a setting |
+| Shopfront 1906 | `acoustics` `shopfront`; `sound_bed` `projector` in the booth behind, `gas_hiss`, `hooves` (the cart's cue); `music` `piano` at the drawn piano, `drive` on `film.transient`, `on` on a setting |
 | Streamline 1937 | `acoustics` `cinema`; `music` `organ`, `flourish` in the ritual |
 | Pink Palace | `acoustics` `cinema`; `sound_bed` `three_bells` (`play` in the ritual) or the foundation's `chime` |
 | Atmospheric 1928 | `acoustics` `cinema`; `sound_bed` `fountain` `at` the wall fountain, `reach` 8, `gain_db` -4; `crickets` around the courtyard (three voices, `film_db` -18); a `scops_owl` from the stone pine, `every` 55, `film_db` -40; the theatre organ (`music`) before the film |
@@ -1983,7 +1995,7 @@ people.
 
 | # | Room | Builders and kits | Light, sky, atmosphere | Life, sound, music | Timeline and cues | Screen | Settings |
 |---|---|---|---|---|---|---|---|
-| 1 | Shopfront picture house, 1906 | `shopfront` (pressed tin), folding chairs (`seats`), a tin booth (`kit`) | gas lamps (`light`, flicker), a dusty beam (`screen_frame`, `atmosphere`) | projector clatter behind (`sound_bed`), a player piano that plays along (`music`, `film.transient`) | the piano starts in `starting` | a framed sheet | piano on or off |
+| 1 | Shopfront picture house, 1906 | `shopfront` (`edwardian`: pressed tin, a drawn player piano, its own tin booth, the street outside), folding chairs (`seats`) | gas lamps (`light`, flicker), a dusty beam (`screen_frame`, `atmosphere`) | projector clatter behind (`sound_bed`), a player piano that plays along (`music`, `film.transient`) | the piano starts in `starting` | a framed sheet | piano on or off |
 | 2 | Atmospheric, 1928 | `auditorium` with `ceiling_cover` 0, thirteen courtyard houses (balconies, towers, a loggia, an oriel, an arcade, lit windows), a palace gate with organ grilles and drapes, lions, cypresses, palms, a stone pine (`kit`) | an open dusk `sky` with real stars, a crescent moon, clouds lit by the town and the screen (`film.colour`); lanterns and floods baked | a wall fountain, crickets, a scops owl (`sound_bed`), a theatre organ before the film (`music`) | the courtyard goes to bed with the film (windows out one by one), curtains part (`showing`) | | clouds, organ |
 | 3 | Streamline, 1937 | `auditorium` dressed by the moderne kit (`kit/streamline.gd`): a stepped ceiling of coves, faience, jade and chrome bands round the hall and a bowed circle front, reeded pilasters, shell lights, a rising-sun carpet; a stepped proscenium round a rising sun, organ grilles, a clock | coves that cycle colours and then follow the film at a glow (`kit` `cove_*`, `film.colour`) | an organ (`music`) | the console rises lit from the pit and the organ plays as the room opens and at the end, a cadence and the console down as the film starts (`motion`) | a festoon curtain up behind the proscenium's head (`motion`) | cove colours |
 | 4 | Screen 3, 1983 | `auditorium` with `partition_z` (a subdivided balcony), plasterboard, swirly carpet, one broken seat, a water stain (picture) | smoke haze in the beam (`atmosphere`), a flickering exit sign (`flicker`) | rumble through the wall (`sound_bed`, `film.bass`) | | gate weave, a slight tilt (`presentation`) | weave and tilt |
@@ -2295,25 +2307,97 @@ room's dark quiet are where they were; the hall round them is the kit's `flagshi
 
 ### Room: Shopfront 1906
 
-`app/environments/shopfront_1906.env.json`. A narrow picture house in a shop: pressed tin, folding chairs and gas
-lamps, the film on a framed sheet. Its test: `tests/test_room_picture_houses.gd`.
+`app/environments/shopfront_1906.env.json`. *A shopfront picture house, 1906: a draper's shop made a cinema, pressed
+tin in relief over a varnished dado, gas lamps, a player piano by a gilt-framed sheet, the wet street outside the
+window.* The deep pass (2026-11-08) answered "continue working on the environments one-by-one like you did with the
+bathysphere, really improving their quality, imagination, delight, detail, lighting and so on. Better to do a smaller
+number of incredible superb ones than a large number not so" (the user). Before it the room was the `shopfront`
+builder's plain hall: flat tin, a cove, a framed sheet, four lamps a side, a tin booth from the kit, the street a glow
+in the window, and no piano drawn though one played. The seats, the eye height and the screen are where they were;
+the hall round them is the builder's new `edwardian` style (`kit/shopfront_edwardian.gd`, its pictures
+`kit/shopfront_pictures.gd`). Its tests: `tests/test_room_shopfront_1906.gd` and `tests/test_room_picture_houses.gd`.
 
-- **Systems:** `light`; `shopfront` (id `hall`): a 5.6 m hall 4.2 m high, the sheet 4.4 x 2.5 m at 7.4 m, 5 rows in
-  front of the viewer's and 3 behind, the tin an aged cream, gas lamps with `flicker` 0.6; `seats` (folding chairs
-  in the builder's slots); `kit` (a tin booth in the back corner's `booth` slot); `screen_frame` (no black masking:
-  the sheet's frame; the beam from the booth's window); `atmosphere` (`beam_haze` 0.4, `beam_dust` 0.7).
-- **Sound:** `acoustics` `shopfront` (pressed tin, rt60 0.9); `sound_bed` `projector` at the booth's window behind
-  (`reach` 5); `sound_bed` `gas` (`gas_hiss`, everywhere); `music` `piano` (a player piano by the screen's left,
-  `at` [-2.4, 0.8, -6.6], `reach` 7): it starts its piece in `starting` and plays on through the film, `drive` on
-  `film.transient` (`range` [0.3, 1], smooth 0.5 s: an agitato after a jump, its oom-pah again when the film calms),
-  `on` on the setting. All at their designed levels. No piano is drawn (the kit has none).
-- **Setting:** `piano` (Player piano, on): `piano.on`.
-- **Cues:** `ritual` (starting, Pre-show on): the gas down to half over 2 s, then to 18 % over 5 s, the street's glow
-  through the shop window down with it. `dim` (Pre-show off): the gas to 18 % over 3 s. `lights_up` (pre-show, end):
-  the gas up over 4 s, the street's glow back.
-- **Measured** (headless): 17 draws, 10 168 triangles, no lights, no particles, 8.4 MB; 63 seats. Sound at the
-  slider's default (dBFS RMS): -52.3 in the pre-show, -54.7 as the film starts, -57.1 in the film, -64.1 under a film
-  at the reference level.
+- **The shop:** the ceiling in pressed tin plates (0.61 m: a beaded border, a ribbed medallion, a rosette of twelve
+  petals, fans in the corners), a border and a rib round the field, two ceiling roses over the pendants; the walls
+  above the dado in a smaller tin lattice (small diamonds with quatrefoils and beads, 0.305 m), all in relief (the
+  maps' normals, drawn in code) and in an aged cream; a cornice of mouldings with a bead-and-reel band, mitred at the
+  corners; a dark varnished matchboard dado with its rail and skirting; a worn plank floor (paler down the aisles and
+  before the stage, darker by the walls). Soot above each lamp and yellowing high up, in the vertex colours.
+- **The screen end:** the sheet's linen margin in a gilt ogee frame with bosses at the corners, a pelmet board over
+  it (THE NONPAREIL in gilt between fleurons on deep red, ANIMATED PICTURES at its ends), crimson drapes gathered back
+  each side, a low stage with a painted front and a velvet skirt with a gilt fringe. The lecturer's lectern on the
+  stage's right: a turned column, a sloping desk with papers, a pointer leaning on it, a brass reading lamp with a
+  green shade (its glow in the house group: down with the gas).
+- **The player piano:** a walnut upright against the left wall by the stage, clear of the front row: its case and
+  cheeks, a lid, the spool box with brass spools and the tracker bar, the roll's paper scrolling between them while it
+  plays (3.5 cm a second, our own perforations), 65 keys in one MultiMesh that go down (3 degrees) with the music
+  system's notes (`music.held_notes()`), brass pedals, two candles in brass sconces (their flames flickering slowly,
+  in the bake as two warm lights), three roll boxes on the top.
+- **The front:** the plate-glass window to the street with its mullions and transom, ANIMATED PICTURES / CONTINUOUS
+  PERFORMANCE in gilt letters on the glass (read backwards from inside, as painted for the street), green curtains at
+  its sides; the door with its bell on a spring and a green portiere. Over the door the projection booth on a timber
+  platform: a riveted sheet-iron box with the lens port and two peepholes glowing, shutters over them in their guides,
+  a vent, a ladder up, a red fire bucket on the post. Under the platform a hat shelf with a bowler, brass coat hooks,
+  an overcoat and a furled umbrella. On the walls: invented bills (THE MAGIC KETTLE, A RIDE ON THE EXPRESS, VOYAGE TO
+  THE ARCTIC, THE RUNAWAY PERAMBULATOR, THE HAUNTED INN, the house's programme), a hand-lettered price board, a
+  LADIES ARE KINDLY REQUESTED TO REMOVE THEIR HATS board and a drop-dial clock whose hands keep the viewer's own time.
+  All lettering in Fira Sans Condensed (the app's own font), drawn into one atlas in code.
+- **The street:** through the window a wet road of setts and flags, our own gas lamp on its post outside with its
+  lantern lit, and across the road a brick terrace: a lit confectioner's window full of jars (J. HARGREAVE,
+  CONFECTIONER: invented), shuttered shops, a lit upper window, their lamp on its bracket; the lamps' glows and
+  streaks on the wet stones. Now and then before the film (the `cart` cue) a horse and covered cart passes left to
+  right as the room sees it, a dark shape against the lit shop, its two lamps gliding by with their streak on the
+  road, the horse walking (legs swinging at a walk, wheels turning), with the hooves' sound going the same way.
+- **The light:** the gas: six brass brackets with swan necks and opal tulip globes, two double pendants from the roses;
+  slow flicker (`flicker` 0.6, the room's Flickering lights setting holds them). Before the film the room is warm and
+  low; the street is cool through the glass. In the film the gas is turned down to 12 % and its globes go a deeper
+  orange (`glow_colour` and `glow_mix` by the cues), still glowing as gas does; the street dims (`street_glow` 0.2);
+  the picture lights the room through the spill (`light` `spill` 0.6: the linen 1, the paint 0.5, the gilt 0.6, the
+  wood 0.25, the tin 0.16 and its ceiling 0.12: the film is the star). Baked (13 hidden lights): the six brackets and
+  the two pendants, the candles, the reading lamp, the booth's port, the street lamp through the window (cool).
+- **Systems:** `light` (a warm low fill, `baked_fill` 0.1); `shopfront` (id `hall`, `style` `edwardian`: the same
+  5.6 m hall 4.2 m high, 5 rows in front of the viewer's and 3 behind, the tin aged cream, the trim walnut);
+  `seats` (folding chairs in the builder's slots); `screen_frame` (no masking; the beam's `lens` in the booth's port,
+  [-1.95, 3.27, 4.8]); `atmosphere` (`beam_haze` 0.4, `beam_dust` 0.7). The kit's booth is gone: the hall draws its
+  own.
+- **Sound:** `acoustics` `shopfront` (pressed tin, rt60 0.9); `sound_bed` `projector` inside the booth (`at`
+  [-1.95, 3.2, 5.3], `reach` 5); `sound_bed` `gas` (`gas_hiss`, everywhere); `sound_bed` `hooves` (a horse and cart on
+  setts, `at` [14.2, 0.5, 12.1] `to` [-13, 0.5, 12.1], `reach` 9, played by the `cart` cue); `music` `piano` at the
+  drawn piano (`at` [-2.45, 1, -5.48], `reach` 7): it starts its piece in `starting` and plays on through the film,
+  `drive` on `film.transient` (an agitato after a jump), `on` on the setting.
+- **Setting:** `piano` (Player piano, on): `piano.on`; off, the keys and the roll rest.
+- **Cues:** `ritual` (starting, Pre-show on): the gas to 55 % over 2 s, then to 12 % over 5 s with the globes' glow
+  to a deeper orange and the street's glow down. `dim` (Pre-show off): the same over 3 s. `cart` (every 45 s in the
+  pre-show, paused or ended; a chance of a half, at most once in 80 s): `hall.cart` (16 s) and `hooves.play`.
+  `lights_up` (pre-show, end): the gas up over 4 s, the glow's colour, the street's glow back.
+- **Comfort:** nothing in front of the picture (tested: no vertex of the hall between the sheet and the front row
+  inside the picture's rectangle); the piano and the lectern beside the stage; the cart only outside the glass behind
+  the seats, slow (its legs under 1.5 rad/s), never in the film; the gas's flicker slow and small; the clock's hands
+  move once a second.
+- **Measured** (`tests/test_room_shopfront_1906.gd`, headless, 2026-11-08): 32 draws, 28 961 triangles, no live
+  light, no particles, 21.9 MB. Before the pass: 17 draws, 10 168 triangles, 8.4 MB. By part: the chairs 9.3k
+  triangles in 2 draws, the shell (floor, tin, dado, cornice, ceiling) 7.4k in 6, the joinery (stage, frame, drapes,
+  piano, booth, lectern, coat) 5.4k in 4, the fittings (brass, gilt and the small painted things) 4.3k in 3, the
+  globes 1.3k in 2, the keys 0.8k, the cart 0.2k in 2 (made again each frame while it passes), and 12 small draws
+  (the candles' wax and flames, the bills, the street, its lamp's post and the lanterns, the clock's hands, the booth's ports, the glass,
+  the lettering, the reading lamp, the roll). The bake: 512 x 512, two layers, about 3.5 s under lavapipe, 13 hidden
+  lights. The textures: the tin's maps (the ceiling's plate, the walls' lattice, the beads, the matchboard, the
+  riveted iron; albedo and normal), the bills' atlas (1024 x 1024), the street (1024 x 1024), the window's lettering
+  (1024 x 256), the roll; all drawn in code at the build (about 1.4 s on a desktop, the bills' text 0.7 s of it).
+  Sound at the slider's default (dBFS RMS): -53.2 in the pre-show, -54.7 as the film starts, -56.5 in the film, -63.5
+  under a film at the reference level.
+- **The costs to watch on the Frame:** fill is one opaque layer but for the window's glass (one large quad, nearly
+  clear), the lettering (alpha scissor), the beam and its haze, the candle flames and the cart's lamps (small). The
+  draws are 32 (the budget's 40); the textures' memory (21.9 MB) and the time to draw them at the build.
+- **The render** (lavapipe, `test_room_shopfront_1906.gd` with `SHOPFRONT_BAKE=1`; a film of typical brightness, warm
+  left, cool right): from the seat, left, right, up, back, back and up, a side seat, the front row, in the pre-show
+  and in the film; close: the piano, the keys, the stage, the ceiling, a wall, the window (and the cart passing), the
+  booth, the lectern, a lamp, the door.
+- **To judge on the Frame:** the frame time (32 draws, the tin's normal maps over the whole room); the gas's level in
+  the pre-show and in the film (a glow, not a light); the street's brightness through the window, and whether the
+  cart's pass reads (and is not a distraction: it never comes in the film); the hooves' level and travel by ear, the
+  piano's level at its new place by the screen; the bills' and the clock's legibility from the seats and close; the
+  tin's relief (no shimmer at a distance); the keys moving with the notes.
 
 ### Room: Streamline 1937
 
