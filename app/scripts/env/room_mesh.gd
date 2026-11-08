@@ -53,6 +53,9 @@ var _chart_min := Vector2(INF, INF)
 var _chart_max := Vector2(-INF, -INF)
 ## Vertex colour for what follows (white: an instance colour multiplies through unchanged).
 var colour := Color.WHITE
+## Metres a lightmap texel covers in this mesh's atlas (TEXEL unless set: since 2026-11-08, the Nave's church sets a
+## coarser one on its carved parts, so its atlases stay small and the bake quick).
+var texel := TEXEL
 
 
 func surface(material: Material) -> void:
@@ -337,7 +340,7 @@ func _pack() -> Vector2i:
 	var area := 0
 	for c: Dictionary in _charts:
 		var size: Vector2 = c["size"]
-		var cell := Vector2i(ceili(size.x / TEXEL) + 1 + PAD * 2, ceili(size.y / TEXEL) + 1 + PAD * 2)
+		var cell := Vector2i(ceili(size.x / texel) + 1 + PAD * 2, ceili(size.y / texel) + 1 + PAD * 2)
 		cells.append(cell)
 		area += cell.x * cell.y
 	var order: Array = range(_charts.size())
@@ -363,5 +366,5 @@ func _pack() -> Vector2i:
 		var s: Surf = c["surface"]
 		var first: int = c["first"]
 		for k in range(first, first + int(c["count"])):
-			s.uv2[k] = (Vector2(origin[i] + Vector2i(PAD, PAD)) + s.uvs[k] / TEXEL + Vector2(0.5, 0.5)) / Vector2(atlas)
+			s.uv2[k] = (Vector2(origin[i] + Vector2i(PAD, PAD)) + s.uvs[k] / texel + Vector2(0.5, 0.5)) / Vector2(atlas)
 	return atlas

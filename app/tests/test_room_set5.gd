@@ -4,9 +4,10 @@ extends "res://tests/env_builder_harness.gd"
 ## docs/environments.md, "Room: Nave", "Room: Reclaimed", "Room: Ice cinema"). Each shipped document is built
 ## headless and checked as tests/test_environments.gd checks it (schema, comfort, licences, names, no people, the
 ## budget measured, a clear sight line from every seat), then for what makes it that room:
-## - Nave: the nave's own screen in the chancel, pews of the seats system, the viewer in a pew's middle; Candles
+## - Nave: the nave's own screen in the chancel, the gothic church's own pews, the viewer in a pew's middle; Candles
 ##   (none, a few, many) rebuilds the stands; the candles flicker and Flickering lights holds them; the rose window
-##   dims as the film starts and comes back after the end; the stone takes more of the film's light.
+##   dims as the film starts and comes back after the end; the stone takes the film's light softly (its own test,
+##   test_room_nave.gd, checks the rest).
 ## - Reclaimed: a hall half open to the sky with the viewer under the open part; ivy and ferns placed; Weather maps
 ##   onto the weather's mode; rain wets the room, the mist and the clouds follow the wet, the fireflies hide; the
 ##   puddle in the pit gives back the picture to the viewer's eyes; a loud bang scatters the birds; a quiet scene
@@ -126,7 +127,7 @@ func _nave() -> void:
 		return
 	var room := await _common("nave", doc)
 	var host: Node = room.host
-	for sid: String in ["light", "nave", "seats", "screen_frame"]:
+	for sid: String in ["light", "nave", "screen_frame"]:
 		check("nave: the system %s is there" % sid, host.system(sid) != null)
 	var nave: Node = host.system("nave")
 	var screen: Dictionary = Registry.script_of("nave").call("screen_for", nave.params)
@@ -135,12 +136,14 @@ func _nave() -> void:
 	var seats: Array[Transform3D] = room.room_seat_transforms()
 	check("nave: pews, one place a slot (%d)" % seats.size(), seats.size() == (nave.seat_slots() as Array).size()
 			and (nave.seat_slots() as Array).all(func(s: Dictionary) -> bool: return s["style"] == "pew"))
-	check("nave: the pews drawn by the seats system, not the nave", room.get_node_or_null("Pews") == null
-			and nave.draws_seats_elsewhere())
+	# Since the deep pass (2026-11-08) the church draws its own carved pews, so the bake lights them (its own test,
+	# test_room_nave.gd, checks the rest).
+	check("nave: the gothic church draws its own pews", str(nave.params["style"]) == "gothic"
+			and _has(room, "Pews") and not nave.draws_seats_elsewhere())
 	var ahead := seats.filter(func(t: Transform3D) -> bool: return t.origin.z < -0.5 and absf(t.origin.x) < 0.1)
 	check("nave: the viewer in a pew's middle with four pews in front (%d)" % ahead.size(), ahead.size() == 4)
-	check("nave: the stone takes the film's light (spill %s)" % host.system("light").params["spill"],
-			float(host.system("light").params["spill"]) > 3.0)
+	check("nave: the stone takes the film's light, softly (spill %s)" % host.system("light").params["spill"],
+			float(host.system("light").params["spill"]) > 0.3 and float(host.system("light").params["spill"]) < 1.5)
 	# Candles: a few by default; none; many. The setting rebuilds the nave.
 	check("nave: two candle stands a side by default", int(nave.params["candles"]) == 2 and _has(room, "Flames"))
 	host.set_setting("candles", "none")
@@ -172,13 +175,14 @@ func _nave() -> void:
 	_steps(host, 4.0)
 	var low := float(nave.params["rose_glow"])
 	check("nave: starting: the rose window dims slowly (%.2f, %.2f, %.2f)" % [glow0, mid, low],
-			glow0 > mid and mid > low and is_equal_approx(low, 0.15))
+			glow0 > mid and mid > low and is_equal_approx(low, 0.12))
 	host.snapshot_override = {"open": true, "playing": false, "position": 5400.0, "duration": 5400.0, "ended": true}
 	_steps(host, 6.0)
 	check("nave: ended: the rose window back (%.2f)" % float(nave.params["rose_glow"]),
 			is_equal_approx(float(nave.params["rose_glow"]), glow0))
 	# Sound: the stone's long reverb, a faint wind high in the clerestory, now and then a candle's gutter; no organ.
-	RoomSound.check_beds(self, "nave", room, {"wind": "wind", "candle": "candle"}, "stone_nave")
+	RoomSound.check_beds(self, "nave", room, {"wind": "wind", "candle": "candle", "owl": "tawny_owl",
+			"bell": "church_bell"}, "stone_nave")
 	var reverb: Dictionary = host.system_of_kind("sound").values()
 	check("nave: a long stone reverb (rt60 %.1f)" % float(reverb["rt60"]), absf(float(reverb["rt60"]) - 3.0) < 0.01)
 	var wind: Node = host.system("wind")

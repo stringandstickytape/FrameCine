@@ -1,5 +1,7 @@
 extends "res://scripts/env/systems/kit/builder.gd"
 
+const NaveGothic := preload("res://scripts/env/systems/kit/nave_gothic.gd")
+
 ## The nave builder (docs/environments.md, "The builders"): a church-like nave to watch in. Two arcades of round
 ## columns with arches between them, side aisles beyond them, clerestory walls with dim windows, a barrel vault, a
 ## chancel up three steps where the screen stands under a chancel arch, a rose window in the end wall over the screen,
@@ -39,8 +41,28 @@ const PARAMS := {
 	"column_radius": {"type": "float", "min": 0.15, "max": 1.0, "default": 0.32, "description": "the columns' radius"},
 	"wall_height": {"type": "float", "min": 6.0, "max": 30.0, "default": 10.5,
 			"description": "the clerestory walls' top, where the vault starts"},
-	"vault": {"type": "enum", "values": ["barrel", "flat"], "default": "barrel",
-			"description": "the nave's ceiling: a barrel vault or flat"},
+	"vault": {"type": "enum", "values": ["barrel", "flat", "rib"], "default": "barrel",
+			"description": "the nave's ceiling: a barrel vault, flat, or (the gothic style's) a pointed rib vault"},
+	# The gothic style: since 2026-11-08, the Nave's deep pass ("really improving their quality, imagination, delight,
+	# detail, lighting", the user). kit/nave_gothic.gd draws it; the plain style is the nave as it was.
+	"style": {"type": "enum", "values": ["plain", "gothic"], "default": "plain",
+			"description": "plain: round columns and arches under a barrel vault; gothic: clustered piers, pointed "
+			+ "arches, a triforium and a clerestory, rib vaults, aisles with coloured glass, a rose window"},
+	"chancel_width": {"type": "float", "min": 0.0, "max": 16.0, "default": 0.0,
+			"description": "the gothic chancel's width (0: the nave's and a little more)"},
+	"window_glow": {"type": "float", "min": 0.0, "max": 2.0, "default": 0.3, "live": true, "brightness": true,
+			"description": "how bright the gothic windows' glass shows (the Moon behind them)"},
+	"moonlight": {"type": "float", "min": 0.0, "max": 2.0, "default": 0.35,
+			"description": "the Moon's light through the gothic windows, for the bake"},
+	"coronae": {"type": "int", "min": 0, "max": 4, "default": 0,
+			"description": "gothic: iron coronae of candles hung over the nave, one a bay from the chancel"},
+	"coronae_lit": {"type": "bool", "default": true, "description": "gothic: the coronae's candles burn"},
+	"votive": {"type": "bool", "default": false,
+			"description": "gothic: a stand of small lights in coloured glass in the north aisle's east end"},
+	"cloth": {"type": "material", "default": {"library": "felt", "color": [0.8, 0.8, 0.8]},
+			"description": "gothic: the hassocks' wool and the hymn books' bindings (each its own colour)"},
+	"iron": {"type": "material", "default": {"library": "dark_metal", "color": [0.12, 0.11, 0.1]},
+			"description": "gothic: the candle stands and the coronae"},
 	"rows_front": {"type": "int", "min": 0, "max": 20, "default": 6, "description": "pews in front of the viewer's"},
 	"rows_back": {"type": "int", "min": 0, "max": 20, "default": 4, "description": "pews behind the viewer's"},
 	"row_pitch": {"type": "float", "min": 0.8, "max": 2.0, "default": 1.0, "description": "metres a pew"},
@@ -73,6 +95,8 @@ const PARAMS := {
 			"description": "the dark hanging behind the screen"},
 	"brass": {"type": "material", "default": {"library": "brass", "color": [0.55, 0.42, 0.22]},
 			"description": "the candle stands"},
+	"webs": {"type": "material", "default": {"library": "rough_plaster", "color": [0.62, 0.58, 0.52], "tiling": 2.0},
+			"description": "the gothic vaults' webs between the ribs (lime-washed)"},
 }
 
 
@@ -89,6 +113,8 @@ static func _end_z(p: Dictionary) -> float:
 static func _box(p: Dictionary) -> AABB:
 	var ow := _outer(p)
 	var top := float(p["wall_height"]) + (float(p["nave_width"]) * 0.5 if str(p["vault"]) == "barrel" else 0.0)
+	if str(p.get("style", "plain")) == "gothic" or str(p["vault"]) == "rib":
+		top = float(p["wall_height"]) + float(p["nave_width"]) * NaveGothic.CROWN
 	var lo := Vector3(-ow, 0.0, _end_z(p))
 	return AABB(lo, Vector3(ow * 2.0, top, float(p["rear_z"]) - lo.z))
 
@@ -192,6 +218,9 @@ func sound_room() -> Dictionary:
 # --- Building -----------------------------------------------------------------------------------------------------
 
 func build() -> void:
+	if str(params["style"]) == "gothic":
+		church = NaveGothic.build(self)
+		return
 	var nh := float(params["nave_width"]) * 0.5
 	var ow := _outer(params)
 	var cz := float(params["chancel_z"])
@@ -375,11 +404,22 @@ func _build_windows(c: Vector3, size: Vector2, ez: float, nh: float, ow: float, 
 
 
 var _rose: ShaderMaterial
+## The gothic style's window glass (one material for all the windows), the Moon's coloured pools on the floor, and
+## what it built (kit/nave_gothic.gd).
+var _windows: ShaderMaterial
+var _pool: ShaderMaterial
+var church = null
 
 
 func _param_changed(param: String, value: Variant) -> void:
+	# The gothic rose is in the steady signs group (the ritual moves accent: the candles), so its glow is its own.
+	var group := "signs" if str(params["style"]) == "gothic" else "accent"
 	if param == "rose_glow" and _rose != null:
-		_rose.set_shader_parameter("energy", float(value) * _group_level("accent"))
+		_rose.set_shader_parameter("energy", float(value) * _group_level(group))
+	elif param == "window_glow" and _windows != null:
+		_windows.set_shader_parameter("energy", float(value) * _group_level("signs"))
+		if _pool != null:
+			_pool.set_shader_parameter("energy", float(value) * NaveGothic.POOL_SHARE)
 
 
 ## Candle stands either side of the screen: a brass stand, three candles, the flames (flickering), a stand-in lamp.

@@ -19,7 +19,7 @@ const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale
 		"projector", "wall_rumble", "cicadas", "moped", "train", "huskies", "hull_creak", "radiator", "rain_glass",
 		"rain_leaves", "gas_hiss", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain",
 		"clock", "tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load", "switch_clunk", "valve_hum",
-		"crt_off", "channel_clunk", "sonar", "bubbles", "far_car", "scops_owl", "church_bell", "city"]
+		"crt_off", "channel_clunk", "sonar", "bubbles", "far_car", "scops_owl", "church_bell", "city", "tawny_owl"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
@@ -27,7 +27,8 @@ const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise
 		"purr": 4.0, "crickets": 6.0, "fire": 8.0, "drips": 8.0, "wind": 12.0, "hum": 4.0, "deep_hum": 8.0,
 		"fountain": 6.0, "clock": 4.0, "tube_whine": 2.0, "three_bells": 3.2, "candle": 0.9, "ice_creak": 2.6,
 		"vcr": 4.5, "tape_load": 8.0, "switch_clunk": 0.6, "valve_hum": 8.0, "crt_off": 1.4, "channel_clunk": 0.45,
-		"sonar": 3.0, "bubbles": 6.0, "far_car": 34.0, "scops_owl": 9.0, "church_bell": 14.0, "city": 12.0}
+		"sonar": 3.0, "bubbles": 6.0, "far_car": 34.0, "scops_owl": 9.0, "church_bell": 14.0, "city": 12.0,
+		"tawny_owl": 7.0}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
 		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles",
@@ -37,7 +38,8 @@ const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiato
 		"hull_creak": 32000, "purr": 22050, "crickets": 32000, "fire": 32000, "drips": 32000, "wind": 22050,
 		"hum": 22050, "deep_hum": 22050, "fountain": 32000, "candle": 32000, "ice_creak": 32000, "vcr": 32000,
 		"tape_load": 32000, "switch_clunk": 32000, "valve_hum": 22050, "crt_off": 32000, "channel_clunk": 32000,
-		"sonar": 32000, "bubbles": 32000, "far_car": 22050, "scops_owl": 32000, "church_bell": 22050, "city": 22050}
+		"sonar": 32000, "bubbles": 32000, "far_car": 22050, "scops_owl": 32000, "church_bell": 22050, "city": 22050,
+		"tawny_owl": 22050}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -1129,6 +1131,33 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 						ph = fmod(ph + float(p[2]) * (0.9 + 0.2 * u) / r, 1.0)
 						v += (sin(TAU * ph) * 0.5 + _lp(st, 4, x, a_low)) * env * 0.35
 				s[i] = v
+		"tawny_owl":
+			# A tawny owl in the churchyard's trees (the Nave's pre-show, since 2026-11-08): the long call of the
+			# woods at night, a hollow "hooo" sliding a little down from about 420 Hz, a pause, a short "hu", then a
+			# long wavering "hoo-oo-oo-oo" (the voice trembling about eight times a second). Near-pure tones with a
+			# little of their octave and a breath of air, swelling in and falling away, softened by the distance and
+			# the walls (low-passed). Our own; no recording.
+			var a_air := _a(1500.0, r)
+			var a_far := _a(1600.0, r)
+			# [start, length, from Hz, to Hz, level, tremble]
+			var calls := [[0.3, 0.75, 425.0, 395.0, 1.0, 0.0], [3.6, 0.14, 380.0, 400.0, 0.55, 0.0],
+					[4.05, 1.75, 410.0, 380.0, 0.9, 1.0]]
+			var ph := 0.0
+			for i in total:
+				var t := float(i) / r
+				var v := 0.0
+				for h: Array in calls:
+					var d := t - float(h[0])
+					if d < 0.0 or d > float(h[1]):
+						continue
+					var u := d / float(h[1])
+					var shake := float(h[5]) * sin(TAU * 7.6 * d) * smoothstep(0.08, 0.3, u)
+					var f := lerpf(float(h[2]), float(h[3]), u) * (1.0 + 0.012 * shake)
+					ph = fmod(ph + f / r, 1.0)
+					var env := minf(d / 0.06, 1.0) * pow(1.0 - u, 0.9) * float(h[4]) * (1.0 + 0.3 * shake)
+					var air := _lp(st, 0, rng.randf_range(-1.0, 1.0), a_air) * 0.25
+					v += (sin(TAU * ph) + 0.12 * sin(TAU * 2.0 * ph) + air) * env
+				s[i] = _lp(st, 1, v, a_far)
 	return s
 
 
