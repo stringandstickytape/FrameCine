@@ -17,8 +17,8 @@ extends RefCounted
 ##   voice is used, and not sooner than whisper_backend.gd's RETRY_SECONDS.
 ## - When the part is complete, its size and SHA-256 are checked; only then is it renamed to NAME. A wrong hash
 ##   deletes the part.
-## - HTTPS without the certificate check: the SHA-256 in this file is the trust (the file is public, so there is
-##   nothing to keep secret), and a headset without the engine's CA list can still download it.
+## - HTTPS with the usual certificate check (the engine's own CA list), as the updater does; the SHA-256 in this file
+##   is checked as well.
 ##
 ## Flag (after `--`): --model-url=URL takes the model from URL instead (tests, a mirror).
 
@@ -242,7 +242,7 @@ func _fetch(part: String, have: int) -> bool:
 		if u.has("error"):
 			_fail(str(u["error"]))
 			return false
-		var tls: TLSOptions = TLSOptions.client_unsafe() if u["scheme"] == "https" else null
+		var tls: TLSOptions = TLSOptions.client() if u["scheme"] == "https" else null
 		var err := client.connect_to_host(str(u["host"]), int(u["port"]), tls)
 		if err != OK:
 			_fail("can't connect to %s: %s" % [u["host"], error_string(err)], true)
