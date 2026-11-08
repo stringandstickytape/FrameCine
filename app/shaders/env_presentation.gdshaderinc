@@ -215,7 +215,7 @@ vec3 pr_source_marks(vec3 rgb, vec2 p, float time) {
 		float present = step(h, pr_dust * 0.016);
 		vec2 at = vec2(pr_hash(cell + 3.7 + pr_frame), pr_hash(cell + 9.1 + pr_frame));
 		float sz = pr_hash(cell + 5.3 + pr_frame);
-		float r = 0.08 + 0.42 * sz * sz * sz;
+		float r = 0.06 + 0.3 * sz * sz * sz;
 		vec2 q = fract(g) - (0.3 + 0.4 * at);
 		float seed = pr_hash(cell + 7.7 + pr_frame) * 6.2832;
 		float ang = atan(q.y, q.x);
@@ -224,8 +224,9 @@ vec3 pr_source_marks(vec3 rgb, vec2 p, float time) {
 		float d = length(q) / max(ragged, 0.35);
 		float edge = max(fwidth(g.y) * 0.7, 0.004);
 		float speck = present * (1.0 - smoothstep(r - edge, r + edge, d));
-		rgb = mix(rgb, vec3(h < pr_dust * 0.002 ? 0.9 : 0.015), speck * 0.94);
-		// Hairs: a fine curled fibre in a bigger cell, one frame each, a couple a second at this print's dust.
+		// Not solid: thin dirt lets some of the picture through (bold specks read as a gimmick: the user, 2026-11-08).
+		rgb = mix(rgb, vec3(h < pr_dust * 0.002 ? 0.8 : 0.03), speck * 0.6);
+		// Hairs: a fine, faint curled fibre in a bigger cell, one frame each, about one a second at the worn print's dust.
 		vec2 g2 = p * vec2(6.0 * pr_aspect, 6.0);
 		vec2 c2 = floor(g2);
 		float hair_on = step(pr_hash(c2 + pr_frame * 7.13 + 41.0), pr_dust * 0.0025);
@@ -234,10 +235,10 @@ vec3 pr_source_marks(vec3 rgb, vec2 p, float time) {
 		float mid = pr_hash(c2 + pr_frame + 6.7) * 6.2832;
 		float off = abs(mod(atan(v.y, v.x) - mid + 3.1416, 6.2832) - 3.1416);
 		float span = 0.6 + 1.4 * pr_hash(c2 + pr_frame + 8.3);
-		float w2 = max(fwidth(g2.y) * 0.8, 0.0015);
+		float w2 = max(fwidth(g2.y) * 0.45, 0.0008);
 		float hair = hair_on * (1.0 - smoothstep(w2 * 0.5, w2 * 1.5, abs(length(v) - rad)))
 				* (1.0 - smoothstep(span * 0.85, span, off));
-		rgb = mix(rgb, vec3(0.02), hair * 0.85);
+		rgb = mix(rgb, vec3(0.05), hair * 0.45);
 		// Scratches: thin lines running down the film, broken here and there.
 		float px = max(fwidth(p.x), 1e-5);
 		for (int i = 0; i < 4; i++) {

@@ -91,7 +91,7 @@ const FILM_FPS := 24.0
 const PRESETS := {
 	"worn_print": {"title": "Worn Print", "description": "a 1980s print near the end of its run: gate weave, a "
 			+ "slight tilt, dust, scratches and a lamp's flicker",
-			"params": {"source": "film", "weave": 0.7, "tilt": 0.35, "flicker": 0.5, "dust": 0.5, "scratches": 0.4,
+			"params": {"source": "film", "weave": 0.7, "tilt": 0.35, "flicker": 0.5, "dust": 0.25, "scratches": 0.4,
 					"hotspot": 0.4}},
 	"starlight_lot_1958": {"title": "Starlight Lot, 1958", "description": "a drive-in: a print with a little "
 			+ "weave and dust, a strong lamp's hotspot, the sound from the window speaker",
