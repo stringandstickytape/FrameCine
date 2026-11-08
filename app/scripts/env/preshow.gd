@@ -34,6 +34,9 @@ var _rate := 0.0
 var _left: MeshInstance3D
 var _right: MeshInstance3D
 var _dimmed := false
+var _material: ShaderMaterial
+## The app's own curtains: red velvet. A room may give its own (env_room.gd curtain_colour, since 2026-11-08).
+const CURTAIN_COLOUR := Color(0.42, 0.05, 0.07)
 var _playing_for := 0.0
 
 
@@ -42,7 +45,8 @@ func _ready() -> void:
 	enabled = bool(main.settings.get_value("preshow", "enabled", true))
 	var m := ShaderMaterial.new()
 	m.shader = ENV_SHADER
-	m.set_shader_parameter("albedo", Color(0.42, 0.05, 0.07))
+	m.set_shader_parameter("albedo", CURTAIN_COLOUR)
+	_material = m
 	m.set_shader_parameter("spill", 1.4)
 	m.set_shader_parameter("floor_darkening", 0.2)
 	_left = _panel("CurtainLeft", m)
@@ -55,6 +59,7 @@ func _ready() -> void:
 	main.environment_changed.connect(func(_id: String, _l: float) -> void:
 		openness = 1.0
 		_target = 1.0
+		_material.set_shader_parameter("albedo", curtain_colour())
 		_update())
 
 
@@ -66,6 +71,12 @@ func _panel(node_name: String, m: Material) -> MeshInstance3D:
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
 	return mi
+
+
+## The curtains' colour in this room: its document's, or the app's red.
+func curtain_colour() -> Color:
+	var c: Variant = main.env.get("curtain_colour") if main.env != null and "curtain_colour" in main.env else null
+	return c if c is Color else CURTAIN_COLOUR
 
 
 func available() -> bool:

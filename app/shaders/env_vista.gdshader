@@ -25,6 +25,10 @@ uniform vec3 pool_z = vec3(0.0, 0.0, 1.0);
 uniform vec2 pool_half = vec2(1.0);
 uniform float water_time = 0.0;
 uniform float snow = 1.0;
+// The room's own light thrown up through an opening on the scenery near it (since 2026-11-08): its colour times its
+// level (linear), and where it comes out (world). It falls off over a dozen metres, strongest on what faces it.
+uniform vec3 room_glow = vec3(0.0);
+uniform vec3 room_glow_at = vec3(0.0, 10.0, 0.0);
 
 // The materials (vista.gd M_*).
 const int M_ROCK = 0;
@@ -61,6 +65,10 @@ void fragment() {
 	vec3 n = normalize(world_normal);
 	vec3 sky = mix(sky_low, sky_top, clamp(n.y * 0.5 + 0.5, 0.0, 1.0)) * sky_gain;
 	vec3 screen = room_light_at(world_pos, spill) - vec3(env_light);
+	if (room_glow != vec3(0.0)) {
+		float gd = distance(world_pos, room_glow_at);
+		screen += room_glow / (1.0 + gd * gd / 140.0);
+	}
 	vec3 albedo = COLOR.rgb;
 	float hf = COLOR.a;
 	vec3 c;

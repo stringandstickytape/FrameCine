@@ -40,7 +40,7 @@ const STRAIGHT_RADIUS := 100000.0
 ## The seat models a hall of rows takes (scripts/env/systems/seats.gd SINGLE_MODELS): the stadium seat is drawn here
 ## (seat_mesh()), the others by the seats system's models.
 const SEAT_MODELS: Array[String] = ["stadium", "folding_chair", "plush", "multiplex", "club_chair", "director",
-		"cushion", "bean_bag"]
+		"cushion", "bean_bag", "civic"]
 const SEATS := "res://scripts/env/systems/seats.gd"
 
 
@@ -110,6 +110,10 @@ const PARAMS := {
 			"description": "the bake's four house lights high over the seats (a ceiling's cans); off: none"},
 	# Since 2026-11-08: where a kit's house fronts stand along the walls, a rail on the wall would run through them.
 	"handrails": {"type": "bool", "default": true, "description": "brass handrails along the side walls"},
+	# Since 2026-11-08: a kit that draws the hall's walls itself (the Palace of Culture's board-marked concrete round
+	# its mosaics) leaves the builder's out; the screen wall stays.
+	"side_walls": {"type": "bool", "default": true,
+			"description": "the side and rear walls; false: a kit draws them (the wall behind the screen stays)"},
 	"lens": {"type": "vec3", "min": -200.0, "max": 200.0, "default": [0.0, 3.45, 6.15],
 			"description": "the projector's lens, in the booth's window"},
 	"cloud_drop": {"type": "float", "min": 0.0, "max": 5.0, "default": 0.7,
@@ -448,16 +452,17 @@ func _build_floor() -> void:
 func _build_shell() -> void:
 	var lo := L.lo
 	var hi := L.hi
-	var walls := RoomMesh.new()
-	walls.surface(_mat("walls"))
-	for s: float in [-1.0, 1.0]:
-		var x := hi.x * s
-		walls.face([Vector3(x, lo.y, lo.z), Vector3(x, lo.y, hi.z), Vector3(x, hi.y, hi.z), Vector3(x, hi.y, lo.z)],
-				Vector3(-s, 0.0, 0.0))
-	var walk := L.row_floor(-L.rows_back)
-	walls.face([Vector3(lo.x, walk, hi.z), Vector3(hi.x, walk, hi.z), Vector3(hi.x, hi.y, hi.z),
-			Vector3(lo.x, hi.y, hi.z)], Vector3.FORWARD)
-	_add_static("Walls", walls)
+	if bool(params.get("side_walls", true)):
+		var walls := RoomMesh.new()
+		walls.surface(_mat("walls"))
+		for s: float in [-1.0, 1.0]:
+			var x := hi.x * s
+			walls.face([Vector3(x, lo.y, lo.z), Vector3(x, lo.y, hi.z), Vector3(x, hi.y, hi.z), Vector3(x, hi.y, lo.z)],
+					Vector3(-s, 0.0, 0.0))
+		var walk := L.row_floor(-L.rows_back)
+		walls.face([Vector3(lo.x, walk, hi.z), Vector3(hi.x, walk, hi.z), Vector3(hi.x, hi.y, hi.z),
+				Vector3(lo.x, hi.y, hi.z)], Vector3.FORWARD)
+		_add_static("Walls", walls)
 	var front := RoomMesh.new()
 	front.surface(_mat("front_wall"))
 	front.face([Vector3(lo.x, lo.y, lo.z), Vector3(hi.x, lo.y, lo.z), Vector3(hi.x, hi.y, lo.z),

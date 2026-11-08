@@ -85,12 +85,20 @@ const MODELS := {
 		"width": 0.62, "forms": [],
 		"boxes": [[Vector3(0.0, 0.24, -0.03), Vector3(1.0, 0.48, 0.84), 0.0],
 				[Vector3(0.0, 0.68, 0.32), Vector3(1.0, 0.5, 0.2), 12.0]]},
+	# Since 2026-11-08, the Palace of Culture 1974: a tip-up seat of the 1970s civic halls, its back a moulded oak
+	# shell round a fabric pad (the row behind sees warm wood), oak arms, plywood standards. About 360 triangles (the
+	# stadium seat is 700): the hall's 377 seats were most of its triangles.
+	"civic": {"upholstery": {"library": "woven_upholstery", "color": [0.4, 0.1, 0.09]},
+		"frame": {"library": "oak_veneer", "color": [0.42, 0.27, 0.14]}, "fold": true, "segment": false,
+		"width": 0.56, "forms": [],
+		"boxes": [[Vector3(0.0, 0.24, -0.05), Vector3(0.52, 0.48, 0.5), 0.0],
+				[Vector3(0.0, 0.76, 0.26), Vector3(0.52, 0.66, 0.1), 12.0]]},
 }
 const MODEL_NAMES: Array[String] = ["stadium", "folding_chair", "plush", "multiplex", "pew", "club_chair",
-		"director", "bench_seat", "cushion", "hide", "bean_bag", "settee"]
+		"director", "bench_seat", "cushion", "hide", "bean_bag", "settee", "civic"]
 ## The models a hall of rows takes (auditorium.gd seat_model): single seats, not segments.
 const SINGLE_MODELS: Array[String] = ["stadium", "folding_chair", "plush", "multiplex", "club_chair", "director",
-		"cushion", "bean_bag"]
+		"cushion", "bean_bag", "civic"]
 ## A builder's slot style -> the model drawn there when `model` is auto.
 const STYLE_MODELS := {"chair": "folding_chair", "pew": "pew", "bench": "bench_seat", "cushion": "cushion",
 		"club": "club_chair", "ring": "plush", "tier": "cushion", "hide": "hide", "director": "director",
@@ -109,7 +117,8 @@ static func spec() -> Dictionary:
 				+ "style or one model), in rows or single places of its own, and broken seats over a builder's own. "
 				+ "Models: stadium, folding_chair (1906), plush (tip-up, palaces), multiplex (1980s, a broken one), "
 				+ "pew, club_chair, director, bench_seat, cushion, hide, bean_bag, settee (two or three places in a "
-				+ "row, its arms at the ends). Instanced, tinted seat by seat, "
+				+ "row, its arms at the ends), civic (1970s: a moulded oak back, fabric pads, oak arms). Instanced, "
+				+ "tinted seat by seat, "
 				+ "the viewer's own chair folded away, boxes for object physics.",
 		"params": PARAMS,
 		"actions": {},
@@ -121,7 +130,7 @@ static func spec() -> Dictionary:
 
 const PARAMS := {
 	"model": {"type": "enum", "values": ["auto", "stadium", "folding_chair", "plush", "multiplex", "pew",
-			"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag", "settee"], "default": "auto",
+			"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag", "settee", "civic"], "default": "auto",
 			"description": "the seat; auto: by each slot's style (its own rows: folding chairs)"},
 	"from_builders": {"type": "bool", "default": true,
 			"description": "a seat in every seat slot of the room's builders"},
@@ -147,7 +156,7 @@ const PARAMS := {
 				"at": {"type": "vec3", "min": -200.0, "max": 200.0, "description": "the floor point"},
 				"turn": {"type": "float", "min": -180.0, "max": 180.0, "description": "degrees (0: towards -z)"},
 				"model": {"type": "enum", "values": ["auto", "stadium", "folding_chair", "plush", "multiplex", "pew",
-						"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag", "settee"],
+						"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag", "settee", "civic"],
 						"description": "this one's model; auto: the system's"}}},
 			"description": "single seats of its own: {at, turn, model}"},
 	"upholstery": {"type": "material", "default": null, "nullable": true,
@@ -209,6 +218,8 @@ static func model_mesh(model: String, upholstery: Material, frame: Material, wid
 			_bean_bag(b, upholstery)
 		"settee":
 			_settee(b, upholstery, w)
+		"civic":
+			_civic(b, upholstery, frame, w)
 		_:
 			_folding_chair(b, upholstery, frame, w)
 	return b.commit(false)
@@ -292,6 +303,25 @@ static func _theatre(b: RoomMesh, u: Material, f: Material, w: float, form: Stri
 	if not plush:
 		b.box(Vector3(0.0, 0.175, -0.02), Vector3(0.1, 0.31, 0.1), Basis(), [RoomMesh.DOWN, RoomMesh.UP])
 		b.box(Vector3(0.0, 0.01, -0.02), Vector3(0.32, 0.02, 0.26), Basis(), [RoomMesh.DOWN])
+
+
+## A civic hall's seat of the 1970s: a fabric cushion and back pad, the back held in a moulded oak shell curving round
+## it, oak arms, plywood standards (the halves of a joined row, as the stadium seat). Faces nobody sees are left out.
+static func _civic(b: RoomMesh, u: Material, f: Material, w: float) -> void:
+	var half := w * 0.5
+	var tilt := Transform3D(Basis(Vector3.RIGHT, deg_to_rad(12.0)), Vector3(0.0, 0.44, 0.2))
+	b.surface(u)
+	b.rounded_box(Vector3(0.0, 0.43, -0.07), Vector3(w - 0.08, 0.11, 0.46), 0.04, Transform3D(), 1, Vector3i(1, 0, 0),
+			0.0, [RoomMesh.DOWN, RoomMesh.BACK])
+	b.rounded_box(Vector3(0.0, 0.3, -0.01), Vector3(w - 0.1, 0.54, 0.07), 0.033, tilt, 1, Vector3i(1, 1, 0), -0.45,
+			[RoomMesh.DOWN, RoomMesh.BACK])
+	b.surface(f)
+	b.rounded_box(Vector3(0.0, 0.31, 0.04), Vector3(w - 0.06, 0.64, 0.03), 0.012, tilt, 1, Vector3i(2, 1, 0), -0.45,
+			[RoomMesh.DOWN, RoomMesh.FRONT])
+	for s: float in [-1.0, 1.0]:
+		b.box(Vector3(s * (half - 0.02), 0.665, -0.04), Vector3(0.04, 0.035, 0.42), Basis(),
+				[Vector3(s, 0, 0), RoomMesh.DOWN])
+		b.box(Vector3(s * (half - 0.015), 0.32, 0.05), Vector3(0.03, 0.64, 0.34), Basis(), [Vector3(s, 0, 0), RoomMesh.DOWN])
 
 
 ## A folding wooden chair of the shopfront years: a slatted seat, two back slats, the back legs running up into the

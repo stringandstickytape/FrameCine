@@ -166,6 +166,9 @@ sky_bottom}})` makes one; the room sets the rest on its own copy:
   the trusses traced as the room is built (`kit/reclaimed.gd`), as the run-time lightmapper gave none.
 - **`bake_pass`** is what the lightmapper renders of the surface: its colour at level 1, no fill, spill or lamps
   (they would bake in as light).
+- **Forms of the house shader** by define: `ICE` (`room_material_house_ice.gdshader`), `REFLECT`
+  (`room_material_house_reflect.gdshader`) and `MOSAIC` (`room_material_house_mosaic.gdshader`, since 2026-11-08:
+  a wall mosaic's tesserae from a map of one texel each, grout, glint; `docs/environments.md`, "The kit").
 
 A `vec3` uniform set with a `Color` comes back as a zero `Vector3` from `ShaderMaterial.duplicate()`: the cinema sets
 the fill again as `Vector3`s on its copies.

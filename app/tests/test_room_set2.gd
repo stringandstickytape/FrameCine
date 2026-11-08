@@ -8,9 +8,10 @@ extends "res://tests/env_builder_harness.gd"
 ##                       lions, trees over the walls, a twilight sky whose clouds follow the Clouds setting and take
 ##                       the film's colour; the ritual parts the curtains and deepens the dusk; Pre-show off: dim only
 ##                       (its own test, test_room_atmospheric_1928.gd, checks the rest)
-##   Palace of Culture   board-marked concrete, mosaic panels that take more of the screen's light, ochre drapes,
+##   Palace of Culture   board-marked concrete over the hall, two wall mosaics on their own shader, ochre drapes,
 ##                       straight rows; the Snow setting drives the snowfall, the clouds and the birches' snow; the
-##                       snow falls only under the open back of the roof
+##                       snow falls only under the opening in the roof (its own test, test_room_palace_of_culture_1974.gd,
+##                       checks the rest)
 ##   Flagship            a steep rake, black walls, blue step lights, a huge screen with its curve; the default seat
 ##                       in the middle of the rows; the ritual takes the house lamps out and the steps down
 ## Every room: seat picking (a chosen seat folds away), the lights come back up in the pre-show. The Palace's and the
@@ -219,29 +220,26 @@ func _palace() -> void:
 	var id := "palace_of_culture_1974"
 	var room := await _built(id)
 	var h: Node = room.host
-	for sid: String in ["light", "hall", "screen_frame", "showing", "sky", "vista", "weather"]:
+	for sid: String in ["light", "hall", "palace", "screen_frame", "showing", "sky", "vista", "weather"]:
 		check("%s: has %s" % [id, sid], h.system(sid) != null)
 	var hall: Node = h.system("hall")
 	var hp: Dictionary = hall.params
-	check("%s: board-marked concrete walls, ochre drapes, straight rows" % id,
-			str(hp["walls"]["library"]) == "concrete_panels" and str(hp["proscenium"]) == "drapes"
+	var kit: Node = h.system("palace")
+	check("%s: board-marked concrete over the hall, ochre drapes, straight rows" % id,
+			str(kit.params["stone"]["library"]).contains("concrete") and str(hp["proscenium"]) == "drapes"
 			and float(hp["row_radius"]) == 0.0 and room.get_node_or_null("Curtains") != null)
-	var panels := room.get_node_or_null("WallPanels") as MeshInstance3D
-	var mosaic: ShaderMaterial = panels.mesh.surface_get_material(0) if panels != null else null
-	var walls := room.get_node_or_null("Walls") as MeshInstance3D
-	var concrete: ShaderMaterial = walls.mesh.surface_get_material(0) if walls != null else null
-	check("%s: the mosaic panels take more of the screen's light than the concrete (%s, %s)" % [id,
-			mosaic.get_shader_parameter("spill") if mosaic != null else null,
-			concrete.get_shader_parameter("spill") if concrete != null else null],
-			mosaic != null and concrete != null
-			and float(mosaic.get_shader_parameter("spill")) > float(concrete.get_shader_parameter("spill")))
-	# The snow falls only under the open back of the roof.
-	var lo := Auditorium.Layout._v3(hp["room_min"])
-	var hi := Auditorium.Layout._v3(hp["room_max"])
-	var open_from := lerpf(lo.z, hi.z, float(hp["ceiling_cover"]))
+	# The mosaics on their own shader, taking less of the screen's light than the concrete (soft colour in the film).
+	var mosaic_mi := room.find_child("Mosaic", true, false) as MeshInstance3D
+	var mosaic: ShaderMaterial = mosaic_mi.mesh.surface_get_material(0) if mosaic_mi != null else null
+	check("%s: the mosaics on the mosaic shader" % id, mosaic != null
+			and str(mosaic.shader.resource_path).contains("mosaic"))
+	# The snow falls only under the opening in the roof (kit/palace_culture.gd OPEN_FROM to OPEN_TO).
+	var Palace: GDScript = load("res://scripts/env/systems/kit/palace_culture.gd")
+	var open_from := float(Palace.get_script_constant_map()["OPEN_FROM"])
 	var area: Dictionary = h.system("weather").params["areas"][0]
-	check("%s: the snow's area under the open roof (from z %.2f; the area from %.2f)" % [id, open_from,
-			area["min"][2]], float(area["min"][2]) >= open_from and float(area["max"][2]) <= hi.z)
+	check("%s: the snow's area under the opening (from z %.2f; the area from %.2f)" % [id, open_from,
+			area["min"][2]], float(area["min"][2]) >= open_from
+			and float(area["max"][2]) <= float(Palace.get_script_constant_map()["OPEN_TO"]))
 	check("%s: the snow falls behind the default seat (the picture clear)" % id, float(area["min"][2]) > 1.0)
 	var shapes: Array = (h.system("vista").params["items"] as Array).map(func(i: Dictionary) -> String: return i["shape"])
 	check("%s: birches outside" % id, shapes.count("birches") >= 1)
@@ -263,8 +261,8 @@ func _palace() -> void:
 	var clear := float(h.system("weather").snow_amount())
 	check("%s: snow falls when Heavy, stops when None (%.2f, %.2f)" % [id, heavy, clear], heavy > 0.5 and clear < 0.1)
 	h.set_setting("snow", "light")
-	# Sound: the concrete hall's echo; the house bells, played by the ritual only.
-	RoomSound.check_beds(self, id, room, {"bells": "three_bells"}, "concrete_hall")
+	# Sound: the concrete hall's echo; the house bells, played by the ritual only; the wind over the opening, a far train.
+	RoomSound.check_beds(self, id, room, {"bells": "three_bells", "wind": "wind", "train": "train"}, "concrete_hall")
 	var bells: Node = h.system("bells")
 	var rang: int = bells.plays
 	await _ritual(id, room, 0.1, 0.5)

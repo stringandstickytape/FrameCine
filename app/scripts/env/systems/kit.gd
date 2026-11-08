@@ -10,7 +10,8 @@ extends "res://scripts/env/systems/kit/builder.gd"
 ## standard lamp, a rug, a coffee table; and the TV rooms' dressing (kit/dressing.gd): bunting, a tea set, sandwiches,
 ## a stool, a channel dial, a soundbar, a floor lamp, a glass table (its top in PieceGlass, see-through), a media unit;
 ## and the moderne hall's (kit/streamline.gd, since 2026-11-08): its walls and coved ceiling, a stepped proscenium, an
-## organ console (its coves in PieceCove, its clock in PieceClock).
+## organ console (its coves in PieceCove, its clock in PieceClock); and the Palace of Culture's (kit/palace_culture.gd,
+## since 2026-11-08): its board-marked concrete hall, wall mosaics, coffered ceiling and field of globes.
 ## All the pieces share a few meshes, one surface a material: a baked one (PieceStatic), an unbaked one for rounded
 ## shapes and leaves (PieceSoft), the lamp shades (PieceLamps), the glows (windows, a booth's window, the video
 ## recorders' clocks: PieceDisplay) and each neon sign. The builder's slots come
@@ -34,7 +35,9 @@ static func spec() -> Dictionary:
 				+ "ceiling of glowing coves, faience and chrome speed bands, a stepped proscenium round a rising sun, "
 				+ "organ grilles, a clock, an illuminated organ console on its lift), a ruined picture house open to the "
 				+ "moonlit sky (broken roof and trusses, fallen plaster, a gilt proscenium with a torn curtain, a fallen "
-				+ "chandelier, a birch, ivy, ferns and wildflowers), a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
+				+ "chandelier, a birch, ivy, ferns and wildflowers), a 1970s palace of culture's hall (board-marked "
+				+ "concrete, wall mosaics of glass and gold tesserae, a coffered ceiling, a field of opal globes, oak "
+				+ "acoustic slats), a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
 				+ "furniture: a desk, a computer, a video recorder flashing 12:00, a sideboard, a standard lamp, a rug, "
 				+ "a coffee table; dressing: bunting, a tea set, sandwiches, a stool, a channel dial, a soundbar, a "
 				+ "floor lamp, a glass table, a media unit.",
@@ -140,6 +143,13 @@ const PARAMS := {
 	"group": {"type": "string", "max": 32, "default": "",
 			"description": "the pieces' meshes under one node of this name (a motion system moves them together: an "
 			+ "organ console on its lift); empty: each in the room"},
+	# Since 2026-11-08, for the Palace of Culture 1974's mosaics (kit/palace_culture.gd); the other rooms have none.
+	"mosaic": {"type": "material", "default": {"library": "white_marble", "color": [1.0, 1.0, 1.0], "tiling": 0.6},
+			"description": "a wall mosaic's bed: its maps under the tesserae (the mosaic shader draws the tesserae)"},
+	"mosaic_glint": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0,
+			"description": "how much the mosaics' tesserae glint (the lamps' and the picture's light, as the head moves)"},
+	"mosaic_wash": {"type": "float", "min": 0.0, "max": 4.0, "default": 1.6,
+			"description": "the lamp line's wash down the mosaics (times the house lamps' level)"},
 }
 ## Pieces that take their slot's size when the entry gives none (the others keep their own size).
 const FILLS: Array[String] = ["facade", "curves", "ivy", "bougainvillea", "balcony_front", "partition"]
@@ -187,6 +197,9 @@ class Ctx:
 	var clocks: Array = []
 	var footlights: Array = []
 	var glow_lights: Array = []
+	## Halls that draw meshes of their own over their pieces (kit/palace_culture.gd, since 2026-11-08): each an object
+	## with finish(kit), called once every piece has drawn, and tick(delta).
+	var halls: Array = []
 
 	## A soft (unbaked) tinted material that reflects (kit/reflect.gd): metal 0 a clear glaze or lacquer, 1 chrome.
 	func shiny(key: String, metal: float, amount: float, roughness := 0.1) -> Material:
@@ -500,6 +513,8 @@ func build() -> void:
 		_ctx.ice.finish(self)
 	if _ctx.ruin != null:
 		_ctx.ruin.finish(self)
+	for h: Object in _ctx.halls:
+		h.call("finish", self)
 
 
 ## The courtyard's lit windows (baked: their glow lights the reveals, sills and shutters round them in the bake) and
@@ -690,6 +705,9 @@ func tick(delta: float) -> void:
 		_ctx.ice.tick(delta)
 	if _ctx != null and _ctx.ruin != null:
 		_ctx.ruin.tick(delta)
+	if _ctx != null:
+		for h: Object in _ctx.halls:
+			h.call("tick", delta)
 	if _water_m != null:
 		_water_t += delta * float(params["water_motion"])
 		_water_m.set_shader_parameter("clock", _water_t)

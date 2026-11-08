@@ -89,6 +89,17 @@ static func spec() -> Dictionary:
 					"description": "snow on the ground under the trees: 0 none (bind it to a snow setting)"},
 			"water_motion": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "live": true,
 					"motion": {"max": 1.0}, "description": "how fast the light ripples in the pool"},
+			# Since 2026-11-08, for the Palace of Culture 1974 (its birches seen overhead through the open roof); the
+			# other rooms keep their trees: frost 0 and no glow by default.
+			"frost": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0,
+					"description": "birches in hoar frost: finer twigs, more of them, white with rime against the sky"},
+			"room_glow": {"type": "color", "default": "#000000", "live": true,
+					"description": "the room's own light thrown up on the scenery near it (an open roof's glow)"},
+			"room_glow_level": {"type": "float", "min": 0.0, "max": 2.0, "default": 0.0, "live": true,
+					"brightness": true, "description": "how much of room_glow reaches the scenery (a cue takes it down "
+					+ "with the house lights); 0: none"},
+			"room_glow_at": {"type": "vec3", "min": -200.0, "max": 200.0, "default": [0.0, 10.0, 0.0],
+					"description": "where the room's light comes out (an opening in its roof), in the room's frame"},
 		},
 		"cost": {"draws": 1, "triangles": 9000, "lights": 0, "particles": 0, "texture_mb": 0.3},
 		"provides": [],
@@ -197,6 +208,8 @@ func _apply() -> void:
 	_material.set_shader_parameter("pool_glow", float(params["pool_glow"]))
 	_material.set_shader_parameter("pool_colour", color_param("pool_colour"))
 	_material.set_shader_parameter("snow", float(params["snow"]))
+	var glow := color_param("room_glow").srgb_to_linear() * float(params["room_glow_level"])
+	_material.set_shader_parameter("room_glow", Vector3(glow.r, glow.g, glow.b))
 	_place_pool()
 	_light_from_sky(true)
 
@@ -210,9 +223,13 @@ func on_room_moved() -> void:
 
 
 func _place_pool() -> void:
-	if _material == null or _pool.is_empty() or not room.is_inside_tree():
+	if _material == null or not room.is_inside_tree():
 		return
 	var g := room.global_transform
+	var at: Array = params.get("room_glow_at", [0.0, 10.0, 0.0])
+	_material.set_shader_parameter("room_glow_at", g * Vector3(float(at[0]), float(at[1]), float(at[2])))
+	if _pool.is_empty():
+		return
 	_material.set_shader_parameter("pool_centre", g * (_pool[0] as Vector3))
 	_material.set_shader_parameter("pool_x", (g.basis * (_pool[1] as Vector3)).normalized())
 	_material.set_shader_parameter("pool_z", (g.basis * (_pool[2] as Vector3)).normalized())
@@ -246,9 +263,9 @@ func tick(delta: float) -> void:
 	if not _pool.is_empty():
 		_water_time += float(params["water_motion"]) * delta
 		_material.set_shader_parameter("water_time", _water_time)
-		if not _placed_once:
-			_placed_once = true
-			_place_pool()
+	if not _placed_once:
+		_placed_once = true
+		_place_pool()
 
 
 ## The shader's light on the scenery now: [top, low] (tests).
@@ -514,7 +531,10 @@ func _birches(it: Dictionary) -> void:
 	var y0 := float(it["floor_y"])
 	var size := float(it["size"])
 	_ground(it, _lin(it["colour"]))
-	var twig := Color(0.1, 0.085, 0.075)
+	# Frost: rime on every twig (pale against the night), the twigs finer and more of them.
+	var frost := float(params.get("frost", 0.0))
+	var twig := Color(0.1, 0.085, 0.075).lerp(Color(0.62, 0.64, 0.7), frost)
+	var thin := lerpf(1.0, 0.5, frost)
 	for t in int(it["count"]):
 		var az := float(it["azimuth"]) + rng.randf_range(-0.5, 0.5) * spread
 		var dist := maxf(3.0, d + rng.randf_range(-0.5, 0.5) * depth)
@@ -537,18 +557,25 @@ func _birches(it: Dictionary) -> void:
 		for r in rows:
 			var k := k0 + r * 2
 			_i.append_array([k, k + 1, k + 3, k, k + 3, k + 2])
-		for b in 11:
+		for b in 11 + int(10.0 * frost):
 			var f := rng.randf_range(0.35, 0.95)
 			var start := base + Vector3.UP * h * f + lean * f * f
 			var out := side * (1.0 if rng.randf() < 0.5 else -1.0)
 			var up := deg_to_rad(rng.randf_range(25.0, 65.0))
 			var length := h * rng.randf_range(0.1, 0.26) * (1.0 - f * 0.45)
 			var tip := start + (out * cos(up) + Vector3.UP * sin(up)) * length
-			_branch(start, tip, n, 0.035 * size, twig)
-			if rng.randf() < 0.6:
+			_branch(start, tip, n, 0.035 * size * thin, twig)
+			if rng.randf() < 0.6 + 0.3 * frost:
 				var mid := start.lerp(tip, 0.6)
 				var up2 := up + deg_to_rad(rng.randf_range(15.0, 35.0))
-				_branch(mid, mid + (out * cos(up2) + Vector3.UP * sin(up2)) * length * 0.5, n, 0.02 * size, twig)
+				_branch(mid, mid + (out * cos(up2) + Vector3.UP * sin(up2)) * length * 0.5, n, 0.02 * size * thin, twig)
+			if frost > 0.0:
+				# A birch's fine twigs hang from its branches: a few drooping strands from each.
+				for k in 3:
+					var from := start.lerp(tip, rng.randf_range(0.4, 1.0))
+					var hang := from + (out * rng.randf_range(0.2, 0.5) - Vector3.UP * rng.randf_range(0.5, 1.1)) \
+							* length * 0.35
+					_branch(from, hang, n, 0.012 * size, twig)
 
 
 func _branch(a: Vector3, b: Vector3, n: Vector3, w: float, col: Color) -> void:

@@ -9,17 +9,18 @@ extends RefCounted
 ##
 ##   PATTERNS                    pressed_tin, ice_blocks, swirl_carpet, corrugated, plasterboard, roof_tiles, ashlar,
 ##                               lime_wash, quarry_tiles, deco_carpet (rising suns in rows: the Streamline's aisles),
-##                               hex_pavers (sintered regolith: the Crater's floor)
+##                               hex_pavers (sintered regolith: the Crater's floor), board_concrete (concrete cast in
+##                               timber formwork: the Palace of Culture 1974's walls)
 ##   maps(pattern) -> {albedo, normal, orm, mean}   the pattern's textures (mean: its albedo's mean, linear)
 ##   apply(material, pattern, colour)   a house material shows the pattern in this colour (on average)
 ##   glass(colour, alpha, room) -> ShaderMaterial   see-through glass that dims with the house lights
 ##   rose_window(), letters(text, colour, back), gradient(top, bottom), abstract(seed, palette), flame()   pictures
 
 const PATTERNS: Array[String] = ["pressed_tin", "ice_blocks", "swirl_carpet", "corrugated", "plasterboard",
-		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles", "deco_carpet", "hex_pavers"]
+		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles", "deco_carpet", "hex_pavers", "board_concrete"]
 const SIZE := 128
 ## Patterns drawn larger than SIZE (many tiles a repeat, each its own: since 2026-11-08, the Athens rooftop's floor).
-const SIZES := {"quarry_tiles": 256, "deco_carpet": 256, "hex_pavers": 256}
+const SIZES := {"quarry_tiles": 256, "deco_carpet": 256, "hex_pavers": 256, "board_concrete": 256}
 const GLASS_SHADER := preload("res://scripts/env/systems/kit/env_glass.gdshader")
 
 static var _maps := {}
@@ -256,7 +257,70 @@ static func _sample(pattern: String, u: float, v: float) -> Array:
 			c = c.lerp(Color(0.12, 0.115, 0.11), joint)
 			var h := lerpf(0.88 - 0.25 * pow(1.0 - minf(edge * 6.0, 1.0), 2.0) - pits * 0.1, 0.2, joint)
 			return [h, c, lerpf(lerpf(0.75, 0.45, glint), 0.95, joint)]
+		# Since 2026-11-08, the Palace of Culture 1974's walls: "board-marked concrete you can read (the timber grain
+		# imprinted, tie holes in a grid, panel seams)", the brief.
+		"board_concrete":
+			# Concrete cast against boards: ten boards down a repeat, each its own depth and tone (each drank the
+			# water differently), the grain of its timber printed in streaks along it, a butt joint along most, a
+			# fine fin where the cement seeped between boards; the form panel's seam at the repeat's edge; tie holes
+			# in a grid (two rows of three: plugged with darker mortar, a little sunk); blowholes here and there.
+			var boards := 10.0
+			var bi := int(floor(v * boards))
+			var bv := fposmod(v * boards, 1.0)
+			var tone := _hash(bi, 3, 211)
+			var depth := (_hash(bi, 5, 213) - 0.5) * 0.1
+			# A butt joint along the board where its timber ended (some boards have none in a repeat).
+			var butt := _hash(bi, 7, 217)
+			var to_butt := absf(u - butt) if _hash(bi, 9, 219) > 0.3 else 1.0
+			var seg := 1 if u > butt else 0
+			tone = lerpf(tone, _hash(bi, 11 + seg, 223), 0.6)
+			var grain := _noise2(u, v, 5, 160, 227 + seg) * 0.6 + _noise2(u, v, 13, 320, 229) * 0.4
+			var rings := smoothstep(0.55, 0.85, _noise2(u + bv * 0.05, v, 3, 80, 233 + bi))
+			var h := 0.5 + depth + 0.05 * (grain - 0.5) - 0.05 * rings
+			var c := Color(0.6, 0.58, 0.54).lerp(Color(0.5, 0.49, 0.47), tone)
+			c = c * (0.95 + 0.1 * grain) * (1.0 - 0.06 * rings)
+			# The fin between boards and its shadow line.
+			var joint := 1.0 - smoothstep(0.0, 0.05, minf(bv, 1.0 - bv))
+			h += 0.18 * joint
+			c = c.lerp(c * 0.78, joint * 0.7)
+			var bj := 1.0 - smoothstep(0.0, 0.004, to_butt)
+			h -= 0.1 * bj
+			c = c.lerp(c * 0.8, bj * 0.6)
+			# The form panel's seam at the repeat's edge: a sharp step and a dark line.
+			var seam := 1.0 - smoothstep(0.0, 0.006, minf(u, 1.0 - u))
+			h -= 0.15 * seam
+			c = c.lerp(Color(0.32, 0.31, 0.3), seam * 0.8)
+			# Tie holes: plugged with a darker mortar disc, sunk a little, a ring where the cone sat.
+			# (Their distance in repeats: the holes about 3 cm across at a 1.5 m repeat.)
+			var tr := Vector2((fposmod(u * 3.0, 1.0) - 0.5) / 3.0, (fposmod(v * 2.0, 1.0) - 0.5) / 2.0).length()
+			var plug := 1.0 - smoothstep(0.008, 0.011, tr)
+			var ring := (1.0 - smoothstep(0.012, 0.017, tr)) * (1.0 - plug)
+			h -= 0.35 * plug + 0.15 * ring
+			c = c.lerp(Color(0.38, 0.37, 0.36), plug)
+			c = c.lerp(c * 0.72, ring)
+			# Blowholes: small air bubbles left in the face.
+			var blow := smoothstep(0.9, 0.93, _noise(u, v, 128, 239)) * smoothstep(0.55, 0.75, _noise(u, v, 16, 241))
+			h -= 0.3 * blow
+			c = c.lerp(c * 0.55, blow)
+			return [h, c, lerpf(0.82, 0.95, minf(joint + plug, 1.0))]
 	return [0.5, Color(0.5, 0.5, 0.5), 0.8]
+
+
+## Smooth value noise with its own number of cells across (pu) and down (pv), wrapping (grain stretched along u).
+static func _noise2(u: float, v: float, pu: int, pv: int, seed_value: int) -> float:
+	var x := u * pu
+	var y := v * pv
+	var xi := int(floor(x))
+	var yi := int(floor(y))
+	var fx := x - xi
+	var fy := y - yi
+	fx = fx * fx * (3.0 - 2.0 * fx)
+	fy = fy * fy * (3.0 - 2.0 * fy)
+	var a := _hash(posmod(xi, pu), posmod(yi, pv), seed_value)
+	var b := _hash(posmod(xi + 1, pu), posmod(yi, pv), seed_value)
+	var c := _hash(posmod(xi, pu), posmod(yi + 1, pv), seed_value)
+	var d := _hash(posmod(xi + 1, pu), posmod(yi + 1, pv), seed_value)
+	return lerpf(lerpf(a, b, fx), lerpf(c, d, fx), fy)
 
 
 ## The pattern's maps, made once (SIZE square, or the pattern's own in SIZES; mipmapped).

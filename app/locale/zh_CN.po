@@ -3106,8 +3106,8 @@ msgstr "中殿"
 msgid "Candles"
 msgstr "蜡烛"
 
-msgid "Candle stands either side of the screen: none, two on each side, or four."
-msgstr "银幕两侧的烛台：没有、每侧两座或每侧四座。"
+msgid "None: the church by moonlight and the film alone. A few: two candle stands either side of the screen, the coronae over the nave and the votive lights. Many: four stands a side."
+msgstr "无：只有月光下的教堂和影片。少量：银幕两侧各两座烛台，中殿上方的吊冠和许愿烛。多：每侧四座烛台。"
 
 msgid "None"
 msgstr "无"
@@ -3346,11 +3346,11 @@ msgstr "大型现代影院：陡峭的阶梯、黑色墙面、蓝色台阶灯和
 msgid "An ice hotel's cinema of sawn blocks and carvings under an ice vault: candles glowing inside the ice, hides on ice benches, the polar night and the northern lights outside."
 msgstr "冰酒店里的影院，由切割的冰块和冰雕砌成，顶上也是冰：烛光在冰中闪烁，冰凳上铺着兽皮，窗外是极夜和北极光。"
 
-msgid "A stone nave with the screen in the chancel: pews, candles, a dim rose window and the film's light climbing the stone."
-msgstr "石砌的中殿，银幕在圣坛里：长椅、烛光、昏暗的玫瑰窗，影片的光沿着石墙向上爬。"
+msgid "A Gothic nave at night, the screen in the chancel: piers rising into rib vaults, candles on iron stands and coronae, coloured glass and a rose window in the moonlight."
+msgstr "夜晚的哥特式中殿，银幕在圣坛里：束柱升入肋拱，铁架与吊冠上的烛光，月光下的彩色玻璃与玫瑰窗。"
 
-msgid "A concrete hall of the 1970s: ochre curtains, a mosaic wall that glitters in the screen's light, and snow on the birches outside."
-msgstr "七十年代的混凝土大厅：土黄色幕布、在银幕光下闪烁的马赛克墙，窗外的树上覆着雪。"
+msgid "A palace of culture, 1974: board-marked concrete, two great mosaics that glitter in the screen's light, a field of glowing globes, and snow falling through the open roof."
+msgstr "1974年的文化宫：木纹清水混凝土、两幅在银幕光下闪烁的巨幅马赛克、一片发光的球形吊灯，雪花从敞开的屋顶飘落。"
 
 msgid "A pillow fort in a bedroom, 1993: cushions and a bedsheet, fairy lights, rain on the window, and the telly filling the opening."
 msgstr "1993年卧室里的枕头堡：靠垫和床单、彩灯、窗上的雨，电视填满了堡的开口。"

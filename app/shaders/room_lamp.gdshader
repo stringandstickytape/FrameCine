@@ -18,6 +18,9 @@ uniform bool bake_pass = false;
 // The mesh's vertex colours times colour (several lamps of different colours in one draw: a car's head and tail
 // lamps, neon in two colours). Since 2026-11-08; off by default.
 uniform bool use_vertex_colour = false;
+// A glowing ball (since 2026-11-08, the Palace of Culture's opal globes): the glow falls off towards the rim as the
+// view grazes the glass, so a sphere reads round, not as a flat disc. 0: off (every other lamp as before).
+uniform float rim = 0.0;
 
 // env_light (the room's level).
 #include "res://shaders/env_spill.gdshaderinc"
@@ -31,6 +34,10 @@ void fragment() {
 	}
 	if (use_vertex_colour) {
 		c *= COLOR.rgb;
+	}
+	if (rim > 0.0) {
+		float facing = clamp(dot(normalize(NORMAL), normalize(VIEW)), 0.0, 1.0);
+		c *= mix(1.0, 0.35 + 0.9 * pow(facing, 0.7), rim);
 	}
 	ALBEDO = vec3(0.0);
 	ROUGHNESS = 1.0;
