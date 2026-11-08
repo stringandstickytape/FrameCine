@@ -576,6 +576,46 @@ builder and renders the same, pixel for pixel; the Void is the second.
 - **Would change if:** a room needs behaviour no system can express (then a new system in the app, never code in the
   document), or the compressor's duck sounds wrong in the headset (then a duck of our own on the bus's volume).
 
+## D31. PC windows as panes: the PC captures and sends, the headset owns the pointer (2026-11-08)
+
+The PC's windows (and whole monitors) come into the headset as panes, beside the film or on the big screen, and are
+used there with a mouse and keyboard paired with the headset (`docs/pc-windows.md`). Not a game streamer: Steam Link
+does low-latency games better, but its picture can't be our screen, our room's presentation or a pane where we put it.
+
+- **The PC app** (`pc/`, C++, Windows 10 2004 and later, MIT): a tray app that lists the top-level windows and the
+  monitors (titles, sizes, small thumbnails), captures the ones the headset asks for with Windows.Graphics.Capture
+  (by window handle, no picker; the yellow border off where Windows allows), encodes each on the PC's GPU through
+  Media Foundation's hardware encoders (NVIDIA, AMD and Intel ship them; HEVC, H.264 where a GPU has no HEVC), and
+  sends it, captures the PC's sound (WASAPI loopback, AAC from Windows' own encoder), and replays the headset's mouse
+  and key events with `SendInput`. Nothing to install beside it: Windows has every part. No installer for now: one
+  folder, one exe.
+- **The headset owns the pointer.** A Bluetooth mouse and keyboard pair with the Frame; Godot gets them as normal
+  input (checked 2026-11-08: motion, buttons and focus). The cursor is drawn in the headset on a sphere round the
+  head (captured mouse mode, relative motion), so it has no lag; over a pane it sends the PC "move to (x, y) in this
+  window", the buttons, the wheel and keys with their key codes (shortcuts work). The PC never captures its own
+  mouse. Apps that lock the cursor and read raw motion (games, 3D viewports) are out of scope.
+- **The PC dials the headset**, as an assistant does (D16): the headset hosts the service, nothing listens on the PC.
+  TCP 47803 on the headset, TLS with the assistant service's self-signed certificate and pin, paired once with a code
+  shown in the headset (a token, its hash kept on the headset, never logged). One control connection (JSON lines,
+  both ways) and one stream connection per open window and one for the sound, in our own packet framing (a kind, a
+  time, a length, the bytes: an HEVC or H.264 access unit, or an AAC frame), so the headset hands packets to its
+  decoder with no demuxer and no MPEG-TS on either side. Private addresses only, off until switched on in System.
+- **Quality, not latency:** the target is a steady picture and readable text within about 150 ms. A window that
+  doesn't change sends nothing (Windows.Graphics.Capture gives frames only on change); the pane being looked at and
+  the big screen get the full rate and bitrate, the others a few frames a second. One PC pixel to about one headset
+  pixel by default.
+- **Private:** window pictures and titles stay in the headset: the panes are on the private render layer (snapshots
+  for assistants leave them out), never logged, never kept.
+- **Focus by gaze:** the pane looked at (a short dwell, so a glance doesn't steal it) takes the keyboard and voice;
+  the PC window is brought to the front only when it gets a click or a key.
+- **Rejected:** Desktop Duplication (whole monitors only); FFmpeg on the PC (a build to carry for what Windows has);
+  MPEG-TS (a muxer and a demuxer for packets we can frame ourselves); the PC capturing its own mouse (lag, and a mouse tied to
+  the PC); a browser-based sender (no hardware encode, no loopback sound); RDP or VNC (no hardware video, no room
+  presentation, a server on the PC).
+- **Would change if:** the headset's decoder can't hold several streams beside a film (then fewer live panes, the
+  others as stills), or text is too soft in 4:2:0 (then a higher bitrate for still windows, or a lossless tile path
+  for them).
+
 ## Open
 
 - Quad layer for flat video vs. drawing in the projection layer: sharpness and bandwidth comparison (spike 03-layer).
