@@ -101,6 +101,8 @@ const PARAMS := {
 	"lamps": {"type": "int", "min": -1, "max": 4, "default": -1,
 			"description": "wall lamps (or candles) on each side wall (-1: the style's)"},
 	"lamp_colour": {"type": "color", "default": [1.0, 0.78, 0.52], "description": "the lamps' glow"},
+	"ceiling_light": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.35,
+			"description": "the ceiling light's baked energy (0: off; a pillow fort has none)"},
 	"flicker": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "live": true, "flicker": true,
 			"steady": 0.0, "brightness": true,
 			"description": "how much the fire, candles and fairy lights waver (slowly; Flickering lights holds them)"},
@@ -832,9 +834,9 @@ func build() -> void:
 	_build_seats()
 	# The main light, off in a pillow fort: the film is watched by the fairy lights and the telly (the user,
 	# 2026-11-07: far too bright inside the fort).
-	if not _fort(p):
-		_bake_spot("Ceiling", Vector3(0, h + rise - 0.1, (fz + bz) * 0.5), true, 75.0, h + rise + 1.0, 0.35,
-				color_param("lamp_colour"))
+	if not _fort(p) and float(p.get("ceiling_light", 0.35)) > 0.0:
+		_bake_spot("Ceiling", Vector3(0, h + rise - 0.1, (fz + bz) * 0.5), true, 75.0, h + rise + 1.0,
+				float(p.get("ceiling_light", 0.35)), color_param("lamp_colour"))
 
 
 func _build_skirting(trim: RoomMesh, door: Array) -> void:
