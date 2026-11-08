@@ -100,9 +100,21 @@ Window ids are strings from the PC: `"w:<window handle, hex>"` for a window, `"m
 | `focus` | `id` | bring that window to the front (sent before its first click or key after it gained focus in the headset) |
 | `ping` | `n` | every 5 s; no `pong` in 15 s and the headset closes |
 
-Mouse coordinates are in the captured picture's pixels (the whole window as captured, title bar included). The PC
+Mouse coordinates are in the stream's pixels (its `w` x `h` from `stream` or `resized`); the PC scales them per axis to
+the captured picture (the whole window as captured, title bar included). The PC
 maps them to the screen through the window's rectangle at the time (per-monitor DPI aware) and moves the real cursor
 there with `SendInput` (absolute, virtual desktop). The PC brings a window to the front only on `focus`.
+
+### Settled after phase 1 was built (2026-11-08)
+
+- `resized` carries the stream's new size (what the pane shows); the `windows` list's `w`, `h` are the window's own size.
+- A minimised window: `error` with `what` "minimised"; the PC keeps sending the last picture every 2 s. Restoring it
+  needs no message: frames simply resume. (A `state` message may replace this later.)
+- The sound (stream 0) has no `stream` message: it is always AAC-LC, 48 kHz, stereo.
+- The wheel: `dy` > 0 scrolls up (away), `dx` > 0 right, in notches (fractions allowed).
+- `bits` is 8 for desktop pictures (SDR); 10 only if HDR capture is added.
+- The AAC encoder's priming (about 21 ms) is left in the sound's times: well inside the fixed delay.
+- To get a key frame the headset closes and reopens the stream for now; a `keyframe` request is a likely v2 addition.
 
 ## Stream connections
 
