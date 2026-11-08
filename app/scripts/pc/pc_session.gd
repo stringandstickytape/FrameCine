@@ -206,6 +206,12 @@ func _take_windows(list: Variant) -> void:
 		var w := {"id": id, "kind": "monitor" if str(d.get("kind", "")) == "monitor" else "window",
 				"title": str(d.get("title", "")).left(200), "app": str(d.get("app", "")).left(80),
 				"w": clampi(int(d.get("w", 0)), 0, 16384), "h": clampi(int(d.get("h", 0)), 0, 16384), "thumb": null}
+		if not d.has("thumb") and old.has(id):
+			# Left out: the same picture as before (docs/pc-windows.md, `windows`).
+			w["thumb"] = old[id]["thumb"]
+			w["thumb_b64_hash"] = old[id].get("thumb_b64_hash", "")
+			out.append(w)
+			continue
 		var b64 := str(d.get("thumb", ""))
 		if b64 != "" and old.has(id) and str(old[id].get("thumb_b64_hash", "")) == str(b64.hash()):
 			w["thumb"] = old[id]["thumb"]

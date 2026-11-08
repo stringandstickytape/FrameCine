@@ -18,6 +18,11 @@ constexpr int64_t kKeyEvery = 2'000'000;    // a key frame at least this often (
 constexpr int64_t kRefreshEvery = 2'000'000; // a frame at least this often, changed or not
 constexpr int64_t kSettleAfter = 250'000;   // the same picture again once it stops changing, for sharper text
 constexpr int kMinW = 256, kMinH = 128;     // encoders refuse smaller pictures
+// A new size waits this long without changing again before the encoder opens at it; until then the picture is
+// scaled into the old size. A maximise or restore goes through two or three sizes in half a second, a drag at the
+// window's edge through dozens, and each new size is a new decoder on the headset: the Frame refused a third 4K
+// decoder at once and the pane froze (the user, 2026-11-08).
+constexpr int64_t kResizeSettle = 400'000;
 
 json::Value msg(const char* type) {
     json::Value v = json::Value::object();
@@ -290,6 +295,7 @@ void VideoStream::run() {
     int cw = 0, ch = 0;
     bool have_picture = false, fresh = false, minimised = false;
     int64_t pic_time = 0, pic_arrived = 0, last_encode = 0, last_key = 0, settle_at = 0, last_time = 0;
+    int64_t resize_at = 0;  // when the waiting new size (cw x ch) opens the encoder; 0 when none waits
     // The frame rate is kept by a token bucket: `fps` tokens a second, at most two saved up, one per frame sent.
     // Frames that come with jitter (a 60 Hz window on a 60 Hz desktop) are all sent, and never more than `fps` a
     // second on average.
@@ -313,6 +319,7 @@ void VideoStream::run() {
                 wait_us = std::min({wait_us, last_encode + kRefreshEvery - now, last_key + kKeyEvery - 100'000 - now});
             }
             if (settle_at) wait_us = std::min(wait_us, settle_at - now);
+            if (resize_at) wait_us = std::min(wait_us, resize_at - now);
             if (blocked) wait_us = std::max<int64_t>(wait_us, 2'000);
             blocked = false;
             if (wait_us > 0) {
@@ -383,23 +390,31 @@ void VideoStream::run() {
             if (w != cw || h != ch) {
                 cw = w;
                 ch = h;
-                int ew, eh;
-                mapping::fit_size(cw, ch, req_.max_w, req_.max_h, kMinW, kMinH, ew, eh);
-                if (ew != enc_w || eh != enc_h) {
-                    const bool was_open = enc_w != 0;
-                    if (!open_encoder(ew, eh)) {
-                        error("no encoder");
-                        break;
-                    }
-                    if (was_open && announced) {
-                        json::Value r = msg("resized");
-                        r.set("id", id).set("w", enc_w).set("h", enc_h);
-                        control_(r);
-                    }
-                }
+                // The first size opens the encoder at once; a later one waits to settle (kResizeSettle).
+                const int64_t n = now_us();
+                resize_at = enc_w == 0 ? n : n + kResizeSettle;
             }
-            if (!announced && enc_w) announce();
         }
+        if (resize_at && now_us() >= resize_at) {
+            resize_at = 0;
+            int ew, eh;
+            mapping::fit_size(cw, ch, req_.max_w, req_.max_h, kMinW, kMinH, ew, eh);
+            if (ew != enc_w || eh != enc_h) {
+                const bool was_open = enc_w != 0;
+                if (!open_encoder(ew, eh)) {
+                    error("no encoder");
+                    break;
+                }
+                if (was_open && announced) {
+                    logf("stream %d: the window settled at %dx%d", req_.stream, cw, ch);
+                    json::Value r = msg("resized");
+                    r.set("id", id).set("w", enc_w).set("h", enc_h);
+                    control_(r);
+                }
+                fresh = true;  // the picture at the new size goes now
+            }
+        }
+        if (!announced && enc_w) announce();
         if (!have_picture || !enc_w) continue;
         if (!announced) announce();
 

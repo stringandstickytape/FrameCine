@@ -510,6 +510,7 @@ void Session::watch_loop() {
     struct Thumb {
         std::string data;
         int64_t made_us = 0;
+        bool sent = false;  // this connection has it: later lists leave it out until it is made again
     };
     std::map<std::string, Thumb> thumbs;
     std::string last_shape;
@@ -571,7 +572,9 @@ void Session::watch_loop() {
                         Thumb& th = thumbs[w.target.id];
                         // A thumbnail is made again when it is older than 10 s, or when the list was asked for.
                         if (th.made_us == 0 || now - th.made_us > 10'000'000 || asked) {
-                            th.data = thumbnail_base64(w, 256, opt_.list.only_titles.empty());
+                            std::string fresh = thumbnail_base64(w, 256, opt_.list.only_titles.empty());
+                            if (fresh != th.data) th.sent = false;
+                            th.data = std::move(fresh);
                             th.made_us = now;
                         }
                         json::Value e = json::Value::object();
@@ -580,8 +583,14 @@ void Session::watch_loop() {
                             .set("title", to_utf8(w.title))
                             .set("app", w.app)
                             .set("w", w.w)
-                            .set("h", w.h)
-                            .set("thumb", th.data);
+                            .set("h", w.h);
+                        // Only a thumbnail the headset has not had: a title changing every second (a clock, a
+                        // spinner) sent all of them, half a megabyte a second, and the headset lurched each time
+                        // (the user, 2026-11-08). An answer to `list` has them all.
+                        if (asked || !th.sent) {
+                            e.set("thumb", th.data);
+                            th.sent = true;
+                        }
                         arr.push(std::move(e));
                     }
                     // Thumbnails of windows that went are dropped.

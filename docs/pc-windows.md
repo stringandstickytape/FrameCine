@@ -81,7 +81,7 @@ Window ids are strings from the PC: `"w:<window handle, hex>"` for a window, `"m
 
 | Type | Fields | When |
 |---|---|---|
-| `windows` | `list`: `[{id, kind: "window"\|"monitor", title, app (the exe's name), w, h, thumb (base64 JPEG, at most 256 px on its long side)}]` | on `list`, and when the list changes (at most once a second) |
+| `windows` | `list`: `[{id, kind: "window"\|"monitor", title, app (the exe's name), w, h, thumb (base64 JPEG, at most 256 px on its long side; left out when the headset has it already: keep the old one)}]` | on `list` (every thumbnail), and when the list changes (at most once a second) |
 | `stream` | `stream` (number), `id`, `codec` (`"hevc"` or `"h264"`), `bits` (8 or 10), `w`, `h` | a stream connection is up and sending |
 | `resized` | `id`, `w`, `h` | the window's size changed (the stream goes on at the new size from its next key frame) |
 | `closed` | `id` | the window went (its stream ends) |

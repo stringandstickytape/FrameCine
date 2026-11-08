@@ -11,6 +11,11 @@ extends RefCounted
 
 signal format_changed
 
+## A new size's decoder that has no frame by then (or fails: the Frame refuses a third 4K decoder, "VIDIOC_REQBUFS
+## failed: Device or resource busy") is given up, and the stream starts again from a key frame (wants_key_frame()),
+## not left frozen on the old size's last picture (the user, 2026-11-08).
+const NEXT_TIMEOUT := 2.0
+
 var _tex: Object
 var _next: Object
 var _source: Object
@@ -18,6 +23,8 @@ var _next_source: Object
 var _size := Vector2i.ZERO
 var _error := ""
 var _opened := 0
+var _next_age := 0.0
+var _next_failed := false
 
 
 static func available() -> bool:
@@ -27,10 +34,18 @@ static func available() -> bool:
 
 ## A source from the stream's reader (its first key frame pushed): decode it.
 func use_source(source: Object) -> void:
+	# A size that came and went before it showed a frame: its decoder goes first, so the hardware has room.
+	if _next != null:
+		_next.call("close")
+		_next = null
+		if _next_source != null:
+			_next_source.call("close")
+		_next_source = null
 	var tex: Object = ClassDB.instantiate("HWVideoTexture")
 	if tex.call("open_source", source) != OK:
 		_error = str(tex.call("get_last_error"))
 		push_warning("PC windows: the stream's decoder did not open: %s" % _error)
+		_next_failed = _tex != null
 		return
 	tex.call("play")
 	_opened += 1
@@ -39,10 +54,9 @@ func use_source(source: Object) -> void:
 		_source = source
 		_tex.connect("format_changed", _on_format)
 	else:
-		if _next != null:
-			_next.call("close")
 		_next = tex
 		_next_source = source
+		_next_age = 0.0
 
 
 ## One frame: `clock` is the PC time to show (pc_clock.gd now()).
@@ -52,7 +66,13 @@ func update(delta: float, clock: float) -> void:
 	_tex.call("update", delta, clock)
 	if _next != null:
 		_next.call("update", delta, clock)
-		if bool(_next.call("has_frame")):
+		_next_age += delta
+		var st: Dictionary = _next.call("get_stats")
+		if str(st.get("state_name", "")) == "error" or _next_age > NEXT_TIMEOUT:
+			push_warning("PC windows: the new size's decoder %s; the stream starts again"
+					% ("failed" if _next_age <= NEXT_TIMEOUT else "showed nothing in %.0f s" % NEXT_TIMEOUT))
+			_next_failed = true
+		elif bool(_next.call("has_frame")):
 			# The new size is decoding: it takes the plane textures the material samples.
 			_tex.call("swap_planes_with", _next)
 			_tex.disconnect("format_changed", _on_format)
@@ -99,6 +119,8 @@ func frame_time() -> float:
 
 ## The decoder lost its place (access units dropped, a decoder error): the stream should start again from a key frame.
 func wants_key_frame() -> bool:
+	if _next_failed:
+		return true
 	if _source != null and bool(_source.call("is_keyframe_wanted")):
 		return true
 	if _tex != null:
@@ -129,6 +151,8 @@ func reset() -> void:
 	if _tex != null and _tex.is_connected("format_changed", _on_format):
 		_tex.disconnect("format_changed", _on_format)
 	close()
+	_next_failed = false
+	_next_age = 0.0
 
 
 func close() -> void:

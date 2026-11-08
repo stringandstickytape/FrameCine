@@ -4,8 +4,9 @@ extends VBoxContainer
 ## windows and monitors as thumbnails (the PC's own pictures, at most 256 px); picking one opens it as a pane in front
 ## of the viewer (or brings its pane into focus). Under them, a line with the on-pane keyboard that types into the
 ## pane in focus (`text`), for when there is no keyboard paired.
-## The titles and the pictures are the PC's (content, never translated, never logged). Built again whenever the
-## feature says something changed.
+## The titles and the pictures are the PC's (content, never translated, never logged). Built again when the feature
+## says something changed, once a frame at most and only while it shows (else when it next shows): a title changing
+## every second rebuilt it every second, hidden or not, and the headset lurched (the user, 2026-11-08).
 
 const W := preload("res://ui/pane_widgets.gd")
 const OnscreenKeyboard := preload("res://ui/onscreen_keyboard.gd")
@@ -17,22 +18,42 @@ var _line: LineEdit
 var _keyboard: OnscreenKeyboard
 ## Window tiles made (the tests press them): [{button, pc, id}].
 var tiles: Array[Dictionary] = []
+var _dirty := false
+var _queued := false
 
 
 func _init() -> void:
 	name = "PcPlace"
 	add_theme_constant_override("separation", 6)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	visibility_changed.connect(func() -> void:
+		if _dirty and is_visible_in_tree():
+			_changed())
 
 
 func bind(p_feature: Node) -> void:
 	feature = p_feature
 	if feature != null:
-		feature.changed.connect(_rebuild)
+		feature.changed.connect(_changed)
+	_rebuild()
+
+
+func _changed() -> void:
+	if not is_inside_tree() or not is_visible_in_tree():
+		_dirty = true
+		return
+	if not _queued:
+		_queued = true
+		_rebuild_now.call_deferred()
+
+
+func _rebuild_now() -> void:
+	_queued = false
 	_rebuild()
 
 
 func _rebuild() -> void:
+	_dirty = false
 	for c in get_children():
 		remove_child(c)
 		c.queue_free()
