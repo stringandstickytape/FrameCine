@@ -130,6 +130,11 @@ func _run() -> void:
 			side = i
 	f.seat.choose_seat(side)
 	_check("a side seat turns the screen toward the middle (yaw %.0f deg)" % rad_to_deg(main.screen_yaw), main.screen_yaw < -0.2)
+	# The screen stays square to the room, as a real one does: it does not turn to face the side seat.
+	var room_facing: Vector3 = main.env.global_basis * main.env.get_screen_anchor().basis.z
+	var facing: Vector3 = (main.screen as Node3D).global_basis.z
+	_check("a side seat: the screen stays square to the room (%.1f deg off)" % rad_to_deg(facing.angle_to(room_facing)),
+			facing.angle_to(room_facing) < 0.01)
 	var pointed: Vector3 = main.env.global_transform * Vector3(seats[back])
 	_check("pointing at a seat picks it", f.seat.choose_seat_at(pointed + Vector3(0.15, 0.5, 0.0)) and f.seat.seat == back)
 	_check("pointing at nothing near a seat: no change", not f.seat.choose_seat_at(Vector3(0, 30, 0)))

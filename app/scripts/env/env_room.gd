@@ -265,6 +265,18 @@ func room_seat_transforms() -> Array[Transform3D]:
 	return out
 
 
+## The room has its own screen, fixed in the room: from a seat at the side it stays square to the room, as a real
+## screen does, instead of turning to the viewer (scripts/comfort/seat_choice.gd; the user, 2026-11-07: "when I move to
+## a seat at the side of the theatre, the screen rotates to face me"). A document's screen.home false opts out.
+func has_home_screen() -> bool:
+	return doc.get("screen") is Dictionary and bool((doc["screen"] as Dictionary).get("home", true))
+
+
+## Reset room's seat: the room's own spot.
+func get_default_seat() -> int:
+	return -1
+
+
 ## The screen's own curve (scripts/play/curved_screen.gd): the document's screen.curve (0..1), -1 when it gives none.
 ## The room starts with it until the viewer sets a curve of their own.
 func get_home_curve() -> float:

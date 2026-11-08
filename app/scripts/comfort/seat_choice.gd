@@ -202,7 +202,7 @@ func home_screen() -> void:
 	var own: bool = env.has_method("has_home_screen") and env.has_home_screen()
 	main.screen.sphere_yaw = 0.0
 	_place_screen(float(env.default_screen_width) if own else main.screen_width)
-	if own and main.get("features") != null and main.features.curve != null:
+	if own and main.get("features") != null and main.features.curve != null 			and float(env.get_home_curve()) >= 0.0:
 		main.features.curve.set_amount(float(env.get_home_curve()))
 
 
