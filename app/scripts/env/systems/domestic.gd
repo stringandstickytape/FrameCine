@@ -121,6 +121,12 @@ const PARAMS := {
 			"description": "seats along a row (odd: one in the middle, the viewer's; 0: the style's)"},
 	"seat_pitch": {"type": "float", "min": 0.0, "max": 2.0, "default": 0.0, "description": "seat centres, metres"},
 	"row_pitch": {"type": "float", "min": 0.0, "max": 3.0, "default": 0.0, "description": "metres a row"},
+	# Since 2026-11-08, for the Ice cinema ("really improving their quality, imagination, delight, detail, lighting",
+	# the user, 2026-11-08): its walls are real blocks of ice the kit lays (kit/ice_hall.gd). Every other room draws
+	# its own shell, as before.
+	"shell": {"type": "enum", "values": ["drawn", "kit"], "default": "drawn",
+			"description": "drawn: the room draws its floor, walls, ceiling, window, doorway and screen panel; kit: it "
+			+ "leaves them to the kit's pieces (an ice hall's blocks) and keeps the rest (seats, box, physics, slots)"},
 	"wall_pattern": {"type": "enum", "values": ["auto", "plain", "ice_blocks", "plasterboard"], "default": "auto",
 			"description": "a pattern over the walls' material: none, ice blocks, plasterboard"},
 	"walls": {"type": "material", "default": AUTO_MAT, "description": "the walls ({}: the style's)"},
@@ -751,6 +757,9 @@ func build() -> void:
 	var h := float(p["height"])
 	var rise := float(p["vault_rise"])
 	var ice := str(p["style"]) == "ice"
+	if str(p.get("shell", "drawn")) == "kit":
+		_build_rest(p)
+		return
 	# The floor.
 	var fl := RoomMesh.new()
 	fl.surface(_m("floor"))
@@ -837,6 +846,19 @@ func build() -> void:
 	if not _fort(p) and float(p.get("ceiling_light", 0.35)) > 0.0:
 		_bake_spot("Ceiling", Vector3(0, h + rise - 0.1, (fz + bz) * 0.5), true, 75.0, h + rise + 1.0,
 				float(p.get("ceiling_light", 0.35)), color_param("lamp_colour"))
+
+
+## shell "kit": the shell is the kit's (an ice hall's blocks); the room keeps its lamps, its seats and its light.
+func _build_rest(p: Dictionary) -> void:
+	if str(p["fairy_lights"]) == "on":
+		_build_fairy_lights()
+	_build_lamps(_window(p))
+	_build_seats()
+	var h := float(p["height"])
+	var rise := float(p["vault_rise"])
+	if float(p.get("ceiling_light", 0.35)) > 0.0:
+		_bake_spot("Ceiling", Vector3(0, h + rise - 0.1, (float(p["front_z"]) + float(p["back_z"])) * 0.5), true, 75.0,
+				h + rise + 1.0, float(p.get("ceiling_light", 0.35)), color_param("lamp_colour"))
 
 
 func _build_skirting(trim: RoomMesh, door: Array) -> void:

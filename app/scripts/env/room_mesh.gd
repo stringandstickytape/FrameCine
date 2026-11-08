@@ -12,8 +12,10 @@ extends RefCounted
 ##   var b := RoomMesh.new()
 ##   b.surface(material)                         the following faces go to this material's surface
 ##   b.face([a, b, c, d], normal)                one flat face (a chart), corners in order round it, either way
+##   b.polygon(corners, normal)                  one flat face of any outline, concave too (a chart, triangulated)
 ##   b.box(centre, size, basis, skip, inside)    a box's faces (each a chart); skip: faces left out, by outward normal
 ##   b.strip(line_a, line_b, normals)            a strip of quads between two polylines (one chart, unrolled)
+##   b.sheet(rows, normals, colours, u, v)       a grid of points as one chart, laid out along two axes
 ##   b.rounded_box(centre, size, radius, ...)    a box with rounded edges and smooth normals (no chart: seats)
 ##   b.commit(with_uv2) -> ArrayMesh
 
@@ -85,6 +87,30 @@ func face(corners: Array, normal: Vector3) -> void:
 		_vertex(p, normal, Vector2((p - a).dot(u_axis), (p - a).dot(v_axis)))
 	for i in range(1, corners.size() - 1):
 		_triangle(base, base + i, base + i + 1, corners[0], corners[i], corners[i + 1], normal)
+	_end_chart()
+
+
+## One flat face of any outline, concave too (a carved relief's front): its corners in order round it, the side it
+## faces; triangulated, one chart. Since 2026-11-08 (the Ice cinema's carvings).
+func polygon(corners: PackedVector3Array, normal: Vector3) -> void:
+	if corners.size() < 3:
+		return
+	var a := corners[0]
+	var u_axis := (corners[1] - a).normalized()
+	var v_axis := normal.cross(u_axis).normalized()
+	var flat := PackedVector2Array()
+	for p: Vector3 in corners:
+		flat.append(Vector2((p - a).dot(u_axis), (p - a).dot(v_axis)))
+	var tris := Geometry2D.triangulate_polygon(flat)
+	if tris.is_empty():
+		return
+	_begin_chart()
+	var base := _current.verts.size()
+	for i in corners.size():
+		_vertex(corners[i], normal, flat[i])
+	for k in range(0, tris.size(), 3):
+		_triangle(base + tris[k], base + tris[k + 1], base + tris[k + 2], corners[tris[k]], corners[tris[k + 1]],
+				corners[tris[k + 2]], normal)
 	_end_chart()
 
 
@@ -211,6 +237,26 @@ func grid(rows: Array, normals: Array, colours: Array = []) -> void:
 			var fn := (n0[j] + n0[j + 1] + n1[j] + n1[j + 1]).normalized()
 			_triangle(a, a + 1, a + w + 1, r0[j], r0[j + 1], r1[j + 1], fn)
 			_triangle(a, a + w + 1, a + w, r0[j], r1[j + 1], r1[j], fn)
+
+
+## A grid as grid() draws it, as one chart for a bake: its chart coordinates the points' places along u_axis and
+## v_axis (a nearly flat surface: a floor of uneven snow, a pelt on it). Since 2026-11-08 (the Ice cinema).
+func sheet(rows: Array, normals: Array, colours: Array, u_axis: Vector3, v_axis: Vector3) -> void:
+	if rows.size() < 2:
+		return
+	_begin_chart()
+	var base := _current.verts.size()
+	grid(rows, normals, colours)
+	var origin: Vector3 = (rows[0] as PackedVector3Array)[0]
+	_chart_min = Vector2(INF, INF)
+	_chart_max = Vector2(-INF, -INF)
+	for i in range(base, _current.verts.size()):
+		var d := _current.verts[i] - origin
+		var uv := Vector2(d.dot(u_axis), d.dot(v_axis))
+		_current.uvs[i] = uv
+		_chart_min = _chart_min.min(uv)
+		_chart_max = _chart_max.max(uv)
+	_end_chart()
 
 
 ## Every vertex's colour so far multiplied by f(position, normal) -> float (occlusion baked into the colours of parts

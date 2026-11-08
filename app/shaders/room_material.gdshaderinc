@@ -119,6 +119,53 @@ uniform vec3 refl_glint_colour = vec3(0.0);
 uniform vec2 refl_glint_size = vec2(2.5, 0.4);
 #endif
 
+#ifdef ICE
+// ICE (with LIT and HOUSE, room_material_house_ice.gdshader; since 2026-11-08, for the Ice cinema: "translucent so
+// light sits *inside* it rather than on it ... a good ice shader with fake depth on opaque geometry, not stacked
+// transparency", the brief): a block of ice. Its face is the library's maps, glassy; under it two layers of what is
+// frozen inside (ice_map: R bubbles, G cracks and veils, B milky cloud, A the saw's marks on the face) drawn at two
+// depths along the view, so they shift against the face as the head moves (and each eye sees them at their depth).
+// What lights the inside: the fill, the candles near it (scattered: a soft glow round each, whichever way the face
+// looks, ice_glow_*), and round the screen the film's own colours seeping through the front wall (ice_film). Points
+// are in the room's frame: the ice's meshes sit at the room's origin, so their VERTEX is the room's frame.
+// COLOR.a: the block's own seed (its inside differs from the next block's), and how clear it is (0.5 up: clearer).
+#define ICE_GLOWS 12
+uniform sampler2D ice_map : hint_default_black, filter_linear_mipmap, repeat_enable;
+uniform vec3 ice_deep : source_color = vec3(0.03, 0.1, 0.14);
+uniform float ice_scale = 0.45;
+uniform float ice_depth = 0.12;
+uniform float ice_inner = 1.0;
+uniform float ice_marks = 0.5;
+uniform int ice_glow_count = 0;
+uniform vec4 ice_glow_pos[ICE_GLOWS];
+uniform vec4 ice_glow_col[ICE_GLOWS];
+uniform float ice_glow_level = 1.0;
+uniform vec3 ice_screen_c = vec3(0.0, 1.7, -6.0);
+uniform vec2 ice_screen_half = vec2(1.6, 0.9);
+uniform float ice_film = 0.0;
+uniform float ice_film_reach = 0.7;
+// The face's gloss: the candles' glints and the picture's soft reflection, strongest at grazing angles.
+uniform float ice_gloss = 1.0;
+// The picture's share of that gloss (its colours mirrored in the walls at a glancing look).
+uniform float ice_shine = 1.0;
+// How much of the hemisphere fill the ice takes (its depth and what is inside it).
+uniform float ice_fill = 1.0;
+// The night outside seen through the walls: the deep's colour lit this much by the snow and the Moon (not the house
+// lights'; it stays while the film plays).
+uniform float ice_night = 0.0;
+// The candles' light on the face itself (frosted faces take more): a niche lit warm from inside.
+uniform float ice_glow_face = 0.0;
+// A vault laid in courses of blocks (the coordinator, 2026-11-08: "the vault ... should be ice/snow-ice with the same
+// life as the walls: block courses curving over, frost"): x the vault's half width, y its springing's height, z its
+// rise, w a course's height along the arch (metres; 0: off). The blocks' joints, their frosted edges, each block's
+// own seed and tilt come from the point's place on the arch, so the vault's mesh stays a few smooth strips.
+uniform vec4 ice_vault = vec4(0.0);
+uniform float ice_vault_block = 0.9;
+// Packed snow instead of ice (the floor): no inside, footprints pressed into it and a sparkle where a crystal catches
+// the eye; no candle loop (the bake lights it).
+uniform float ice_snow = 0.0;
+#endif
+
 // env_light, screen_center, screen_glow and the bias light's tint (ideas #29).
 #include "res://shaders/env_spill.gdshaderinc"
 
@@ -326,6 +373,92 @@ void fragment() {
 	// Chrome shows its reflection, little light of its own.
 	diffuse *= mix(1.0, 0.3, reflect_metal * min(reflect_amount, 1.0));
 #endif
+#ifdef ICE
+	vec3 ice_vw = normalize(CAMERA_POSITION_WORLD - world_pos);
+	float ice_seed = COLOR.a;
+	float ice_edge = 0.0;
+	float ice_groove = 0.0;
+	float ice_shade = 1.0;
+	float ice_frost = 0.0;
+	float bubbles = 0.0;
+	float cracks = 0.0;
+	float cloud = 0.0;
+	float snow_sparkle = 0.0;
+	if (ice_vault.w > 0.0) {
+		// The vault's courses: the point's place along the arch (an ellipse: its angle from the springing, in
+		// metres by the mean radius) and down the room; each course's blocks their own length and set off from
+		// the last's (sawn by hand, not tiles).
+		vec2 e = vec2(obj_pos.x / ice_vault.x, max(obj_pos.y - ice_vault.y, 0.0) / ice_vault.z);
+		float c = atan(e.y, e.x) * (ice_vault.x + ice_vault.z) * 0.5 / ice_vault.w;
+		float course = floor(c);
+		float ch = fract(sin(course * 91.7 + 3.1) * 43758.5453);
+		float len = ice_vault_block * (0.75 + 0.5 * ch);
+		float z = obj_pos.z / len + ch * 7.3;
+		float blk = floor(z);
+		vec2 f = vec2(fract(c) * ice_vault.w, fract(z) * len);
+		vec2 to_edge = min(f, vec2(ice_vault.w, len) - f);
+		float m = min(to_edge.x, to_edge.y);
+		vec2 h = fract(sin(vec2(dot(vec2(course, blk), vec2(12.9898, 78.233)),
+				dot(vec2(course, blk), vec2(39.346, 11.135)))) * 43758.5453);
+		ice_seed = 0.6 + 0.38 * h.x;
+		// The joint packed with snow (pale, a hairline shadow at its edge), the sawn edges frosted a little.
+		ice_groove = 1.0 - smoothstep(0.002, 0.006, m);
+		ice_shade = 0.8 + 0.4 * h.y;
+		ice_edge = (1.0 - smoothstep(0.006, 0.022, m)) * 0.45;
+		// Each block set by hand: its face turned a little its own way (the candles glint block by block).
+		n = normalize(n + (tan_u * (h.x - 0.5) + tan_v * (h.y - 0.5)) * 0.12);
+	}
+	if (ice_snow > 0.0) {
+		// Packed snow: in cells of half a metre, some with a boot's oval pressed in, each turned its own way.
+		vec2 q = obj_pos.xz / 0.5;
+		vec2 cell = floor(q);
+		vec2 h = fract(sin(vec2(dot(cell, vec2(127.1, 311.7)), dot(cell, vec2(269.5, 183.3)))) * 43758.5453);
+		float a = h.x * 6.2832;
+		vec2 lp = (fract(q) - 0.3 - 0.4 * h.yx) * 0.5;
+		vec2 r = vec2(cos(a) * lp.x + sin(a) * lp.y, -sin(a) * lp.x + cos(a) * lp.y);
+		float press = step(0.68, h.y) * (1.0 - smoothstep(0.55, 1.0, length(r / vec2(0.05, 0.13)))) * ice_snow;
+		// Its slopes tilt the normal (the height's change across the pixel), and the room's light from the screen's
+		// side shades them: the far wall of the print lit, the near one in shadow.
+		float height = -press * 0.012;
+		vec3 dpx = dFdx(world_pos);
+		vec3 dpy = dFdy(world_pos);
+		vec3 r1 = cross(dpy, n);
+		vec3 r2 = cross(n, dpx);
+		float det = dot(dpx, r1);
+		if (abs(det) > 1e-10) {
+			n = normalize(abs(det) * n - sign(det) * (dFdx(height) * r1 + dFdy(height) * r2));
+		}
+		float print_shade = dot(n - geo_n, normalize(screen_center - world_pos + vec3(0.0, 2.0, 0.0)));
+		diffuse *= clamp(1.0 + 1.2 * print_shade - 0.05 * press, 0.75, 1.25);
+		// Sparkle: a crystal here and there catches the eye, which ones by where it looks from (still in the world;
+		// near only, where a crystal is a few pixels wide).
+		vec2 g = obj_pos.xz / 0.012;
+		vec2 gc = floor(g);
+		float k = fract(sin(dot(gc + floor(ice_vw.xz * 9.0) * 17.0, vec2(12.9898, 78.233))) * 43758.5453);
+		float dot_in = 1.0 - smoothstep(0.12, 0.32, length(fract(g) - 0.5));
+		float near = 1.0 - smoothstep(2.0, 4.5, length(CAMERA_POSITION_WORLD - world_pos));
+		snow_sparkle = step(0.993, k) * dot_in * near * ice_snow;
+	} else {
+		// The inside, seen through the face: two layers at their depths along the view (metres on the face).
+		float ice_vz = max(dot(ice_vw, geo_n), 0.25);
+		vec2 ice_par = vec2(-dot(ice_vw, tan_u), dot(ice_vw, tan_v)) / ice_vz;
+		vec2 ice_q = uv * tiling / ice_scale + vec2(ice_seed * 13.7, ice_seed * 5.3);
+		vec4 near_l = texture(ice_map, ice_q + ice_par * (ice_depth * 0.3 / ice_scale));
+		vec4 far_l = texture(ice_map, ice_q * 0.73 + vec2(0.41, 0.17) + ice_par * (ice_depth * 0.73 / ice_scale));
+		// COLOR.a: under 0.5 a carved, frosted surface (white where the chisel went); 0.5 to 1 a block, milky to
+		// clear. A vault's blocks: frosted at their edges.
+		ice_frost = max(clamp(1.0 - ice_seed * 2.0, 0.0, 1.0), max(ice_edge, ice_groove * 0.9));
+		float ice_clear = clamp(ice_seed * 2.0 - 1.0, 0.0, 1.0);
+		bubbles = near_l.r * 0.7 + far_l.r * 0.45;
+		cracks = max(near_l.g, far_l.g * 0.8);
+		cloud = mix(near_l.b, far_l.b, 0.5) * (1.3 - ice_clear);
+		// The light that reaches the ice (a lightmap's, the stand-in lamps') shows on what is frozen inside it, at
+		// its depth; the clear face itself takes little of it.
+		float ice_scatter = (0.04 + 0.25 * cloud + 0.5 * bubbles + 0.22 * cracks) * (1.0 - 0.6 * ice_frost)
+				+ 0.75 * ice_frost;
+		diffuse = (diffuse * 0.3 + vec3(0.62, 0.84, 1.0) * ice_scatter * 0.55) * (1.0 - 0.3 * ice_groove) * ice_shade;
+	}
+#endif
 	// HOUSE: the house lights' level scales what the engine lights (a baked lightmap included).
 	ALBEDO = diffuse * level;
 	METALLIC = metallic * 0.5;
@@ -380,11 +513,68 @@ void fragment() {
 		film = min(c / SPILL_REFERENCE, vec3(SPILL_MAX)) * screen_light * facing / (1.0 + 0.08 * d * d);
 	}
 #endif
+#ifdef ICE
+	// The fill reaches into the ice less than onto a wall: the clear blocks stay dark away from the candles.
+	vec3 own = diffuse * (fill * ice_fill + film) * occlusion * ao;
+#else
 	vec3 own = diffuse * (fill + film) * occlusion * ao;
+#endif
 	if (sheen > 0.0) {
 		float rim = 1.0 - max(dot(n, normalize(CAMERA_POSITION_WORLD - world_pos)), 0.0);
 		own += base * (fill + film) * sheen * rim * rim * rim * 2.0;
 	}
+#ifdef ICE
+	if (!bake_pass && ice_snow > 0.0) {
+		own += snow_sparkle * (fill * 6.0 + film * 2.0 + vec3(0.012));
+	} else if (!bake_pass) {
+		vec3 vw = ice_vw;
+		vec3 mirror = reflect(-vw, n);
+		vec3 glow = vec3(0.0);
+		vec3 glint = vec3(0.0);
+		vec3 on_face = vec3(0.0);
+		for (int i = 0; i < min(ice_glow_count, ICE_GLOWS); i++) {
+			vec3 to = (MODEL_MATRIX * vec4(ice_glow_pos[i].xyz, 1.0)).xyz - world_pos;
+			float d = length(to);
+			float reach = max(ice_glow_pos[i].w, 0.01);
+			glow += ice_glow_col[i].rgb * exp(-d / reach);
+			// A candle's reflection on the wet face: a small bright lobe, smaller the farther the flame (the wavy
+			// face's normals break it into a streak).
+			vec3 l = to / max(d, 0.001);
+			float lobe = pow(max(dot(mirror, l), 0.0), 60.0 + 160.0 * d * d);
+			glint += ice_glow_col[i].rgb * lobe / (1.0 + 0.3 * d * d);
+			// Its light on the face (a niche's walls round it).
+			on_face += ice_glow_col[i].rgb * max(dot(n, l), 0.0) * reach * reach / (reach * reach + d * d);
+		}
+		glow *= ice_glow_level;
+		glint *= ice_glow_level;
+		own += on_face * ice_glow_level * ice_glow_face * mix(0.3, 1.0, ice_frost) * (1.0 - 0.5 * ice_groove);
+		vec3 seep = vec3(0.0);
+		if (ice_film > 0.0) {
+			// Round the picture, the film's own colours carried through the front wall's ice.
+			vec2 r = abs(obj_pos.xy - ice_screen_c.xy) - ice_screen_half;
+			float out_d = length(max(r, vec2(0.0)));
+			float wall = 1.0 - smoothstep(0.2, 0.7, abs(obj_pos.z - ice_screen_c.z));
+			seep = spill_tint(world_pos) * screen_glow * ice_film * wall * exp(-out_d / ice_film_reach);
+		}
+		// The cold depth (the fill seen far into the ice, its own blue-green), the warm light scattered inside (by
+		// the milky cloud, the bubbles and the cracks, a little by the clear ice itself), the flecks faintly always.
+		vec3 warm = glow + seep;
+		vec3 inside = (fill * ice_fill * 2.5 + vec3(ice_night)) * ice_deep * (1.0 + 0.4 * cloud)
+				+ warm * (0.25 + 0.3 * cloud + 0.45 * bubbles + 0.25 * cracks + 0.3 * ice_frost);
+		float nv = clamp(dot(n, vw), 0.0, 1.0);
+		float fresnel = 0.04 + 0.96 * pow(1.0 - nv, 5.0);
+		// The picture's soft reflection on the face, in its colours, mostly at grazing angles.
+		vec3 to_s = normalize(screen_center - world_pos);
+		float shine = pow(max(dot(mirror, to_s), 0.0), 18.0);
+		vec3 gloss = (glint * 1.5 + spill_tint(world_pos) * screen_glow * shine * 0.5 * ice_shine) * ice_gloss
+				* (0.3 + fresnel);
+		// The room in the wet face at a glancing look: the snow overhead, the floor below (the fill, as dim as the
+		// house).
+		vec3 room_seen = mix(sky_bottom, sky_top, clamp(mirror.y * 0.5 + 0.5, 0.0, 1.0)) * level * 2.0;
+		own += inside * ice_inner * (1.0 - fresnel * 0.5) * (1.0 - 0.3 * ice_groove) * ice_shade + gloss
+				+ room_seen * fresnel * ice_gloss;
+	}
+#endif
 #ifdef REFLECT
 	if (reflect_amount > 0.0) {
 		vec3 rv = normalize(CAMERA_POSITION_WORLD - world_pos);
