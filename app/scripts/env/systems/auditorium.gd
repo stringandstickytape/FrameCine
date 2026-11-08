@@ -40,7 +40,7 @@ const STRAIGHT_RADIUS := 100000.0
 ## The seat models a hall of rows takes (scripts/env/systems/seats.gd SINGLE_MODELS): the stadium seat is drawn here
 ## (seat_mesh()), the others by the seats system's models.
 const SEAT_MODELS: Array[String] = ["stadium", "folding_chair", "plush", "multiplex", "club_chair", "director",
-		"cushion", "bean_bag", "civic"]
+		"cushion", "bean_bag", "civic", "recliner"]
 const SEATS := "res://scripts/env/systems/seats.gd"
 
 

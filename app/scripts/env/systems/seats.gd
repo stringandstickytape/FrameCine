@@ -93,12 +93,21 @@ const MODELS := {
 		"width": 0.56, "forms": [],
 		"boxes": [[Vector3(0.0, 0.24, -0.05), Vector3(0.52, 0.48, 0.5), 0.0],
 				[Vector3(0.0, 0.76, 0.26), Vector3(0.52, 0.66, 0.1), 12.0]]},
+	# Since 2026-11-08, the Flagship: a premium recliner between armrests the room draws itself (kit/flagship.gd's
+	# flagship_rows: fixed arms with cupholders between the seats, so the viewer's own seat folds away and both of its
+	# arms stay). A deep cushion, a reclined back in two pads (the lumbar and a headrest), a sculpted shell behind them
+	# down to the floor (what the row behind sees). About 430 triangles, no arms of its own.
+	"recliner": {"upholstery": {"library": "oxblood_leather", "color": [0.36, 0.06, 0.07]},
+		"frame": {"library": "black_leather", "color": [0.05, 0.05, 0.055]}, "fold": true, "segment": false,
+		"width": 0.62, "forms": [],
+		"boxes": [[Vector3(0.0, 0.24, -0.08), Vector3(0.46, 0.48, 0.58), 0.0],
+				[Vector3(0.0, 0.84, 0.3), Vector3(0.46, 0.84, 0.14), 15.0]]},
 }
 const MODEL_NAMES: Array[String] = ["stadium", "folding_chair", "plush", "multiplex", "pew", "club_chair",
-		"director", "bench_seat", "cushion", "hide", "bean_bag", "settee", "civic"]
+		"director", "bench_seat", "cushion", "hide", "bean_bag", "settee", "civic", "recliner"]
 ## The models a hall of rows takes (auditorium.gd seat_model): single seats, not segments.
 const SINGLE_MODELS: Array[String] = ["stadium", "folding_chair", "plush", "multiplex", "club_chair", "director",
-		"cushion", "bean_bag", "civic"]
+		"cushion", "bean_bag", "civic", "recliner"]
 ## A builder's slot style -> the model drawn there when `model` is auto.
 const STYLE_MODELS := {"chair": "folding_chair", "pew": "pew", "bench": "bench_seat", "cushion": "cushion",
 		"club": "club_chair", "ring": "plush", "tier": "cushion", "hide": "hide", "director": "director",
@@ -107,6 +116,8 @@ const STYLE_MODELS := {"chair": "folding_chair", "pew": "pew", "bench": "bench_s
 ## A settee's arm, its width.
 const SETTEE_ARM := 0.17
 const TIP_UP_DEG := 78.0
+## The recliner's armrest (drawn by the room's kit between the seats), its full width.
+const RECLINER_ARM := 0.14
 const BROKEN_BACK_DEG := 36.0
 
 
@@ -117,7 +128,8 @@ static func spec() -> Dictionary:
 				+ "style or one model), in rows or single places of its own, and broken seats over a builder's own. "
 				+ "Models: stadium, folding_chair (1906), plush (tip-up, palaces), multiplex (1980s, a broken one), "
 				+ "pew, club_chair, director, bench_seat, cushion, hide, bean_bag, settee (two or three places in a "
-				+ "row, its arms at the ends), civic (1970s: a moulded oak back, fabric pads, oak arms). Instanced, "
+				+ "row, its arms at the ends), civic (1970s: a moulded oak back, fabric pads, oak arms), recliner (a "
+				+ "premium recliner without arms: a kit draws the shared armrests). Instanced, "
 				+ "tinted seat by seat, "
 				+ "the viewer's own chair folded away, boxes for object physics.",
 		"params": PARAMS,
@@ -130,7 +142,8 @@ static func spec() -> Dictionary:
 
 const PARAMS := {
 	"model": {"type": "enum", "values": ["auto", "stadium", "folding_chair", "plush", "multiplex", "pew",
-			"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag", "settee", "civic"], "default": "auto",
+			"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag", "settee", "civic",
+			"recliner"], "default": "auto",
 			"description": "the seat; auto: by each slot's style (its own rows: folding chairs)"},
 	"from_builders": {"type": "bool", "default": true,
 			"description": "a seat in every seat slot of the room's builders"},
@@ -156,7 +169,8 @@ const PARAMS := {
 				"at": {"type": "vec3", "min": -200.0, "max": 200.0, "description": "the floor point"},
 				"turn": {"type": "float", "min": -180.0, "max": 180.0, "description": "degrees (0: towards -z)"},
 				"model": {"type": "enum", "values": ["auto", "stadium", "folding_chair", "plush", "multiplex", "pew",
-						"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag", "settee", "civic"],
+						"club_chair", "director", "bench_seat", "cushion", "hide", "bean_bag", "settee", "civic",
+			"recliner"],
 						"description": "this one's model; auto: the system's"}}},
 			"description": "single seats of its own: {at, turn, model}"},
 	"upholstery": {"type": "material", "default": null, "nullable": true,
@@ -220,6 +234,8 @@ static func model_mesh(model: String, upholstery: Material, frame: Material, wid
 			_settee(b, upholstery, w)
 		"civic":
 			_civic(b, upholstery, frame, w)
+		"recliner":
+			_recliner(b, upholstery, frame, w)
 		_:
 			_folding_chair(b, upholstery, frame, w)
 	return b.commit(false)
@@ -322,6 +338,31 @@ static func _civic(b: RoomMesh, u: Material, f: Material, w: float) -> void:
 		b.box(Vector3(s * (half - 0.02), 0.665, -0.04), Vector3(0.04, 0.035, 0.42), Basis(),
 				[Vector3(s, 0, 0), RoomMesh.DOWN])
 		b.box(Vector3(s * (half - 0.015), 0.32, 0.05), Vector3(0.03, 0.64, 0.34), Basis(), [Vector3(s, 0, 0), RoomMesh.DOWN])
+
+
+## A premium recliner (the Flagship, since 2026-11-08), without arms: the room's kit draws the armrests between the
+## seats (kit/flagship.gd), fixed, so the viewer's own seat folds away and its arms stay. Between them (w less an arm):
+## a deep cushion on a closed base, the back reclined 15 degrees in two pads (the lumbar and a headrest, softly
+## curved in plan), and a sculpted shell behind them that runs down to the floor (what the row behind sees). The
+## headrest stands a little behind the seated eyes (the eyes at z 0). Faces nobody sees are left out.
+static func _recliner(b: RoomMesh, u: Material, f: Material, w: float) -> void:
+	var wi := w - RECLINER_ARM - 0.01
+	var tilt := Transform3D(Basis(Vector3.RIGHT, deg_to_rad(15.0)), Vector3(0.0, 0.46, 0.12))
+	b.surface(u)
+	b.rounded_box(Vector3(0.0, 0.4, -0.12), Vector3(wi, 0.15, 0.56), 0.05, Transform3D(), 1, Vector3i.ZERO, 0.0,
+			[RoomMesh.DOWN])
+	b.rounded_box(Vector3(0.0, 0.27, -0.01), Vector3(wi - 0.02, 0.5, 0.13), 0.05, tilt, 1, Vector3i(2, 1, 0), -0.35,
+			[RoomMesh.DOWN, RoomMesh.BACK])
+	b.rounded_box(Vector3(0.0, 0.645, -0.005), Vector3(wi - 0.05, 0.25, 0.14), 0.06, tilt, 1, Vector3i(2, 0, 0), -0.35,
+			[RoomMesh.DOWN, RoomMesh.BACK])
+	b.surface(f)
+	b.rounded_box(Vector3(0.0, 0.37, 0.085), Vector3(wi + 0.02, 0.92, 0.07), 0.03, tilt, 1, Vector3i(2, 1, 0), -0.35,
+			[RoomMesh.DOWN, RoomMesh.FRONT])
+	# The closed base: its front under the cushion, its back down to the floor under the shell.
+	b.box(Vector3(0.0, 0.165, -0.37), Vector3(wi - 0.02, 0.33, 0.02), Basis(), [RoomMesh.DOWN, RoomMesh.UP,
+			RoomMesh.LEFT, RoomMesh.RIGHT, RoomMesh.BACK])
+	b.box(Vector3(0.0, 0.22, 0.2), Vector3(wi + 0.02, 0.44, 0.08), Basis(), [RoomMesh.DOWN, RoomMesh.FRONT,
+			RoomMesh.LEFT, RoomMesh.RIGHT])
 
 
 ## A folding wooden chair of the shopfront years: a slatted seat, two back slats, the back legs running up into the

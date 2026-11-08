@@ -3340,8 +3340,6 @@ msgstr "月球基地里网格玻璃圆顶下的影院：地球在银幕上方缓
 msgid "A drive-in lot at dusk, seen from a convertible's bench seat: the stars come out over the film, moths in the beam, mesas on the horizon."
 msgstr "黄昏时的汽车影院，从敞篷车的长椅上观看：星星在影片上方出现，光束里有飞蛾，地平线上是平顶山。"
 
-msgid "A big modern cinema: a steep rake, black walls, blue step lights and a huge curved screen."
-msgstr "大型现代影院：陡峭的阶梯、黑色墙面、蓝色台阶灯和一块巨大的弧形银幕。"
 
 msgid "An ice hotel's cinema of sawn blocks and carvings under an ice vault: candles glowing inside the ice, hides on ice benches, the polar night and the northern lights outside."
 msgstr "冰酒店里的影院，由切割的冰块和冰雕砌成，顶上也是冰：烛光在冰中闪烁，冰凳上铺着兽皮，窗外是极夜和北极光。"
@@ -3588,3 +3586,18 @@ msgstr "电脑要求时，在电脑上输入此代码。输错五次即停止。
 
 msgid "connected"
 msgstr "已连接"
+
+msgid "A big modern cinema: a steep rake, folded acoustic walls washed in amber, recliners, a starlit ceiling of baffles and a huge curved screen in velvet."
+msgstr "大型现代影院：陡峭的阶梯、暖黄灯光洗亮的折板吸音墙、躺椅、星光点点的吸音板天花，以及镶在丝绒中的巨大弧形银幕。"
+
+msgid "Starlight ceiling"
+msgstr "星光天花"
+
+msgid "Pinholes of light in the ceiling between the baffles."
+msgstr "吸音板之间的天花上点点针孔光。"
+
+msgid "Before the film"
+msgstr "影片开始前"
+
+msgid "Always (faint in the film)"
+msgstr "始终（放映时微弱）"
