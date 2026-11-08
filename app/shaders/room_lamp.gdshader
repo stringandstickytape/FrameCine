@@ -15,6 +15,9 @@ uniform float house_reference = 0.05;
 uniform sampler2D picture : source_color, filter_linear;
 uniform bool use_picture = false;
 uniform bool bake_pass = false;
+// The mesh's vertex colours times colour (several lamps of different colours in one draw: a car's head and tail
+// lamps, neon in two colours). Since 2026-11-08; off by default.
+uniform bool use_vertex_colour = false;
 
 // env_light (the room's level).
 #include "res://shaders/env_spill.gdshaderinc"
@@ -25,6 +28,9 @@ void fragment() {
 	vec3 c = colour;
 	if (use_picture) {
 		c *= texture(picture, UV).rgb;
+	}
+	if (use_vertex_colour) {
+		c *= COLOR.rgb;
 	}
 	ALBEDO = vec3(0.0);
 	ROUGHNESS = 1.0;

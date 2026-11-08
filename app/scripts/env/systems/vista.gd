@@ -12,7 +12,7 @@ extends "res://scripts/env/systems/env_system.gd"
 
 const SHADER := preload("res://shaders/env_vista.gdshader")
 const SkySystem := preload("res://scripts/env/systems/sky.gd")
-const SHAPES: Array[String] = ["hills", "mesas", "acropolis", "birches", "cypresses", "pool"]
+const SHAPES: Array[String] = ["hills", "mesas", "acropolis", "birches", "cypresses", "pool", "cacti"]
 ## The shader's materials (UV2.x).
 const M_ROCK := 0
 const M_BARK := 1
@@ -34,6 +34,8 @@ const DEFAULTS := {
 	"cypresses": {"azimuth": 0.0, "spread": 90.0, "distance": 30.0, "depth": 10.0, "size": 1.0, "count": 14,
 			"colour": "#16261a"},
 	"pool": {"azimuth": 0.0, "distance": 14.0, "size": 1.0, "colour": "#16201a"},
+	"cacti": {"azimuth": 0.0, "spread": 60.0, "distance": 70.0, "depth": 40.0, "size": 1.0, "count": 16,
+			"colour": "#1c2418"},
 }
 ## The grounds (under trees, the pool's lawn) keep this far clear of the room's middle (metres): the room's own floor
 ## is there, and two floors at one height would fight.
@@ -61,8 +63,8 @@ static func spec() -> Dictionary:
 	return {
 		"kind": "sky",
 		"description": "Far scenery round the room, made of simple shapes: hills and mesas on the horizon, an "
-				+ "acropolis with floodlit ruins on its hill, birches in snow, cypresses, a pool glowing in a garden. "
-				+ "One draw, lit by the sky and by the screen where it is near.",
+				+ "acropolis with floodlit ruins on its hill, birches in snow, cypresses, a pool glowing in a garden, "
+				+ "desert cacti and yucca trees. One draw, lit by the sky and by the screen where it is near.",
 		"params": {
 			"items": {"type": "list", "max": 12, "of": {"type": "object", "fields": item},
 					"default": [{"shape": "hills"}],
@@ -88,7 +90,7 @@ static func spec() -> Dictionary:
 			"water_motion": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "live": true,
 					"motion": {"max": 1.0}, "description": "how fast the light ripples in the pool"},
 		},
-		"cost": {"draws": 1, "triangles": 6000, "lights": 0, "particles": 0, "texture_mb": 0.3},
+		"cost": {"draws": 1, "triangles": 9000, "lights": 0, "particles": 0, "texture_mb": 0.3},
 		"provides": [],
 	}
 
@@ -147,6 +149,8 @@ func setup() -> void:
 				_cypresses(it)
 			"pool":
 				_pool_garden(it)
+			"cacti":
+				_cacti(it)
 	if _v.is_empty():
 		return
 	var arrays := []
@@ -607,6 +611,105 @@ func _cypresses(it: Dictionary) -> void:
 			for s in sides:
 				var k := k0 + ring * row + s
 				_i.append_array([k, k + 1, k + row + 1, k, k + row + 1, k + row])
+
+
+## Desert plants (since 2026-11-08, the drive-in): tall columnar cacti with arms that turn up, and branching yucca
+## trees with a spiky tuft at each branch's end, scattered over a stretch of desert; dark against the sky after sunset.
+## Generic shapes (no particular species' likeness beyond the kind). Their bases go into the ground a little, so a
+## swell of the plain never leaves one standing on air.
+func _cacti(it: Dictionary) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = int(it["seed"]) + 71
+	var d := float(it["distance"])
+	var spread := float(it["spread"])
+	var depth := float(it["depth"])
+	var y0 := float(it["floor_y"])
+	var size := float(it["size"])
+	var col := _lin(it["colour"])
+	for t in int(it["count"]):
+		var az := float(it["azimuth"]) + rng.randf_range(-0.5, 0.5) * spread
+		var dist := maxf(3.0, d + rng.randf_range(-0.5, 0.5) * depth)
+		var base := _dir(az) * dist + Vector3(0, y0 - 0.6, 0)
+		var c := col * rng.randf_range(0.8, 1.15)
+		if rng.randf() < 0.6:
+			# A column with up to three arms.
+			var h := rng.randf_range(4.5, 9.0) * size
+			var r := rng.randf_range(0.26, 0.4) * size
+			_tube([base, base + Vector3(0, h * 0.6, 0), base + Vector3(0, h - r, 0), base + Vector3(0, h, 0)],
+					[r, r, r * 0.92, r * 0.35], c)
+			for k in rng.randi_range(0, 3):
+				var a := rng.randf() * TAU
+				var out := Vector3(cos(a), 0, sin(a))
+				var y := h * rng.randf_range(0.35, 0.6)
+				var reach := rng.randf_range(0.7, 1.2) * size
+				var up := rng.randf_range(1.2, 2.8) * size
+				var p0 := base + Vector3(0, y, 0)
+				_tube([p0, p0 + out * reach * 0.7 + Vector3(0, 0.1, 0), p0 + out * reach + Vector3(0, 0.5, 0),
+						p0 + out * reach + Vector3(0, up, 0), p0 + out * reach + Vector3(0, up + r * 0.7, 0)],
+						[r * 0.7, r * 0.7, r * 0.7, r * 0.7, r * 0.25], c)
+		else:
+			# A yucca tree: a leaning trunk forking twice or three times, a tuft at each end.
+			var h := rng.randf_range(2.5, 4.5) * size
+			var lean := Vector3(rng.randf_range(-0.3, 0.3), 1.0, rng.randf_range(-0.3, 0.3)).normalized()
+			var top := base + lean * h
+			_tube([base, base + lean * h * 0.5, top], [0.22 * size, 0.18 * size, 0.15 * size], c * 0.85)
+			var ends: Array = [[top, lean, 0]]
+			var tips: Array = []
+			while not ends.is_empty():
+				var e: Array = ends.pop_back()
+				var at: Vector3 = e[0]
+				var dirv: Vector3 = e[1]
+				var level := int(e[2])
+				if level >= 2 or (level >= 1 and rng.randf() < 0.3):
+					tips.append(at)
+					continue
+				for k in 2 + int(rng.randf() < 0.3):
+					var a := rng.randf() * TAU
+					var nd := (dirv * 0.6 + Vector3(cos(a), 0.3, sin(a)) * 0.8).normalized()
+					var len := rng.randf_range(0.8, 1.5) * size
+					var to := at + nd * len
+					_tube([at, to], [0.12 * size, 0.09 * size], c * 0.85)
+					ends.append([to, Vector3(nd.x, maxf(nd.y, 0.4), nd.z).normalized(), level + 1])
+			for p: Vector3 in tips:
+				_tuft(p, 0.55 * size, c)
+
+
+## A tube along a polyline with a radius at each point (five sides: far off, a smooth column).
+func _tube(points: Array, radii: Array, col: Color) -> void:
+	var sides := 5
+	var k0 := _v.size()
+	for i in points.size():
+		var p: Vector3 = points[i]
+		var along: Vector3 = ((points[mini(i + 1, points.size() - 1)] as Vector3) - (points[maxi(i - 1, 0)] as Vector3))
+		along = along.normalized() if along.length() > 0.001 else Vector3.UP
+		var u := along.cross(Vector3.FORWARD if absf(along.z) < 0.9 else Vector3.RIGHT).normalized()
+		var w := along.cross(u).normalized()
+		for s in sides + 1:
+			var a := TAU * s / sides
+			var out := u * cos(a) + w * sin(a)
+			var c := col
+			c.a = clampf(p.y / 8.0, 0.0, 1.0)
+			_vert(p + out * float(radii[i]), out, c, Vector2(float(s) / sides, p.y), M_TWIG)
+	var row := sides + 1
+	for i in points.size() - 1:
+		for s in sides:
+			var k := k0 + i * row + s
+			_i.append_array([k, k + 1, k + row + 1, k, k + row + 1, k + row])
+
+
+## A spiky tuft: six thin blades out from a point.
+func _tuft(at: Vector3, r: float, col: Color) -> void:
+	for k in 6:
+		var a := TAU * k / 6.0 + 0.3
+		var out := Vector3(cos(a), 0.55 + 0.4 * float(k % 2), sin(a)).normalized()
+		var side := out.cross(Vector3.UP).normalized() * r * 0.12
+		var c := col * 0.8
+		c.a = 1.0
+		var k0 := _v.size()
+		_vert(at - side, out, c, Vector2.ZERO, M_TWIG)
+		_vert(at + side, out, c, Vector2.ZERO, M_TWIG)
+		_vert(at + out * r, out, c, Vector2.ZERO, M_TWIG)
+		_i.append_array([k0, k0 + 1, k0 + 2])
 
 
 ## A pool glowing in a garden: the water and its walls lit from below, the stone coping, a lawn round it that takes

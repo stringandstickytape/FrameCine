@@ -9,6 +9,10 @@ uniform vec3 colour = vec3(0.62, 0.74, 0.8);
 uniform float alpha = 0.06;
 uniform float rim = 0.22;
 uniform float house_reference = 0.05;
+// The sky seen in the glass where the view grazes it (a car's windscreen under an open sky: since 2026-11-08, the
+// drive-in); sky_mix 0 (the default) leaves the glass as it was.
+uniform vec3 sky_colour : source_color = vec3(0.0);
+uniform float sky_mix = 0.0;
 
 // env_light, screen_center, screen_glow and the bias light's tint.
 #include "res://shaders/env_spill.gdshaderinc"
@@ -23,6 +27,6 @@ void fragment() {
 	float level = clamp(env_light / max(house_reference, 0.0001), 0.0, 2.0);
 	vec3 light = vec3(level * level * 0.5) + room_light_at(world_pos, 0.8) - vec3(env_light);
 	float graze = pow(1.0 - abs(dot(normalize(NORMAL), normalize(VIEW))), 3.0);
-	ALBEDO = colour * light;
+	ALBEDO = mix(colour * light, sky_colour, clamp(sky_mix * (0.3 + graze), 0.0, 1.0));
 	ALPHA = clamp(alpha + rim * graze, 0.0, 0.5);
 }

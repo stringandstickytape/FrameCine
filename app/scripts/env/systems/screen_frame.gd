@@ -9,6 +9,8 @@ extends "res://scripts/env/systems/env_system.gd"
 
 const ENV_SHADER := preload("res://shaders/env_unlit.gdshader")
 const BEAM_SHADER := preload("res://shaders/room_beam.gdshader")
+const VOLUME_SHADER := preload("res://shaders/env_beam_volume.gdshader")
+const SkySystem := preload("res://scripts/env/systems/sky.gd")
 ## Nodes the sight-line check looks through (env_checks.gd).
 const SEE_THROUGH := "env_see_through"
 
@@ -25,6 +27,14 @@ static func spec() -> Dictionary:
 			"beam": {"type": "bool", "default": true, "description": "the projector's beam through the room"},
 			"lens": {"type": "vec3", "min": -200.0, "max": 200.0, "default": [0.0, 3.45, 6.15],
 					"description": "the beam's lens, in the room's frame"},
+			# Since 2026-11-08 (the drive-in, where the beam passes over the viewer): "flat", as before, is the
+			# default.
+			"beam_style": {"type": "enum", "values": ["flat", "volume"], "default": "flat",
+					"description": "flat: the beam's sides, soft-edged (a hall's beam seen from the side); volume: the "
+					+ "light along each view ray's path through it, brightest by the lens, in the picture's colours, "
+					+ "a slow haze drifting in it (a beam passing overhead, seen from under it)"},
+			"beam_strength": {"type": "float", "min": 0.0, "max": 0.05, "default": 0.004, "brightness": true,
+					"description": "volume: how much the air scatters the beam's light"},
 		},
 		"cost": {"draws": 2, "triangles": 16, "lights": 0, "particles": 0, "texture_mb": 0},
 	}
@@ -37,6 +47,7 @@ var _screen_local := Transform3D()
 var _screen_size := Vector2.ZERO
 var _beam_key := ""
 var _lens := Vector3.ZERO
+var _haze_time := 0.0
 
 
 func setup() -> void:
@@ -51,6 +62,10 @@ func setup() -> void:
 		_beam.name = "Cone"
 		var m := ShaderMaterial.new()
 		m.shader = BEAM_SHADER
+		if str(params["beam_style"]) == "volume":
+			m.shader = VOLUME_SHADER
+			m.set_shader_parameter("strength", float(params["beam_strength"]))
+			m.set_shader_parameter("haze", SkySystem.noise_texture())
 		m.set_shader_parameter("house_reference", float(room.get("ambient_level")))
 		_beam.material_override = m
 		_beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -95,6 +110,9 @@ func _shape_beam(screen: Transform3D) -> void:
 	if key == _beam_key:
 		return
 	_beam_key = key
+	if str(params["beam_style"]) == "volume":
+		_shape_volume(corners)
+		return
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for i in 4:
@@ -107,9 +125,52 @@ func _shape_beam(screen: Transform3D) -> void:
 	_beam.mesh = st.commit()
 
 
-func tick(_delta: float) -> void:
+## The volume beam: the closed pyramid (its sides and the screen's end, each facing out, so the far side is drawn
+## once a pixel) and its planes for the shader.
+func _shape_volume(corners: Array[Vector3]) -> void:
+	var centre := (corners[0] + corners[1] + corners[2] + corners[3]) * 0.25
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var tris: Array = []
+	var m := _beam.material_override as ShaderMaterial
+	for i in 4:
+		var p := corners[i]
+		var q := corners[(i + 1) % 4]
+		var n := p.cross(q).normalized()
+		if n.dot(centre) > 0.0:
+			n = -n
+		m.set_shader_parameter("side_n%d" % i, n)
+		tris.append([Vector3.ZERO, p, q, n])
+	var axis := centre.normalized()
+	tris.append([corners[0], corners[1], corners[2], axis])
+	tris.append([corners[0], corners[2], corners[3], axis])
+	for t: Array in tris:
+		var a: Vector3 = t[0]
+		var b: Vector3 = t[1]
+		var c: Vector3 = t[2]
+		var n: Vector3 = t[3]
+		var order := [a, b, c] if (c - a).cross(b - a).dot(n) >= 0.0 else [a, c, b]
+		for v: Vector3 in order:
+			st.set_normal(n)
+			st.set_uv(Vector2(0.0, v.length() / centre.length()))
+			st.add_vertex(v)
+	_beam.mesh = st.commit()
+	var far_n := (corners[1] - corners[0]).cross(corners[3] - corners[0]).normalized()
+	if far_n.dot(axis) < 0.0:
+		far_n = -far_n
+	m.set_shader_parameter("far_plane", Plane(far_n, far_n.dot(corners[0])))
+	m.set_shader_parameter("axis", axis)
+	m.set_shader_parameter("axis_len", centre.length())
+	m.set_shader_parameter("right", (corners[1] - corners[0]).normalized())
+	m.set_shader_parameter("half_w", corners[0].distance_to(corners[1]) * 0.5)
+
+
+func tick(delta: float) -> void:
 	if _beam_root == null:
 		return
+	if str(params["beam_style"]) == "volume":
+		_haze_time += delta
+		(_beam.material_override as ShaderMaterial).set_shader_parameter("haze_time", _haze_time)
 	var on := true
 	var main := main_node()
 	if main != null:

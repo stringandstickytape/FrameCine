@@ -12,6 +12,10 @@ render_mode unshaded, cull_front, shadows_disabled, specular_disabled, fog_disab
 uniform mat3 galactic = mat3(1.0);
 uniform float milky_way = 0.5;
 uniform vec3 milky_colour : source_color = vec3(0.9, 0.86, 0.78);
+// The galaxy's finer structure (since 2026-11-08, the drive-in; 0, the default, is the soft band): dark dust in
+// filaments across it, bright star clouds along it, the bulge warmer and the arms cooler. Two more texture reads,
+// only inside the band.
+uniform float milky_detail = 0.0;
 // The clouds' own colour in the night's light (a binding can take it towards the film's colour) and how much the
 // clouds near the screen catch its light (the picture's colour from the bias light).
 uniform vec3 cloud_colour : source_color = vec3(0.07, 0.075, 0.09);
@@ -61,7 +65,21 @@ void fragment() {
 		float rift = 1.0 - 0.75 * exp(-pow((b - 0.03) / 0.045, 2.0)) * smoothstep(-0.35, 0.05, l)
 				* (1.0 - smoothstep(1.2, 1.6, l));
 		float mw = band * along * (0.45 + 0.9 * mottle) * rift;
-		c += milky_colour * mw * milky_way * MILKY_GAIN * dark * above;
+		vec3 mcol = milky_colour;
+		if (milky_detail > 0.0 && band > 0.015) {
+			float u = l / (2.0 * SKY_PI);
+			float f1 = texture(sky_noise, vec2(u * 6.0, b * 1.9 + 0.31)).b;
+			float f2 = texture(sky_noise, vec2(u * 15.0 + 0.4, b * 4.2 + 0.7)).a;
+			float ridge = 1.0 - abs(f1 * 2.0 - 1.0);
+			float dust = smoothstep(0.6, 0.95, ridge) * exp(-(b * b) / (width * width * 0.6));
+			float star_clouds = smoothstep(0.4, 0.85, f2) * exp(-(b * b) / (width * width * 0.4));
+			float core = pow(max(lc, 0.0), 3.0);
+			float fine = band * along * (0.25 + 0.8 * mottle + 1.1 * star_clouds) * rift * (1.0 - 0.8 * dust);
+			mw = mix(mw, fine * 1.15, milky_detail);
+			mcol = mix(milky_colour, milky_colour * mix(vec3(0.84, 0.92, 1.1), vec3(1.15, 0.96, 0.76), core),
+					milky_detail);
+		}
+		c += mcol * mw * milky_way * MILKY_GAIN * dark * above;
 	}
 	if (aurora > 0.0 && d.y > -0.02) {
 		vec2 h = normalize(vec2(d.x, d.z) + vec2(1e-5));

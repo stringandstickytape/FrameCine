@@ -92,9 +92,86 @@ uniform sampler2D caustic_map : hint_default_black, filter_linear_mipmap, repeat
 uniform bool bake_pass = false;
 uniform bool instance_tint = false;
 #endif
+#ifdef REFLECT
+// REFLECT (with LIT and HOUSE, room_material_house_reflect.gdshader; since 2026-11-08, for the drive-in's car: "chrome
+// needs believable reflections done cheaply"): a lacquered or chromed surface shows what is round it without a probe:
+// the sky's gradient and the sunset's glow (the sky system's colours, set every frame by the builder), a dark skyline
+// of low hills, the ground, the screen with the picture's colours where the reflected ray meets it (the bias light's
+// copy), and one glint (a neon sign). A few dot products and one texture read. reflect_metal 0: a clear coat
+// (Fresnel, 4 % head on, a mirror at grazing angles: the long bonnet); 1: chrome (the base colour times the
+// reflection everywhere). Rough surfaces see a blurred, averaged world.
+uniform float reflect_amount = 0.0;
+uniform float reflect_metal = 0.0;
+uniform vec3 refl_zenith : source_color = vec3(0.02, 0.03, 0.06);
+uniform vec3 refl_horizon : source_color = vec3(0.06, 0.07, 0.1);
+uniform vec3 refl_ground : source_color = vec3(0.01);
+uniform vec3 refl_glow : source_color = vec3(0.0);
+uniform vec3 refl_glow_dir = vec3(0.0, 0.0, -1.0);
+// The screen in the world: its centre, its right and up half extents.
+uniform vec3 refl_screen_centre = vec3(0.0, 8.0, -50.0);
+uniform vec3 refl_screen_x = vec3(12.0, 0.0, 0.0);
+uniform vec3 refl_screen_y = vec3(0.0, 5.0, 0.0);
+// The picture's brightness in the reflection (0 with the screen dark).
+uniform float refl_screen_level = 1.0;
+// A glint: its place in the world, its colour times energy, its half size (metres across, up).
+uniform vec3 refl_glint_pos = vec3(0.0, 3.0, 16.0);
+uniform vec3 refl_glint_colour = vec3(0.0);
+uniform vec2 refl_glint_size = vec2(2.5, 0.4);
+#endif
 
 // env_light, screen_center, screen_glow and the bias light's tint (ideas #29).
 #include "res://shaders/env_spill.gdshaderinc"
+
+#ifdef REFLECT
+// What a mirror at p sees along r (world, unit): sky, skyline, ground, the screen, the glint; rough: 0..1.
+vec3 reflect_world(vec3 p, vec3 r, float rough) {
+	float up = r.y;
+	vec3 level = normalize(vec3(r.x, 0.0, r.z) + vec3(1e-5));
+	vec3 sky = mix(refl_horizon, refl_zenith, pow(clamp(up, 0.0, 1.0), 0.5));
+	sky += refl_glow * pow(max(dot(level, refl_glow_dir), 0.0), 4.0) * exp(-max(up, 0.0) * 7.0);
+	// Low hills all round, a few degrees high, dark against the sky.
+	float az = atan(level.z, level.x);
+	float hills = 0.03 + 0.018 * sin(az * 5.0 + 1.3) * sin(az * 3.0 + 0.4) + 0.008 * sin(az * 17.0);
+	float blur = 0.004 + rough * 0.25;
+	vec3 c = mix(sky, refl_ground, smoothstep(hills + blur, hills - blur, up));
+	// The screen where the ray meets its plane, in front of the mirror.
+	vec3 sn = normalize(cross(refl_screen_x, refl_screen_y));
+	float den = dot(r, sn);
+	if (abs(den) > 1e-4 && refl_screen_level > 0.0) {
+		float t = dot(refl_screen_centre - p, sn) / den;
+		if (t > 0.0) {
+			vec3 h = p + r * t - refl_screen_centre;
+			vec2 q = vec2(dot(h, refl_screen_x) / dot(refl_screen_x, refl_screen_x),
+					dot(h, refl_screen_y) / dot(refl_screen_y, refl_screen_y));
+			float soft = 0.03 + rough * 0.8;
+			float inside = (1.0 - smoothstep(1.0 - soft, 1.0 + soft, abs(q.x)))
+					* (1.0 - smoothstep(1.0 - soft, 1.0 + soft, abs(q.y)));
+			if (inside > 0.0) {
+				vec3 film = vec3(0.35);
+				if (screen_tint > 0.0) {
+					film = spill_srgb_to_linear(textureLod(screen_thumb,
+							vec2(clamp(0.5 + 0.5 * q.x, 0.125, 0.875), clamp(0.5 - 0.5 * q.y, 0.25, 0.75)), 0.0).rgb);
+				}
+				c = mix(c, film * screen_glow * refl_screen_level, inside);
+			}
+		}
+	}
+	// The glint: an ellipse round its place, as seen from p.
+	if (dot(refl_glint_colour, vec3(1.0)) > 0.0) {
+		vec3 to = refl_glint_pos - p;
+		float d = length(to);
+		vec3 g = to / d;
+		vec3 side = normalize(cross(vec3(0.0, 1.0, 0.0), g) + vec3(1e-5));
+		vec3 off = r - g * dot(r, g);
+		vec2 e = vec2(dot(off, side) * d / refl_glint_size.x, off.y * d / refl_glint_size.y);
+		float k = (1.0 - smoothstep(0.6 - rough * 0.5, 1.0 + rough * 3.0, length(e))) * step(0.0, dot(r, g));
+		c += refl_glint_colour * k / (1.0 + rough * 6.0);
+	}
+	// A rough surface: the world averaged.
+	vec3 mean = mix(refl_horizon, refl_zenith, 0.5) * 0.7 + refl_ground * 0.3;
+	return mix(c, mean, clamp(rough * 1.4 - 0.1, 0.0, 1.0));
+}
+#endif
 
 varying vec3 world_pos;
 // Object space in metres (the instance's scale applied), and the object's axes in world space for the normal map.
@@ -245,6 +322,10 @@ void fragment() {
 	float occlusion = mix(1.0 - contact_strength, 1.0, smoothstep(0.0, contact_height, world_pos.y - floor_y));
 	// Metals: no environment to reflect, so a dimmer copy of their colour stands in for it (as unlit).
 	vec3 diffuse = base * mix(1.0, 0.45, metallic);
+#ifdef REFLECT
+	// Chrome shows its reflection, little light of its own.
+	diffuse *= mix(1.0, 0.3, reflect_metal * min(reflect_amount, 1.0));
+#endif
 	// HOUSE: the house lights' level scales what the engine lights (a baked lightmap included).
 	ALBEDO = diffuse * level;
 	METALLIC = metallic * 0.5;
@@ -304,6 +385,17 @@ void fragment() {
 		float rim = 1.0 - max(dot(n, normalize(CAMERA_POSITION_WORLD - world_pos)), 0.0);
 		own += base * (fill + film) * sheen * rim * rim * rim * 2.0;
 	}
+#ifdef REFLECT
+	if (reflect_amount > 0.0) {
+		vec3 rv = normalize(CAMERA_POSITION_WORLD - world_pos);
+		float nv = clamp(dot(n, rv), 0.0, 1.0);
+		float rough = clamp(t.orm.g * roughness_scale, 0.0, 1.0);
+		vec3 seen = reflect_world(world_pos, reflect(-rv, n), rough);
+		float fresnel = 0.04 + 0.96 * pow(1.0 - nv, 5.0);
+		vec3 f = mix(vec3(fresnel), base * (0.75 + 0.25 * fresnel), reflect_metal);
+		own += seen * f * reflect_amount * ao;
+	}
+#endif
 #ifdef HOUSE
 	if (bake_pass) {
 		own = vec3(0.0);

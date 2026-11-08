@@ -15,6 +15,9 @@ uniform float twinkle = 0.0;
 // The layer's distance (its mesh's vertices are there too, so the checks see them far away): nearer than the
 // dome, whose flat facets come up to a metre inside its radius, so the dome never hides a star.
 uniform float model_radius = 185.0;
+// The brightest (magnitude under 0: an evening planet) show through a bright twilight, as they do. Since 2026-11-08
+// (the drive-in's evening star); 0 by default.
+uniform float bright_in_twilight = 0.0;
 
 varying vec2 corner;
 varying float vis;
@@ -28,6 +31,7 @@ void vertex() {
 	corner = UV * 2.0 - 1.0;
 	float lum = dot(sky_base(d), vec3(0.2126, 0.7152, 0.0722));
 	float show = mix(clamp(1.0 - lum * 14.0, 0.0, 1.0), 1.0, space);
+	show = mix(show, max(show, clamp(1.2 - lum * 2.0, 0.0, 1.0)), bright_in_twilight * smoothstep(0.0, -1.0, UV2.y));
 	float low = 1.0 - clamp(d.y * 3.0, 0.0, 1.0);
 	float ext = mix(smoothstep(-0.01, 0.1, d.y), step(-0.02, d.y), space);
 	float cover = sky_cloud_cover(d, 3.0);

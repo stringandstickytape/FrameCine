@@ -7,7 +7,10 @@ render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabl
 uniform vec3 colour : source_color = vec3(1.0);
 uniform float energy = 1.0;
 uniform sampler2D picture : source_color, filter_linear_mipmap;
+// The mesh's vertex colours times colour (halos of several colours in one draw: a drive-in's neon). Since 2026-11-08;
+// off by default.
+uniform bool use_vertex_colour = false;
 
 void fragment() {
-	ALBEDO = colour * texture(picture, UV).rgb * energy;
+	ALBEDO = colour * texture(picture, UV).rgb * energy * (use_vertex_colour ? COLOR.rgb : vec3(1.0));
 }

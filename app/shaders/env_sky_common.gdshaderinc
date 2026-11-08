@@ -15,6 +15,11 @@ uniform vec3 glow_dir = vec3(-1.0, 0.0, 0.0);
 uniform float dusk = 1.0;
 // 0: a sky with air (the gradient); 1: space (black, the stars at full).
 uniform float space = 0.0;
+// The twilight's finer structure (since 2026-11-08, the drive-in's desert dusk; 0, the default, is the plain
+// gradient): the warm light held in a thinner band along the horizon under a clearer blue, and opposite the sunset the
+// Earth's shadow rising as a blue-grey band under the pink belt of Venus.
+uniform float afterglow = 0.0;
+uniform vec3 belt_colour : source_color = vec3(0.62, 0.36, 0.42);
 
 // The clouds: a tiling noise (sky.gd noise_texture(): r, g two sizes of cloud, b the galaxy's mottling, a rays).
 uniform sampler2D sky_noise : filter_linear_mipmap, repeat_enable;
@@ -43,6 +48,17 @@ vec3 sky_base(vec3 d) {
 	vec3 horizon = mix(mix(twilight_zenith, twilight_horizon, 0.4) * 0.7, twilight_horizon,
 			smoothstep(-1.0, 1.0, g));
 	vec3 twilight = mix(horizon, twilight_zenith, pow(up, 0.6));
+	if (afterglow > 0.0) {
+		float toward = smoothstep(-1.0, 1.0, g);
+		float band = exp(-up * mix(7.0, 11.0, 1.0 - toward));
+		vec3 rich = mix(twilight_zenith, horizon, band);
+		float anti = smoothstep(-0.1, -0.85, g);
+		float belt = exp(-pow((up - 0.15) / 0.075, 2.0)) * anti;
+		float shade = (1.0 - smoothstep(0.02, 0.1, up)) * anti;
+		rich = mix(rich, belt_colour, belt * 0.55);
+		rich = mix(rich, twilight_zenith * 0.55 + horizon * 0.12, shade * 0.75);
+		twilight = mix(twilight, rich, afterglow);
+	}
 	twilight += glow_colour * pow(max(g, 0.0), 6.0) * exp(-up * 9.0) * 0.9;
 	vec3 c = mix(twilight, night, smoothstep(0.0, 1.0, dusk));
 	c *= 1.0 - space;

@@ -19,7 +19,7 @@ const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale
 		"projector", "wall_rumble", "cicadas", "moped", "train", "huskies", "hull_creak", "radiator", "rain_glass",
 		"rain_leaves", "gas_hiss", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain",
 		"clock", "tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load", "switch_clunk", "valve_hum",
-		"crt_off", "channel_clunk", "sonar", "bubbles"]
+		"crt_off", "channel_clunk", "sonar", "bubbles", "far_car"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
@@ -27,7 +27,7 @@ const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise
 		"purr": 4.0, "crickets": 6.0, "fire": 8.0, "drips": 8.0, "wind": 12.0, "hum": 4.0, "deep_hum": 8.0,
 		"fountain": 6.0, "clock": 4.0, "tube_whine": 2.0, "three_bells": 3.2, "candle": 0.9, "ice_creak": 2.6,
 		"vcr": 4.5, "tape_load": 8.0, "switch_clunk": 0.6, "valve_hum": 8.0, "crt_off": 1.4, "channel_clunk": 0.45,
-		"sonar": 3.0, "bubbles": 6.0}
+		"sonar": 3.0, "bubbles": 6.0, "far_car": 34.0}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
 		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles"]
@@ -36,7 +36,7 @@ const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiato
 		"hull_creak": 32000, "purr": 22050, "crickets": 32000, "fire": 32000, "drips": 32000, "wind": 22050,
 		"hum": 22050, "deep_hum": 22050, "fountain": 32000, "candle": 32000, "ice_creak": 32000, "vcr": 32000,
 		"tape_load": 32000, "switch_clunk": 32000, "valve_hum": 22050, "crt_off": 32000, "channel_clunk": 32000,
-		"sonar": 32000, "bubbles": 32000}
+		"sonar": 32000, "bubbles": 32000, "far_car": 22050}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -374,6 +374,48 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 				var near := 15.0 / sqrt(x * x + 225.0)
 				var bright := _lp(st, 0, pulse + rng.randf_range(-0.3, 0.3), a_buzz * (0.3 + 0.7 * near))
 				s[i] = (bright + _res(st, 2, pulse, nasal) * 0.6) * (0.25 + 0.75 * near)
+		"far_car":
+			# A big old car on the highway behind a drive-in (since 2026-11-08), 78 m off at its closest and
+			# 25 m/s, crossing over the length: the tyres' roar on concrete (the slabs' joints a soft double knock
+			# four times a second), a V8's low, uneven burble at cruise under it. Its pitch rides the passing
+			# (Doppler); the air dulls it the farther it is. The level by distance is left to the 3D player (its
+			# reach the closest distance), so only the far ends fade here.
+			var length := float(total) / r
+			var phase := 0.0
+			var joint := 0.0
+			var since := 10.0
+			var a_knock := _a(260.0, r)
+			var a_drone := _a(320.0, r)
+			for i in total:
+				var t := float(i) / r
+				var x := 25.0 * (t - length * 0.5)
+				var d := sqrt(x * x + 78.0 * 78.0)
+				var dop := 343.0 / (343.0 + 25.0 * x / d)
+				var near := 78.0 / d
+				# The tyres: noise round 500 Hz (a broad resonance) and its low rumble, brighter when near.
+				var wn := rng.randf_range(-1.0, 1.0)
+				var a_air := _a((550.0 + 2300.0 * near * near) * dop, r)
+				var roar := _res_f(st, 0, wn, 480.0 * dop, 0.86, r) * 0.9 + _lp(st, 2, wn, a_air) * 0.6
+				roar = _lp(st, 3, roar, a_air)
+				# The slab joints: the front then the rear wheels over each, 6 m apart.
+				joint += 25.0 / 6.0 / r
+				if joint >= 1.0:
+					joint -= 1.0
+					since = 0.0
+				since += 1.0 / r
+				var knock := 0.0
+				for off: float in [0.0, 0.12]:
+					var k := since - off
+					if k >= 0.0:
+						knock += exp(-k * 38.0) * sin(TAU * 62.0 * dop * k)
+				knock += _lp(st, 4, wn, a_knock) * knock * 2.0
+				# The V8 at about 2200 rpm: firing at 147 Hz with a lope (cylinders uneven) and its half order.
+				phase = fmod(phase + 147.0 * dop / r, 8.0)
+				var cyl := int(phase)
+				var pulse := (1.0 if fmod(phase, 1.0) < 0.3 else -0.35) * (1.0 + 0.25 * sin(float(cyl) * 2.3))
+				var drone := _lp(st, 6, _lp(st, 5, pulse, a_drone), a_drone) * 3.2
+				var env := smoothstep(0.0, 8.0, t) * (1.0 - smoothstep(length - 8.0, length, t))
+				s[i] = (roar * 1.0 + knock * 0.35 * near + drone * (0.35 + 0.25 * near)) * env
 		"train":
 			# A freight train far off: a low roll that rises and dies away over the run, the wheels on the rail
 			# joints (pairs of knocks), and early on the horn's two notes, dulled by the distance.

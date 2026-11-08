@@ -91,6 +91,18 @@ static func spec() -> Dictionary:
 					"description": "the Milky Way's brightness (bind it to playback.playing to show it as the "
 					+ "lights dim)"},
 			"milky_colour": {"type": "color", "default": "#e6dccb", "description": "the Milky Way's colour"},
+			# Since 2026-11-08 (the drive-in: "the sky's change from sunset glow to a deep starfield with the Milky Way
+			# rising is the star of the show", the brief). Each 0 by default: the sky as before.
+			"milky_detail": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0,
+					"description": "the Milky Way's finer structure: dust lanes, star clouds, a warmer bulge (0: the "
+					+ "soft band)"},
+			"afterglow": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0,
+					"description": "the twilight's structure: the warm light in a thin band at the horizon, and "
+					+ "opposite the sunset the Earth's shadow under the pink belt of Venus (0: the plain gradient)"},
+			"belt_colour": {"type": "color", "default": "#9e5c6b", "description": "the belt of Venus's pink"},
+			"evening_star": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0,
+					"description": "a bright planet low over the sunset's glow at the start (it sets with the sky as "
+					+ "the hours turn); 0: none"},
 			"clouds": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "brightness": true,
 					"description": "how much of the sky the clouds cover; 0: a clear sky"},
 			"cloud_colour": {"type": "color", "default": "#3a3e48", "live": true,
@@ -314,6 +326,11 @@ func _bearing(param: String) -> Vector3:
 	return bearing_dir(float(params[param]), float(params["facing"]))
 
 
+## Where the sun went down, as a direction in the room's frame (a reflection's glow, kit/reflect.gd).
+func glow_direction() -> Vector3:
+	return _bearing("glow_bearing")
+
+
 ## The sky's light now, for scenery under it (vista.gd): {zenith, horizon} (sRGB colours), and dusk.
 func sky_light() -> Dictionary:
 	if str(params["mode"]) != "sky":
@@ -386,6 +403,15 @@ func _star_list() -> Array:
 		var s: Array = cat["stars"][sid]
 		out.append([equatorial(s[0], s[1]), float(s[2]), float(s[3])])
 	out.append_array(faint_field(int(params["faint_stars"])))
+	var es := float(params.get("evening_star", 0.0))
+	if es > 0.0:
+		# Low over the glow at the starting hour (11 degrees up, a little left of where the sun went down), fixed on
+		# the celestial sphere from there, so it sets as the hours turn. Brighter than any star (magnitude -3.5 at 1),
+		# its size held to a star's largest.
+		var flat := bearing_dir(float(params["glow_bearing"]) - 6.0, float(params["facing"]))
+		var alt := deg_to_rad(11.0)
+		var here := (flat * cos(alt) + Vector3.UP * sin(alt)).normalized()
+		out.append([star_basis().inverse() * here, lerpf(0.5, -1.2, es), 0.75])
 	return out
 
 
@@ -515,6 +541,8 @@ func _apply_all() -> void:
 	_set_all("glow_colour", color_param("glow"))
 	_set_all("glow_dir", _bearing("glow_bearing"))
 	_set_all("space", 1.0 if str(params["mode"]) == "space" else 0.0)
+	_set_all("afterglow", float(params["afterglow"]))
+	_set_all("belt_colour", color_param("belt_colour"))
 	_set_all("radius", DOME_RADIUS)
 	for k: String in ["dusk", "clouds"]:
 		_set_all(k, float(params[k]))
@@ -523,6 +551,7 @@ func _apply_all() -> void:
 	var dm := _dome.material_override as ShaderMaterial
 	dm.set_shader_parameter("milky_way", float(params["milky_way"]))
 	dm.set_shader_parameter("milky_colour", color_param("milky_colour"))
+	dm.set_shader_parameter("milky_detail", float(params["milky_detail"]))
 	dm.set_shader_parameter("cloud_colour", color_param("cloud_colour"))
 	dm.set_shader_parameter("cloud_screen", float(params["cloud_screen"]))
 	dm.set_shader_parameter("aurora", float(params["aurora"]))
@@ -533,6 +562,7 @@ func _apply_all() -> void:
 	var sm := _stars.material_override as ShaderMaterial
 	sm.set_shader_parameter("stars", float(params["stars"]))
 	sm.set_shader_parameter("twinkle", float(params["twinkle"]))
+	sm.set_shader_parameter("bright_in_twilight", 1.0 if float(params["evening_star"]) > 0.0 else 0.0)
 	if _lines != null:
 		var lm := _lines.material_override as ShaderMaterial
 		lm.set_shader_parameter("lines", float(params["lines"]))

@@ -149,7 +149,7 @@ system's node by either name. Tested in `test_env_kit.gd` (two kits in one room)
 |---|---|---|---|
 | `light` | light | the house materials (the library on the house shader: fill, the film's spill, stand-in lamps before a bake), the lamp glows by group (house, steps, stage, signs), the hidden bake lights, the bake hooks. The screen is the main light: every lit surface takes the film's spill. `caustics` (live, a brightness; since 2026-11-08): the light of a water's surface above, a slowly drifting web on whatever faces up, not dimmed by the house lights; `caustic_colour`, `caustic_scale` (metres a cell), `caustic_speed` (`motion`). Two more texture reads on the house shader where it is on (`procedural.gd caustic_map()`, 256 x 256, 64 KB) | built |
 | `auditorium` | builder | stadium rows on a rake, seats, aisles, side walls and panels, proscenium and screen wall, ceiling, step and house lights, curved rows, balcony, boxes, open ceiling, a partition wall | built |
-| `screen_frame` | screen | the black masking round the screen, the projector's beam from a lens | built |
+| `screen_frame` | screen | the black masking round the screen, the projector's beam from a lens (`beam_style` `flat`, or `volume`: light summed through the beam's pyramid, `beam_strength`; since 2026-11-08) | built |
 | `showing` | showing | the curtains' part in the ritual: actions `open_curtains`, `close_curtains` (the pre-show's curtains, `scripts/env/preshow.gd`) | built |
 | `mirror_floor` | builder | a black floor that takes the film's reflection, a ripple where the viewer moves | built |
 | `shopfront`, `nave`, `dome_hall`, `terrace`, `domestic`, `vehicle` | builder | the other parametric structures (shopfront hall, nave, dome, open-air terrace or lot, domestic room, vehicle interior; below, "The builders") | built |
@@ -392,7 +392,9 @@ and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider'
 
 3. **Clear sight line:** from every seat's eyes (1.2 m over its floor point) to nine points of the default screen
    (its corners, edges and centre, 5 % in), nothing static is hit: the room's meshes and seats as physics shapes, ray
-   by ray. A seat's own back and anything behind the eyes do not count.
+   by ray. A seat's own back and anything behind the eyes do not count. A MultiMesh stands at the seats unless it has
+   meta `env_placed` (an Array of its instances' transforms, since 2026-11-08: the drive-in's parked cars), which
+   places it there instead (a headless MultiMesh keeps no transforms of its own).
 4. **Comfort:** no system moves the viewer; every `motion` parameter within its limit; every binding on a
    `brightness` parameter smoothed by at least 1 / (2 pi MAX_HZ) seconds; every cue fade on one at least
    1 / (2 MAX_HZ) seconds.
@@ -711,6 +713,18 @@ document sets them.
   `bulb_colour`, materials.
 - Slots: `parapet` (along the parapets' tops), `screen`, `proscenium`, `floor`, `corners`.
 - Measured: rooftop 8 draws, 12k triangles, 7 MB; lot 5 draws, 3k triangles; amphitheatre 4 draws, 2k triangles.
+- **The whole drive-in** (`lot` with `drive_in` on, since 2026-11-08; `kit/drive_in_lot.gd`; off, the lot is as it
+  was). Rows of bays on arcs fanned round the screen (`DriveInLot.bays()`), the ground as one fan grid with the
+  lanes, ruts, oil and the parked cars' shadows in its vertex colours (unbaked, so it costs no lightmap), the posts
+  (two speakers each, cables, an amber ramp light at the foot), `cars` parked cars (one coarse hardtop, a MultiMesh
+  with its instances' colours; `parked()` keeps the viewer's bay, its neighbours and the bay straight ahead empty),
+  the screen tower's back and frame, the snack bar with its booth (neon `snack_sign`, lit windows), the entrance
+  marquee (`name`, the `board`'s two lines, a ring of chaser bulbs), a fence, and the highway behind. Live:
+  `neon`, `chase` (the bulbs' run: 0 stops it), `ramp_lights`. Action `car_passes` (args `way`: 1 from -X to +X, -1
+  back, none either): a car's head and tail lights cross the highway over 34 s. The parked cars' paint and chrome
+  reflect as the car's do (`kit/reflect.gd`). The MultiMesh carries meta `env_placed` (its instances' transforms),
+  so the sight-line check tests the cars where they stand. About 14 draws and 112k triangles with 30 cars (the
+  parked cars 72k in one draw).
 
 ### `domestic`
 
@@ -820,9 +834,25 @@ badge, no maker's shape.
 - Parameters: `ground_y` (the ground under the car; the wheels show when it is under the body), `rear_seat`, `top`
   (`folded` or `none`), `fins`; live: `headlamps`, `dial_glow`; `dial_colour`; materials `body`, `chrome`,
   `upholstery`, `piping`, `carpet`, `tyres`, `hood_cover`.
+- Since the drive-in's quality pass (2026-11-08) the body is lofted from sections (`kit/car_shape.gd`: the bonnet's
+  crown, the belt line into the fins, the arches, the side spear), with a jet ornament, bumpers and grille, a lit
+  dash (`shaders/env_dash.gdshader`: speedometer, radio, gauges, and a clock whose hands follow the sky's `hour`), a
+  big thin wheel, tuck-and-roll benches and the lot's speaker on the door. More parameters: `dash_light` (the dial
+  light's stand-in lamp on the benches), `trim` (the dash pad's colour), `speaker`; live: `reflect_screen` (how much
+  of the screen the paint and chrome show), `glint_at`, `glint_colour`, `glint_energy` (a light seen in the chrome:
+  the snack bar's neon). Paint and chrome use the house shader's `REFLECT` (`kit/reflect.gd`): the sky's colours,
+  the skyline, the ground, the screen with its picture and the glint, refreshed each frame from the `sky` system and
+  the screen; no probe. `reflective_materials()` gives them (the tests).
 - It brings no screen. `screen_for()` gives the lot's, so a test room has one.
 - Slots: `dash`, `bonnet`, `rear_shelf`, `floor`.
-- Measured: 16 draws, 6k triangles. The car's parts share one baked and one unbaked mesh.
+- Measured: 9 draws, 24k triangles. Not baked: its occlusion (the cabin's floor, the footwells) is in its vertex
+  colours.
+- **Shared pieces the drive-in added** (each off by default, so every other room is as it was): `RoomMesh.grid()`
+  (a grid of rows of points with normals and colours) and `RoomMesh.shade(f)` (darkens the vertex colours by a
+  function of position: baked occlusion); `room_lamp.gdshader` and `kit/env_flame.gdshader` `use_vertex_colour`
+  (many lamps of different colours in one draw); `kit/env_glass.gdshader` `sky_colour`, `sky_mix` (glass at a
+  grazing angle shows the sky, not grey); the house shader's `REFLECT` define
+  (`shaders/room_material_house_reflect.gdshader`, through `kit/reflect.gd`).
 
 ### The film layer and the builders
 
@@ -1087,6 +1117,7 @@ tones and swells divide its length, so it has no seam.
 | `bubbles` | loop 6 | a vent's bubbles in deep water: bursts of low bubbles (tones that rise as they ring) between quiet spells, the water's soft hiss (since 2026-11-08) | a vent outside the glass |
 | `sonar` | one-shot 3 | a sonar's ping: a soft round tone at 1.18 kHz with a faint beat, swelling in over 15 ms and ringing down, a lower octave under it, and 1.25 s later its echo off the sea floor, duller and a third as loud (since 2026-11-08) | a bathysphere's pre-show (a cue's `do`); a cue sound too |
 | `moped` | one-shot 8 | a small two-stroke passing, 15 m away at its closest; with `to` it travels | a street below |
+| `far_car` | one-shot 34 | a big old car on a highway 78 m off at its closest, 25 m/s: tyres on concrete (the slabs' joints a soft double knock), a V8's low, uneven burble, its pitch riding the passing, duller when far; the level by distance is the 3D player's (`reach` the closest distance), only the far ends fade in it (since 2026-11-08; designed level -56) | the drive-in's highway, with `to` and a cue (`far_car.play` with `car_passes`) |
 | `train` | one-shot 40 | a freight train far off: the roll, the rail joints, the horn's two notes early on | far off, `every` |
 | `huskies` | one-shot 7 | three far howls and a few yips, an echo | snow |
 | `hull_creak` | one-shot 3.5 | steel under pressure: stick-slip pulses through a low groan and bright partials | a hull |
@@ -1427,6 +1458,9 @@ Way, clouds, an aurora, shooting stars, and Earth as seen from the Moon.
 | `twinkle` | 0 | a slow, small twinkle, under 1 Hz; off by default for comfort. Live, a brightness |
 | `lines`, `line_colour` | 0, pale blue | the constellations' lines, faint, as a planetarium shows them. Live |
 | `milky_way`, `milky_colour` | 0.6, warm white | the Milky Way. Live, a brightness |
+| `milky_detail` | 0 | the Milky Way's dust lanes, star clouds, its warm core and cooler arms (read only inside the band). Since 2026-11-08 |
+| `afterglow`, `belt_colour` | 0, rose | the twilight's band over the sunset, and opposite it the Earth's shadow with the belt of Venus over it. Since 2026-11-08 |
+| `evening_star` | 0 | a bright planet over the sunset's glow (6 degrees to its left, 11 up), bright in the twilight as the stars are not. Since 2026-11-08 |
 | `clouds` | 0 | how much of the sky the clouds cover. Live, a brightness |
 | `cloud_colour` | dark grey | the clouds' own colour. Live (bind it to `film.colour` with a `strength`) |
 | `cloud_screen` | 1 | how much the clouds towards the screen catch its light, in the picture's colour. Live, a brightness |
@@ -1494,6 +1528,7 @@ MB (the shared noise, 256 x 256). With Earth: 4 draws, under 9 000 triangles.
 | `birches` | 120 degrees, 40 m, 40 trees | white trunks with dark marks and bare branches, on snow |
 | `cypresses` | 90 degrees, 30 m, 14 trees | tall, narrow, flame-shaped dark trees |
 | `pool` | 14 m | a pool glowing from below, its coping, a lawn that takes its glow, a hedge behind |
+| `cacti` | 60 degrees, 70 m, 16 plants | desert silhouettes: saguaros with their arms, yucca trees (forked, tufted), low tufts of scrub (since 2026-11-08, the drive-in) |
 
 - **Placing:** `azimuth` is degrees from the room's front (positive to the right), `distance` metres from the room's
   middle (at most 170), `spread` the degrees of the horizon it covers, `depth` how deep a grove is.
@@ -2007,29 +2042,79 @@ worn print.
 ### Room: Drive-in - 1958
 
 `app/environments/drive_in_1958.env.json`, apart from the older drive-in scene (`drive_in.tscn`). The front bench of
-a convertible on a drive-in's lot in the desert, dusk falling to a starry night as the film runs.
+a 1950s convertible on a full drive-in's lot in the desert, the sunset fading to the Milky Way as the film runs. The
+quality pass (2026-11-08) answered "you may be able to do a large number of superb ones, see how it goes, but aim
+for incredible quality plz!" (the user): the car, the lot, the desert and the sky were made anew; the seats, the eye
+height and the screen did not move.
 
-- **The lot** (`terrace`, id `lot`, style `lot`): humps and speaker posts in rows of bays, the ground out to 120 m;
-  the screen (24 x 10 m, 4 m up, 50 m ahead) on the kit's tower; a neon snack bar 16 m behind the car ("SNACK BAR").
-- **The car** (`vehicle`, id `car`): the viewer in the middle of the front bench (the room's own seat), a rear bench
-  behind; six places to pick.
+- **The car** (`vehicle`, id `car`, `kit/car_shape.gd`): a lofted body (sections along its length: a long bonnet with
+  a crown, a belt line that sweeps up into fins, wheel arches cut in, a side spear in chrome), a jet ornament on the
+  bonnet, wing bullets, chrome headlamp rims, bumpers with a grille, whitewall tyres. Inside: a padded dash with a
+  lit speedometer (a sweep of ticks, a needle), a clock whose hands keep the sky's own `hour`, a radio's band and
+  push buttons, fuel and temperature gauges (`shaders/env_dash.gdshader`: the picture glows as a lamp does, and the
+  dial light is a stand-in lamp on the benches); a big thin steering wheel with a horn ring; a chrome-framed
+  wraparound windscreen; tuck-and-roll benches (rolls with their seams, piping); the lot's speaker hung on the
+  driver's door, its cable to the post. Occlusion is baked into the vertex colours (the cabin's floor and footwells
+  darker), so the car is unbaked and costs no lightmap.
+- **Chrome and paint that show the night** (`kit/reflect.gd`, `room_material.gdshaderinc` `REFLECT`): no live probe.
+  The house shader reflects a cheap world: the sky's zenith, horizon and glow (from the `sky` system, so it darkens
+  with the dusk), a dark skyline, the ground, the screen (its plane and its picture: the bias light's copy, so the
+  film moves on the bonnet), and a glint ellipse (the snack bar's neon on the chrome, `glint_*`). Lacquer is a
+  Fresnel coat over the paint; chrome is metal. `reflect_screen` follows `playback.playing` (0.25 to 1).
+- **The lot** (`terrace`, id `lot`, `drive_in` on, `kit/drive_in_lot.gd`): rows of bays on arcs that fan round the
+  screen (30 degrees, 7 m apart), each row on its hump; 30 parked cars (one coarse hardtop shape, a MultiMesh, dark
+  period colours with chrome glints, no people; the viewer's neighbours and the bay straight ahead stay empty);
+  a speaker post with two speakers by each bay, cables to the cars, an amber ramp light at its foot; gravel lanes and
+  asphalt bays with ruts, oil and the cars' shadows in the ground's vertex colours, the plain beyond out to 186 m;
+  the screen tower's back and frame; the snack bar and projection booth 15 m behind (a swept roof, neon "SNACK BAR"
+  tubes with their halo, lit windows, its own warm stand-in lamp); the entrance marquee at the right behind ("MESA
+  MOON", its board "TWO FEATURES / SHOW AT DUSK", a ring of chaser bulbs: `shaders/env_bulbs.gdshader`, slow, 0.6 a
+  second, never in the flicker band); a fence round the lot; the highway 78 m behind, where a car's head and tail
+  lights cross now and then (`car_passes`). All the text is our own stroke font (`kit/strokes.gd`).
+- **The beam** (`screen_frame` `beam_style` `volume`, `shaders/env_beam_volume.gdshader`): one closed pyramid from the
+  booth's lens to the screen. Each pixel sums the light along the eye's ray's chord through it (exactly: the light per
+  metre falls with the square of the distance from the lens), takes the picture's colours across the beam and a slow
+  haze. It reads as a shaft from the side and as a soft glow overhead from inside (the car sits under it).
+  `beam_strength` 0.0002.
+- **The desert** (`vista`): the mesas and hills as before, and `cacti`: saguaros and yucca trees (Joshua-tree-like
+  silhouettes) in five groups round the lot, all beyond the fence, none in front of the screen.
 - **The sky** (`sky`): latitude 35, mid July, the screen facing west-south-west with the sunset's glow to its right.
   Tracks by `film.minutes`: `dusk` from the last light (0) to night (0.75 at 12 minutes, 1 at 25), and `hour` from
-  20:45 on, so the stars turn through the film. `milky_way` follows `playback.playing` (0.25 to 0.85, smoothed 3 s).
-  Mesas round the horizon (`vista`).
-- **Life:** 30 moths in the projector's beam (the beam from the snack bar's roof, `screen_frame` without masking);
-  a plane's lights about every 5 minutes.
-- **Cues:** the headlamps off and the dials dimmed as the film starts or plays (`lamps_off`); in the pre-show the
-  dials lit, the headlamps off (`arrive`); 3 s after the end the headlamps come on (`time_to_go`).
+  20:45 on, so the stars turn through the film. The twilight's colours are the desert's (`twilight_*`, `glow`); the
+  `afterglow` and `belt_colour` draw the band over the sunset and the Earth's shadow with the belt of Venus opposite;
+  the `evening_star` stands over the glow and stays bright in the twilight; `milky_detail` gives the Milky Way its
+  dust lanes and star clouds. `milky_way` follows `playback.playing` (0.35 to 0.9).
+- **Light:** no live light. Stand-in lamps for the dash, the snack bar's neon and the marquee; the lot's lights by
+  live params (`lot.neon`, `lot.chase`, `lot.ramp_lights`); the film's light on the cars and the ground (the
+  spill, `film.colour`). During the film the lot goes night-dark.
+- **Life:** 30 moths in the projector's beam; a plane's lights about every 5 minutes.
+- **Cues:** as the film starts or plays (`lamps_off`): the headlamps off, the dials dimmed, the marquee's chase
+  stops over 4 s, the ramp lights go to 35 % and the neon to 65 %. In the pre-show (`arrive`) all of it full. After
+  the end (`time_to_go`): the lot's lights back up, then the dials and the headlamps. `road` (every 70 s, chance
+  0.45): a car on the highway, its lights and its sound together (`lot.car_passes` with `way` 1, `far_car.play`).
 - **Setting:** Window speaker (`tinny`, bool, default off): `presentation.speaker` by map (`window` or `none`). It
   is off by default: a whole film through a band-limited mono speaker is a big loss of the film's sound, which the
   room must never spoil; the viewer turns it on for the effect. No picture stage, so the film layer stays.
-- **Measured** (`tests/test_room_drive_in_1958.gd`, headless): 30 draws, 17 288 triangles, no live light, no
-  particles, 11.3 MB of textures; a clear sight line from all 6 places. Sound at the slider's default (dBFS RMS,
-  with the train passing): -57.8 in the pre-show, -63.0 in the film, -69.7 under a film at the reference level.
 - **Sound:** `acoustics` `outdoors` (rt60 0.2); `sound_bed` `crickets` around the car (four voices, `radius` 8);
   `sound_bed` `train` (a freight train about 380 m off, `at` [-260, 2, -280], `reach` 300, `every` 900: now and
-  then, its two-note horn early on). The window speaker stays the Window speaker setting (`presentation.speaker`).
+  then, its two-note horn early on); `sound_bed` `wind` (everywhere, `gain_db` -5, `film_db` -10: a soft breath over
+  the lot); `sound_bed` `far_car` (`far_car`: a big old car on the highway, tyres on the slabs' joints and a V8's low
+  burble, its pitch riding the passing; travels from [-420, 1, 78] to [420, 1, 78] over its 34 s, with the lights,
+  `reach` 80, `vary` 0 so it keeps time with them). The window speaker stays the Window speaker setting.
+- **Measured** (`tests/test_room_drive_in_1958.gd`, headless; before the pass / after):
+
+  | | Draws | Triangles | Lights | Particles | Textures | Lightmap atlas |
+  |---|---|---|---|---|---|---|
+  | Before | 30 | 17 288 | 0 | 0 | 11.3 MB | 604 x 628 |
+  | After | 27 | 151 134 | 0 | 0 | 7.4 MB | 816 x 752 |
+
+  The triangles are mostly the parked cars (30 x 2 390, one MultiMesh draw), the car (24k), the ground (17k) and
+  the posts (14k). Sound at the slider's default (dBFS RMS, with the train passing): before -57.8 in the pre-show,
+  -60.3 as it starts, -63.0 in the film, -69.8 under a film; after -56.7, -59.1, -62.6, -69.1. A clear sight line
+  from all 6 places.
+- **Fill rate (to judge on the Frame):** the beam is one large additive surface (from inside it covers the upper
+  view; one pass, five plane tests, two haze reads a pixel); the sky dome's Milky Way detail reads its noise twice
+  more, only inside the band.
 
 ### Room: Screening room 1962
 

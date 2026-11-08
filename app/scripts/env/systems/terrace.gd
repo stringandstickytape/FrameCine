@@ -20,6 +20,7 @@ static func spec() -> Dictionary:
 				+ "posts (the seats are a vehicle's); or stone tiers on arcs round the screen on a dusty plain (a "
 				+ "lunar amphitheatre).",
 		"params": PARAMS,
+		"actions": {"car_passes": "drive_in: a car's lights go by on the road behind the lot (args: way, 1 or -1)"},
 		"requires": ["light"],
 		"provides": ["seats", "collision", "sound_room", "bake", "slots"],
 		"cost": {"draws": 8, "triangles": 13000, "lights": 0, "particles": 0, "texture_mb": 8},
@@ -83,7 +84,29 @@ const PARAMS := {
 			"description": "the chairs' canvas or cover"},
 	"seat_frame": {"type": "material", "default": {"library": "oak_veneer", "color": [0.4, 0.28, 0.16]},
 			"description": "the chairs' frames"},
+	# The whole drive-in (kit/drive_in_lot.gd): since 2026-11-08, the drive-in's quality pass. Off: the lot as before.
+	"drive_in": {"type": "bool", "default": false,
+			"description": "a lot as a whole drive-in: rows on arcs in a fan facing the screen, gravel bays and "
+			+ "lanes, posts with their speakers, other cars parked, the snack bar and projection booth in neon, the "
+			+ "screen's tower, the marquee by the entrance, a fence, the desert round it, a road far behind"},
+	"cars": {"type": "int", "min": 0, "max": 80, "default": 30,
+			"description": "drive_in: cars parked in the bays round the viewer's (no people in them)"},
+	"name": {"type": "string", "max": 20, "default": "",
+			"description": "drive_in: the drive-in's name in neon on its marquee (our letters A to Z, 0 to 9)"},
+	"snack_sign": {"type": "string", "max": 16, "default": "SNACK BAR",
+			"description": "drive_in: the neon over the snack bar"},
+	"board": {"type": "list", "max": 2, "of": {"type": "string", "max": 20}, "default": [],
+			"description": "drive_in: the marquee's letter board, a line each"},
+	"neon": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
+			"description": "drive_in: the neon's and the lit windows' glow"},
+	"chase": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true, "brightness": true,
+			"description": "drive_in: the marquee's bulbs chasing round its board (slowly; 0 holds them steady)"},
+	"ramp_lights": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true, "brightness": true,
+			"description": "drive_in: the posts' small amber ramp lights"},
 }
+
+const DriveInLot := preload("res://scripts/env/systems/kit/drive_in_lot.gd")
+const Reflect := preload("res://scripts/env/systems/kit/reflect.gd")
 
 ## Each style's recommended parameters (a room document sets these; the docs list them).
 const STYLES := {
@@ -156,6 +179,10 @@ static func _posts(p: Dictionary) -> Array[Vector3]:
 	var out: Array[Vector3] = []
 	if str(p["style"]) != "lot":
 		return out
+	if bool(p.get("drive_in", false)):
+		for e: Array in DriveInLot.posts(float(p["ground_y"])):
+			out.append(e[0])
+		return out
 	var hw := float(p["half_width"])
 	for k in range(-1, int(p["bays"])):
 		# Beside the front seats of a car whose front wheels are on the hump (the window speaker within reach).
@@ -203,6 +230,9 @@ static func collision_shapes_for(p: Dictionary, with_seats := true) -> Array:
 						Vector3(chord, h, float(t[2])), Basis(Vector3.UP, a)))
 	for post in _posts(p):
 		out.append(PhysicsShapes.box(post + Vector3(0, 0.7, 0), Vector3(0.12, 1.4, 0.12)))
+	if str(p["style"]) == "lot" and bool(p.get("drive_in", false)):
+		out.append(PhysicsShapes.box(Vector3(0, gy + DriveInLot.SNACK_H * 0.5, DriveInLot.SNACK_Z
+				+ DriveInLot.SNACK_D * 0.5), Vector3(DriveInLot.SNACK_W, DriveInLot.SNACK_H, DriveInLot.SNACK_D)))
 	if with_seats and str(p["style"]) == "rooftop":
 		out.append_array(U.seat_boxes(seat_slots_for(p), str(p["seat_model"])))
 	return out
@@ -257,6 +287,13 @@ func build() -> void:
 	var gy := _pit_y(params)
 	var ext := float(params["ground_extent"])
 	var style := str(params["style"])
+	if style == "lot" and bool(params["drive_in"]):
+		_build_drive_in(gy)
+		match str(params["screen"]):
+			"frame":
+				_build_frame(gy)
+		_bake_spot("Sky", Vector3(0, gy + 14.0, (fz + bz) * 0.5), true, 80.0, 30.0, 0.4, Color(0.6, 0.65, 0.85))
+		return
 	# The terrace's own floor is baked; the ground beyond it (an open lot, a plain: up to hundreds of metres) is a
 	# ring round it left out of the bake, so the lightmap's atlas stays small.
 	var fl := RoomMesh.new()
@@ -470,3 +507,328 @@ func _build_bulbs(hw: float, fz: float, bz: float, gy: float) -> void:
 				lamps += 1
 	_add_static("Wires", wire)
 	_add_lamps("Bulbs", bulbs)
+
+
+# --- The drive-in (drive_in on) --------------------------------------------------------------------------------------
+
+## The parked cars' paint and chrome (they reflect: kit/reflect.gd), the lit materials whose level is live.
+var _di_reflect: Array[ShaderMaterial] = []
+var _di_neon: Array = []
+var _di_bulbs: ShaderMaterial
+var _di_ramp: ShaderMaterial
+var _di_phase := 0.0
+var _di_road: MeshInstance3D
+## A car on the road: its age in seconds, -1 none; its way (+1 to the right, -1 to the left).
+var _di_road_t := -1.0
+var _di_road_way := 1.0
+var _di_screen := Transform3D(Basis(), Vector3(0, 8.5, -49.4))
+var _di_screen_size := Vector2(24.0, 10.0)
+var _di_sky: Node
+var _di_glint := Vector3(0, 3.0, 14.4)
+## Seconds a passing car takes along the road.
+const ROAD_SECONDS := 34.0
+const ROAD_HALF := 420.0
+
+
+## The whole drive-in (kit/drive_in_lot.gd): the ground and the plain, the posts, the parked cars, the snack bar and
+## booth, the tower, the marquee, the fence, the road.
+func _build_drive_in(gy: float) -> void:
+	var sc: Dictionary = room.get("doc").get("screen", {}) if room.get("doc") is Dictionary else {}
+	if sc.has("center"):
+		_di_screen = Transform3D(Basis(), U.v3(sc["center"]))
+		_di_screen_size = U.v2(sc["size"])
+	_di_sky = host.system_of_kind("sky") if host != null else null
+	var cars := DriveInLot.parked(int(params["cars"]), 1958)
+	# The ground: the lot's fan and the plain, one draw, vertex colours (left out of the bake: its light is the fill's,
+	# the film's spill and the stand-in lamps', which it keeps).
+	var gm := _mat("ground", true)
+	gm.set_shader_parameter("instance_tint", true)
+	var g := RoomMesh.new()
+	g.surface(gm)
+	DriveInLot.ground(g, gy, cars)
+	_add_unbaked("Ground", g)
+	# The posts, their speakers and cables; the marquee's steel. One draw in vertex colours, baked.
+	var steel: ShaderMaterial = _light.library("brushed_steel", Color(0.85, 0.85, 0.85), {"tiling": 0.5})
+	steel.set_shader_parameter("instance_tint", true)
+	var pb := RoomMesh.new()
+	pb.surface(steel)
+	var lamp_b := RoomMesh.new()
+	_di_ramp = _lamp(Color(1.0, 0.62, 0.25), 0.9 * float(params["ramp_lights"]), 0.0, "steps")
+	lamp_b.surface(_di_ramp)
+	var taken := {}
+	for e: Array in cars:
+		taken["%d %.4f" % [e[0], e[1]]] = e
+	var step0 := 0.0
+	for e: Array in DriveInLot.posts(gy):
+		var k := int(e[1])
+		var a := float(e[2])
+		step0 = DriveInLot.BAY / DriveInLot.row_radius(k)
+		var right_bay := a + step0 * 0.5
+		var into: Variant = null
+		var key := "%d %.4f" % [k, right_bay]
+		if taken.has(key):
+			var f := DriveInLot.bay_frame(k, right_bay, gy)
+			into = f * Vector3(-1.0, 0.68, -0.22)
+		elif k == 0 and absf(right_bay) < 0.001:
+			# The viewer's own car: its speaker on the left door (vehicle.gd draws the cable from there).
+			into = null
+			DriveInLot.post(pb, lamp_b, e[0], a, Vector3.INF)
+			continue
+		DriveInLot.post(pb, lamp_b, e[0], a, into)
+	# The structures: the snack bar and booth, the tower, the fence (plaster and wood, vertex colours, baked).
+	var plaster: ShaderMaterial = _light.library("rough_plaster", Color(0.9, 0.9, 0.9), {"tiling": 1.5})
+	plaster.set_shader_parameter("instance_tint", true)
+	var wood := _mat("frame")
+	var sb := RoomMesh.new()
+	sb.surface(plaster)
+	var snack := DriveInLot.snack_bar(sb, gy, str(params["snack_sign"]))
+	sb.surface(wood)
+	sb.colour = Color.WHITE
+	var tower_wood := RoomMesh.new()
+	tower_wood.surface(wood)
+	sb.surface(plaster)
+	var beacon := DriveInLot.tower(sb, tower_wood, gy, _di_screen.origin, _di_screen_size)
+	sb.surface(wood)
+	DriveInLot.fence(sb, gy)
+	var marquee := DriveInLot.marquee(pb, gy, str(params["name"]), params["board"])
+	_add_static("Posts", pb)
+	_add_static("Structures", sb)
+	_add_static("TowerFrame", tower_wood)
+	_add_lamps("RampLights", lamp_b)
+	# The neon: tubes (one draw in their vertex colours) and their halo (one more); the booth's ports and the tower's
+	# red lamp in the tubes' draw.
+	var neon_lines: Array = []
+	neon_lines.append_array(snack["neon"])
+	neon_lines.append_array(marquee["neon"])
+	var nm := _lamp(Color.WHITE, 3.0 * float(params["neon"]), 0.0, "signs")
+	nm.set_shader_parameter("use_vertex_colour", true)
+	_di_neon = [[nm, 3.0]]
+	var nb := RoomMesh.new()
+	nb.surface(nm)
+	DriveInLot.tubes(nb, neon_lines, 0.026)
+	nb.colour = Color(0.75, 0.82, 1.0) * 0.6
+	for q: Array in snack["ports"]:
+		Shapes.quad(nb, q[0], q[1], q[2], q[3])
+	nb.colour = Color(1.0, 0.08, 0.04)
+	Shapes.lathe(nb, [Vector2(0.0, 0.0), Vector2(0.12, 0.1), Vector2(0.0, 0.22)], beacon, 8)
+	nb.colour = Color.WHITE
+	_add_lamps("Neon", nb)
+	var halos: Array = DriveInLot.halo_quads(snack["neon"], Vector3.FORWARD, 0.5)
+	var mface: Basis = Basis(Vector3.UP, atan2(DriveInLot.MARQUEE_AT.x, DriveInLot.MARQUEE_AT.z))
+	halos.append_array(DriveInLot.halo_quads(marquee["neon"], mface * Vector3.FORWARD, 0.7))
+	_di_neon.append([_halo_mesh("NeonGlow", halos), 0.8])
+	# The snack bar's windows (warm, booth group) and the marquee's letter board.
+	_add_picture("SnackWindows", snack["windows"], DriveInLot.window_picture(), Color(1, 1, 1),
+			1.4 * float(params["neon"]), "booth")
+	if not (params["board"] as Array).is_empty():
+		var board := _add_picture("MarqueeBoard", marquee["board"], DriveInLot.board_picture(params["board"]),
+				Color(1.0, 0.95, 0.85), 1.2 * float(params["neon"]), "signs")
+		_di_neon.append([board.mesh.surface_get_material(0), 1.2])
+	_build_bulbs_mesh(marquee["bulbs"])
+	# Their light on the lot: stand-in lamps before a bake, hidden lights for it.
+	for l: Array in snack["lamps"]:
+		var c: Color = l[1]
+		_light.add_lamp(l[0], c * 1.6, -1.0)
+		_bake_omni("SnackLight", l[0], 18.0, 1.2, c)
+	_light.add_lamp(marquee["lamp"][0], (marquee["lamp"][1] as Color) * 1.2, -1.0)
+	_bake_omni("MarqueeLight", marquee["lamp"][0], 12.0, 0.8, marquee["lamp"][1])
+	_di_glint = Vector3(0, gy + DriveInLot.SNACK_H + 0.25, DriveInLot.SNACK_Z - 0.66)
+	# The parked cars: one MultiMesh, their paint and chrome reflecting.
+	if not cars.is_empty():
+		var paint: ShaderMaterial = _light.library("dark_metal", Color.WHITE, {}, true)
+		Reflect.make(paint, 0.0, 0.75, 0.1)
+		paint.set_shader_parameter("tint", Color.WHITE)
+		paint.set_shader_parameter("instance_tint", true)
+		var chrome: ShaderMaterial = _light.library("brushed_steel", Color(0.8, 0.8, 0.82), {}, true)
+		Reflect.make(chrome, 1.0, 1.0, 0.08)
+		chrome.set_shader_parameter("tint", Color(0.8, 0.8, 0.82))
+		_di_reflect = [paint, chrome]
+		var mm := MultiMesh.new()
+		mm.transform_format = MultiMesh.TRANSFORM_3D
+		mm.use_colors = true
+		mm.mesh = DriveInLot.parked_mesh(paint, chrome, -0.5)
+		mm.instance_count = cars.size()
+		var rng := RandomNumberGenerator.new()
+		rng.seed = 58
+		var placed: Array[Transform3D] = []
+		var colours: Array[Color] = []
+		for i in cars.size():
+			var e: Array = cars[i]
+			var f := DriveInLot.bay_frame(int(e[0]), float(e[1]), gy)
+			f.basis = f.basis * Basis(Vector3.UP, rng.randf_range(-0.04, 0.04))
+			mm.set_instance_transform(i, f)
+			var c: Color = DriveInLot.CAR_COLOURS[rng.randi() % DriveInLot.CAR_COLOURS.size()]
+			mm.set_instance_color(i, c)
+			placed.append(f)
+			colours.append(c)
+		var mmi := MultiMeshInstance3D.new()
+		mmi.name = "ParkedCars"
+		mmi.multimesh = mm
+		mmi.set_meta("instances", cars.size())
+		# The sight-line check takes them where they stand (not as seats); a headless MultiMesh keeps no transforms.
+		mmi.set_meta("env_placed", placed)
+		mmi.set_meta("colours", colours)
+		mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mmi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		own(mmi)
+	_build_road()
+
+
+## Halos: soft bands, added over what is behind, in their colours (one draw).
+func _halo_mesh(node_name: String, quads: Array) -> ShaderMaterial:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for q: Array in quads:
+		var c: Vector3 = q[0]
+		var u: Vector3 = q[1]
+		var v: Vector3 = q[2]
+		var corners := [c - u - v, c + u - v, c + u + v, c - u + v]
+		var uvs := [Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)]
+		for k: int in [0, 1, 2, 0, 2, 3]:
+			st.set_color(q[4])
+			st.set_normal(q[3])
+			st.set_uv(uvs[k])
+			st.add_vertex(corners[k])
+	var m := ShaderMaterial.new()
+	m.shader = GLOW_SHADER
+	m.set_shader_parameter("colour", Color.WHITE)
+	m.set_shader_parameter("picture", DriveInLot.halo_picture())
+	m.set_shader_parameter("use_vertex_colour", true)
+	m.set_shader_parameter("energy", 0.8 * float(params["neon"]) * _group_level("signs"))
+	var mesh := st.commit()
+	mesh.surface_set_material(0, m)
+	var mi := _add_mesh(node_name, mesh)
+	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	mi.add_to_group(SEE_THROUGH)
+	return m
+
+
+## The marquee's bulbs: a quad each facing out from its board, its place in the run in UV2.
+func _build_bulbs_mesh(bulbs: Array) -> void:
+	if bulbs.is_empty():
+		return
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for e: Array in bulbs:
+		var p: Vector3 = e[0]
+		var n: Vector3 = e[2]
+		var u := Vector3.UP.cross(n).normalized() * 0.09
+		var v := Vector3.UP * 0.09
+		var corners := [p - u - v, p + u - v, p + u + v, p - u + v]
+		var uvs := [Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)]
+		for k: int in [0, 1, 2, 0, 2, 3]:
+			st.set_normal(n)
+			st.set_uv(uvs[k])
+			st.set_uv2(Vector2(float(e[1]), 0.0))
+			st.add_vertex(corners[k] + n * 0.02)
+	_di_bulbs = ShaderMaterial.new()
+	_di_bulbs.shader = DriveInLot.BULB_SHADER
+	_di_bulbs.set_shader_parameter("picture", DriveInLot.bulb_picture())
+	_di_bulbs.set_shader_parameter("energy", 1.5 * float(params["neon"]) * _group_level("signs"))
+	_di_bulbs.set_shader_parameter("chase", float(params["chase"]))
+	var mesh := st.commit()
+	mesh.surface_set_material(0, _di_bulbs)
+	var mi := _add_mesh("Bulbs", mesh)
+	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	mi.add_to_group(SEE_THROUGH)
+
+
+## The road far behind the lot: a car's lights (two white ahead, two red behind) that go by now and then.
+func _build_road() -> void:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for e: Array in [[Vector3(2.3, 0, 0.7), Color(1.0, 0.93, 0.78)], [Vector3(2.3, 0, -0.7), Color(1.0, 0.93, 0.78)],
+			[Vector3(-2.3, 0, 0.7), Color(0.9, 0.08, 0.04)], [Vector3(-2.3, 0, -0.7), Color(0.9, 0.08, 0.04)]]:
+		var p: Vector3 = e[0] + Vector3(0, 0.7, 0)
+		var u := Vector3(0.0, 0.0, 0.0)
+		var corners := [p + Vector3(-0.5, -0.5, 0), p + Vector3(0.5, -0.5, 0), p + Vector3(0.5, 0.5, 0),
+				p + Vector3(-0.5, 0.5, 0)]
+		var uvs := [Vector2(0, 1), Vector2(1, 1), Vector2(1, 0), Vector2(0, 0)]
+		for k: int in [0, 1, 2, 0, 2, 3]:
+			st.set_color(e[1])
+			st.set_normal(Vector3.FORWARD)
+			st.set_uv(uvs[k])
+			st.add_vertex(corners[k] + u)
+	var m := ShaderMaterial.new()
+	m.shader = GLOW_SHADER
+	m.set_shader_parameter("colour", Color.WHITE)
+	m.set_shader_parameter("picture", DriveInLot.bulb_picture())
+	m.set_shader_parameter("use_vertex_colour", true)
+	m.set_shader_parameter("energy", 1.6)
+	var mesh := st.commit()
+	mesh.surface_set_material(0, m)
+	_di_road = _add_mesh("Road", mesh)
+	_di_road.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	_di_road.add_to_group(SEE_THROUGH)
+	_di_road.visible = false
+
+
+## way 1 drives it from -X to +X (as the room's far_car sound travels), -1 back; none: either.
+func act(action: String, args: Dictionary) -> void:
+	if action == "car_passes" and _di_road != null and _di_road_t < 0.0:
+		_di_road_t = 0.0
+		var way := float(args.get("way", 0.0))
+		_di_road_way = signf(way) if way != 0.0 else (1.0 if randf() < 0.5 else -1.0)
+		_di_road.visible = true
+
+
+func on_screen_changed(local: Transform3D, size: Vector2) -> void:
+	_di_screen = local
+	_di_screen_size = size
+
+
+func tick(delta: float) -> void:
+	super.tick(delta)
+	if _di_reflect.is_empty() and _di_bulbs == null and _di_road == null:
+		return
+	if not _di_reflect.is_empty():
+		var neon := NEON_GLINT * float(params["neon"]) * _group_level("signs")
+		Reflect.update(_di_reflect, _di_sky, room, _di_screen, _di_screen_size, _di_glint, neon, Vector2(2.6, 0.5),
+				_screen_level())
+	if _di_bulbs != null:
+		# A wave every three bulbs, one bulb on in 0.55 s: each bulb's light goes round about once in 1.7 s.
+		_di_phase = fposmod(_di_phase + delta * 0.6 * float(params["chase"]), 1000.0)
+		_di_bulbs.set_shader_parameter("phase", _di_phase)
+	if _di_road_t >= 0.0:
+		_di_road_t += delta
+		var t := _di_road_t / ROAD_SECONDS
+		if t >= 1.0:
+			_di_road_t = -1.0
+			_di_road.visible = false
+		else:
+			var x := lerpf(-ROAD_HALF, ROAD_HALF, t) * _di_road_way
+			_di_road.transform = Transform3D(Basis(Vector3.UP, 0.0 if _di_road_way > 0.0 else PI),
+					Vector3(x, float(params["ground_y"]), DriveInLot.ROAD_Z))
+
+
+## The neon's colour as the cars' chrome shows it.
+const NEON_GLINT := Color(1.0, 0.3, 0.5) * 0.9
+
+
+## The picture's level in the cars' paint: the film's while it plays (the playback state), dim before.
+func _screen_level() -> float:
+	if host == null:
+		return 1.0
+	var v: Variant = host.channel("playback.playing")
+	return lerpf(0.25, 1.0, clampf(float(v) if v != null else 0.0, 0.0, 1.0))
+
+
+func _param_changed(param: String, value: Variant) -> void:
+	match param:
+		"neon":
+			for e: Array in _di_neon:
+				(e[0] as ShaderMaterial).set_shader_parameter("energy", float(e[1]) * float(value)
+						* _group_level("signs"))
+			if _di_bulbs != null:
+				_di_bulbs.set_shader_parameter("energy", 1.5 * float(value) * _group_level("signs"))
+		"chase":
+			if _di_bulbs != null:
+				_di_bulbs.set_shader_parameter("chase", float(value))
+		"ramp_lights":
+			if _di_ramp != null:
+				_di_ramp.set_shader_parameter("energy", 0.9 * float(value) * _group_level("steps"))
+
+
+## The road's car now: its place, or null (tests).
+func passing_car() -> Variant:
+	return _di_road.position if _di_road != null and _di_road.visible else null

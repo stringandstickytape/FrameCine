@@ -184,6 +184,45 @@ func rounded_box(centre: Vector3, size: Vector3, radius: float, xform := Transfo
 				_triangle(base + i0, base + i2, base + i3, grid[i0], grid[i2], grid[i3], fn)
 
 
+## A smooth surface through a grid of points (rows of one length), with a normal at each point and, if given, a colour
+## at each point (else `colour`); no chart, as rounded_box (parts left out of a bake: a car's body, a bench's rolls).
+## Since 2026-11-08 (the drive-in's car).
+func grid(rows: Array, normals: Array, colours: Array = []) -> void:
+	if rows.size() < 2:
+		return
+	var w := (rows[0] as PackedVector3Array).size()
+	var base := _current.verts.size()
+	var keep := colour
+	for i in rows.size():
+		var row: PackedVector3Array = rows[i]
+		var nrow: PackedVector3Array = normals[i]
+		for j in w:
+			if not colours.is_empty():
+				colour = (colours[i] as PackedColorArray)[j]
+			_vertex(row[j], nrow[j], Vector2(float(j), float(i)))
+	colour = keep
+	for i in rows.size() - 1:
+		var r0: PackedVector3Array = rows[i]
+		var r1: PackedVector3Array = rows[i + 1]
+		var n0: PackedVector3Array = normals[i]
+		var n1: PackedVector3Array = normals[i + 1]
+		for j in w - 1:
+			var a := base + i * w + j
+			var fn := (n0[j] + n0[j + 1] + n1[j] + n1[j + 1]).normalized()
+			_triangle(a, a + 1, a + w + 1, r0[j], r0[j + 1], r1[j + 1], fn)
+			_triangle(a, a + w + 1, a + w, r0[j], r1[j + 1], r1[j], fn)
+
+
+## Every vertex's colour so far multiplied by f(position, normal) -> float (occlusion baked into the colours of parts
+## left out of a bake; the house shader's instance_tint shows it). Since 2026-11-08.
+func shade(f: Callable) -> void:
+	for s: Surf in _surfaces.values():
+		for i in s.verts.size():
+			var k := float(f.call(s.verts[i], s.normals[i]))
+			var c := s.colours[i]
+			s.colours[i] = Color(c.r * k, c.g * k, c.b * k, c.a)
+
+
 ## The mesh: one surface per material, in the order they were first used. with_uv2: the charts laid out as a
 ## lightmap atlas (UV2) and lightmap_size_hint set; without, no UV2 (instanced or never baked).
 func commit(with_uv2 := true) -> ArrayMesh:
