@@ -1,5 +1,7 @@
 extends "res://scripts/env/systems/kit/builder.gd"
 
+const Edwardian := preload("res://scripts/env/systems/kit/shopfront_edwardian.gd")
+
 ## The shopfront builder (docs/environments.md, "The builders"): a narrow picture house of about 1906 made in a shop.
 ## A long hall with a wooden dado, pressed tin on the walls above it and on the ceiling (procedural.gd's pressed_tin
 ## over a library metal, or the library's own maps), a cornice, a small raised screen end with a framed sheet, the
@@ -17,6 +19,8 @@ static func spec() -> Dictionary:
 				+ "door behind the seats with the street's glow beyond, gas lamps that flicker slowly, folding "
 				+ "chairs in rows. Slots for a tin booth and other kit pieces.",
 		"params": PARAMS,
+		"actions": {"cart": "the Edwardian style: a horse and cart passes in the street outside the window (args: "
+				+ "seconds; play the hooves' sound_bed with it)"},
 		"requires": ["light"],
 		"provides": ["seats", "collision", "sound_room", "bake", "slots"],
 		"cost": {"draws": 13, "triangles": 6000, "lights": 0, "particles": 0, "texture_mb": 30},
@@ -79,6 +83,12 @@ const PARAMS := {
 	"flicker": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "live": true, "flicker": true,
 			"steady": 0.0, "brightness": true,
 			"description": "how much the gas lamps waver (slowly; the room's Flickering lights setting holds them)"},
+	# The Edwardian style: since 2026-11-08, Shopfront 1906's deep pass ("really improving their quality, imagination,
+	# delight, detail, lighting", the user). kit/shopfront_edwardian.gd draws it; the plain style is the hall as it was.
+	"style": {"type": "enum", "values": ["plain", "edwardian"], "default": "plain",
+			"description": "plain: the hall as a simple shell; edwardian: a draper's shop of 1906 made a picture house "
+			+ "(pressed tin in relief, a gilt-framed sheet under drapes, a player piano whose keys move, a booth over "
+			+ "the door, bills on the walls, the street outside the window)"},
 }
 
 
@@ -158,6 +168,11 @@ func sound_room() -> Dictionary:
 # --- Building -----------------------------------------------------------------------------------------------------
 
 func build() -> void:
+	if str(params["style"]) == "edwardian":
+		hall = Edwardian.build(self)
+		_build_seat_multimesh(str(params["seat_model"]), _mat("chair_wood", true), _mat("chair_frame", true),
+				seat_slots_for(params), 1906)
+		return
 	var box := _box(params)
 	var lo := box.position
 	var hi := box.end
@@ -298,11 +313,43 @@ func _build_front(hi: Vector3, hw: float) -> void:
 
 var _street: ShaderMaterial
 var _wall_m: ShaderMaterial
+## The Edwardian style's hall (kit/shopfront_edwardian.gd): what moves in it.
+var hall = null
+var _clock_t := 1.0
 
 
 func _param_changed(param: String, value: Variant) -> void:
 	if param == "street_glow" and _street != null:
 		_street.set_shader_parameter("energy", float(value) * _group_level("accent"))
+	elif param == "street_glow" and hall != null:
+		Edwardian.set_street(hall, float(value))
+
+
+func act(action: String, args: Dictionary) -> void:
+	if action == "cart" and hall != null:
+		Edwardian.start_cart(hall, float(args.get("seconds", 16.0)))
+
+
+func tick(delta: float) -> void:
+	super.tick(delta)
+	if hall == null:
+		return
+	# The player piano's keys and roll follow the room's piano (the music system playing a piano).
+	var notes: Array[int] = []
+	var playing := false
+	for s: Node in host.systems_of_kind("music"):
+		if str(s.params.get("instrument", "")) == "piano":
+			notes = s.held_notes()
+			playing = s.sounding()
+			break
+	Edwardian.animate(hall, delta, notes, playing)
+	Edwardian.animate_cart(hall, delta)
+	# The drop-dial clock keeps the viewer's own time (its hands move once a second).
+	_clock_t += delta
+	if _clock_t >= 1.0:
+		_clock_t = 0.0
+		var t := Time.get_time_dict_from_system()
+		Edwardian.set_clock(hall, float(t["hour"]), float(t["minute"]) + float(t["second"]) / 60.0)
 
 
 ## Gas lamps on brass brackets: a bracket arm, a glowing glass globe (house group, flickering), a stand-in lamp and a

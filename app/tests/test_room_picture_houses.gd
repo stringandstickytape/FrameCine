@@ -16,6 +16,7 @@ const EnvChecks := preload("res://scripts/env/env_checks.gd")
 const EnvDoc := preload("res://scripts/env/env_doc.gd")
 const EnvRoom := preload("res://scripts/env/env_room.gd")
 const EnvLibrary := preload("res://scripts/env/env_library.gd")
+const Edwardian := preload("res://scripts/env/systems/kit/shopfront_edwardian.gd")
 ## These rooms stay well inside the headset's budget (env_checks.gd BUDGET): the Frame draws them twice at 90 Hz.
 const SPARE := {"draws": 32, "triangles": 300000, "lights": 0, "particles": 1000, "texture_mb": 32.0}
 const DT := 0.1
@@ -119,7 +120,6 @@ func _shopfront() -> void:
 	var room := await _room("shopfront_1906")
 	var hall := _system(room, "hall", "builder")
 	_system(room, "seats", "seats")
-	_system(room, "kit", "kit")
 	_system(room, "screen_frame", "screen")
 	_system(room, "atmosphere", "atmosphere")
 	_check("shopfront: folding chairs in the builder's slots", room.find_child("Seats", true, false) != null
@@ -127,11 +127,11 @@ func _shopfront() -> void:
 	_check("shopfront: pressed tin", hall.params["tin_pattern"] == "pressed_tin")
 	_check("shopfront: a framed sheet, no black masking", bool(hall.params["sheet_frame"])
 			and not bool(room.host.system("screen_frame").params["masking"]))
-	# The beam leaves from the tin booth's window.
-	var booth := room.find_child("PieceBooth", true, false) as MeshInstance3D
-	var window := booth.global_transform * booth.mesh.get_aabb().get_center() if booth != null else Vector3.INF
+	# The beam leaves from the tin booth's port (since 2026-11-08 the Edwardian hall draws its own booth).
+	_check("shopfront: the Edwardian hall", str(hall.params["style"]) == "edwardian" and hall.hall != null)
+	var window: Vector3 = Edwardian.lens(hall.hall) if hall.hall != null else Vector3.INF
 	var lens: Array = room.host.system("screen_frame").params["lens"]
-	_check("shopfront: the beam's lens in the booth's window (%s)" % window,
+	_check("shopfront: the beam's lens in the booth's port (%s)" % window,
 			window.distance_to(Vector3(lens[0], lens[1], lens[2])) < 0.05)
 	var air: Node = room.host.system("atmosphere")
 	_check("shopfront: a dusty beam", float(air.params["beam_dust"]) >= 0.5 and float(air.params["beam_haze"]) > 0.0)
@@ -149,7 +149,7 @@ func _shopfront() -> void:
 	_check("shopfront: the gas lamps' hiss", room.host.system("gas").is_loop() and room.host.system("gas").playing())
 	var piano: Node = room.host.system("piano")
 	_check("shopfront: a player piano by the screen", str(piano.params["instrument"]) == "piano" and piano.is_ready()
-			and (piano.owned()[0] as Node3D).position.z < -6.0)
+			and (piano.owned()[0] as Node3D).position.z < -5.0)
 	_check("shopfront: the common settings that apply: ritual and flickering lights",
 			room.common_applies("ritual") and room.common_applies("flicker"))
 	# The gas lamps flicker, and hold steady with Flickering lights off.

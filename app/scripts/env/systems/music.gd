@@ -15,6 +15,7 @@ extends "res://scripts/env/systems/env_system.gd"
 ## It plays on the room's bus (acoustics.gd BUS, under Environment) at its designed level (LEVELS, 12 dB or more under
 ## the level check's target), film_db lower while the film plays, ducked under the film.
 ##   sounding() -> bool, resting() -> bool, notes_played, voices_sounding() -> int, bar_kind,
+##   held_notes() -> Array[int] (the notes down now: a drawn piano's keys),
 ##   piece() -> {key, mode, form, progressions}
 
 const EnvSynth := preload("res://scripts/env/env_synth.gd")
@@ -577,6 +578,16 @@ func resting() -> bool:
 
 func voices_sounding() -> int:
 	return _voices.size()
+
+
+## The notes held down now (MIDI numbers, not yet released): what a drawn instrument shows (since 2026-11-08, the
+## Shopfront 1906's player piano: its keys go down as it plays).
+func held_notes() -> Array[int]:
+	var out: Array[int] = []
+	for v: Dictionary in _voices:
+		if not bool(v.get("releasing", false)) and v.has("midi"):
+			out.append(int(v["midi"]))
+	return out
 
 
 func is_ready() -> bool:

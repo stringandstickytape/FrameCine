@@ -19,7 +19,8 @@ const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale
 		"projector", "wall_rumble", "cicadas", "moped", "train", "huskies", "hull_creak", "radiator", "rain_glass",
 		"rain_leaves", "gas_hiss", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain",
 		"clock", "tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load", "switch_clunk", "valve_hum",
-		"crt_off", "channel_clunk", "sonar", "bubbles", "far_car", "scops_owl", "church_bell", "city", "tawny_owl"]
+		"crt_off", "channel_clunk", "sonar", "bubbles", "far_car", "scops_owl", "church_bell", "city", "tawny_owl",
+		"hooves"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
@@ -28,7 +29,7 @@ const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise
 		"fountain": 6.0, "clock": 4.0, "tube_whine": 2.0, "three_bells": 3.2, "candle": 0.9, "ice_creak": 2.6,
 		"vcr": 4.5, "tape_load": 8.0, "switch_clunk": 0.6, "valve_hum": 8.0, "crt_off": 1.4, "channel_clunk": 0.45,
 		"sonar": 3.0, "bubbles": 6.0, "far_car": 34.0, "scops_owl": 9.0, "church_bell": 14.0, "city": 12.0,
-		"tawny_owl": 7.0}
+		"tawny_owl": 7.0, "hooves": 16.0}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
 		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles",
@@ -39,7 +40,7 @@ const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiato
 		"hum": 22050, "deep_hum": 22050, "fountain": 32000, "candle": 32000, "ice_creak": 32000, "vcr": 32000,
 		"tape_load": 32000, "switch_clunk": 32000, "valve_hum": 22050, "crt_off": 32000, "channel_clunk": 32000,
 		"sonar": 32000, "bubbles": 32000, "far_car": 22050, "scops_owl": 32000, "church_bell": 22050, "city": 22050,
-		"tawny_owl": 22050}
+		"tawny_owl": 22050, "hooves": 32000}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -1158,6 +1159,55 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 					var air := _lp(st, 0, rng.randf_range(-1.0, 1.0), a_air) * 0.25
 					v += (sin(TAU * ph) + 0.12 * sin(TAU * 2.0 * ph) + air) * env
 				s[i] = _lp(st, 1, v, a_far)
+		"hooves":
+			# A horse and cart passing in the street outside (Shopfront 1906's pre-show, since 2026-11-08): a horse
+			# at a walk on granite setts, four beats a stride (about 1.7 strides a second), each hoof's strike a
+			# hard knock with the stone's ring and the shoe's clink, the near feet louder; the cart's iron tyres
+			# rumbling over the setts' joints, a harness jingle now and then. It comes from far off, passes and goes;
+			# the 3D player carries it across (the sound_bed's `to`), so only its far ends fade here. Our own; no
+			# recording.
+			var length := float(total) / r
+			var knock := _res_c(1850.0, 0.955, r)
+			var ring := _res_c(3300.0, 0.975, r)
+			var thud := _res_c(420.0, 0.93, r)
+			var a_rumble := _a(240.0, r)
+			var a_tyre := _a(900.0, r)
+			var stride := 1.0 / 1.7
+			# The walk's footfalls in a stride: left hind, left fore, right hind, right fore.
+			var beats := [0.0, 0.26, 0.5, 0.76]
+			var level := [0.85, 1.0, 0.7, 0.9]
+			var jitter := PackedFloat32Array()
+			for k in 256:
+				jitter.append(rng.randf_range(-0.018, 0.018))
+			var joint := 0.0
+			for i in total:
+				var t := float(i) / r
+				var fade := smoothstep(0.0, 3.5, t) * smoothstep(length, length - 3.5, t)
+				var hit := 0.0
+				var n_stride := int(floor(t / stride))
+				for b in 4:
+					var at := (n_stride + float(beats[b])) * stride + jitter[(n_stride * 4 + b) % 256]
+					var d := t - at
+					if d >= 0.0 and d < 0.06:
+						hit += exp(-d * 260.0) * float(level[b]) * (0.85 + 0.3 * jitter[(n_stride * 4 + b + 7) % 256]
+								/ 0.018 * 0.5)
+				var ex := rng.randf_range(-1.0, 1.0)
+				var v := _res(st, 0, ex * hit, knock) * 2.2 + _res(st, 2, ex * hit, ring) * 0.9
+				v += _res(st, 4, hit * 0.8, thud) * 1.6
+				# The tyres on the setts: a low rumble, a knock at each joint (the setts about 13 cm, the cart at
+				# 1.7 m/s: thirteen a second), a little grit.
+				joint += 1.7 / 0.13 / r
+				if joint >= 1.0:
+					joint -= 1.0
+				var bump := exp(-joint * 6.0)
+				var rumble := _lp(st, 6, ex, a_rumble) * (0.6 + 0.6 * bump)
+				var grit := _lp(st, 7, ex, a_tyre) * 0.12
+				v += rumble * 2.2 + grit
+				# The harness: a small tink now and then.
+				var jt := fmod(t * 0.83 + 0.37, 1.0)
+				if jt < 0.03:
+					v += sin(TAU * 4100.0 * t) * exp(-jt * 120.0) * 0.12
+				s[i] = v * fade
 	return s
 
 
