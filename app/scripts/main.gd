@@ -122,12 +122,16 @@ const FLAT_EYE_HEIGHT := 1.2
 ## The room is lifted by the viewer's real eye height less this, so their eyes are where the room's seat puts them
 ## and a telly, a screen's frame or a stage lines up with the picture (lift_room()).
 const ROOM_EYE_HEIGHT := 1.2
-## Every room's seat as the viewer sits in it: the room (and its screen with it) 0.25 m nearer and 0.1 m lower than its
-## seat puts the eyes, in all rooms alike (the user, 2026-11-07: "in every case ... maybe 30 cm too far back and 10 cm
-## too low"). Applied with the lift; the screen keeps its place in the room.
-const SEAT_SHIFT := Vector3(0.0, -0.1, 0.25)
-## The SEAT_SHIFT in use (zero where the room is not lifted).
+## Every room's seat as the viewer sits in it (the user, 2026-11-07: "in every case ... maybe 30 cm too far back and
+## 10 cm too low"): the eyes 0.1 m higher in every room, and nearer the screen by SEAT_NEARER of its distance from the
+## seat, at most SEAT_NEARER_MAX (25 cm in a cinema, a few at a telly: a fixed 25 cm put the viewer on the front edge of
+## the chair and against TV 1937's set, 2026-11-08). The room moves, its screen with it (_apply_room_offset()).
+const SEAT_RISE := 0.1
+const SEAT_NEARER := 0.03
+const SEAT_NEARER_MAX := 0.25
+## The shift in use (zero where the room is not lifted): the room's move on top of the lift.
 var room_shift := Vector3.ZERO
+var _lift := 0.0
 ## A grip shorter than this, with the hand turned less than GRIP_TAP_ANGLE, is a tap (screen to gaze).
 const GRIP_TAP_MSEC := 350
 const GRIP_TAP_ANGLE := deg_to_rad(4.0)
@@ -995,21 +999,32 @@ static func _screen_default_key(d: Dictionary) -> String:
 ## picture float above the room's telly (the user, 2026-11-07: TV 1930's picture well above the set). Not in the
 ## passthrough room (the real room), lying down (the pose places the screen), or off XR.
 func lift_room() -> void:
-	var lift := 0.0
 	var lying := features != null and features.get("pose") != null and bool(features.pose.get("lying"))
-	if use_xr and env_id != "passthrough" and not lying:
-		lift = eye_height - ROOM_EYE_HEIGHT
-	var shift := SEAT_SHIFT if use_xr and env_id != "passthrough" and not lying else Vector3.ZERO
-	env_root.position = Vector3(0.0, lift, 0.0) + shift
-	if shift != room_shift:
+	_lift = eye_height - ROOM_EYE_HEIGHT if use_xr and env_id != "passthrough" and not lying else 0.0
+	var was := room_shift
+	_apply_room_offset()
+	if room_shift != was and screen != null and env != null:
 		# Lying down or sitting up: the screen goes with the room.
-		room_shift = shift
-		if screen != null and env != null:
-			_place_screen()
+		_place_screen()
+
+
+## The room's place: the lift, and the seat shift for the seat in use (the screen's distance from it, so a seat
+## change or a new room moves it again; the screen being pushed away or pulled near does not).
+func _apply_room_offset() -> void:
+	var lying := features != null and features.get("pose") != null and bool(features.pose.get("lying"))
+	var shift := Vector3.ZERO
+	if use_xr and env_id != "passthrough" and not lying and env != null and env.has_method("get_screen_anchor"):
+		var a: Vector3 = env.transform * env.get_screen_anchor().origin
+		var flat := Vector3(a.x, 0.0, a.z)
+		var nearer := minf(flat.length() * SEAT_NEARER, SEAT_NEARER_MAX)
+		shift = Vector3(0.0, -SEAT_RISE, 0.0) - (flat.normalized() * nearer if flat.length() > 0.01 else Vector3.ZERO)
+	room_shift = shift
+	env_root.position = Vector3(0.0, _lift, 0.0) + shift
 
 
 ## Puts the flat screen at screen_yaw / screen_distance / eye height + offset, facing the viewer; the overlay with it.
 func _place_screen() -> void:
+	_apply_room_offset()
 	var pos := Vector3(sin(screen_yaw) * screen_distance, eye_height + screen_height_offset,
 			-cos(screen_yaw) * screen_distance) + room_shift
 	var t := Transform3D(Basis(Vector3.UP, -screen_yaw if is_nan(screen_turn) or mode.is_spherical() else screen_turn),
