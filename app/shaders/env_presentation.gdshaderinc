@@ -164,8 +164,9 @@ vec2 pr_geometry(vec2 mesh_uv, float time) {
 		// Tracking: the lines sway a little, slowly, more some moments than others.
 		float sway = 0.0011 * sin(p.y * 9.0 + time * 1.7) + 0.0005 * sin(p.y * 37.0 - time * 4.3);
 		p.x += pr_tracking * sway * (0.6 + 0.4 * sin(time * 0.37));
-		// Head switching: the last few lines tear to the right, raggedly.
-		float band = smoothstep(0.972, 0.992, p.y) * pr_head_switch;
+		// Head switching: the last few lines tear to the right, raggedly. Only the last 1% (about five lines): a set's
+		// overscan hid most of it, and a letterboxed film's black bar fizzed with a wider band (the user, 2026-11-08).
+		float band = smoothstep(0.988, 0.997, p.y) * pr_head_switch;
 		float line = floor(p.y * pr_lines);
 		p.x += band * (0.008 + 0.02 * pr_hash(vec2(line, floor(time * 30.0))));
 	}
@@ -223,9 +224,9 @@ vec3 pr_source_marks(vec3 rgb, vec2 p, float time) {
 			rgb = mix(rgb, vec3(0.92), w * run * pr_scratch_a[i]);
 		}
 	} else if (pr_source == 2) {
-		float band = smoothstep(0.972, 0.992, p.y) * pr_head_switch;
+		float band = smoothstep(0.988, 0.997, p.y) * pr_head_switch;
 		float n = pr_hash(floor(p * vec2(pr_lines * pr_aspect, pr_lines)) + fract(time * 13.7) * 91.0) - 0.5;
-		rgb += n * (0.05 * pr_tape_noise + 0.5 * band);
+		rgb += n * (0.05 * pr_tape_noise + 0.16 * band);
 		// The tape's softer colour.
 		float y = dot(rgb, PR_LUMA);
 		rgb = mix(vec3(y), rgb, 1.0 - 0.15 * pr_tape_noise);
