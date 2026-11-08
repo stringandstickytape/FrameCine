@@ -281,6 +281,28 @@ static func gradient(top: Color, bottom: Color) -> Texture2D:
 	return t
 
 
+## Caustics' map (the light system's `caustics`, the sea floor's, env_water.gdshaderinc): a seamless cellular pattern,
+## the distance to the second-nearest cell less the nearest's (near 0 on the walls between cells; the shaders turn
+## the walls into the bright web that light focused by waves lays on a floor), 256 x 256 (64 KB with its mipmaps),
+## made once by the engine's noise.
+static func caustic_map() -> Texture2D:
+	if _pictures.has("caustics"):
+		return _pictures["caustics"]
+	var noise := FastNoiseLite.new()
+	noise.seed = 1934
+	noise.noise_type = FastNoiseLite.TYPE_CELLULAR
+	noise.frequency = 0.03
+	noise.cellular_distance_function = FastNoiseLite.DISTANCE_EUCLIDEAN
+	noise.cellular_return_type = FastNoiseLite.RETURN_DISTANCE2_SUB
+	noise.cellular_jitter = 1.0
+	var img := noise.get_seamless_image(256, 256, false, false, 0.15, true)
+	img.convert(Image.FORMAT_L8)
+	img.generate_mipmaps()
+	var t := ImageTexture.create_from_image(img)
+	_pictures["caustics"] = t
+	return t
+
+
 ## An abstract painting of our own: soft blocks of colour on a ground, a few bands across (a mid-century canvas or
 ## a bedroom poster). seed_value picks the layout; palette: [ground, colours...].
 static func abstract(seed_value: int, palette: Array) -> Texture2D:

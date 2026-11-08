@@ -1,7 +1,7 @@
 extends RefCounted
 
 ## Picks the source for a path: test patterns (stub://) are always the stub; browser:// and window:// the window source
-## (a desktop window, docs/window-source.md); pictures (jpg, png, webp, jps, mpo) the image source
+## (a desktop window, docs/window-source.md); pcwindow:// a PC window's pane (scripts/pc/pc_window_source.gd); pictures (jpg, png, webp, jps, mpo) the image source
 ## (scripts/play/image_source.gd, ideas #22); otherwise the hardware source when the engine has HWVideoTexture and the
 ## file opens. When the right source can't open, the stub stands in (with the reason on screen).
 
@@ -13,6 +13,7 @@ const DirectoryLister := preload("res://scripts/net/directory_lister.gd")
 const LabVideoSource := preload("res://scripts/video/lab_video_source.gd")
 const ImageSource := preload("res://scripts/play/image_source.gd")
 const MusicSource := preload("res://scripts/play/music_source.gd")
+const PcWindowSource := preload("res://scripts/pc/pc_window_source.gd")
 
 ## Files the player lists and plays in a folder. The engine's FFmpeg reads every one of these containers; H.264, HEVC
 ## and VP9 decode in hardware, everything else (DivX/Xvid, MPEG-1/2, WMV/VC-1, RealVideo, FLV, Theora, VP8, AV1, ...)
@@ -79,6 +80,13 @@ static func create(path: String, host: Node) -> VideoSource:
 		pattern.attach(host)
 		pattern.open(path)
 		return pattern
+	if PcWindowSource.is_pc_path(path):
+		# A PC window's pane on the big screen (scripts/pc/pc_windows.gd).
+		var pc := PcWindowSource.new()
+		pc.attach(host)
+		if pc.open(path) == OK:
+			return pc
+		return _placeholder(path, host, pc.last_error)
 	if WindowVideoSource.is_window_path(path):
 		var window := WindowVideoSource.new()
 		window.attach(host)

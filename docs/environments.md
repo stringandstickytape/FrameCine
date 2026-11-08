@@ -147,7 +147,7 @@ system's node by either name. Tested in `test_env_kit.gd` (two kits in one room)
 
 | System | Kind | Role | State |
 |---|---|---|---|
-| `light` | light | the house materials (the library on the house shader: fill, the film's spill, stand-in lamps before a bake), the lamp glows by group (house, steps, stage, signs), the hidden bake lights, the bake hooks. The screen is the main light: every lit surface takes the film's spill | built |
+| `light` | light | the house materials (the library on the house shader: fill, the film's spill, stand-in lamps before a bake), the lamp glows by group (house, steps, stage, signs), the hidden bake lights, the bake hooks. The screen is the main light: every lit surface takes the film's spill. `caustics` (live, a brightness; since 2026-11-08): the light of a water's surface above, a slowly drifting web on whatever faces up, not dimmed by the house lights; `caustic_colour`, `caustic_scale` (metres a cell), `caustic_speed` (`motion`). Two more texture reads on the house shader where it is on (`procedural.gd caustic_map()`, 256 x 256, 64 KB) | built |
 | `auditorium` | builder | stadium rows on a rake, seats, aisles, side walls and panels, proscenium and screen wall, ceiling, step and house lights, curved rows, balcony, boxes, open ceiling, a partition wall | built |
 | `screen_frame` | screen | the black masking round the screen, the projector's beam from a lens | built |
 | `showing` | showing | the curtains' part in the ritual: actions `open_curtains`, `close_curtains` (the pre-show's curtains, `scripts/env/preshow.gd`) | built |
@@ -659,8 +659,41 @@ screen (style `ring`). Beyond glass: nothing (a sky system's sky), deep water, o
 - `glass_colour` and `glass_alpha` (0.05; lower is clearer): a pale tint at a low alpha keeps the view out clear,
   where before a room needed a near-black tint to stop the glass hazing what lies outside.
 - Seats: `rows_front`, `rows_back`, `row_depth`, `seat_pitch`, `arc_deg`, `seat_model`.
+- `rib_phase` (0..1): the ribs turned by that share of the gap between two (0.5: none straight behind the screen).
 - Slots: `drum`, `screen`, `proscenium`, `floor`, `ceiling`.
 - Measured (glass, about 120 seats): 8 draws, 88k triangles, 4 MB.
+
+#### The water and the sea floor (since 2026-11-08)
+
+With `outside` water the water is its own shader (`shaders/env_water_outside.gdshader`), and everything in the water
+shares its uniforms (`shaders/env_water.gdshaderinc`: the colour along a view, the murk, caustics, the floodlights'
+light, the film's light through the glass). Each part is built only when the document asks for it. The geometry is
+`scripts/env/systems/kit/seabed.gd`; nothing is read from a file.
+
+| Parameter | Default | What |
+|---|---|---|
+| `depth` | 0.5 | live, a brightness: 0 the sunlit shallows (Snell's window overhead with the surface's waves in it, shafts round it, caustics on the sea floor), 0.5 `water_top` and `water_deep` as given, 1 the abyss (black; a few specks glow now and then) |
+| `murk` | 0.07 | how quickly the water hides what lies in it, per metre |
+| `water_motion` | 1 | live, `motion` (at most 1): the shafts' sway, the caustics' drift, the fronds' sway, the snow's sinking, the bubbles' rise |
+| `seabed` | false | a bowl of sea floor: banks rising to the sides and behind, a trench behind the screen, two ledges near the glass that lift what grows on them over the drum |
+| `rocks`, `coral`, `fronds` | 24, 0, 0 | boulders; coral on the right ledge and round it (branching coral, heads, fans, anemones); kelp on the left ledge and in beds |
+| `wreck`, `vent`, `bubbles` | false, false, 140 | an old diving bell on its skid, a fallen derrick, an anchor; a vent's chimney and its bubbles rising past the glass |
+| `snow` | 0 | marine snow: quads sinking slowly round the dome, never inside it (moved in the vertex shader: no particle system) |
+| `floodlights`, `flood`, `flood_colour` | 0, 1, warm white | lamps on the drum's top outside aimed at the features, their beams in the murk (`flood` live, a brightness) |
+
+#### The fittings (since 2026-11-08)
+
+`scripts/env/systems/kit/dome_fittings.gd`: `portholes` (round ports in the drum, none in front), `rivets` (along a
+glass dome's ribs and the drum's ledge), `gauges` and live `gauge` (each needle swings from its own rest by its own
+share; bind `gauge` to `film.bass`), `console` (an instrument desk behind the seats with a sonar scope,
+`shaders/env_sonar.gdshader`; live `sonar` its glow, a brightness) and `hatch`. Unbaked (small faces), lit as the
+seats. The console is a physics box. `needle_readings()` gives the needles' readings (tests: headless, a MultiMesh
+keeps no transforms).
+
+Measured, the Bathysphere's set (`test_room_bathysphere.gd`): the sea floor with its rocks, coral, bell and chimney 1
+draw and 8.7k triangles, the fronds 1 and 4.1k, the snow (1800) 1 and 3.6k, the bubbles 1, the beams 1 (480), the
+lenses 1, the ports' glass 1, the scope 1, the gauges' faces 1 and needles 1, the console's lamps 3, the brass and the
+dark fittings 2, the rivets 1 and 4.4k: 17 draws and about 25k triangles on top of the hall.
 
 ### `terrace`
 
@@ -1010,7 +1043,7 @@ Cue sounds (`env_audio.play`, the chime) and the thud still go straight to Envir
 
 | Param | Default | What |
 |---|---|---|
-| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`; `silence` plays nothing (the sounds: below) |
+| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`; `silence` plays nothing (the sounds: below) |
 | `gain_db` | 0 | dB from the designed level (-30 to +6) |
 | `level` | 1 | 0 to 1, live. Bind it: `film.bass` for a rumble through the wall, `weather.rain` or `weather.wet` for rain, a setting |
 | `film_db` | -8 | dB lower in `starting`, `playing` and `credits`. Up again in the pre-show, paused, the intermission and the end |
@@ -1051,6 +1084,8 @@ tones and swells divide its length, so it has no seam.
 | `clock` | loop 4 | a tick and a slightly duller, slightly early tock each second, through a wooden case | a mantel, a shelf |
 | `tube_whine` | loop 2 | a picture tube's line whine at 15 625 Hz and its valves' faint hum. `pitch` 0.648: a 405-line set's 10 125 Hz; 1.007: 15 734 Hz | a CRT telly, very low |
 | `noise` | loop 4 | pink noise | under other beds |
+| `bubbles` | loop 6 | a vent's bubbles in deep water: bursts of low bubbles (tones that rise as they ring) between quiet spells, the water's soft hiss (since 2026-11-08) | a vent outside the glass |
+| `sonar` | one-shot 3 | a sonar's ping: a soft round tone at 1.18 kHz with a faint beat, swelling in over 15 ms and ringing down, a lower octave under it, and 1.25 s later its echo off the sea floor, duller and a third as loud (since 2026-11-08) | a bathysphere's pre-show (a cue's `do`); a cue sound too |
 | `moped` | one-shot 8 | a small two-stroke passing, 15 m away at its closest; with `to` it travels | a street below |
 | `train` | one-shot 40 | a freight train far off: the roll, the rail joints, the horn's two notes early on | far off, `every` |
 | `huskies` | one-shot 7 | three far howls and a few yips, an echo | snow |
@@ -1069,7 +1104,7 @@ tones and swells divide its length, so it has no seam.
 
 Cue sounds (`EnvDoc.SOUNDS`, for a cue's `sound` step and ambient life's calls): the foundation's seven, `moped`,
 `train`, `huskies`, `hull_creak`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `switch_clunk`, `crt_off`,
-`channel_clunk` (not `valve_hum`: 8 s, too long to make on the main thread). A cue's `sound` step plays at
+`channel_clunk`, `sonar` (not `valve_hum`: 8 s, too long to make on the main thread). A cue's `sound` step plays at
 the reference level less its `gain_db`: at 0 dB it reaches the level check's target, so give it -10 or lower. A
 `sound_bed` with `play` is the levelled way: it plays at the sound's designed level.
 
@@ -1144,9 +1179,11 @@ second.
 | `hum` | -58 | -58.0 | -66.0 | -73.1 | -47.7 |
 | `deep_hum` | -54 | -54.0 | -63.1 | -68.4 | -41.0 |
 | `fountain` | -56 | -56.0 | -64.2 | -71.1 | -41.8 |
+| `bubbles` (2026-11-08) | -57 | -57.0 | -64.7 | -72.4 | -36.2 |
 | `clock` | -56 | -56.0 | -64.0 | -71.1 | -19.9 |
 | `tube_whine` | -62 | -62.0 | -70.0 | -77.2 | -55.0 |
 | `noise` | -54 | -54.0 | -62.0 | -69.1 | -41.2 |
+| `sonar` (2026-11-08) | -56 | -56.0 | -64.0 | | -39.7 |
 | `moped` | -52 | -52.0 | -60.0 | | -42.9 |
 | `train` | -52 | -52.0 | -60.0 | | -40.6 |
 | `huskies` | -54 | -54.0 | -62.0 | | -46.0 |
@@ -1221,7 +1258,7 @@ at 8 m they are 19 dB under their "in film" level even at -12. Without the filte
 | Nave | `acoustics` `stone_nave` (`rt60` 3); `sound_bed` `wind` high up, `gain_db` -4; `candle`, `every` 120, `gain_db` -4. No organ, no bells |
 | Reclaimed | `acoustics` `outdoors`; `sound_bed` `rain_leaves` around, `level` on `weather.rain`; `drips`, `level` on `weather.wet`; `wind`, `gain_db` -6; the birds' calls from `life` |
 | Ice cinema | `acoustics` `ice`; `sound_bed` `huskies`, `every` 300; `wind` by the doorway; `ice_creak`, `every` 240 |
-| Bathysphere | `acoustics` `hull` (`rt60` 0.9); `sound_bed` `hull_creak`, `every` 90, to the sides; `deep_hum`, `gain_db` -4; the whale from `life` at `voice_db` -4 |
+| Bathysphere | `acoustics` `hull` (`rt60` 0.9); `sound_bed` `hull_creak`, `every` 180, to either side; `deep_hum`, `gain_db` -4; `bubbles` at the vent outside; `sonar` pinging in the pre-show (a cue); a far `whale` song in a quiet scene (a cue); the passing whale from `life` at `voice_db` -4 |
 | Pillow Fort | `acoustics` `small_room` (`rt60` 0.3); `sound_bed` `radiator`, `rain_glass` on `weather.rain` |
 | Screening room 1962 | `acoustics` `small_room` (`rt60` 0.45); `sound_bed` `fire` at the hearth; `hum` at the window (the pool's pump); `three_bells` before the ritual |
 | Crater | `sound_bed` `silence`; `acoustics` `vacuum` |
@@ -1251,8 +1288,9 @@ no textures, no live lights and no particles.
 
 | Parameter | Default | What |
 |---|---|---|
-| `creature` | `moth` | `moth`, `bird`, `firefly`, `cat`, `deer`, `fish`, `jelly` (glowing deep-sea creatures), `whale`, `plane` (a plane's lights). Built once |
-| `count` | 0 | how many; 0: the creature's own (below). The cat, the deer and the whale are one at most |
+| `creature` | `moth` | `moth`, `bird`, `firefly`, `cat`, `deer`, `fish`, `jelly` (glowing deep-sea creatures), `ray` (a manta gliding over), `whale`, `plane` (a plane's lights). Built once |
+| `count` | 0 | how many; 0: the creature's own (below). The cat, the deer, the ray and the whale are one at most |
+| `schooling` | 0 | fish: how tightly they school (since 2026-11-08). Over 0 the school draws in (to 60 % at 1) and stretches along its way (1.9 times), and each fish keeps its place relative to where the school was a moment before, the later the further back it swims (up to 2.4 s at 1): a turn starts at the leaders and ripples back. One lookup in a short history a fish, no neighbour search |
 | `region` | null | the box `{min, max}` they keep to, in the room's frame; null: the creature's own |
 | `path` | [] | points in the room's frame: the cat's wall top, the deer's and the whale's way (first to last), the birds' perches |
 | `size` | 1 | times the creature's own size |
@@ -1287,6 +1325,7 @@ Actions (each creature does what fits it; args in brackets):
 | `deer` | 1 | every 300 s on average it comes out of the dark at one end of its path, grazes once or twice, and fades at the far end. By default its way runs past the viewer's left |
 | `fish` | 48 | a silver school, 28 cm each. The school's centre wanders the region; `attraction` pulls it to the region's point nearest the screen. They take the screen's light on their flanks |
 | `jelly` | 18 | bells of 35 cm that glow at the rim and pulse every 2 to 3 s. Each has a place on a ring round the picture, just clear of the sight line, in front of the screen or behind it |
+| `ray` | 1 | a manta ray 4 m across its wings, dark above and pale below (the body shader's `belly`). Every 90 s on average (`every`), or on `pass`, it comes out of the gloom on one side, glides high over the room on a long gentle curve (the `path`, or a chord across the `region` at its height), banking a little into the turn, its wings beating slowly half the time and gliding the rest, and fades on the other side. 1.4 m/s at most; kept out of the sight line |
 | `whale` | 1 | 14 m, dark, slow. It comes only when called (`every` 0 by default): a cue on `film.quiet` with a long cooldown. By default its way runs high behind the screen. A third of the way along it sings |
 | `plane` | 2 at once | a red, a green and a white light and a soft white strobe every 1.5 s, on a great circle 160 m out, 17 to 52 degrees up. A crossing takes a minute or two. One every 75 s on average |
 
@@ -1349,9 +1388,10 @@ puts a MultiMesh's base mesh at every seat). Measured at the own counts (`test_e
 | planes | 16 | 0.01 |
 | the cat | 86 | 0.01 |
 | the deer | 98 | 0.01 |
-| the whale | 102 | 0.00 |
+| the ray | 35 | 0.01 |
+| the whale | 240 (102 before 2026-11-08) | 0.00 |
 
-All nine at once: 9 draws, about 3600 triangles, under 1 ms a frame on the desktop. The spec declares the largest (fish,
+All nine (before the ray) at once: 9 draws, about 3600 triangles, under 1 ms a frame on the desktop. The spec declares the largest (fish,
 1700 triangles); 200 fish would be 6800. The time on the Frame is not measured yet.
 
 ### For the rooms
@@ -1361,7 +1401,7 @@ All nine at once: 9 draws, about 3600 triangles, under 1 ms a frame on the deskt
 | Drive-in | `moth` in the beam; `plane` with `activity` bound to `time.of_day` inverted |
 | Rooftop Athens | `cat` with a `path` along the wall top, clear of the sight line; `plane` |
 | Reclaimed | `bird` with perches on the broken roof's edge; `firefly` low over the floor, `glow` bound to `film.brightness`; `deer` with a path along a side aisle |
-| Bathysphere | `fish` and `jelly` outside the glass, `attraction` bound to `film.brightness`; `whale` on the quiet-scene cue, its `chance` set by the room's whale setting |
+| Bathysphere | `fish` (two schools, `schooling` 0.8 and 0.6) and `jelly` outside the glass, `attraction` bound to `film.brightness`, the bells' `glow` to `film.quiet`; a `ray` gliding over every 150 s; `whale` on the quiet-scene cue, its `chance` set by the room's whale setting |
 
 ## The sky and the vista
 
@@ -1688,7 +1728,7 @@ people.
 | 11 | Nave | `nave`, pews (`seats`) | a dim rose window, candles (`light`, flicker), the film's light climbing the stone | reverb (`acoustics`) | | in the chancel | candles |
 | 12 | Reclaimed | `auditorium` with `ceiling_cover` 0.5, ivy and ferns (`kit`) | stars (`sky`), dynamic `weather` (rain into a puddle that reflects the film) | birds, fireflies, an occasional deer (`life`) | | a patched sheet | weather |
 | 13 | Ice cinema | `domestic` of ice blocks, hides (`seats`) | the room glowing in the film's colours, an aurora that swells in quiet scenes (`sky`, `film.quiet`), breath fog (`atmosphere`) | far huskies (`sound_bed`) | | | aurora |
-| 14 | Bathysphere | `dome_hall` (glass) | caustics (`light`) | fish, glowing creatures drawn to the screen, a rare whale in a quiet scene (`life`, cue with `cooldown`), hull creaks (`sound_bed`) | | | whale |
+| 14 | Bathysphere | `dome_hall` (glass; the sea floor, kelp, coral, a sunken bell, a vent, marine snow, floodlights; portholes, rivets, gauges, a sonar console) | the water by depth, Snell's window and shafts, caustics (`light`) | schools of fish, glowing creatures drawn to the screen, a manta overhead, a rare whale in a quiet scene (`life`, cue with `cooldown`), hull creaks, the vent's bubbles, a sonar ping, a far song (`sound_bed`) | floodlights down with the film, the scope dims, pings in the pre-show | | depth, lights outside, whale |
 | 15 | Crater | `terrace` (a lunar amphitheatre) under a `dome_hall` | Earth turning over the film (`sky`, film-time track), the Milky Way when the lights dim | silence (no bed) | | | Earth's speed |
 | 16 | Void | `mirror_floor` | black | | | | ripple |
 | 17 | Pillow Fort, 1993 | `domestic` (cushions, a bedsheet), a tree, a tin of sweets (objects) | fairy lights (`light`, flicker), rain on the window (`weather`) | a ticking radiator (`sound_bed`) | the VCR flashes 12:00 (object widget) | a CRT telly (`presentation`, TV-era display) | the telly fills the opening |
@@ -2069,35 +2109,104 @@ window, and the telly filling the fort's opening, showing the film as a tube sho
 
 ### Room: Bathysphere
 
-`app/environments/bathysphere.env.json`. A round hall under a glass dome in deep water. Fish and glowing creatures
-gather round the screen outside the glass; now and then, in a quiet scene, a whale swims past above it.
+`app/environments/bathysphere.env.json`. A round hall under a glass dome on the sea floor. Through the glass: a bowl
+of sea floor with kelp on a ledge to the left, coral on a ledge to the right, an old diving bell half silted behind,
+a vent whose bubbles stream past the glass, floodlights reaching out into the murk, marine snow drifting through
+their beams, schools of fish and glowing bells round the screen, now and then a manta gliding overhead, and in a
+quiet scene a whale. Inside: brass ribs with their rivets, portholes, pressure gauges whose needles swing with the
+film's bass, and behind the seats an instrument console with a sonar scope sweeping. The second pass (2026-11-08)
+answered "go nuts on the bathysphere - I think that has a lot of potential that isn't realised yet" (the user).
 
 - **The hall** (`dome_hall`): radius 9 m, a 1.3 m drum of dark metal with 12 warm lamps (group `house`), a glass
-  dome 7.5 m high on 12 brass ribs, an oak floor, a low stage. The screen (6.4 x 3.6 m, its bottom 1.45 m up) stands
-  8.3 m ahead, inside the glass. Plush seats in teal velvet on arcs round it (six rows, 100 degrees); the room's own seat is at the
-  origin, in the third row. Seat picking is the builder's (`ring` seats; the chosen one folds away).
-- **The water** (`outside` water): blue-black, lit faintly from above. `outside_glow` follows `playback.playing`
-  (0.7 before the film, 0.45 in it, over 3 s). The glass is tinted almost black, so it adds little haze and the water
-  stays dark.
-- **The light** (`light`): a cool blue-green fill from above, warm lamps.
-- **Life** (`life`, four systems, all outside the glass): `fish`, 40 silver fish to the left; `shoal`, 28 smaller
-  grey-green ones to the right; `glow`, 16 glowing bells behind and round the picture (`size` 2, their colour half
-  the film's); `whale`, its way high behind the screen (13 m up, 17 to 19 m out). The fish's and the bells'
-  `attraction` follows `film.brightness`: they come nearer the screen in a bright scene. The regions are boxes outside
-  the dome's ellipsoid and inside the water's sphere, to the sides of the picture, so no school hides behind it.
-- **Settings:** Whale (`whale`): never, rarely (the default), sometimes. Two cues on `film.quiet` (above 0.9 for 4 s,
-  while playing) call `whale.pass`, one per choice: rarely has a chance of 0.3 and a cooldown of 30 minutes,
-  sometimes 0.7 and 15 minutes; never fires neither. The whale sings as it passes.
-- **Cues:** `dim` (with the film: the house lamps to 12 % over 4 s), `lights_up` (pre-show and the end).
-- **Measured** (`test_room_bathysphere.gd`, headless): 12 draws, 79 078 triangles, no lights, no particles, 6 MB.
-- **The render** (lavapipe, from the seat): a dark blue dome on brass ribs over rows of teal seats, a school to each
-  side of the picture, faint bells at its edges, the whale's shape crossing above it.
+  dome 7.5 m high on 12 brass ribs turned half a step (`rib_phase` 0.5, so no rib stands straight behind the
+  picture), an oak floor, a low stage. The screen (6.4 x 3.6 m, its bottom 1.45 m up) stands 8.3 m ahead, inside the
+  glass. Plush seats in teal velvet on arcs round it (six rows, 100 degrees); the room's own seat is at the origin,
+  in the third row. Seat picking is the builder's (`ring` seats; the chosen one folds away).
+- **The fittings** (`dome_hall`, `kit/dome_fittings.gd`): `rivets` (two heads every half metre down each rib's inner
+  face, one every 0.4 m round the drum's ledge), 10 `portholes` round the drum (none in front; brass rims with eight
+  bolts; the water's own shader in the glass, so a port shows the water as the dome does), 6 `gauges` round the drum
+  and two on the console (backlit cream faces with ticks round three quarters and a red arc; each needle rests at
+  its own reading and swings by its own share with `gauge`, bound to `film.bass` with 0.3 s smoothing), the
+  `console` against the drum behind the seats (a sloped panel with brass trim, two rows of toggles, small steady
+  green, amber and blue lamps, and the sonar scope: `shaders/env_sonar.gdshader`, a sweep once in 6 s, range rings,
+  echoes that light as the sweep passes, three of them a school drifting), and the `hatch` in the floor behind the
+  last row (a brass ring, a steel lid, a wheel on four spokes). The fittings are unbaked (their many small faces would
+  each be a lightmap chart) and lit as the seats are.
+- **The water** (`outside` water, `shaders/env_water_outside.gdshader`, `env_water.gdshaderinc`): the colour by
+  where the eye looks, the deep below and the lit water above; at the shallow end the surface's light: Snell's
+  window overhead (the sky squeezed into a disc 49 degrees round the zenith, the surface's waves rippling in it, its
+  rim wavering) and shafts slanting down round it. `outside_glow` follows `playback.playing` (0.7 before the film,
+  0.45 in it, over 3 s). The glass is tinted almost black, so it adds little haze.
+- **The sea floor** (`seabed`, `kit/seabed.gd`, `shaders/env_seabed.gdshader`): a bowl round the hall whose banks rise
+  to the sides and behind (4 to 7 m up 24 m out, so they show over the drum) and fall away behind the screen into a
+  trench; 30 `rocks`; two ledges near the glass that lift what grows on them over the drum; 28 `coral` (branching
+  coral, coral heads, sea fans, anemones) on the right ledge and round it; 90 `fronds` (kelp: a stalk and long blades
+  at the nodes, swaying slowly) on the left ledge and in beds behind; the `wreck` (an old diving bell on its skid,
+  tilted, its portholes dark, a fallen lattice derrick, an anchor) on the left behind; the `vent` (a rough chimney
+  on the right behind) with 140 `bubbles` rising past the glass to the surface. Lit by the water's light from above,
+  the surface's light and caustics in the shallows, the floodlights' pools and the film's light through the glass
+  (only on the screen's room side); then the murk (`murk` 0.07 a metre) takes it into the water's own colour, so the
+  far banks melt into the blue.
+- **In the water:** 1800 flakes of marine `snow` sinking slowly round the dome (never inside it), glittering where the
+  floodlights or the film's light catch them, a few glowing now and then in the abyss; 4 `floodlights` on the drum's
+  top outside, aimed at the kelp, the coral, the bell and the vent, their beams soft cones in the murk
+  (`shaders/env_water_beam.gdshader`: each fragment takes the eye's ray's chord through the cone, so a beam reads from
+  the side and along it from the seats behind its lamp).
+- **The light** (`light`): a cool blue-green fill from above, warm lamps, and caustics on the floor, the seats and
+  the drum (`caustics` by the Depth setting, `caustic_scale` 1.3).
+- **Life** (`life`, five systems, all outside the glass): `fish`, 40 silver fish to the left, schooling 0.8;
+  `shoal`, 28 smaller grey-green ones to the right, schooling 0.6 (a turn starts at the leaders and ripples back
+  through the school); `glow`, 16 glowing bells round the picture (`size` 2, their colour half the film's, their glow
+  rising in quiet scenes: `film.quiet` to 0.8..1.6, smoothed 3 s); `manta`, a manta ray gliding high over the dome on
+  a long curve, about every 150 s, its wings beating slowly and gliding, pale below; `whale`, its way high behind the
+  screen (13 m up, 17 to 19 m out), now with twelve rings, long pectoral fins and a paler throat. The fish's and the
+  bells' `attraction` follows `film.brightness`. The regions are boxes outside the dome's ellipsoid and inside the
+  water's sphere, to the sides of the picture, so no school hides behind it.
+- **Settings:**
+
+  | Setting | Choices | Default | What it moves |
+  |---|---|---|---|
+  | Depth (`depth`) | Sunlit shallows, Twilight, Abyss | Twilight | `hall.depth` 0, 0.5, 1 (smoothed 3 s): the water's colours, the surface's light, the specks' glow; `light.caustics` 1, 0.3, 0 |
+  | Lights outside in the film (`flood_level`) | 0 to 100 % | 30 % | the floodlights' level once the film has started (the `dim` cue); before the film they are full |
+  | Whale (`whale`) | Never, Rarely, Sometimes | Rarely | the whale cues' and the far song's `requires` |
+
+  The water's colours at the ends of `depth` are `dome_hall.gd SHALLOW_TOP` / `SHALLOW_DEEP` and `ABYSS_TOP` /
+  `ABYSS_DEEP`; the document's `water_top` and `water_deep` are its middle (twilight).
+- **Cues:** `dim` (with the film: the house lamps to 12 % over 4 s, then the floodlights to the setting's level over
+  6 s), `lights_up` (pre-show and the end: lamps and floodlights up), `ping` (a sonar ping every 12 s in the pre-show,
+  paused and after the end), `first_ping` (with the Pre-show setting, as the film starts: a ping, the scope dims to
+  35 % over 6 s), `scope_up`, the two whale cues (on `film.quiet` above 0.9 for 4 s, while playing: rarely a chance of
+  0.3 and a cooldown of 30 minutes, sometimes 0.7 and 15 minutes), and `far_song` / `far_song_rare` (a whale's song
+  far off in a quiet scene, 22 m away behind and to the left: sometimes a chance of 0.5 and 10 minutes, rarely 0.3
+  and 20 minutes).
+- **Comfort:** nothing moves fast or crosses the sight line. The shafts, the caustics and the fronds' sway change at
+  well under 1 Hz at any point; the sonar's sweep brightens a point once in 6 s; the manta glides at 1.4 m/s at most,
+  more than 11 m up; the floodlights' level changes over 5 and 6 s. The Motion setting scales `water_motion` (shafts,
+  caustics in the water, fronds, snow, bubbles) and `light.caustic_speed`; at 0 the water stands still.
+- **Measured** (`test_room_bathysphere.gd`, headless, 2026-11-08): 29 draws, 105 755 triangles, no live lights, no
+  particles (the specks are vertex-animated quads), 6.1 MB. Before the second pass: 12 draws, 79 078 triangles. By
+  part: the seats 79k triangles (2 draws), the sea floor with its rocks, coral, bell and chimney 8.7k (1), the fronds
+  4.1k (1), the rivets 4.4k (1), the marine snow 3.6k (1), the brass fittings 2.5k (1), the water sphere 2.3k (1;
+  24 rings of 48 sides, where it was 12 of 24, so its rim is round against the banks), the whale 240, the manta 35.
+- **The costs to watch on the Frame** (not measured on the headset yet): fill, not geometry. The water sphere
+  covers the whole view behind the glass, as before, its shader now a few dozen ALU and one texture read for the
+  window's waves (shallows only); the sea floor is opaque and drawn behind the glass (early depth rejects most of it);
+  the house shader takes two more texture reads where `caustics` is on; the beams are additive cones (about 10 % of
+  the view from the seat, a quadratic each fragment); the snow's quads are tiny. No new transparent layer is large.
+- **The render** (lavapipe, `test_room_bathysphere.gd`): from the seat (the screen, the schools either side, the
+  bells round it, the Snell's window over the dome), left (kelp on its ledge in the floodlight, the bell behind),
+  right (the coral ledge, the vent's bubbles), up (the window, the shafts, the manta), a side seat, the console (the
+  scope sweeping, the gauges, the hatch), from the back, and from the seat in the shallows and the abyss.
 - **Sound:** a small hard room of metal and glass (`acoustics` `hull`, rt60 0.9); the hull creaking now and then to
   either side (`sound_bed` `hull_creak` twice, at the drum left and right, `every` 180 each: one about every 90 s);
-  the deep's low hum (`deep_hum`, `gain_db` -4); the whale's song is `life`'s (`voice_db` -4). Measured
-  (`test_room_bathysphere.gd`, the slider's default, both creaks playing): -52.0 dBFS RMS in the pre-show, -73.0
-  under a film at the reference level.
-- **Gap:** caustics. The light system has no moving light pattern; the room has a cool fill from above instead.
+  the deep's low hum (`deep_hum`, `gain_db` -4); the vent's `bubbles` outside behind on the right (`gain_db` -3,
+  `reach` 8); the console's `sonar` ping (`gain_db` -2, by the `ping` cue); a far whale's song (`far_song`, the
+  synthesiser's `whale`, `gain_db` -6, 22 m off); the passing whale's song is `life`'s (`voice_db` -4). Measured
+  (`test_room_bathysphere.gd`, the slider's default): -51.4 dBFS RMS in the pre-show, -72.3 under a film at the
+  reference level.
+- **To judge on the Frame:** the frame time with the water, the beams and the caustics (fill); whether the
+  floodlights' beams and the Snell's window are too bright beside the film at 30 %; the shallows' brightness in the
+  film; the sonar ping's and the bubbles' levels by ear.
 
 ### Room: Crater
 

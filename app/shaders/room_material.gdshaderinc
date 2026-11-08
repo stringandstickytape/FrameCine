@@ -79,6 +79,16 @@ uniform float house_floor = 0.04;
 uniform int lamp_count = 0;
 uniform vec4 lamp_position[HOUSE_LAMPS];
 uniform vec4 lamp_colour[HOUSE_LAMPS];
+// Caustics (the light system's `caustics`, docs/environments.md "The systems"): the light of a water's surface above,
+// focused into a slowly drifting web on whatever faces up (a glass dome under the sea). Light from outside: the house
+// lights' level does not scale it, and a bake does not take it. caustic_map: a cellular map, near 0 on the walls
+// between cells (procedural.gd caustic_map()); two copies drift apart, brightest where their walls meet. Every point
+// changes at well under 1 Hz (caustic_speed, which the Motion setting scales).
+uniform float caustics = 0.0;
+uniform vec3 caustic_colour : source_color = vec3(0.55, 0.85, 1.0);
+uniform float caustic_scale = 1.6;
+uniform float caustic_speed = 1.0;
+uniform sampler2D caustic_map : hint_default_black, filter_linear_mipmap, repeat_enable;
 uniform bool bake_pass = false;
 uniform bool instance_tint = false;
 #endif
@@ -269,6 +279,14 @@ void fragment() {
 			lambert = sqrt(lambert);
 		}
 		fill += lamp_colour[i].rgb * level * (lambert * cone * window * window / (1.0 + d2));
+	}
+	if (caustics > 0.0 && !bake_pass) {
+		float ct = TIME * 0.045 * caustic_speed;
+		vec2 cuv = world_pos.xz / (caustic_scale * 4.0);
+		float ca = 1.0 - smoothstep(0.0, 0.28, texture(caustic_map, cuv + vec2(ct, ct * 0.37)).r);
+		float cb = 1.0 - smoothstep(0.0, 0.28, texture(caustic_map, cuv * 1.31 + vec2(-ct * 0.71, ct * 0.53) + 0.37).r);
+		float web = clamp(0.5 * (ca * ca + cb * cb) + 1.5 * ca * cb, 0.0, 1.5);
+		film += caustic_colour * caustics * (0.1 + 1.4 * web) * clamp(n.y * 0.8 + 0.2, 0.0, 1.0);
 	}
 #else
 	if (screen_light > 0.0) {

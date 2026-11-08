@@ -119,7 +119,9 @@ func _restore() -> void:
 func _keep_turn(at_home: bool) -> void:
 	if at_home and _owns_screen():
 		main.screen_turn = _home_turn()
-		main.set_screen(main.screen_width, main.screen_distance, main.screen_height_offset)
+		# Placed again, not saved: the viewer moved nothing, so nothing is kept for this room (every shipped room owns
+		# its screen since 2026-11-08; saving here wrote a placement for each room opened).
+		main._place_screen()
 
 
 func _owns_screen() -> bool:

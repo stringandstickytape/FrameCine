@@ -11,7 +11,7 @@ extends HBoxContainer
 ## dropped. Virtual folders: "stub://" (test patterns), "network://" (saved hosts, and hosts found on the LAN, #49),
 ## "browser://" (the URL form, saved pages, the desktop's windows; scripts/video/window_video_source.gd), "queue://"
 ## (the play queue, #78), "favourites://" (#76), "search://" (#76: favourites, history, queue and the last local
-## folder) and "android://" (the apps in ~/Android; scripts/android/). The Library (~/Videos/Library, made on first use) is a real folder, drawn by ui/library_view.gd as posters,
+## folder), "android://" (the apps in ~/Android; scripts/android/) and "pc://" (a paired PC's windows, ui/pc_place.gd). The Library (~/Videos/Library, made on first use) is a real folder, drawn by ui/library_view.gd as posters,
 ## seasons and episodes where its NFOs say what things are, and listed like any other where they don't.
 
 const StubVideoSource := preload("res://scripts/video/stub_video_source.gd")
@@ -35,6 +35,7 @@ const SearchForm := preload("res://ui/search_form.gd")
 const HostDiscovery := preload("res://scripts/net/host_discovery.gd")
 const VideoMode := preload("res://scripts/video_mode.gd")
 const W := preload("res://ui/pane_widgets.gd")
+const PcPlace := preload("res://ui/pc_place.gd")
 const PaneStyle := preload("res://ui/pane_style.gd")
 
 signal file_selected(path: String)
@@ -54,6 +55,8 @@ const AGENT_PREFIX := "agent://"
 ## The Android apps in ~/Android (scripts/android/): one click runs one on the big screen.
 const ANDROID_FOLDER := "android://"
 const QUEUE_FOLDER := "queue://"
+## The PC's windows (scripts/pc/pc_windows.gd, docs/pc-windows.md): one click opens one as a pane.
+const PC_FOLDER := "pc://"
 const FAVOURITES_FOLDER := "favourites://"
 const SEARCH_FOLDER := "search://"
 ## Media servers on the LAN (UPnP/DLNA, scripts/net/media_servers.gd): upnp:// lists the servers, then their folders.
@@ -297,7 +300,7 @@ func sync() -> void:
 ## name is a key. Anything else is named by its folder, its drive or the viewer: content.
 static func is_named_place(path: String) -> bool:
 	if path in [PATTERNS_FOLDER, NETWORK_FOLDER, MEDIA_SERVERS_FOLDER, BROWSER_FOLDER, QUEUE_FOLDER, FAVOURITES_FOLDER,
-			SEARCH_FOLDER, ANDROID_FOLDER]:
+			SEARCH_FOLDER, ANDROID_FOLDER, PC_FOLDER]:
 		return true
 	return path != "" and path in [LibraryIndex.root(), _home(), DEVICE_HOME, _system_dir(OS.SYSTEM_DIR_MOVIES),
 			_system_dir(OS.SYSTEM_DIR_DOWNLOADS), AssistantFetch.folder()]
@@ -366,7 +369,7 @@ static func place_group(path: String) -> int:
 		return 0
 	if path in [NETWORK_FOLDER, MEDIA_SERVERS_FOLDER]:
 		return 2
-	if path in [BROWSER_FOLDER, ANDROID_FOLDER]:
+	if path in [BROWSER_FOLDER, ANDROID_FOLDER, PC_FOLDER]:
 		return 3
 	if path.begins_with(AGENT_PREFIX):
 		return 4
@@ -379,7 +382,7 @@ static func place_group(path: String) -> int:
 static func _place_rank(path: String) -> int:
 	var named: Array[String] = [LibraryIndex.root(), SEARCH_FOLDER, FAVOURITES_FOLDER, QUEUE_FOLDER,
 			_system_dir(OS.SYSTEM_DIR_MOVIES), _system_dir(OS.SYSTEM_DIR_DOWNLOADS), NETWORK_FOLDER,
-			MEDIA_SERVERS_FOLDER, BROWSER_FOLDER, ANDROID_FOLDER]
+			MEDIA_SERVERS_FOLDER, BROWSER_FOLDER, ANDROID_FOLDER, PC_FOLDER]
 	var i := named.find(path)
 	return i if i >= 0 else named.size()
 
@@ -397,6 +400,7 @@ static func get_places() -> Array[Dictionary]:
 	for id: String in AgentTerminal.AGENTS:
 		out.append({"label": str(AgentTerminal.AGENTS[id]["name"]), "path": AGENT_PREFIX + id})
 	out.append({"label": "Android apps", "path": ANDROID_FOLDER}) # i18n
+	out.append({"label": "PC windows", "path": PC_FOLDER}) # i18n
 	var seen := {}
 	var add := func(label: String, p: String) -> void:
 		if p != "" and not seen.has(p) and DirAccess.dir_exists_absolute(p):
@@ -461,7 +465,7 @@ static func is_media_file(p: String) -> bool:
 
 static func _is_virtual(p: String) -> bool:
 	return p in [PATTERNS_FOLDER, NETWORK_FOLDER, BROWSER_FOLDER, QUEUE_FOLDER, FAVOURITES_FOLDER, SEARCH_FOLDER,
-			ANDROID_FOLDER] or p.begins_with(AGENT_PREFIX)
+			ANDROID_FOLDER, PC_FOLDER] or p.begins_with(AGENT_PREFIX)
 
 
 func open_folder(p: String) -> void:
@@ -537,7 +541,7 @@ func _refresh() -> void:
 	_queue_bar.visible = current == QUEUE_FOLDER and _queue() != null
 	_favourite_folder.visible = not _is_virtual(current) and _library() != null
 	_in_corner.visible = _feature("pip") != null and current not in [NETWORK_FOLDER, BROWSER_FOLDER, PATTERNS_FOLDER,
-			ANDROID_FOLDER]
+			ANDROID_FOLDER, PC_FOLDER]
 	if not _in_corner.visible:
 		_in_corner.set_pressed_no_signal(false)
 	if _favourite_folder.visible:
@@ -547,6 +551,13 @@ func _refresh() -> void:
 		return
 	if current == ANDROID_FOLDER:
 		_list_android()
+		return
+	if current == PC_FOLDER:
+		_clear(tr("PC windows"))
+		var place := PcPlace.new()
+		_list.add_child(place)
+		place.bind(_feature("pc_windows"))
+		listing_changed.emit()
 		return
 	if current == BROWSER_FOLDER:
 		_list_browser()

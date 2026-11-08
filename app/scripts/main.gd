@@ -635,7 +635,7 @@ func open_path(path: String, update_playlist := true, siblings: Array[String] = 
 		elif path.begins_with("stub://"):
 			playlist = VideoSourceFactory.list_videos("stub://")
 		elif NetworkHosts.is_smb(path) or path.begins_with("http://") or path.begins_with("https://") \
-				or path.begins_with("udp://") or WindowVideoSource.is_window_path(path):
+				or path.begins_with("udp://") or WindowVideoSource.is_window_path(path) 				or path.begins_with("pcwindow://"):
 			playlist = [path]
 		elif LibraryIndex.is_inside(path) and VideoSourceFactory.is_video_file(path):
 			# Episodes in order, and not the posters and thumbnails beside them.
@@ -714,9 +714,13 @@ func _on_opened() -> void:
 	# there is (format_changed).
 	screen.set_shown(src.has_frame() or not src.get_kind() in ["window", "image"])
 	# An agent's terminal and an Android app stay out of the room snapshots for assistants.
-	screen.set_private(src.get_kind() == "window" and (src.is_terminal() or src.is_named()))
+	# So does a PC window (scripts/pc/pc_window_source.gd).
+	screen.set_private((src.get_kind() == "window" and (src.is_terminal() or src.is_named()))
+			or src.get_kind() == "pc")
 	_apply_mode()
-	settings.set_value("player", "last_file", current_path)
+	# A PC window is there only while its pane is: nothing to open again at the next start.
+	if src.get_kind() != "pc":
+		settings.set_value("player", "last_file", current_path)
 	_last_stats = {}
 	_last_stats_msec = Time.get_ticks_msec()
 	print("Opened %s (%d/%d in playlist): %s source, %s (%s)" % [current_path, playlist_index + 1, playlist.size(),
@@ -772,6 +776,9 @@ func display_title() -> String:
 		return title if title != "" else WindowVideoSource.describe_path(current_path)
 	if WindowVideoSource.is_window_path(current_path):
 		return WindowVideoSource.describe_path(current_path)
+	# A PC window's title stays in its pane (the header shows in the room snapshots).
+	if current_path.begins_with("pcwindow://"):
+		return tr("PC window")
 	if LibraryIndex.is_inside(current_path):
 		# Asked for many times a second: read once per file.
 		if _library_title[0] != current_path:
@@ -1210,6 +1217,9 @@ func _on_trigger(hand: XRController3D, pressed: bool) -> void:
 		return
 	if ui != null and ui.on_trigger(hand, pressed):
 		return
+	# On a PC window's pane: the left button there (scripts/pc/pc_windows.gd).
+	if features != null and features.pc_windows.on_trigger(hand, pressed):
+		return
 	if local_agents.on_trigger(hand, pressed):
 		return
 	if window_pointer.on_trigger(hand as XRHand, pressed):
@@ -1230,6 +1240,10 @@ func _on_grip(hand: XRController3D, pressed: bool) -> void:
 		_grip_down.erase(h)
 		return
 	if ui != null and ui.on_grip(h, pressed):
+		return
+	# On a PC window's pane: squeeze and hold moves it (scripts/pc/pc_windows.gd).
+	if features != null and features.pc_windows.on_grip(h, pressed):
+		_grip_down.erase(h)
 		return
 	# Squeeze no longer moves the screen or turns it to the gaze (the user, in the headset, 2026-10-31: the Room and
 	# Picture controls and Reset room do that in terms of the room). A quick squeeze is still a right click on a
@@ -1289,6 +1303,10 @@ func _update_sticks(delta: float) -> void:
 		var stick := hand.get_stick()
 		# Holding an object: the stick brings it nearer or further and turns it (object_grab.gd).
 		if features != null and features.grab.on_stick(hand, stick, delta):
+			_seek_hold[hand] = -1.0
+			continue
+		# Holding a PC window's pane: the stick makes it bigger or smaller (scripts/pc/pc_windows.gd).
+		if features != null and features.pc_windows.on_stick(hand, stick, delta):
 			_seek_hold[hand] = -1.0
 			continue
 		if (ui != null and ui.on_stick(hand, stick, delta)) or local_agents.on_stick(hand, stick, delta) \
@@ -1428,6 +1446,11 @@ static func _profile_bindings(profile: String, side: String) -> Array:
 func _unhandled_input(event: InputEvent) -> void:
 	# Typing into a text field of the menu (desktop keyboard) goes to the menu, not to the shortcuts.
 	if event is InputEventKey and ui != null and ui.on_key(event as InputEventKey):
+		return
+	# A PC connected: the mouse paired with the headset moves the PC windows' cursor, and the keys go to the pane in
+	# focus (scripts/pc/pc_windows.gd).
+	if features != null and features.pc_windows.on_input(event):
+		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey:
 		var key := event as InputEventKey

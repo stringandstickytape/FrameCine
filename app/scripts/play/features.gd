@@ -72,6 +72,8 @@ extends Node
 ##   physics    scripts/play/object_physics.gd: placed objects picked up, thrown, bouncing off the room and the screen,
 ##              resting where they land (docs/physics.md); its thud (scripts/play/thud.gd)
 ##   grab       scripts/play/object_grab.gd: the controllers pick objects up (laser or hand), turn, drop and throw them
+##   pc_windows scripts/pc/pc_windows.gd: a PC's windows as panes, used with the mouse and keyboard paired with the
+##              headset (docs/pc-windows.md); off until System, PC windows is on
 
 const EndTime := preload("res://scripts/play/end_time.gd")
 const RoomLightmaps := preload("res://scripts/env/room_lightmaps.gd")
@@ -141,6 +143,7 @@ const ObjectGrab := preload("res://scripts/play/object_grab.gd")
 const EnvAudio := preload("res://scripts/env/env_audio.gd")
 const RoomSettings := preload("res://scripts/env/room_settings.gd")
 const TimeTravel := preload("res://scripts/env/time_travel.gd")
+const PcWindows := preload("res://scripts/pc/pc_windows.gd")
 
 ## The app core (scripts/main.gd). Untyped: main.gd preloads this script, so a typed reference would be circular.
 var main: Node3D
@@ -216,6 +219,8 @@ var room_settings: RoomSettings
 ## Time travel through television: the room moves forward an era at a time while the film plays
 ## (scripts/env/time_travel.gd).
 var time_travel: TimeTravel
+## PC windows as panes (scripts/pc/pc_windows.gd, docs/pc-windows.md).
+var pc_windows: PcWindows
 
 
 func _ready() -> void:
@@ -288,6 +293,7 @@ func _ready() -> void:
 	room_settings = _add(RoomSettings.new(), "RoomSettings")
 	env_audio = _add(EnvAudio.new(), "EnvAudio")
 	time_travel = _add(TimeTravel.new(), "TimeTravel")
+	pc_windows = _add(PcWindows.new(), "PcWindows")
 
 
 func _add(node: Node, node_name: String) -> Node:

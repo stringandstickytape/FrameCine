@@ -47,6 +47,7 @@ handlers are not duplicated here.
 | Search | `search` (read) |
 | An agent's place (Claude Code, Codex) | `agents` (read). Pressing a running agent's place shows its pane: `agent_show` (apps) |
 | Android apps | `android_status` (read) |
+| PC windows | `pc_list` (read; no titles or thumbnails), `pc_open` (control); see room-system.md, "Elsewhere in this area". `list_dir pc://` is refused |
 | Home, Device home, Videos, Downloads, From assistant, saved folders, removable media, /mnt | `places` and `list_dir` (read) |
 | A place added by an assistant | `add_place`, `remove_place` (files, core; a card asks the viewer) |
 
