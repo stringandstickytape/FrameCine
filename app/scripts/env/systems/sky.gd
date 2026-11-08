@@ -17,6 +17,11 @@ const DOME_SHADER := preload("res://shaders/env_sky.gdshader")
 const STAR_SHADER := preload("res://shaders/env_sky_stars.gdshader")
 const LINE_SHADER := preload("res://shaders/env_sky_lines.gdshader")
 const EARTH_SHADER := preload("res://shaders/env_sky_earth.gdshader")
+const MOON_SHADER := preload("res://shaders/env_sky_moon.gdshader")
+## The Moon's layer: nearer than the stars (it hides them), beyond Earth's. Its quad reaches HALO times its radius,
+## for the halo round it.
+const MOON_RADIUS := 178.0
+const MOON_HALO := 3.0
 const CATALOGUE := "res://environments/sky/bright_stars.json"
 const DOME_RADIUS := 190.0
 const STAR_RADIUS := 185.0
@@ -125,6 +130,25 @@ static func spec() -> Dictionary:
 			"earth_turn": {"type": "float", "min": 0.0, "max": 60.0, "default": 1.0, "live": true,
 					"motion": {"max": 60.0}, "description": "Earth's own turning, in times its real speed (1: once a "
 					+ "day; 60: once in 24 minutes)"},
+			# Since 2026-11-08, for the Atmospheric 1928 ("perhaps a crescent moon over the wall"; clouds "lit warm
+			# from below by the house"). Every other room keeps its sky: the moon is off and the glow at 0 by default.
+			"moon": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "brightness": true,
+					"description": "the Moon's brightness (its crescent, the faint earthshine on the rest, a soft halo, "
+					+ "the clouds near it silvered); 0: no Moon"},
+			"moon_bearing": compass.call(220.0, "where the Moon stands (compass bearing)"),
+			"moon_altitude": {"type": "float", "min": 0.0, "max": 90.0, "default": 45.0,
+					"description": "the Moon's height over the horizon in degrees"},
+			"moon_size": {"type": "float", "min": 0.3, "max": 8.0, "default": 1.6,
+					"description": "the Moon's size across in degrees (the real one is half a degree; a little larger "
+					+ "reads in a headset)"},
+			"moon_phase": {"type": "float", "min": 0.02, "max": 1.0, "default": 0.22,
+					"description": "how much of the Moon's face is lit: a young crescent 0.1 to 0.3, full 1; the lit "
+					+ "side faces where the sun went down (glow_bearing)"},
+			"cloud_glow": {"type": "color", "default": "#ff9a52",
+					"description": "the town's light on the clouds' undersides, strongest low over the walls"},
+			"cloud_glow_level": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
+					"brightness": true, "description": "how much of the town's light the clouds catch (a cue takes "
+					+ "it down with the house lights); 0: none"},
 		},
 		"actions": {"shooting_star": "a shooting star crosses the sky (args: none)"},
 		"cost": {"draws": 4, "triangles": 9000, "lights": 0, "particles": 0, "texture_mb": 0.3},
@@ -140,6 +164,7 @@ var _dome: MeshInstance3D
 var _stars: MeshInstance3D
 var _lines: MeshInstance3D
 var _earth: MeshInstance3D
+var _moon: MeshInstance3D
 var _materials: Array[ShaderMaterial] = []
 var _cloud_offset := Vector2.ZERO
 var _aurora_time := 0.0
@@ -355,6 +380,9 @@ func setup() -> void:
 		var dir := _earth_dir()
 		var half := tan(deg_to_rad(float(params["earth_size"])) * 0.5) * EARTH_RADIUS
 		_earth.transform = Transform3D(Basis().scaled(Vector3.ONE * half), dir * EARTH_RADIUS)
+	if float(params["moon"]) > 0.0 and str(params["mode"]) == "sky":
+		_moon = _instance("SkyMoon", _moon_mesh(), _material(MOON_SHADER, noise))
+		_moon.material_override.render_priority = 2
 	_apply_all()
 
 
@@ -481,6 +509,48 @@ func _build_lines() -> void:
 	_apply_all()
 
 
+## The Moon's quad where it hangs (the shader draws it round the camera; the vertices are here so the checks see it
+## far off): MOON_HALO times its radius each way, for the halo.
+func _moon_mesh() -> ArrayMesh:
+	var dir := _moon_dir()
+	var f := _moon_frame()
+	var half := tan(deg_to_rad(float(params["moon_size"])) * 0.5) * MOON_HALO
+	var verts := PackedVector3Array()
+	var uvs := PackedVector2Array()
+	for k: Vector2 in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
+		verts.append((dir + (f[0] * k.x + f[1] * k.y) * half) * MOON_RADIUS)
+		uvs.append(k * 0.5 + Vector2(0.5, 0.5))
+	return _array_mesh(verts, uvs, PackedVector2Array(), PackedColorArray(), PackedInt32Array([0, 1, 2, 0, 2, 3]))
+
+
+func _moon_dir() -> Vector3:
+	var flat := _bearing("moon_bearing")
+	var alt := deg_to_rad(float(params["moon_altitude"]))
+	return (flat * cos(alt) + Vector3.UP * sin(alt)).normalized()
+
+
+## The Moon's quad's right and up (its up as near the sky's up as it can be).
+func _moon_frame() -> Array:
+	var dir := _moon_dir()
+	var right := Vector3.UP.cross(-dir)
+	if right.length() < 0.01:
+		right = Vector3.RIGHT
+	right = right.normalized()
+	var up := (-dir).cross(right).normalized()
+	return [right, up]
+
+
+## Where the sunlight comes from on the Moon's face, in its quad's frame (x right, y up, z towards the viewer): the sun
+## is down behind the horizon at glow_bearing; its angle from the Moon sets how much of it is lit (moon_phase).
+func _moon_light() -> Vector3:
+	var f := _moon_frame()
+	var sun := (_bearing("glow_bearing") * cos(deg_to_rad(-12.0)) + Vector3.UP * sin(deg_to_rad(-12.0))).normalized()
+	var side := Vector2(sun.dot(f[0]), sun.dot(f[1]))
+	side = side.normalized() if side.length() > 0.001 else Vector2(1, 0)
+	var theta := acos(clampf(1.0 - 2.0 * float(params["moon_phase"]), -1.0, 1.0))
+	return Vector3(side.x * sin(theta), side.y * sin(theta), -cos(theta))
+
+
 func _earth_dir() -> Vector3:
 	var flat := _bearing("earth_bearing")
 	var alt := deg_to_rad(float(params["earth_altitude"]))
@@ -530,6 +600,21 @@ func _apply_all() -> void:
 	dm.set_shader_parameter("aurora_high", color_param("aurora_high"))
 	dm.set_shader_parameter("aurora_dir", _bearing("aurora_bearing"))
 	dm.set_shader_parameter("aurora_time", _aurora_time)
+	dm.set_shader_parameter("cloud_glow", color_param("cloud_glow"))
+	dm.set_shader_parameter("cloud_glow_level", float(params["cloud_glow_level"]))
+	dm.set_shader_parameter("moon_dir", _moon_dir())
+	dm.set_shader_parameter("moon_light", float(params["moon"]) if _moon != null else 0.0)
+	if _moon != null:
+		var mm := _moon.material_override as ShaderMaterial
+		var f := _moon_frame()
+		mm.set_shader_parameter("moon", float(params["moon"]))
+		mm.set_shader_parameter("moon_dir", _moon_dir())
+		mm.set_shader_parameter("moon_right", f[0])
+		mm.set_shader_parameter("moon_up", f[1])
+		mm.set_shader_parameter("moon_half", tan(deg_to_rad(float(params["moon_size"])) * 0.5))
+		mm.set_shader_parameter("halo", MOON_HALO)
+		mm.set_shader_parameter("sun", _moon_light())
+		mm.set_shader_parameter("model_radius", MOON_RADIUS)
 	var sm := _stars.material_override as ShaderMaterial
 	sm.set_shader_parameter("stars", float(params["stars"]))
 	sm.set_shader_parameter("twinkle", float(params["twinkle"]))
@@ -648,7 +733,12 @@ func act(action: String, _args: Dictionary) -> void:
 
 ## Tests: the nodes drawn.
 func layers() -> Dictionary:
-	return {"dome": _dome, "stars": _stars, "lines": _lines, "earth": _earth}
+	return {"dome": _dome, "stars": _stars, "lines": _lines, "earth": _earth, "moon": _moon}
+
+
+## The Moon's direction in the room (tests; Vector3.ZERO without a Moon).
+func moon_direction() -> Vector3:
+	return _moon_dir() if _moon != null else Vector3.ZERO
 
 
 func material(layer: String) -> ShaderMaterial:

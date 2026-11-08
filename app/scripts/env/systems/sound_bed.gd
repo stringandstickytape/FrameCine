@@ -25,7 +25,7 @@ const SOUNDS: Array[String] = ["silence", "projector", "wall_rumble", "cicadas",
 		"hull_creak", "radiator", "rain_glass", "rain_leaves", "gas_hiss", "noise", "rumble", "tick", "creak", "whale",
 		"chime", "gong", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock",
 		"tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load", "switch_clunk", "valve_hum", "crt_off",
-		"channel_clunk", "sonar", "bubbles"]
+		"channel_clunk", "sonar", "bubbles", "scops_owl"]
 ## Each sound's designed level: dBFS RMS on Environment at the slider's default (-18 dB), full level, no film; a
 ## one-shot's loudest second. The level check's target is -38 dBFS; every bed is 12 dB or more under it.
 const LEVELS := {"projector": -51.0, "wall_rumble": -50.0, "cicadas": -54.0, "moped": -52.0, "train": -52.0,
@@ -35,7 +35,7 @@ const LEVELS := {"projector": -51.0, "wall_rumble": -50.0, "cicadas": -54.0, "mo
 		"wind": -55.0, "hum": -58.0, "deep_hum": -54.0, "fountain": -56.0, "clock": -56.0, "tube_whine": -62.0,
 		"three_bells": -50.0, "candle": -58.0, "ice_creak": -55.0, "vcr": -54.0, "tape_load": -58.0,
 		"switch_clunk": -54.0, "valve_hum": -58.0, "crt_off": -60.0, "channel_clunk": -55.0, "sonar": -56.0,
-		"bubbles": -57.0}
+		"bubbles": -57.0, "scops_owl": -58.0}
 ## The states in which the film plays: the bed sits film_db lower.
 const FILM_STATES: Array[String] = ["starting", "playing", "credits"]
 ## Under this linear gain a bed stops its players.
@@ -51,8 +51,9 @@ static func spec() -> Dictionary:
 				+ "a motor's hum, the deep's hum, a fountain, a clock, a picture tube's whine, a three-tone house bell, "
 				+ "a candle's gutter, ice creaking, a video recorder taking a tape, a cassette loading, a telly's power "
 				+ "switch, its valves' hum warming up, its tube's tick as it goes off, a channel knob's clunk, a "
-				+ "sonar's ping, a vent's bubbles, a bird, a purr or silence. It sits well under the film (its designed "
-				+ "level, ducked under the film, lower while the film plays) and can follow a channel by its level "
+				+ "sonar's ping, a vent's bubbles, a scops owl's call over the roofs, a bird, a purr or silence. It sits "
+				+ "well under the film (its designed level, ducked under the film, lower while the film plays) and can "
+				+ "follow a channel by its level "
 				+ "(film.bass, weather.rain, weather.wet).",
 		"params": {
 			"sound": {"type": "enum", "values": SOUNDS, "default": "silence",

@@ -104,6 +104,12 @@ const PARAMS := {
 	"door_size": {"type": "vec2", "min": 0.5, "max": 5.0, "default": [1.8, 2.35], "description": "an exit's size"},
 	"doors": {"type": "bool", "default": true, "description": "four exits with signs over them"},
 	"booth": {"type": "bool", "default": true, "description": "the projection booth's windows in the rear wall"},
+	# Since 2026-11-08: a hall open to the sky has no ceiling for them (the Atmospheric 1928's courtyard is lit by
+	# its lanterns and windows instead).
+	"house_spots": {"type": "bool", "default": true,
+			"description": "the bake's four house lights high over the seats (a ceiling's cans); off: none"},
+	# Since 2026-11-08: where a kit's house fronts stand along the walls, a rail on the wall would run through them.
+	"handrails": {"type": "bool", "default": true, "description": "brass handrails along the side walls"},
 	"lens": {"type": "vec3", "min": -200.0, "max": 200.0, "default": [0.0, 3.45, 6.15],
 			"description": "the projector's lens, in the booth's window"},
 	"cloud_drop": {"type": "float", "min": 0.0, "max": 5.0, "default": 0.7,
@@ -641,13 +647,14 @@ func _build_fixtures() -> void:
 	var rail_from := Vector3(0.0, L.lo.y + 0.9, L.arc_z(L.row_radius(L.rows_front) - L.depth * 0.5, L.block_x))
 	var rail_to := Vector3(0.0, L.row_floor(-L.rows_back) + 0.9, L.arc_z(L.row_radius(-L.rows_back) + L.depth * 0.5,
 			L.block_x))
-	for s: float in [-1.0, 1.0]:
+	for s: float in ([-1.0, 1.0] if bool(params["handrails"]) else []):
 		var a := rail_from + Vector3(s * (L.hi.x - 0.09), 0.0, 0.0)
 		var c := rail_to + Vector3(s * (L.hi.x - 0.09), 0.0, 0.0)
 		var dir := (c - a).normalized()
 		var across := Vector3.UP.cross(dir).normalized()
 		brass.box((a + c) * 0.5, Vector3(0.05, 0.05, a.distance_to(c)), Basis(across, dir.cross(across), dir))
-	_add_static("Brass", brass)
+	if brass.triangle_count() > 0:
+		_add_static("Brass", brass)
 	# Ceiling cans (the house lights): two rows under each acoustic cloud, a row on the ceiling at either end.
 	var cans: Array[Vector3] = []
 	var cover_end := lerpf(L.lo.z, L.hi.z, float(params["ceiling_cover"]))
@@ -793,7 +800,7 @@ func _build_bake_lights() -> void:
 			_light.add_bake_light(l)
 		i += 1
 	i = 0
-	for x: float in [-4.0, 4.0]:
+	for x: float in ([-4.0, 4.0] if bool(params["house_spots"]) else []):
 		for z: float in [-7.0, 1.0]:
 			var l := SpotLight3D.new()
 			l.name = "House%d" % i
@@ -1000,6 +1007,23 @@ static func booth_picture() -> Texture2D:
 			if x < 64:
 				var d := Vector2((u - 0.5) * 1.75, v - 0.5).length()
 				var lens_glow := exp(-d * d / 0.004) * 1.0 + exp(-d * d / 0.03) * 0.25
+				c = c.lerp(Color(1.0, 0.96, 0.88), clampf(lens_glow, 0.0, 1.0))
+			img.set_pixel(x, y, c)
+	return ImageTexture.create_from_image(img)
+
+
+## One booth window's picture (since 2026-11-08, for a courtyard house's booth, kit/courtyard.gd): the dim booth,
+## warmer near its lamp above, with the projector's lens glowing in the middle (lens) or without.
+static func port_picture(lens: bool) -> Texture2D:
+	var img := Image.create_empty(64, 40, false, Image.FORMAT_RGB8)
+	for y in 40:
+		for x in 64:
+			var u := float(x) / 63.0
+			var v := float(y) / 39.0
+			var c := Color(0.035, 0.03, 0.035).lerp(Color(0.11, 0.08, 0.05), clampf(1.0 - v, 0.0, 1.0) * 0.6)
+			if lens:
+				var d := Vector2((u - 0.5) * 1.6, v - 0.55).length()
+				var lens_glow := exp(-d * d / 0.004) * 1.0 + exp(-d * d / 0.04) * 0.22
 				c = c.lerp(Color(1.0, 0.96, 0.88), clampf(lens_glow, 0.0, 1.0))
 			img.set_pixel(x, y, c)
 	return ImageTexture.create_from_image(img)
