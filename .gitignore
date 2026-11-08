@@ -17,3 +17,6 @@ spikes/04-q10c-probe/q10c-probe-x86_64
 
 # Claude Code: local settings and agent worktrees
 .claude/
+
+# pc-windows (pc/): CMake build folder
+pc/build/
