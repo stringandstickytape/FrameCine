@@ -228,6 +228,14 @@ if problems:
     sys.exit(1)
 print("packages: %d entries, one top folder, tarball and zip alike, modes 644/755, arm64 engine" % len(t))
 PYEOF
+# The packaged app/ started with the desktop engine (WSL): every script must load.
+SMOKE_PKG=$(printf '%s' "$REL/$PKG.tar.gz" | sed -E 's#^/([a-z])/#/mnt/\1/#')
+SMOKE_SH=$(printf '%s' "$REPO/tools/smoke-package.sh" | sed -E 's#^/([a-z])/#/mnt/\1/#')
+if command -v wsl.exe > /dev/null 2>&1; then
+  MSYS_NO_PATHCONV=1 wsl.exe bash -l "$SMOKE_SH" "$SMOKE_PKG" || { echo "the packaged app does not start: nothing published" >&2; exit 1; }
+else
+  bash "$REPO/tools/smoke-package.sh" "$REL/$PKG.tar.gz" || { echo "the packaged app does not start: nothing published" >&2; exit 1; }
+fi
 
 # --- latest.json, its signature, the install manifest, SHA256SUMS, the notes --------------------------------------
 step "the update file and the manifest"

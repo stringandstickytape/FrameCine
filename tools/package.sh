@@ -131,7 +131,12 @@ ENGINE_SHA=$(sha256sum "$STAGE/bin/framevrvideo-engine" | cut -d' ' -f1)
 # With LF line ends whatever this checkout uses (Git for Windows' autocrlf would give CRLF JSON and SVG files), so the
 # package is the same from any PC.
 git -c core.autocrlf=false -c core.eol=lf archive HEAD app | tar -x -C "$STAGE"
+# app/tools is dev tools, except the files the app loads at run time (tools/smoke-package.sh catches a miss).
+KEEP_TOOLS=(make_pane_theme.gd)
+mkdir -p "$STAGE/keep-tools"
+for f in "${KEEP_TOOLS[@]}"; do cp "$STAGE/app/tools/$f" "$STAGE/keep-tools/"; done
 rm -rf "$STAGE/app/tests" "$STAGE/app/docs" "$STAGE/app/tools"
+mv "$STAGE/keep-tools" "$STAGE/app/tools"
 
 # The shortcut helper for install-on-frame.sh --steam (runs on the headset).
 mkdir -p "$STAGE/tools"
