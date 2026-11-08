@@ -176,6 +176,7 @@ void VideoStream::run() {
         return;
     }
     int applied_fps = fps_, applied_kbps = kbps_;
+    int enc_fps = applied_fps;  // the frame rate the encoder was opened with
     cap.set_max_rate(applied_fps);
 
     // The stream connection: the encoder's thread writes to it, this thread replaces it when it breaks.
@@ -259,6 +260,7 @@ void VideoStream::run() {
             logf("stream %d: %s", req_.stream, err.c_str());
             return false;
         }
+        enc_fps = applied_fps;
         enc_w = w;
         enc_h = h;
         size_w_ = w;
@@ -349,14 +351,16 @@ void VideoStream::run() {
             std::lock_guard g(stats_lock_);
             stats_.minimised = minimised;
         }
-        // Rate changes from `quality`.
-        if (kbps_ != applied_kbps) {
+        // Rate changes from `quality`, live: no new encoder, no new key frame. The encoder budgets each frame as
+        // bitrate / the frame rate it was opened with, so at another rate it is given the bitrate scaled to match,
+        // and the stream comes out at the kbit/s asked for.
+        if (kbps_ != applied_kbps || fps_ != applied_fps) {
+            const bool fps_changed = fps_ != applied_fps;
             applied_kbps = kbps_;
-            enc.set_bitrate(applied_kbps);
-        }
-        if (fps_ != applied_fps) {
             applied_fps = fps_;
-            cap.set_max_rate(applied_fps);
+            const int64_t scaled = static_cast<int64_t>(applied_kbps) * enc_fps / std::max(1, applied_fps);
+            enc.set_bitrate(static_cast<int>(std::clamp<int64_t>(scaled, 100, 400'000)));
+            if (fps_changed) cap.set_max_rate(applied_fps);
         }
 
         int w = 0, h = 0;

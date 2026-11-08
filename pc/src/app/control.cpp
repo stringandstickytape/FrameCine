@@ -48,7 +48,7 @@ Session::Session(Options options) : opt_(std::move(options)), pc_name_(pc_name()
             f.seen_us = now_us();
             status_.found = true;
             status_.offers_pairing = h.pairing || status_.offers_pairing;
-            if (!pairing_ || pairing_->pin != h.pin) status_.headset = status_.headset.empty() ? h.name : status_.headset;
+            if (!pairing_ && status_.headset.empty()) status_.headset = h.name;  // shown until one is paired
         }
         if (news) {
             logf("discovery: a headset at %s (%s)", format_ipv4(a).c_str(), h.pairing ? "pairing open" : "paired only");

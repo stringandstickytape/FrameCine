@@ -183,7 +183,8 @@ bool focus(const Target& t) {
     HWND fg = GetForegroundWindow();
     const DWORD fg_thread = fg ? GetWindowThreadProcessId(fg, nullptr) : 0;
     const DWORD me = GetCurrentThreadId();
-    if (fg_thread && fg_thread != me && AttachThreadInput(me, fg_thread, TRUE)) {
+    // Not with a hung window in front: attaching to its thread can hang us too.
+    if (fg_thread && fg_thread != me && !IsHungAppWindow(fg) && AttachThreadInput(me, fg_thread, TRUE)) {
         BringWindowToTop(h);
         SetForegroundWindow(h);
         AttachThreadInput(me, fg_thread, FALSE);

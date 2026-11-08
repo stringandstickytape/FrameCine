@@ -20,8 +20,8 @@ namespace wd3d = winrt::Windows::Graphics::DirectX::Direct3D11;
 
 namespace pcw {
 
-// One buffer waits here for the stream's thread, one is being copied, one is free for Windows to fill: with only
-// two, Windows drops frames while we copy.
+// One buffer waits here for the stream's thread, one is being copied, one is free for Windows to fill. (Two were
+// not shown to lose frames; the frame rate here was set by MinUpdateInterval, below.)
 constexpr int kBuffers = 3;
 
 void capture_init() {
@@ -137,6 +137,15 @@ bool Capture::start(ID3D11Device* d3d, const Target& t, std::function<void()> wa
             m.session.IsBorderRequired(false);
         } catch (...) {
         }
+        // A window's menus, drop-down lists and dialogs are windows of their own; without this they would open on
+        // the PC but never show in the pane (Windows 11 and later).
+        try {
+            if (!t.monitor && winrt::Windows::Foundation::Metadata::ApiInformation::IsPropertyPresent(
+                                  L"Windows.Graphics.Capture.GraphicsCaptureSession", L"IncludeSecondaryWindows")) {
+                m.session.IncludeSecondaryWindows(true);
+            }
+        } catch (...) {
+        }
         m.arrived = m.pool.FrameArrived(winrt::auto_revoke, [&m](auto&&, auto&&) { m.on_frame(); });
         m.closed_revoker = m.item.Closed(winrt::auto_revoke, [&m](auto&&, auto&&) {
             m.closed = true;
@@ -179,8 +188,13 @@ void Capture::set_max_rate(int fps) {
     try {
         if (winrt::Windows::Foundation::Metadata::ApiInformation::IsPropertyPresent(
                 L"Windows.Graphics.Capture.GraphicsCaptureSession", L"MinUpdateInterval")) {
-            // A little under the frame time, so a 60 Hz window is not cut to 30 by jitter.
-            m.session.MinUpdateInterval(std::chrono::microseconds(1'000'000 / fps / 2));
+            // `fps` (the headset's own refresh rate for the pane in focus) caps what Windows hands over: on a 144 Hz
+            // desktop at 72 it gives every other composed frame, evenly; on a 60 Hz one simply 60. Three quarters of
+            // the frame time, not nearly all of it: composition times jitter, and at 0.9 or 0.95 a 60 Hz desktop gave
+            // only 54-55 frames a second here (0.75 still leaves out a 144 Hz desktop's next frame at 72). The
+            // stream's own pacing keeps the average at `fps`. Always set: Windows 11 24H2 holds a session that never
+            // sets it to about 50-60 frames a second. Never under 1 ms.
+            m.session.MinUpdateInterval(std::chrono::microseconds(std::max(1000, 750'000 / fps)));
         }
     } catch (...) {
     }

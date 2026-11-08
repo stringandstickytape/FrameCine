@@ -281,6 +281,8 @@ bool VideoEncoder::open(ID3D11Device* /*dev*/, IMFDXGIDeviceManager* manager, co
     // Some encoders refuse this setting; in low-latency mode they make no B-frames anyway (the tests check).
     set_u32(CODECAPI_AVEncMPVDefaultBPictureCount, 0, nullptr);
     set_u32(CODECAPI_AVEncMPVGOPSize, static_cast<UINT32>(fps_ * 2), "GOP size");
+    // Tells the encoder the pictures are a desktop (some tune for text and still areas); not all take it.
+    set_u32(CODECAPI_AVScenarioInfo, eAVScenarioInfo_DisplayRemoting, nullptr);
     if (codec_api_) {
         VARIANT v;
         VariantInit(&v);

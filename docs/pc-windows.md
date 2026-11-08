@@ -135,6 +135,113 @@ H.264), WASAPI loopback and Windows' AAC encoder for the sound, `SendInput` for 
 token, Schannel for TLS. No other libraries. A tray icon with a small
 window: the headset found, the code to pair, the windows being sent, Quit.
 
+Built 2026-11-08 (phase 1). Tested on this PC against a fake headset; not yet with the real one. How to build and
+run, what it sends and the privacy notes: `pc/README.md`.
+
+| File | What |
+|---|---|
+| `pc/src/core/` | the pure parts, unit-tested: JSON lines, the PCW1 header, discovery messages, Godot key names to scan codes, the mouse mapping and stream sizes, Annex B and ADTS |
+| `pc/src/app/control.cpp` | the session: dialling, pairing, the control connection, the window list, the cursor's shape, the numbers in the log |
+| `pc/src/app/discovery.cpp`, `net.cpp`, `tls.cpp`, `store.cpp` | `pcw_find` and the replies; TCP; Schannel with the pin; the pairing under DPAPI |
+| `pc/src/app/window_list.cpp` | the windows (Alt+Tab's rules: visible, titled, not tool windows, not cloaked) and monitors, their sizes and JPEG thumbnails (WIC) |
+| `pc/src/app/video_stream.cpp`, `capture.cpp`, `video_encoder.cpp` | one stream: capture, convert, encode, send |
+| `pc/src/app/audio_stream.cpp` | stream 0: loopback, AAC, ADTS |
+| `pc/src/app/input.cpp` | `SendInput`, focus, the cursor's shape |
+| `pc/src/app/ui.cpp`, `main.cpp` | the tray icon and window; the options |
+| `pc/tests/`, `tools/pc_windows_fake_headset.py` | the unit tests, the test window and the fake headset |
+
+### Pictures
+
+- Each `open` gets a thread of its own (and the encoder's event thread), its own Direct3D 11 device on the GPU that
+  has the encoder, and a Windows.Graphics.Capture session by window handle or monitor (no picker; the cursor is left
+  out, as the headset draws its own; the yellow border is turned off where Windows allows, which it does here; the
+  window's menus and drop-down lists are included, `IncludeSecondaryWindows`, Windows 11).
+- The picture never leaves the GPU: the frame is copied into a texture of our own (kept, to send again), the GPU's
+  video processor scales it to fit `max` and converts it to NV12 (BT.709 limited range, said so in the VUI) in the
+  encoder's own texture pool, and the hardware MFT (async, fed through an `IMFDXGIDeviceManager`) encodes it. Sizes
+  are rounded down to even; a picture smaller than 256 x 128 is scaled up keeping its shape.
+- Encoder: HEVC Main if any hardware encoder has it, else H.264 High; none at all: `error` "no encoder", no software
+  fall-back. CBR at `kbps` (changed in place by `quality`), low-latency mode, no B-frames (checked on the decoded
+  streams), a key frame 2 s after the last one whatever happens, on a new connection and on a new size. Parameter
+  sets are put in front of any key frame that lacks them. 8 bit only (`bits` is always 8: desktop pictures are SDR).
+- Rate: `fps` (the headset's refresh rate for the pane in focus, 5 for the others) is a cap. Windows gives frames
+  only when the window changed, and at most one per `MinUpdateInterval`, set to 0.75 of the frame time (never under
+  1 ms; setting it at all also lifts Windows 11 24H2's own cap of about 60): on a 144 Hz desktop at 72 Windows hands
+  over every other composed frame, on a 60 Hz one simply 60. Not 0.95: composition times jitter, and on this PC's
+  60 Hz desktop 0.95 gave 53.8 frames a second sent (3 rounds), 0.75 gave 58.4 and 0.5 gave 58.6. No frame is made up. A token bucket of `fps` a second
+  (at most two saved up) keeps the cap where `MinUpdateInterval` is missing (before Windows 11 24H2). A still window
+  sends its picture again 250 ms after it stopped changing (sharper text), and then every 2 s, as a key frame.
+- `quality` applies at once, with no new encoder or key frame: the capture's interval and the bucket follow `fps`;
+  the encoder's bitrate is set live, scaled by (the rate it was opened at / the new `fps`), because its rate control
+  gives each frame bitrate / that first rate, so the stream comes out near the kbit/s asked for.
+- Packet times: the frame's composition time from Windows (`SystemRelativeTime`, the QPC clock; it is the vblank
+  the frame is meant for, so a few ms ahead of now), the send time for a repeat; always rising.
+- A new size (a resize, a DPI change): a new encoder, `resized` with the stream's new size, and its first key frame
+  carries the config-change flag. Minimised: `error` "minimised", the last picture goes on every 2 s; Windows' frames
+  at the taskbar button's size around minimise and restore are dropped. Opened while minimised: the `error`, and
+  `stream` once it is restored. The window closes: `closed`, the stream ends. A stream connection that breaks is
+  dialled again (four tries) and starts with a key frame and the config-change flag.
+
+### Sound
+
+The default output device by WASAPI loopback, asked for as 48 kHz stereo float (Windows converts; any other format is
+converted here), with a silent stream played on the same device so loopback flows while nothing plays. Windows' AAC
+encoder (AAC-LC, 160 kbit/s, raw) with our ADTS headers. Each frame's time comes from the device's own QPC time for
+its samples, so the sound does not drift from the pictures however long it runs. A change of default device opens
+the new one. The encoder's priming (about a frame, 21 ms) is not taken off the times.
+
+### Input
+
+- Mouse: stream pixels to the captured picture (each axis scaled on its own), through the window's extended frame
+  bounds at that moment (per-monitor-v2 DPI aware, physical pixels), to `SendInput`'s absolute units over the virtual
+  desktop, aimed at the pixel's middle; kept inside the window. The move and the button go in one event. Wheel: `dy`
+  positive is up (away), `dx` positive is right; fractions of a notch are kept.
+- Keys: Godot's name to the US place's set-1 scan code (`KEYEVENTF_SCANCODE`, extended where Windows wants it), so the
+  PC's own layout makes the character, as a keyboard on the PC would; keys without a scan code (Pause, NumLock, media
+  and browser keys) by virtual key. Every key and button still held is let go when the headset goes.
+- `text`: UTF-16 units as `KEYEVENTF_UNICODE` (emoji as a surrogate pair), new lines as Enter, tabs as Tab.
+- `focus`: restores a minimised window, then `SetForegroundWindow` after an empty input event (Windows lets the
+  sender of the last input take the foreground), else after `AttachThreadInput` to the foreground window's thread,
+  else with an Alt press.
+- `cursor`: the shape is polled every 100 ms (`GetCursorInfo` against the system cursors) for the window the mouse
+  was last sent to, and sent when it changes.
+
+### Measured (2026-11-08, this PC)
+
+NVIDIA GeForce RTX 5090 with "NVIDIA HEVC Encoder MFT" (and "NVIDIA H.264 Encoder MFT"), Intel Core i9-14900K, a
+3840 x 2160 desktop at 60 Hz. The PC was busy with other work during these runs, so the numbers are an upper bound.
+Test windows of 1920 x 1080 (a quarter of each new noise every frame, so the encoder reaches its rate) at 60 fps and
+20 Mbit/s each:
+
+| Median (range) over 3 rounds of 15 s | 1 window | 3 windows (each) |
+|---|---|---|
+| Frames sent a second (asked 60) | 58.4 (58.3 to 58.7) | 58.7 (58.6 to 60.0) |
+| kbit/s (asked 20 000) | 19 899 (19 818 to 20 000) | 19 924 (19 662 to 20 375) |
+| Composed to received, p50 / p95 | 0.6 / 8.5 ms | 1.8 / 10.8 ms |
+| Arrived to sent, p50 / p95 | 9.1 / 17.2 ms | 10.0 / 18.5 ms |
+| pc-windows CPU, % of the whole PC (30 logical processors) | 0.23 | 0.60 (all three) |
+| The whole PC meanwhile: CPU; GPU 3D; GPU video encode | 50 %; 53 %; 10 % | 56 %; 82 %; 29 % |
+| Stalls over 100 ms (all rounds) | 7, longest 200 ms | 12, longest 246 ms |
+
+The stalls came with the other work on the PC (seen at the time on the test window itself), so they are reported,
+not counted against the app. Windows delivered about 64 frames a second of a window painted 160 times a second; the
+stream sends at most 60. Asked for 72 on this 60 Hz desktop (with `MinUpdateInterval` at 0.95, before the change to
+0.75) it sent 54 to 57: a 72 Hz headset gets what the PC composes, never made-up frames.
+
+"Composed to received" is from Windows' composition time of each frame to the fake headset reading it on the same PC
+(the composition time is a few ms ahead, hence small or negative values). "Arrived to sent" is from the frame
+reaching pc-windows to its last byte handed to TLS, including the wait for its turn when the window changes faster
+than `fps`. A plain test pattern (large flat colours) at 60 fps needs only about 225 kbit/s.
+
+### Only the real headset can tell
+
+- The headset's half reading this PC's streams at once (the fake headset checks the framing and decodes with ffmpeg).
+- Wi-Fi: throughput for several 20 Mbit/s streams, a stream connection or the control connection dropping for real,
+  the headset going off and on, a new address from DHCP (handled by discovery and the kept address, not tested).
+- Discovery over the real network (broadcast and the per-interface broadcasts; here it ran on one PC).
+- Keys from a real Bluetooth keyboard's names, and layouts other than the one both sides use.
+- How sharp text is through HEVC 4:2:0 at 1:1 in the headset.
+
 ## The headset (`app/`)
 
 Built 2026-11-08 (phase 1). Tested on the desktop against a fake PC; not yet on the device.
