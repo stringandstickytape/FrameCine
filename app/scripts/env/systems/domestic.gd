@@ -21,7 +21,8 @@ extends "res://scripts/env/systems/kit/builder.gd"
 ## Every parameter marked "auto" (an enum's "auto", 0 or -1 for a number, {} for a material, [0, 0] for a size) takes
 ## the style's value (STYLE_DEFAULTS); a document sets only what it changes.
 ##   Floor, Walls, Ceiling, Trim, Window (glass), Outside, Door, Fireplace, Fire, Radiator, Lamps, Screen (the screen's
-##   own parts), Painting, Telly, Bed, Fort, FortSheet, FairyLights, Seats or Cushions
+##   own parts), Painting, Telly, Lid and Mirror (a mirror-lid set: scripts/env/mirror_view.gd), Bed, Fort, FortSheet,
+##   FairyLights, Seats or Cushions
 ## Slots for the kit: side_walls, screen, proscenium, floor, ceiling, corners, window, vista, mantel, fort_opening,
 ## telly_stand (the stand's top), telly_shelf (a video recorder's place under the set).
 
@@ -225,11 +226,16 @@ const REAR_WIDE := [1.107, 0.623]
 ## The forms that stand on the floor (no stand), and their picture's bottom when the document gives none.
 const FLOOR_FORMS: Array[String] = ["mirror_lid", "console", "rear_projection"]
 const TELLY_BOTTOMS := {"mirror_lid": 0.98, "console": 0.62, "rear_projection": 0.55}
-## The mirror-lid set: the hinge's line (and so the picture, the tube's reflection) this far out from the front wall;
-## the picture's bottom this far over the cabinet's top (the tube's face); the lid at 45 degrees, its frame's width.
+## The mirror-lid set: the picture (the tube's reflection) this far out from the front wall, its bottom this far over
+## the cabinet's top; the lid at 45 degrees, its frame's width; the top board's thickness, and how far under the top
+## the tube's face lies (under the board, 3 mm clear). The hinge is TUBE_SINK further out than the picture and the
+## tube TUBE_SINK further out still, so the sunken face's reflection is the picture's place (mirror_view.gd draws the
+## film on the face and reflects it).
 const MIRROR_HINGE := 0.07
 const LID_GAP := 0.05
 const LID_FRAME := 0.035
+const TOP_BOARD := 0.025
+const TUBE_SINK := TOP_BOARD + 0.003
 ## The OLED panel's depth (its electronics' bulge included) and its bezel.
 const OLED_DEPTH := 0.03
 const OLED_BEZEL := 0.008
@@ -244,6 +250,7 @@ const PEDESTAL := 0.1
 ## their back against the front wall, their front at the set's (a flat panel's pedestal set back on it).
 const STANDS := {"radiogram": [0.7, 1.5, 0.45], "desk": [0.6, 1.1, 0.7], "tv_unit": [0.3, 1.0, 0.45]}
 const Furniture := preload("res://scripts/env/systems/kit/furniture.gd")
+const MirrorView := preload("res://scripts/env/mirror_view.gd")
 
 
 # --- From parameters alone ----------------------------------------------------------------------------------------
@@ -437,8 +444,8 @@ static func _set_depth(form: String, s: Vector2) -> float:
 		"rear_projection":
 			return REAR_DEPTH
 		"mirror_lid":
-			# From the cabinet's back (3 cm behind the hinge) to its front (the tube and a margin before it).
-			return maxf(0.03 + s.y + LID_GAP + 0.08, 0.42)
+			# From the cabinet's back (3 cm behind the picture) to its front (the tube and a margin before it).
+			return maxf(0.03 + TUBE_SINK + s.y + LID_GAP + 0.08, 0.42)
 	return clampf(s.x * 0.75, 0.35, 1.2)
 
 
@@ -507,10 +514,12 @@ static func _telly(p: Dictionary) -> Dictionary:
 			"pedestal": pedestal, "body": [Vector3(cx, mid_y, body_z), Vector3(outer.x, outer.y, depth)],
 			"stand_box": [], "shelf": []}
 	if form == "mirror_lid":
-		# The tube's face in the cabinet's top (its picture's width, as deep as the picture is tall), and the lid:
-		# hinged along the back of the top, open at 45 degrees, long enough that its mirror shows the whole face.
-		out["tube"] = [Vector3(0.0, outer.y, c.z + LID_GAP + s.y * 0.5), s]
-		out["lid"] = {"hinge": Vector3(0.0, outer.y, c.z), "length": sqrt(2.0) * (s.y + LID_GAP) + 0.1,
+		# The tube's face in the cabinet's top, under its board (its picture's width, as deep as the picture is tall),
+		# and the lid: hinged along the back of the top, open at 45 degrees, long enough that its mirror shows the
+		# whole face. A face TUBE_SINK down reflects TUBE_SINK further back (a 45 degree mirror), so the hinge and the
+		# face both stand TUBE_SINK further out, and the face's reflection is the picture again.
+		out["tube"] = [Vector3(0.0, outer.y - TUBE_SINK, c.z + TUBE_SINK + LID_GAP + s.y * 0.5), s]
+		out["lid"] = {"hinge": Vector3(0.0, outer.y, c.z + TUBE_SINK), "length": sqrt(2.0) * (s.y + LID_GAP) + 0.1,
 				"width": outer.x - 0.02}
 	if form == "console":
 		# The legs' room under the body.
@@ -1204,12 +1213,12 @@ func _build_rear_projection(tv: RoomMesh, t: Dictionary) -> void:
 
 ## A 1937 mirror-lid set: a tall cabinet whose tube faces up in its top, and a lid hinged along the back of the top,
 ## open at 45 degrees, a mirror on its underside. The picture (the room's screen) is the tube's reflection, upright
-## over the hinge's line; behind it the reflection of the tube's dark face and of the cabinet's top, so the mirror
-## shows what a mirror would. The lid is its own mesh: its back is in the line of sight to the reflection (seen only
+## behind the mirror. The mirror is a true one (mirror_view.gd, "Mirror"): it reflects the room for each eye, the film
+## lies on the tube's face under the top board, and the upright screen is hidden, so from above or the side the set
+## looks as a real one would. The lid is its own mesh: its back is in the line of sight to the reflection (seen only
 ## from behind: see-through for the sight line, and in front of the picture for the film layer), its frame round the
-## mirror; the mirror's glass a faint sheen over the picture.
+## mirror.
 func _build_mirror_lid(tv: RoomMesh, t: Dictionary) -> void:
-	var c: Vector3 = (t["pic"] as Array)[0]
 	var s: Vector2 = (t["pic"] as Array)[1]
 	var bc: Vector3 = (t["body"] as Array)[0]
 	var bs: Vector3 = (t["body"] as Array)[1]
@@ -1218,7 +1227,7 @@ func _build_mirror_lid(tv: RoomMesh, t: Dictionary) -> void:
 	var back := bc.z - bs.z * 0.5
 	var front := bc.z + bs.z * 0.5
 	var hx := bs.x * 0.5
-	var board := 0.025
+	var board := TOP_BOARD
 	# The cabinet up to its top board, a plinth, and the top round the tube's opening.
 	tv.box(Vector3(0.0, (face - board) * 0.5, bc.z), Vector3(bs.x, face - board, bs.z), Basis(), [RoomMesh.UP])
 	tv.box(Vector3(0.0, 0.04, front + 0.01), Vector3(bs.x + 0.02, 0.08, 0.02), Basis(), [RoomMesh.DOWN])
@@ -1255,23 +1264,29 @@ func _build_mirror_lid(tv: RoomMesh, t: Dictionary) -> void:
 	var lid_mi := _add_static("Lid", lm)
 	lid_mi.add_to_group(SEE_THROUGH)
 	lid_mi.add_to_group("env_in_front")
-	var glass := RoomMesh.new()
-	glass.surface(GLASS)
-	Shapes.quad(glass, hinge + along * length * 0.5 + under * 0.002, Vector3(w - fw, 0, 0), along * (length * 0.5 - fw),
-			under)
-	_add_glass("Mirror", glass, Color(0.78, 0.8, 0.82), 0.05)
-	# In the mirror, behind the picture: the cabinet's shadowed top and the tube's dark face round the picture (the
-	# whole of what the mirror shows from the seats, so no wall shows through it).
-	tv.surface(_light.library("dark_metal", Color(0.03, 0.035, 0.035)))
-	var seen := (length - fw) * sqrt(0.5) + 0.08
-	Shapes.quad(tv, Vector3(0.0, face + seen * 0.5, c.z - 0.012), Vector3(w - fw, 0, 0), Vector3(0, seen * 0.5, 0),
-			Vector3.BACK)
+	# The mirror (mirror_view.gd): a true reflection, the film on the tube's face, the upright screen hidden. In the
+	# lid's own plane through the hinge (the frame's strips lie round it, not over it), so the tube's face reflects to
+	# the picture's place exactly.
+	var mirror := MirrorView.new()
+	mirror.name = "Mirror"
+	mirror.centre = hinge + along * length * 0.5
+	mirror.half_right = Vector3(w - fw, 0, 0)
+	mirror.half_up = along * (length * 0.5 - fw)
+	mirror.find_flat = _screen_flat
+	own(mirror)
+	# The tube's dark face in the top, facing up, just under the film (TubePicture lies on the face's plane), reaching
+	# under the board round the hole so no light shows through the gap between them.
 	tv.surface(_light.library("dark_metal", Color(0.012, 0.014, 0.014)))
-	Shapes.quad(tv, Vector3(0.0, c.y, c.z - 0.006), Vector3(s.x * 0.5 + 0.02, 0, 0), Vector3(0, s.y * 0.5 + 0.02, 0),
-			Vector3.BACK)
-	# The tube's own face in the top, facing up.
-	Shapes.quad(tv, Vector3(0.0, face - board - 0.005, tc.z), Vector3(s.x * 0.5 + 0.02, 0, 0), Vector3(0, 0,
-			-(s.y * 0.5 + 0.02)), Vector3.UP)
+	Shapes.quad(tv, Vector3(0.0, tc.y - 0.002, tc.z), Vector3(s.x * 0.5 + 0.05, 0, 0), Vector3(0, 0,
+			-(s.y * 0.5 + 0.05)), Vector3.UP)
+
+
+## The app's screen's flat mesh (main.screen's Flat), or null (a room on its own: tests, tools).
+func _screen_flat() -> MeshInstance3D:
+	var main := main_node()
+	if main == null or main.get("screen") == null:
+		return null
+	return (main.screen as Node).get_node_or_null("Flat") as MeshInstance3D
 
 
 ## The stand (the trim's material): a chest of drawers, a radiogram, a desk, a tv unit, or a shelf on the wall.
