@@ -152,32 +152,8 @@ if [ "$WHISPER" = 1 ]; then
 fi
 
 # --- Launcher, desktop entry, icon ------------------------------------------------------------------------------------
-cat > "$STAGE/run.sh" <<'EOF'
-#!/bin/bash
-# Starts the player in the headset. Arguments after the launcher go to the app (see USAGE.md), e.g.
-#   ./run.sh --file=/home/steamos/Videos/film.mkv --env=cinema
-# The display and runtime folder default to the headset's session; the log goes to ~/.local/state/vr-video-player.
-HERE=$(cd "$(dirname "$0")" && pwd)
-export DISPLAY=${DISPLAY:-:0}
-export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
-LOGDIR=${XDG_STATE_HOME:-$HOME/.local/state}/vr-video-player
-mkdir -p "$LOGDIR"
-[ -f "$LOGDIR/last.log" ] && mv -f "$LOGDIR/last.log" "$LOGDIR/previous.log"
-# --hands (a spike, docs/xr-spikes.md): hand tracking is an engine start-up setting, so it is switched on here, in the
-# app's override file, before the engine starts. The app removes the file on a start without --hands. A file with
-# other settings in it is left alone.
-OVR="${XDG_DATA_HOME:-$HOME/.local/share}/godot/app_userdata/VR Video Player/xr_override.cfg"
-case " $* " in
-  *" --hands "*)
-    if [ ! -f "$OVR" ] || ! grep -qvE '^(\[xr\]|openxr/extensions/hand_tracking[a-z_]*=true)?$' "$OVR"; then
-      mkdir -p "$(dirname "$OVR")"
-      printf '[xr]\n\nopenxr/extensions/hand_tracking=true\nopenxr/extensions/hand_tracking_unobstructed_data_source=true\nopenxr/extensions/hand_tracking_controller_data_source=true\n' > "$OVR"
-    fi ;;
-esac
-cd "$HERE"
-exec "$HERE/bin/vr-video-player-engine" --path "$HERE/app" --display-driver x11 --xr-mode on -- "$@" \
-  > "$LOGDIR/last.log" 2>&1
-EOF
+# The launcher, with the update swap and rollback (tools/player-run.sh; tested by tools/test_player_run.sh).
+cp tools/player-run.sh "$STAGE/run.sh"
 chmod +x "$STAGE/run.sh"
 
 cat > "$STAGE/vr-video-player.desktop.in" <<'EOF'

@@ -3601,3 +3601,49 @@ msgstr "影片开始前"
 
 msgid "Always (faint in the film)"
 msgstr "始终（放映时微弱）"
+
+#. Updates (scripts/update/updater.gd, ui/update_row.gd).
+msgid "Updates"
+msgstr "更新"
+
+msgid "Check for updates"
+msgstr "检查更新"
+
+msgid "Restart now"
+msgstr "立即重启"
+
+msgid "Once a day the player asks GitHub for a new version and downloads it in the background. Only your IP address goes to GitHub."
+msgstr "播放器每天向 GitHub 查询一次新版本，并在后台下载。只有你的 IP 地址会发送给 GitHub。"
+
+msgid "This copy does not run from an install: no updates."
+msgstr "此副本不是从安装目录运行的：不会更新。"
+
+msgid "Version %s"
+msgstr "版本 %s"
+
+msgid "Downloading version %s: %d %%"
+msgstr "正在下载版本 %s：%d %%"
+
+msgid "Preparing version %s..."
+msgstr "正在准备版本 %s……"
+
+msgid "Version %s is ready. It goes in at the next start."
+msgstr "版本 %s 已就绪，下次启动时生效。"
+
+msgid "Updated to version %s"
+msgstr "已更新到版本 %s"
+
+msgid "Restart now to update to %s?"
+msgstr "立即重启以更新到 %s？"
+
+msgid "Quit now to update to %s? Then start the player again."
+msgstr "现在退出以更新到 %s？然后再次启动播放器。"
+
+msgid "Restart"
+msgstr "重启"
+
+msgid "Quit"
+msgstr "退出"
+
+msgid "Later"
+msgstr "稍后"

@@ -5,7 +5,8 @@ extends ScrollContainer
 ## test patterns, calibration cards and the bandwidth meter (#48); the benchmark (#82); hardware 10-bit video (which way
 ## it plays, read-only, ui/hw_video_row.gd); foveation (D22) and the film layer (#70, a prototype); the controllers' look
 ## and haptics; the phone remote with its address and QR code (#13); the assistant (ui/assistant_row.gd); PC windows
-## (ui/pc_windows_row.gd); the dev tools when dev mode is on (theme, remote changes and their undo); about.
+## (ui/pc_windows_row.gd); updates (ui/update_row.gd); the dev tools when dev mode is on (theme, remote changes and
+## their undo); about.
 ##
 ## Hooks used: scripts/dev/stats.gd (made here while the stats view is on, freed when it goes off or the tab hides),
 ## DevHost.instance().permissions (scripts/dev/permission_ring.gd), scripts/remote/remote.gd,
@@ -23,6 +24,7 @@ const Tour := preload("res://scripts/dev/tour.gd")
 const HwVideoRow := preload("res://ui/hw_video_row.gd")
 const AssistantRow := preload("res://ui/assistant_row.gd")
 const PcWindowsRow := preload("res://ui/pc_windows_row.gd")
+const UpdateRow := preload("res://ui/update_row.gd")
 const ControllerLook := preload("res://scripts/xr/controller_look.gd")
 const ObjectSection := preload("res://ui/object_section.gd")
 const I18n := preload("res://scripts/i18n.gd")
@@ -98,6 +100,8 @@ var _share_qr: TextureRect
 var assistant_row: AssistantRow
 ## PC windows (ui/pc_windows_row.gd; docs/pc-windows.md).
 var pc_windows_row: PcWindowsRow
+## Updates (ui/update_row.gd; scripts/update/updater.gd).
+var update_row: UpdateRow
 var _dev_box: VBoxContainer
 var _dev_status: Label
 var _remote_mode: HFlowContainer
@@ -334,6 +338,11 @@ func bind(p_app: Node) -> void:
 	pc_windows_row = PcWindowsRow.new()
 	box.add_child(pc_windows_row)
 	pc_windows_row.bind(app)
+
+	box.add_child(W.section("Updates"))
+	update_row = UpdateRow.new()
+	box.add_child(update_row)
+	update_row.bind(app)
 
 	_dev_box = W.vbox()
 	box.add_child(_dev_box)
