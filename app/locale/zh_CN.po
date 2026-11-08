@@ -3355,8 +3355,8 @@ msgstr "1974年的文化宫：木纹清水混凝土、两幅在银幕光下闪�
 msgid "A pillow fort in a bedroom, 1993: cushions and a bedsheet, fairy lights, rain on the window, and the telly filling the opening."
 msgstr "1993年卧室里的枕头堡：靠垫和床单、彩灯、窗上的雨，电视填满了堡的开口。"
 
-msgid "A plush picture palace in pink and blue: a sunburst ceiling with cycling lights, chandeliers, a balcony and a ceremonial curtain."
-msgstr "粉蓝两色的豪华电影宫：灯光变幻的放射状天花板、枝形吊灯、楼座和一道礼仪幕布。"
+msgid "A dream palace in sugared almond colours: inside a great shell, its ribs glowing pink and blue round a sunburst dome, scalloped arches, mirrors, a buttoned balcony, a festoon with a gold fringe."
+msgstr "糖衣杏仁色调的梦幻电影宫：置身巨大的贝壳之中，贝肋围绕放射状圆顶泛着粉蓝光芒；扇贝形拱门、镜子、钉扣丝绒楼座，以及缀着金色流苏的花彩幕。"
 
 msgid "An old picture house taken back by nature: half its roof gone to the stars, ivy and ferns, rain into a puddle that gives back the film."
 msgstr "被大自然收回的老影院：半个屋顶已向星空敞开，常春藤和野草，雨水落进映着影片的水洼。"

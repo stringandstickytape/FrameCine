@@ -119,6 +119,12 @@ const PARAMS := {
 			"description": "festoon: how far its top hangs over the screen's top, metres"},
 	"curtain": {"type": "material", "default": {"library": "velvet", "color": [0.62, 0.42, 0.16], "tiling": 0.3},
 			"description": "festoon: its cloth"},
+	# Since 2026-11-08 (the Pink Palace): a bullion fringe along the festoon's hem, following its swags. 0, as before:
+	# none.
+	"festoon_fringe": {"type": "float", "min": 0.0, "max": 0.6, "default": 0.0,
+			"description": "festoon: a fringe along its hem this deep, metres (0: none)"},
+	"fringe": {"type": "material", "default": {"library": "velvet", "color": [0.86, 0.66, 0.3], "tiling": 0.3},
+			"description": "festoon: its fringe"},
 }
 
 
@@ -154,6 +160,9 @@ var _festoon: MeshInstance3D
 var _festoon_mesh: ArrayMesh
 var _festoon_size := Vector2.ZERO
 var _festoon_lift := -1.0
+## With a fringe the festoon's two surfaces take their own materials (no override): the cloth's and the fringe's.
+var _cloth_m: Material
+var _fringe_m: Material
 var _screen_local := Transform3D()
 var _screen_size := Vector2.ZERO
 ## Tests: positions and turns of every frame [[time, origin, angle]], when recording.
@@ -514,6 +523,15 @@ func _build_festoon() -> void:
 				{"colour": RoomSchemaRef.to_color(m.get("color", "#a06a28"))})
 		if shared != null:
 			_festoon.material_override = shared
+	if float(params["festoon_fringe"]) > 0.0:
+		_cloth_m = _festoon.material_override
+		_festoon.material_override = null
+		var f: Dictionary = params["fringe"]
+		if light != null:
+			_fringe_m = light.call("from_param", f, true)
+		else:
+			_fringe_m = MaterialLibrary.get_material(str(f.get("library", "velvet")),
+					{"colour": RoomSchemaRef.to_color(f.get("color", "#dca84c"))})
 	own(_festoon)
 	# A festoon is always in front of the screen.
 	params["in_front"] = true
@@ -601,8 +619,54 @@ func _lift_festoon(a: float) -> void:
 	var mat := _festoon_mesh.surface_get_material(0) if _festoon_mesh.get_surface_count() > 0 else null
 	_festoon_mesh.clear_surfaces()
 	_festoon_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	if _cloth_m != null:
+		mat = _cloth_m
 	if mat != null:
 		_festoon_mesh.surface_set_material(0, mat)
+	var fringe := float(params["festoon_fringe"])
+	if fringe > 0.0:
+		_festoon_fringe(verts, normals, cols, fringe)
+
+
+## The fringe under the hem (the grid's first row): a band of bullion following the swags, its foot in little
+## tassels (every 6 cm one hangs a third longer), a hair in front of the cloth.
+func _festoon_fringe(verts: PackedVector3Array, normals: PackedVector3Array, cols: int, depth: float) -> void:
+	var sub := 6
+	var top := PackedVector3Array()
+	var tn := PackedVector3Array()
+	for c in cols:
+		for k in sub:
+			var t := float(k) / sub
+			top.append(verts[c].lerp(verts[c + 1], t))
+			tn.append(normals[c].lerp(normals[c + 1], t).normalized())
+	top.append(verts[cols])
+	tn.append(normals[cols])
+	var fv := PackedVector3Array()
+	var fn := PackedVector3Array()
+	var fuv := PackedVector2Array()
+	var idx := PackedInt32Array()
+	for j in top.size():
+		var p := top[j] + Vector3(0.0, 0.0, 0.012)
+		var tassel := 1.0 if j % 2 == 0 else 0.72
+		fv.append(p + Vector3(0.0, 0.02, 0.0))
+		fv.append(p - Vector3(0.0, depth * tassel, 0.0))
+		for i in 2:
+			fn.append(tn[j])
+		fuv.append(Vector2(p.x, 0.0))
+		fuv.append(Vector2(p.x, depth))
+		if j > 0:
+			var a := (j - 1) * 2
+			# Facing +z (the viewer): clockwise seen from the front.
+			idx.append_array([a, a + 2, a + 1, a + 1, a + 2, a + 3])
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = fv
+	arrays[Mesh.ARRAY_NORMAL] = fn
+	arrays[Mesh.ARRAY_TEX_UV] = fuv
+	arrays[Mesh.ARRAY_INDEX] = idx
+	_festoon_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	if _fringe_m != null:
+		_festoon_mesh.surface_set_material(1, _fringe_m)
 
 
 ## The festoon's hem height under its top now (tests): metres, negative.

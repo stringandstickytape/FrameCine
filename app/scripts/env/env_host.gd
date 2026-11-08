@@ -434,8 +434,11 @@ func _step_fades(delta: float) -> void:
 		var k := eased(float(f["t"]) / float(f["seconds"]) if float(f["seconds"]) > 0.0 else 1.0, str(f["ease"]))
 		var v: Variant
 		if f["from"] is Color or f["to"] is Color:
-			v = RoomSchema.to_color(f["from"]).lerp(RoomSchema.to_color(f["to"]), k) if not (f["from"] is Color) \
-					else (f["from"] as Color).lerp(f["to"] if f["to"] is Color else RoomSchema.to_color(f["to"]), k)
+			# Either side may still be the document's [r, g, b] (a colour given plainly, not bound): each converted
+			# on its own (to_color of a Color is its fallback, white: the Pink Palace's troughs went white, 2026-11-08).
+			var ca: Color = f["from"] if f["from"] is Color else RoomSchema.to_color(f["from"])
+			var cb: Color = f["to"] if f["to"] is Color else RoomSchema.to_color(f["to"])
+			v = ca.lerp(cb, k)
 		elif (f["from"] is float or f["from"] is int) and (f["to"] is float or f["to"] is int):
 			v = lerpf(float(f["from"]), float(f["to"]), k)
 		else:

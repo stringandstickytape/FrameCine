@@ -23,6 +23,7 @@ const IceHall := preload("res://scripts/env/systems/kit/ice_hall.gd")
 const Streamline := preload("res://scripts/env/systems/kit/streamline.gd")
 const Reclaimed := preload("res://scripts/env/systems/kit/reclaimed.gd")
 const PalaceCulture := preload("res://scripts/env/systems/kit/palace_culture.gd")
+const PinkPalace := preload("res://scripts/env/systems/kit/pink_palace.gd")
 
 const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk", "column", "facade", "castle_gate",
 		"booth", "snack_bar", "screen_tower", "bougainvillea", "ivy", "ferns", "carpet", "partition", "curves",
@@ -32,7 +33,8 @@ const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk
 		"ice_shell", "ice_screen", "ice_benches", "ice_outside",
 		"moderne_hall", "ziggurat", "organ_console",
 		"ruin_shell", "ruin_roof", "ruin_growth", "ruin_stalls",
-		"culture_hall", "globe_field"]
+		"culture_hall", "globe_field",
+		"pink_hall", "pink_proscenium", "pink_balcony", "pink_dome"]
 ## Each piece's size when neither the entry nor its slot gives one: [width, height, depth].
 const SIZES := {
 	"balcony_front": [6.0, 1.0, 0.25], "niche": [1.3, 2.6, 0.4], "urn": [0.5, 1.0, 0.5], "lion": [0.55, 0.9, 1.0],
@@ -54,6 +56,8 @@ const SIZES := {
 	"ruin_shell": [0.0, 0.0, 0.0], "ruin_roof": [0.0, 0.0, 0.0], "ruin_growth": [0.0, 0.0, 0.0],
 	"ruin_stalls": [0.0, 0.0, 0.0],
 	"culture_hall": [0.0, 0.0, 0.0], "globe_field": [0.0, 0.0, 0.0],
+	"pink_hall": [0.0, 0.0, 0.0], "pink_proscenium": [0.0, 0.0, 0.0], "pink_balcony": [0.0, 0.0, 0.0],
+	"pink_dome": [0.0, 0.0, 0.0],
 }
 ## The pieces that stand on a floor (their slot's origin is a floor point); the others hang on a wall.
 const STANDING: Array[String] = ["urn", "lion", "obelisk", "column", "booth", "snack_bar", "ferns", "partition",
@@ -128,6 +132,8 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			Reclaimed.build(piece, c, xf, size, e)
 		"culture_hall", "globe_field":
 			PalaceCulture.build(piece, c, xf, size, e)
+		"pink_hall", "pink_proscenium", "pink_balcony", "pink_dome":
+			PinkPalace.build(piece, c, xf, size, e)
 
 
 # --- Furniture (furniture.gd draws it) -----------------------------------------------------------------------------

@@ -11,7 +11,9 @@ extends "res://scripts/env/systems/kit/builder.gd"
 ## a stool, a channel dial, a soundbar, a floor lamp, a glass table (its top in PieceGlass, see-through), a media unit;
 ## and the moderne hall's (kit/streamline.gd, since 2026-11-08): its walls and coved ceiling, a stepped proscenium, an
 ## organ console (its coves in PieceCove, its clock in PieceClock); and the Palace of Culture's (kit/palace_culture.gd,
-## since 2026-11-08): its board-marked concrete hall, wall mosaics, coffered ceiling and field of globes.
+## since 2026-11-08): its board-marked concrete hall, wall mosaics, coffered ceiling and field of globes; and the Pink
+## Palace's (kit/pink_palace.gd, since 2026-11-08): a hall inside a great shell, its fluted vault and scalloped rings
+## lit from hidden lamps (PieceCove), mirrors, a buttoned balcony, a sunburst dome with a chandelier of glass shells.
 ## All the pieces share a few meshes, one surface a material: a baked one (PieceStatic), an unbaked one for rounded
 ## shapes and leaves (PieceSoft), the lamp shades (PieceLamps), the glows (windows, a booth's window, the video
 ## recorders' clocks: PieceDisplay) and each neon sign. The builder's slots come
@@ -37,7 +39,10 @@ static func spec() -> Dictionary:
 				+ "moonlit sky (broken roof and trusses, fallen plaster, a gilt proscenium with a torn curtain, a fallen "
 				+ "chandelier, a birch, ivy, ferns and wildflowers), a 1970s palace of culture's hall (board-marked "
 				+ "concrete, wall mosaics of glass and gold tesserae, a coffered ceiling, a field of opal globes, oak "
-				+ "acoustic slats), a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
+				+ "acoustic slats), a dream palace inside a great scallop shell (a fluted vault fanning from a "
+				+ "sunburst dome with a chandelier of glass shells, scalloped rings round the screen, mirrors, a wave "
+				+ "frieze, a buttoned velvet balcony), "
+				+ "a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
 				+ "furniture: a desk, a computer, a video recorder flashing 12:00, a sideboard, a standard lamp, a rug, "
 				+ "a coffee table; dressing: bunting, a tea set, sandwiches, a stool, a channel dial, a soundbar, a "
 				+ "floor lamp, a glass table, a media unit.",
@@ -150,6 +155,12 @@ const PARAMS := {
 			"description": "how much the mosaics' tesserae glint (the lamps' and the picture's light, as the head moves)"},
 	"mosaic_wash": {"type": "float", "min": 0.0, "max": 4.0, "default": 1.6,
 			"description": "the lamp line's wash down the mosaics (times the house lamps' level)"},
+	# Since 2026-11-08, for the Pink Palace (kit/pink_palace.gd): the gilt and the mirrors see a rose hall, not the
+	# Streamline's walnut and jade. The defaults are the Streamline's.
+	"reflect_wall": {"type": "color", "default": [0.16, 0.12, 0.09],
+			"description": "what the reflecting materials see round their horizon (the walls), at full house light"},
+	"reflect_ground": {"type": "color", "default": [0.02, 0.03, 0.025],
+			"description": "what they see below (the floor), at full house light"},
 }
 ## Pieces that take their slot's size when the entry gives none (the others keep their own size).
 const FILLS: Array[String] = ["facade", "curves", "ivy", "bougainvillea", "balcony_front", "partition"]
@@ -642,7 +653,7 @@ func _update_reflect() -> void:
 		return
 	var house := _group_level("house")
 	var cove := cove_colour_now() * float(params["cove"]) * house
-	var wall := Color(0.16, 0.12, 0.09) * (0.15 + 0.85 * house)
+	var wall := color_param("reflect_wall") * (0.15 + 0.85 * house)
 	var screen: Dictionary = _ctx.screen
 	var xf: Transform3D = screen.get("xf", Transform3D())
 	var size: Vector2 = screen.get("size", Vector2(12, 5))
@@ -654,7 +665,7 @@ func _update_reflect() -> void:
 	for m: ShaderMaterial in _reflect:
 		m.set_shader_parameter("refl_zenith", cove * 0.35 + wall * 0.3)
 		m.set_shader_parameter("refl_horizon", wall)
-		m.set_shader_parameter("refl_ground", Color(0.02, 0.03, 0.025) * (0.3 + 0.7 * house))
+		m.set_shader_parameter("refl_ground", color_param("reflect_ground") * (0.3 + 0.7 * house))
 
 
 ## The pieces' meshes under one node when `group` is given (an organ console on its lift moves as one).

@@ -273,7 +273,12 @@ func room_seat_transforms() -> Array[Transform3D]:
 		var script := Registry.script_of(str(entry["system"]))
 		if script != null and script.has_method("layout"):
 			var p := EnvDoc.with_defaults(Registry.spec(str(entry["system"]))["params"], _defaults_of(entry.get("params", {})))
-			out.append_array(script.call("layout", p).seat_transforms())
+			# Every seat the builder will place, where it says (the auditorium's balcony too: since 2026-11-08, the
+			# Pink Palace's), else its layout's rows.
+			if script.has_method("seat_transforms_for"):
+				out.append_array(script.call("seat_transforms_for", p))
+			else:
+				out.append_array(script.call("layout", p).seat_transforms())
 	return out
 
 

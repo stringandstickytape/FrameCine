@@ -4359,7 +4359,7 @@ msgid "A pillow fort in a bedroom, 1993: cushions and a bedsheet, fairy lights, 
 msgstr ""
 
 #: environments/pink_palace.env.json
-msgid "A plush picture palace in pink and blue: a sunburst ceiling with cycling lights, chandeliers, a balcony and a ceremonial curtain."
+msgid "A dream palace in sugared almond colours: inside a great shell, its ribs glowing pink and blue round a sunburst dome, scalloped arches, mirrors, a buttoned balcony, a festoon with a gold fringe."
 msgstr ""
 
 #: environments/reclaimed.env.json

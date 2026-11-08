@@ -130,6 +130,9 @@ const PARAMS := {
 	"balcony_rows": {"type": "int", "min": 0, "max": 8, "default": 0, "description": "a balcony over the rear"},
 	"balcony_height": {"type": "float", "min": 2.0, "max": 20.0, "default": 3.4,
 			"description": "the balcony's floor over the rear walkway"},
+	# Since 2026-11-08: the Pink Palace's buttoned front rolls over the parapet, under the front row's sight line.
+	"balcony_parapet": {"type": "float", "min": 0.3, "max": 1.5, "default": 1.0,
+			"description": "the balcony's parapet, metres over its floor"},
 	"boxes_per_side": {"type": "int", "min": 0, "max": 6, "default": 0, "description": "boxes on each side wall"},
 	"box_height": {"type": "float", "min": 1.0, "max": 20.0, "default": 3.0, "description": "the boxes' floor"},
 	"partition_z": {"type": "float", "min": -200.0, "max": 0.0, "default": 0.0,
@@ -231,6 +234,15 @@ class Layout:
 
 static func layout(p: Dictionary) -> Layout:
 	return Layout.new(p)
+
+
+## Every seat the hall places for these parameters, the balcony's after the rows' (what seats() gives once built: the
+## room's seats from its document alone, env_room.gd room_seat_transforms()).
+static func seat_transforms_for(p: Dictionary) -> Array[Transform3D]:
+	var l := Layout.new(p)
+	var out := l.seat_transforms()
+	out.append_array(_balcony_seats_for(p, l))
+	return out
 
 
 var L: Layout
@@ -895,7 +907,8 @@ static func _balcony_boxes(p: Dictionary, l: Layout) -> Array:
 		var h := float(row[1]) - slab_y + 0.3
 		out.append([Vector3(0.0, float(row[1]) - h * 0.5, float(row[0])), Vector3(width, h, l.depth)])
 	var front_z := float(rows[0][0]) - l.depth * 0.5
-	out.append([Vector3(0.0, slab_y + 0.5, front_z - 0.08), Vector3(width, 1.0, 0.16)])
+	var parapet := float(p.get("balcony_parapet", 1.0))
+	out.append([Vector3(0.0, slab_y + parapet * 0.5, front_z - 0.08), Vector3(width, parapet, 0.16)])
 	return out
 
 
