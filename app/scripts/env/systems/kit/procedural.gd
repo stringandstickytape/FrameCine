@@ -8,17 +8,18 @@ extends RefCounted
 ## system's lamp material. Static; preload to use.
 ##
 ##   PATTERNS                    pressed_tin, ice_blocks, swirl_carpet, corrugated, plasterboard, roof_tiles, ashlar,
-##                               lime_wash, quarry_tiles, deco_carpet (rising suns in rows: the Streamline's aisles)
+##                               lime_wash, quarry_tiles, deco_carpet (rising suns in rows: the Streamline's aisles),
+##                               hex_pavers (sintered regolith: the Crater's floor)
 ##   maps(pattern) -> {albedo, normal, orm, mean}   the pattern's textures (mean: its albedo's mean, linear)
 ##   apply(material, pattern, colour)   a house material shows the pattern in this colour (on average)
 ##   glass(colour, alpha, room) -> ShaderMaterial   see-through glass that dims with the house lights
 ##   rose_window(), letters(text, colour, back), gradient(top, bottom), abstract(seed, palette), flame()   pictures
 
 const PATTERNS: Array[String] = ["pressed_tin", "ice_blocks", "swirl_carpet", "corrugated", "plasterboard",
-		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles", "deco_carpet"]
+		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles", "deco_carpet", "hex_pavers"]
 const SIZE := 128
 ## Patterns drawn larger than SIZE (many tiles a repeat, each its own: since 2026-11-08, the Athens rooftop's floor).
-const SIZES := {"quarry_tiles": 256, "deco_carpet": 256}
+const SIZES := {"quarry_tiles": 256, "deco_carpet": 256, "hex_pavers": 256}
 const GLASS_SHADER := preload("res://scripts/env/systems/kit/env_glass.gdshader")
 
 static var _maps := {}
@@ -220,6 +221,41 @@ static func _sample(pattern: String, u: float, v: float) -> Array:
 			var fleck := _noise(u, v, 64, 21)
 			c = c * (0.92 + 0.16 * fleck)
 			return [h + 0.1 * fleck, c, 0.95]
+		# Since 2026-11-08, the Crater's floor: pavers of sintered regolith.
+		"hex_pavers":
+			# Hexagonal pavers, seven across and eight rows down a repeat (each row half a paver along from the last,
+			# so they are near enough regular), in narrow dark joints: each fused its own shade of grey-brown, its face
+			# a little domed and its edges softened, pitted here and there, a few glassy flecks.
+			var best := 9.0
+			var second := 9.0
+			var cell := Vector2i.ZERO
+			var fy := v * 8.0
+			var row0 := int(floor(fy))
+			for j in range(row0 - 1, row0 + 2):
+				var off := 0.5 * float(posmod(j, 2))
+				var col0 := int(floor(u * 7.0 - off))
+				for i in range(col0 - 1, col0 + 2):
+					var d := Vector2(u * 7.0 - (i + 0.5 + off), (fy - (j + 0.5)) * 0.866).length()
+					if d < best:
+						second = best
+						best = d
+						cell = Vector2i(posmod(i, 7), posmod(j, 8))
+					elif d < second:
+						second = d
+			var edge := (second - best) * 0.5
+			var joint := 1.0 - smoothstep(0.025, 0.05, edge)
+			var shade := _hash(cell.x, cell.y, 91)
+			var c := Color(0.36, 0.34, 0.31).lerp(Color(0.46, 0.43, 0.39), shade)
+			if _hash(cell.x, cell.y, 97) > 0.9:
+				c = c * 0.85
+			var pits := smoothstep(0.82, 0.9, _noise(u, v, 64, 101))
+			c = c.lerp(c * 0.7, pits * 0.6)
+			c = c * (0.94 + 0.12 * _noise(u, v, 32, 103))
+			var glint := smoothstep(0.93, 0.97, _noise(u, v, 128, 107))
+			c = c.lerp(Color(0.6, 0.6, 0.62), glint * 0.5)
+			c = c.lerp(Color(0.12, 0.115, 0.11), joint)
+			var h := lerpf(0.88 - 0.25 * pow(1.0 - minf(edge * 6.0, 1.0), 2.0) - pits * 0.1, 0.2, joint)
+			return [h, c, lerpf(lerpf(0.75, 0.45, glint), 0.95, joint)]
 	return [0.5, Color(0.5, 0.5, 0.5), 0.8]
 
 

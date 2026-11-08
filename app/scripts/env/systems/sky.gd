@@ -17,6 +17,8 @@ const DOME_SHADER := preload("res://shaders/env_sky.gdshader")
 const STAR_SHADER := preload("res://shaders/env_sky_stars.gdshader")
 const LINE_SHADER := preload("res://shaders/env_sky_lines.gdshader")
 const EARTH_SHADER := preload("res://shaders/env_sky_earth.gdshader")
+const EARTH_DETAIL_SHADER := preload("res://shaders/env_sky_earth_detail.gdshader")
+const EarthMap := preload("res://scripts/env/systems/kit/earth_map.gd")
 const MOON_SHADER := preload("res://shaders/env_sky_moon.gdshader")
 ## The Moon's layer: nearer than the stars (it hides them), beyond Earth's. Its quad reaches HALO times its radius,
 ## for the halo round it.
@@ -142,6 +144,16 @@ static func spec() -> Dictionary:
 			"earth_turn": {"type": "float", "min": 0.0, "max": 60.0, "default": 1.0, "live": true,
 					"motion": {"max": 60.0}, "description": "Earth's own turning, in times its real speed (1: once a "
 					+ "day; 60: once in 24 minutes)"},
+			# Since 2026-11-08, for the Crater ("Earth is the jewel", the brief). Off: Earth as before.
+			"earth_detail": {"type": "bool", "default": false,
+					"description": "Earth as itself: its continents, deserts and ice from a small map, cloud bands, "
+					+ "the sun's glint on the oceans, a thin blue atmosphere round the limb, the cities' lights on "
+					+ "the night side (off: the plain Earth-like world)"},
+			"earth_light_angle": {"type": "float", "min": -180.0, "max": 180.0, "default": 0.0,
+					"description": "where the sunlight comes from round Earth's face, in degrees from its right "
+					+ "(90: from above; -90: from below, the sun under the horizon behind the viewer)"},
+			"earth_lights": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true,
+					"brightness": true, "description": "earth_detail: the cities' lights on the night side"},
 			# Since 2026-11-08, for the Atmospheric 1928 ("perhaps a crescent moon over the wall"; clouds "lit warm
 			# from below by the house"). Every other room keeps its sky: the moon is off and the glow at 0 by default.
 			"moon": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "brightness": true,
@@ -392,7 +404,10 @@ func setup() -> void:
 		sphere.height = 2.0
 		sphere.radial_segments = 32
 		sphere.rings = 16
-		_earth = _instance("SkyEarth", sphere, _material(EARTH_SHADER, noise))
+		var detail := bool(params["earth_detail"])
+		_earth = _instance("SkyEarth", sphere, _material(EARTH_DETAIL_SHADER if detail else EARTH_SHADER, noise))
+		if detail:
+			_earth.material_override.set_shader_parameter("earth_map", EarthMap.texture())
 		# Its mesh where it shows (the checks see it there), its size as drawn.
 		var dir := _earth_dir()
 		var half := tan(deg_to_rad(float(params["earth_size"])) * 0.5) * EARTH_RADIUS
@@ -662,7 +677,10 @@ func _apply_all() -> void:
 		em.set_shader_parameter("earth_half", tan(deg_to_rad(float(params["earth_size"])) * 0.5))
 		em.set_shader_parameter("earth_basis", eb)
 		em.set_shader_parameter("earth_radius", EARTH_RADIUS)
-		em.set_shader_parameter("sun_dir", (-dir * cos(theta) + eb.x * sin(theta)).normalized())
+		var la := deg_to_rad(float(params["earth_light_angle"]))
+		var side := eb.x * cos(la) + eb.y * sin(la)
+		em.set_shader_parameter("sun_dir", (-dir * cos(theta) + side * sin(theta)).normalized())
+		em.set_shader_parameter("city_level", float(params["earth_lights"]))
 		_set_spin()
 
 

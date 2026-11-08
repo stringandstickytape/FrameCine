@@ -118,12 +118,26 @@ const PARAMS := {
 			"description": "city: the floodlights on the citadel's walls and temples"},
 	"city_lights": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
 			"description": "city: the street lamps, the far lights on the hills, the churches' floodlights"},
+	# The whole Moon base (kit/lunar_base.gd inside a dome, kit/lunar_surface.gd outside): since 2026-11-08, the
+	# Crater's quality pass. Off: the amphitheatre as before.
+	"lunar": {"type": "bool", "default": false,
+			"description": "amphitheatre: a Moon base's cinema under a dome_hall's glass dome: sintered pavers and "
+			+ "tiers of precast blocks with seat pads, light under each nose, stairs with handrails, a stage and "
+			+ "pylons for the screen; outside the regolith with craters, rocks and their shadows, tracks and "
+			+ "footprints, the crater's wall with its peaks in the sun, habitat modules with warm windows, a mast, "
+			+ "solar arrays, a lander and a rover, all lit by Earth from where the sky system puts it"},
+	"base_lights": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
+			"description": "lunar: the base's lights outside (its windows, the mast's beacon, the marker lights)"},
+	"earthlight": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
+			"description": "lunar: Earth's light on the plain outside (1: as designed)"},
 }
 
 const DriveInLot := preload("res://scripts/env/systems/kit/drive_in_lot.gd")
 const Reflect := preload("res://scripts/env/systems/kit/reflect.gd")
 const AthensRoof := preload("res://scripts/env/systems/kit/athens_roof.gd")
 const AthensCity := preload("res://scripts/env/systems/kit/athens_city.gd")
+const LunarBase := preload("res://scripts/env/systems/kit/lunar_base.gd")
+const LunarSurface := preload("res://scripts/env/systems/kit/lunar_surface.gd")
 
 ## Each style's recommended parameters (a room document sets these; the docs list them).
 const STYLES := {
@@ -233,6 +247,9 @@ static func collision_shapes_for(p: Dictionary, with_seats := true) -> Array:
 	if str(p["screen"]) == "painted_wall":
 		out.append(PhysicsShapes.box(Vector3(0, gy + float(p["wall_height"]) * 0.5, fz - 0.25),
 				Vector3(hw * 2.0 + 4.0, float(p["wall_height"]), 0.5)))
+	if _amph(p) and bool(p.get("lunar", false)):
+		for e: Array in LunarBase.collision_boxes(screen_for(p), gy):
+			out.append(PhysicsShapes.box(e[0], e[1]))
 	if _amph(p):
 		var half := deg_to_rad(float(p["arc_deg"])) * 0.5
 		var foot_z := _screen_z(p)
@@ -316,6 +333,9 @@ func build() -> void:
 		return
 	if style == "rooftop" and bool(params["city"]):
 		_build_city(hw, fz, bz, gy)
+		return
+	if style == "amphitheatre" and bool(params["lunar"]):
+		_build_lunar(gy)
 		return
 	# The terrace's own floor is baked; the ground beyond it (an open lot, a plain: up to hundreds of metres) is a
 	# ring round it left out of the bake, so the lightmap's atlas stays small.
@@ -804,6 +824,10 @@ func tick(delta: float) -> void:
 	super.tick(delta)
 	if _city != null:
 		_city_tick()
+	if _moon != null:
+		_moon_apply()
+		_moon_clock = fposmod(_moon_clock + delta, 400.0)
+		_moon_lights.set_shader_parameter("clock", _moon_clock)
 	if _di_reflect.is_empty() and _di_bulbs == null and _di_road == null:
 		return
 	if not _di_reflect.is_empty():
@@ -890,6 +914,77 @@ func _city_sky_light(force := false) -> void:
 		_city.set_shader_parameter("sky_low", low)
 
 
+# --- The Moon base (amphitheatre with lunar on) -----------------------------------------------------------------------
+
+## The regolith's and the lights' materials outside, the level they were last given.
+var _moon: ShaderMaterial
+var _moon_lights: ShaderMaterial
+var _moon_seen := Vector3(-1, -1, -1)
+var _moon_clock := 0.0
+## How much of its light the plain keeps in the film (the eye adjusts to the dimmed room: the plain dims a little
+## with the house lights, never out).
+const MOON_FILM_LEVEL := 0.6
+
+
+## The dome over the amphitheatre (a glass dome_hall in the room): {centre, radius}; else a round as wide as the
+## terrace, centred on it.
+func _lunar_dome(gy: float) -> Dictionary:
+	if host != null:
+		for s: Node in host.systems_of_kind("builder"):
+			var sp: Dictionary = s.get("params")
+			if s != self and sp.has("dome") and str(sp["dome"]) == "glass":
+				return {"centre": Vector3(0.0, float(sp["floor_y"]), float(sp["centre_z"])), "radius": float(sp["radius"])}
+	var fz := float(params["front_z"])
+	var bz := float(params["back_z"])
+	return {"centre": Vector3(0.0, gy, (fz + bz) * 0.5), "radius": maxf(float(params["half_width"]), (bz - fz) * 0.5)
+			+ 2.0}
+
+
+## Earth's direction from the sky system (its bearing and height; the room's front is the sky's facing), and the sun's
+## (just under the horizon opposite the room's front, a little to the left).
+func _lunar_lights() -> Array:
+	var earth := Vector3(0.18, 0.5, -0.85).normalized()
+	var sun := Vector3(-0.25, 0.03, 1.0).normalized()
+	var sky: Node = host.system_of_kind("sky") if host != null else null
+	if sky != null:
+		var sp: Dictionary = sky.get("params")
+		var az := deg_to_rad(float(sp.get("earth_bearing", 192.0)) - float(sp.get("facing", 180.0)))
+		var alt := deg_to_rad(float(sp.get("earth_altitude", 30.0)))
+		earth = Vector3(sin(az) * cos(alt), sin(alt), -cos(az) * cos(alt))
+	return [earth, sun]
+
+
+## The Moon base: inside (kit/lunar_base.gd), outside (kit/lunar_surface.gd).
+func _build_lunar(gy: float) -> void:
+	var dome := _lunar_dome(gy)
+	var dirs := _lunar_lights()
+	LunarBase.build(self, params, gy, dome, dirs[0])
+	var lamp := Color(0.85, 0.9, 1.0)
+	var refs := LunarSurface.build(self, dome["centre"], float(dome["radius"]), dirs[0], dirs[1], lamp)
+	_moon = refs["regolith"]
+	_moon_lights = refs["lights"]
+	_moon_apply()
+
+
+func _moon_apply() -> void:
+	if _moon == null:
+		return
+	var house := _group_level("house")
+	var k := Vector3(house, float(params["earthlight"]), float(params["base_lights"]))
+	if k == _moon_seen:
+		return
+	_moon_seen = k
+	_moon.set_shader_parameter("level", lerpf(MOON_FILM_LEVEL, 1.0, house))
+	_moon.set_shader_parameter("lamps", house)
+	_moon.set_shader_parameter("earth_energy", 0.85 * k.y)
+	_moon_lights.set_shader_parameter("energy", k.z)
+
+
+## The regolith's material (tests).
+func moon_material() -> ShaderMaterial:
+	return _moon
+
+
 func _city_tick() -> void:
 	_city_sky_light()
 	var house := _group_level("house")
@@ -914,6 +1009,8 @@ func _screen_level() -> float:
 func _param_changed(param: String, value: Variant) -> void:
 	if param in ["windows", "floodlight", "city_lights"]:
 		_city_apply()
+	if param in ["earthlight", "base_lights"]:
+		_moon_apply()
 	match param:
 		"neon":
 			for e: Array in _di_neon:

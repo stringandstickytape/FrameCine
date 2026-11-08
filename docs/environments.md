@@ -704,6 +704,21 @@ share; bind `gauge` to `film.bass`), `console` (an instrument desk behind the se
 seats. The console is a physics box. `needle_readings()` gives the needles' readings (tests: headless, a MultiMesh
 keeps no transforms).
 
+#### A Moon base's dome (since 2026-11-08)
+
+`scripts/env/systems/kit/lunar_dome.gd`, each off by default (the dome as before): `lattice` `geodesic` (an
+icosahedron with a point at the top split `frequency` times, even, so a ring of edges stands on the drum; steel struts
+of a box section, a hub at every node, bolt heads on the lowest two rings, a compression ring on the drum; flat glass in
+every triangle, one layer; `rib_phase` turns it by a share of a fifth of a turn; the struts and the drum unbaked: their
+thousands of small faces, and the drum's one long strip, would multiply the lightmap's atlas), `airlocks` (0..4: a door
+set into the dome's foot at 62 degrees either side of the screen, then at 118: a steel portal, the door leaf with a
+round window lit warm from the vestibule, a green status lamp over it, a lit panel beside it, all `signs`; a hidden
+bake light over each), `trays` (a cable tray along the drum on brackets, cables in it, broken at the doors).
+`glass_reflect` (the picture's colour mirrored faintly where a pane faces the screen: one dot product a pixel) and
+`glass_dust` (dust on the glass, thickest at its foot, gone 2.2 m up) are uniforms of the one glass layer
+(`kit/env_glass.gdshader`, both 0 by default). Measured in the Crater (radius 18, `frequency` 6): the lattice 1 draw
+and about 18k triangles, the glass 1 draw (one layer over the whole view: the dome's whole cost in fill rate).
+
 Measured, the Bathysphere's set (`test_room_bathysphere.gd`): the sea floor with its rocks, coral, bell and chimney 1
 draw and 8.7k triangles, the fronds 1 and 4.1k, the snow (1800) 1 and 3.6k, the bubbles 1, the beams 1 (480), the
 lenses 1, the ports' glass 1, the scope 1, the gauges' faces 1 and needles 1, the console's lamps 3, the brass and the
@@ -725,6 +740,23 @@ document sets them.
   `bulb_colour`, materials.
 - Slots: `parapet` (along the parapets' tops), `screen`, `proscenium`, `floor`, `corners`.
 - Measured: rooftop 8 draws, 12k triangles, 7 MB; lot 5 draws, 3k triangles; amphitheatre 4 draws, 2k triangles.
+- **The Moon base** (`amphitheatre` with `lunar` on, since 2026-11-08; `kit/lunar_base.gd` inside,
+  `kit/lunar_surface.gd` outside; off, the amphitheatre is as it was). Under a glass `dome_hall` in the room (its centre
+  and radius are read from it): hexagonal pavers of sintered regolith (`procedural.gd` `hex_pavers`) the whole round of
+  the dome; the tiers in precast blocks of about two metres, each its own shade, a chamfered nose with a strip of warm
+  light under it (`steps`); a pad on every seat and a back pad on the riser behind; stairs up each end of the tiers,
+  two steps a tier, a lamp in each riser and a handrail; a guard rail behind the top tier; a stage under the screen
+  with footlights (`stage`), two tapered pylons carrying the frame on steel brackets, a slot of cool light high on
+  each (`house`). Earth's light falls through the glass in the bake (a hidden directional light from where the sky
+  puts Earth). Outside, one mesh on its own unshaded shader (`shaders/env_regolith.gdshader`: Earth's light with the
+  regolith's way of scattering it back, the sun only over its shadow's line, the dome's lamps on the berm, the film's a
+  little): the plain banked against the drum, craters with raised rims, boulders in dust skirts each with its own sharp
+  shadow, the rover's tracks and the footprints (bands of ground drawn by the same shader, so their edges vanish), the
+  crater's wall at 128 to 160 m from the dome's centre with its peaks in the sun, a base of habitat modules with warm
+  windows, a lattice mast and its slow beacon, solar arrays, a cargo lander, a rover, the airlocks' tubes, an
+  instrument station; and one for its lights (`shaders/env_lunar_lights.gdshader`: points that face the eye, never under
+  a tenth of a degree, so a far light never shimmers). Live: `earthlight`, `base_lights`. The plain dims to 0.6 of its
+  light with the house lights (never out).
 - **The Athens roof and its city** (`rooftop` with `city` on, since 2026-11-08; `kit/athens_roof.gd`,
   `kit/athens_city.gd`; off, the rooftop is as it was). The roof made by hand: quarry tiles, the parapet with its
   coping and spouts, the screen building's weathered wall with ghost signs, the projection hut, the kiosk, the plants,
@@ -1584,6 +1616,9 @@ Way, clouds, an aurora, shooting stars, and Earth as seen from the Moon.
 | `earth`, `earth_bearing`, `earth_altitude`, `earth_size`, `earth_phase` | off, 180, 35, 2, 0.65 | Earth in the sky: where, how high, how big (degrees), how much of it is lit |
 | `earth_angle` | 0 | how far Earth has turned on its axis (degrees). Live: a track can turn it over the film |
 | `earth_turn` | 1 | Earth's own turning in times its real speed (motion, at most 60: once in 24 minutes) |
+| `earth_detail` | off | Earth as itself (`shaders/env_sky_earth_detail.gdshader`, since 2026-11-08 for the Crater): the continents, deserts, ice and cities from a small map drawn from coarse outlines (`kit/earth_map.gd`, 512 x 256, made once), the coasts broken by noise, cloud bands by latitude, the sun's glint on the sea, a terminator with rosy clouds, the cities' lights on the night side, a thin blue atmosphere round the limb (each pixel finds the ball itself, so the limb is exact). It turns west to east. Off: the plain Earth-like world as before |
+| `earth_light_angle` | 0 | where the sunlight comes from round Earth's face, degrees from its right (90 above, -90 below) |
+| `earth_lights` | 1 | `earth_detail`: the cities' lights. Live, a brightness |
 | `moon` | 0 | the Moon seen from the Earth (`mode` `sky`): its brightness. Live, a brightness. 0 draws nothing (the layer is made only when it is over 0) |
 | `moon_bearing`, `moon_altitude`, `moon_size`, `moon_phase` | 220, 45, 1.6, 0.22 | where it hangs, how high, how big (degrees; the real Moon is 0.5, drawn larger as the eye sees it low), how much of it is lit (0.22: a crescent). It is lit from the sunset's side (`glow_bearing`), the dark part a faint earthshine; a halo round it; clouds dim it |
 | `cloud_glow`, `cloud_glow_level` | warm orange, 0 | a town's lamps lighting the clouds from below, strongest low over the walls; a silver edge near the Moon. Live, a brightness |
@@ -1673,7 +1708,7 @@ covers them, as the screen would.
 | Palace of Culture | `vista` birches in snow outside the windows; `snow` bound to the room's snow setting |
 | Reclaimed | `sky` through the open roof: stars, `clouds` bound to `weather.wet` |
 | Ice cinema | `sky` (68 degrees north, a January night, the Moon low in the south-east): `aurora` from the Aurora setting, up for the pre-show and in quiet scenes by cues, `aurora_bearing` over the window and the left skylights |
-| Crater | `sky` `mode` `space`, `earth` on, `earth_turn` from the Earth's speed setting, `milky_way` bound to `playback.playing` |
+| Crater | `sky` `mode` `space`, `earth` and `earth_detail` on, `earth_turn` from the Earth's speed setting, `milky_way` bound to `playback.playing`, `milky_detail` 1 |
 | Screening room 1962 | `vista` pool behind the window, `pool_glow` 1 |
 
 ## A room's screen and its builder
@@ -1880,7 +1915,7 @@ people.
 | 12 | Reclaimed | `auditorium` with `ceiling_cover` 0.5, ivy and ferns (`kit`) | stars (`sky`), dynamic `weather` (rain into a puddle that reflects the film) | birds, fireflies, an occasional deer (`life`) | | a patched sheet | weather |
 | 13 | Ice cinema | `domestic` (`shell` `kit`) with the ice hall's pieces (`kit`: blocks, carvings, a vault with skylights, a snowfield outside), hides (`seats`) | candles inside the ice, the film's colours through the front wall, the aurora in the window and the skylights (`sky`), breath fog (`atmosphere`), snow outside (`weather`) | far huskies, ice creaks (`sound_bed`) | candles down and the aurora settles with the film | | aurora |
 | 14 | Bathysphere | `dome_hall` (glass; the sea floor, kelp, coral, a sunken bell, a vent, marine snow, floodlights; portholes, rivets, gauges, a sonar console) | the water by depth, Snell's window and shafts, caustics (`light`) | schools of fish, glowing creatures drawn to the screen, a manta overhead, a rare whale in a quiet scene (`life`, cue with `cooldown`), hull creaks, the vent's bubbles, a sonar ping, a far song (`sound_bed`) | floodlights down with the film, the scope dims, pings in the pre-show | | depth, lights outside, whale |
-| 15 | Crater | `terrace` (a lunar amphitheatre) under a `dome_hall` | Earth turning over the film (`sky`, film-time track), the Milky Way when the lights dim | silence (no bed) | | | Earth's speed |
+| 15 | Crater | `terrace` (`lunar`: a Moon base's amphitheatre, the plain, the crater's wall, a base, a lander, a rover) under a `dome_hall` (`geodesic`, airlocks, trays) | Earth as itself turning over the screen (`sky` `earth_detail`), the Milky Way when the lights dim, the crater's peaks in the sun | silence (no bed) | the dome's lamps out, the strips low | | Earth's speed |
 | 16 | Void | `mirror_floor` | black | | | | ripple |
 | 17 | Pillow Fort, 1993 | `domestic` (cushions, a bedsheet), a tree, a tin of sweets (objects) | fairy lights (`light`, flicker), rain on the window (`weather`) | a ticking radiator (`sound_bed`) | the VCR flashes 12:00 (object widget) | a CRT telly (`presentation`, TV-era display) | the telly fills the opening |
 
@@ -2651,30 +2686,62 @@ answered "go nuts on the bathysphere - I think that has a lot of potential that 
 
 ### Room: Crater
 
-`app/environments/crater.env.json`. A lunar amphitheatre of stone tiers under a glass dome, Earth over the screen
-in a black sky full of stars. Silent: the room has no sound bed and makes no sound at all; only the film is heard.
+`app/environments/crater.env.json`. A Moon base's cinema under a geodesic glass dome: Earth as itself over the
+screen in a black sky full of stars, the crater's wall all round with its peaks catching a sun that has just gone
+under the horizon behind, a small base and a lander out on the plain. Silent: no sound bed, no sound at all; only the
+film is heard. The deep pass (2026-11-08: "Better to do a smaller number of incredible superb ones than a large number
+not so", the user) replaced the plain tiers on a flat grey plain under sixteen ribs.
 
-- **The amphitheatre** (`terrace`, style `amphitheatre`): seven tiers on arcs of 120 degrees round the screen
-  (rows 2 in front, 5 behind, 0.95 m deep, 0.42 m rise), the pit 1.26 m under the room's own seat, the screen (8 x
-  4.5 m) on a dark frame 11.4 m ahead, 18 rocks on a grey plain that runs 150 m out. The room's own seat is in the
-  third tier at the origin; seat picking uses the tiers' places (`tier`).
-- **The dome** (`dome_hall` as a cover: `has_floor` and `seating` off, `outside` none): glass, radius 18 m centred
-  9 m ahead, on a 0.8 m drum with 16 cool lamps (group `house`), 12 m high, 16 ribs of brushed steel. Every seat's
-  eyes and the screen are under it with a metre to spare. The glass is tinted almost black, so space shows black
-  through it.
-- **Why both:** the two combine cleanly. The terrace gives the tiers, the plain and the screen; the dome adds only its
-  drum, panes, ribs and lamps over them (no floor, no seats, no water). The screen is the terrace's.
-- **The sky** (`sky`, mode `space`): latitude -30, a July night, so the Milky Way's bright middle stands high.
-  `milky_way` follows `playback.playing` (0.35 before the film, 1 in it, over 3 s): the Milky Way comes out as the
-  lights dim. Earth 4 degrees across, 30 degrees up, a little to the right of the screen, 70 % lit.
-- **The rim** (`vista`): low grey hills 160 m out all round, the crater's wall.
+- **The amphitheatre** (`terrace`, style `amphitheatre`, `lunar` on; `kit/lunar_base.gd`): seven tiers on arcs of 120
+  degrees round the screen (rows 2 in front, 5 behind, 0.95 m deep, 0.42 m rise), the pit 1.26 m under the room's own
+  seat, the screen (8 x 4.5 m) 11.4 m ahead: all as before (seats, eye height and screen unchanged). Now the tiers are
+  precast blocks of sintered regolith about 2 m long, each its own shade, with a chamfered nose and a warm strip of
+  light hidden under it that washes the tread in front (`steps`); a slate pad on every seat and a back pad on the riser
+  behind it; stairs up both ends (two steps a tier, a lamp in each riser, a steel handrail); a guard rail along the back
+  of the top tier, over its drop. The floor is hexagonal pavers (`hex_pavers`) the whole round of the dome. The screen
+  stands on a low stage with a line of footlights (`stage`) between two tapered pylons that carry its frame on steel
+  brackets, a short slot of cool light high on each (`house`): no more legs and braces.
+- **The dome** (`dome_hall` as a cover, `lattice` `geodesic`, `frequency` 6): radius 18 m centred 9 m ahead, 12 m
+  high on a 0.8 m concrete drum: steel struts and bolted hubs, flat glass in every triangle (one layer, tinted almost
+  black; `glass_reflect` 0.5 puts a faint ghost of the picture in the panes behind and above, `glass_dust` 0.5 dusts
+  their feet), a compression ring on the drum, 16 cool lamps round it (`house`). Two airlocks either side of the
+  screen (`airlocks` 2): steel portals, doors with a warm round window, green status lamps, blue panels; their tubes
+  run out across the plain. A cable tray runs round the drum (`trays`).
+- **Outside** (`kit/lunar_surface.gd`, one draw on `env_regolith.gdshader`, its lights one more): the regolith banked
+  against the drum and rolling out to the crater's wall at 128 to 160 m from the dome's centre, 23 craters with raised
+  rims (a big one ahead on the left), 70 boulders in dust skirts with their sharp shadows cast away from Earth, a
+  rover's tracks curving from the right airlock to the base and to the lander, footprints from the left airlock to an
+  instrument station and back; ahead on the left the base (three habitat modules half buried under bagged regolith
+  with warm windows, a node, a lattice mast with a dish turned to Earth and a red beacon that swells and fades once in
+  4 s, two solar arrays), on the right a cargo lander in gold foil, by the right airlock a parked rover; amber marker
+  lights every 7 m along the track. The light: Earth's, from where the sky puts it (the regolith scatters it back:
+  the plain ahead, lit from beyond it, is dim, its rocks' shadows reaching towards the dome); the sun's only over a
+  shadow line just under the wall's crest (the peaks catch it); the dome's lamps on the berm. In the film the plain
+  keeps 0.6 of its light (the eye adapts to the dimmed room) and the berm's glow goes with the lamps. All pastiche: no
+  agency, no flag, no mark of anyone's; no people.
+- **The sky** (`sky`, mode `space`): latitude -30, a July night; 4000 faint stars; the Milky Way with its dust lanes
+  and star clouds (`milky_detail` 1), `milky_way` 0.25 before the film and 0.6 in it (bound to `playback.playing`,
+  over 3 s). Earth (`earth_detail`): 5 degrees across, 30 degrees up, a little right of the screen's middle, 80 % lit
+  from below (`earth_light_angle` -70: the sun under the horizon behind the room, as the lit peaks say), so a thin
+  night side shows its cities' lights; Africa and the Atlantic face the room at the start.
 - **Setting:** Earth's speed (`earth_speed`, 0.5 to 4 times, default 1): bound to `sky.earth_turn` by `range`
   [6, 48], so 1 x is twelve times Earth's real speed, a turn in two hours (about one a film), and 4 x a turn in 30
   minutes. The Motion setting scales it (half Motion, half the speed).
-- **Cues:** `dim` (the dome's lamps out over 5 s with the film), `lights_up`. `pause_rise_db` 0.
-- **Measured** (`test_room_crater.gd`, headless): 12 draws, 15 836 triangles, no lights, no particles, 4.3 MB.
-- **The render** (lavapipe, from the seat): the framed screen on the pit floor, pale tiers either side, the dome's
-  ribs meeting overhead, stars and the Milky Way through the glass, Earth up and to the right of the picture.
+- **Cues:** `dim` (the dome's lamps out and the strips to 0.4 over 5 s with the film), `lights_up` (both back over 4
+  s in the pre-show and at the end). `pause_rise_db` 0.
+- **Measured** (`test_room_crater.gd`, headless): before, 12 draws, 15 836 triangles, no lights, no particles,
+  4.3 MB; now 23 draws, 161 170 triangles, no live light, no particles, 9.2 MB (the pavers' and the concrete's maps,
+  the craterlets' map, Earth's map). The bake under lavapipe: about 7 s, a 512 x 512 atlas in 2 layers (3.1 MB); the
+  floor, the tiers, the stage, the pylons and the frame are baked, the lattice, the drum, the steel, the pads and the
+  whole Moon are not.
+- **Costs (judge on the device):** the dome's one layer of glass covers the whole view (blended, a cheap shader: one
+  overdraw); the plain and the wall are opaque, unshaded, with two texture reads a pixel near and one far; the lights
+  are a handful of small additive quads. The lattice is about 18k triangles of thin struts (aliasing, not fill, is its
+  risk). No particles, no live light.
+- **The renders** (lavapipe, `CRATER_BAKE=1`): from the seat the picture between its pylons on the stage, the lattice
+  closing overhead against the stars, Earth in a triangle of it up and right, the wall's sunlit peaks low either side,
+  the base's windows to the left; in the film the struts take the picture's colours, the Milky Way comes out and the
+  floor and tiers go dark but for the strips.
 - **Sound:** none, by design: `sound_bed` `silence` (it plays nothing) and `acoustics` `vacuum` (dry); no cue
   sound, no life, no pause rise (the test measures nothing on Environment). Acoustics for the film's spatial sound:
   a large glass dome, rt60 1.1, wet 0.35.
