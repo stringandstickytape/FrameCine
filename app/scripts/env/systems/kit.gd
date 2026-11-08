@@ -14,7 +14,10 @@ extends "res://scripts/env/systems/kit/builder.gd"
 ## since 2026-11-08): its board-marked concrete hall, wall mosaics, coffered ceiling and field of globes; and the
 ## Flagship's (kit/flagship.gd, since 2026-11-08): its faceted acoustic hall, starlight ceiling and the rows' arms; and
 ## the Pink Palace's (kit/pink_palace.gd, since 2026-11-08): a hall inside a great shell, its fluted vault and
-## scalloped rings lit from hidden lamps (PieceCove), mirrors, a buttoned balcony, a sunburst dome with a chandelier.
+## scalloped rings lit from hidden lamps (PieceCove), mirrors, a buttoned balcony, a sunburst dome with a chandelier;
+## and the Screening room 1962's (kit/screening_1962.gd, since 2026-11-08): its walnut room, coffered ceiling and
+## window, a floating hearth with a slow fire and a sunburst clock, its furniture, and the garden outside (Garden,
+## Glows: the hall's own meshes).
 ## All the pieces share a few meshes, one surface a material: a baked one (PieceStatic), an unbaked one for rounded
 ## shapes and leaves (PieceSoft), the lamp shades (PieceLamps), the glows (windows, a booth's window, the video
 ## recorders' clocks: PieceDisplay) and each neon sign. The builder's slots come
@@ -44,7 +47,10 @@ static func spec() -> Dictionary:
 				+ "baffles with starlight, a velvet-masked curved screen in a slatted proscenium, armrests with "
 				+ "cupholders, lit row letters, a glass balustrade), a dream palace inside a great scallop shell (a "
 				+ "fluted vault fanning from a sunburst dome with a chandelier of glass shells, scalloped rings round "
-				+ "the screen, mirrors, a wave frieze, a buttoned velvet balcony), "
+				+ "the screen, mirrors, a wave frieze, a buttoned velvet balcony), a 1962 screening room in a house "
+				+ "in the hills (walnut panels and slats, a coffered ceiling, a floating hearth with a slow fire and a "
+				+ "sunburst clock, a credenza, a bar cart, shelves of books and film cans, a terrace with a glowing "
+				+ "pool, agaves, palms and the city's lights below), "
 				+ "a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
 				+ "furniture: a desk, a computer, a video recorder flashing 12:00, a sideboard, a standard lamp, a rug, "
 				+ "a coffee table; dressing: bunting, a tea set, sandwiches, a stool, a channel dial, a soundbar, a "

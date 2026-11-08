@@ -15,7 +15,8 @@ extends RefCounted
 ##   maps(pattern) -> {albedo, normal, orm, mean}   the pattern's textures (mean: its albedo's mean, linear)
 ##   apply(material, pattern, colour)   a house material shows the pattern in this colour (on average)
 ##   glass(colour, alpha, room) -> ShaderMaterial   see-through glass that dims with the house lights
-##   rose_window(), letters(text, colour, back), gradient(top, bottom), abstract(seed, palette), flame()   pictures
+##   rose_window(), letters(text, colour, back), gradient(top, bottom), abstract(seed, palette), colour_field(aspect),
+##   flame()   pictures
 
 const PATTERNS: Array[String] = ["pressed_tin", "ice_blocks", "swirl_carpet", "corrugated", "plasterboard",
 		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles", "deco_carpet", "hex_pavers", "board_concrete",
@@ -591,6 +592,54 @@ static func abstract(seed_value: int, palette: Array) -> Texture2D:
 				var a := 1.0 - smoothstep(-0.01, 0.01, d + 0.01 * _noise(p.x, p.y, 24, seed_value + 3))
 				c = c.lerp(bl[1], a * 0.85)
 			img.set_pixel(x, y, c)
+	img.generate_mipmaps()
+	var t := ImageTexture.create_from_image(img)
+	_pictures[key] = t
+	return t
+
+
+## A canvas of our own for a 1962 collector (since 2026-11-08, the Screening room 1962's painting): a hard-edged
+## composition on a warm ground: a deep teal field, a vermilion sun over its edge, an ochre bar, a black line and a
+## small black square; each colour laid on by hand (its edge wavers a little, the paint's strokes show in it), the
+## canvas's weave under all. aspect: the picture's width over its height.
+static func colour_field(aspect: float) -> Texture2D:
+	var key := "colour_field %.3f" % aspect
+	if _pictures.has(key):
+		return _pictures[key]
+	var w := 512
+	var h := maxi(64, roundi(w / maxf(aspect, 0.2)))
+	var img := Image.create_empty(w, h, false, Image.FORMAT_RGB8)
+	var ground := Color(0.86, 0.79, 0.64)
+	var teal := Color(0.06, 0.29, 0.31)
+	var vermilion := Color(0.86, 0.27, 0.1)
+	var ochre := Color(0.87, 0.6, 0.16)
+	var black := Color(0.07, 0.065, 0.06)
+	for y in h:
+		for x in w:
+			var u := (x + 0.5) / w
+			var v := (y + 0.5) / h
+			# The edges waver: each shape's boundary pushed by a slow noise.
+			var wob := (_noise(u, v, 9, 11) - 0.5) * 0.006
+			var strokes := _noise(u * 6.0, v * 0.7, 48, 5) * 0.06 - 0.03
+			var c := ground * (0.95 + 0.06 * _noise(u, v, 12, 3)) + Color(strokes, strokes, strokes) * 0.4
+			# The teal field.
+			var dt := maxf(maxf(0.07 - u, u - 0.47), maxf(0.09 - v, v - 0.91)) + wob
+			c = c.lerp(teal * (0.92 + 0.12 * _noise(u * 3.0, v, 20, 7)) + Color(strokes, strokes, strokes) * 0.3,
+					1.0 - smoothstep(-0.002, 0.002, dt))
+			# The ochre bar, under the sun.
+			var db := maxf(maxf(0.5 - u, u - 0.93), maxf(0.7 - v, v - 0.82)) + wob
+			c = c.lerp(ochre * (0.94 + 0.1 * _noise(u * 4.0, v, 24, 9)), 1.0 - smoothstep(-0.002, 0.002, db))
+			# The sun: round on the canvas (its width in u is its height over the aspect).
+			var ds := Vector2((u - 0.555) * aspect, v - 0.4).length() - 0.27 + wob
+			c = c.lerp(vermilion * (0.93 + 0.12 * _noise(u * 2.0, v * 2.0, 16, 13)) + Color(strokes, strokes, strokes)
+					* 0.3, 1.0 - smoothstep(-0.002, 0.002, ds))
+			# The black line and the small square.
+			var dl := maxf(maxf(0.8 - u, u - 0.812), maxf(0.1 - v, v - 0.6)) + wob * 0.5
+			var dq := maxf(maxf(0.86 - u, u - 0.915), maxf(0.13 - v, v - 0.23)) + wob
+			c = c.lerp(black, 1.0 - smoothstep(-0.0015, 0.0015, minf(dl, dq)))
+			# The canvas's weave.
+			var weave := 0.97 + 0.03 * sin(x * 2.2) * sin(y * 2.2)
+			img.set_pixel(x, y, c * weave)
 	img.generate_mipmaps()
 	var t := ImageTexture.create_from_image(img)
 	_pictures[key] = t

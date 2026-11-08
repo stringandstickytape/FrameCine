@@ -3365,8 +3365,8 @@ msgstr "雅典屋顶上的夏日露天影院：赤陶地砖上的导演椅、三
 msgid "A tired multiplex screen, 1983: plasterboard, a swirly carpet, a broken seat, smoke in the beam and a worn print."
 msgstr "1983年一间疲惫的多厅影院放映厅：石膏板墙、旋涡花纹地毯、一个坏座位、光束里的烟雾和一卷磨损的拷贝。"
 
-msgid "A private screening room, 1962: walnut walls, club chairs, a pool glowing through the window, and a painting that slides up to show the screen."
-msgstr "1962年的私人放映室：胡桃木墙面、俱乐部椅、窗外发光的泳池，一幅画升起露出银幕。"
+msgid "A collector's private cinema in the hills, 1962: walnut and brass, a slow fire on a floating hearth, the pool glowing outside the glass, the city's lights below, a painting that rises off the screen."
+msgstr "1962年山间收藏家的私人影院：胡桃木与黄铜，悬空壁炉里的慢火，玻璃外发光的泳池，山下城市的灯火，一幅画从银幕前升起。"
 
 msgid "A shopfront picture house, 1906: a pressed tin ceiling, folding chairs, gas lamps and a dusty beam from the tin booth."
 msgstr "1906年的店面电影院：压花锡板天花板、折叠椅、煤气灯，铁皮放映间射出满是尘埃的光束。"

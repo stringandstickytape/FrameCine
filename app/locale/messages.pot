@@ -4376,7 +4376,7 @@ msgid "A tired multiplex screen, 1983: plasterboard, a swirly carpet, a broken s
 msgstr ""
 
 #: environments/screening_room_1962.env.json
-msgid "A private screening room, 1962: walnut walls, club chairs, a pool glowing through the window, and a painting that slides up to show the screen."
+msgid "A collector's private cinema in the hills, 1962: walnut and brass, a slow fire on a floating hearth, the pool glowing outside the glass, the city's lights below, a painting that rises off the screen."
 msgstr ""
 
 #: environments/shopfront_1906.env.json
