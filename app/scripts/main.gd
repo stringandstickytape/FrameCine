@@ -283,6 +283,10 @@ var foveation := "low"
 var foveation_sharp_panel := true
 ## What foveation is set on: the OpenXR interface in XR (_setup_view), else null. Tests put a stand-in here.
 var foveation_xr: Object
+## False from _setup_view until the session has drawn a few frames. The engine makes the eye swapchains foveated only
+## if the level is above 0 when it creates them (the session's first frames). Until then the level stays at
+## project.godot's: setting 0 earlier (the panel rule, at start) left foveation off for good (2026-11-09).
+var foveation_live := true
 ## [controllers] look and look_options: how both controllers look (scripts/xr/controller_look.gd).
 var controller_look := ControllerLook.DEFAULT
 var controller_look_options := {}
@@ -558,6 +562,11 @@ func _setup_view(want_xr: bool) -> void:
 		# resolution all over, then unfoveated whatever the level, with odd distortions (2026-11-04).
 		get_viewport().vrs_mode = Viewport.VRS_XR
 		foveation_xr = xr
+		foveation_live = false
+		xr.connect("session_visible", _foveation_go_live)
+		xr.connect("session_stopping", _foveation_hold)
+		if xr.get_session_state() >= OpenXRInterface.SESSION_STATE_VISIBLE:
+			_foveation_go_live.call_deferred()
 		xr_camera.current = true
 		camera = xr_camera
 		use_xr = true
@@ -1165,12 +1174,33 @@ static func foveation_choice(level: int, sharp_panel: bool, panel_shown: bool, p
 ## Sets the runtime's foveation level from [view] foveation and the panel rule. Called with the controller labels,
 ## which change exactly when the panel or the agent pane opens or closes, and when either setting changes.
 func _update_foveation() -> void:
-	if foveation_xr == null or not "foveation_level" in foveation_xr or not foveation_available():
+	if foveation_xr == null or not "foveation_level" in foveation_xr or not foveation_available() \
+			or not foveation_live:
 		return
 	var want := foveation_choice(FOVEATION_LEVELS.find(foveation), foveation_sharp_panel, menu_shown,
 			local_agents != null and local_agents.pane_shown())
 	if foveation_xr.foveation_level != want:
 		foveation_xr.foveation_level = want
+
+
+## The session is visible: the engine creates the eye swapchains on the frames that follow. A few frames later the
+## level from the settings can apply (see foveation_live).
+func _foveation_go_live() -> void:
+	if foveation_live:
+		return
+	for i in 10:
+		await get_tree().process_frame
+	if foveation_live or foveation_xr == null:
+		return
+	foveation_live = true
+	_update_foveation()
+
+
+## The session ends: a new one makes new swapchains, so the level goes back to project.godot's until they exist.
+func _foveation_hold() -> void:
+	foveation_live = false
+	if foveation_xr != null and foveation_available():
+		foveation_xr.foveation_level = int(ProjectSettings.get_setting("xr/openxr/foveation_level", 1))
 
 
 func _update_overlay_visibility() -> void:

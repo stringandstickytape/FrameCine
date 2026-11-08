@@ -371,6 +371,13 @@ The viewer can change both in System, Rendering (`[view] foveation`, default "lo
 on; the `foveation` command): project.godot keeps level 1 so the swapchain is made foveated, and the app sets
 `OpenXRInterface.foveation_level` from the setting at run time.
 
+The engine makes the eye swapchains foveated only if the level is above 0 when it creates them, on the session's
+first frames. Until 2026-11-09 the app set the level in `_ready`, and the panel rule makes it 0 there (the panel shows
+at start), so the swapchains were made without foveation and no level changed anything. The app now keeps
+project.godot's level until the session has been visible for 10 frames (`foveation_live` in main.gd), and goes back to
+it when the session stops. Checked with a bare test project, sphere test (GPU per frame): Off 36.5 ms, Low 14.1 ms, High
+5.9 ms, the same with and without Valve's FDM injection layers, which Steam adds since the 2026-11-03 SteamOS update.
+
 Rejected: subsampled images (Godot's default), which the Frame doesn't support yet: with them the whole picture warps
 as the head turns (Godot issue 124520); dynamic foveation, which the runtime ignores. Would change if: the Frame adds
 subsampled images, or a later engine merges PR 124811 (then the fork's line goes).
