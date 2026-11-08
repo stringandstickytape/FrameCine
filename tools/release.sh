@@ -288,16 +288,21 @@ sed 's/^/  /' "$REL/latest.json"
 echo "install-manifest.json:"
 sed 's/^/  /' "$REL/install-manifest.json"
 
+# gh runs in the release folder, with the assets by name.
 GH_ARGS=(release create "$TAG" --repo "$GH_REPO" --verify-tag --draft --title "VR Video Player $VERSION"
-         --notes-file "$REL/release-notes.md")
-for a in "${ASSETS[@]}"; do GH_ARGS+=("$REL/$a"); done
-show() { printf '  %q' "$@"; printf '\n'; }
+         --notes-file release-notes.md "${ASSETS[@]}")
+show() { local s; s=$(printf ' %q' "$@"); echo "  ${s# }"; }
 if [ "$PUBLISH" = 0 ]; then
   echo
-  echo "Not published (no --publish). To publish, after the user agrees, run: tools/release.sh $VERSION --publish"
-  echo "which runs, in $REPO:"
+  if [[ "$VERSION" == *-* ]]; then
+    echo "Not published: $VERSION is a trial version. A release runs: tools/release.sh ${VERSION%%-*} --publish"
+  else
+    echo "Not published (no --publish). To publish, after the user agrees: tools/release.sh $VERSION --publish"
+  fi
+  echo "which, after the checks and the build above, runs in the repository:"
   show git tag -a "$TAG" -m "VR Video Player $VERSION" "$COMMIT"
   show git push origin "refs/tags/$TAG"
+  echo "  and in ${REL#"$REPO/"}/:"
   show gh "${GH_ARGS[@]}"
   show gh release edit "$TAG" --repo "$GH_REPO" --draft=false --latest
   echo "  then checks that $BASE_URL/latest/download/latest.json is this latest.json, byte for byte"
@@ -307,7 +312,7 @@ fi
 step "publish $TAG"
 git rev-parse -q --verify "refs/tags/$TAG" > /dev/null || git tag -a "$TAG" -m "VR Video Player $VERSION" "$COMMIT"
 git push origin "refs/tags/$TAG"
-gh "${GH_ARGS[@]}"
+(cd "$REL" && gh "${GH_ARGS[@]}")
 # Published only once every asset is up, so no player sees a latest.json without its package.
 gh release edit "$TAG" --repo "$GH_REPO" --draft=false --latest
 CHECK=$(mktemp)
