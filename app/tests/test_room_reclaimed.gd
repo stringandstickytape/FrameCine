@@ -9,7 +9,9 @@ extends "res://tests/env_builder_harness.gd"
 ## vertices: some lit, more in shadow; never on the picture), seats tipped up and broken, never the viewer's; the owl
 ## far off and quiet in the film, the crickets only when it is dry (tests/test_room_set5.gd checks the weather, the
 ## creatures and the room's level). Under lavapipe it draws the room from its own seat, left, right, up, back, a side
-## seat and up behind, in the pre-show and with a film playing (RECL_BAKE=1 bakes it first; RECL_RENDER_ONLY=1 skips
+## seat and up behind, in the pre-show and with a film playing, at the headset's room light (the room's ambient; in
+## the film times the light system's dimmed_level), and prints how bright the walls beside the picture, the floor
+## before the viewer and the picture are (RECL_BAKE=1 bakes it first; RECL_RENDER_ONLY=1 skips
 ## the checks; RECL_SHOTS=preshow or film draws one of them; RECL_CLOSE=1 adds close views in the pre-show; RECL_TOP=1
 ## a view from over the roof; RECL_TAG names the files).
 ## godot --headless --xr-mode off --path app --script res://tests/test_room_reclaimed.gd
@@ -110,9 +112,10 @@ func _moon(room: Node3D) -> void:
 	check("no Moon under the front roof but for the hole (%.2f)" % Ruin.moon_light(Vector3(3.0, 1.0, -7.0)),
 			Ruin.moon_light(Vector3(3.0, 1.0, -7.0)) < 0.01)
 	var hole := Vector3(Ruin.HOLE.x, Ruin.CEIL, Ruin.HOLE.y)
-	var pool := hole - Ruin.MOON_DIR / Ruin.MOON_DIR.y * (Ruin.CEIL - 1.0)
-	check("the shaft through the hole lands on the stage (%s: %.2f)" % [pool, Ruin.moon_light(pool)],
-			Ruin.moon_light(pool) > 0.9 and pool.z < -7.6 and pool.z > -9.2)
+	var pool := hole - Ruin.MOON_DIR / Ruin.MOON_DIR.y * (Ruin.CEIL + 0.38)
+	check("the shaft through the hole lands on the pit's floor under the front roof (%s: %.2f)" % [pool,
+			Ruin.moon_light(pool)], Ruin.moon_light(pool) > 0.9 and pool.z < -6.0 and pool.z > -8.4
+			and Ruin.moon_light(pool + Vector3(0, 0, 1.2)) < 0.05)
 	var sc := _v3(room.doc["screen"]["center"])
 	var ss: Array = room.doc["screen"]["size"]
 	var worst := 0.0
@@ -202,7 +205,14 @@ func _render(doc: Dictionary) -> void:
 	for phase: String in ["preshow", "film"]:
 		if only != "" and not (phase in only):
 			continue
-		RoomRender.set_light(screen, 0.05 if phase == "preshow" else 0.015)
+		# The room light as the headset gives it (vr_environment.gd: env_light is the room's ambient times the light's
+		# level; light_follow.gd: the light system's dimmed_level while the film plays).
+		var ambient := float(doc["room"]["ambient"])
+		var dimmed := 1.0
+		for sys: Dictionary in doc["systems"]:
+			if str(sys["system"]) == "light":
+				dimmed = float(sys["params"].get("dimmed_level", 1.0))
+		RoomRender.set_light(screen, ambient if phase == "preshow" else ambient * dimmed)
 		var vc := await RoomRender.open(self, doc)
 		var host: Node = (vc[2] as Node).host
 		for mi: Node in (vc[2] as Node).get_children():
@@ -237,7 +247,15 @@ func _render(doc: Dictionary) -> void:
 					(l as Light3D).shadow_enabled, (l as Node3D).global_position, (l as Light3D).light_energy])
 		var eye := Vector3(0, 1.2, 0)
 		var p := "recl_%s%s%s_" % [tag, "baked_" if baked else "", phase]
-		await RoomRender.shot(self, vc, eye, screen, p + "seat")
+		var img: Image = await RoomRender.shot(self, vc, eye, screen, p + "seat")
+		# As test_room_atmospheric_1928.gd measures its houses: the walls beside the picture, and the floor before the
+		# viewer, against the picture (luminance of the shown colours, 0..1).
+		var walls := (RoomRender.mean(img, Rect2(0.08, 0.3, 0.12, 0.2)).get_luminance()
+				+ RoomRender.mean(img, Rect2(0.8, 0.3, 0.12, 0.2)).get_luminance()) * 0.5
+		var floor_lum := RoomRender.mean(img, Rect2(0.1, 0.82, 0.8, 0.16)).get_luminance()
+		var picture := RoomRender.mean(img, Rect2(0.42, 0.44, 0.16, 0.12)).get_luminance()
+		print("  render: %s from the seat: the walls %.3f, the floor %.3f, the picture %.3f" % [phase, walls, floor_lum,
+				picture])
 		await RoomRender.shot(self, vc, eye, eye + Vector3(-1.0, 0.15, -0.4), p + "left")
 		await RoomRender.shot(self, vc, eye, eye + Vector3(1.0, 0.15, -0.4), p + "right")
 		await RoomRender.shot(self, vc, eye, eye + Vector3(0.0, 1.0, -0.35), p + "up")
@@ -262,7 +280,11 @@ func _render(doc: Dictionary) -> void:
 			await RoomRender.shot(self, vc, Vector3(2.0, 1.5, 0.5), Vector3(7.2, 4.0, 3.2), p + "birch")
 			await RoomRender.shot(self, vc, Vector3(-3.0, 1.4, -2.0), Vector3(-5.8, 1.6, -8.6), p + "curtain")
 			await RoomRender.shot(self, vc, Vector3(0.5, 1.3, -1.5), Vector3(1.5, -0.4, -4.6), p + "meadow")
-			await RoomRender.shot(self, vc, Vector3(-1.5, 1.4, -2.0), Vector3(-0.4, 0.15, -8.8), p + "shaft")
-			await RoomRender.shot(self, vc, Vector3(-3.0, 1.2, -2.0), Vector3(-7.0, 7.5, -5.9), p + "hole")
+			await RoomRender.shot(self, vc, Vector3(-1.5, 1.4, -2.0), Vector3(0.5, -0.4, -7.3), p + "shaft")
+			await RoomRender.shot(self, vc, Vector3(-3.0, 1.2, -1.0), Vector3(-6.74, 7.5, -4.14), p + "hole")
+			await RoomRender.shot(self, vc, Vector3(3.5, 1.6, -0.5), Vector3(8.0, 3.0, 0.5), p + "wall")
+			await RoomRender.shot(self, vc, Vector3(-3.5, 1.6, 0.5), Vector3(-8.0, 4.0, -3.5), p + "wall_left")
+			await RoomRender.shot(self, vc, Vector3(-1.5, 1.4, 1.0), Vector3(-4.5, 2.6, 5.6), p + "rear")
+			await RoomRender.shot(self, vc, Vector3(0.0, 2.6, 2.6), Vector3(0.0, 3.2, 5.6), p + "ports")
 			(vc[1] as Camera3D).fov = 90.0
 		await RoomRender.close(self, vc)

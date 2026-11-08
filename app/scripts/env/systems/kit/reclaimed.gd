@@ -62,11 +62,11 @@ const GRILLE_X := 6.35
 const GRILLE_W := 1.7
 const GRILLE_Y0 := 1.5
 const GRILLE_Y1 := 5.3
-## A hole through the front roof and its ceiling over the stage's left (the ceiling's in x, z; its radius): the Moon
-## comes through it in a narrow shaft onto the stage's apron before the picture's left half (a pool of moonlight on the
-## empty stage); from the seats a few stars show through it. The roof's hole sits up the Moon's ray from the ceiling's,
-## and is larger.
-const HOLE := Vector2(-7.0, -5.9)
+## A hole through the front roof and its ceiling over the hall's left (the ceiling's in x, z; its radius): the Moon
+## comes through it in a narrow shaft onto the pit's floor under the front roof, a pool of moonlight in the dark below
+## the picture (on the stage's narrow apron it hardly showed from the seats; the second pass, 2026-11-08); from the
+## seats a few stars show through it. The roof's hole sits up the Moon's ray from the ceiling's, and is larger.
+const HOLE := Vector2(-6.74, -4.14)
 const HOLE_R := 0.62
 ## The trusses over the open half (z), the one over the edge first.
 const TRUSSES: Array[float] = [-2.9, 0.3, 3.1]
@@ -89,8 +89,8 @@ const SKY_SHARE := 0.22
 const TEXELS := {"brick": 0.12, "plaster": 0.14, "wood": 0.13, "cloth": 0.15}
 ## The walls' thickness (their outer faces: the Moon's shadows need them).
 const WALL_T := 0.45
-## Plaster stands this far out of the brick; its broken edges show this much.
-const PLASTER := 0.025
+## Plaster stands this far out of the brick; its broken edges show this much (a lip you can read from the seats).
+const PLASTER := 0.035
 ## The marching squares' cell on walls and the ceiling (metres).
 const CELL := 0.2
 
@@ -100,7 +100,11 @@ const OXBLOOD := Color(0.12, 0.028, 0.02)
 const GILT := Color(0.36, 0.22, 0.06)
 const CEILING_WHITE := Color(0.42, 0.4, 0.34)
 const DAMP_GREEN := Color(0.05, 0.075, 0.03)
-const BRICK := Color(0.36, 0.27, 0.22)
+## Brick: darker than the plaster over it, so a hole reads as a hole (the second pass, 2026-11-08: paler brick in
+## the moonlight read as paper stuck on the wall).
+const BRICK := Color(0.2, 0.125, 0.095)
+## Plaster freshly broken: paler than its painted face (the lip round a hole).
+const PLASTER_BREAK := Color(0.4, 0.38, 0.32)
 const TIMBER := Color(0.42, 0.38, 0.33)
 const BOARD := Color(0.36, 0.3, 0.25)
 const VOID := Color(0.012, 0.011, 0.01)
@@ -255,13 +259,14 @@ static func ruin(c: Object) -> Ruin:
 		var m: ShaderMaterial = light.from_param({"library": library, "color": [1.0, 1.0, 1.0], "spill": spill}, true)
 		m.set_shader_parameter("instance_tint", true)
 		return m
-	# Their share of the film's light: the stone and timber near the screen take its colour, the far ruin a little.
-	r.brick.surface(mat.call("red_brick", 0.15, 1.3))
-	r.plaster.surface(mat.call("rough_plaster", 0.22, 1.6))
-	r.wood.surface(mat.call("rustic_planks", 0.18, 1.6))
-	r.cloth.surface(mat.call("velvet", 0.3))
-	r.brass.surface(soft.call("brass", 0.3))
-	var leaf_m: ShaderMaterial = soft.call("felt", 0.12)
+	# Their share of the film's light: a tint, never a light (the second pass, 2026-11-08: the test picture's warm and
+	# cool halves split the hall in two at twice these).
+	r.brick.surface(mat.call("red_brick", 0.06, 1.3))
+	r.plaster.surface(mat.call("rough_plaster", 0.09, 1.6))
+	r.wood.surface(mat.call("rustic_planks", 0.08, 1.6))
+	r.cloth.surface(mat.call("velvet", 0.12))
+	r.brass.surface(soft.call("brass", 0.12))
+	var leaf_m: ShaderMaterial = soft.call("felt", 0.05)
 	leaf_m.set_shader_parameter("tiling", 0.2)
 	r.leaves.surface(leaf_m)
 	var crystal_m: ShaderMaterial = light.lamp_material(Color(0.8, 0.88, 1.0), 1.0, 1.0, "accent")
@@ -370,21 +375,41 @@ static func riser_z(r: Ruin, x: float) -> float:
 ## (between the ceiling's broken edge and the rear wall, over the walls' broken tops and the gable), past the trusses
 ## and the slates still on the right. For the parts left out of the bake, so they agree with it.
 static func moon_light(p: Vector3) -> float:
-	var d := MOON_DIR.normalized()
 	if p.y > RIDGE + 0.5:
 		return 1.0
-	# The truss members the ray passes through.
+	return _moon_trusses(p) * _moon_open(p)
+
+
+## The trusses' shadow on p (1: none): each member a soft band, its penumbra widening with the distance to it (wider
+## than the Moon's own, so the shadow falls across the vertices smoothly instead of in steps; the second pass,
+## 2026-11-08).
+static func _moon_trusses(p: Vector3) -> float:
+	var d := MOON_DIR.normalized()
+	var lit := 1.0
 	for tz: float in TRUSSES:
 		if (tz - p.z) * d.z <= 0.0:
 			continue
 		var t := (tz - p.z) / d.z
 		var q := p + d * t
-		if q.y > TOP - 0.3 and q.y < TOP + 0.02 and absf(q.x) < 8.3:
-			return 0.1
-		if absf(q.y - (roof_y(q.x) - 0.15)) < 0.17 and absf(q.x) < 8.3 and not (tz > 3.0 and q.x < -3.4):
-			return 0.12
-		if absf(q.x) < 0.12 and q.y > TOP - 0.3 and q.y < RIDGE:
-			return 0.12
+		if absf(q.x) > 8.3:
+			continue
+		var soft := 0.05 + 0.035 * t
+		var hit := _band(q.y, TOP - 0.3, TOP + 0.02, soft)
+		if not (tz > 3.0 and q.x < -3.4):
+			hit = maxf(hit, _band(q.y, roof_y(q.x) - 0.32, roof_y(q.x) + 0.02, soft))
+		hit = maxf(hit, _band(q.x, -0.12, 0.12, soft) * _band(q.y, TOP - 0.3, RIDGE, soft))
+		lit *= 1.0 - 0.88 * hit
+	return lit
+
+
+## 1 between a and b, 0 outside, soft by s either side.
+static func _band(x: float, a: float, b: float, s: float) -> float:
+	return smoothstep(a - s, a + s, x) * (1.0 - smoothstep(b - s, b + s, x))
+
+
+## The Moon at p past the walls, the gables, the front roof (its hole) and the slates (0..1).
+static func _moon_open(p: Vector3) -> float:
+	var d := MOON_DIR.normalized()
 	# Where it crosses the walls' tops (y = TOP) or a wall below them.
 	var t_top := (TOP - p.y) / d.y if p.y < TOP else 0.0
 	var at := p + d * t_top
@@ -408,8 +433,10 @@ static func moon_light(p: Vector3) -> float:
 		var k := (RIDGE - TOP) / 8.25
 		var t2 := (RIDGE - p.y - k * p.x) / (d.y + k * d.x)
 		var s := p + d * t2
-		if s.x > 4.3 and s.x < 8.2 and s.z > 0.5 and s.z < 5.6 and _slate_left(s.x, s.z):
-			return 0.08
+		if s.x > 4.3 and s.x < 8.2 and s.z > 0.5 and s.z < 5.6:
+			var cover := smoothstep(-0.12, 0.12, _n(s.x * 1.7, s.z * 1.3, 21) + 0.15 + (s.x - 5.2) * 0.12) \
+					* smoothstep(5.05, 5.35, s.x)
+			return (1.0 - 0.92 * cover) * smoothstep(edge_z(at.x) + 0.15, edge_z(at.x) + 0.45, at.z)
 	return smoothstep(edge_z(at.x) + 0.15, edge_z(at.x) + 0.45, at.z)
 
 
@@ -454,10 +481,12 @@ static func _n3(p: Vector3, seed_value: int) -> float:
 
 ## A layer over a plane where f(a, v) > 0 (a along u_axis, v along v_axis from origin, metres), by marching squares
 ## over cells of `cell`, lifted `off` along n; its cut edges get a side `depth` deep back towards the plane. One chart
-## (its coordinates a and v). col(a, v) -> Color (linear) for each point.
+## (its coordinates a and v). col(a, v) -> Color (linear) for each point. `lip` (its alpha the share): the cut edges'
+## sides take this colour and the face's points on the cut edge half of it (broken plaster, paler than its face);
+## alpha 0: the sides a little darker than the face.
 static func _masked(b: RoomMesh, origin: Vector3, u_axis: Vector3, v_axis: Vector3, n: Vector3, a0: float,
 		a1: float, v0: float, v1: float, cell: float, f: Callable, col: Callable, off: float, depth: float,
-		chart := true) -> void:
+		chart := true, lip := Color(0, 0, 0, 0)) -> void:
 	var nx := maxi(ceili((a1 - a0) / cell), 1)
 	var ny := maxi(ceili((v1 - v0) / cell), 1)
 	var da := (a1 - a0) / nx
@@ -485,6 +514,7 @@ static func _masked(b: RoomMesh, origin: Vector3, u_axis: Vector3, v_axis: Vecto
 			if inside == 0:
 				continue
 			var poly: Array[Vector2] = []
+			var on_cut: Array[bool] = []
 			var cuts: Array[Vector2] = []
 			for k in 4:
 				var ca := corners[k]
@@ -493,19 +523,24 @@ static func _masked(b: RoomMesh, origin: Vector3, u_axis: Vector3, v_axis: Vecto
 				var vb := vs[(k + 1) % 4]
 				if va > 0.0:
 					poly.append(ca)
+					on_cut.append(false)
 				if (va > 0.0) != (vb > 0.0):
 					var t := va / (va - vb)
 					var pt := ca.lerp(cb, t)
 					poly.append(pt)
+					on_cut.append(true)
 					cuts.append(pt)
 			var pts: Array[Vector3] = []
 			var base: int = b._current.verts.size()
-			for q: Vector2 in poly:
+			for qi in poly.size():
+				var q := poly[qi]
 				var a := a0 + q.x * da
 				var vv := v0 + q.y * dv
 				var w := origin + u_axis * a + v_axis * vv + lift
 				pts.append(w)
 				b.colour = col.call(a, vv)
+				if on_cut[qi] and lip.a > 0.0:
+					b.colour = b.colour.lerp(Color(lip.r, lip.g, lip.b), lip.a * 0.35)
 				b._vertex(w, n, Vector2(a, vv))
 			for k in range(1, pts.size() - 1):
 				b._triangle(base, base + k, base + k + 1, pts[0], pts[k], pts[k + 1], n)
@@ -522,6 +557,8 @@ static func _masked(b: RoomMesh, origin: Vector3, u_axis: Vector3, v_axis: Vecto
 					var uv1 := Vector2(a0 + c1.x * da, v0 + c1.y * dv)
 					var s0: int = b._current.verts.size()
 					b.colour = (col.call(uv0.x, uv0.y) as Color) * 0.8
+					if lip.a > 0.0:
+						b.colour = (col.call(uv0.x, uv0.y) as Color).lerp(Color(lip.r, lip.g, lip.b), lip.a)
 					b._vertex(e0, side, uv0)
 					b._vertex(e1, side, uv1)
 					b._vertex(e1 + back, side, uv1)
@@ -708,7 +745,7 @@ static func _walls(r: Ruin) -> void:
 		var mask := func(a: float, v: float) -> float: return _wall_plaster(r, side, a, v)
 		var pcol := func(a: float, v: float) -> Color: return _plaster_colour(r, side, a, v)
 		_masked(r.plaster, origin, Vector3.BACK, Vector3.UP, n, PROS_Z, r.hi.z, r.lo.y, TOP, CELL, mask, pcol,
-				PLASTER, PLASTER)
+				PLASTER, PLASTER, true, Color(PLASTER_BREAK, 0.75))
 		# Pilasters: under the front roof whole, under the open half broken off.
 		for pz: float in [-6.6, -4.0, -0.9, 2.2]:
 			_pilaster(r, side, pz)
@@ -720,6 +757,9 @@ static func _walls(r: Ruin) -> void:
 
 static func _brick_colour(r: Ruin, side: float, z: float, y: float) -> Color:
 	var c := BRICK * (0.85 + 0.25 * _n(z * 0.7, y * 0.7, 31))
+	# In a hole: darker near the plaster's edge (its lip shades it, the dirt collects), the brick's own colour deeper
+	# in.
+	c *= _hole_shade(_wall_plaster(r, side, z, y))
 	var fl := floor_at(r, z)
 	# Rising damp at the foot, darker; green where the rain runs down from the broken top.
 	c = c.lerp(c * 0.45, 1.0 - smoothstep(0.0, 1.4, y - fl))
@@ -767,8 +807,14 @@ static func _plaster_colour(r: Ruin, side: float, z: float, y: float) -> Color:
 	c = c.lerp(c * Color(0.55, 0.45, 0.32), clampf(bloom * 1.5, 0.0, 0.7))
 	var open := smoothstep(edge_z(side * 8.0) - 1.0, edge_z(side * 8.0) + 1.5, z)
 	var streak := maxf(0.0, _n(z * 3.1, 9.0, 57)) * open * smoothstep(2.5, 7.0, y)
-	c = c.lerp(DAMP_GREEN, clampf(streak * 1.4 + 0.25 * open, 0.0, 0.8))
-	return c * (1.0 - 0.3 * open)
+	c = c.lerp(DAMP_GREEN, clampf(streak * 1.4 + 0.1 * open, 0.0, 0.8))
+	return c * (1.0 - 0.12 * open)
+
+
+## How much of the brick's colour shows in a plaster hole by the plaster's mask there (negative in the hole): half
+## at the edge, all of it 0.4 m in.
+static func _hole_shade(mask: float) -> float:
+	return lerpf(0.5, 1.0, smoothstep(0.0, -0.4, mask))
 
 
 static func _pilaster(r: Ruin, side: float, z: float) -> void:
@@ -850,7 +896,10 @@ static func _cornice_colours() -> Array[Color]:
 	return [c, c, GILT * 0.8, GILT * 0.7, c, c, c, c, c, c, c, c, c, GILT * 0.6, c, c]
 
 
-## The rear wall: brick to the broken gable, plaster below, the booth's ports, a doorway at the left.
+## The rear wall: brick to the broken gable, plaster below, the booth's ports, a doorway at the left. Its decay as the
+## side walls' under the open roof (the second pass, 2026-11-08: "plain and dark"): plaster fallen in sheets from the
+## top where the rain runs down, rising damp and a tide mark at the foot, brown blooms, green runs, soot over the
+## ports where the lamps' heat came out.
 static func _rear_wall(r: Ruin) -> void:
 	var z := r.hi.z
 	var origin := Vector3(0, 0, z)
@@ -860,7 +909,8 @@ static func _rear_wall(r: Ruin) -> void:
 		var c := BRICK * (0.85 + 0.25 * _n(a * 0.7, v * 0.7, 61))
 		c = c.lerp(c * 0.5, 1.0 - smoothstep(0.0, 1.2, v - walk))
 		var streak := maxf(0.0, _n(a * 2.4, 4.0, 63)) * smoothstep(4.0, 9.0, v)
-		return c.lerp(Color(0.12, 0.16, 0.07), clampf(streak, 0.0, 0.7))
+		c = c.lerp(Color(0.07, 0.09, 0.04), clampf(streak, 0.0, 0.7))
+		return c * _hole_shade(_rear_plaster(r, a, v))
 	var bottom := func(_a: float) -> float: return walk - 0.05
 	var top := func(a: float) -> float: return gable_top(a)
 	# The rear doorway (x -7.6..-6.4, to 3.15): the brick round it.
@@ -868,27 +918,108 @@ static func _rear_wall(r: Ruin) -> void:
 	_sheet(r.brick, origin, Vector3.RIGHT, Vector3.UP, n, -7.6, -6.4, func(_a: float) -> float: return walk + 2.25,
 			top, 0.4, 12, bcol)
 	_sheet(r.brick, origin, Vector3.RIGHT, Vector3.UP, n, -6.4, r.hi.x, bottom, top, 0.3, 30, bcol)
-	var mask := func(a: float, v: float) -> float:
-		var m := 0.38 - 0.95 * maxf(0.0, _n(a * 0.45, v * 0.45 + 9.0, 65))
-		m -= 0.6 * maxf(0.0, _n(a * 1.2, v * 1.2, 67))
-		m = minf(m, 6.4 + 0.5 * _n(a * 0.5, 3.0, 69) - v)
-		m = minf(m, v - walk + 0.02)
-		# Round the doorway and the ports.
-		var dz := maxf(absf(a + 7.0) - 0.6, 0.0)
-		var dy := maxf(v - walk - 2.25, 0.0)
-		m = minf(m, Vector2(dz, dy).length() - 0.1)
-		for px: float in [-0.9, 0.0, 0.9]:
-			m = minf(m, maxf(absf(a - px) - 0.25, absf(v - 3.2) - 0.2))
-		return m
-	var pcol := func(a: float, v: float) -> Color:
-		var h := v - walk
-		var c := CREAM if h > 1.3 else OXBLOOD
-		c = c * (0.8 + 0.3 * _n(a * 0.9, v * 0.9, 71))
-		if h < 0.85:
-			c *= 0.6
-		return c.lerp(DAMP_GREEN, clampf(maxf(0.0, _n(a * 3.0, 2.0, 73)) * smoothstep(3.0, 6.4, v), 0.0, 0.6))
-	_masked(r.plaster, origin, Vector3.RIGHT, Vector3.UP, n, r.lo.x, r.hi.x, walk - 0.1, 6.8, CELL, mask, pcol,
-			PLASTER, PLASTER)
+	var mask := func(a: float, v: float) -> float: return _rear_plaster(r, a, v)
+	var pcol := func(a: float, v: float) -> Color: return _rear_colour(r, a, v)
+	_masked(r.plaster, origin, Vector3.RIGHT, Vector3.UP, n, r.lo.x, r.hi.x, walk - 0.1, 7.2, CELL, mask, pcol,
+			PLASTER, PLASTER, true, Color(PLASTER_BREAK, 0.75))
+	# The dado rail across it, broken where the plaster fell, and round the doorway.
+	var piece: Array[Vector3] = []
+	var outs: Array[Vector3] = []
+	var x := r.hi.x - 0.05
+	while x > r.lo.x + 0.05:
+		var keep := _rear_plaster(r, x, walk + 1.26) > -0.05 and not (x > -7.75 and x < -6.25)
+		if keep:
+			piece.append(Vector3(x, walk + 1.2, z))
+			outs.append(n)
+		if (not keep or x - 0.25 <= r.lo.x + 0.05) and piece.size() > 1:
+			_sweep(r.wood, piece, outs, Vector3.UP, [Vector2(0.0, 0.0), Vector2(0.035, 0.005), Vector2(0.045, 0.04),
+					Vector2(0.03, 0.06), Vector2(0.0, 0.07)], [TIMBER * 0.6])
+			piece = []
+			outs = []
+		elif not keep:
+			piece = []
+			outs = []
+		x -= 0.25
+	_clock(r, Vector3(-7.0, walk + 2.85, z))
+
+
+## The rear wall's plaster mask: more fallen high up where the rain ran down from the broken gable, at the foot
+## where the damp rose; none round the doorway and the ports (their surrounds are their own).
+static func _rear_plaster(r: Ruin, a: float, v: float) -> float:
+	var walk := floor_at(r, r.hi.z - 0.1)
+	var m := 0.42 - 0.95 * maxf(0.0, _n(a * 0.42, v * 0.42 + 9.0, 65))
+	m -= 0.55 * maxf(0.0, _n(a * 1.3, v * 1.3, 67)) * 1.3
+	m -= 0.5 * smoothstep(-0.2, 0.5, _n(a * 0.6 + 3.0, v * 0.35, 69)) * smoothstep(3.0, 6.0, v)
+	m -= 0.6 * (1.0 - smoothstep(0.15, 0.7, v - walk)) * (0.5 + 0.5 * _n(a * 1.7, 1.0, 47))
+	m = minf(m, 6.3 + 0.6 * _n(a * 0.5, 3.0, 69) - v)
+	m = minf(m, v - walk + 0.02)
+	var dz := maxf(absf(a + 7.0) - 0.68, 0.0)
+	var dy := maxf(v - walk - 2.33, 0.0)
+	m = minf(m, Vector2(dz, dy).length() - 0.08)
+	for px: float in [-0.9, 0.0, 0.9]:
+		m = minf(m, maxf(absf(a - px) - 0.36, absf(v - 3.2) - 0.31))
+	return m
+
+
+static func _rear_colour(r: Ruin, a: float, v: float) -> Color:
+	var walk := floor_at(r, r.hi.z - 0.1)
+	var h := v - walk
+	var c := CREAM if h > 1.3 else OXBLOOD
+	if h > 1.22 and h < 1.3:
+		c = GILT * 0.6
+	c = c * (0.82 + 0.3 * _n(a * 0.9, v * 0.9, 71))
+	var tide := 0.9 + 0.15 * _n(a * 0.5, 2.0, 53)
+	if h < tide:
+		c *= 0.62
+	elif h < tide + 0.07:
+		c = c.lerp(Color(0.36, 0.33, 0.26), 0.55)
+	var bloom := maxf(0.0, _n(a * 0.35, v * 0.35, 75) - 0.2)
+	c = c.lerp(c * Color(0.55, 0.45, 0.32), clampf(bloom * 1.5, 0.0, 0.7))
+	var streak := maxf(0.0, _n(a * 3.1, 19.0, 73)) * smoothstep(2.5, 6.4, v)
+	c = c.lerp(DAMP_GREEN, clampf(streak * 1.4 + 0.1, 0.0, 0.8))
+	# Soot over each port (the lamp's heat came out of it) and rust run down from its shutter's runners.
+	for px: float in [-0.9, 0.0, 0.9]:
+		var soot := 1.0 - smoothstep(0.15, 0.55, Vector2((a - px) * 1.2, (v - 3.62) * 0.8).length())
+		c = c.lerp(Color(0.02, 0.018, 0.016), soot * 0.75)
+		for s: float in [-1.0, 1.0]:
+			var run := (1.0 - smoothstep(0.015, 0.05, absf(a - px - s * 0.3))) * smoothstep(1.6, 2.85, v) \
+					* (1.0 - smoothstep(2.85, 2.95, v))
+			c = c.lerp(Color(0.12, 0.05, 0.02), run * 0.6)
+	return c * 0.88
+
+
+## A stopped clock over the rear door: a brass bezel, its glass gone, a pale dial with the hours as bars (no
+## numerals), its hands stopped at twenty to four.
+static func _clock(r: Ruin, at: Vector3) -> void:
+	var rad := 0.27
+	var corners: Array = []
+	for k in 24:
+		var a := TAU * k / 24.0
+		corners.append(at + Vector3(cos(a) * rad, sin(a) * rad, -0.045))
+	var keep := r.plaster.colour
+	r.plaster.colour = CEILING_WHITE * 0.8
+	r.plaster.face(corners, Vector3.FORWARD)
+	r.plaster.colour = keep
+	var b := r.brass
+	for k in 24:
+		var a0 := TAU * k / 24.0
+		var a1 := TAU * (k + 1) / 24.0
+		var p0 := at + Vector3(cos(a0), sin(a0), 0) * (rad + 0.02)
+		var p1 := at + Vector3(cos(a1), sin(a1), 0) * (rad + 0.02)
+		_beam(b, p0 + Vector3(0, 0, -0.05), p1 + Vector3(0, 0, -0.05), 0.05, 0.04, _lit(GILT * 0.8, p0),
+				Vector3.BACK)
+	for k in 12:
+		var a := TAU * k / 12.0
+		var d := Vector3(cos(a), sin(a), 0)
+		_beam(r.wood, at + d * (rad - 0.07) + Vector3(0, 0, -0.05), at + d * (rad - 0.025) + Vector3(0, 0, -0.05),
+				0.018 if k % 3 == 0 else 0.009, 0.004, VOID * 3.0, Vector3.BACK)
+	# Twenty to four: the hour hand past three, the minute hand at eight.
+	var hour := deg_to_rad(90.0 - (3.0 + 40.0 / 60.0) * 30.0)
+	var minute := deg_to_rad(90.0 - 40.0 * 6.0)
+	_beam(r.wood, at + Vector3(0, 0, -0.055), at + Vector3(cos(hour), sin(hour), 0) * 0.15 + Vector3(0, 0, -0.055),
+			0.02, 0.005, VOID * 3.0, Vector3.BACK)
+	_beam(r.wood, at + Vector3(0, 0, -0.06), at + Vector3(cos(minute), sin(minute), 0) * 0.22
+			+ Vector3(0, 0, -0.06), 0.014, 0.005, VOID * 3.0, Vector3.BACK)
 
 
 ## The proscenium: a plaster wall across the hall with the arched opening, an architrave of steps and beads in gilt
@@ -897,17 +1028,12 @@ static func _proscenium(r: Ruin) -> void:
 	var origin := Vector3(0, 0, PROS_Z - PLASTER)
 	var n := Vector3.BACK
 	var opening := func(a: float, v: float) -> float: return _pros_holes(a, v)
-	var bcol := func(a: float, v: float) -> Color: return BRICK * (0.7 + 0.2 * _n(a * 0.8, v * 0.8, 81))
 	var bottom := r.stage_top - 0.02
+	var bcol := func(a: float, v: float) -> Color:
+		return BRICK * (0.7 + 0.2 * _n(a * 0.8, v * 0.8, 81)) * _hole_shade(_pros_plaster(r, a, v))
 	_masked(r.brick, origin, Vector3.RIGHT, Vector3.UP, n, r.lo.x, r.hi.x, bottom, CEIL + 0.02, 0.25, opening, bcol,
 			0.0, 0.0)
-	var mask := func(a: float, v: float) -> float:
-		var m := _pros_holes(a, v) - 0.02
-		var loss := maxf(0.0, _n(a * 0.5, v * 0.5 + 20.0, 83) - 0.25) * 1.2
-		loss += maxf(0.0, _n(a * 1.6, v * 1.6, 85) - 0.45)
-		# More fallen towards the left, where the curtain hangs torn and the rain blew in.
-		loss *= 0.6 + 0.5 * smoothstep(2.0, -6.0, a)
-		return minf(m, 0.4 - loss)
+	var mask := func(a: float, v: float) -> float: return _pros_plaster(r, a, v)
 	var pcol := func(a: float, v: float) -> Color:
 		var c := CREAM * (0.85 + 0.25 * _n(a * 0.8, v * 0.8, 87))
 		if v < r.stage_top + 1.0:
@@ -918,7 +1044,7 @@ static func _proscenium(r: Ruin) -> void:
 		var runs := maxf(0.0, _n(a * 2.8, 30.0, 93)) * smoothstep(3.0, 7.4, v)
 		return c.lerp(c * Color(0.45, 0.4, 0.33), clampf(runs * 1.3, 0.0, 0.6))
 	_masked(r.plaster, origin, Vector3.RIGHT, Vector3.UP, n, r.lo.x, r.hi.x, bottom, CEIL + 0.02, CELL, mask, pcol,
-			PLASTER, PLASTER)
+			PLASTER, PLASTER, true, Color(PLASTER_BREAK, 0.75))
 	_architrave(r)
 	_reveal(r)
 	for s: float in [-1.0, 1.0]:
@@ -933,6 +1059,16 @@ static func _proscenium(r: Ruin) -> void:
 		outs.append(Vector3.BACK)
 		x += 0.5
 	_sweep(r.plaster, path, outs, Vector3.UP, _cornice_profile(), _cornice_colours())
+
+
+## The proscenium's plaster mask: on where positive, fallen where negative.
+static func _pros_plaster(_r: Ruin, a: float, v: float) -> float:
+	var m := _pros_holes(a, v) - 0.02
+	var loss := maxf(0.0, _n(a * 0.5, v * 0.5 + 20.0, 83) - 0.25) * 1.2
+	loss += maxf(0.0, _n(a * 1.6, v * 1.6, 85) - 0.45)
+	# More fallen towards the left, where the curtain hangs torn and the rain blew in.
+	loss *= 0.6 + 0.5 * smoothstep(2.0, -6.0, a)
+	return minf(m, 0.4 - loss)
 
 
 ## Signed distance outside the opening and the grilles' openings (negative inside one).
@@ -1425,11 +1561,37 @@ static func _pit(r: Ruin) -> void:
 ## dark; frames of timber.
 static func _booth(r: Ruin) -> void:
 	var z := r.hi.z
-	for px: float in [-0.9, 0.0, 0.9]:
+	for i in 3:
+		var px: float = [-0.9, 0.0, 0.9][i]
 		_box(r.wood, Vector3(px, 3.2, z - 0.012), Vector3(0.44, 0.34, 0.01), Basis(), VOID, [Vector3.BACK])
 		for s: float in [-1.0, 1.0]:
 			_box(r.wood, Vector3(px + s * 0.24, 3.2, z - 0.02), Vector3(0.05, 0.44, 0.06), Basis(), TIMBER * 0.4)
 			_box(r.wood, Vector3(px, 3.2 + s * 0.2, z - 0.02), Vector3(0.53, 0.05, 0.06), Basis(), TIMBER * 0.4)
+		# A moulded plaster surround with a sill, stained by the soot; chipped on the left port.
+		var sur := CREAM * 0.55
+		_box(r.plaster, Vector3(px, 3.2 + 0.3, z - 0.05), Vector3(0.72, 0.07, 0.07), Basis(), sur, [Vector3.BACK])
+		_box(r.plaster, Vector3(px, 3.2 - 0.29, z - 0.06), Vector3(0.78, 0.06, 0.1), Basis(), sur * 1.1,
+				[Vector3.BACK])
+		for s: float in [-1.0, 1.0]:
+			if i == 0 and s < 0.0:
+				_box(r.plaster, Vector3(px - 0.33, 3.33, z - 0.045), Vector3(0.07, 0.3, 0.06), Basis(), sur,
+						[Vector3.BACK])
+			else:
+				_box(r.plaster, Vector3(px + s * 0.33, 3.2, z - 0.045), Vector3(0.07, 0.6, 0.06), Basis(), sur,
+						[Vector3.BACK])
+		# The fire shutter's runners either side, rusted; the shutter itself: the left port's down to halfway, the
+		# right one fallen askew on one runner, the middle one up (the lit lens shows).
+		for s: float in [-1.0, 1.0]:
+			_box(r.wood, Vector3(px + s * 0.3, 3.45, z - 0.09), Vector3(0.025, 1.1, 0.03), Basis(),
+					Color(0.09, 0.045, 0.025))
+		var steel := Color(0.07, 0.065, 0.06)
+		if i == 0:
+			_box(r.wood, Vector3(px, 3.29, z - 0.1), Vector3(0.58, 0.2, 0.012), Basis(), steel)
+		elif i == 2:
+			_box(r.wood, Vector3(px - 0.04, 3.05, z - 0.13), Vector3(0.58, 0.4, 0.012), Basis(Vector3.BACK, 0.42)
+					* Basis(Vector3.RIGHT, 0.12), steel)
+		else:
+			_box(r.wood, Vector3(px, 3.75, z - 0.1), Vector3(0.58, 0.4, 0.012), Basis(), steel)
 	# The lens: a small disc glowing in the dark port.
 	var corners: Array = []
 	for k in 12:
@@ -1515,7 +1677,7 @@ static func _ceiling(r: Ruin) -> void:
 			c *= 0.75
 		return c
 	_masked(r.plaster, origin, Vector3.RIGHT, Vector3.BACK, Vector3.DOWN, r.lo.x, r.hi.x, PROS_Z, EDGE_Z + 1.2, CELL,
-			mask, col, 0.0, 0.03)
+			mask, col, 0.0, 0.03, true, Color(PLASTER_BREAK, 0.6))
 	# Laths over the holes and past the edge: strips across (along x) at 3.6 cm, the dark of the roof's void above.
 	var lath_y := CEIL + 0.035
 	var z := PROS_Z + 0.2
@@ -2684,9 +2846,9 @@ static func vertex_light(p: Vector3, n: Vector3) -> float:
 
 ## The sky's light at p through the open roof (0..1): under the opening, less near the walls and low down beside them.
 static func sky_light(p: Vector3, n: Vector3) -> float:
-	var open := smoothstep(edge_z(p.x) - 0.3, edge_z(p.x) + 1.8, p.z) * smoothstep(5.9, 4.0, p.z)
+	var open := smoothstep(edge_z(p.x) - 0.3, edge_z(p.x) + 1.8, p.z) * smoothstep(5.75, 5.6, p.z)
 	var up := 0.3 + 0.7 * maxf(n.y, 0.0)
-	var walls := smoothstep(0.0, 2.5, 8.0 - absf(p.x) + p.y * 0.3)
+	var walls := smoothstep(0.0, 2.5, 8.0 - absf(p.x) + p.y * 0.3) * smoothstep(0.0, 2.5, 5.65 - p.z + p.y * 0.3)
 	return open * up * walls
 
 
