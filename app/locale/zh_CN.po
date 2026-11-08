@@ -2746,6 +2746,25 @@ msgstr "浏览器窗口已关闭，所以没有输入任何内容。"
 msgid "Speech to text isn't working on the headset, so nothing was typed."
 msgstr "头显上的语音转文字不可用，所以没有输入任何内容。"
 
+#. The one-time speech model download (scripts/voice/whisper_backend.gd).
+msgid "Voice needs a one-time download of about %d MB. Downloaded: %d %%. The rest of the player works as usual."
+msgstr "语音功能需要一次性下载约 %d MB。已下载：%d %%。播放器的其他功能照常可用。"
+
+msgid "Speech model download: %d %%"
+msgstr "语音模型下载：%d %%"
+
+msgid "Voice needs the network once, for a download of about %d MB. The rest of the player works as usual."
+msgstr "语音功能需要联网一次，下载约 %d MB。播放器的其他功能照常可用。"
+
+msgid "The speech model did not download. Voice tries again when you use it next."
+msgstr "语音模型没有下载成功。下次使用语音时会再试一次。"
+
+msgid "Voice is starting."
+msgstr "语音功能正在启动。"
+
+msgid "Voice is ready."
+msgstr "语音功能已可用。"
+
 msgid "Didn't catch that. Try again."
 msgstr "没听清，请再说一次。"
 

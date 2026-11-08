@@ -1407,7 +1407,9 @@ func _on_clip(wav: PackedByteArray, seconds: float, uid: int) -> void:
 	if id >= 0:
 		_jobs[id] = job
 	else:
-		_not_heard(job, "Speech to text isn't working on the headset, so nothing was sent.")
+		# The speech model downloading (or no network for it) says so; else the plain line.
+		var why := Transcriber.why_unavailable()
+		_not_heard(job, why if why != "" else "Speech to text isn't working on the headset, so nothing was sent.")
 
 
 func _on_transcribed(id: int, text: String, final: bool) -> void:
