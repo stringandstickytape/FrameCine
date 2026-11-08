@@ -15,6 +15,7 @@ extends "res://tests/env_builder_harness.gd"
 const Procedural := preload("res://scripts/env/systems/kit/procedural.gd")
 const Domestic := preload("res://scripts/env/systems/domestic.gd")
 const Furniture := preload("res://scripts/env/systems/kit/furniture.gd")
+const MirrorView := preload("res://scripts/env/mirror_view.gd")
 
 
 func run_tests() -> void:
@@ -230,8 +231,14 @@ func _era_sets() -> void:
 						why == "")
 				var lid := room.get_node_or_null("Lid")
 				check("%s: the lid in front of the picture for the film layer, see-through for the sight line" % label,
-						lid != null and lid.is_in_group("env_in_front") and lid.is_in_group("env_see_through")
-						and room.get_node_or_null("Mirror") != null)
+						lid != null and lid.is_in_group("env_in_front") and lid.is_in_group("env_see_through"))
+				# A true mirror (scripts/env/mirror_view.gd; tests/test_mirror_view.gd checks it reflects).
+				var mirror := room.get_node_or_null("Mirror")
+				check("%s: a true mirror in the lid, in its plane, its glass see-through for the sight line" % label,
+						mirror != null and mirror.get_script() == MirrorView
+						and mirror.glass().is_in_group("env_see_through")
+						and absf((mirror.centre - (t["lid"]["hinge"] as Vector3)).dot(
+								Vector3(0.0, -sqrt(0.5), sqrt(0.5)))) < 0.0001)
 				check("%s: 5:4 by default (%s)" % [label, size], absf(size.aspect() - 1.25) < 0.001)
 		if DisplayServer.get_name() != "headless":
 			await _picture_of(room, sc, label.replace(" ", "_"))

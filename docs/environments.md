@@ -706,14 +706,27 @@ for a count that can be 0, `{}` for a material, `[0, 0]` for the screen's size. 
   from its width). Left on auto, `screen_size` is the form's own: a portable 0.3 x 0.225 m, a flat panel 0.8 x 0.45 m.
 - The eras' sets (`telly`), for the history of television:
   - `mirror_lid` (1937): a tall cabinet whose tube faces up in its top, and a lid hinged along the back of the top,
-    open at 45 degrees, a mirror on its underside. The picture you see is the tube's reflection: upright, over the
-    hinge's line (7 cm out from the front wall), its bottom 5 cm over the cabinet's top. So `screen_for()` gives the
-    reflection's place and the app's screen sits there, behind the mirror. Behind the picture the mirror shows the
-    tube's dark face and the cabinet's shadowed top. The lid is its own mesh (`Lid`: see-through for the sight line, its
-    back lies across the line of sight; in `env_in_front`, so the film layer steps aside), the mirror's glass a faint
-    sheen (`Mirror`). The cabinet is at least 0.7 m wide, so seats well to the side still see every corner in the
-    mirror (tested from every seat). 0.3 x 0.24 m (5:4), its bottom 0.98 m. Seen from the side, the picture stands
-    behind the lid. The lid is not a physics shape. Use the presentation's `tube` 1.25 (`mirrorlid_1937`).
+    open at 45 degrees, a mirror on its underside. The picture you see is the tube's reflection: upright, behind the
+    mirror (7 cm out from the front wall), its bottom 5 cm over the cabinet's top. So `screen_for()` gives the
+    reflection's place and the app's screen sits there. The tube's face lies under the top board (`TUBE_SINK`, 28 mm
+    down), the hinge and the face 28 mm further out to match, so the face's reflection is still the picture's place.
+    The mirror is a true one (`Mirror`, `scripts/env/mirror_view.gd`, 2026-11-08): for each eye a camera at the eye's
+    mirror image renders what the mirror shows (its near plane on the mirror, its frustum the mirror's rectangle, off
+    axis), into a small SubViewport the mirror's glass shows that eye (`shaders/env_mirror.gdshader`, old silvering:
+    a little dim and warm, the edges slightly tarnished). The film lies on the tube's face (`TubePicture`: the
+    screen's flat mesh and its material, so the presentation's tube, scan lines, switching and Wrong way round carry
+    over, at the screen's mirror image), and the app's upright screen is hidden from every camera while the mirror
+    shows (its render layers 0, given back when the room goes or hides). So the mirror shows the room in front of
+    the set (the top board, the rug, the floor), and looking down into the cabinet the picture is on the tube, upside
+    down as a real set's was; from the side or above nothing floats behind the lid. The mirror's glass is on its own
+    render layer (19), which its cameras leave out, as they leave out the private layer (20): an agents' terminal on
+    the screen shows on the tube but not in the mirror, so a room snapshot never sees it there. Cost: two more renders
+    of the room a frame (no shadows, no MSAA), each `MirrorView.PIXELS_WIDE` (720) pixels across, the knob; no render
+    while the mirror is out of view (80 degrees off the head's forward), seen from behind, or hidden (a 180 / 360
+    film). The lid is its own mesh (`Lid`: see-through for the sight line, its back lies across the line of sight; in
+    `env_in_front`, so the film layer steps aside). The cabinet is at least 0.7 m wide, so seats well to the side
+    still see every corner in the mirror (tested from every seat). 0.3 x 0.24 m (5:4), its bottom 0.98 m. The lid is
+    not a physics shape. Use the presentation's `tube` 1.25 (`mirrorlid_1937`).
   - `console` (1960s): a wooden cabinet on four splayed legs, the 4:3 tube over a speaker's cloth grille, two knobs.
     `telly_doors`: two doors, open and folded back beside it. 0.48 x 0.36 m, its bottom 0.62 m.
   - `rear_projection` (2002): a big deep cabinet from the floor (0.62 m deep below the picture, 0.36 m behind it,
@@ -2197,7 +2210,9 @@ clunk (`presentation.channel`). `test_room_tv.gd` `switches()` checks each room.
 fireplace with a coal fire, two velvet armchairs angled in beside the viewer's, a standard lamp, a walnut sideboard
 with the tea tray on it, a fern. The set is a walnut cabinet whose lid holds a mirror (`telly` `mirror_lid`): the
 tube faces up in the cabinet's top and the picture is seen in the mirror in the open lid (`mirrorlid_1937`: 405 lines,
-black and white, a small round 5:4 tube, the film panned and scanned to fill it, a ten-second warm-up).
+black and white, a small round 5:4 tube, the film panned and scanned to fill it, a ten-second warm-up). The mirror is
+a true one (see `mirror_lid` under the domestic builder): it reflects the room for each eye, and the film is on the
+tube's face, so looking down into the set shows the tube itself. `test_mirror_view.gd` checks it.
 
 - Systems: `light`, `domestic` (2.9 m high; the picture 0.40 x 0.32 m, 1.1 m from the seat, its bottom 0.98 m up;
   the window on the left with a dark night glow, the fireplace on the right, `surround` `white_marble`), `kit` (a
