@@ -60,7 +60,8 @@ still read, without change. Every key of version 3 keeps its meaning.
 |---|---|
 | `schema` | 4 |
 | `name` | the room's name; a room that ships has its name as a translation key |
-| `room` | the room as a whole: `ambient` (0..1, its surfaces' light with a dark screen), `screen_glow` (0..2), `curtains` (the pre-show's curtains may close here), `reacts_to_film` (the film's transients may flash the light), `reflection` (the floor reflection's default here), `reflection_floor` (its height; null: none) and `category` (where the Room tab lists it: `cinema` under Cinemas, `tv` under Television, `other` with the other rooms, the default; `env_library.gd category_of()`) and `description` (a line about the room under the Room tab's "This room", at most 200 characters; a key, so a room that ships translates it) |
+| `room` | the room as a whole: `ambient` (0..1, its surfaces' light with a dark screen), `screen_glow` (0..2), `curtains` (the pre-show's curtains may close here), `reacts_to_film` (the film's transients may flash the light), `reflection` (the floor reflection's default here), `reflection_floor` (its height; null: none), `curtain_colour` (the pre-show's curtains' colour; null, the
+default: the app's red velvet; since 2026-11-08, the Palace of Culture's ochre) and `category` (where the Room tab lists it: `cinema` under Cinemas, `tv` under Television, `other` with the other rooms, the default; `env_library.gd category_of()`) and `description` (a line about the room under the Room tab's "This room", at most 200 characters; a key, so a room that ships translates it) |
 | `screen` | as version 3: the default screen's `center` and `size` |
 | `acoustics` | the room's sound for spatial audio (`get_sound_room()`, `scripts/play/spatial_audio.gd`): `box` ({min, max}; default: the builder's walls), `reflect`, `rt60`, `wet`, `surround_height`, `array`, `array_spacing`, `ring`, `distance` |
 | `systems` | the systems, in build order: `{system, id, params}`. `id` defaults to the system's name; two of one system need their own ids. Cues and bindings address a parameter as `<id>.<param>` |
@@ -419,7 +420,7 @@ and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider'
 | `seats_per_row`, `seat_pitch` | 27, 0.58 | seats along a row, centre to centre |
 | `row_radius` | 45 | rows curve round a point this far ahead; 0 is straight rows |
 | `block_x` | 8.1 | the seats reach this far either side; the side aisles go from there to the walls |
-| `seat_model` | `stadium` | the seat: `stadium` (drawn by the auditorium), or a single seat of the seats system: `plush`, `multiplex`, `folding_chair`, `club_chair`, `director`, `cushion`, `bean_bag` (set `seat_pitch` to fit) |
+| `seat_model` | `stadium` | the seat: `stadium` (drawn by the auditorium), or a single seat of the seats system: `plush`, `multiplex`, `folding_chair`, `club_chair`, `director`, `cushion`, `bean_bag`, `civic` (set `seat_pitch` to fit) |
 | `seat_upholstery`, `seat_shell` | velvet, black leather | materials |
 | `seat_tint_spread` | 0.12 | how much the seats differ, one from the next |
 | `wall_treatment` | `panels` | `panels` (fabric panels with wooden rails) or `plain` |
@@ -433,6 +434,7 @@ and 12 dB. The cinema's sounds (its chime) measure -46.2 dBFS RMS at the slider'
 | `house_spots` | true | the bake's four house lights high over the seats (a ceiling's cans); off for a hall open to the sky (since 2026-11-08) |
 | `handrails` | true | brass handrails along the side walls; off where a kit's house fronts stand along the walls (since 2026-11-08) |
 | `doors` | true | the four exits with signs |
+| `shell` | true | the side and rear walls; false: a kit draws them (the Palace of Culture's board-marked concrete round its mosaics; since 2026-11-08). The wall behind the screen stays |
 | materials | the cinema's | `floor`, `walls`, `front_wall`, `ceiling`, `panel_fabric`, `panel_wood`, `stage`, `curtains`, `door_leaf`, `door_metal`, `brass` |
 
 ## The seats system
@@ -457,6 +459,7 @@ origin, facing -Z. Each has two library materials (CC0), `upholstery` and `frame
 | `cushion` | 322 | | no | a buttoned floor cushion |
 | `hide` | 462 | | no | a pelt over a low block (of ice) |
 | `bean_bag` | 196 | | no | a squat sack with a dent |
+| `civic` | 338 | | yes | a 1970s civic hall's seat: woven upholstery on a moulded oak shell, oak arms and standards (the Palace of Culture; since 2026-11-08) |
 | `settee` | 276 a place, 106 an end | | no | a segment a place wide: the base, a seat cushion and a back cushion each; the padded arms and the feet are its ends. Two or three places in a row make a settee; its places take no tint of their own, so they match |
 
 Forms: `up` is a tip-up seat tipped up (the hall is empty). `broken` is a seat with its back slumped and its cushion
@@ -594,7 +597,9 @@ Six more builders of kind `builder`, and the `kit`. They keep the auditorium's c
   a swirling carpet, corrugated tin, plasterboard, quarry tiles) are our own maps, drawn in `procedural.gd` and put on
   a library material. The library material is CC0, so the licence check still holds. `quarry_tiles` (since
   2026-11-08): square terracotta tiles in mortar, each its own shade and wear, at 256 x 256 (`SIZES`: a pattern can
-  have its own size; the others keep theirs).
+  have its own size; the others keep theirs). `board_concrete` (since 2026-11-08, the Palace of Culture): concrete
+  cast against boards, ten to a repeat, each its own tone and depth, butt joints, grain, the fins between boards,
+  tie holes and blowholes, at 256 x 256.
 - **Text** is our own stroke font (`kit/strokes.gd`): Latin capitals and figures, and since 2026-11-08 the Greek
   capitals that differ from Latin ones (Γ Δ Θ Λ Ξ Π Σ Φ Ψ Ω; the others, Α Β Ε and so on, draw as their Latin
   look-alikes through `ALIASES`).
@@ -979,7 +984,9 @@ features, below) and `seed` (its own variation). For the moderne hall's pieces (
 pieces' meshes under one node of that name, so a motion system moves them together: an organ console on its lift),
 and live: `cove` (the coves' lamps, times the house lamps' level), `cove_colour` (their light: a setting or a cue
 moves it), `cove_film_colour` (their light in the film: bind it to `film.colour`) and `cove_film` (0: `cove_colour`,
-1: `cove_film_colour`).
+1: `cove_film_colour`). For the Palace of Culture's hall (since 2026-11-08): material `mosaic` (the bed under a wall
+mosaic's tesserae; `white_marble` by default), `mosaic_glint` (how much gold and glass glint, 1) and `mosaic_wash`
+(the lamp line's wash down the mosaics, times the house lamps, 1.6).
 
 | Piece | What |
 |---|---|
@@ -1022,6 +1029,8 @@ moves it), `cove_film_colour` (their light in the film: bind it to `film.colour`
 | `ice_outside` | the night outside an ice hall: a snowfield with drifts, snow banked against the walls, the path from the doorway, spruces under snow, the forest's edge, the fells, a cabin far off with its windows lit |
 | `moderne_hall` | an auditorium builder's hall as a 1930s moderne one (`kit/streamline.gd`, no slot): a ceiling of coves stepping up to the screen, ledges with their coves along the walls, speed bands of faience, jade and chrome round the hall and across a bowed circle front, rounded rear corners, a walnut dado, reeded pilasters, etched glass shell lights (stand-in lamps and bake lights), ventilators |
 | `ziggurat` | round the room's screen (no slot): three frames stepping out towards the seats, each lit from behind the next, gilt reveals, a glowing rising sun with gilt rays and chrome speed lines, two organ grilles lit from their chambers, a clock telling the real time (`PieceClock`), a speed-line roundel, footlights (stand-in lamps in the coves' colour) and the lift's chrome ring in the pit |
+| `culture_hall` | an auditorium builder's hall as a 1970s palace of culture (`kit/palace_culture.gd`, no slot; set the auditorium's `shell` false and `ceiling_cover` 0): board-marked concrete walls, a wall mosaic either side (`kit/mosaics.gd`, the cosmos and the earth, on the house shader's `MOSAIC`) in a bronze frame under a cornice with its lamp line, a coffered ceiling with a roof light over the back rows (snow on its ledges), a stepped concrete proscenium with ribs and a bronze edge, oak slats on the rear wall, the booth's band and a 1970s clock (`PieceClock` `style` 1) |
+| `globe_field` | 60 opal globes on rods from a `culture_hall`'s coffers, hung in a bell (`PieceLamps`, `house` group, `rim`); each lights the coffer over it (`PieceCove`) |
 | `organ_console` | an illuminated organ console on its lift platform, its foot at `at`: a skirt of glass panels in the coves' colour between gilt fins, an ivory horseshoe of stop tabs, three manuals, a lit music desk under a chrome hood, a bench. Put it in a kit of its own with `group` |
 
 The furniture is drawn by `scripts/env/systems/kit/furniture.gd` (plain boxes and turned shapes of our own: no maker's
@@ -1082,6 +1091,20 @@ bake takes the slots' light from a hidden lamp in each (`KitGlow*`). Footlights 
 behind the first frame's head are stand-in lamps in the coves' colour (they light the festoon's folds and the
 console, which are never baked). `cove_state()`, `cove_colour_now()` and `clock_hands()` give the coves and the
 clock now (tests).
+
+**The palace of culture's hall** (`kit/palace_culture.gd`, `kit/mosaics.gd`, since 2026-11-08). A piece may add a
+hall to the ctx's `halls`: an object with `finish(kit)`, called once every piece has drawn (the hall puts its own
+meshes in, here `Mosaic`, and sets the clock's face), and `tick(delta)`. The mosaics are one static mesh on
+`shaders/room_material_house_mosaic.gdshader` (`MOSAIC` in `room_material.gdshaderinc`, off in every other form):
+`mosaic_map` holds one texel a tessera (rgb its colour, alpha its kind: 0 stone, 0.5 glass, 1 gold); the shader lays
+the courses in the mesh's UV (metres), each tessera fetched at its middle, with uneven joints of `mosaic_grout`
+(antialiased by the pixel's footprint, thinning to `mosaic_joint` far off), a shade, a tilt (`mosaic_tilt`) and a
+worn edge of its own (`mosaic_wander`). The glint is a sharp lobe (`mosaic_glint_sharp`) of the light from
+`mosaic_glint_pos` (the room's frame) and of the screen's spill (`mosaic_film_glint`), weighted by the kind cubed
+(gold glints, glass a little, stone hardly) and tinted by the tessera; it moves only as the head moves.
+`mosaic_wash` (rgb, w the fall in metres) washes down from `mosaic_wash_y` at the house lamps' level. The lamp shader
+`room_lamp.gdshader` has `rim` (0 by default: off): a glowing ball brighter where it is seen square on. The clock
+shader `env_clock.gdshader` has `style` (0 by default: the moderne face; 1 a dark dial with lit bars).
 
 **The video recorder's clock.** 12:00 in seven segments of our own (quads, no font, no texture of letters), in
 `display_colour`, all the room's clocks one mesh (`PieceDisplay`, accent group). It flashes once a second: lit half a
@@ -1682,6 +1705,8 @@ MB (the shared noise, 256 x 256). With Earth: 4 draws, under 9 000 triangles.
 | `town_lights` | 0.6 | the lamps of the town under the acropolis. Live, a brightness |
 | `pool_glow`, `pool_colour` | 1, cyan | the pool's underwater lights. Live, a brightness |
 | `snow` | 1 | snow on the ground under the trees. Live, a brightness |
+| `frost` | 0 | birches in hoar frost: finer twigs, more of them, pale with rime against the sky, a few drooping strands from each branch (since 2026-11-08, the Palace of Culture's) |
+| `room_glow`, `room_glow_level`, `room_glow_at` | black, 0, [0, 10, 0] | the room's own light thrown up on the scenery near it (an opening in its roof): its colour, a brightness (live: a cue takes it down with the house lights) and where it comes out, in the room's frame |
 | `water_motion` | 0.5 | how fast the light ripples in the pool (motion, at most 1) |
 
 | Shape | Default | What |
@@ -1718,7 +1743,7 @@ covers them, as the screen would.
 | Atmospheric 1928 | `auditorium` with `ceiling_cover` 0; `sky` at a deep blue dusk (`dusk` 0.45, 0.85 in the film), `lines` off, `twinkle` 0.35, a crescent `moon`, clouds lit from below by the town (`cloud_glow`) with `cloud_colour` bound to `film.colour`; the trees over the walls are the kit's (`cypress`, `palm`, `pine`), no `vista` |
 | Drive-in 1958 | `sky` with a dusk track by `film.minutes`, `milky_way` bound to `playback.playing`; `vista` mesas all round |
 | Rooftop, Athens | `sky` (`latitude` 38, a summer night); `vista` acropolis ahead, a little to one side |
-| Palace of Culture | `vista` birches in snow outside the windows; `snow` bound to the room's snow setting |
+| Palace of Culture | `sky` a January night at latitude 56, `clouds` by the Snow setting, `cloud_glow` warm from the hall; `vista` birches in hoar frost round the roof light (`frost` 1, `room_glow` warm, down for the film by the cues), `snow` bound to the Snow setting |
 | Reclaimed | `sky` through the open roof: stars, `clouds` bound to `weather.wet` |
 | Ice cinema | `sky` (68 degrees north, a January night, the Moon low in the south-east): `aurora` from the Aurora setting, up for the pre-show and in quiet scenes by cues, `aurora_bearing` over the window and the left skylights |
 | Crater | `sky` `mode` `space`, `earth` and `earth_detail` on, `earth_turn` from the Earth's speed setting, `milky_way` bound to `playback.playing`, `milky_detail` 1 |
@@ -2029,30 +2054,99 @@ trees, the windows, the Moon, the owl and the organ are new in it.
 
 ### Room: Palace of Culture 1974
 
-`app/environments/palace_of_culture_1974.env.json`. The cinema hall of a civic palace of culture: board-marked
-concrete, mosaic panels on the side walls that take the screen's light, ochre curtains, straight rows on a parquet
-rake, and the back of the roof open to a winter night with birches and falling snow.
+`app/environments/palace_of_culture_1974.env.json`. *A palace of culture, 1974: board-marked concrete, two great
+mosaics that glitter in the screen's light, a field of glowing globes, and snow falling through the open roof.* The
+deep pass (2026-11-08) answered "continue working on the environments one-by-one like you did with the bathysphere,
+really improving their quality, imagination, delight, detail, lighting and so on. Better to do a smaller number of
+incredible superb ones than a large number not so" (the user). Before it the room was the auditorium builder's
+cinema in other materials: concrete panels, six flat terrazzo panels a side for the mosaic (no tesserae), ochre
+drapes, stadium seats in red, the back three quarters of the roof open. The seats, the eye height and the screen
+are where they were; the hall round them is the kit's `culture_hall` piece (`kit/palace_culture.gd`), its mosaics
+`kit/mosaics.gd` on the house shader's `MOSAIC` form.
 
-- **Systems:** `light`; `auditorium` (22 x 22.6 m, 10 m high, 8 rows in front and 4 behind, straight, 29 seats a
-  row in woven red with oak arms; `concrete_panels` walls and ceiling; six panels a side of `terrazzo` in muted gold
-  with `spill` 5 (the concrete's is the light's 3), steel rails; ochre velvet drapes; `ceiling_cover` 0.76: open
-  from just behind the viewer's row); `screen_frame`; `showing`; `sky` (latitude 56, mid January, full night,
-  grey clouds); `vista` (birches 14 to 18 m out behind and to both sides, hills); `weather` (`falls` snow, 1400
-  flakes, one area under the open roof, from z 2.2 to the rear wall).
+- **The mosaics (the soul):** one on each side wall, 14.4 m long and 7.2 m high (z -13.6 to 0.8, y 1 to 8.2), of
+  our own design, no people and no emblem: 320 x 160 tesserae of 4.5 cm each, drawn tessera by tessera
+  (`kit/mosaics.gd`) into one map (320 x 320, both murals, 400 KB) whose alpha says what each tessera is: stone, coloured
+  glass or gold. The left wall is **the cosmos**: a night laid in rings round a gold sun (the andamento a mosaicist
+  lays), its rays in gold and ochre, an atom's three orbits round a red nucleus, a rocket climbing on a trail of
+  flame, a crescent moon cut out of the night, a ringed planet, a comet, gold and white stars. The right wall is
+  **the earth**: dawn in bands of cream, peach, aqua and blue round a sun rising on the horizon, gulls gliding, a
+  sheaf of wheat bound with twine, furrows converging to the horizon in ochre, olive, gold and brown. Along both
+  feet a river of waves (scales of turquoise, cobalt and ultramarine with white rims); a black and gold border; a
+  bronze frame. The shader (`MOSAIC`): courses with uneven joints and a stagger, each tessera its own shade, tilt
+  and edge, dark grout that stays thin at a distance; gold and glass glint as the head moves (the lamp line's and
+  the picture's light, gold tinted by its own colour, stone hardly), never a flicker of its own. The lamp line over
+  the cornice washes down them (`mosaic_wash`, times the house lamps). In the film they take `film.colour` through
+  the screen's spill, softly: `spill` 0.22 against the concrete's 0.45 (the mosaics must never be lit more than the
+  picture).
+- **The architecture:** board-marked concrete everywhere (`procedural.gd` `board_concrete`: ten boards a repeat, each
+  its own tone and depth, butt joints, grain, the fins between boards, tie holes, blowholes) on `smooth_concrete`;
+  a moulded cornice at 8.4 m over each mosaic with a lamp line in its underside; a coffered ceiling, 10 x 7 coffers
+  on beams 0.7 m deep, each coffer's soffit lit by the globes under it (`PieceCove`: the light worked out per vertex,
+  a pool round each globe falling off over half a metre, no light pass); a bold concrete proscenium round the
+  screen's drapes: a broad face, two stepped reveals, vertical ribs every 0.42 m, a groove band and a
+  bronze edge, the ochre valance inside it.
+- **The globes:** a field of 60 opal globes (six rows of ten) on long rods from the coffers' crossings, hung lower in
+  the middle (a bell) and never below 6.6 m, all at least 2 m above the picture's top. Each glows warm
+  (`room_lamp.gdshader` `rim`: brighter where the view meets the glass square on, so they read round, not flat
+  discs), in the `house` group: they dim with the house lamps for the film but never go quite out
+  (`follows_house` 0.93).
+- **The opening and the winter:** a roof light 4 m deep across the hall's width just behind the default row (z 1.2
+  to 5.2), crossed by a grid of concrete beams; a frozen sky (`sky`: latitude 56, mid January, full night, grey
+  clouds, a warm glow on their undersides from the hall); birches in hoar frost overhead (`vista` `frost` 1: fine
+  white twigs, drooping strands; `room_glow`: the hall's warm light thrown up on the near trees, down with the
+  lamps in the film); snow lying on every ledge and beam of the opening (unbaked, draped over the edges so it
+  reads from below), snow falling under the opening only (1400 flakes).
+- **The rear wall:** oak acoustic slats (7.5 cm pitch, each its own tone) to 5 m, on bronze rails; a concrete band
+  with the booth's windows; over it the hall's clock (0.6 m, a bronze ring, `env_clock.gdshader` `style` 1: a dark
+  dial, lit bars and minute dots, telling the real time); dark felt between.
+- **The seats:** the seats system's new `civic` model, 377 of them (29 a row, 13 rows): woven red upholstery on a
+  moulded oak shell, oak arms and standards. 338 triangles a seat against the stadium seat's 646.
+- **The light:** warm in the pre-show (the globes, the lamp lines, the wash down the mosaics, the coffers' pools),
+  cold from the opening (a pale blue spot from the sky for the bake), dim in the film. Baked: 8 lamps (stand-ins
+  until the bake), 5 glows along the cornices, 11 hidden spots (six washing down the mosaics, the sky's spot, two
+  footlights on the drapes, two uplights on the proscenium from the pit). The curtains of the pre-show are ochre,
+  as the drapes (`room` `curtain_colour`).
+- **Systems:** `light` (spill 0.45, `baked_fill` 0.15), `auditorium` (unchanged layout; `seat_model` `civic`,
+  `shell` false: the kit draws the side and rear walls; `ceiling_cover` 0: the kit draws the ceiling; `house_spots`
+  off), `kit` (`builder` the hall, pieces `culture_hall` and `globe_field`, `bake_lamps` 8, `mosaic` on
+  `white_marble`), `screen_frame`, `showing`, `sky`, `vista`, `weather`, `acoustics`, three `sound_bed`s.
 - **Setting:** Snow (no snow, light, heavy; light by default): `weather.mode` (clear, light, heavy), `sky.clouds`
-  (0.2, 0.55, 0.85) and `vista.snow` (0.8, 1, 1), each by `map`.
-- **Cues:** `ritual`: the lamps to half over 2 s, the curtains part over 5 s, then the lamps to 10 % and the steps
-  to half over 6 s. `dim` and `lights_up` as in the Atmospheric.
-- **The mosaic:** no library material or shader option sparkles yet; the mosaic is terrazzo that takes more of
-  the film's light (its colours) than the walls round it.
-- **The snow and the picture:** the snow falls only under the open roof, behind the default seat, so nothing falls
+  (0.2, 0.55, 0.85), `vista.snow` (0.8, 1, 1) and the wind's level (0.5, 0.8, 1), each by `map`.
+- **Cues:** `ritual`: the bells, the lamps to half over 2 s, the curtains part over 5 s, then the lamps to 10 %, the
+  steps to half and the trees' glow to 0.04 over 6 s. `dim` (the same without the ritual), `lights_up` (all back
+  over 4 s). `night_train`: in the pre-show, when paused and at the end, every four minutes a one-in-two chance (at
+  most once in eight minutes) of a train far off.
+- **The snow and the picture:** the snow falls only under the opening, behind the default seat, so nothing falls
   between the viewer and the picture from there; from the back rows it falls round them.
+- **The vista's ground:** the side groves' ground is at -3.1, under the pit's floor: at 0 the vista's snow (8 m
+  out from the middle) showed over the side aisles as a pale slab (before the pass too).
 - **Default seat:** the middle of row 0.
-- **Measured:** 23 draws, 256 688 triangles, 1400 particles, 12.4 MB.
-- **Sound:** an echoey hall (`acoustics` `concrete_hall`: rt60 2.4, a 60 ms predelay and its echo); the house bells
-  (`sound_bed` `three_bells` by the stage, played by the ritual's first step: once as the film starts, none with the
-  Pre-show off). Measured (`test_room_set2.gd`): the bells' loudest second -52.2 dBFS at the slider's default,
-  14 dB under the level check's target; nothing else sounds.
+- **Comfort:** nothing moves but the snow, the clouds and the clock's hands; nothing between a seat and the picture (tested from
+  every seat); the globes hang high and clear of the view.
+- **Measured** (`tests/test_room_palace_of_culture_1974.gd`, headless, 2026-11-08): 29 draws, 178 958 triangles,
+  no live light, 1400 particles, 14.6 MB. Before the pass: 23 draws, 256 688 triangles, 1400 particles, 12.4 MB. By
+  part: the seats 127.4k triangles in 2 draws (243.5k before), the vista 14.1k (the frosted birches), the globes
+  11.5k, the coves (coffers, cornices) 8.9k, the soft meshes (snow, rods) 5.3k, the stars 4.0k, the hall's static
+  meshes 2.9k in 5 draws, the sky 2.4k, the floor 1.6k, the mosaics 4 triangles (all their detail is in the shader).
+  The bake: the lightmap 1024 x 1024, one layer (6.3 MB), 11.4 to 11.8 s under lavapipe; 24 hidden lights for it.
+  The textures made at load: the board-marked concrete's three maps (256) and the mosaics' map (320 x 320).
+- **The costs to watch on the Frame:** fill is one opaque layer (the snow's flakes are the only blended part); the
+  mosaic shader costs one more texture fetch and a few hashes a pixel over the house shader, on two walls that fill
+  much of the view; the frosted birches add 14k triangles to the vista's one draw; the 60 globes 11.5k in one draw.
+  The bake's time on the headset (24 lights) is the thing to judge.
+- **The render** (lavapipe, `test_room_palace_of_culture_1974.gd` with `PALACE_BAKE`): from the seat, left, right,
+  up, back, back and up, a side seat and its wall, in the pre-show and with a film; close: the left mosaic, the
+  proscenium, the ceiling, the rear wall, the opening, the right mosaic, the roof from above, the side aisle.
+- **Sound:** an echoing hall (`acoustics` `concrete_hall`: rt60 2.4, a 60 ms predelay); the house bells
+  (`three_bells` by the stage, played by the ritual only); the wind over the opening (`wind` 10.5 m up, its level on
+  the Snow setting, 12 dB down in the film); a train far off now and then (`train`, about 280 m away, by the cue only).
+  Measured (the slider's default): -52.1 dBFS RMS in the pre-show (peak -38.1), -73.5 under a film at the reference
+  level. Before the pass the bells' loudest second was -52.2 and nothing else sounded.
+- **To judge on the Frame:** the frame time with the mosaics filling the view and the bake's time; whether the
+  glint is subtle (gold should catch as the head moves, never sparkle); the mosaics' level in a bright film; the
+  globes' level in the film; the ochre curtains of the pre-show; the wind's and the train's levels by ear;
+  snowflakes near the eyes in the back rows.
 
 ### Room: Flagship
 

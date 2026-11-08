@@ -4347,11 +4347,11 @@ msgid "An ice hotel's cinema of sawn blocks and carvings under an ice vault: can
 msgstr ""
 
 #: environments/nave.env.json
-msgid "A stone nave with the screen in the chancel: pews, candles, a dim rose window and the film's light climbing the stone."
+msgid "A Gothic nave at night, the screen in the chancel: piers rising into rib vaults, candles on iron stands and coronae, coloured glass and a rose window in the moonlight."
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
-msgid "A concrete hall of the 1970s: ochre curtains, a mosaic wall that glitters in the screen's light, and snow on the birches outside."
+msgid "A palace of culture, 1974: board-marked concrete, two great mosaics that glitter in the screen's light, a field of glowing globes, and snow falling through the open roof."
 msgstr ""
 
 #: environments/pillow_fort_1993.env.json
@@ -4608,7 +4608,7 @@ msgid "The northern lights in the window and the skylights: lively before the fi
 msgstr ""
 
 #: environments/nave.env.json
-msgid "Candle stands either side of the screen: none, two on each side, or four."
+msgid "None: the church by moonlight and the film alone. A few: two candle stands either side of the screen, the coronae over the nave and the votive lights. Many: four stands a side."
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json

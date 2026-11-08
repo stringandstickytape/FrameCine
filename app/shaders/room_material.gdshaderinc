@@ -166,6 +166,35 @@ uniform float ice_vault_block = 0.9;
 uniform float ice_snow = 0.0;
 #endif
 
+#ifdef MOSAIC
+// MOSAIC (with LIT and HOUSE, room_material_house_mosaic.gdshader; since 2026-11-08, for the Palace of Culture 1974:
+// "the mosaics are the soul ... in small glass and stone tesserae with a faint glint as the head moves, grout lines,
+// slight unevenness ... a tessera shader over one texture", the brief): a wall mosaic. mosaic_map holds one texel per
+// tessera over the mesh's UV square: rgb the tessera's colour, a what it is (0 stone, matt; 0.5 coloured glass;
+// 1 gold leaf under glass). The tesserae are laid in courses across the map, each course set off from the last, its
+// joints a little uneven; grout between them. Each tessera is pressed into the bed a little askew (its own tilt), so
+// the light glints off the mosaic tessera by tessera and the glints move as the head does: the lamps' light
+// (mosaic_glint_colour, from mosaic_glint_pos in the room's frame) and the picture's (the bias light's colour, from the
+// screen). Gold glints most, in its own colour; glass less; stone hardly. Where a tessera is only a few pixels across
+// the grout fades to its share of the colour, so nothing shimmers at a distance. A wash from a lamp line above
+// (mosaic_wash: rgb its light, w metres to fall to a third; mosaic_wash_y its height in the room's frame) lights it
+// from the top down, at the house lights' level. Not with TRIPLANAR (it reads the mesh's UVs).
+uniform sampler2D mosaic_map : source_color, filter_nearest, repeat_enable;
+uniform vec3 mosaic_grout : source_color = vec3(0.42, 0.4, 0.36);
+// The grout's width as a share of a tessera, and how far the courses' joints wander (a share of a tessera).
+uniform float mosaic_joint = 0.14;
+uniform float mosaic_wander = 0.3;
+uniform float mosaic_tilt = 0.12;
+uniform float mosaic_glint = 0.0;
+uniform vec3 mosaic_glint_colour = vec3(0.0);
+uniform vec3 mosaic_glint_pos = vec3(0.0, 8.0, 0.0);
+// How sharp a glint is (the lobe's power) and how much of it the picture gives.
+uniform float mosaic_glint_sharp = 30.0;
+uniform float mosaic_film_glint = 1.0;
+uniform vec4 mosaic_wash = vec4(0.0, 0.0, 0.0, 2.0);
+uniform float mosaic_wash_y = 8.0;
+#endif
+
 // env_light, screen_center, screen_glow and the bias light's tint (ideas #29).
 #include "res://shaders/env_spill.gdshaderinc"
 
@@ -291,6 +320,18 @@ void turn_frame(inout vec3 u, inout vec3 v) {
 	v = b;
 }
 
+#ifdef MOSAIC
+// A hash in 0..1 for a tessera's place (course, number along it).
+float mosaic_hash(vec2 p) {
+	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+// Where joint k of a course falls along it (tesserae: k is about where the k-th begins).
+float mosaic_joint_at(float course, float k) {
+	return k + mosaic_wander * (mosaic_hash(vec2(course, k)) - 0.5);
+}
+#endif
+
 void fragment() {
 	mat3 model = mat3(MODEL_MATRIX);
 	vec3 geo_n = normalize(world_normal);
@@ -353,6 +394,40 @@ void fragment() {
 		n = normalize(n + across_dir * cos(phase) * pleat_depth);
 		fold = 1.0 - pleat_depth * 0.35 * (1.0 - sin(phase));
 	}
+#ifdef MOSAIC
+	// The tessera under this point: its course, its joints either side (uneven), its middle (where its colour is read).
+	vec2 m_size = vec2(textureSize(mosaic_map, 0));
+	vec2 m_q = UV * m_size;
+	float m_course = floor(m_q.y);
+	float m_set = fract(sin(m_course * 91.37 + 4.1) * 43758.5453);
+	float m_u = m_q.x + m_set;
+	float m_k = floor(m_u);
+	if (m_u < mosaic_joint_at(m_course, m_k)) {
+		m_k -= 1.0;
+	} else if (m_u >= mosaic_joint_at(m_course, m_k + 1.0)) {
+		m_k += 1.0;
+	}
+	float m_a = mosaic_joint_at(m_course, m_k);
+	float m_b = mosaic_joint_at(m_course, m_k + 1.0);
+	float m_fy = fract(m_q.y);
+	float m_edge = min(min(m_u - m_a, m_b - m_u), min(m_fy, 1.0 - m_fy));
+	vec2 m_h = vec2(mosaic_hash(vec2(m_k, m_course) + 17.0), mosaic_hash(vec2(m_course, m_k) + 41.0));
+	vec4 m_tess = textureLod(mosaic_map, (vec2((m_a + m_b) * 0.5 - m_set, m_course + 0.5)) / m_size, 0.0);
+	// The grout: sharp where a tessera is many pixels across, its share of the colour where it is a few.
+	float m_px = max(length(vec2(dFdx(m_q.x), dFdy(m_q.x))), length(vec2(dFdx(m_q.y), dFdy(m_q.y))));
+	float m_half = mosaic_joint * 0.5;
+	float m_grout = 1.0 - smoothstep(m_half - m_px * 0.6, m_half + m_px * 0.6, m_edge);
+	m_grout = mix(m_grout, mosaic_joint * 1.2, smoothstep(0.2, 0.5, m_px));
+	float m_kind = m_tess.a;
+	// Each tessera its own shade (glass a little more lively than stone), its edges dipping into the bed.
+	float m_dip = mix(0.8, 1.0, smoothstep(m_half, m_half + 0.14, m_edge));
+	vec3 m_col = m_tess.rgb * (0.88 + (0.18 + 0.1 * m_kind) * m_h.x) * mix(m_dip, 1.0, smoothstep(0.25, 0.5, m_px));
+	t.albedo = mix(m_col, mosaic_grout, m_grout);
+	t.orm.r = 1.0;
+	// Pressed in a little askew: the tessera's face turned its own way (not the grout's).
+	n = normalize(n + (tan_u * (m_h.y - 0.5) + tan_v * (fract(m_h.x * 7.31) - 0.5)) * mosaic_tilt * 2.0
+			* (1.0 - m_grout));
+#endif
 	vec3 base = tint * t.albedo;
 	float level = 1.0;
 #ifdef HOUSE
@@ -573,6 +648,29 @@ void fragment() {
 		vec3 room_seen = mix(sky_bottom, sky_top, clamp(mirror.y * 0.5 + 0.5, 0.0, 1.0)) * level * 2.0;
 		own += inside * ice_inner * (1.0 - fresnel * 0.5) * (1.0 - 0.3 * ice_groove) * ice_shade + gloss
 				+ room_seen * fresnel * ice_gloss;
+	}
+#endif
+#ifdef MOSAIC
+	if (!bake_pass) {
+		// The wash from the lamp line over the mosaic: strongest at the top, falling away down the wall.
+		float m_drop = max(mosaic_wash_y - obj_pos.y, 0.0);
+		own += diffuse * mosaic_wash.rgb * level * exp(-m_drop / max(mosaic_wash.w, 0.01)) * ao;
+		if (mosaic_glint > 0.0) {
+			vec3 m_v = normalize(CAMERA_POSITION_WORLD - world_pos);
+			vec3 m_r = reflect(-m_v, n);
+			// Gold glints in its own colour, glass in the light's.
+			float m_gold = smoothstep(0.7, 0.95, m_kind);
+			vec3 m_tint = mix(vec3(1.0), m_tess.rgb * 2.2, m_gold);
+			float m_gk = mix(0.02, 1.0, pow(m_kind, 3.0)) * (1.0 - m_grout);
+			vec3 m_lamp = (MODEL_MATRIX * vec4(mosaic_glint_pos, 1.0)).xyz;
+			float m_lobe = pow(max(dot(m_r, normalize(m_lamp - world_pos)), 0.0), mosaic_glint_sharp);
+			vec3 m_to_s = screen_center - world_pos;
+			float m_ds = length(m_to_s);
+			float m_slobe = pow(max(dot(m_r, m_to_s / max(m_ds, 0.001)), 0.0), mosaic_glint_sharp * 0.6);
+			vec3 m_film = spill * screen_glow * spill_tint(world_pos) / (1.0 + 0.05 * m_ds * m_ds);
+			own += m_tint * m_gk * mosaic_glint * (mosaic_glint_colour * level * m_lobe
+					+ m_film * m_slobe * mosaic_film_glint);
+		}
 	}
 #endif
 #ifdef REFLECT

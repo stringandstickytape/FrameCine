@@ -79,6 +79,9 @@ const ROOM_OPTIONS := {
 	"ambient": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
 	"screen_glow": {"type": "float", "min": 0.0, "max": 2.0, "default": 0.0},
 	"curtains": {"type": "bool", "default": false},
+	# The pre-show's curtains' colour (since 2026-11-08: the Palace of Culture's are ochre, as its drapes); null: the
+	# app's red velvet.
+	"curtain_colour": {"type": "color", "default": null, "nullable": true},
 	"reacts_to_film": {"type": "bool", "default": false},
 	"reflection": {"type": "bool", "default": false},
 	"reflection_floor": {"type": "float", "min": -20.0, "max": 20.0, "default": null, "nullable": true},

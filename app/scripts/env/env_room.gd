@@ -29,6 +29,8 @@ var _baked: bool:
 		return is_baked()
 var has_curtains := false
 var curtains_by_cue := false
+## The pre-show's curtains' colour from the document (room.curtain_colour), or null: the app's own.
+var curtain_colour: Variant = null
 var reflection_floor_y := NAN
 var reflection_default := false
 var _main: Node
@@ -81,6 +83,7 @@ func _apply_room() -> void:
 	if r.get("reflection_floor") != null and r.has("reflection_floor"):
 		reflection_floor_y = float(r["reflection_floor"])
 	reflection_default = bool(r.get("reflection", reflection_default))
+	curtain_colour = RoomSchema.to_color(r["curtain_colour"]) if r.get("curtain_colour") != null else null
 	if doc.get("screen") is Dictionary:
 		var s: Dictionary = doc["screen"]
 		if screen_anchor == null:
