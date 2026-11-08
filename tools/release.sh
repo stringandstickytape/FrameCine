@@ -246,7 +246,8 @@ latest = {"version": version, "tag": tag,
           "package": {"url": tgz["url"], "size": tgz["size"], "sha256": tgz["sha256"]},
           "notes": notes}
 zp = info(pkg + ".zip")
-manifest = {"schema": "framedrop.install/v1", "name": "Frame VR Video",
+# "name" becomes the Devkit id, which is the title Steam shows (no spaces: Frame Control turns them into "_").
+manifest = {"schema": "framedrop.install/v1", "name": "FrameVRVideo",
             "files": [{"url": zp["url"], "sha256": zp["sha256"], "size": zp["size"], "exe": "run.sh"}]}
 # UTF-8, no BOM, LF; signed byte for byte as written.
 for name, obj in (("latest.json", latest), ("install-manifest.json", manifest)):

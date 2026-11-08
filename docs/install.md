@@ -41,10 +41,10 @@ The install:
        <https://framedropvr.com/install?manifest=https%3A%2F%2Fgithub.com%2Fstringandstickytape%2FFrameVRVideo%2Freleases%2Flatest%2Fdownload%2Finstall-manifest.json>
    - Or download `framevrvideo-<version>-arm64.zip` from the releases page and drag it onto the PC program.
      Do not unzip it first.
-6. On the headset, open the Steam library. **Frame VR Video** is under **Non-Steam**. Start it.
+6. On the headset, open the Steam library. **FrameVRVideo** is under **Non-Steam** (Steam shows Devkit titles by their id). Start it.
 
 The PC program copies the player to the headset (about 100 MB) and adds it to the library. You do not need to restart
-Steam. The player runs from the folder the program made for it (Frame Control: `~/devkit-game/VR_Video_Player/`).
+Steam. The player runs from the folder the program made for it (Frame Control: `~/devkit-game/FrameVRVideo/`).
 
 If the install link does nothing, the PC program is not installed or has not been started once. Start it, then
 click the link again. If the player is not in the library, check that Steam was open on the headset during the
