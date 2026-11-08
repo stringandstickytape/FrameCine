@@ -38,6 +38,18 @@ var _tool := ""
 var _render := false
 
 
+## A hand for the hold: the ray along its -Z, the laser calls ignored.
+class FakeHand extends Node3D:
+	func get_ray_origin() -> Vector3:
+		return global_position
+
+	func get_ray_direction() -> Vector3:
+		return -global_basis.z
+
+	func set_laser(_on: bool, _length := 3.0, _hit := false, _beam := Color(), _dot := Color()) -> void:
+		pass
+
+
 func _init() -> void:
 	_run.call_deferred()
 
@@ -46,6 +58,7 @@ func _run() -> void:
 	_test_protocol()
 	_test_clock()
 	_test_sniff()
+	await _test_bar()
 	_render = DisplayServer.get_name() != "headless"
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
 	_tool = ProjectSettings.globalize_path("res://").path_join("../tools/pc_windows_fake_pc.py").simplify_path()
@@ -403,6 +416,60 @@ func _test_panes() -> void:
 		_check("the pattern moved between the pictures (%d samples differ)" % diff, diff > 5)
 	var h := await _open_and_wait(s, "w:264")
 	_check("H.264: frames", h != null and h.video.has_frame())
+	await _test_hold(pane)
+
+
+## Holding a pane (the user, 2026-11-08): it rides the ray and turns with the hand, kept level.
+func _test_hold(pane: Node3D) -> void:
+	var hand := FakeHand.new()
+	root.add_child(hand)
+	hand.global_position = Vector3(0.2, 1.1, -0.2)
+	hand.look_at(pane.global_position, Vector3.UP)
+	var d := hand.global_position.distance_to(pane.global_position)
+	var before: Basis = pane.global_basis
+	pc._aims[hand] = {"pane": pane, "distance": d}
+	_check("hold: the squeeze takes the pane", pc.on_grip(hand, true) and pc.holding(hand))
+	pc._hold(hand, 0.016)
+	_check("hold: no jump on taking it (%.3f)" % pane.global_basis.z.angle_to(before.z),
+			pane.global_basis.z.angle_to(before.z) < 0.01)
+	hand.rotate_y(deg_to_rad(20.0))
+	hand.rotate_object_local(Vector3.RIGHT, deg_to_rad(-15.0))
+	pc._hold(hand, 0.016)
+	var front: Vector3 = pane.global_basis.z
+	var yaw := rad_to_deg(wrapf(atan2(front.x, front.z) - atan2(before.z.x, before.z.z), -PI, PI))
+	var tilt := rad_to_deg(asin(clampf(front.y, -1.0, 1.0)))
+	_check("hold: turning the hand turns the pane (yaw %.1f, tilt %.1f)" % [yaw, tilt],
+			absf(yaw - 20.0) < 6.0 and tilt > 8.0)
+	_check("hold: level, no roll (%.3f)" % pane.global_basis.x.y, absf(pane.global_basis.x.y) < 0.001)
+	_check("hold: on the ray", pane.global_position.distance_to(hand.get_ray_origin() + hand.get_ray_direction() * d)
+			< 0.001)
+	hand.rotate_y(deg_to_rad(-20.0))
+	pc.on_grip(hand, false)
+	_check("hold: letting go", not pc.holding(hand))
+	pc._aims.erase(hand)
+	hand.free()
+
+
+## The bar under a pane scales with it (the user, 2026-11-08): a small pane gets small buttons, which still hit.
+func _test_bar() -> void:
+	var p := PcPane.new()
+	root.add_child(p)
+	await process_frame
+	p.set_width(1.6)
+	var big: Vector2 = ((p.get_node("Bar/Close") as MeshInstance3D).mesh as QuadMesh).size
+	p.set_width(0.4)
+	var small: Vector2 = ((p.get_node("Bar/Close") as MeshInstance3D).mesh as QuadMesh).size
+	_check("bar: a quarter the pane, a quarter the buttons (%s, %s)" % [big, small],
+			big.is_equal_approx(Vector2(PcPane.BUTTON_WIDTH, PcPane.BAR_HEIGHT)) and small.is_equal_approx(big * 0.25))
+	_check("bar: the buttons narrower than the pane", small.x * 2.0 + 0.01 < p.width)
+	var at: Vector3 = (p.get_node("Bar/Screen") as Node3D).global_position
+	var hit: Dictionary = p.hit(at + Vector3(0, 0, 1), Vector3(0, 0, -1))
+	_check("bar: the small Show button hits (%s)" % hit, str(hit.get("button", "")) == "screen")
+	hit = p.hit(at + Vector3(0, small.y, 1), Vector3(0, 0, -1))
+	_check("bar: above the small button misses it (%s)" % hit, not hit.has("button"))
+	p.set_width(30.0)
+	_check("bar: no bigger than BAR_SCALE_MAX", is_equal_approx(p.bar_scale(), PcPane.BAR_SCALE_MAX))
+	p.free()
 
 
 func _open_and_wait(s: RefCounted, id: String) -> Node3D:

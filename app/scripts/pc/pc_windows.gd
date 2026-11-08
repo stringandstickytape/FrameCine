@@ -805,7 +805,10 @@ func on_grip(hand: Node, pressed: bool) -> bool:
 	if aim.is_empty():
 		return false
 	var pane: PcPane = aim["pane"]
-	_holds[hand] = {"pane": pane, "distance": float(aim["distance"])}
+	# The pane's turn against the controller's, so turning the hand turns the pane (the user, 2026-11-08: grab to
+	# move changes its angle too), as if held on the end of the ray.
+	var rel: Basis = (hand.global_basis as Basis).orthonormalized().inverse() * pane.global_basis.orthonormalized()
+	_holds[hand] = {"pane": pane, "distance": float(aim["distance"]), "rel": rel}
 	set_focus(pane)
 	return true
 
@@ -832,9 +835,8 @@ func _hold(hand: Node, _delta: float) -> void:
 	var o: Vector3 = hand.get_ray_origin()
 	var d: Vector3 = hand.get_ray_direction()
 	pane.global_position = o + d * float(hold["distance"])
-	var head := _head()
-	if head != null:
-		pane.face(head.global_position)
+	var turned: Basis = (hand.global_basis as Basis).orthonormalized() * (hold["rel"] as Basis)
+	pane.face_along(turned.z)
 	hand.set_laser(true, float(hold["distance"]), true)
 
 

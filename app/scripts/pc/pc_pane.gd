@@ -14,9 +14,15 @@ const SHADER := preload("res://shaders/pc_pane.gdshader")
 
 ## The Frame's panels: 2160 pixels across about 108 degrees.
 const PIXELS_PER_DEGREE := 20.0
+## The bar's sizes for a pane BAR_FOR_WIDTH across; it scales with the pane (the user, 2026-11-08: a small pane
+## close by had a huge bar), within BAR_SCALE_MIN..BAR_SCALE_MAX.
 const BAR_HEIGHT := 0.07
 const BAR_GAP := 0.012
 const BUTTON_WIDTH := 0.36
+const LABEL_PIXEL := 0.0006
+const BAR_FOR_WIDTH := 1.6
+const BAR_SCALE_MIN := 0.22
+const BAR_SCALE_MAX := 1.5
 const MIN_WIDTH := 0.2
 const MAX_WIDTH := 8.0
 
@@ -64,7 +70,6 @@ func _ready() -> void:
 		var m := MeshInstance3D.new()
 		m.name = str(b[0]).capitalize()
 		m.mesh = QuadMesh.new()
-		(m.mesh as QuadMesh).size = Vector2(BUTTON_WIDTH, BAR_HEIGHT)
 		var mat := StandardMaterial3D.new()
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		mat.albedo_color = Color(0.12, 0.13, 0.15)
@@ -73,7 +78,7 @@ func _ready() -> void:
 		_bar.add_child(m)
 		var l := Label3D.new()
 		l.text = b[1]
-		l.pixel_size = 0.0006
+		l.pixel_size = LABEL_PIXEL
 		l.font_size = 44
 		l.position.z = 0.001
 		l.modulate = Color(0.92, 0.93, 0.95)
@@ -134,10 +139,19 @@ func _layout() -> void:
 	(_quad.mesh as QuadMesh).size = Vector2(width, h)
 	material.set_shader_parameter("size_m", Vector2(width, h))
 	material.set_shader_parameter("outline_m", clampf(width * 0.003, 0.002, 0.01))
-	_bar.position = Vector3(0, -h / 2.0 - BAR_GAP - BAR_HEIGHT / 2.0, 0)
-	(_buttons["close"] as Node3D).position.x = -BUTTON_WIDTH / 2.0 - 0.01
-	(_buttons["screen"] as Node3D).position.x = BUTTON_WIDTH / 2.0 + 0.01
+	var k := bar_scale()
+	_bar.position = Vector3(0, -h / 2.0 - (BAR_GAP + BAR_HEIGHT / 2.0) * k, 0)
+	for b: String in _buttons:
+		var m := _buttons[b] as MeshInstance3D
+		(m.mesh as QuadMesh).size = Vector2(BUTTON_WIDTH, BAR_HEIGHT) * k
+		m.position.x = (BUTTON_WIDTH / 2.0 + 0.01) * k * (-1.0 if b == "close" else 1.0)
+		(_labels[b] as Label3D).pixel_size = LABEL_PIXEL * k
 	_quad.visible = not on_screen
+
+
+## How big the bar is against its sizes at BAR_FOR_WIDTH.
+func bar_scale() -> float:
+	return clampf(width / BAR_FOR_WIDTH, BAR_SCALE_MIN, BAR_SCALE_MAX)
 
 
 ## On the big screen the picture is there instead: only the bar stays (Close, Back to a pane).
@@ -186,9 +200,10 @@ func hit(origin: Vector3, direction: Vector3) -> Dictionary:
 		var uv := Vector2(p.x / width + 0.5, 0.5 - p.y / h)
 		return {"pixel": uv * Vector2(pixels), "distance": dist}
 	var by := p.y - _bar.position.y
-	if absf(by) <= BAR_HEIGHT / 2.0:
+	var k := bar_scale()
+	if absf(by) <= BAR_HEIGHT * k / 2.0:
 		for b: String in _buttons:
-			if absf(p.x - (_buttons[b] as Node3D).position.x) <= BUTTON_WIDTH / 2.0:
+			if absf(p.x - (_buttons[b] as Node3D).position.x) <= BUTTON_WIDTH * k / 2.0:
 				return {"button": b, "distance": dist}
 	return {}
 
@@ -206,6 +221,13 @@ func face(head_pos: Vector3) -> void:
 	if to.length() < 0.01:
 		return
 	global_basis = Basis.looking_at(-to.normalized(), Vector3.UP)
+
+
+## Turns the picture's front (+Z) to `front`, kept level (no roll); a front almost straight up or down is left alone.
+func face_along(front: Vector3) -> void:
+	if front.length() < 0.01 or absf(front.normalized().y) > 0.97:
+		return
+	global_basis = Basis.looking_at(-front.normalized(), Vector3.UP)
 
 
 func status() -> Dictionary:
