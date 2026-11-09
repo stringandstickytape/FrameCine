@@ -1,0 +1,27 @@
+{
+  "rows": [
+    {"room": "void", "name": "Void", "foveation": "off", "foveation_applied": 0, "dropped": 0, "gpu_ms": 4.12,
+     "gpu_ms_p95": 4.6, "cpu_ms": 2.31, "frame_ms": 13.89, "fps": 72.0, "frames": 720, "seconds": 9.99},
+    {"room": "cinema", "name": "Cinema", "foveation": "off", "foveation_applied": 0, "dropped": 0, "gpu_ms": 8.45,
+     "gpu_ms_p95": 9.8, "cpu_ms": 3.02, "frame_ms": 13.89, "fps": 72.0, "frames": 720, "seconds": 9.99,
+     "delta_gpu_ms": 4.33},
+    {"room": "bathysphere", "name": "Bathysphere", "foveation": "off", "foveation_applied": 0, "dropped": 3,
+     "gpu_ms": 12.9, "gpu_ms_p95": 15.02, "cpu_ms": 3.4, "frame_ms": 14.2, "fps": 70.4, "frames": 704,
+     "seconds": 9.99, "delta_gpu_ms": 8.78},
+    {"room": "tv_1953", "name": "TV 1953", "foveation": "off", "foveation_applied": 0, "dropped": 0, "gpu_ms": 6.2,
+     "gpu_ms_p95": 7.1, "cpu_ms": 2.75, "frame_ms": 13.89, "fps": 72.0, "frames": 720, "seconds": 9.99,
+     "delta_gpu_ms": 2.08}
+  ],
+  "table": ["Void: off 4.12 ms", "Bathysphere: off 12.9 ms (+8.78)", "Cinema: off 8.45 ms (+4.33)",
+            "TV 1953: off 6.2 ms (+2.08)"],
+  "baseline": "void",
+  "levels": ["off"],
+  "settle": 4.0,
+  "seconds": 10.0,
+  "film_playing": true,
+  "refresh_hz": 72,
+  "budget_ms": 13.89,
+  "renderer": true,
+  "foveation_available": true,
+  "notes": ["the panel was open: it is in the numbers; close it for the rooms alone"]
+}
