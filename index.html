@@ -16,8 +16,9 @@
       spatial sound.</p>
     <div class="buttons">
       <a class="button" href="frame-control.html">Install with Frame Control</a>
-      <a class="button alt" id="framedrop" href="https://framedropvr.com/">Install with FrameDrop</a>
     </div>
+    <p class="fine">FrameDrop: its one-click link can't download from GitHub yet; download the zip below and drop it
+      on FrameDrop instead.</p>
     <p class="fine">Both install from a PC: turn on Developer Mode on the headset (Steam Settings, System, Developer
       Mode) and pair it once with the installer. Each asks before it installs. FrameCine then shows in the Steam
       library under Non-Steam, and updates itself from then on.</p>
@@ -33,12 +34,5 @@
       · MIT licence · Free, no account, no AI unless you install it yourself
     </footer>
   </main>
-  <script>
-    (() => {
-      const MANIFEST = "https://github.com/stringandstickytape/FrameCine/releases/latest/download/install-manifest.json";
-      document.getElementById("framedrop").href =
-        "https://framedropvr.com/install?manifest=" + encodeURIComponent(MANIFEST);
-    })();
-  </script>
 </body>
 </html>
