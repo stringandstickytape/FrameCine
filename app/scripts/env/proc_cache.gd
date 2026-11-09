@@ -22,7 +22,8 @@ extends RefCounted
 ## already keeps its pictures in memory by a key has decided what tells one picture from another; the same key
 ## serves here, so adding the disk under it takes no new judgment and can leave nothing out.
 ##
-## The stamp says which code drew it: one MD5 over every script under res://scripts/env. A change to any of them
+## The stamp says which code drew it: one MD5 over every script under res://scripts/env (the scripts themselves, not
+## a version number: a developer's edit changes a picture long before any version does). A change to any of them
 ## empties the whole cache. Coarse on purpose: a generator calls helpers in other files, and a finer stamp would have
 ## to know which. An update redraws every room once.
 ##
@@ -43,6 +44,8 @@ static var mismatches := 0
 ## How long another stamp's folder is left alone after its last write (_forget_other_stamps()).
 static var keep_seconds := 86400.0
 static var _stamp := ""
+## The scripts could not be listed (stamp()): asked once, not at every picture.
+static var _no_stamp := false
 
 
 static func image(key: String, make: Callable) -> Image:
@@ -51,6 +54,13 @@ static func image(key: String, make: Callable) -> Image:
 
 static func images(key: String, make: Callable) -> Array[Image]:
 	var out: Array[Image] = []
+	if enabled and stamp() == "":
+		# No stamp, no cache: pictures that cannot be tied to the code that drew them are never read.
+		var drawn: Array[Image] = []
+		for img: Variant in make.call():
+			drawn.append(img as Image)
+		misses += 1
+		return drawn
 	if enabled:
 		out = _read(key)
 		if not out.is_empty():
@@ -82,16 +92,21 @@ static func _same(a: Array, b: Variant) -> bool:
 	return true
 
 
-## This run's stamp: the scripts' MD5s in one (the app's version where the scripts cannot be listed).
+## This run's stamp: the scripts' MD5s in one. "" when the scripts cannot be listed: then nothing says which code
+## drew a picture, and the cache is off (images() draws every time) rather than trusted. The app runs from its
+## scripts as files today (the headset too), so they can; an export that packs them as .gdc is read as well, and one
+## that hides them altogether gets no cache, not a stale one.
 static func stamp() -> String:
-	if _stamp != "":
+	if _stamp != "" or _no_stamp:
 		return _stamp
 	var files: Array[String] = []
 	_scripts(SCRIPTS, files)
+	if files.is_empty():
+		_no_stamp = true
+		return ""
 	files.sort()
 	var ctx := HashingContext.new()
 	ctx.start(HashingContext.HASH_MD5)
-	ctx.update(str(ProjectSettings.get_setting("application/config/version", "")).to_utf8_buffer())
 	for f in files:
 		ctx.update((f + FileAccess.get_md5(f)).to_utf8_buffer())
 	_stamp = ctx.finish().hex_encode()
@@ -103,7 +118,7 @@ static func _scripts(dir: String, out: Array[String]) -> void:
 	for d in DirAccess.get_directories_at(dir):
 		_scripts(dir.path_join(d), out)
 	for f in DirAccess.get_files_at(dir):
-		if f.ends_with(".gd"):
+		if f.ends_with(".gd") or f.ends_with(".gdc"):
 			out.append(dir.path_join(f))
 
 
