@@ -12,7 +12,7 @@ const ShapeMesh := preload("res://scripts/env/systems/passing/shape_mesh.gd")
 const BUDGET := {"reeds": 70, "willow": 330, "tree": 420, "poplar": 120, "hedge": 60, "fence": 50, "ridge": 2,
 		"lights": 0, "cottage": 80, "post": 12, "lamp": 70, "bridge": 140, "boat": 130, "wharf": 220, "tower": 130}
 ## The highest point of each shape at size 1 (metres): at least, at most.
-const HEIGHT := {"reeds": [1.2, 2.4], "willow": [3.0, 6.5], "tree": [8.5, 14.5], "poplar": [13.5, 20.5],
+const HEIGHT := {"reeds": [1.2, 2.4], "willow": [3.0, 6.5], "tree": [9.0, 14.0], "poplar": [13.5, 20.5],
 		"hedge": [1.4, 2.2], "fence": [1.0, 1.2], "cottage": [5.3, 5.5], "post": [1.1, 1.3], "lamp": [3.1, 3.3],
 		"bridge": [5.1, 5.3], "boat": [1.9, 2.0], "wharf": [4.7, 4.9], "tower": [19.5, 19.7]}
 const VARIED: Array[String] = ["reeds", "willow", "tree", "cottage", "boat"]
@@ -28,6 +28,7 @@ func _init() -> void:
 func _run() -> void:
 	for shape: String in Shapes.BANDS + Shapes.LANDMARKS:
 		_shape(shape)
+	_tree()
 	_hedge()
 	_cottage()
 	_bridge()
@@ -86,8 +87,8 @@ func _shape(shape: String) -> void:
 			and m.light_count() == again.light_count() and a[Mesh.ARRAY_VERTEX] == b[Mesh.ARRAY_VERTEX]
 			and _light_points(m) == _light_points(again))
 	if shape in VARIED:
-		# UNDECIDED (brief): "a different one" is any difference in the vertices, their colours or their materials
-		# (a cottage's and a boat's differ only in which windows are lit), and the other seed is 4321.
+		# "A different one" is any difference in the vertices, their colours or their materials: a cottage and a
+		# boat differ only in which windows are lit.
 		var c := _arrays(_draw(shape, 4321, _info()))
 		_check("%s: a different seed draws a different one" % shape, a[Mesh.ARRAY_VERTEX] != c[Mesh.ARRAY_VERTEX]
 				or a[Mesh.ARRAY_COLOR] != c[Mesh.ARRAY_COLOR] or a[Mesh.ARRAY_TEX_UV2] != c[Mesh.ARRAY_TEX_UV2])
@@ -117,6 +118,21 @@ func _top_at(m: ShapeMesh, z: float) -> float:
 		if absf(v.z - z) < 1e-4:
 			high = maxf(high, v.y)
 	return high
+
+
+## A tree is as tall as it says for every seed, not for one: its top ball's top is its height, and no other ball
+## stands over it.
+func _tree() -> void:
+	var low := INF
+	var high := -INF
+	for s in range(1, 41):
+		var top := -INF
+		for v in _arrays(_draw("tree", s, _info()))[Mesh.ARRAY_VERTEX] as PackedVector3Array:
+			top = maxf(top, v.y)
+		low = minf(low, top)
+		high = maxf(high, top)
+	_check("tree: forty seeds stand from %.2f to %.2f m, within 9 to 14" % [low, high], low >= 9.0 and high <= 14.0)
+	_check("tree: and they are not all one height (%.2f m between them)" % (high - low), high - low > 2.0)
 
 
 func _hedge() -> void:

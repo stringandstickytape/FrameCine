@@ -136,14 +136,16 @@ static func _reeds(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour
 		var p2 := p1 + up2 * h * 0.45
 		var across := _dir(a + PI / 2.0)
 		m.material(ShapeMesh.M_STEM, rng.randf())
-		# UNDECIDED (brief): the blades' widths and the seed head's size are taken as written, not times size.
-		m.ribbon(PackedVector3Array([p0, p1, p2]), PackedFloat32Array([0.035, 0.025, 0.008]), across,
-				_mul(colour, 0.75), colour.lerp(Color("#8a8456"), 0.7))
+		# A blade's width and its seed head grow with `size` as its height does: a bigger clump is the same plant
+		# seen larger, not a taller and thinner one. (A blade of 8 mm at its tip is two pixels at 4 m on the
+		# headset; a clump made taller at the same width would shimmer as it goes by.)
+		m.ribbon(PackedVector3Array([p0, p1, p2]), PackedFloat32Array([0.035 * size, 0.025 * size, 0.008 * size]),
+				across, _mul(colour, 0.75), colour.lerp(Color("#8a8456"), 0.7))
 		if i % 3 == 0:
 			m.material(ShapeMesh.M_PLAIN)
-			var c := p2 - up2 * 0.09
-			var w := across * 0.015
-			var l := up2 * 0.07
+			var c := p2 - up2 * 0.09 * size
+			var w := across * 0.015 * size
+			var l := up2 * 0.07 * size
 			m.quad(c - w - l, c + w - l, c + w + l, c - w + l, Color("#3a2a1c"))
 
 
@@ -178,6 +180,8 @@ static func _willow(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colou
 
 
 ## A broadleaf tree, 9 to 14 m: a trunk to under half its height and a crown of five to seven balls about a top one.
+## Its height is the top ball's top, exactly: no other ball stands over it, so a document that asks for a tree gets
+## one of the height this says (a band of them makes an even wood, and a far tower still shows over it).
 static func _tree(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color) -> void:
 	var h := size * rng.randf_range(9.0, 14.0)
 	var bark := Color("#2b2620")
@@ -190,11 +194,13 @@ static func _tree(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour:
 		var lift := rng.randf_range(0.0, 1.0)
 		var radius := h * rng.randf_range(0.16, 0.24)
 		var tint := rng.randf_range(0.85, 1.15)
-		var centre := Vector3(cos(b) * 0.16 * h * ri, 0.38 * h + h * (0.18 + 0.44 * lift), sin(b) * 0.16 * h * ri)
+		# No higher than the tree: a ball's top is its centre and 0.85 of its radius (ShapeMesh.ball()'s squash).
+		var y := minf(0.38 * h + h * (0.18 + 0.44 * lift), h - radius * 0.85)
+		var centre := Vector3(cos(b) * 0.16 * h * ri, y, sin(b) * 0.16 * h * ri)
 		m.material(ShapeMesh.M_LEAF, rng.randf())
 		m.ball(centre, radius, 4, 6, _mul(colour, tint), 0.85, 0.12, rng)
 	m.material(ShapeMesh.M_LEAF, rng.randf())
-	m.ball(Vector3(0.0, 0.78 * h, 0.0), 0.18 * h, 4, 6, colour, 0.85, 0.12, rng)
+	m.ball(Vector3(0.0, h - 0.18 * h * 0.85, 0.0), 0.18 * h, 4, 6, colour, 0.85, 0.12, rng)
 
 
 ## A poplar, 14 to 20 m: a short trunk and a tall narrow crown, widest a quarter of the way up, paler towards its top.
@@ -306,7 +312,8 @@ static func _bridge(m: ShapeMesh, size: float, colour: Color, info: Dictionary) 
 	var side := float(info["side"])
 	var d := float(info["distance"])
 	var xc := -side * d
-	# UNDECIDED (brief): the depth along the way (half 2.25) is taken as not times size, like the span.
+	# Its depth along the way is the road's width over it (4.5 m), which a taller arch does not make wider: not
+	# times size, as the span is not (that is the water's width, the item's distance twice).
 	var hz := 2.25
 	var s := 1.4 * size
 	var r := 2.6 * size
@@ -391,8 +398,8 @@ static func _wharf(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -
 		m.quad(Vector3(x, 3.6 * size, -7.2), Vector3(x, 3.6 * size, 1.2), Vector3(sx, 4.8 * size, 1.2),
 				Vector3(sx, 4.8 * size, -7.2), roof)
 	for z: float in [-7.0, 1.0]:
-		# UNDECIDED (brief): the gables' corners are taken as the shed's walls (x = sx - 2 and sx + 2 at y = 3.6 *
-		# size) and the ridge, as the cottage's are.
+		# A gable stands on the shed's walls (x = sx - 2 and sx + 2), not on the eaves, which hang 0.2 over them:
+		# as the cottage's.
 		m.tri(Vector3(sx - 2.0, 3.6 * size, z), Vector3(sx + 2.0, 3.6 * size, z), Vector3(sx, 4.8 * size, z), brick)
 	var x := side * 1.59
 	m.quad(Vector3(x, deck, -5.6), Vector3(x, deck, -3.4), Vector3(x, deck + 2.4 * size, -3.4),
