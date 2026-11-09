@@ -73,10 +73,11 @@ func _run() -> void:
 	var seats: Array[Vector3] = env.get_seats()
 	_check("get_seats lists every seat, the viewer's at the origin", seats.size() == mm.instance_count
 			and seats.has(Vector3.ZERO))
-	var tints := {}
-	for i in mm.instance_count:
-		tints[mm.get_instance_color(i).to_html()] = true
-	_check("each seat's velvet a little different (%d tints)" % tints.size(), mm.use_colors and tints.size() > 100)
+	# The auditorium system builds the seats. A MultiMesh keeps no instance data without a renderer (these tests run
+	# headless), so the checks read the system: its seat variation and the seat it folded.
+	var hall: Node = env.host.systems_of_kind("builder").filter(func(n: Node) -> bool: return n.get("_hidden_seat") != null).front()
+	_check("each seat's velvet a little different (variation %.2f, per-seat colours)" % float(hall.params["seat_variation"]),
+			mm.use_colors and float(hall.params["seat_variation"]) > 0.0)
 	var xforms := Cinema.seat_transforms()
 	var end := xforms[Cinema.ROWS_BACK * Cinema.SEATS_PER_ROW + Cinema.SEATS_PER_ROW - 1]
 	_check("rows curve toward the screen: row 0's end seat nearer it and turned in (%s)" % end.origin,
@@ -95,8 +96,8 @@ func _run() -> void:
 		worst = minf(worst, line_y - back.y)
 	_check("every seat back in front is under the sight line to the screen's bottom (clearance %.2f m)" % worst,
 			worst > 0.05)
-	_check("the viewer's own seat is folded away", mm.get_instance_transform(
-			Cinema.ROWS_BACK * Cinema.SEATS_PER_ROW + Cinema.SEATS_PER_ROW / 2).basis.get_scale().length() < 0.001)
+	_check("the viewer's own seat is folded away (%d)" % int(hall.get("_hidden_seat")),
+			int(hall.get("_hidden_seat")) == Cinema.ROWS_BACK * Cinema.SEATS_PER_ROW + Cinema.SEATS_PER_ROW / 2)
 
 	# Static parts ready for a bake.
 	var statics: Array[MeshInstance3D] = env.static_meshes()
@@ -202,10 +203,9 @@ func _run() -> void:
 			back = i
 	main.features.seat.choose_seat(back)
 	await _frames(3)
-	_check("a back seat chosen: that one folded away, the viewer's own back",
-			mm.get_instance_transform(back).basis.get_scale().length() < 0.001
-			and mm.get_instance_transform(Cinema.ROWS_BACK * Cinema.SEATS_PER_ROW + Cinema.SEATS_PER_ROW / 2)
-			.basis.get_scale().length() > 0.5)
+	var hall_now: Node = main.env.host.systems_of_kind("builder").filter(func(n: Node) -> bool: return n.get("_hidden_seat") != null).front()
+	_check("a back seat chosen: that one folded away, the viewer's own back (%d)" % int(hall_now.get("_hidden_seat")),
+			int(hall_now.get("_hidden_seat")) == back)
 	var lamp_after: Vector4 = (wall.get_shader_parameter("lamp_position") as PackedVector4Array)[0]
 	_check("the lamps moved with the room (%s -> %s)" % [lamp_before, lamp_after],
 			Vector3(lamp_after.x, lamp_after.y, lamp_after.z).is_equal_approx(
