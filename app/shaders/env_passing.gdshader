@@ -60,9 +60,13 @@ void vertex() {
 void fragment() {
 	vec3 n = normalize(world_normal);
 	vec3 sky = mix(sky_low, sky_top, clamp(n.y * 0.5 + 0.5, 0.0, 1.0)) * light * shown;
-	vec3 screen = (room_light_at(world_pos, spill) - vec3(env_light)) * shown;
-	vec3 cabin = glow_colour * glow * shown * (1.0 - smoothstep(0.0, glow_reach, across))
+	// What comes out of the cabin's windows: it is gone glow_reach from the way's line, and past the windows' ends.
+	float from_windows = (1.0 - smoothstep(0.0, glow_reach, across))
 			* (1.0 - smoothstep(glow_half_length, glow_half_length + 2.0, abs(along)));
+	// The screen's light leaves the cabin by the same windows as the lamps' does: the bank beside the boat flickers
+	// with the film, the far bank and the fields do not.
+	vec3 screen = (room_light_at(world_pos, spill) - vec3(env_light)) * shown * from_windows;
+	vec3 cabin = glow_colour * glow * shown * from_windows;
 	vec3 lit = sky + screen + cabin;
 	vec3 c;
 	if (mat == M_LEAF) {

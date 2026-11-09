@@ -45,7 +45,7 @@ const VARY := Vector2(0.8, 1.25)
 ## Worked out from the drawing functions below at the largest each draws; change a shape and change its line here.
 const REACH := {
 	"reeds": {"stem": [0.25, 0.7], "wide": [0.25, 0.7], "over": [0.0, 0.0]},
-	"willow": {"stem": [0.0, 0.8], "wide": [0.0, 3.75], "over": [0.0, 2.8]},
+	"willow": {"stem": [0.0, 0.8], "wide": [0.0, 3.75], "over": [0.0, 1.8]},
 	"tree": {"stem": [0.0, 0.42], "wide": [0.0, 6.0], "over": [0.0, 3.2]},
 	"poplar": {"stem": [0.0, 0.24], "wide": [0.0, 1.7], "over": [0.0, 1.4]},
 	"hedge": {"stem": [0.68, 0.0], "wide": [0.68, 0.0], "over": [0.0, 0.0]},
@@ -185,7 +185,9 @@ static func _ridge(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -
 static func _lights(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color) -> void:
 	var warm := rng.randf() < 0.8
 	var c := colour if warm else COOL
-	m.light(Vector3(0.0, rng.randf_range(1.5, 6.0) * size, 0.0), c, rng.randf_range(0.4, 1.0), 0.08)
+	# 0.25 m: a lit window and its glow on the wall round it. (At 0.08 a village across the fields was single
+	# pixels, there and not seen: 2026-11-09.)
+	m.light(Vector3(0.0, rng.randf_range(1.5, 6.0) * size, 0.0), c, rng.randf_range(0.4, 1.0), 0.25 * size)
 
 
 ## A clump of seven to twelve reeds, each a thin blade that leans and bends a little more near its tip; every third
@@ -217,8 +219,11 @@ static func _reeds(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour
 			m.quad(c - w - l, c + w - l, c + w + l, c - w + l, Color("#3a2a1c"))
 
 
-## A pollard willow: a short thick trunk, a knobbed head, and sixteen to twenty-four long shoots that rise from it,
-## arch over and droop.
+## A pollard willow: a short thick trunk, a knobbed head, and twenty-six to thirty-four long shoots that rise from
+## it, arch over and hang. They must hang: the first drawing's shoots stopped level, and from a boat's window at dusk
+## the tree was a palm (2026-11-09, the Narrowboat's first render). Each now turns 35 degrees a piece through five
+## pieces, from steeply up to steeply down, so the head is a fountain and its outline a dome with a ragged hem.
+## REACH's line for it is worked out from these numbers.
 static func _willow(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color) -> void:
 	var lean_x := rng.randf_range(-0.2, 0.2)
 	var lean_z := rng.randf_range(-0.2, 0.2)
@@ -227,21 +232,21 @@ static func _willow(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colou
 	m.material(ShapeMesh.M_BARK)
 	m.tube(Vector3.ZERO, top, 0.32 * size, 0.26 * size, 7, bark, _mul(bark, 1.1))
 	m.ball(top + Vector3(0.0, 0.25 * size, 0.0), 0.5 * size, 3, 7, bark, 0.7, 0.15, rng)
-	var n := rng.randi_range(16, 24)
+	var n := rng.randi_range(26, 34)
 	for i in n:
 		var a := TAU * (i + rng.randf()) / n
-		var pitch := rng.randf_range(35.0, 75.0)
-		var length := size * rng.randf_range(2.2, 3.4)
-		var piece := length / 4.0
+		var pitch := rng.randf_range(50.0, 80.0)
+		var length := size * rng.randf_range(3.0, 4.4)
+		var piece := length / 5.0
 		var p := top + Vector3(0.0, 0.45 * size, 0.0) + _dir(a) * 0.35 * size
 		var points := PackedVector3Array([p])
-		for _k in 4:
+		for _k in 5:
 			var t := deg_to_rad(pitch)
 			p += (_dir(a) * cos(t) + Vector3.UP * sin(t)) * piece
 			points.append(p)
-			pitch -= 22.0
+			pitch -= 35.0
 		var widths := PackedFloat32Array()
-		for w: float in [0.10, 0.22, 0.22, 0.14, 0.04]:
+		for w: float in [0.10, 0.2, 0.24, 0.2, 0.12, 0.03]:
 			widths.append(w * size)
 		m.material(ShapeMesh.M_LEAF, rng.randf())
 		m.ribbon(points, widths, _dir(a + PI / 2.0), _mul(colour, 0.8), colour.lerp(Color("#55623a"), 0.6))

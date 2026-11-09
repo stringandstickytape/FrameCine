@@ -2084,7 +2084,7 @@ static func _draw_stone_maps(kind: String, span: float) -> Array:
 			orm.set_pixel(px, py, Color(clampf(0.6 + 0.4 * heights[py * size + px], 0.0, 1.0), rough[py * size + px], 0.0))
 	for img: Image in [albedo, normal, orm]:
 		img.generate_mipmaps()
-	# UNDECIDED (brief): the mean is a number, not a picture; it is kept beside the maps as one float pixel (exact).
+	# The mean is a number, not a picture: kept beside the maps as one float pixel, which reads back exactly.
 	var mean_px := Image.create_empty(1, 1, false, Image.FORMAT_RGBAF)
 	mean_px.set_pixel(0, 0, mean)
 	return [albedo, normal, orm, mean_px]

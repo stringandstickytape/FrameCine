@@ -9,7 +9,7 @@ extends SceneTree
 const Shapes := preload("res://scripts/env/systems/passing/shapes.gd")
 const ShapeMesh := preload("res://scripts/env/systems/passing/shape_mesh.gd")
 
-const BUDGET := {"reeds": 70, "willow": 330, "tree": 420, "poplar": 120, "hedge": 60, "fence": 50, "ridge": 2,
+const BUDGET := {"reeds": 70, "willow": 400, "tree": 420, "poplar": 120, "hedge": 60, "fence": 50, "ridge": 2,
 		"lights": 0, "cottage": 80, "post": 12, "lamp": 70, "bridge": 140, "boat": 130, "wharf": 220, "tower": 130}
 ## The highest point of each shape at size 1 (metres): at least, at most.
 const HEIGHT := {"reeds": [1.2, 2.4], "willow": [3.0, 6.5], "tree": [9.0, 14.0], "poplar": [13.5, 20.5],

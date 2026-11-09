@@ -46,17 +46,29 @@ void fragment() {
 	vec2 g = vec2(UV.x, UV.y + ground_phase);
 	float still = smoothstep(nearest * 0.6, nearest, abs(UV.x));
 	vec3 sky = sky_top * light * shown;
-	vec3 screen = (room_light_at(world_pos, spill) - vec3(env_light)) * shown;
-	vec3 cabin = glow_colour * glow * shown * (1.0 - smoothstep(0.0, glow_reach, abs(UV.x)))
+	// What comes out of the cabin's windows (as env_passing.gdshader): the lamps' light and the screen's alike.
+	float from_windows = (1.0 - smoothstep(0.0, glow_reach, abs(UV.x)))
 			* (1.0 - smoothstep(glow_half_length, glow_half_length + 2.0, abs(UV.y)));
+	vec3 screen = (room_light_at(world_pos, spill) - vec3(env_light)) * shown * from_windows;
+	vec3 cabin = glow_colour * glow * shown * from_windows;
 	vec3 lit = sky + screen + cabin;
 	vec3 c;
 	if (int(UV2.x + 0.5) == K_WATER) {
 		float ripple = texture(noise_tex, g / GROUND_PERIOD * 8.0).b - 0.5;
 		vec3 e = normalize(CAMERA_POSITION_WORLD - world_pos);
 		float fres = pow(1.0 - max(e.y, 0.0), 4.0);
-		c = COLOR.rgb * light * shown + mix(sky_low, sky_top, 0.3) * light * shown * fres * (1.0 + ripple * 0.8 * still)
-				+ cabin * (0.35 + ripple * 0.5 * still) + screen * 0.2;
+		// Water does not take light as ground does: it mirrors, and what it mirrors towards someone inside the boat
+		// is the sky and the far bank, never the boat's own windows. So the cabin's light and the screen's show on it
+		// only as a glint on the ripples' crests, and a trace of scatter. (The first drawing lit it as a floor: a
+		// floodlit cream slab round the boat, 2026-11-09.)
+		float glint = max(ripple, 0.0) * 0.25 * still;
+		// What it mirrors: looked at steeply, the sky overhead; looked along (the far water), what stands low on the
+		// far side, which is the bank and its trees, dark. Without that the far water mirrored the bright horizon and
+		// a canal at dusk was a sheet of snow.
+		float open = smoothstep(0.06, 0.28, e.y);
+		vec3 mirrored = mix(COLOR.rgb * 0.6, mix(sky_low, sky_top, 0.45), open) * light * shown;
+		c = COLOR.rgb * light * shown + mirrored * fres * (1.0 + ripple * 0.8 * still)
+				+ cabin * (0.04 + glint) + screen * (0.02 + glint * 0.5);
 	} else {
 		float v = texture(noise_tex, g / GROUND_PERIOD * 4.0).g;
 		c = COLOR.rgb * (1.0 + (v - 0.5) * 0.5 * still) * lit;

@@ -22,8 +22,10 @@ static func flat_maps(roughness: float, metal: float) -> Dictionary:
 	var key := "%.2f %.2f" % [roughness, metal]
 	if _flat.has(key):
 		return _flat[key]
-	# UNDECIDED (brief): the memory's key rounds roughness and metal to 0.01; the picture uses them in full.
-	var drawn := ProcCache.images("reflect.gd:_flat:" + key, func() -> Array: return _draw_flat_maps(roughness, metal))
+	# Drawn from the values as the key has them (to 0.01), so the key is all the maps depend on: two materials a
+	# hair apart get one set of maps, the same in every run, whichever asked first.
+	var drawn := ProcCache.images("reflect.gd:_flat:" + key,
+			func() -> Array: return _draw_flat_maps(snappedf(roughness, 0.01), snappedf(metal, 0.01)))
 	var out := {"albedo": ImageTexture.create_from_image(drawn[0]), "normal": ImageTexture.create_from_image(drawn[1]),
 			"orm": ImageTexture.create_from_image(drawn[2])}
 	_flat[key] = out

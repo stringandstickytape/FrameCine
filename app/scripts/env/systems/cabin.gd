@@ -16,6 +16,10 @@ const CORNER_STEPS := 4
 const MIN_WINDOW := 0.1
 ## How far inside a bulkhead a bay's mark must be for a rib, a wall lamp or a side_walls slot to stand at it.
 const MARK_MARGIN := 0.1
+## The windows' glass: its tint, how much of it shows square on, and how much more where the view grazes it.
+const GLASS_TINT := Color(0.62, 0.74, 0.8)
+const GLASS_ALPHA := 0.02
+const GLASS_RIM := 0.06
 
 
 static func spec() -> Dictionary:
@@ -602,7 +606,12 @@ func _build_windows(q: Dictionary, trim: RoomMesh) -> void:
 			trim.strip(inner, outer, face_n)
 			trim.strip(wall_line, out_line, reveal_n)
 			glass.polygon(pane, n)
-	_add_glass("Glass", glass)
+	# Fainter than a hall's glass (0.06, and 0.22 more where the view grazes it): a cabin's windows are an arm's
+	# length from a bright picture and are looked through at night, and at a hall's strength the picture's light
+	# on the panes was a grey veil over everything outside (2026-11-09, the Narrowboat's wharf at night).
+	var panes := _add_glass("Glass", glass, GLASS_TINT, GLASS_ALPHA)
+	if panes != null and panes.material_override is ShaderMaterial:
+		(panes.material_override as ShaderMaterial).set_shader_parameter("rim", GLASS_RIM)
 
 
 ## The dado's rail, and the ribs at the bays' marks up both walls and under the roof.

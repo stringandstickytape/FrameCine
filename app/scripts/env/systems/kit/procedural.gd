@@ -424,7 +424,7 @@ static func _draw_maps(pattern: String) -> Array:
 					0.35 if pattern in ["pressed_tin", "corrugated"] else 0.0))
 	for img: Image in [albedo, normal, orm]:
 		img.generate_mipmaps()
-	# UNDECIDED (brief): the mean is a number, not a picture; it is kept beside the maps as one float pixel (exact).
+	# The mean is a number, not a picture: kept beside the maps as one float pixel, which reads back exactly.
 	var mean_px := Image.create_empty(1, 1, false, Image.FORMAT_RGBAF)
 	mean_px.set_pixel(0, 0, mean)
 	return [albedo, normal, orm, mean_px]
@@ -639,9 +639,10 @@ static func colour_field(aspect: float) -> Texture2D:
 	var key := "colour_field %.3f" % aspect
 	if _pictures.has(key):
 		return _pictures[key]
-	# UNDECIDED (brief): the memory's key rounds the aspect to 0.001; the picture uses it in full.
+	# Drawn from the aspect as the key has it (to 0.001), so the key is all the picture depends on: two callers
+	# a hair apart get one picture, the same in every run, whichever asked first.
 	var t := ImageTexture.create_from_image(ProcCache.image("procedural.gd:_pictures:" + key,
-			func() -> Image: return _draw_colour_field(aspect)))
+			func() -> Image: return _draw_colour_field(snappedf(aspect, 0.001))))
 	_pictures[key] = t
 	return t
 

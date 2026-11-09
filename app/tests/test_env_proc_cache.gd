@@ -13,7 +13,7 @@ const EnvDoc := preload("res://scripts/env/env_doc.gd")
 const EnvRoom := preload("res://scripts/env/env_room.gd")
 
 ## Where a child leaves each room's build time for the parent (its output is one line).
-# UNDECIDED (brief): the child prints one line, but the parent needs each room's time for the five largest savings.
+## (The child prints one line; the parent needs each room's time for the five largest savings.)
 const CHILD_TIMES := "user://test_env_proc_cache_child.json"
 const OTHER_STAMP := "user://env_cache/0123456789abcdef0123456789abcdef"
 
@@ -186,7 +186,6 @@ func _part_2() -> void:
 	_check("child: %d hits, 0 misses, 0 mismatches (%s)" % [n, proof["line"]], proof["hits"] == n
 			and proof["misses"] == 0 and proof["mismatches"] == 0)
 	# The time: verify draws every picture again, so the build time is taken by a child that only reads.
-	# UNDECIDED (brief): the brief times the verify child, whose builds draw every picture too; timed here without it.
 	var timed := _start_child(exe, project, ["--child", "--no-verify"])
 	_check("child without verify: exit code 0 (%d), %d hits (%s)" % [timed["code"], n, timed["line"]],
 			timed["code"] == 0 and timed["hits"] == n and timed["misses"] == 0)

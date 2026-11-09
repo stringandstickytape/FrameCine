@@ -98,7 +98,7 @@ static func _draw_maps(kind: String) -> Array:
 			orm.set_pixel(x, y, Color(clampf(0.7 + 0.3 * heights[i] - 0.4 * cavity, 0.0, 1.0), rough[i], metal))
 	for img: Image in [albedo, normal, orm]:
 		img.generate_mipmaps()
-	# UNDECIDED (brief): the mean is a number, not a picture; it is kept beside the maps as one float pixel (exact).
+	# The mean is a number, not a picture: kept beside the maps as one float pixel, which reads back exactly.
 	var mean_px := Image.create_empty(1, 1, false, Image.FORMAT_RGBAF)
 	mean_px.set_pixel(0, 0, mean)
 	return [albedo, normal, orm, mean_px]
