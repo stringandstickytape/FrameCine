@@ -95,6 +95,7 @@ const ACOUSTICS_OPTIONS := {
 	"reflect": {"type": "list", "of": {"type": "float", "min": 0.0, "max": 1.0}, "max": 6, "min_items": 6},
 	"rt60": {"type": "float", "min": 0.05, "max": 8.0},
 	"wet": {"type": "float", "min": 0.0, "max": 1.0},
+	"late": {"type": "float", "min": 0.0, "max": 2.0},
 	"surround_height": {"type": "float", "min": 0.0, "max": 30.0},
 	"array": {"type": "int", "min": 1, "max": 5},
 	"array_spacing": {"type": "float", "min": 0.5, "max": 10.0},

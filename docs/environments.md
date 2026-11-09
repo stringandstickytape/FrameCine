@@ -39,7 +39,7 @@ still read, without change. Every key of version 3 keeps its meaning.
  "name": "Cinema",
  "room": {"ambient": 0.05, "screen_glow": 1.0, "curtains": true},
  "screen": {"center": [0, 1.6, -13.8], "size": [12.0, 5.0]},
- "acoustics": {"reflect": [0.3, 0.3, 0.25, 0.35, 0.2, 0.3], "rt60": 0.7, "wet": 0.55},
+ "acoustics": {"reflect": [0.35, 0.35, 0.15, 0.2, 0.2, 0.3], "rt60": 0.8, "wet": 0.5, "late": 1.8},
  "systems": [
    {"system": "light", "params": {"house_lamps": 1.0}},
    {"system": "auditorium", "id": "hall", "params": {"rows_front": 7, "rows_back": 3}},
@@ -63,7 +63,7 @@ still read, without change. Every key of version 3 keeps its meaning.
 | `room` | the room as a whole: `ambient` (0..1, its surfaces' light with a dark screen), `screen_glow` (0..2), `curtains` (the pre-show's curtains may close here), `reacts_to_film` (the film's transients may flash the light), `reflection` (the floor reflection's default here), `reflection_floor` (its height; null: none), `curtain_colour` (the pre-show's curtains' colour; null, the
 default: the app's red velvet; since 2026-11-08, the Palace of Culture's ochre) and `category` (where the Room tab lists it: `cinema` under Cinemas, `tv` under Television, `other` with the other rooms, the default; `env_library.gd category_of()`) and `description` (a line about the room under the Room tab's "This room", at most 200 characters; a key, so a room that ships translates it) |
 | `screen` | as version 3: the default screen's `center` and `size` |
-| `acoustics` | the room's sound for spatial audio (`get_sound_room()`, `scripts/play/spatial_audio.gd`): `box` ({min, max}; default: the builder's walls), `reflect`, `rt60`, `wet`, `surround_height`, `array`, `array_spacing`, `ring`, `distance` |
+| `acoustics` | the room's sound for spatial audio (`get_sound_room()`, `scripts/play/spatial_audio.gd`): `box` ({min, max}; default: the builder's walls), `reflect`, `rt60`, `wet`, `late` (the late reverb against the reflections, 0..2, default 0.5), `surround_height`, `array`, `array_spacing`, `ring`, `distance`; below, "The film's room" |
 | `systems` | the systems, in build order: `{system, id, params}`. `id` defaults to the system's name; two of one system need their own ids. Cues and bindings address a parameter as `<id>.<param>` |
 | `settings` | the room's own settings (below, "Room settings") |
 | `cues` | sequences the timeline runs (below, "Timeline and cues") |
@@ -1398,6 +1398,71 @@ little wet.
 ring in the room too. The binaural renderer's code is not changed. The document's own `acoustics` section still goes
 over it.
 
+### The film's room: the document's `acoustics` section
+
+Spatial audio (`scripts/play/spatial_audio.gd`, D23) renders the film's speakers in a room: first-order reflections
+off the six walls of a box and an 8-line FDN for the late reverb. Each frame it asks the room for
+`get_sound_room()` and gives `BinauralRenderer.set_room()` a new room when it differs, so a room's acoustics reach
+the renderer when the room loads, when the viewer changes room, and when a setting rebuilds the room. For a room
+document, `get_sound_room()` is `env_host.gd sound_room()`: the builders' `sound_room()` (their walls: `box`, and the
+speaker layout's `surround_height`, `array`, `array_spacing`), an `acoustics` system's with `film` on, then the
+document's `acoustics` section over them. A scene room (`dim_room`, `home_theatre`, `drive_in`, `planetarium`,
+`dome`, `passthrough`) gives a constant from its script. Without a room spatial audio uses `STANDARD_ROOM`.
+
+| Key | What reaches the renderer |
+|---|---|
+| `box` | the walls, the room's frame (default: the builder's). Sizes the reflections' delays, the FDN's delay lines and its predelay (the mean free path) |
+| `reflect` | six walls: left, right, floor, ceiling, front (the screen's), back; 0..1 each (default 0.4). A reflection's gain is reflect x wet x direct distance / its path |
+| `rt60` | the late reverb's decay (s) |
+| `wet` | the room's level: the reflections and the late reverb together; times the viewer's reverb amount (Settings) |
+| `late` | the late reverb against the reflections, 0..2 (default 0.5, the renderer's own; since 2026-11-09) |
+
+**The renderer keeps the late reverb's energy the same whatever its rt60** (the FDN is normalised), and that energy is
+about (wet x late)² / 8 of the direct sound's (measured about 4 dB lower again, through the HRTF and the lines'
+damping). So a longer rt60 alone spreads the same reverb thinner, and `late` is what makes a live room louder. Until
+2026-11-09 every room left `late` at 0.5 and kept `wet` at 0.1 to 0.55: every cinema's reverb was 16 to 25 dB under
+the direct sound, inaudible, and the rooms sounded alike. Now each room's values come from what it is:
+
+- **The box** is the builder's walls, the room's real size (the Void's is the standard room's, written out, with
+  its speakers still on the standard 2.5 m ring: `ring`, `distance`).
+- **rt60** by type, checked against the box: Sabine's mean absorption 0.161 V / (S rt60) must be a real one (0.05 to
+  0.75; `tests/test_room_acoustics.gd`). A 9 800 m³ hall can't be 0.45 s, so the flagship is 0.8 s.
+- **wet and late** for a reverb level that suits the room, from about 9 dB under the direct sound (the nave) to 40 dB
+  and more under it (open air). The liveliest room's wet stays at 0.85, so the film's speech stays clear.
+- **reflect** from the walls' materials: plaster, stone, concrete, ice and glass high; felt, carpet, seats and an
+  open sky low.
+
+Measured by `tests/test_room_acoustics.gd` (an impulse from the picture's centre to the seat through the renderer
+with Listener H5; R/D: the reverb and reflections against the direct sound; T20: the decay measured):
+
+| Room | rt60 (s) | wet | late | reflect (L, R, floor, ceiling, front, back) | R/D (dB) | T20 (s) |
+|---|---|---|---|---|---|---|
+| Nave | 2.8 | 0.85 | 2.0 | 0.45 0.45 0.35 0.4 0.4 0.45 | -9.0 | 2.24 |
+| Palace of Culture 1974 (board-marked concrete, an echo between its side walls) | 1.9 | 0.7 | 1.9 | 0.65 0.65 0.2 0.25 0.45 0.3 | -10.8 | 1.49 |
+| Bathysphere (steel and glass) | 1.2 | 0.6 | 1.8 | 0.55 0.55 0.3 0.6 0.55 0.55 | -11.2 | 0.94 |
+| Atmospheric 1928 (plaster courtyard, a sky for a ceiling) | 1.4 | 0.7 | 1.9 | 0.45 0.45 0.15 0.08 0.3 0.35 | -11.8 | 1.13 |
+| Crater (a glass dome) | 1.6 | 0.65 | 1.95 | 0.4 0.4 0.15 0.5 0.4 0.4 | -12.0 | 1.32 |
+| Pink Palace (a plaster shell, mirrors) | 1.25 | 0.6 | 1.9 | 0.45 0.45 0.2 0.5 0.25 0.25 | -12.0 | 1.00 |
+| Ice cinema (ice blocks, hides) | 0.9 | 0.6 | 1.6 | 0.6 0.6 0.25 0.6 0.5 0.4 | -12.3 | 0.68 |
+| Shopfront 1906 (a narrow tin box) | 0.8 | 0.6 | 1.6 | 0.45 0.45 0.35 0.6 0.3 0.4 | -12.4 | 0.62 |
+| Streamline 1937 (plaster coves, faience) | 1.1 | 0.6 | 1.8 | 0.4 0.4 0.2 0.35 0.2 0.3 | -13.4 | 0.89 |
+| Cinema (the converted cinema) | 0.8 | 0.5 | 1.8 | 0.35 0.35 0.15 0.2 0.2 0.3 | -16.0 | 0.65 |
+| Screen 3, 1983 (plasterboard, carpet, foam) | 0.6 | 0.45 | 1.7 | 0.4 0.4 0.15 0.15 0.25 0.35 | -16.8 | 0.48 |
+| TV tomorrow (a bare room) | 0.7 | 0.42 | 1.7 | 0.5 0.5 0.35 0.45 0.35 0.45 | -17.1 | 0.55 |
+| Reclaimed (half its roof gone) | 0.65 | 0.4 | 1.45 | 0.4 0.4 0.2 0.12 0.35 0.25 | -18.7 | 0.53 |
+| Screening room 1962 (walnut, carpet, the window on the left) | 0.4 | 0.35 | 1.3 | 0.5 0.3 0.15 0.3 0.2 0.3 | -19.4 | 0.31 |
+| TV rooms 1930 to today | 0.35 to 0.55 | 0.34 to 0.36 | 1.4 to 1.65 | as before | -20 to -22 | 0.29 to 0.45 |
+| Flagship (felt, baffles, recliners) | 0.8 | 0.32 | 1.55 | 0.12 0.12 0.15 0.1 0.15 0.1 | -22.7 | 0.66 |
+| Pillow Fort 1993 (cushions) | 0.25 | 0.25 | 0.9 | 0.15 0.15 0.15 0.1 0.2 0.15 | -29.0 | 0.22 |
+| Rooftop, Athens (open air, a slap off the blind wall) | 0.2 | 0.15 | 0.6 | 0.05 0.05 0.3 0 0.45 0.05 | -42.5 | 0.17 |
+| Drive-in 1958 (open air) | 0.15 | 0.12 | 0.5 | 0.02 0.02 0.25 0 0.3 0.02 | -57.3 | 0.18 |
+| Void (unchanged) | 0.35 | 0.25 | 0.5 | 0.4 each | -27.7 | 0.23 |
+
+The scene rooms keep their own (late 0.5): Dim room -15.8 dB, Planetarium -16.9, Home theatre -20.1, the car at the
+drive-in -22.7 (its reflections arrive within 3 ms: a colour more than a reverb), Passthrough -22.5, Dome -42.3. The
+room's own sounds (`sound_bed`, `music`) take the `acoustics` system's reverb, a separate one on the Environment
+room bus; `film` there is still off in every room.
+
 ### `music`
 
 `scripts/env/systems/music.gd`. An instrument that plays itself. No player is shown: the keys move by themselves.
@@ -1589,7 +1654,7 @@ Actions (each creature does what fits it; args in brackets):
 | `moth` | 40 | pale, 7 cm. They flutter in the projector's beam, between a tenth and three fifths of the way from the lens, lit by the beam. `attraction` is the share that keep to the beam. Without a beam they wander the region |
 | `bird` | 6 (40 at most) | dark, 32 cm across the wings. They roost on perches (the path, or the region's top edges), turn now and then, and one at a time flit to another perch on an arc through the open air |
 | `firefly` | 60 | yellow-green points low in the region. Each flashes every 1.5 to 6 s (a 0.6 s swell and fall), faint between |
-| `cat` | 1 | dark, 42 cm. It walks its wall, sits a while, walks on and turns at the ends. Sitting down it purrs |
+| `cat` | 1 | dark, 42 cm. It walks its wall, sits a while, walks on and turns at the ends. Sitting down it purrs. It faces the way it walks: at an end (or a bend of more than about 57 degrees) it stops and turns on the spot, eased, in 0.35 s (a small turn) to 0.55 s (turning round), 0.3 s when it hurries or turns in the sight line, its legs stepping round; a gentler bend it steers through as it walks. Until 2026-11-09 it walked back facing the way it came |
 | `deer` | 1 | every 300 s on average it comes out of the dark at one end of its path, grazes once or twice, and fades at the far end. By default its way runs past the viewer's left |
 | `fish` | 48 | a silver school, 28 cm each. The school's centre wanders the region; `attraction` pulls it to the region's point nearest the screen. They take the screen's light on their flanks |
 | `jelly` | 18 | bells of 35 cm that glow at the rim and pulse every 2 to 3 s. Each has a place on a ring round the picture, just clear of the sight line, in front of the screen or behind it |
@@ -2681,8 +2746,9 @@ the screen are where they were; the church is drawn by the nave builder's `gothi
   chancel's stands (`candle`, `every` 120, its `level` on the Candles setting); a tawny owl in the churchyard's trees
   (`tawny_owl`, new, `every` 150, 29 m off to the north, 14 dB lower in the film: a whisper); the bell in the tower
   over the west end (`church_bell` at `pitch` 0.82, deeper than the Athens rooftop's), only by the cues before the
-  film and after it. No organ. The film's own `acoustics` section stays modest (rt60 1.6, wet 0.4) so speech in the
-  film stays clear. Measured (`test_room_nave.gd`, the slider's default): -56.0 dBFS RMS in the pre-show, -76.5 under
+  film and after it. No organ. The film's own `acoustics` section (since 2026-11-09: rt60 2.8, wet 0.85, late 2, the reverb
+  9 dB under the direct sound; before, rt60 1.6, wet 0.4, 20 dB under it, inaudible) is live but keeps the film's
+  speech clear ("The film's room: the document's `acoustics` section"). Measured (`test_room_nave.gd`, the slider's default): -56.0 dBFS RMS in the pre-show, -76.5 under
   a film at the reference level (before the pass -55.3 and -70.5).
 - **To judge on the Frame:** the bake's time and the frame time; the candles' level in the film (20 %, the coronae
   30 %); whether the moonlight reads (cool patches on the north piers and the south aisle's floor, the pools' colour);
@@ -3372,7 +3438,8 @@ not so", the user) replaced the plain tiers on a flat grey plain under sixteen r
   floor and tiers go dark but for the strips.
 - **Sound:** none, by design: `sound_bed` `silence` (it plays nothing) and `acoustics` `vacuum` (dry); no cue
   sound, no life, no pause rise (the test measures nothing on Environment). Acoustics for the film's spatial sound:
-  a large glass dome, rt60 1.1, wet 0.35.
+  a large glass dome, rt60 1.6, wet 0.65, late 1.95 (since 2026-11-09; before rt60 1.1, wet 0.35, with the
+  terrace's open-air walls).
 
 Twelve rooms are the history of television: `app/environments/tv_<year>.env.json` (`tv_today`, `tv_future`), in
 the Room tab's Television group (`room.category` "tv"). Their names start "TV <year> - " ("TV today - " for the
