@@ -3283,6 +3283,9 @@ msgstr "旗舰影院"
 msgid "Ice cinema"
 msgstr "冰雪影院"
 
+msgid "Narrowboat"
+msgstr "运河窄船"
+
 msgid "Nave"
 msgstr "中殿"
 
@@ -3379,6 +3382,9 @@ msgstr "大型现代影院：陡峭的阶梯、暖黄灯光洗亮的折板吸音
 
 msgid "An ice hotel's cinema of sawn blocks and carvings under an ice vault: candles glowing inside the ice, hides on ice benches, the polar night and the northern lights outside."
 msgstr "冰酒店里的影院，由切割的冰块和冰雕砌成，顶上也是冰：烛光在冰中闪烁，冰凳上铺着兽皮，窗外是极夜和北极光。"
+
+msgid "A canal boat's saloon at walking pace: dusk falls as reeds, willows and a brick bridge slide past the windows, a village's lights come up, and the boat ties up at a lamp-lit wharf with the credits."
+msgstr "以步行速度前行的运河船舱：暮色降临，芦苇、柳树和砖砌拱桥从窗外缓缓滑过，村庄的灯火渐次亮起，片尾字幕时船停靠在灯火映照的码头。"
 
 msgid "A Gothic nave at night, the screen in the chancel: piers rising into rib vaults, candles on iron stands and coronae, coloured glass and a rose window in the moonlight."
 msgstr "夜晚的哥特式中殿，银幕在圣坛里：束柱升入肋拱，铁架与吊冠上的烛光，月光下的彩色玻璃与玫瑰窗。"

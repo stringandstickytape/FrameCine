@@ -931,25 +931,25 @@ msgstr ""
 msgid "Updated to version %s"
 msgstr ""
 
-#: scripts/update/updater.gd:426
+#: scripts/update/updater.gd:431
 #, c-format
 msgid "Restart now to update to %s?"
 msgstr ""
 
-#: scripts/update/updater.gd:427
+#: scripts/update/updater.gd:432
 #, c-format
 msgid "Quit now to update to %s? Then start the player again."
 msgstr ""
 
-#: scripts/update/updater.gd:430
+#: scripts/update/updater.gd:435
 msgid "Restart"
 msgstr ""
 
-#: scripts/update/updater.gd:430
+#: scripts/update/updater.gd:435
 msgid "Quit"
 msgstr ""
 
-#: scripts/update/updater.gd:430
+#: scripts/update/updater.gd:435
 msgid "Later"
 msgstr ""
 
@@ -4485,6 +4485,10 @@ msgstr ""
 msgid "Ice cinema"
 msgstr ""
 
+#: environments/narrowboat.env.json
+msgid "Narrowboat"
+msgstr ""
+
 #: environments/nave.env.json
 msgid "Nave"
 msgstr ""
@@ -4599,6 +4603,10 @@ msgstr ""
 
 #: environments/ice_cinema.env.json
 msgid "An ice hotel's cinema of sawn blocks and carvings under an ice vault: candles glowing inside the ice, hides on ice benches, the polar night and the northern lights outside."
+msgstr ""
+
+#: environments/narrowboat.env.json
+msgid "A canal boat's saloon at walking pace: dusk falls as reeds, willows and a brick bridge slide past the windows, a village's lights come up, and the boat ties up at a lamp-lit wharf with the credits."
 msgstr ""
 
 #: environments/nave.env.json

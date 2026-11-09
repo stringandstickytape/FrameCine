@@ -28,6 +28,16 @@ people.
 | 16 | Void | `mirror_floor` | black | | | | ripple |
 | 17 | Pillow Fort, 1993 | `domestic` (cushions, a bedsheet), a tree, a tin of sweets (objects) | fairy lights (`light`, flicker), rain on the window (`weather`) | a ticking radiator (`sound_bed`) | the VCR flashes 12:00 (object widget) | a CRT telly (`presentation`, TV-era display) | the telly fills the opening |
 
+## Journeys
+
+A cabin that goes somewhere for as long as the film lasts: the scenery goes by outside its windows, a pause holds it,
+and a film of known length arrives as it ends (`cabin`, `passing`). The Room tab lists them under Journeys
+(`category` `journey`).
+
+| # | Room | Builders and kits | Light, sky, atmosphere | Life, sound, music | Timeline and cues | Screen | Settings |
+|---|---|---|---|---|---|---|---|
+| 1 | Narrowboat | `cabin` (a canal boat's saloon: leaning walls, an arched roof, round-cornered windows, wall lamps), a stove, a rug and a sideboard (`kit`) | dusk to night over the film (`sky`, film-time tracks); reeds, willows, a hedge, bridges, a village's lights and a wharf going by (`passing`), mist later on | an owl, a far church bell, the engine (following `journey.speed`) and water on the hull (`sound_bed`) | the lamps down with the film, the bell as the church comes by | on the front bulkhead | |
+
 ## TV-era rooms
 
 The same `presentation` chain makes the TV-era rooms: source (a broadcast, a tape, a disc), transmission (aerial

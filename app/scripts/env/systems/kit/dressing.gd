@@ -1,9 +1,10 @@
 extends RefCounted
 
 ## The kit's room dressing for the TV-era rooms (docs/environments.md, "The kit"): small things of a front room, a
-## lounge and a living room, each drawn into the kit's shared meshes in its own frame (xf places it: the middle of its
-## foot at local y 0, its front facing local +Z). Low-poly, plain shapes of our own: no maker's shape, no badge, no
-## lettering, no crown, flag or arms. pieces.gd calls build(); ctx is kit.gd's Ctx.
+## lounge and a living room, and a boat's stove (the Narrowboat's saloon), each drawn into the kit's shared meshes in
+## its own frame (xf places it: the middle of its foot at local y 0, its front facing local +Z). Low-poly, plain
+## shapes of our own: no maker's shape, no badge, no lettering, no crown, flag or arms. pieces.gd calls build(); ctx
+## is kit.gd's Ctx.
 ##
 ##   bunting       a string of triangular pennants across a room, sagging: size.x the span, size.y the sag; the
 ##                 pennants red, white and blue in turn (`colour`, white, `accent`). It hangs from local y 0
@@ -15,6 +16,8 @@ extends RefCounted
 ##   floor_lamp    a flat round base, a slim pole, a tall column shade that glows (house group)
 ##   glass_table   a low table: a glass top (the kit's glass, see-through), a steel frame (`tin`)
 ##   media_unit    a long low cabinet on a recessed plinth, three handleless doors (`wood`)
+##   boat_stove    a small solid-fuel stove on a hearth plate, its flue straight up to the roof (`iron`); its door's
+##                 window glows (the kit's lit windows)
 ##
 ## The china (`china`) and the cloth (`cloth`: bunting, bread and filling) are one material each, coloured per vertex
 ## (the house shader's instance tint): bunting, a tea set and three plates of sandwiches cost two draws.
@@ -25,7 +28,7 @@ const PhysicsShapes := preload("res://scripts/play/physics_shapes.gd")
 
 ## Its pieces (pieces.gd lists them with the others, their sizes and which stand on a floor).
 const PIECES: Array[String] = ["bunting", "tea_set", "sandwiches", "stool", "channel_dial", "soundbar", "floor_lamp",
-		"glass_table", "media_unit"]
+		"glass_table", "media_unit", "boat_stove"]
 ## The bunting's colours when the entry gives none: a red, a white, a blue (cloth, faded a little).
 const RED := Color(0.62, 0.07, 0.09)
 const WHITE := Color(0.86, 0.84, 0.8)
@@ -33,6 +36,10 @@ const BLUE := Color(0.1, 0.15, 0.42)
 ## A pennant: its width at the string, its drop, and the string's length between two pennants' middles.
 const PENNANT := Vector2(0.17, 0.21)
 const PENNANT_STEP := 0.26
+## The boat stove: the size it is drawn at (pieces.gd SIZES has the same), its body's and its hearth plate's colours.
+const STOVE_SIZE := Vector3(0.4, 2.0, 0.38)
+const STOVE_BODY := Color(0.05, 0.05, 0.055)
+const STOVE_PLATE := Color(0.16, 0.15, 0.14)
 
 
 static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
@@ -55,6 +62,8 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			_glass_table(c, xf, size, e)
 		"media_unit":
 			_media_unit(c, xf, size, e)
+		"boat_stove":
+			_boat_stove(c, xf, size, e)
 
 
 # --- Helpers ---------------------------------------------------------------------------------------------------
@@ -365,3 +374,43 @@ static func _media_unit(c: Object, xf: Transform3D, size: Vector3, e: Dictionary
 		_box(b, xf, Vector3(-w * 0.5 + 0.01 + dw * (k + 0.5), plinth + (h - plinth) * 0.5, d * 0.5 - 0.01),
 				Vector3(dw - 0.006, h - plinth - 0.02, 0.016))
 	_solid(c, xf, Vector3(0, h * 0.5, 0), Vector3(w, h, d))
+
+
+# --- A boat's saloon ---------------------------------------------------------------------------------------------
+
+## A narrowboat's stove: a hearth plate on the floor, a squat body on four short legs, a top plate, a door with a
+## small window that glows (the kit's lit windows: PieceWindows, in `window_colour`; it lights nothing), and a round
+## flue straight up to the roof with a collar near its top. Plain painted metal (`iron`, tinted). Drawn at its own
+## size ([0.4, 2.0, 0.38]); another size stretches it along each axis.
+static func _boat_stove(c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
+	# UNDECIDED (brief): how the parts follow a size other than its own: here each axis stretches by its share.
+	var k := size / STOVE_SIZE
+	var body := _colour(e, "colour", STOVE_BODY)
+	var b: RoomMesh = c.s
+	b.surface(c.mat("iron", STOVE_PLATE))
+	_box(b, xf, Vector3(0, 0.0075, 0.03) * k, Vector3(0.5, 0.015, 0.48) * k)
+	# UNDECIDED (brief): the legs, the top plate and the collar have no colour given: the body's.
+	b.surface(c.mat("iron", body))
+	for sx: float in [-1.0, 1.0]:
+		for sz: float in [-1.0, 1.0]:
+			_box(b, xf, Vector3(sx * 0.15, 0.055, sz * 0.12) * k, Vector3(0.03, 0.08, 0.03) * k)
+	_box(b, xf, Vector3(0, 0.305, 0) * k, Vector3(0.36, 0.42, 0.32) * k)
+	_box(b, xf, Vector3(0, 0.525, 0) * k, Vector3(0.4, 0.02, 0.36) * k)
+	var flue := Vector3(0, 0.535, -0.08) * k
+	var s := xf.basis.get_scale().x
+	Shapes.cylinder(b, xf * flue, 0.05 * minf(k.x, k.z) * s, (2.0 - 0.535) * k.y * s, 8, xf.basis.orthonormalized(),
+			false)
+	_box(b, xf, Vector3(0, 1.93, -0.08) * k, Vector3(0.16, 0.02, 0.16) * k)
+	b.surface(c.mat("iron", body * 1.3))
+	_box(b, xf, Vector3(0, 0.33, 0.166) * k, Vector3(0.22, 0.2, 0.012) * k)
+	# The door's window: a glow quad [centre, half across, half up, facing], 0.007 in front of the door.
+	# UNDECIDED (brief): the brief names the "display" glow, but that one flashes once a second (a video recorder's
+	# clock) at 1.6 in `display_colour`; the lit windows' glow ("window") is steady at 0.9 in `window_colour`, which
+	# the room's kit sets to the stove's colour.
+	var g: Array = c.glows.get("window", [])
+	g.append([xf * (Vector3(0, 0.33, 0.179) * k), xf.basis.x * 0.07 * k.x, xf.basis.y * 0.05 * k.y,
+			xf.basis.z.normalized()])
+	c.glows["window"] = g
+	_solid(c, xf, Vector3(0, 0.0075, 0.03) * k, Vector3(0.5, 0.015, 0.48) * k)
+	_solid(c, xf, Vector3(0, 0.275, 0) * k, Vector3(0.4, 0.52, 0.36) * k)
+	_solid(c, xf, Vector3(0, 1.2675, -0.08) * k, Vector3(0.1, 1.465, 0.1) * k)

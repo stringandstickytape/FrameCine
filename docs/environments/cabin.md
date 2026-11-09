@@ -57,7 +57,7 @@ builder that every such room dresses, instead of one hand-made shell a room.
 | `rear_door` | enum | none, centre | centre | a door in the rear bulkhead |
 | `door_glow` | float | 0..2 | 0.3 | live, a brightness: the light in the door's window |
 | `door_colour` | color | | [1.0, 0.85, 0.6] | the colour of the door's light |
-| `screen_size` | vec2 | 0..8 | [0, 0] | the picture's width and height ([0, 0]: its own) |
+| `screen_size` | vec2 | 0..8 | [0, 0] | the picture's width and height ([0, 0]: its own; one 0: 16:9 from the other) |
 | `screen_bottom` | float | 0..3 | 0 | the picture's bottom edge over the floor (0: its own) |
 | `screen_frame` | bool | | true | a narrow frame round the picture |
 | `seating` | enum | none, rows | none | none: the viewer's own seat alone; rows: seats in rows either side of an aisle |
@@ -89,18 +89,25 @@ triangles, 30 MB; no actions.
 - L = the lean in radians. hw = width / 2. wall_len = wall_height / cos L (the wall's length up its slope).
 - top_half = hw - wall_height * tan L (half the width at the walls' tops).
 - rise = roof_rise with an arched roof, else 0. headroom = wall_height + rise.
+- Rows with no seat in either block (seating rows, seats_left + seats_right 0) are no rows: seating is none, the
+  viewer's own seat alone on `centre_x`.
 - cx: with seating none, `centre_x`. With seating rows the viewer's own seat is at x = 0: its offset from the centre
   line is o = aisle / 2 + seat_pitch * (own_index + 0.5), positive in the right block, and cx = -o. own_index is
   clamped to the block's last seat; a block with no seats gives its place to the other.
 - The windows: z_k = window_from_z + k * bay_pitch. A window is kept only when it stays 0.15 m clear of both
   bulkheads. Its top (window_sill + window_height) is at most wall_height - 0.05; window_height is reduced to fit.
-  r = min(window_round, window_width / 2, window_height / 2).
+  Where that leaves less than `MIN_WINDOW` (0.1 m) over the sill, the cabin has no windows at all: not slits, and
+  not openings with nothing in them. r = min(window_round, window_width / 2, window_height / 2).
 - dado = min(dado_height, window_sill) when there are windows, else dado_height.
 - The screen, with `screen_size` [0, 0]: w = clamp(top_half * 2 - 0.5, 0.6, 3.2), h = w * 9 / 16; if h > headroom -
-  0.95, h = headroom - 0.95 and w = h * 16 / 9. With `screen_bottom` 0: bottom = clamp(1.3 - h / 2, 0.75, headroom -
-  0.12 - h). `screen_for()`: centre (cx, bottom + h / 2, front_z + 0.03), size (w, h).
+  0.95, h = headroom - 0.95 and w = h * 16 / 9. With one 0 in `screen_size`, that one is 16:9 from the other (h = w *
+  9 / 16, or w = h * 16 / 9), so a room can ask for a width and let the height follow. With `screen_bottom` 0: bottom
+  = clamp(1.3 - h / 2, 0.75, headroom - 0.12 - h). `screen_for()`: centre (cx, bottom + h / 2, front_z + 0.03), size
+  (w, h).
 - The bays' marks (ribs, wall lamps, `side_walls` slots): half a bay_pitch before the first kept window, half way
-  between each pair, half a bay_pitch after the last; with no windows, the cabin's middle.
+  between each pair, half a bay_pitch after the last; with no windows, the cabin's middle. A mark is kept only where
+  it is at least `MARK_MARGIN` (0.1 m) inside both bulkheads: the first and the last can fall in a bulkhead or beyond
+  it, and nothing stands there.
 
 The static functions, from parameters alone: `resolved`, `_box` (cx - hw, 0, front_z to cx + hw, headroom, back_z),
 `seat_slots_for`, `layout`, `screen_for`, `collision_shapes_for` (the shell's boxes, and the seats' when drawn),
@@ -114,11 +121,15 @@ The static functions, from parameters alone: `resolved`, `_box` (cx - hw, 0, fro
 | `Floor` | static: one face, `floor` |
 | `Lining` | static: `dado` (both walls up to the dado), `walls` (above it, cut round the windows), `ceiling` (the roof: a face, or a strip along the arc), `bulkhead` (front and rear, each a polygon of the section) |
 | `Trim` | static, `trim`: each window's frame (a strip from the opening out by frame_width, frame_depth into the room) and its reveal (a strip through the wall's thickness); the dado's rail; the ribs (at the bays' marks, up both walls and under the roof); the screen's frame (four boxes 0.04 wide and 0.03 deep, at the picture's edge); the rear door (0.62 wide, up to 1.85 high) and its handle; the ceiling lamps' roses and the wall lamps' arms |
-| `Glass` | each window's pane at the wall's outer face; in `env_see_through` |
+| `Glass` | each window's pane at the wall's outer face; in `env_see_through`. Tinted `GLASS_TINT` (0.62, 0.74, 0.8), `GLASS_ALPHA` 0.02 square on and `GLASS_RIM` 0.06 more where the view grazes it |
 | `DoorGlow` | the light in the door's window (0.3 x 0.4, its middle 1.5 m up), group `accent`; follows `door_glow` |
 | `Lamps` | ceiling: a lamp under the roof's middle at each window (the cabin's middle without windows); wall: on both walls at the bays' marks, `lamp_height` up, on an arm; group `house`, a hidden bake light each |
 | `Hull` | not baked, `hull`, with `ledge`: outside each windowed wall a ledge at `ledge_y` from front_z - 2 to back_z + 2, an upstand at its outer edge |
 | `Seats` | the plain seats (one MultiMesh), unless `seat_model` is none or the room has a seats system |
+
+The glass is fainter than a hall's (0.06, and 0.22 more where the view grazes it): a cabin's windows are an arm's
+length from a bright picture and are looked through at night. At a hall's strength the picture's light on the panes
+was a grey veil over everything outside (2026-11-09, the Narrowboat's wharf at night).
 
 A wall with windows is cut into cells at the midpoints between neighbouring windows (the first from front_z, the
 last to back_z). Each cell has a face below the window, one above, one either side, and, with round corners, a
@@ -153,10 +164,7 @@ A piece's front faces its local +Z, into the cabin; on a wall its Y goes up the 
 
 No live lights in any (the lamps' lights are the bake's).
 
-## Open questions
+## Rows and the picture
 
-- **A coach's sight line.** The rules' picture in the coach is low (its bottom 0.77 m), and the default plush seats'
-  backs (1.12 m) hide its bottom from the rows behind. The test's coach has folding seats.
-- **The bays' end marks** (half a bay before the first window, after the last) can fall beyond a bulkhead: the
-  default's last is at z 2.55, behind the rear bulkhead at 2.4. The ribs, wall lamps and `side_walls` slots there are
-  kept where the rule puts them.
+The picture the rules give is for a cabin with one seat or low ones. With rows of tall seats the rows behind do not
+see its bottom edge: such a room sets screen_bottom itself.

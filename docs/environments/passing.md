@@ -67,7 +67,7 @@ Many of one shape on a loop that comes round again.
 
 | Field | Type | Default | What |
 |---|---|---|---|
-| `shape` | enum `Shapes.BANDS` | | what stands in the band |
+| `shape` | enum `Shapes.BANDS`, required | | what stands in the band |
 | `side` | left, right, both | both | which side of the way |
 | `near` | float 3..170 | 6 | the nearest its feet stand from the way's line |
 | `far` | float 3..170 | 12 | the furthest (made at least `near`) |
@@ -91,8 +91,8 @@ Something that stands once on the route: it comes into view ahead, passes and go
 
 | Field | Type | Default | What |
 |---|---|---|---|
-| `shape` | enum `Shapes.LANDMARKS` | | what it is |
-| `at` | float 0..1 | | its place on the route, as a fraction |
+| `shape` | enum `Shapes.LANDMARKS`, required | | what it is |
+| `at` | float 0..1, required | | its place on the route, as a fraction |
 | `side` | left, right | left | which side of the way |
 | `distance` | float 3..170 | 8 | metres from the way's line |
 | `height` | float -20..40 | 0 | its foot's height |
@@ -103,17 +103,40 @@ Something that stands once on the route: it comes into view ahead, passes and go
 With no route's end (a film with no length), a landmark at 0 (the place the journey starts from) is there; the others
 never come.
 
+**A landmark's clearing.** No band's item stands on the ground a landmark stands on (a hedge through a wharf's shed,
+reeds through a moored boat, a willow on a bridge's road). `Shapes.clearing()` gives that ground as half its length
+along the way and its nearest and furthest edge across it (signed as the way's frame is: left negative); a shape
+with none gives nothing. The margins past the shape itself are for what reaches (below, `REACH`).
+
+| Landmark | Half its length along | Across |
+|---|---|---|
+| `bridge` | 4.25 | both sides, out to its distance + 9 |
+| `wharf` | 11.5 | its distance - 2 to its distance + 11 |
+| `boat` | 8.5 x size | its distance -+ (size + 0.5) |
+| `tower` | 20 x size | its distance -+ 8 x size |
+| `lamp` | | none |
+
+The scenery's shaders get them as `landmark_clear` (one a landmark), and `band_extent` for each band: how far one of
+its items runs on along the way from its foot (a row's piece: its `SEGMENT` length; else 0). An item whose run along
+the way overlaps a landmark's clearing and whose foot is inside it across is drawn at nothing. A band that goes by at
+the landmark's pace (`seems` 1) keeps its place against it, so this holds for the whole time both are in view.
+
 ### A ground strip
 
 | Field | Type | Default | What |
 |---|---|---|---|
 | `side` | left, right, both | both | which side of the way |
-| `from`, `to` | float 0..175 | | metres from the way's line |
+| `from`, `to` | float 0..175, required | | metres from the way's line |
 | `height_from`, `height_to` | float -20..40 | 0 | its height at each edge |
 | `kind` | water, grass, path, field, snow, sand, stone | grass | what it is |
 | `colour` | color | the kind's own | water `#0c1218`, grass `#1a2414`, path `#3b362c`, field `#201c16`, snow `#c8ccd6`, sand `#4a4232`, stone `#34322e` |
 
 A strip runs 175 m ahead and astern. It stands still; its pattern goes by.
+
+`shape` (a band's and a landmark's), `at` (a landmark's), `from` and `to` (a strip's) are required: the schema says
+`"required": true` and refuses an entry without them (`docs/environments/checks.md`, item 1). A band of scenery with
+no shape is a mistake in the document, not a row of whatever the system would draw in its place. A caller that skips
+the schema gets the plainest: a band of posts, a lamp at the journey's start, a strip of no width (nothing drawn).
 
 ## The journey's rules
 
@@ -149,43 +172,103 @@ From `env_checks.gd` (`docs/environments/checks.md`, item 10), with the reasons 
 
 | Limit | Constant | Here |
 |---|---|---|
-| the fastest anything crosses the eye, at its nearest | `FLOW_MAX_DEG` | `comfort_for()`: a band (`near`, `seems`) or a landmark (`distance`) at the fastest the journey goes (`speed` and `CATCH_UP`) |
-| the nearest anything passes the way's line | `FLOW_NEAREST` | `comfort_for()`: a band's `near`, a landmark's `distance`. Ground nearer than this is fine: its shader holds its pattern still there |
+| the fastest anything crosses the eye, at its nearest | `FLOW_MAX_DEG` | `comfort_for()`: a band (slowed by its `seems`) or a landmark at its nearest (below) at the fastest the journey goes (`speed` x (1 + `CATCH_UP`)) |
+| the nearest anything passes the line the eyes go along | `FLOW_NEAREST` | `comfort_for()`: a band's or a landmark's nearest (below). Ground nearer than this is fine: its shader holds its pattern still there |
 | how fast the speed changes | `FLOW_ACCEL` | step 7; an arrival slows at half of it (`BRAKE`) |
 | clear of the picture's edges, from the room's own seat | `FLOW_CLEAR_DEG` | `flow_volumes()`: the boxes the moving scenery keeps to, for `flow_clear()` |
 | the Motion setting under which nothing goes by | `FLOW_MOTION_FLOOR` | step 2 |
 
-`flow_volumes()` gives, in the room's frame: for each band and side, across from `near` to `far`, along half its loop
-(at most 175 m) each way, from 2 m under its feet to 30 m over; for each landmark, 15 m either side of its distance
-(never under `FLOW_NEAREST`); for each ground strip, its part beyond `FLOW_NEAREST`.
+**Comfort is judged by the nearest any part of a shape comes,** not by where its foot stands. A tree whose foot is
+9 m off has a crown that reaches to 3; a moored boat's side is a metre nearer than its middle. `Shapes.nearest(shape,
+size, distance, foot, eye)` gives the nearest any part of it comes to the line the eyes go along (the eyes at
+`EnvChecks.EYE_HEIGHT`, 1.2 m): the least of its stem's distance and its widest part's, that one measured up to the
+height it hangs at. `comfort_for()` asks it at the largest the band draws its shape (a scattered band's items are up
+to `VARY.y`, 1.25 times its `size`; a row's pieces are all its size). A bridge goes over the way: its nearest is its
+arch, measured at nine points from pier to pier. Every other shape's lengths are `Shapes.REACH`, each [metres whatever
+the size, metres times the size]:
 
-The scenery's meshes hold each item about its own foot (the shader places it), so a check that reads vertices as they
-are sees every item heaped at the origin. The sight-line check looks through them (they are in `env_see_through`).
-`flow_clear()` does not yet: its `_view_bodies()` takes them as solid round the eye, which can hide scenery by the
-picture where no wall stands in front of it (a room with no side walls, tried 2026-11-09: 4 problems hidden). With
-the walls a cabin has, the check is right.
+- `stem`: how far its solid part stands out from its foot at any height (a trunk, a wall, half a hedge)
+- `wide`: how far its widest part reaches (a crown, a willow's shoots, a lamp's arm, the eaves)
+- `over`: the height over its foot under which that widest part never comes (0: it reaches at the ground)
+
+| Shape | `stem` | `wide` | `over` |
+|---|---|---|---|
+| `reeds` | [0.25, 0.7] | [0.25, 0.7] | [0, 0] |
+| `willow` | [0, 0.8] | [0, 3.75] | [0, 1.8] |
+| `tree` | [0, 0.42] | [0, 6.0] | [0, 3.2] |
+| `poplar` | [0, 0.24] | [0, 1.7] | [0, 1.4] |
+| `hedge` | [0.68, 0] | [0.68, 0] | [0, 0] |
+| `fence` | [0.05, 0] | [0.05, 0] | [0, 0] |
+| `cottage` | [0, 2.25] | [0, 2.4] | [0, 2.6] |
+| `post` | [0.07, 0] | [0.07, 0] | [0, 0] |
+| `lamp` | [0.06, 0] | [0.61, 0] | [0, 2.85] |
+| `boat` | [0, 1.0] | [0, 1.0] | [0, 0] |
+| `tower` | [0, 3.5] | [0, 3.5] | [0, 0] |
+
+A shape not in the table (`ridge`, `lights`, `wharf`) comes no nearer than its foot. The table is worked out from the
+drawing functions at the largest each draws: a change to a shape is a change to its line here.
+
+`flow_volumes()` gives, in the room's frame: for each band and side, across from where its largest item reaches (its
+`near` less its `REACH` `wide`) to its `far`, along half its loop (at most 175 m) each way, from 2 m under its feet to
+30 m over; for each landmark, 15 m either side of its distance (never under `FLOW_NEAREST`); for each ground strip,
+its part beyond `FLOW_NEAREST`.
+
+**The scenery's nodes are in the group `env_placed_in_shader`** (`EnvChecks.PLACED_IN_SHADER`). Their meshes hold
+each item about its own foot and the vertex shader carries it to its place, so a check that reads the vertices as
+they are sees every item heaped at the room's origin, round the viewer's head: it would hide everything behind it
+from the sight line, the blended layers and `flow_clear()` alike. No check that casts rays reads a mesh in the group.
+What it costs is still counted (draws, triangles); where it can be is `flow_volumes()`'s to say.
 
 ## The shaders
 
-**`env_passing.gdshader`** (the bands and landmarks, one draw). A band's item goes round its loop by the band's phase
-(`fposmod(travel / seems, loop)`, on the CPU in 64 bits, so a long film does not lose precision); it grows from
-nothing over the last 18 % of the loop's half length each way, and stays at nothing where its band's presence at its
-own place on the route is under its threshold (the presence texture: a row a band, 64 texels along the route). A
-landmark is placed at its own place on the route less the travel. Nothing is drawn further than 188 m from the
-origin. Unshaded: the sky's light by the surface's facing (the sky system's colours, or `night`), the screen's spill,
-and the cabin's glow on what is near the way and abreast of the windows. Leaves are mottled and catch more light on
-top; stems are paler at the tip; lit windows glow at `windows` and take no light. Mist takes the far scenery, and
-everything fades into the horizon from 120 m. Every term of light is multiplied by `shown`, so a blink takes it all
-to black.
+**Colours.** Every colour in these meshes is written as sRGB, as it is written: a document's, a shape's own
+(`Shapes.COLOURS`, a willow's bark, a roof, a lit window) and a ground kind's alike (`passing.gd _written()`). The
+shaders take them all to linear light in one place: `passing_colour()` in `env_passing_place.gdshaderinc` (the
+ground's shader does the same sum in its `vertex()`). Converting some on the CPU and not the others would draw a
+shape's own colours far lighter than the colour its document gave it.
 
-**`env_passing_lights.gdshader`** (the points of light, one draw). Each light is placed as its item is, then spread
-to face the eye as the Crater's lunar lights are: its radius in metres, never under a tenth of a degree, so a far
-light stays a few pixels wide and never shimmers. A soft round point added over what is behind, dimmed by mist.
+**`env_passing_place.gdshaderinc`** (the placing the scenery and its points of light share, so a lamp's light is
+always on its lamp). `passing_foot(CUSTOM0, CUSTOM1, grow)` returns an item's foot in the way's frame (x across, y up,
+z along, ahead positive), and in `grow` how much of the item is there (0 none, 1 whole; the item is scaled about its
+foot by it). A band's item goes round its loop by the band's phase (`fposmod(travel / seems, loop)`, on the CPU in 64
+bits, so a long film does not lose precision) and grows from nothing over the last 18 % of the loop's half length
+each way (`EDGE` 0.82). It stays at nothing where its band's presence at its own place on the route is under its
+threshold (the presence texture: a row a band, 64 texels along the route); its own place does not change while it
+goes by, so nothing appears or goes while it is in view. It stays at nothing on a landmark's clearing (above). A
+landmark is placed at its own place on the route less the travel. Last, everything fades in over the last 6 % before
+`FAR` (188 m from the origin: from 176.7 m): a thing comes out of the horizon's haze, it is not switched on.
+
+**The light reaches the scenery only through the windows.** What the cabin's lamps and the screen give the scenery
+is weighted by `from_windows`: 1 at the way's line, gone at `glow_reach` across it, and gone from `glow_half_length`
+to 2 m past it ahead and astern. So the bank beside the boat flickers with the film, and the far bank and the fields
+do not. The sky's light reaches everything.
+
+**`env_passing.gdshader`** (the bands and landmarks, one draw). Unshaded: the sky's light by the surface's facing (the
+sky system's colours, or `night`), and the screen's spill and the cabin's glow through the windows. Leaves are
+mottled and catch more light on top; stems are paler at the tip; lit windows glow at `windows` and take no light.
+Mist takes the far scenery, and everything fades into the horizon from 120 m. Every term of light is multiplied by
+`shown`, so a blink takes it all to black.
+
+**`env_passing_lights.gdshader`** (the points of light, one draw). Each light is placed as its item is, and grows
+with it (a light that is not there is not drawn at the tenth of a degree either), then spread to face the eye as the
+Crater's lunar lights are: its radius in metres, never under a tenth of a degree, so a far light stays a few pixels
+wide and never shimmers. A soft round point added over what is behind, dimmed by mist.
 
 **`env_passing_ground.gdshader`** (the ground, one draw). The strips stand still; their noise pattern goes by with the
 travel (it repeats every 64 m). Nearer the way's line than `FLOW_NEAREST` the pattern fades out, so the ground that
-passes closest shows nothing moving. Water takes the sky by Fresnel, rippled, a little of the cabin's glow and the
-screen's spill. The same mist and horizon as the scenery.
+passes closest shows nothing moving. Ground takes the sky's light from above, and the screen's and the cabin's
+through the windows. **Water mirrors:** it does not take light as ground does. It shows its own colour and, by
+Fresnel, what it mirrors: looked at steeply, the sky overhead; looked along (the far water), what stands low on the
+far side, the bank and its trees, dark (the water's colour at 0.6). The ripples (a noise texture going by) move the
+mirrored light where the pattern is not held still. What it mirrors towards someone inside the boat is never the
+boat's own windows, so the cabin's glow and the screen's light show on it only as a glint on the ripples' crests and
+a trace of scatter. The same mist and horizon as the scenery.
+
+## Choosing a band's loop
+
+What is seen through a side window is never further along the way than about 1.5 times its distance across. An item
+grows from nothing over the last 18 % of half its loop. So a band's loop should be at least 3.7 times its `far`: then
+nothing is seen growing.
 
 ## Measured
 

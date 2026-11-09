@@ -59,7 +59,7 @@ Cue sounds (`env_audio.play`, the chime) and the thud still go straight to Envir
 
 | Param | Default | What |
 |---|---|---|
-| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`, `hooves`; `silence` plays nothing (the sounds: below) |
+| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`, `boat_engine`, `water_lap`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`, `hooves`; `silence` plays nothing (the sounds: below) |
 | `gain_db` | 0 | dB from the designed level (-30 to +6) |
 | `level` | 1 | 0 to 1, live. Bind it: `film.bass` for a rumble through the wall, `weather.rain` or `weather.wet` for rain, a setting |
 | `film_db` | -8 | dB lower in `starting`, `playing` and `credits`. Up again in the pre-show, paused, the intermission and the end |
@@ -112,6 +112,8 @@ tones and swells divide its length, so it has no seam.
 | `hull_creak` | one-shot 3.5 | steel under pressure: stick-slip pulses through a low groan and bright partials | a hull |
 | `church_bell` | one-shot 14 | a parish church's bell across the roofs: three strokes 3.2 s apart, each a struck bell's partials (hum, prime, minor third, fifth, octave; damped oscillators, the hum ringing longest), a faint echo off the houses, softened by distance (since 2026-11-08) | before the show (a cue's `do`), far off |
 | `city` | loop 12 | a summer city at night from a roof: a low murmur of traffic that swells and settles, a faint hiss, three far engines passing in the loop (since 2026-11-08) | round a roof, from the streets below |
+| `boat_engine` | loop 8 | a narrowboat's slow single-cylinder diesel under the stern deck, through a bulkhead: four beats a second, each a 58 Hz thump with its octave and a short knock of the block at 420 Hz, each a little stronger or weaker (32 strengths in the loop); a 29 Hz drone and a low rumble under it; all of it under 600 Hz (since 2026-11-09; designed level -52) | the Narrowboat, astern; `level` on `journey.speed` |
+| `water_lap` | loop 12 | water against a steel hull, slow and uneven: a lap every 0.9 to 2.2 s, a band of noise that swells in over 0.15 s and dies away as it falls from 900 to 500 Hz, a drop after every second lap, a soft wash between 250 and 1200 Hz all the time (since 2026-11-09; designed level -57) | a boat's hull |
 | `ice_creak` | one-shot 2.6 | a crack that sings down, then a low groan | ice, `every` |
 | `candle` | one-shot 0.9 | a candle's flame puffs and wavers, three or four sputters of wax | `every`, very low |
 | `three_bells` | one-shot 3.2 | a soft house bell: three struck-bar tones, up a fifth, down a minor third (our own call) | before the show |
@@ -270,6 +272,8 @@ second.
 | `fountain` | -56 | -56.0 | -64.2 | -71.1 | -41.8 |
 | `bubbles` (2026-11-08) | -57 | -57.0 | -64.7 | -72.4 | -36.2 |
 | `city` (2026-11-08) | -58 | -58.0 | -66.6 | -73.6 | -45.3 |
+| `boat_engine` (2026-11-09) | -52 | -52.0 | -60.0 | -67.1 | -37.0 |
+| `water_lap` (2026-11-09) | -57 | -57.0 | -64.1 | -73.6 | -35.4 |
 | `clock` | -56 | -56.0 | -64.0 | -71.1 | -19.9 |
 | `tube_whine` | -62 | -62.0 | -70.0 | -77.2 | -55.0 |
 | `noise` | -54 | -54.0 | -62.0 | -69.1 | -41.2 |
@@ -367,3 +371,4 @@ at 8 m they are 19 dB under their "in film" level even at -12. Without the filte
 | TV 2002 | `acoustics` `small_room`; `sound_bed` `hum` at the set (its fan), `gain_db` -3 |
 | TV today | `acoustics` `small_room` (`rt60` 0.3); `sound_bed` `rain_glass` on `weather.rain`, `gain_db` -6 |
 | TV tomorrow | `acoustics` `small_room` (`rt60` 0.3); no beds: a quiet room |
+| Narrowboat | `acoustics` `small_room`; `sound_bed` `boat_engine` astern under the deck (`reach` 3, `film_db` -10, `level` on `journey.speed` from 0.4 to 1); `water_lap` everywhere (`gain_db` -2, `film_db` -10); a `tawny_owl` far off (a cue); a `church_bell` far off as the tower comes by (a cue) |

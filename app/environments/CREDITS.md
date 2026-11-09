@@ -94,3 +94,11 @@ No bundled asset. The ice room, the hides, the aurora, the stars and the breath 
 - `app/environments/crater.env.json`: no asset of its own. The tiers, the rocks, the dome, the crater's rim, Earth
   and the stars are made in code by the systems (the stars from the catalogue under "Data"); its surfaces are library
   materials (rough plaster, smooth concrete, dark metal, brushed steel). It makes no sound.
+
+## Narrowboat (`narrowboat.env.json`)
+
+No bundled asset. The saloon, its stove, rug and sideboard, the canal and everything that goes by it (reeds, willows,
+trees, the hedge, the fence, cottages, bridges, boats, the tower, the wharf), the sky and its stars are made in code
+by the systems (`cabin.gd`, `kit.gd`, `passing.gd`, `sky.gd`; the stars from the catalogue under "Data") on library
+materials (`painted_wall`, `oak_veneer`, `oak_planks`, `dark_metal`, `oxblood_leather`, `walnut_veneer`, the kit's
+`woven_carpet` and `oak_veneer`, all CC0). Its sounds (the engine, the water, the owl, the bell) are synthesised.

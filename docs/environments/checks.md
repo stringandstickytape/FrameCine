@@ -5,7 +5,10 @@ Part of the environments engine: [`docs/environments.md`](../environments.md) ha
 `scripts/env/env_checks.gd`, run by `tests/test_environments.gd` over every `app/environments/*.env.json`, and by
 `tests/test_env_checks.gd` against a bad document for each check.
 
-1. **Schema:** `RoomSchema.validate(doc, "new")`, with the version 4 sections.
+1. **Schema:** `RoomSchema.validate(doc, "new")`, with the version 4 sections. A field of an object can be
+   `"required": true` (`env_doc.gd _options()`): an entry without it is refused, "missing", with its path. It is for a
+   field with no sensible default: a band of scenery with no shape is a mistake in the document, not a row of whatever
+   the system would draw in its place.
 2. **Headset budget:** the room is built headless and measured: draw calls (one a mesh surface), triangles, live
    lights (the bake's hidden lights do not count), particles, and texture memory (the images' bytes with mip levels).
    Texture memory is the headset's: a library map counts its ASTC blocks as loaded from its `.mtex`
@@ -28,7 +31,11 @@ Part of the environments engine: [`docs/environments.md`](../environments.md) ha
    (its corners, edges and centre, 5 % in), nothing static is hit: the room's meshes and seats as physics shapes, ray
    by ray. A seat's own back and anything behind the eyes do not count. A MultiMesh stands at the seats unless it has
    meta `env_placed` (an Array of its instances' transforms, since 2026-11-08: the drive-in's parked cars), which
-   places it there instead (a headless MultiMesh keeps no transforms of its own).
+   places it there instead (a headless MultiMesh keeps no transforms of its own). A mesh in the group
+   `env_placed_in_shader` (`PLACED_IN_SHADER`) is not read: its vertices are not where it is drawn (a vertex shader
+   carries them there: the passing system's scenery lies about each item's own foot in its mesh). Read as it is, it
+   is a heap at the room's origin round the viewer's head, and it would hide everything behind it. What it costs is
+   still counted; where it can be is its system's to say (`flow_volumes()`, item 10).
 4. **Comfort:** no system moves the viewer; every `motion` parameter within its limit; every binding on a
    `brightness` parameter smoothed by at least 1 / (2 pi MAX_HZ) seconds; every cue fade on one at least
    1 / (2 MAX_HZ) seconds.
@@ -44,7 +51,8 @@ Part of the environments engine: [`docs/environments.md`](../environments.md) ha
    dome is a few thousand triangles and the whole view. The view is 110 x 100 degrees in cells of 2.5 degrees;
    every crossing counts, a volume's far side as its near one. Budget: 1.0 layer on average (`BLEND_BUDGET`).
    Not counted: particles (the budget has their number), a MultiMesh, quads a vertex shader turns to the eye
-   (halos), and anything hidden when the room is built with no film (a projector's haze).
+   (halos), a mesh in `PLACED_IN_SHADER` (item 3), and anything hidden when the room is built with no film (a
+   projector's haze). `flow_clear()` (item 10) reads the room's meshes the same way, without them.
 9. **Build time** (since 2026-11-09): a room is built on the main thread when the viewer chooses it, and no frame
    is drawn until it is done. The check measures the machine first (`pace()`: a fixed piece of the same kind of
    work) and counts a room's second build in those (`build_units()`). Budget: 4.0 (`BUILD_BUDGET`). The first
@@ -99,7 +107,7 @@ What this says:
   13.9 ms), and its glass is only 0.57 of a layer. Its cost is in the shading of its water, which no count made here
   can see. The check guards against a room that stacks glass on haze; it does not explain the Bathysphere.
 - **Only the headset can measure shading.** `perf_rooms` (`docs/showrooms.md`) takes a room's GPU time there.
-  `tools/room-perf.sh` runs it over every room that ships and writes the table below.
+  `tools/room_perf.py` runs it over every room that ships (below, "On the headset").
 - **The first build of a run is the long wait,** and it is nearly all pictures: the Shopfront takes 1.3 s the first
   time and 0.04 s after. Two rooms are slow every time, in their geometry: the Crater and Reclaimed.
 
@@ -165,5 +173,16 @@ The largest savings: Shopfront 1906 1319 to 67 ms, Screening room 1962 935 to 95
 
 ## On the headset
 
-`tools/room-perf.sh` writes `docs/environments/perf.md`: each room's GPU time (mean and p95) and dropped frames, from
+`tools/room_perf.py` writes `docs/environments/perf.md`: each room's GPU time (mean and p95) and dropped frames, from
 `perf_rooms`. Not run yet.
+
+- `tools/room_perf.py run [--seconds 10] [--settle 4] [--foveation off] [--rooms a,b,c]` measures every room of
+  `app/environments/*.env.json` (sorted), or the ones given, on the headset through `tools/listener.py send
+  perf_rooms` (the Void first, the baseline). It saves the result as `docs/environments/perf.json` and writes the
+  table to `docs/environments/perf.md`. It needs the listener running and the headset on the dev link; play a film
+  first and close the panel.
+- `tools/room_perf.py format RESULT [OUT]` writes the same table from a saved result (OUT: standard output by
+  default).
+
+It never starts the listener and never reaches the headset by any other way: when the send fails it prints the
+listener's error and exits 1, writing nothing. `tools/test_room_perf.py` tests it without the headset.
