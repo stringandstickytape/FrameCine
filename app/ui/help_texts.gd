@@ -73,7 +73,7 @@ const SOUND := {
 	"Dialogue boost": "Makes voices louder. Only for 5.1 sound and more.",
 	"Spatial sound": "Sound from speakers around you and above you, not inside your head.",
 	"Bass channel": "Plays the film's separate bass channel (the .1 of 5.1) too.",
-	"Room sound": "How much echo of the room you hear. More: the speakers seem farther.",
+	"Room echo and reverb": "The room's echoes and reverb. Off: dry sound, the film only. 100 %: the room as it is built; more: the speakers seem farther.",
 	"Auto": "The headset sees what the sound plays on: its own speakers or headphones.",
 	"Headset speakers": "Settings for the headset's own speakers.",
 	"Headphones": "Settings for earbuds or headphones.",

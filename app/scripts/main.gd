@@ -250,6 +250,8 @@ var camera: Camera3D
 var hands: Array[XRHand] = []
 var env: VREnvironment
 var env_id := "void"
+## The room of a new install (the user, 2026-11-09); a chosen room, the Void too, is kept in [view] environment.
+const DEFAULT_ENVIRONMENT := "cinema"
 var room_light := 1.0
 var mode: VideoMode = VideoMode.new()
 ## Where the mode came from: "auto" (file name + size), "metadata" (the container's stereo / spherical metadata),
@@ -461,7 +463,7 @@ func _ready() -> void:
 			update_controller_labels())
 	if ui != null:
 		ui.setup(self)
-	set_environment(_env_from_arg(str(_args.get("env", settings.get_value("view", "environment", "void")))))
+	set_environment(_env_from_arg(str(_args.get("env", settings.get_value("view", "environment", DEFAULT_ENVIRONMENT)))))
 	if _args.has("screen-width") or _args.has("distance") or _args.has("height"):
 		set_screen(float(_args.get("screen-width", screen_width)), float(_args.get("distance", screen_distance)),
 				float(_args.get("height", screen_height_offset)))

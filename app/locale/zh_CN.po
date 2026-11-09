@@ -602,8 +602,8 @@ msgstr "声音来自你周围和上方的扬声器，而不是在你脑袋里。
 msgid "Plays the film's separate bass channel (the .1 of 5.1) too."
 msgstr "同时播放影片单独的低音声道（5.1 中的 .1）。"
 
-msgid "How much echo of the room you hear. More: the speakers seem farther."
-msgstr "你能听到多少房间回声。越多：扬声器显得越远。"
+msgid "The room's echoes and reverb. Off: dry sound, the film only. 100 %: the room as it is built; more: the speakers seem farther."
+msgstr "房间的回声与混响。关：干声，只有影片的声音。100 %：房间原本的声音；更多：扬声器听起来更远。"
 
 msgid "The headset sees what the sound plays on: its own speakers or headphones."
 msgstr "头显会识别声音从哪里播放：它自己的扬声器还是耳机。"
@@ -1136,8 +1136,8 @@ msgstr "空间音效"
 msgid "Bass channel"
 msgstr "低音声道"
 
-msgid "Room sound"
-msgstr "房间声音"
+msgid "Room echo and reverb"
+msgstr "房间回声与混响"
 
 msgid "Sound plays on"
 msgstr "声音播放于"

@@ -6,15 +6,15 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: scripts/main.gd:790
+#: scripts/main.gd:792
 msgid "PC window"
 msgstr ""
 
-#: scripts/main.gd:1404
+#: scripts/main.gd:1411
 msgid "TALK"
 msgstr ""
 
-#: scripts/main.gd:1451
+#: scripts/main.gd:1458
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
@@ -850,43 +850,43 @@ msgid ""
 "Menu: keep it  ·  B: put it back"
 msgstr ""
 
-#: scripts/play/spatial_audio.gd:63
+#: scripts/play/spatial_audio.gd:67
 msgid "Dummy head A"
 msgstr ""
 
-#: scripts/play/spatial_audio.gd:64
+#: scripts/play/spatial_audio.gd:68
 msgid "Dummy head B"
 msgstr ""
 
-#: scripts/play/spatial_audio.gd:65
+#: scripts/play/spatial_audio.gd:69
 msgid "Listener H3"
 msgstr ""
 
-#: scripts/play/spatial_audio.gd:66
+#: scripts/play/spatial_audio.gd:70
 msgid "Listener H4"
 msgstr ""
 
-#: scripts/play/spatial_audio.gd:67
+#: scripts/play/spatial_audio.gd:71
 msgid "Listener H5"
 msgstr ""
 
-#: scripts/play/spatial_audio.gd:68
+#: scripts/play/spatial_audio.gd:72
 msgid "Listener H6"
 msgstr ""
 
-#: scripts/play/spatial_audio.gd:74
+#: scripts/play/spatial_audio.gd:78
 msgid "Dummy head, MIT (normal ear)"
 msgstr ""
 
-#: scripts/play/spatial_audio.gd:78
+#: scripts/play/spatial_audio.gd:82
 msgid "HUTUBS listener 1"
 msgstr ""
 
-#: scripts/play/spatial_audio.gd:81
+#: scripts/play/spatial_audio.gd:85
 msgid "ARI listener NH2"
 msgstr ""
 
-#: scripts/play/spatial_audio.gd:85
+#: scripts/play/spatial_audio.gd:89
 msgid "CIPIC subject 003"
 msgstr ""
 
@@ -1096,75 +1096,75 @@ msgstr ""
 msgid "Voice is ready."
 msgstr ""
 
-#: scripts/xr/controller_look.gd:48
+#: scripts/xr/controller_look.gd:54
 msgid "Black"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:50
+#: scripts/xr/controller_look.gd:56
 msgid "White"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:52
+#: scripts/xr/controller_look.gd:58
 msgid "Graphite"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:54
+#: scripts/xr/controller_look.gd:60
 msgid "Red"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:55 environments/streamline_1937.env.json
+#: scripts/xr/controller_look.gd:61 environments/streamline_1937.env.json
 msgid "Blue"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:56
+#: scripts/xr/controller_look.gd:62
 msgid "Any colour"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:58
+#: scripts/xr/controller_look.gd:64
 msgid "Brushed steel"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:60
+#: scripts/xr/controller_look.gd:66
 msgid "Dark metal"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:62
+#: scripts/xr/controller_look.gd:68
 msgid "Brass"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:64
+#: scripts/xr/controller_look.gd:70
 msgid "Plasma"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:66
+#: scripts/xr/controller_look.gd:72
 msgid "Cold plasma"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:69
+#: scripts/xr/controller_look.gd:75
 msgid "Embers"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:71
+#: scripts/xr/controller_look.gd:77
 msgid "Circuit"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:73
+#: scripts/xr/controller_look.gd:79
 msgid "Neon"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:75
+#: scripts/xr/controller_look.gd:81
 msgid "Starfield"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:78
+#: scripts/xr/controller_look.gd:84
 msgid "Liquid chrome"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:80
+#: scripts/xr/controller_look.gd:86
 msgid "Iridescent"
 msgstr ""
 
-#: scripts/xr/controller_look.gd:82
+#: scripts/xr/controller_look.gd:88
 msgid "Carbon fibre"
 msgstr ""
 
@@ -1955,7 +1955,8 @@ msgid "Plays the film's separate bass channel (the .1 of 5.1) too."
 msgstr ""
 
 #: ui/help_texts.gd:76
-msgid "How much echo of the room you hear. More: the speakers seem farther."
+#, c-format
+msgid "The room's echoes and reverb. Off: dry sound, the film only. 100 %: the room as it is built; more: the speakers seem farther."
 msgstr ""
 
 #: ui/help_texts.gd:77
@@ -1978,7 +1979,7 @@ msgstr ""
 msgid "The sound plays on a PC, in time with the picture."
 msgstr ""
 
-#: ui/host_form.gd:56 ui/sound_tab.gd:334
+#: ui/host_form.gd:56 ui/sound_tab.gd:336
 msgid "Save"
 msgstr ""
 
@@ -2613,7 +2614,7 @@ msgstr ""
 msgid "Mode"
 msgstr ""
 
-#: ui/picture_tab.gd:169 ui/picture_tab.gd:31 ui/sound_tab.gd:131
+#: ui/picture_tab.gd:169 ui/picture_tab.gd:31 ui/sound_tab.gd:133
 msgid "Auto"
 msgstr ""
 
@@ -2973,8 +2974,8 @@ msgstr ""
 msgid "Polynomial"
 msgstr ""
 
-#: ui/picture_tab.gd:31 ui/room_tab.gd:22 ui/system_tab.gd:44 environments/flagship.env.json
-#: environments/ice_cinema.env.json
+#: ui/picture_tab.gd:31 ui/room_tab.gd:22 ui/sound_tab.gd:129 ui/system_tab.gd:44
+#: environments/flagship.env.json environments/ice_cinema.env.json
 msgid "Off"
 msgstr ""
 
@@ -3405,139 +3406,139 @@ msgstr ""
 msgid "Bass channel"
 msgstr ""
 
-#: ui/sound_tab.gd:127
-msgid "Room sound"
+#: ui/sound_tab.gd:128
+msgid "Room echo and reverb"
 msgstr ""
 
-#: ui/sound_tab.gd:130
+#: ui/sound_tab.gd:132
 msgid "Sound plays on"
 msgstr ""
 
-#: ui/sound_tab.gd:131
+#: ui/sound_tab.gd:133
 msgid "Headset speakers"
 msgstr ""
 
-#: ui/sound_tab.gd:131
+#: ui/sound_tab.gd:133
 msgid "Headphones"
 msgstr ""
 
-#: ui/sound_tab.gd:135
+#: ui/sound_tab.gd:137
 msgid "Head measurements (HRTF)"
 msgstr ""
 
-#: ui/sound_tab.gd:142
+#: ui/sound_tab.gd:144
 msgid "Fetching..."
 msgstr ""
 
-#: ui/sound_tab.gd:148
+#: ui/sound_tab.gd:150
 msgid "Tune spatial sound"
 msgstr ""
 
-#: ui/sound_tab.gd:157
+#: ui/sound_tab.gd:159
 msgid "Fetched; choose it above."
 msgstr ""
 
-#: ui/sound_tab.gd:157
+#: ui/sound_tab.gd:159
 #, c-format
 msgid "Could not fetch %s: %s"
 msgstr ""
 
-#: ui/sound_tab.gd:192
+#: ui/sound_tab.gd:194
 msgid "No audio tracks"
 msgstr ""
 
-#: ui/sound_tab.gd:202
+#: ui/sound_tab.gd:204
 #, c-format
 msgid "%d ch"
 msgstr ""
 
-#: ui/sound_tab.gd:206 ui/subtitles_tab.gd:160 ui/subtitles_tab.gd:338
+#: ui/sound_tab.gd:208 ui/subtitles_tab.gd:160 ui/subtitles_tab.gd:338
 #, c-format
 msgid "Track %d"
 msgstr ""
 
-#: ui/sound_tab.gd:256
+#: ui/sound_tab.gd:258
 msgid "Sound from speakers in the room, in front, behind and above you, outside your head; dialogue from the screen. It stays put when you turn your head."
 msgstr ""
 
-#: ui/sound_tab.gd:259
+#: ui/sound_tab.gd:261
 msgid "This player has no spatial sound (an older engine): the stereo mix plays."
 msgstr ""
 
-#: ui/sound_tab.gd:263
+#: ui/sound_tab.gd:265
 msgid "the 360 sound field"
 msgstr ""
 
-#: ui/sound_tab.gd:264
+#: ui/sound_tab.gd:266
 #, c-format
 msgid "From the room: %s. Headphones."
 msgstr ""
 
-#: ui/sound_tab.gd:265
+#: ui/sound_tab.gd:267
 #, c-format
 msgid "From the room: %s. The headset's speakers."
 msgstr ""
 
-#: ui/sound_tab.gd:267
+#: ui/sound_tab.gd:269
 msgid "At this speed the stereo mix plays."
 msgstr ""
 
-#: ui/sound_tab.gd:269
+#: ui/sound_tab.gd:271
 msgid "The stereo mix plays for now (PC sound on, or no file open)."
 msgstr ""
 
-#: ui/sound_tab.gd:272
+#: ui/sound_tab.gd:274
 #, c-format
 msgid "Tuned to your ears: head size %d %%."
 msgstr ""
 
-#: ui/sound_tab.gd:290
+#: ui/sound_tab.gd:292
 #, c-format
 msgid "Fetch: %s"
 msgstr ""
 
-#: ui/sound_tab.gd:298
+#: ui/sound_tab.gd:300
 #, c-format
 msgid "Licence: %s"
 msgstr ""
 
-#: ui/sound_tab.gd:310
+#: ui/sound_tab.gd:312
 #, c-format
 msgid "Download %s"
 msgstr ""
 
-#: ui/sound_tab.gd:316
+#: ui/sound_tab.gd:318
 msgid "Play on a PC"
 msgstr ""
 
-#: ui/sound_tab.gd:317
+#: ui/sound_tab.gd:319
 msgid "Play sound on a PC"
 msgstr ""
 
-#: ui/sound_tab.gd:369
+#: ui/sound_tab.gd:371
 #, c-format
 msgid "PC: %s"
 msgstr ""
 
-#: ui/sound_tab.gd:369
+#: ui/sound_tab.gd:371
 msgid "none set"
 msgstr ""
 
-#: ui/sound_tab.gd:371
+#: ui/sound_tab.gd:373
 msgid "The headset goes silent and holds its picture back to match the PC's speakers."
 msgstr ""
 
-#: ui/sound_tab.gd:375
+#: ui/sound_tab.gd:377
 #, c-format
 msgid "Playing on %s; the picture is held back %d ms."
 msgstr ""
 
-#: ui/sound_tab.gd:380
+#: ui/sound_tab.gd:382
 #, c-format
 msgid "Connecting to %s... (%s)"
 msgstr ""
 
-#: ui/sound_tab.gd:381
+#: ui/sound_tab.gd:383
 #, c-format
 msgid "Connecting to %s..."
 msgstr ""
@@ -3562,7 +3563,7 @@ msgstr ""
 msgid "original"
 msgstr ""
 
-#: ui/sound_tab.gd:334
+#: ui/sound_tab.gd:336
 msgid "The PC running tools/audio_sink.py: its address, or address:port"
 msgstr ""
 

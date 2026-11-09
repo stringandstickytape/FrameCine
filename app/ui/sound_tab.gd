@@ -124,7 +124,9 @@ func bind(p_app: Node) -> void:
 	box.add_child(W.hbox([_speakers, _lfe]))
 	_spatial_box = W.vbox()
 	box.add_child(_spatial_box)
-	_reverb = W.slider_row("Room sound", 0.0, 200.0, 5.0, func(v: float) -> String: return "%d %%" % roundi(v),
+	# 0: no room at all (no reflections, no reverb), shown as Off; 100 %: the room as built.
+	_reverb = W.slider_row("Room echo and reverb", 0.0, 200.0, 5.0,
+			func(v: float) -> String: return tr("Off") if roundi(v) == 0 else "%d %%" % roundi(v),
 			func(v: float) -> void: speakers.set_reverb(v / 100.0))
 	_spatial_box.add_child(_reverb)
 	_spatial_box.add_child(W.label("Sound plays on", &"MutedLabel"))
