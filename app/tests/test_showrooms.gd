@@ -258,8 +258,19 @@ func _test_room_tab() -> void:
 			func(r: Dictionary) -> String: return str(r["name"])))
 	_check("no showroom among the rooms' own rows", (tab._envs.get_children() as Array).all(func(b: Button) -> bool:
 			return not str(b.text) in rooms.map(func(r: Dictionary) -> String: return str(r["name"]))))
-	_check("the rooms' rows come first", tab._cinemas.get_child_count() + tab._tvs.get_child_count()
-			+ tab._envs.get_child_count() + tab._yours.get_child_count() + rows.size() == tab._env_ids.size())
+	var in_categories := 0
+	for holder: Node in tab._category_rows.values():
+		in_categories += holder.get_child_count()
+	_check("the rooms' rows come first", in_categories + tab._envs.get_child_count() + tab._yours.get_child_count()
+			+ rows.size() == tab._env_ids.size())
+	# One table of categories (EnvDoc.ROOM_GROUPS): a group for each, in its order, and the library reads the same.
+	_check("a group for every category, in the table's order %s" % [tab._category_boxes.keys()],
+			tab._category_boxes.keys() == EnvDoc.ROOM_GROUPS.keys() and EnvDoc.ROOM_GROUPS.keys().all(
+			func(c: String) -> bool: return tab._groups.has(EnvDoc.ROOM_GROUPS[c])))
+	_check("a category with no room shows no heading", EnvDoc.ROOM_GROUPS.keys().all(func(c: String) -> bool:
+			return (tab._category_boxes[c] as Control).visible == ((tab._category_rows[c] as Node).get_child_count() > 0)))
+	_check("a document may name every category of the table, and no other", EnvDoc.ROOM_GROUPS.keys().all(
+			func(c: String) -> bool: return EnvDoc.validate({"schema": 4, "name": "x", "room": {"category": c}})["ok"]))
 	# The cinemas and the television rooms (a document's room.category) in their own groups.
 	var cinema_rows: Array = (tab._cinemas.get_children() as Array).map(func(b: Button) -> String: return b.text)
 	_check("the cinema under Cinemas (%s)" % [cinema_rows], tab._cinema_box.visible and EnvLibrary.category_of("cinema")

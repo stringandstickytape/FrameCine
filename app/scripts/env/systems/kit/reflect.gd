@@ -11,6 +11,7 @@ extends RefCounted
 ##   update(materials, sky, room, screen_local, screen_size, glint_local, glint_colour, glint_size, screen_level)
 
 const SHADER := preload("res://shaders/room_material_house_reflect.gdshader")
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
 static var _flat := {}
 
@@ -21,16 +22,24 @@ static func flat_maps(roughness: float, metal: float) -> Dictionary:
 	var key := "%.2f %.2f" % [roughness, metal]
 	if _flat.has(key):
 		return _flat[key]
+	# Drawn from the values as the key has them (to 0.01), so the key is all the maps depend on: two materials a
+	# hair apart get one set of maps, the same in every run, whichever asked first.
+	var drawn := ProcCache.images("reflect.gd:_flat:" + key,
+			func() -> Array: return _draw_flat_maps(snappedf(roughness, 0.01), snappedf(metal, 0.01)))
+	var out := {"albedo": ImageTexture.create_from_image(drawn[0]), "normal": ImageTexture.create_from_image(drawn[1]),
+			"orm": ImageTexture.create_from_image(drawn[2])}
+	_flat[key] = out
+	return out
+
+
+static func _draw_flat_maps(roughness: float, metal: float) -> Array:
 	var albedo := Image.create_empty(4, 4, false, Image.FORMAT_RGB8)
 	albedo.fill(Color(1.0, 1.0, 1.0))
 	var normal := Image.create_empty(4, 4, false, Image.FORMAT_RGBA8)
 	normal.fill(Color(0.5, 0.5, 0.5, 0.5))
 	var orm := Image.create_empty(4, 4, false, Image.FORMAT_RGB8)
 	orm.fill(Color(1.0, roughness, metal))
-	var out := {"albedo": ImageTexture.create_from_image(albedo), "normal": ImageTexture.create_from_image(normal),
-			"orm": ImageTexture.create_from_image(orm)}
-	_flat[key] = out
-	return out
+	return [albedo, normal, orm]
 
 
 ## The material on the reflecting shader. metal 0: a clear coat over paint (Fresnel); 1: chrome. amount: how much it

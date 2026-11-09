@@ -22,6 +22,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#. PC windows (scripts/pc/, ui/pc_windows_row.gd, ui/pc_place.gd).
+msgid "PC window"
+msgstr "电脑窗口"
+
 msgid "TALK"
 msgstr "说话"
 
@@ -67,6 +71,9 @@ msgstr "章节 +"
 msgid "REPLAY"
 msgstr "重播"
 
+msgid "ENTER"
+msgstr "回车"
+
 msgid "R-CLICK"
 msgstr "右键"
 
@@ -79,17 +86,135 @@ msgstr "空格"
 msgid "BACK"
 msgstr "返回"
 
-msgid "ENTER"
-msgstr "回车"
-
 msgid "HOLD: SCROLL"
 msgstr "按住：滚动"
+
+msgid "POINTER"
+msgstr "光标"
+
+msgid "KEEP PICTURE"
+msgstr "保存图片"
+
+msgid "APPLY"
+msgstr "应用"
+
+msgid "SIZE / TURN"
+msgstr "大小 / 旋转"
+
+msgid "CANCEL"
+msgstr "取消"
 
 msgid "ARROWS"
 msgstr "方向键"
 
 msgid "ESC"
 msgstr "ESC"
+
+msgid "GRAB"
+msgstr "抓取"
+
+msgid "LET GO: THROW"
+msgstr "松开：扔出"
+
+msgid "NEAR-FAR / TURN"
+msgstr "远近 / 转动"
+
+# --- stage 2, set B ---
+msgid "Fisheye %d°"
+msgstr "鱼眼 %d°"
+
+msgid "%s (half)"
+msgstr "%s（半幅）"
+
+msgid "%s, eyes swapped"
+msgstr "%s，左右眼互换"
+
+msgid "Flat"
+msgstr "平面"
+
+msgid "Fisheye"
+msgstr "鱼眼"
+
+msgid "Dual fisheye 360°"
+msgstr "双鱼眼 360°"
+
+msgid "%s, mono"
+msgstr "%s，单画面"
+
+msgid "%s, side by side"
+msgstr "%s，左右并排"
+
+msgid "%s, top / bottom"
+msgstr "%s，上下排列"
+
+msgid "%s is on the big screen"
+msgstr "%s 正在大屏幕上"
+
+msgid "Last try: %s"
+msgstr "上次尝试：%s"
+
+msgid "Getting ready"
+msgstr "正在准备"
+
+msgid "Clearing what was left from last time"
+msgstr "正在清理上次留下的内容"
+
+msgid "Starting the display"
+msgstr "正在启动显示"
+
+msgid "Starting Android"
+msgstr "正在启动安卓"
+
+msgid "Opening the app"
+msgstr "正在打开应用"
+
+msgid "Ready"
+msgstr "就绪"
+
+msgid "Lepton isn't on this headset."
+msgstr "这台头显上没有 Lepton。"
+
+msgid "Install the Lepton tool from Steam, then come back here."
+msgstr "请从 Steam 安装 Lepton 工具，然后回到这里。"
+
+msgid "The compositor isn't on this headset (%s)."
+msgstr "这台头显上没有合成器（%s）。"
+
+msgid "No Android apps yet."
+msgstr "还没有安卓应用。"
+
+msgid "Put an APK in a folder of its own: ~/%s/<name>/app.apk"
+msgstr "把 APK 放进单独的文件夹：~/%s/<名称>/app.apk"
+
+msgid "The folder's name is the name shown here."
+msgstr "文件夹的名称就是这里显示的名称。"
+
+msgid "From assistant"
+msgstr "来自助手"
+
+# --- stage 2, set C ---
+# The Room, Objects and Mixed reality tabs, the built-in rooms, showrooms and objects, the sleep timer's line and the
+# assistant service's status line.
+msgid "%s asks to pair. Tell it this code:"
+msgstr "%s 请求配对。把这个代码告诉它："
+
+msgid "Give an assistant this address: %s (%d min left)."
+msgstr "把这个地址给助手：%s（剩余 %d 分钟）。"
+
+msgid "No assistant yet. Press \"Let an assistant find me\" and give it the address."
+msgstr "还没有助手。按“让助手找到我”，再把地址给它。"
+
+msgid "An assistant is connected."
+msgstr "已连接一个助手。"
+
+msgid "Listening for paired assistants at %s."
+msgstr "正在 %s 等待已配对的助手。"
+
+msgid "Can't make the HTTPS certificate: %s."
+msgstr "无法生成 HTTPS 证书：%s。"
+
+msgid "Can't listen on port %d: %s."
+msgstr "无法监听端口 %d：%s。"
 
 msgid "Let the assistant control playback"
 msgstr "允许助手控制播放"
@@ -106,6 +231,201 @@ msgstr "允许助手管理文件"
 msgid "Let the assistant run apps"
 msgstr "允许助手运行应用"
 
+msgid "Adding %s: a moment."
+msgstr "正在添加 %s，请稍候。"
+
+msgid "%s is in your objects."
+msgstr "%s 已在你的物品中。"
+
+msgid "%s is in your materials."
+msgstr "%s 已加入你的材质。"
+
+msgid "Box"
+msgstr "立方体"
+
+msgid "Sphere"
+msgstr "球体"
+
+msgid "Cylinder"
+msgstr "圆柱体"
+
+msgid "Plane"
+msgstr "平面"
+
+msgid "Text"
+msgstr "文字"
+
+msgid "Particles"
+msgstr "粒子"
+
+msgid "Picture frame"
+msgstr "相框"
+
+msgid "Poster"
+msgstr "海报"
+
+msgid "Canvas"
+msgstr "画布"
+
+msgid "Cut-out"
+msgstr "立牌"
+
+msgid "Wall shelf"
+msgstr "壁架"
+
+msgid "Pot plant"
+msgstr "盆栽"
+
+msgid "Wall clock"
+msgstr "挂钟"
+
+msgid "Large format"
+msgstr "巨幕"
+
+msgid "Living room"
+msgstr "客厅"
+
+msgid "In bed"
+msgstr "床上"
+
+msgid "sleep at end of file"
+msgstr "文件结束时睡眠"
+
+msgid "sleep in %d min"
+msgstr "%d 分钟后睡眠"
+
+msgid "The sound and the room fade out over a minute, the film pauses with its place kept, then the app closes."
+msgstr "声音和房间在一分钟内渐弱，影片暂停并记住位置，然后应用关闭。"
+
+msgid "The sound and the room fade out over a minute, the film pauses with its place kept, then the headset turns itself off."
+msgstr "声音和房间在一分钟内渐弱，影片暂停并记住位置，然后头显自动关机。"
+
+msgid "The sound and the room fade out over a minute, then the film pauses with its place kept; the room stays dim until you play again."
+msgstr "声音和房间在一分钟内渐弱，然后影片暂停并记住位置；房间保持昏暗，直到你再次播放。"
+
+msgid "Dim during the film"
+msgstr "放映时调暗"
+
+msgid "The room's light goes down while the film plays."
+msgstr "影片播放时，房间的灯光变暗。"
+
+msgid "Ambience"
+msgstr "环境声"
+
+msgid "This room's sound against the Environment sound slider. At the bottom: off."
+msgstr "本房间的声音，相对于“环境声音”滑块。拉到最低：关闭。"
+
+msgid "Ambient life"
+msgstr "环境中的生物"
+
+msgid "Animals and other life in the room."
+msgstr "房间里的动物和其他生物。"
+
+msgid "Pre-show"
+msgstr "开场仪式"
+
+msgid "Curtains before the film, and the room's start of the show."
+msgstr "影片开始前的幕布，以及本房间的开场仪式。"
+
+msgid "Flickering lights"
+msgstr "闪烁的灯光"
+
+msgid "Off: lights that flicker stay steady."
+msgstr "关闭：闪烁的灯光保持稳定。"
+
+msgid "Motion"
+msgstr "动态"
+
+msgid "How much things in the room move: sways, tilts, weave."
+msgstr "房间里物体的运动幅度：摇摆、倾斜、抖动。"
+
+#. The Room tab: the group of cinema rooms.
+msgid "Cinemas"
+msgstr "影院"
+
+#. The Room tab: the group of television rooms (the history of television).
+msgid "Television"
+msgstr "电视"
+
+msgid "Journeys"
+msgstr "旅程"
+
+msgid "A small dark room with nothing in it to look at but the film."
+msgstr "一间昏暗的小房间，除了影片别无可看。"
+
+msgid "Your own room through the headset's cameras, with the film in front of you."
+msgstr "通过头显摄像头看到你自己的房间，影片就在你面前。"
+
+msgid "A small home theatre: a sofa in a dark room, the screen above a low cabinet, tower speakers either side."
+msgstr "小型家庭影院：昏暗房间里的沙发，矮柜上方的银幕，两侧是落地音箱。"
+
+msgid "A drive-in at night, seen from a car in the middle of the lot: other cars, speaker posts and stars."
+msgstr "夜晚的汽车影院，从停车场中间的一辆车里观看：周围的车、扬声器柱和星星。"
+
+msgid "A planetarium: reclined seats under a dark dome full of stars, a skyline round its foot."
+msgstr "天文馆：深色圆顶下的躺椅，满天星斗，圆顶脚下一圈城市剪影。"
+
+msgid "An open geodesic dome on a wide plain at dusk, the first stars coming out overhead."
+msgstr "黄昏时宽阔平原上一座敞开的网格球顶，头顶第一批星星正在出现。"
+
+msgid "off"
+msgstr "关"
+
+msgid "%+d dB"
+msgstr "%+d dB"
+
+msgid "%.1f s"
+msgstr "%.1f 秒"
+
+msgid "%d min"
+msgstr "%d 分钟"
+
+msgid "Library"
+msgstr "片库"
+
+msgid "On the PC, run the PC windows app and type this code (%d min left)."
+msgstr "在电脑上运行电脑窗口程序，并输入此代码（还剩 %d 分钟）。"
+
+msgid "No PC yet. Press Add a PC, then run the PC windows app on the PC."
+msgstr "还没有电脑。按“添加电脑”，然后在电脑上运行电脑窗口程序。"
+
+msgid "Waiting for a paired PC on this network."
+msgstr "正在等待此网络上已配对的电脑。"
+
+msgid "%d PC connected."
+msgid_plural "%d PCs connected."
+msgstr[0] "已连接 %d 台电脑。"
+
+msgid "Can't make the certificate: %s."
+msgstr "无法生成证书：%s。"
+
+msgid "Close"
+msgstr "关闭"
+
+msgid "Back to a pane"
+msgstr "回到窗格"
+
+msgid "Show on the big screen"
+msgstr "在大屏幕上显示"
+
+msgid "No picture under the pointer"
+msgstr "指针下没有图片"
+
+msgid "That picture could not be kept"
+msgstr "无法保存这张图片"
+
+msgid "Picture kept: %s"
+msgstr "已保存图片：%s"
+
+msgid "Already in your pictures: %s"
+msgstr "已在你的图片中：%s"
+
+msgid "Picture"
+msgstr "画面"
+
+msgid "Cropped to %.2f:1"
+msgstr "已裁切为 %.2f:1"
+
 msgid "Not available for this file"
 msgstr "此文件不可用"
 
@@ -114,6 +434,39 @@ msgstr "正在查找黑边"
 
 msgid "No bars"
 msgstr "没有黑边"
+
+msgid "Container says %s; not supported yet"
+msgstr "容器标注为 %s；暂不支持"
+
+msgid "Container says %s 3D; not supported"
+msgstr "容器标注为 %s 3D；不支持"
+
+msgid "container: %s"
+msgstr "容器：%s"
+
+msgid "fisheye"
+msgstr "鱼眼"
+
+msgid "side by side"
+msgstr "左右并排"
+
+msgid "top / bottom"
+msgstr "上下排列"
+
+msgid "mono"
+msgstr "单画面"
+
+msgid "right eye first"
+msgstr "右眼在前"
+
+msgid "360 camera video"
+msgstr "360 相机视频"
+
+msgid "360 camera photo"
+msgstr "360 相机照片"
+
+msgid "Other camera"
+msgstr "其他相机"
 
 msgid "ends %s"
 msgstr "%s 结束"
@@ -163,6 +516,9 @@ msgstr "此引擎没有 OpenXR 图层。"
 msgid "Only in the headset: here the film is drawn in the room."
 msgstr "仅在头显中可用：这里影片在房间中绘制。"
 
+msgid "On; this room draws the film itself, for the look of its screen."
+msgstr "开；此房间自己绘制影片，以呈现它的屏幕效果。"
+
 msgid "180, 360 and fisheye films are drawn in the room."
 msgstr "180°、360° 和鱼眼影片在房间中绘制。"
 
@@ -175,11 +531,11 @@ msgstr "此头显没有曲面图层：曲面屏幕在房间中绘制。"
 msgid "On; nothing to show."
 msgstr "开；没有可显示的内容。"
 
-msgid "On; the room draws the film while the menu is open, so the menu shows in front."
-msgstr "开；菜单打开时由房间绘制影片，菜单因此显示在前面。"
-
 msgid "On; the room draws the film while something is in front of the screen, so it shows."
 msgstr "已开启；屏幕前有东西时由房间绘制影片，它才能显示在前面。"
+
+msgid "On; the room draws the film while the menu is open, so the menu shows in front."
+msgstr "开；菜单打开时由房间绘制影片，菜单因此显示在前面。"
 
 msgid "In use: two cylinder layers, one per eye, %d x %d px each."
 msgstr "使用中：两个圆柱图层，每只眼睛一个，各 %d x %d 像素。"
@@ -192,6 +548,30 @@ msgstr "使用中：一个圆柱图层，%d x %d 像素。"
 
 msgid "In use: one quad layer, %d x %d px."
 msgstr "使用中：一个平面图层，%d x %d 像素。"
+
+msgid "loop %s-%s"
+msgstr "循环 %s-%s"
+
+msgid "%s, peak %d nits (%s)"
+msgstr "%s，峰值 %d 尼特（%s）"
+
+msgid "%s, BT.2390"
+msgstr "%s，BT.2390"
+
+msgid "%s, tone mapping off"
+msgstr "%s，色调映射已关闭"
+
+msgid "default"
+msgstr "默认"
+
+msgid "content light level"
+msgstr "内容亮度级别"
+
+msgid "mastering display"
+msgstr "母版显示器"
+
+msgid "DV profile 5 (IPT, as PQ)"
+msgstr "DV 配置文件 5（IPT，按 PQ）"
 
 msgid "on (P010 from the system's video driver)"
 msgstr "开（P010，来自系统的视频驱动）"
@@ -290,6 +670,184 @@ msgid ""
 msgstr ""
 "%s\n"
 "菜单：保留  ·  B：恢复原样"
+
+msgid "Dummy head A"
+msgstr "假人头 A"
+
+msgid "Dummy head B"
+msgstr "假人头 B"
+
+msgid "Listener H3"
+msgstr "听者 H3"
+
+msgid "Listener H4"
+msgstr "听者 H4"
+
+msgid "Listener H5"
+msgstr "听者 H5"
+
+msgid "Listener H6"
+msgstr "听者 H6"
+
+msgid "Dummy head, MIT (normal ear)"
+msgstr "假人头，MIT（标准耳）"
+
+msgid "HUTUBS listener 1"
+msgstr "HUTUBS 听者 1"
+
+msgid "ARI listener NH2"
+msgstr "ARI 听者 NH2"
+
+msgid "CIPIC subject 003"
+msgstr "CIPIC 受试者 003"
+
+msgid "This copy does not run from an install: no updates."
+msgstr "此副本不是从安装目录运行的：不会更新。"
+
+msgid "Version %s"
+msgstr "版本 %s"
+
+msgid "Downloading version %s: %d %%"
+msgstr "正在下载版本 %s：%d %%"
+
+msgid "Preparing version %s..."
+msgstr "正在准备版本 %s……"
+
+msgid "Version %s is ready. It goes in at the next start."
+msgstr "版本 %s 已就绪，下次启动时生效。"
+
+msgid "Updated to version %s"
+msgstr "已更新到版本 %s"
+
+msgid "Restart now to update to %s?"
+msgstr "立即重启以更新到 %s？"
+
+msgid "Quit now to update to %s? Then start the player again."
+msgstr "现在退出以更新到 %s？然后再次启动播放器。"
+
+msgid "Restart"
+msgstr "重启"
+
+msgid "Quit"
+msgstr "退出"
+
+msgid "Later"
+msgstr "稍后"
+
+msgid "That is a password field. Voice never types into one."
+msgstr "这是密码框。语音从不输入到密码框。"
+
+msgid "No microphone, so nothing was typed."
+msgstr "没有麦克风，所以没有输入任何内容。"
+
+msgid "Select a text field on the page first, then hold the talk button."
+msgstr "请先选中网页上的文本框，再按住说话键。"
+
+msgid "The page changed, so nothing was typed."
+msgstr "网页已更换，所以没有输入任何内容。"
+
+msgid "The browser window closed, so nothing was typed."
+msgstr "浏览器窗口已关闭，所以没有输入任何内容。"
+
+msgid "Speech to text isn't working on the headset, so nothing was typed."
+msgstr "头显上的语音转文字不可用，所以没有输入任何内容。"
+
+msgid "Didn't catch that. Try again."
+msgstr "没听清，请再说一次。"
+
+msgid "The page didn't answer, so nothing was typed."
+msgstr "网页没有响应，所以没有输入任何内容。"
+
+msgid "The text field lost focus, so nothing was typed."
+msgstr "文本框已失去焦点，所以没有输入任何内容。"
+
+msgid "Per-eye alignment"
+msgstr "每眼对齐"
+
+msgid "Convergence and IPD"
+msgstr "会聚与瞳距"
+
+msgid "Judder 24 fps"
+msgstr "抖动 24 fps"
+
+msgid "Judder 30 fps"
+msgstr "抖动 30 fps"
+
+msgid "Judder 60 fps"
+msgstr "抖动 60 fps"
+
+msgid "A/V sync"
+msgstr "音画同步"
+
+msgid "Zone plate, flat 4K"
+msgstr "波带片，平面 4K"
+
+msgid "Zone plate, 360° 8K"
+msgstr "波带片，360° 8K"
+
+msgid "Starfield, 360° 8K"
+msgstr "星空，360° 8K"
+
+msgid "Dark gradient, flat 4K"
+msgstr "暗部渐变，平面 4K"
+
+msgid "Flat 2D"
+msgstr "平面 2D"
+
+msgid "Flat 3D, side by side (full)"
+msgstr "平面 3D，左右（全宽）"
+
+msgid "Flat 3D, side by side (half)"
+msgstr "平面 3D，左右（半宽）"
+
+msgid "Flat 3D, top/bottom (full)"
+msgstr "平面 3D，上下（全高）"
+
+msgid "Flat 3D, top/bottom (half)"
+msgstr "平面 3D，上下（半高）"
+
+msgid "180° mono"
+msgstr "180° 单目"
+
+msgid "180° 3D, side by side"
+msgstr "180° 3D，左右"
+
+msgid "360° mono"
+msgstr "360° 单目"
+
+msgid "360° 3D, top/bottom"
+msgstr "360° 3D，上下"
+
+msgid "Fisheye 180° mono"
+msgstr "鱼眼 180° 单目"
+
+msgid "Fisheye 180° 3D, side by side"
+msgstr "鱼眼 180° 3D，左右"
+
+msgid "Fisheye 200° 3D, side by side"
+msgstr "鱼眼 200° 3D，左右"
+
+msgid "Dual fisheye 360° (front and back lens)"
+msgstr "双鱼眼 360°（前后镜头）"
+
+#. The one-time speech model download (scripts/voice/whisper_backend.gd).
+msgid "Voice needs a one-time download of about %d MB. Downloaded: %d %%. The rest of the player works as usual."
+msgstr "语音功能需要一次性下载约 %d MB。已下载：%d %%。播放器的其他功能照常可用。"
+
+msgid "Speech model download: %d %%"
+msgstr "语音模型下载：%d %%"
+
+msgid "Voice needs the network once, for a download of about %d MB. The rest of the player works as usual."
+msgstr "语音功能需要联网一次，下载约 %d MB。播放器的其他功能照常可用。"
+
+msgid "The speech model did not download. Voice tries again when you use it next."
+msgstr "语音模型没有下载成功。下次使用语音时会再试一次。"
+
+msgid "Voice is starting."
+msgstr "语音功能正在启动。"
+
+msgid "Voice is ready."
+msgstr "语音功能已可用。"
 
 msgid "Black"
 msgstr "黑色"
@@ -402,6 +960,109 @@ msgstr "复制和下载到片库、位置和已保存的主机。它永远看不
 msgid "Starts, stops, shows and hides Android apps and the agents on this headset."
 msgstr "启动、停止、显示和隐藏此头显上的安卓应用和代理。"
 
+# --- Fab in the app (ui/fab_panel.gd) ---
+msgid "Fab"
+msgstr "Fab"
+
+msgid "Search and import Quixel Megascans' free 3D objects from Fab here. Fab's licence (its EULA) covers what you download: you may use the objects; you may not pass the files on. Read it, then accept it to start."
+msgstr "在这里从 Fab 搜索并导入 Quixel Megascans 的免费 3D 物品。你下载的内容受 Fab 的许可（其 EULA）约束：你可以使用这些物品，但不可以转交文件。请先阅读，然后接受即可开始。"
+
+msgid "Read Fab's licence"
+msgstr "阅读 Fab 的许可"
+
+msgid "Accept"
+msgstr "接受"
+
+msgid "Search Fab"
+msgstr "搜索 Fab"
+
+msgid "More"
+msgstr "更多"
+
+msgid "Import"
+msgstr "导入"
+
+msgid "Clear Fab's cache"
+msgstr "清除 Fab 缓存"
+
+msgid "Withdraw"
+msgstr "撤回"
+
+msgid "Results for “%s”"
+msgstr "“%s”的结果"
+
+msgid "Search for an object by its name, in English."
+msgstr "用英文按名称搜索物品。"
+
+msgid "Searching Fab..."
+msgstr "正在搜索 Fab..."
+
+msgid "Nothing found. Try other words, in English."
+msgstr "什么也没找到。请换些英文词再试。"
+
+msgid "It is in your objects already."
+msgstr "它已在你的物品中。"
+
+msgid "Pick one, then Import."
+msgstr "选择一个，然后导入。"
+
+msgid "You accepted Fab's licence on %s."
+msgstr "你已于 %s 接受 Fab 的许可。"
+
+msgid "Asking Fab for %s..."
+msgstr "正在向 Fab 请求 %s..."
+
+msgid "Downloading %s: %.1f of %.1f MB"
+msgstr "正在下载 %s：%.1f / %.1f MB"
+
+msgid "Downloading %s: %.1f MB"
+msgstr "正在下载 %s：%.1f MB"
+
+msgid "Cancelled."
+msgstr "已取消。"
+
+msgid "Fab is busy: the app waits %d s before it asks again."
+msgstr "Fab 正忙：应用会等待 %d 秒后再请求。"
+
+msgid "Fab can't be reached. Is the headset online?"
+msgstr "无法连接 Fab。头显联网了吗？"
+
+msgid "Fab answered with an error (HTTP %d). Try again later."
+msgstr "Fab 返回了错误（HTTP %d）。请稍后再试。"
+
+msgid "Fab's answer was not as expected. Try again later."
+msgstr "Fab 的回复与预期不符。请稍后再试。"
+
+msgid "This object has no download the app can use."
+msgstr "这个物品没有应用能用的下载文件。"
+
+msgid "This object's download is too big for the headset."
+msgstr "这个物品的下载文件对头显来说太大。"
+
+msgid "A download is under way."
+msgstr "正在下载中。"
+
+msgid "The import failed: %s"
+msgstr "导入失败：%s"
+
+msgid "Fab's licence accepted. Search Fab to find objects."
+msgstr "已接受 Fab 的许可。搜索 Fab 来查找物品。"
+
+msgid "Fab's licence withdrawn: the app asks Fab nothing until you accept it again."
+msgstr "已撤回 Fab 的许可：在你再次接受之前，应用不会向 Fab 请求任何内容。"
+
+msgid "Fab's cache is cleared."
+msgstr "Fab 缓存已清除。"
+
+msgid "Search Fab's free Megascans"
+msgstr "搜索 Fab 的免费 Megascans"
+
+msgid "Search"
+msgstr "搜索"
+
+msgid "words in English, such as rock or chair"
+msgstr "英文词，例如 rock 或 chair"
+
 msgid "Add host"
 msgstr "添加主机"
 
@@ -439,6 +1100,216 @@ msgstr[0] "%d 个文件夹"
 msgid "%d item"
 msgid_plural "%d items"
 msgstr[0] "%d 个项目"
+
+msgid "PC windows"
+msgstr "电脑窗口"
+
+msgid "Test patterns (generated, no decoder)"
+msgstr "测试图案（程序生成，不用解码器）"
+
+msgid "Network: pick a host to edit"
+msgstr "网络：选择要编辑的主机"
+
+msgid "Network (SMB)"
+msgstr "网络（SMB）"
+
+msgid "Edit: %s"
+msgstr "编辑：%s"
+
+msgid "+ Add host..."
+msgstr "+ 添加主机……"
+
+msgid "Looking for hosts on this network..."
+msgstr "正在此网络上查找主机……"
+
+msgid "Find hosts on this network"
+msgstr "在此网络上查找主机"
+
+msgid "Found: %s   (%s)"
+msgstr "已找到：%s   (%s)"
+
+msgid "(simulated: this engine build has no MediaBrowser yet)"
+msgstr "（模拟：此引擎版本还没有 MediaBrowser）"
+
+msgid "Browser: pick a page to edit"
+msgstr "浏览器：选择要编辑的网页"
+
+msgid "Browser (web pages and desktop windows)"
+msgstr "浏览器（网页和桌面窗口）"
+
+msgid "Stop showing: %s"
+msgstr "停止显示：%s"
+
+msgid "+ Open a web page or a stream..."
+msgstr "+ 打开网页或流……"
+
+msgid "Desktop windows"
+msgstr "桌面窗口"
+
+msgid "(no windows)"
+msgstr "（没有窗口）"
+
+msgid "(untitled)"
+msgstr "（无标题）"
+
+msgid "%s   (loading...)"
+msgstr "%s   （正在加载……）"
+
+msgid "Looking for media servers on this network..."
+msgstr "正在此网络上查找媒体服务器……"
+
+msgid "Loading..."
+msgstr "正在加载……"
+
+msgid "Media servers"
+msgstr "媒体服务器"
+
+msgid "%s   (simulated)"
+msgstr "%s   （模拟）"
+
+msgid "Look again for media servers"
+msgstr "重新查找媒体服务器"
+
+msgid "(no folders, videos or pictures here)"
+msgstr "（这里没有文件夹、视频或图片）"
+
+msgid "No such agent"
+msgstr "没有这个代理"
+
+msgid "Running in its terminal"
+msgstr "正在其终端中运行"
+
+msgid "Not running"
+msgstr "未运行"
+
+msgid "Not installed"
+msgstr "未安装"
+
+msgid "Install"
+msgstr "安装"
+
+msgid "Show on the controller"
+msgstr "在手柄上显示"
+
+msgid "Restart, briefed on the player"
+msgstr "重新启动，附带播放器说明"
+
+msgid "Restart plain, no briefing"
+msgstr "直接重新启动，不附说明"
+
+msgid "Start, briefed on the player"
+msgstr "启动，附带播放器说明"
+
+msgid "Start plain, no briefing"
+msgstr "直接启动，不附说明"
+
+msgid "Hide from the controller (it keeps working)"
+msgstr "从手柄上隐藏（它会继续工作）"
+
+msgid "Put it on the big screen"
+msgstr "放到大屏幕上"
+
+msgid "Android apps"
+msgstr "安卓应用"
+
+msgid "Stop %s"
+msgstr "停止 %s"
+
+msgid "%s: its APK's file name has spaces, so it can't run yet"
+msgstr "%s：它的 APK 文件名有空格，所以还不能运行"
+
+msgid "PICTURE %s"
+msgstr "图片 %s"
+
+msgid "PICTURE"
+msgstr "图片"
+
+msgid "MUSIC"
+msgstr "音乐"
+
+msgid "FISHEYE"
+msgstr "鱼眼"
+
+msgid "DUAL 360"
+msgstr "双鱼眼 360"
+
+msgid "SBS"
+msgstr "左右"
+
+msgid "TB"
+msgstr "上下"
+
+msgid "Queue: pick a file to remove"
+msgstr "队列：选择要移除的文件"
+
+msgid "Queue"
+msgstr "队列"
+
+msgid "(nothing queued: open a file from a folder)"
+msgstr "（队列为空：从文件夹中打开一个文件）"
+
+msgid "Playing: %s"
+msgstr "正在播放：%s"
+
+msgid "Remove: %s"
+msgstr "移除：%s"
+
+msgid "Favourites: pick one to remove"
+msgstr "收藏：选择要移除的一项"
+
+msgid "Favourites"
+msgstr "收藏"
+
+msgid "+ Add the playing file"
+msgstr "+ 添加正在播放的文件"
+
+msgid "(no favourites yet: open a folder and press Favourite)"
+msgstr "（还没有收藏：打开一个文件夹并按“收藏”）"
+
+msgid "Search: %s"
+msgstr "搜索：%s"
+
+msgid "type a name..."
+msgstr "输入名称……"
+
+msgid "(nothing found yet)"
+msgstr "（还没有找到）"
+
+msgid "Repeat: one"
+msgstr "重复：单个"
+
+msgid "Repeat: all"
+msgstr "重复：全部"
+
+msgid "Test patterns"
+msgstr "测试图案"
+
+msgid "Network"
+msgstr "网络"
+
+msgid "Browser"
+msgstr "浏览器"
+
+msgid "Home"
+msgstr "主文件夹"
+
+msgid "Device home"
+msgstr "设备主文件夹"
+
+msgid "Videos"
+msgstr "视频"
+
+msgid "Downloads"
+msgstr "下载"
+
+msgid "Edit pages"
+msgstr "编辑网页"
+
+msgid "Edit queue"
+msgstr "编辑队列"
+
+msgid "Edit favourites"
+msgstr "编辑收藏"
 
 msgid "%s: %s"
 msgstr "%s：%s"
@@ -635,11 +1506,140 @@ msgstr "添加网络主机（SMB）"
 msgid "Edit network host"
 msgstr "编辑网络主机"
 
+# --- stage 2, set A ---
+# The Source tab (ui/files_tab.gd), the Library (ui/library_view.gd), the host and search forms, the test patterns and
+# the calibration cards, the Android apps place.
+msgid "Server"
+msgstr "服务器"
+
+msgid "Share"
+msgstr "共享"
+
+msgid "User"
+msgstr "用户"
+
+msgid "Password"
+msgstr "密码"
+
+msgid "Domain"
+msgstr "域"
+
+msgid "nas.local or 192.168.1.10"
+msgstr "nas.local 或 192.168.1.10"
+
+msgid "optional"
+msgstr "可选"
+
 msgid "Details"
 msgstr "详情"
 
 msgid "Hardware 10-bit video: %s"
 msgstr "硬件 10 位视频：%s"
+
+msgid "Step %d of %d"
+msgstr "第 %d 步，共 %d 步"
+
+msgid "Calibrate your eyes"
+msgstr "校准你的眼睛"
+
+msgid "The headset sees where you look. Look at a window or at the agent's terminal, and the controller's keys go to it."
+msgstr "头显能看到你在看哪里。看着一个窗口或代理的终端，手柄的按键就会交给它。"
+
+msgid "A short calibration makes this exact. Look at each dot and pull the trigger. It takes about a minute."
+msgstr "简短的校准能让它更准确。看着每个点，然后扣动扳机。大约需要一分钟。"
+
+msgid "Calibrate"
+msgstr "校准"
+
+msgid "Skip"
+msgstr "跳过"
+
+msgid "The controls"
+msgstr "操作方法"
+
+msgid "Hold the right bumper and speak instead of typing. It types into a text field in the browser, a PC window or the agent's terminal, or talks to a connected assistant. Its label says TALK when it can."
+msgstr "按住右侧肩键说话，代替打字。它会输入到浏览器的文本框、电脑窗口或代理的终端，或者与已连接的助手对话。可以说话时，它的标签显示“说话”。"
+
+msgid "Menu button: this menu. Hold it to bring the menu in front of you."
+msgstr "菜单键：打开这个菜单。按住它，菜单会来到你面前。"
+
+msgid "Trigger: play and pause. On the menu it clicks."
+msgstr "扳机：播放和暂停。在菜单上用于点击。"
+
+msgid "Stick: seek and screen distance. On the menu it scrolls."
+msgstr "摇杆：快进快退和屏幕距离。在菜单上用于滚动。"
+
+msgid "A and B: the next and the previous video."
+msgstr "A 和 B：下一个和上一个视频。"
+
+msgid "Hold the left bumper and speak instead of typing. It types into a text field in the browser, a PC window or the agent's terminal, or talks to a connected assistant. Its label says TALK when it can."
+msgstr "按住左侧肩键说话，代替打字。它会输入到浏览器的文本框、电脑窗口或代理的终端，或者与已连接的助手对话。可以说话时，它的标签显示“说话”。"
+
+msgid "Next"
+msgstr "下一个"
+
+msgid "Back"
+msgstr "返回"
+
+msgid "In the agent's terminal"
+msgstr "在代理的终端里"
+
+msgid "Only for Claude Code and Codex on the headset, on the pane at your controller."
+msgstr "仅用于头显上的 Claude Code 和 Codex，显示在你手柄旁的面板上。"
+
+msgid "X is Enter while the terminal shows."
+msgstr "终端显示时，X 是回车键。"
+
+msgid "Y shows and hides it. A quick tap of the bumper hides it too."
+msgstr "Y 显示和隐藏它。快速按一下肩键也能隐藏它。"
+
+msgid "When it asks you something (an amber edge), when you look at it (a blue edge) or while you hold the squeeze: the trigger is Enter, the stick is the arrow keys, A is Space and B is Escape."
+msgstr "当它问你问题时（琥珀色边框）、当你看着它时（蓝色边框）或按住握把时：扳机是回车键，摇杆是方向键，A 是空格键，B 是 Esc 键。"
+
+msgid "Squeeze held: the stick scrolls back."
+msgstr "按住握把：摇杆向回滚动。"
+
+msgid "A keyboard paired to the headset types into it."
+msgstr "与头显配对的键盘也能在里面打字。"
+
+msgid "The print on the controllers always shows what each button does now."
+msgstr "手柄上的印字始终显示每个按键当前的作用。"
+
+msgid "To see this again: System, Test and setup, Show the introduction again."
+msgstr "要再次查看：系统，测试和设置，再次显示介绍。"
+
+msgid "Start"
+msgstr "开始"
+
+msgid "Eye calibration done."
+msgstr "眼动校准完成。"
+
+msgid "No calibration: the gaze still works, but less exactly."
+msgstr "未校准：视线仍然可用，但不太准确。"
+
+msgid "The calibration could not start: the headset gave no eye gaze. Try again later from System, Show the introduction again."
+msgstr "校准无法开始：头显没有提供眼动数据。稍后可在“系统”中点“再次显示介绍”重试。"
+
+msgid "Downloading the speech model for voice (about 264 MB): %d %%"
+msgstr "正在下载语音识别模型（约 264 MB）：%d %%"
+
+msgid "Start comes on when the speech model is here: %d %%"
+msgstr "语音模型下载完成后即可开始：%d %%"
+
+msgid "The speech model for voice is here."
+msgstr "语音识别模型已就绪。"
+
+msgid "The speech model for voice did not download."
+msgstr "语音识别模型未能下载。"
+
+msgid "The speech model for voice did not download: no network. Connect to Wi-Fi and press Retry."
+msgstr "语音识别模型未能下载：没有网络。请连接 Wi-Fi 后点“重试”。"
+
+msgid "Retry"
+msgstr "重试"
+
+msgid "Start without voice"
+msgstr "不使用语音，直接开始"
 
 msgid "TV shows"
 msgstr "电视剧"
@@ -647,8 +1647,31 @@ msgstr "电视剧"
 msgid "Films"
 msgstr "电影"
 
+msgid "%d season"
+msgid_plural "%d seasons"
+msgstr[0] "%d 季"
+
+msgid "Season %d"
+msgstr "第 %d 季"
+
+msgid "Specials"
+msgstr "特别篇"
+
 msgid "Play"
 msgstr "播放"
+
+msgid "Watched"
+msgstr "已看"
+
+msgid "%d of %d"
+msgstr "已看 %d/%d"
+
+msgid "%d episode"
+msgid_plural "%d episodes"
+msgstr[0] "%d 集"
+
+msgid "Nothing here yet. Ask an agent on the headset to fill it, or add folders to %s"
+msgstr "这里还没有内容。可以让头显上的代理来填充，或把文件夹添加到 %s"
 
 msgid "Areas"
 msgstr "区域"
@@ -686,8 +1709,20 @@ msgstr "编辑"
 msgid "Delete"
 msgstr "删除"
 
+msgid "%s  ·  %d x %d x %d cm"
+msgstr "%s  ·  %d x %d x %d 厘米"
+
+msgid "%s deleted"
+msgstr "已删除 %s"
+
+msgid "Undo"
+msgstr "撤销"
+
 msgid "The headset's cameras can't show here."
 msgstr "头显的摄像头无法在这里显示。"
+
+msgid "Point at a part first"
+msgstr "请先指向一个部件"
 
 msgid "Built-in objects"
 msgstr "内置物品"
@@ -710,11 +1745,48 @@ msgstr "还没有：从下面的 Fab 添加一个。"
 msgid "In Downloads, from Fab"
 msgstr "下载文件夹中来自 Fab 的"
 
+msgid "Pictures"
+msgstr "图片"
+
+msgid "Surfaces"
+msgstr "表面"
+
 msgid "In this room"
 msgstr "在此房间中"
 
 msgid "Nothing from the library yet."
 msgstr "片库中还没有任何物品。"
+
+msgid "Tidy up"
+msgstr "整理"
+
+msgid "Pick up: point at an object and hold the grip. Let go to drop it, or throw it. Tidy up puts everything back."
+msgstr "拿起：指向物体并按住握把。松开即放下，也可以把它扔出去。整理会把一切放回原处。"
+
+msgid "Add %s"
+msgstr "添加 %s"
+
+msgid "That didn't work."
+msgstr "没有成功。"
+
+msgid "%d part"
+msgid_plural "%d parts"
+msgstr[0] "%d 个部件"
+
+msgid "Pick an object, then Place."
+msgstr "选择一个物品，然后放置。"
+
+msgid "Pick one, then Place."
+msgstr "选择一个，然后放置。"
+
+msgid "%s is in %s: remove it there first."
+msgstr "%s 在 %s 中：请先在那里移除它。"
+
+msgid "Delete %s from the library?"
+msgstr "从物品库中删除 %s？"
+
+msgid "Keep"
+msgstr "保留"
 
 msgid "Move"
 msgstr "移动"
@@ -722,11 +1794,23 @@ msgstr "移动"
 msgid "Remove"
 msgstr "移除"
 
+msgid "Attach"
+msgstr "附着"
+
+msgid "Detach"
+msgstr "分离"
+
+msgid "Put back"
+msgstr "放回"
+
+msgid "Follows %s"
+msgstr "跟随 %s"
+
+msgid "(changed)"
+msgstr "（已更改）"
+
 msgid "Colour"
 msgstr "颜色"
-
-msgid "Picture"
-msgstr "画面"
 
 msgid "Material"
 msgstr "材质"
@@ -736,6 +1820,97 @@ msgstr "效果"
 
 msgid "Reset"
 msgstr "重置"
+
+msgid "Open a picture on the headset first (Files); then Picture puts it on the part."
+msgstr "先在头显上打开一张图片（片源）；然后“画面”会把它放到部件上。"
+
+msgid "That picture is too big for a part (at most %d MB)."
+msgstr "这张图片对部件来说太大了（最多 %d MB）。"
+
+msgid "its own colour"
+msgstr "原来的颜色"
+
+msgid "changed"
+msgstr "已更改"
+
+msgid "Follows:"
+msgstr "跟随："
+
+msgid "%s follows %s"
+msgstr "%s 跟随 %s"
+
+msgid "%s stays where it is"
+msgstr "%s 留在原处"
+
+msgid "%s is back where it was placed"
+msgstr "%s 已放回原处"
+
+msgid "Tidied up: %d object back"
+msgid_plural "Tidied up: %d objects back"
+msgstr[0] "已整理：%d 个物体放回原处"
+
+msgid "Remove %s from the room?"
+msgstr "从房间中移除 %s？"
+
+msgid "Removed %s"
+msgstr "已移除 %s"
+
+msgid "All"
+msgstr "全部"
+
+msgid "Floors"
+msgstr "地面"
+
+msgid "Walls"
+msgstr "墙面"
+
+msgid "Fabric"
+msgstr "织物"
+
+msgid "Wood"
+msgstr "木材"
+
+msgid "Leather"
+msgstr "皮革"
+
+msgid "Metal"
+msgstr "金属"
+
+msgid "Stone"
+msgstr "石材"
+
+msgid "Classic"
+msgstr "经典"
+
+msgid "Energy"
+msgstr "能量"
+
+msgid "Nature"
+msgstr "自然"
+
+msgid "Reactive"
+msgstr "响应"
+
+msgid "Skies"
+msgstr "天空"
+
+msgid "Stylised"
+msgstr "风格化"
+
+msgid "Transitions"
+msgstr "过渡"
+
+msgid "Materials"
+msgstr "材质"
+
+msgid "free"
+msgstr "随处"
+
+msgid "wall"
+msgstr "墙面"
+
+msgid "floor"
+msgstr "地面"
 
 msgid "abc"
 msgstr "abc"
@@ -776,9 +1951,6 @@ msgstr "−10 秒"
 msgid "+10 s"
 msgstr "+10 秒"
 
-msgid "Next"
-msgstr "下一个"
-
 msgid "Source"
 msgstr "片源"
 
@@ -800,11 +1972,80 @@ msgstr "混合现实"
 msgid "System"
 msgstr "系统"
 
+msgid "List"
+msgstr "列表"
+
+msgid "Grid"
+msgstr "网格"
+
 msgid "Pause"
 msgstr "暂停"
 
 msgid "General"
 msgstr "常规"
+
+msgid "PC windows is off. Turn it on in System, PC windows, and add your PC there."
+msgstr "电脑窗口已关闭。请在“系统”的“电脑窗口”中打开，并在那里添加你的电脑。"
+
+msgid "No windows yet."
+msgstr "还没有窗口。"
+
+msgid "Monitor"
+msgstr "显示器"
+
+msgid "Type into the window in focus"
+msgstr "输入到当前焦点窗口"
+
+msgid "Text to type"
+msgstr "要输入的文字"
+
+msgid "Send"
+msgstr "发送"
+
+msgid "Keyboard"
+msgstr "键盘"
+
+msgid "Your PC's windows as panes here, used with a mouse and keyboard paired with the headset. Run the PC windows app on the PC."
+msgstr "把电脑的窗口作为窗格显示在这里，用与头显配对的鼠标和键盘操作。请在电脑上运行电脑窗口程序。"
+
+msgid "Add a PC"
+msgstr "添加电脑"
+
+msgid "Type this code on the PC when it asks. Five wrong codes stop it."
+msgstr "电脑要求时，在电脑上输入此代码。输错五次即停止。"
+
+msgid "connected"
+msgstr "已连接"
+
+msgid "Find pictures"
+msgstr "查找图片"
+
+msgid "Browse yourself. On an image, the right stick click keeps it; Copy image and saving to Downloads keep it too."
+msgstr "请自行浏览。在图片上按下右摇杆即可保存；“复制图片”和保存到“下载”也能保存。"
+
+msgid "Place as:"
+msgstr "放置为："
+
+msgid "Framed"
+msgstr "装框"
+
+msgid "Apply to a part"
+msgstr "应用到部件"
+
+msgid "Kept pictures stay on this headset, for your own use: the app never uploads or shares them."
+msgstr "保存的图片只留在这台头显上，供你自己使用：应用从不上传或共享它们。"
+
+msgid "Pick a picture, then place it or apply it."
+msgstr "选择一张图片，然后放置或应用它。"
+
+msgid "On an image, the right stick click keeps it."
+msgstr "在图片上按下右摇杆即可保存。"
+
+msgid "Delete %s from your pictures?"
+msgstr "从你的图片中删除 %s？"
+
+msgid "words to search for, such as autumn forest"
+msgstr "要搜索的词，例如 autumn forest"
 
 msgid "Mode"
 msgstr "模式"
@@ -875,8 +2116,14 @@ msgstr "距离"
 msgid "Height"
 msgstr "高度"
 
+msgid "%+.2f m"
+msgstr "%+.2f 米"
+
 msgid "Curvature"
 msgstr "曲率"
+
+msgid "flat"
+msgstr "平直"
 
 msgid "Zoom"
 msgstr "缩放"
@@ -935,11 +2182,17 @@ msgstr "重置 HDR"
 msgid "Exposure"
 msgstr "曝光"
 
+msgid "%+.1f stops"
+msgstr "%+.1f 档"
+
 msgid "Knee"
 msgstr "拐点"
 
 msgid "HDR brightness"
 msgstr "HDR 亮度"
+
+msgid "%d nits"
+msgstr "%d 尼特"
 
 msgid "Slideshow"
 msgstr "幻灯片"
@@ -947,8 +2200,17 @@ msgstr "幻灯片"
 msgid "Each picture"
 msgstr "每张图片"
 
+msgid "%d s"
+msgstr "%d 秒"
+
 msgid "Crossfade"
 msgstr "交叉淡化"
+
+msgid "cut"
+msgstr "硬切"
+
+msgid "%s s"
+msgstr "%s 秒"
 
 msgid "Frame"
 msgstr "帧"
@@ -992,26 +2254,140 @@ msgstr "右下"
 msgid "Bottom left"
 msgstr "左下"
 
+msgid "%.1f m"
+msgstr "%.1f 米"
+
+msgid "Auto: %s (%s)"
+msgstr "自动：%s（%s）"
+
+msgid "Auto: %s"
+msgstr "自动：%s"
+
+msgid "Folder rule: %s for %s"
+msgstr "文件夹规则：%s，用于 %s"
+
+msgid "%s  (opening...)"
+msgstr "%s（正在打开……）"
+
+msgid "Screenshot saved: %s"
+msgstr "截图已保存：%s"
+
+msgid "No screenshot: %s"
+msgstr "未能截图：%s"
+
+msgid "Mono"
+msgstr "单画面"
+
+msgid "Dual 360"
+msgstr "双 360"
+
+msgid "Brightness"
+msgstr "亮度"
+
+msgid "Contrast"
+msgstr "对比度"
+
+msgid "Saturation"
+msgstr "饱和度"
+
+msgid "Gamma"
+msgstr "Gamma"
+
+msgid "Dark-scene lift"
+msgstr "暗部提亮"
+
+msgid "Sharpen"
+msgstr "锐化"
+
+msgid "Equidistant"
+msgstr "等距"
+
+msgid "Equisolid"
+msgstr "等立体角"
+
+msgid "Stereographic"
+msgstr "体视"
+
+msgid "Polynomial"
+msgstr "多项式"
+
+msgid "Off"
+msgstr "关"
+
+msgid "Bob"
+msgstr "Bob"
+
+msgid "Edge"
+msgstr "边缘"
+
+msgid "%s (your choice)"
+msgstr "%s（你的选择）"
+
+msgid "%s (from the command line)"
+msgstr "%s（来自命令行）"
+
+msgid "%s (test pattern)"
+msgstr "%s（测试图）"
+
+msgid "%s (window)"
+msgstr "%s（窗口）"
+
+msgid "%s (remembered for this file)"
+msgstr "%s（为此文件记住）"
+
+msgid "%s (from the file's sidecar)"
+msgstr "%s（来自旁挂文件）"
+
+msgid "%s (the folder's rule)"
+msgstr "%s（文件夹规则）"
+
 msgid "Environment"
 msgstr "环境"
 
-msgid "Built in"
-msgstr "内置"
+msgid "A journey is as long as the film: it leaves when the film starts and arrives with the credits. Pause, and it waits."
+msgstr "旅程与影片一样长：影片开始时出发，片尾字幕时到达。暂停时，它会等待。"
 
-msgid "Yours"
-msgstr "你的"
+msgid "Time travel"
+msgstr "时光旅行"
+
+msgid "Over the film"
+msgstr "贯穿整部影片"
+
+msgid "Every 5 minutes"
+msgstr "每5分钟"
+
+msgid "Every 10 minutes"
+msgstr "每10分钟"
+
+msgid "Every 15 minutes"
+msgstr "每15分钟"
+
+msgid "One film, and the room moves forward through the history of television, an era at a time while it plays."
+msgstr "一部影片，播放时房间沿着电视的历史向前推进，一次一个年代。"
 
 msgid "Use this picture as the room"
 msgstr "用这张图片作为房间"
 
-msgid "Showrooms"
-msgstr "展示厅"
+msgid "Current"
+msgstr "当前"
 
-msgid "Seat"
-msgstr "座位"
+msgid "Back to defaults"
+msgstr "恢复默认"
 
 msgid "Pick a seat"
 msgstr "选择座位"
+
+msgid "Default seat"
+msgstr "默认座位"
+
+msgid "Reset room"
+msgstr "重置房间"
+
+msgid "Reset screen"
+msgstr "重置屏幕"
+
+msgid "Reset room: back to the room's own seat, facing the screen, view recentred."
+msgstr "重置房间：回到房间默认座位，面向屏幕，视角重新居中。"
 
 msgid "Floor reflection"
 msgstr "地面反射"
@@ -1061,15 +2437,6 @@ msgstr "播放时调暗"
 msgid "Dimmed to"
 msgstr "调暗到"
 
-msgid "Reset room"
-msgstr "重置房间"
-
-msgid "Reset screen"
-msgstr "重置屏幕"
-
-msgid "Reset room: back to the room's own seat, facing the screen, view recentred."
-msgstr "重置房间：回到房间默认座位，面向屏幕，视角重新居中。"
-
 msgid "The showing"
 msgstr "放映"
 
@@ -1094,11 +2461,112 @@ msgstr "影片交叉淡化"
 msgid "Sleep timer"
 msgstr "睡眠定时"
 
+msgid "Then"
+msgstr "然后"
+
+msgid "%s (photo)"
+msgstr "%s（照片）"
+
+msgid "This picture can't be a room (only local pictures)."
+msgstr "这张图片不能用作房间（只能用本地图片）。"
+
+msgid "%s (moved) (%d of %d)"
+msgstr "%s（已移动）（第 %d 个，共 %d 个）"
+
+msgid "%s (%d of %d)"
+msgstr "%s（第 %d 个，共 %d 个）"
+
+msgid "Where %s was (%d seat)"
+msgid_plural "Where %s was (%d seats)"
+msgstr[0] "%s 原来的位置（%d 个座位）"
+
+msgid "The room's own spot (%d seat)"
+msgid_plural "The room's own spot (%d seats)"
+msgstr[0] "房间默认位置（%d 个座位）"
+
+msgid "Go to %s"
+msgstr "前往 %s"
+
 msgid "Flashes only in rooms that react, such as the drive-in; the room pulses with the bass."
 msgstr "只在会做出反应的房间（如汽车影院）中闪烁；房间随低音律动。"
 
+msgid "Seat %d"
+msgstr "座位 %d"
+
 msgid "Curtains: in the cinema and the home theatre, flat screen."
 msgstr "幕布：用于电影院和家庭影院中的平面屏幕。"
+
+msgid "Intermission: %s left. Play ends it."
+msgstr "中场休息：剩余 %s。播放即结束。"
+
+msgid "This film stops at %s."
+msgstr "这部影片将在 %s 暂停。"
+
+msgid "Films over %d min with chapters stop once, near the middle."
+msgstr "超过 %d 分钟且有章节的影片会在中间附近暂停一次。"
+
+msgid "15 min"
+msgstr "15 分钟"
+
+msgid "30 min"
+msgstr "30 分钟"
+
+msgid "60 min"
+msgstr "60 分钟"
+
+msgid "90 min"
+msgstr "90 分钟"
+
+msgid "End of file"
+msgstr "文件结束时"
+
+msgid "Pause the film"
+msgstr "暂停影片"
+
+msgid "Close the app"
+msgstr "关闭应用"
+
+msgid "Turn the headset off"
+msgstr "关闭头显"
+
+msgid "Void"
+msgstr "虚空"
+
+msgid "Dim room"
+msgstr "暗室"
+
+msgid "Cinema"
+msgstr "影院"
+
+msgid "Passthrough"
+msgstr "透视"
+
+msgid "Home theatre"
+msgstr "家庭影院"
+
+msgid "Drive-in"
+msgstr "汽车影院"
+
+msgid "Planetarium"
+msgstr "天文馆"
+
+msgid "Dome"
+msgstr "圆顶"
+
+msgid "Built in"
+msgstr "内置"
+
+msgid "Yours"
+msgstr "你的"
+
+msgid "Showrooms"
+msgstr "展示厅"
+
+msgid "Search your favourites, history, queue and the last local folder"
+msgstr "搜索收藏、历史记录、队列和上次打开的本地文件夹"
+
+msgid "words from the name"
+msgstr "名称中的词"
 
 msgid "Audio track"
 msgstr "音轨"
@@ -1109,11 +2577,17 @@ msgstr "音量和时间"
 msgid "Volume"
 msgstr "音量"
 
+msgid "Environment sound"
+msgstr "环境声音"
+
+msgid "The room's own sound: rain, birds, the projector. It always stays under the film."
+msgstr "房间自身的声音：雨声、鸟叫、放映机。它始终低于影片的声音。"
+
 msgid "A/V offset"
 msgstr "音画偏移"
 
-msgid "Calibrate"
-msgstr "校准"
+msgid "%+d ms"
+msgstr "%+d 毫秒"
 
 msgid "Live delay"
 msgstr "直播延迟"
@@ -1129,6 +2603,9 @@ msgstr "均衡力度"
 
 msgid "Dialogue boost"
 msgstr "对白增强"
+
+msgid "+%.1f dB"
+msgstr "+%.1f dB"
 
 msgid "Spatial sound"
 msgstr "空间音效"
@@ -1151,17 +2628,26 @@ msgstr "耳机"
 msgid "Head measurements (HRTF)"
 msgstr "头部测量（HRTF）"
 
+msgid "Fetching..."
+msgstr "正在获取……"
+
 msgid "Tune spatial sound"
 msgstr "调校空间音效"
+
+msgid "Fetched; choose it above."
+msgstr "已获取；请在上方选择。"
+
+msgid "Could not fetch %s: %s"
+msgstr "无法获取 %s：%s"
 
 msgid "No audio tracks"
 msgstr "没有音轨"
 
-msgid "Play on a PC"
-msgstr "在电脑上播放"
+msgid "%d ch"
+msgstr "%d 声道"
 
-msgid "Play sound on a PC"
-msgstr "在电脑上播放声音"
+msgid "Track %d"
+msgstr "轨道 %d"
 
 msgid "Sound from speakers in the room, in front, behind and above you, outside your head; dialogue from the screen. It stays put when you turn your head."
 msgstr "声音来自房间里你前方、后方和上方的扬声器，在你脑袋之外；对白来自屏幕。你转头时声音位置不变。"
@@ -1169,11 +2655,74 @@ msgstr "声音来自房间里你前方、后方和上方的扬声器，在你脑
 msgid "This player has no spatial sound (an older engine): the stereo mix plays."
 msgstr "此播放器没有空间音效（较旧的引擎）：播放立体声混音。"
 
+msgid "the 360 sound field"
+msgstr "360 声场"
+
+msgid "From the room: %s. Headphones."
+msgstr "来自房间：%s。耳机。"
+
+msgid "From the room: %s. The headset's speakers."
+msgstr "来自房间：%s。头显扬声器。"
+
+msgid "At this speed the stereo mix plays."
+msgstr "此速度下播放立体声混音。"
+
 msgid "The stereo mix plays for now (PC sound on, or no file open)."
 msgstr "当前播放立体声混音（电脑声音已开启，或没有打开文件）。"
 
+msgid "Tuned to your ears: head size %d %%."
+msgstr "已按你的耳朵调校：头部大小 %d %%。"
+
+msgid "Fetch: %s"
+msgstr "获取：%s"
+
+msgid "Licence: %s"
+msgstr "许可：%s"
+
+msgid "Download %s"
+msgstr "下载 %s"
+
+msgid "Play on a PC"
+msgstr "在电脑上播放"
+
+msgid "Play sound on a PC"
+msgstr "在电脑上播放声音"
+
+msgid "PC: %s"
+msgstr "电脑：%s"
+
+msgid "none set"
+msgstr "未设置"
+
 msgid "The headset goes silent and holds its picture back to match the PC's speakers."
 msgstr "头显会静音，并延迟画面以配合电脑的扬声器。"
+
+msgid "Playing on %s; the picture is held back %d ms."
+msgstr "正在 %s 上播放；画面延迟 %d 毫秒。"
+
+msgid "Connecting to %s... (%s)"
+msgstr "正在连接 %s……（%s）"
+
+msgid "Connecting to %s..."
+msgstr "正在连接 %s……"
+
+msgid "commentary"
+msgstr "解说"
+
+msgid "description"
+msgstr "口述影像"
+
+msgid "SDH"
+msgstr "听障"
+
+msgid "forced"
+msgstr "强制"
+
+msgid "original"
+msgstr "原版"
+
+msgid "The PC running tools/audio_sink.py: its address, or address:port"
+msgstr "运行 tools/audio_sink.py 的电脑：地址，或 地址:端口"
 
 msgid "Replay 10 s"
 msgstr "重播 10 秒"
@@ -1199,11 +2748,17 @@ msgstr "偏移"
 msgid "Nearer"
 msgstr "更近"
 
+msgid "%.2f m"
+msgstr "%.2f 米"
+
 msgid "Background"
 msgstr "背景"
 
 msgid "Delay"
 msgstr "延迟"
+
+msgid "%+.1f s"
+msgstr "%+.1f 秒"
 
 msgid "Reset delay"
 msgstr "重置延迟"
@@ -1226,14 +2781,99 @@ msgstr "当前附近的台词"
 msgid "This file has no subtitle tracks"
 msgstr "此文件没有字幕轨道"
 
-msgid "A second track needs a subtitle file next to the video"
-msgstr "第二轨道需要视频旁有字幕文件"
+msgid "file"
+msgstr "文件"
+
+msgid "picture"
+msgstr "图像"
+
+msgid "Loaded: %s"
+msgstr "已加载：%s"
+
+msgid "No subtitle files found for this video"
+msgstr "没有找到此视频的字幕文件"
 
 msgid "Searching..."
 msgstr "正在搜索……"
 
+msgid "%d line with \"%s\""
+msgid_plural "%d lines with \"%s\""
+msgstr[0] "%d 行含有“%s”"
+
+msgid "No script for this file: %s"
+msgstr "此文件没有台词：%s"
+
+msgid "no subtitle text"
+msgstr "没有字幕文字"
+
 msgid "Reading the script..."
 msgstr "正在读取台词……"
+
+msgid "Lines around %s"
+msgstr "%s 附近的台词"
+
+msgid "Reading the film for its subtitles: %d s"
+msgstr "正在读取影片中的字幕：%d 秒"
+
+msgid "%s %d s"
+msgstr "%s %d 秒"
+
+msgid "Script from: %s"
+msgstr "台词来源：%s"
+
+msgid "A second track needs a subtitle file next to the video"
+msgstr "第二轨道需要视频旁有字幕文件"
+
+msgid "Find a line by its words (\"quoted phrases\" too)"
+msgstr "按词语查找台词（也可用 \"带引号的短语\"）"
+
+msgid "Find surfaces"
+msgstr "查找表面"
+
+msgid "Apply: point at a wall, the floor, a seat or an object's part; the trigger puts it there. Stick: size and turn the pattern."
+msgstr "应用：指向墙、地面、座位或物品的部件，扳机即可放上。摇杆：调整图案大小和旋转。"
+
+msgid "Search for a surface by its name, in English."
+msgstr "用英文名称搜索表面。"
+
+msgid "It is in your materials already."
+msgstr "它已在你的材质中。"
+
+msgid "Asking for %s..."
+msgstr "正在请求 %s……"
+
+msgid "Accept Fab's licence in Your objects first."
+msgstr "请先在“你的物品”中接受 Fab 的许可。"
+
+msgid "The site is busy: the app waits %d s before it asks again."
+msgstr "该网站繁忙：应用将等待 %d 秒后再请求。"
+
+msgid "The site can't be reached. Is the headset online?"
+msgstr "无法连接该网站。头显是否已联网？"
+
+msgid "The site answered with an error (HTTP %d). Try again later."
+msgstr "该网站返回错误（HTTP %d）。请稍后再试。"
+
+msgid "The site's answer was not as expected. Try again later."
+msgstr "该网站的回复不符合预期。请稍后再试。"
+
+msgid "This surface has no download the app can use."
+msgstr "这个表面没有应用可用的下载。"
+
+msgid "This surface's download is too big for the headset."
+msgstr "这个表面的下载对头显来说太大。"
+
+msgid "Pick a material, then Apply to a part."
+msgstr "选择一种材质，然后点“应用到部件”。"
+
+msgid "%.1f m a repeat"
+msgstr "每 %.1f 米重复一次"
+
+msgid "Delete %s from your materials?"
+msgstr "从你的材质中删除 %s？"
+
+msgid "words in English, such as brick or oak floor"
+msgstr "英文词语，例如 brick 或 oak floor"
 
 msgid "Views"
 msgstr "视图"
@@ -1265,6 +2905,9 @@ msgstr "语言"
 msgid "The menus and the controller labels. Names of films and files stay as they are."
 msgstr "用于菜单和手柄标签。影片和文件的名称保持不变。"
 
+msgid "The translations other than English were made automatically, by AI."
+msgstr "英语以外的翻译均由 AI 自动生成。"
+
 msgid "Accessibility"
 msgstr "辅助功能"
 
@@ -1280,8 +2923,8 @@ msgstr "字幕始终开启"
 msgid "Test and setup"
 msgstr "测试和设置"
 
-msgid "Test patterns"
-msgstr "测试图案"
+msgid "Show the introduction again"
+msgstr "再次显示介绍"
 
 msgid "Network hosts"
 msgstr "网络主机"
@@ -1340,6 +2983,9 @@ msgstr "放大镜"
 msgid "Magnification"
 msgstr "放大倍数"
 
+msgid "Laser on the browser"
+msgstr "在浏览器上使用激光"
+
 msgid "Phone remote"
 msgstr "手机遥控"
 
@@ -1354,6 +3000,13 @@ msgstr "共享此头显的文件"
 
 msgid "Phones and computers on this network can download and upload files. Scan the code: it holds the pairing code, which is shown nowhere else."
 msgstr "本网络中的手机和电脑可以下载和上传文件。扫描二维码：其中包含配对码，配对码不会在其他地方显示。"
+
+msgid "Development AI assistant"
+msgstr "开发用 AI 助手"
+
+#. Updates (scripts/update/updater.gd, ui/update_row.gd).
+msgid "Updates"
+msgstr "更新"
 
 msgid "Dev tools"
 msgstr "开发工具"
@@ -1388,9 +3041,6 @@ msgstr "热重载关"
 msgid "%s; remote changes allowed for %d more min"
 msgstr "%s；远程更改还允许 %d 分钟"
 
-msgid "Undo"
-msgstr "撤销"
-
 msgid "Measuring %s ..."
 msgstr "正在测量 %s ……"
 
@@ -1418,6 +3068,9 @@ msgstr "曲面屏幕作为头显的圆柱图层；关：在房间中绘制，前
 msgid "In 180 and 360: hold the grip and pull the trigger for a magnifier"
 msgstr "在 180° 和 360° 中：按住握把并扣动扳机即可使用放大镜"
 
+msgid "The laser points and clicks on the page too, as well as the stick"
+msgstr "除摇杆外，激光也能在网页上指向和点击"
+
 msgid "Ask"
 msgstr "询问"
 
@@ -1426,9 +3079,6 @@ msgstr "允许"
 
 msgid "Deny"
 msgstr "拒绝"
-
-msgid "Off"
-msgstr "关"
 
 msgid "Low"
 msgstr "低"
@@ -1496,6 +3146,15 @@ msgstr "指向一个座位并扣动扳机。B 取消。"
 msgid "Seat unchanged"
 msgstr "座位未改变"
 
+msgid "That can't be applied here"
+msgstr "无法应用到这里"
+
+msgid "Point at a part and pull the trigger. Stick: size and turn the pattern. B cancels."
+msgstr "指向一个部件并扣动扳机。摇杆：调整图案大小和旋转。B 键取消。"
+
+msgid "Point at a part and pull the trigger. B cancels."
+msgstr "指向一个部件并扣动扳机。B 键取消。"
+
 msgid "That object can't be placed here"
 msgstr "该物品不能放在这里"
 
@@ -1514,6 +3173,9 @@ msgstr "已添加 %s：摄像头画面会显示在那里"
 msgid "%s changed"
 msgstr "%s 已更改"
 
+msgid "Nothing changed"
+msgstr "没有任何更改"
+
 msgid "Nothing placed"
 msgstr "没有放置任何物品"
 
@@ -1522,6 +3184,18 @@ msgstr "未放置"
 
 msgid "No seat there"
 msgstr "那里没有座位"
+
+msgid "Seat"
+msgstr "座位"
+
+msgid "Check for updates"
+msgstr "检查更新"
+
+msgid "Restart now"
+msgstr "立即重启"
+
+msgid "Once a day the player asks GitHub for a new version and downloads it in the background. Only your IP address goes to GitHub."
+msgstr "播放器每天向 GitHub 查询一次新版本，并在后台下载。只有你的 IP 地址会发送给 GitHub。"
 
 msgid "example.com, https://.../film.mkv or udp://@:1234"
 msgstr "example.com、https://.../film.mkv 或 udp://@:1234"
@@ -1562,845 +3236,6 @@ msgstr "墨黑配天蓝"
 msgid "Espresso & peach"
 msgstr "咖啡配蜜桃"
 
-# --- stage 2, set B ---
-
-msgid "Fisheye %d°"
-msgstr "鱼眼 %d°"
-
-msgid "%s (half)"
-msgstr "%s（半幅）"
-
-msgid "%s, eyes swapped"
-msgstr "%s，左右眼互换"
-
-msgid "Flat"
-msgstr "平面"
-
-msgid "Fisheye"
-msgstr "鱼眼"
-
-msgid "Dual fisheye 360°"
-msgstr "双鱼眼 360°"
-
-msgid "%s, mono"
-msgstr "%s，单画面"
-
-msgid "%s, side by side"
-msgstr "%s，左右并排"
-
-msgid "%s, top / bottom"
-msgstr "%s，上下排列"
-
-msgid "Large format"
-msgstr "巨幕"
-
-msgid "Living room"
-msgstr "客厅"
-
-msgid "In bed"
-msgstr "床上"
-
-msgid "Cropped to %.2f:1"
-msgstr "已裁切为 %.2f:1"
-
-msgid "Container says %s; not supported yet"
-msgstr "容器标注为 %s；暂不支持"
-
-msgid "Container says %s 3D; not supported"
-msgstr "容器标注为 %s 3D；不支持"
-
-msgid "container: %s"
-msgstr "容器：%s"
-
-msgid "fisheye"
-msgstr "鱼眼"
-
-msgid "side by side"
-msgstr "左右并排"
-
-msgid "top / bottom"
-msgstr "上下排列"
-
-msgid "mono"
-msgstr "单画面"
-
-msgid "right eye first"
-msgstr "右眼在前"
-
-msgid "360 camera video"
-msgstr "360 相机视频"
-
-msgid "360 camera photo"
-msgstr "360 相机照片"
-
-msgid "Other camera"
-msgstr "其他相机"
-
-msgid "loop %s-%s"
-msgstr "循环 %s-%s"
-
-msgid "%s, peak %d nits (%s)"
-msgstr "%s，峰值 %d 尼特（%s）"
-
-msgid "%s, BT.2390"
-msgstr "%s，BT.2390"
-
-msgid "%s, tone mapping off"
-msgstr "%s，色调映射已关闭"
-
-msgid "default"
-msgstr "默认"
-
-msgid "content light level"
-msgstr "内容亮度级别"
-
-msgid "mastering display"
-msgstr "母版显示器"
-
-msgid "Dummy head A"
-msgstr "假人头 A"
-
-msgid "Dummy head B"
-msgstr "假人头 B"
-
-msgid "Listener H3"
-msgstr "听者 H3"
-
-msgid "Listener H4"
-msgstr "听者 H4"
-
-msgid "Listener H5"
-msgstr "听者 H5"
-
-msgid "Listener H6"
-msgstr "听者 H6"
-
-msgid "Dummy head, MIT (normal ear)"
-msgstr "假人头，MIT（标准耳）"
-
-msgid "HUTUBS listener 1"
-msgstr "HUTUBS 听者 1"
-
-msgid "ARI listener NH2"
-msgstr "ARI 听者 NH2"
-
-msgid "CIPIC subject 003"
-msgstr "CIPIC 受试者 003"
-
-msgid "%+.2f m"
-msgstr "%+.2f 米"
-
-msgid "flat"
-msgstr "平直"
-
-msgid "%+.1f stops"
-msgstr "%+.1f 档"
-
-msgid "%d nits"
-msgstr "%d 尼特"
-# --- stage 2, set C ---
-# The Room, Objects and Mixed reality tabs, the built-in rooms, showrooms and objects, the sleep timer's line and the
-# assistant service's status line.
-
-msgid "%s asks to pair. Tell it this code:"
-msgstr "%s 请求配对。把这个代码告诉它："
-
-msgid "Give an assistant this address: %s (%d min left)."
-msgstr "把这个地址给助手：%s（剩余 %d 分钟）。"
-
-msgid "No assistant yet. Press \"Let an assistant find me\" and give it the address."
-msgstr "还没有助手。按“让助手找到我”，再把地址给它。"
-
-msgid "An assistant is connected."
-msgstr "已连接一个助手。"
-
-msgid "Listening for paired assistants at %s."
-msgstr "正在 %s 等待已配对的助手。"
-
-msgid "Can't make the HTTPS certificate: %s."
-msgstr "无法生成 HTTPS 证书：%s。"
-
-msgid "Can't listen on port %d: %s."
-msgstr "无法监听端口 %d：%s。"
-
-msgid "Box"
-msgstr "立方体"
-
-msgid "Sphere"
-msgstr "球体"
-
-msgid "Cylinder"
-msgstr "圆柱体"
-
-msgid "Plane"
-msgstr "平面"
-
-msgid "Text"
-msgstr "文字"
-
-msgid "Particles"
-msgstr "粒子"
-
-msgid "Picture frame"
-msgstr "相框"
-
-msgid "Wall shelf"
-msgstr "壁架"
-
-msgid "Pot plant"
-msgstr "盆栽"
-
-msgid "Wall clock"
-msgstr "挂钟"
-
-msgid "sleep at end of file"
-msgstr "文件结束时睡眠"
-
-msgid "sleep in %d min"
-msgstr "%d 分钟后睡眠"
-
-msgid "%s  ·  %d x %d x %d cm"
-msgstr "%s  ·  %d x %d x %d 厘米"
-
-msgid "%s deleted"
-msgstr "已删除 %s"
-
-msgid "Add %s"
-msgstr "添加 %s"
-
-msgid "Adding %s: a moment."
-msgstr "正在添加 %s，请稍候。"
-
-msgid "%s is in your objects."
-msgstr "%s 已在你的物品中。"
-
-msgid "That didn't work."
-msgstr "没有成功。"
-
-msgid "%d part"
-msgid_plural "%d parts"
-msgstr[0] "%d 个部件"
-
-msgid "Pick an object, then Place."
-msgstr "选择一个物品，然后放置。"
-
-msgid "Pick one, then Place."
-msgstr "选择一个，然后放置。"
-
-msgid "%s is in %s: remove it there first."
-msgstr "%s 在 %s 中：请先在那里移除它。"
-
-msgid "Delete %s from the library?"
-msgstr "从物品库中删除 %s？"
-
-msgid "Keep"
-msgstr "保留"
-
-msgid "(changed)"
-msgstr "（已更改）"
-
-msgid "Open a picture on the headset first (Files); then Picture puts it on the part."
-msgstr "先在头显上打开一张图片（片源）；然后“画面”会把它放到部件上。"
-
-msgid "That picture is too big for a part (at most %d MB)."
-msgstr "这张图片对部件来说太大了（最多 %d MB）。"
-
-msgid "its own colour"
-msgstr "原来的颜色"
-
-msgid "changed"
-msgstr "已更改"
-
-msgid "Remove %s from the room?"
-msgstr "从房间中移除 %s？"
-
-msgid "Removed %s"
-msgstr "已移除 %s"
-
-msgid "All"
-msgstr "全部"
-
-msgid "Floors"
-msgstr "地面"
-
-msgid "Walls"
-msgstr "墙面"
-
-msgid "Fabric"
-msgstr "织物"
-
-msgid "Wood"
-msgstr "木材"
-
-msgid "Leather"
-msgstr "皮革"
-
-msgid "Metal"
-msgstr "金属"
-
-msgid "Stone"
-msgstr "石材"
-
-msgid "Classic"
-msgstr "经典"
-
-msgid "Energy"
-msgstr "能量"
-
-msgid "Nature"
-msgstr "自然"
-
-msgid "Reactive"
-msgstr "响应"
-
-msgid "Skies"
-msgstr "天空"
-
-msgid "Stylised"
-msgstr "风格化"
-
-msgid "Transitions"
-msgstr "过渡"
-
-msgid "Materials"
-msgstr "材质"
-
-msgid "free"
-msgstr "随处"
-
-msgid "wall"
-msgstr "墙面"
-
-msgid "floor"
-msgstr "地面"
-
-msgid "%d s"
-msgstr "%d 秒"
-
-msgid "cut"
-msgstr "硬切"
-
-msgid "%s s"
-msgstr "%s 秒"
-
-msgid "%.1f m"
-msgstr "%.1f 米"
-
-msgid "Auto: %s (%s)"
-msgstr "自动：%s（%s）"
-
-msgid "Auto: %s"
-msgstr "自动：%s"
-
-msgid "Folder rule: %s for %s"
-msgstr "文件夹规则：%s，用于 %s"
-
-msgid "%s  (opening...)"
-msgstr "%s（正在打开……）"
-
-msgid "Screenshot saved: %s"
-msgstr "截图已保存：%s"
-
-msgid "No screenshot: %s"
-msgstr "未能截图：%s"
-
-msgid "Mono"
-msgstr "单画面"
-# --- stage 2, set A ---
-# The Source tab (ui/files_tab.gd), the Library (ui/library_view.gd), the host and search forms, the test patterns and
-# the calibration cards, the Android apps place.
-
-msgid "Server"
-msgstr "服务器"
-
-msgid "Library"
-msgstr "片库"
-
-msgid "From assistant"
-msgstr "来自助手"
-
-msgid "Network"
-msgstr "网络"
-
-msgid "Media servers"
-msgstr "媒体服务器"
-
-msgid "Browser"
-msgstr "浏览器"
-
-msgid "Queue"
-msgstr "队列"
-
-msgid "Favourites"
-msgstr "收藏"
-
-msgid "Search"
-msgstr "搜索"
-
-msgid "Android apps"
-msgstr "安卓应用"
-
-msgid "Home"
-msgstr "主文件夹"
-
-msgid "Device home"
-msgstr "设备主文件夹"
-
-msgid "Videos"
-msgstr "视频"
-
-msgid "Downloads"
-msgstr "下载"
-
-msgid "Edit pages"
-msgstr "编辑网页"
-
-msgid "Edit queue"
-msgstr "编辑队列"
-
-msgid "Edit favourites"
-msgstr "编辑收藏"
-
-msgid "Repeat: one"
-msgstr "重复：单个"
-
-msgid "Repeat: all"
-msgstr "重复：全部"
-
-msgid "Test patterns (generated, no decoder)"
-msgstr "测试图案（程序生成，不用解码器）"
-
-msgid "Network: pick a host to edit"
-msgstr "网络：选择要编辑的主机"
-
-msgid "Network (SMB)"
-msgstr "网络（SMB）"
-
-msgid "Edit: %s"
-msgstr "编辑：%s"
-
-msgid "+ Add host..."
-msgstr "+ 添加主机……"
-
-msgid "Looking for hosts on this network..."
-msgstr "正在此网络上查找主机……"
-
-msgid "Find hosts on this network"
-msgstr "在此网络上查找主机"
-
-msgid "Found: %s   (%s)"
-msgstr "已找到：%s   (%s)"
-
-msgid "(simulated: this engine build has no MediaBrowser yet)"
-msgstr "（模拟：此引擎版本还没有 MediaBrowser）"
-
-msgid "Browser: pick a page to edit"
-msgstr "浏览器：选择要编辑的网页"
-
-msgid "Browser (web pages and desktop windows)"
-msgstr "浏览器（网页和桌面窗口）"
-
-msgid "Stop showing: %s"
-msgstr "停止显示：%s"
-
-msgid "+ Open a web page or a stream..."
-msgstr "+ 打开网页或流……"
-
-msgid "Desktop windows"
-msgstr "桌面窗口"
-
-msgid "(no windows)"
-msgstr "（没有窗口）"
-
-msgid "(untitled)"
-msgstr "（无标题）"
-
-msgid "%s   (loading...)"
-msgstr "%s   （正在加载……）"
-
-msgid "Looking for media servers on this network..."
-msgstr "正在此网络上查找媒体服务器……"
-
-msgid "Loading..."
-msgstr "正在加载……"
-
-msgid "%s   (simulated)"
-msgstr "%s   （模拟）"
-
-msgid "Look again for media servers"
-msgstr "重新查找媒体服务器"
-
-msgid "(no folders, videos or pictures here)"
-msgstr "（这里没有文件夹、视频或图片）"
-
-msgid "No such agent"
-msgstr "没有这个代理"
-
-msgid "Running in its terminal"
-msgstr "正在其终端中运行"
-
-msgid "Not running"
-msgstr "未运行"
-
-msgid "Not installed"
-msgstr "未安装"
-
-msgid "Show on the controller"
-msgstr "在手柄上显示"
-
-msgid "Restart, briefed on the player"
-msgstr "重新启动，附带播放器说明"
-
-msgid "Restart plain, no briefing"
-msgstr "直接重新启动，不附说明"
-
-msgid "Start, briefed on the player"
-msgstr "启动，附带播放器说明"
-
-msgid "Start plain, no briefing"
-msgstr "直接启动，不附说明"
-
-msgid "Hide from the controller (it keeps working)"
-msgstr "从手柄上隐藏（它会继续工作）"
-
-msgid "Put it on the big screen"
-msgstr "放到大屏幕上"
-
-msgid "Stop %s"
-msgstr "停止 %s"
-
-msgid "%s: its APK's file name has spaces, so it can't run yet"
-msgstr "%s：它的 APK 文件名有空格，所以还不能运行"
-
-msgid "%s is on the big screen"
-msgstr "%s 正在大屏幕上"
-
-msgid "Last try: %s"
-msgstr "上次尝试：%s"
-
-msgid "Getting ready"
-msgstr "正在准备"
-
-msgid "Clearing what was left from last time"
-msgstr "正在清理上次留下的内容"
-
-msgid "Starting the display"
-msgstr "正在启动显示"
-
-msgid "Starting Android"
-msgstr "正在启动安卓"
-
-msgid "Opening the app"
-msgstr "正在打开应用"
-
-msgid "Ready"
-msgstr "就绪"
-
-msgid "Lepton isn't on this headset."
-msgstr "这台头显上没有 Lepton。"
-
-msgid "Install the Lepton tool from Steam, then come back here."
-msgstr "请从 Steam 安装 Lepton 工具，然后回到这里。"
-
-msgid "The compositor isn't on this headset (%s)."
-msgstr "这台头显上没有合成器（%s）。"
-
-msgid "No Android apps yet."
-msgstr "还没有安卓应用。"
-
-msgid "Put an APK in a folder of its own: ~/%s/<name>/app.apk"
-msgstr "把 APK 放进单独的文件夹：~/%s/<名称>/app.apk"
-
-msgid "The folder's name is the name shown here."
-msgstr "文件夹的名称就是这里显示的名称。"
-
-msgid "PICTURE %s"
-msgstr "图片 %s"
-
-msgid "PICTURE"
-msgstr "图片"
-
-msgid "MUSIC"
-msgstr "音乐"
-
-msgid "FISHEYE"
-msgstr "鱼眼"
-
-msgid "DUAL 360"
-msgstr "双鱼眼 360"
-
-msgid "SBS"
-msgstr "左右"
-
-msgid "TB"
-msgstr "上下"
-
-msgid "Dual 360"
-msgstr "双 360"
-
-msgid "Brightness"
-msgstr "亮度"
-
-msgid "Contrast"
-msgstr "对比度"
-
-msgid "Saturation"
-msgstr "饱和度"
-
-msgid "Gamma"
-msgstr "Gamma"
-
-msgid "Dark-scene lift"
-msgstr "暗部提亮"
-
-msgid "Sharpen"
-msgstr "锐化"
-
-msgid "Equidistant"
-msgstr "等距"
-
-msgid "Equisolid"
-msgstr "等立体角"
-
-msgid "Stereographic"
-msgstr "体视"
-
-msgid "Polynomial"
-msgstr "多项式"
-
-msgid "Bob"
-msgstr "Bob"
-
-msgid "Edge"
-msgstr "边缘"
-
-msgid "%s (your choice)"
-msgstr "%s（你的选择）"
-
-msgid "%s (from the command line)"
-msgstr "%s（来自命令行）"
-
-msgid "%s (test pattern)"
-msgstr "%s（测试图）"
-
-msgid "%s (window)"
-msgstr "%s（窗口）"
-
-msgid "%s (remembered for this file)"
-msgstr "%s（为此文件记住）"
-
-msgid "%s (from the file's sidecar)"
-msgstr "%s（来自旁挂文件）"
-
-msgid "%s (the folder's rule)"
-msgstr "%s（文件夹规则）"
-
-msgid "%+d ms"
-msgstr "%+d 毫秒"
-
-msgid "%.1f s"
-msgstr "%.1f 秒"
-
-msgid "Fetching..."
-msgstr "正在获取……"
-
-msgid "Fetched; choose it above."
-msgstr "已获取；请在上方选择。"
-
-msgid "Could not fetch %s: %s"
-msgstr "无法获取 %s：%s"
-
-msgid "%d ch"
-msgstr "%d 声道"
-
-msgid "Track %d"
-msgstr "轨道 %d"
-
-msgid "the 360 sound field"
-msgstr "360 声场"
-
-msgid "From the room: %s. Headphones."
-msgstr "来自房间：%s。耳机。"
-
-msgid "From the room: %s. The headset's speakers."
-msgstr "来自房间：%s。头显扬声器。"
-
-msgid "At this speed the stereo mix plays."
-msgstr "此速度下播放立体声混音。"
-
-msgid "Tuned to your ears: head size %d %%."
-msgstr "已按你的耳朵调校：头部大小 %d %%。"
-
-msgid "Fetch: %s"
-msgstr "获取：%s"
-
-msgid "Licence: %s"
-msgstr "许可：%s"
-
-msgid "Download %s"
-msgstr "下载 %s"
-
-msgid "PC: %s"
-msgstr "电脑：%s"
-
-msgid "none set"
-msgstr "未设置"
-
-msgid "Playing on %s; the picture is held back %d ms."
-msgstr "正在 %s 上播放；画面延迟 %d 毫秒。"
-
-msgid "Connecting to %s... (%s)"
-msgstr "正在连接 %s……（%s）"
-
-msgid "Connecting to %s..."
-msgstr "正在连接 %s……"
-
-msgid "commentary"
-msgstr "解说"
-
-msgid "description"
-msgstr "口述影像"
-
-msgid "SDH"
-msgstr "听障"
-
-msgid "forced"
-msgstr "强制"
-
-msgid "original"
-msgstr "原版"
-
-msgid "The PC running tools/audio_sink.py: its address, or address:port"
-msgstr "运行 tools/audio_sink.py 的电脑：地址，或 地址:端口"
-
-msgid "%.2f m"
-msgstr "%.2f 米"
-
-msgid "%+.1f s"
-msgstr "%+.1f 秒"
-
-msgid "file"
-msgstr "文件"
-
-msgid "picture"
-msgstr "图像"
-
-msgid "Loaded: %s"
-msgstr "已加载：%s"
-
-msgid "No subtitle files found for this video"
-msgstr "没有找到此视频的字幕文件"
-
-msgid "%d line with \"%s\""
-msgid_plural "%d lines with \"%s\""
-msgstr[0] "%d 行含有“%s”"
-
-msgid "No script for this file: %s"
-msgstr "此文件没有台词：%s"
-
-msgid "no subtitle text"
-msgstr "没有字幕文字"
-
-msgid "Lines around %s"
-msgstr "%s 附近的台词"
-
-msgid "Reading the film for its subtitles: %d s"
-msgstr "正在读取影片中的字幕：%d 秒"
-
-msgid "%s %d s"
-msgstr "%s %d 秒"
-
-msgid "Script from: %s"
-msgstr "台词来源：%s"
-
-msgid "Find a line by its words (\"quoted phrases\" too)"
-msgstr "按词语查找台词（也可用 \"带引号的短语\"）"
-
-msgid "+%.1f dB"
-msgstr "+%.1f dB"
-
-msgid "DV profile 5 (IPT, as PQ)"
-msgstr "DV 配置文件 5（IPT，按 PQ）"
-msgid "%d min"
-msgstr "%d 分钟"
-
-msgid "off"
-msgstr "关"
-
-msgid "%s (photo)"
-msgstr "%s（照片）"
-
-msgid "This picture can't be a room (only local pictures)."
-msgstr "这张图片不能用作房间（只能用本地图片）。"
-
-msgid "%s (moved) (%d of %d)"
-msgstr "%s（已移动）（第 %d 个，共 %d 个）"
-
-msgid "%s (%d of %d)"
-msgstr "%s（第 %d 个，共 %d 个）"
-
-msgid "Where %s was (%d seat)"
-msgid_plural "Where %s was (%d seats)"
-msgstr[0] "%s 原来的位置（%d 个座位）"
-
-msgid "The room's own spot (%d seat)"
-msgid_plural "The room's own spot (%d seats)"
-msgstr[0] "房间默认位置（%d 个座位）"
-
-msgid "Go to %s"
-msgstr "前往 %s"
-
-msgid "Seat %d"
-msgstr "座位 %d"
-
-msgid "Intermission: %s left. Play ends it."
-msgstr "中场休息：剩余 %s。播放即结束。"
-
-msgid "This film stops at %s."
-msgstr "这部影片将在 %s 暂停。"
-
-msgid "Films over %d min with chapters stop once, near the middle."
-msgstr "超过 %d 分钟且有章节的影片会在中间附近暂停一次。"
-
-msgid "15 min"
-msgstr "15 分钟"
-
-msgid "30 min"
-msgstr "30 分钟"
-
-msgid "60 min"
-msgstr "60 分钟"
-
-msgid "90 min"
-msgstr "90 分钟"
-
-msgid "End of file"
-msgstr "文件结束时"
-
-msgid "Void"
-msgstr "虚空"
-
-msgid "Dim room"
-msgstr "暗室"
-
-msgid "Cinema"
-msgstr "影院"
-
-msgid "Passthrough"
-msgstr "透视"
-
-msgid "Home theatre"
-msgstr "家庭影院"
-
-msgid "Drive-in"
-msgstr "汽车影院"
-
-msgid "Planetarium"
-msgstr "天文馆"
-
-msgid "Dome"
-msgstr "圆顶"
-
 msgid "Effects gallery"
 msgstr "效果展厅"
 
@@ -2424,603 +3259,59 @@ msgstr "日落天空"
 
 msgid "Cloud layers sky"
 msgstr "云层天空"
-msgid "Queue: pick a file to remove"
-msgstr "队列：选择要移除的文件"
-
-msgid "(nothing queued: open a file from a folder)"
-msgstr "（队列为空：从文件夹中打开一个文件）"
-
-msgid "Playing: %s"
-msgstr "正在播放：%s"
-
-msgid "Remove: %s"
-msgstr "移除：%s"
-
-msgid "Favourites: pick one to remove"
-msgstr "收藏：选择要移除的一项"
-
-msgid "+ Add the playing file"
-msgstr "+ 添加正在播放的文件"
-
-msgid "(no favourites yet: open a folder and press Favourite)"
-msgstr "（还没有收藏：打开一个文件夹并按“收藏”）"
-
-msgid "Search: %s"
-msgstr "搜索：%s"
-
-msgid "type a name..."
-msgstr "输入名称……"
-
-msgid "(nothing found yet)"
-msgstr "（还没有找到）"
-
-msgid "Search your favourites, history, queue and the last local folder"
-msgstr "搜索收藏、历史记录、队列和上次打开的本地文件夹"
-
-msgid "words from the name"
-msgstr "名称中的词"
-
-msgid "Share"
-msgstr "共享"
-
-msgid "User"
-msgstr "用户"
-
-msgid "Password"
-msgstr "密码"
-
-msgid "Domain"
-msgstr "域"
-
-msgid "nas.local or 192.168.1.10"
-msgstr "nas.local 或 192.168.1.10"
-
-msgid "optional"
-msgstr "可选"
-
-msgid "%d season"
-msgid_plural "%d seasons"
-msgstr[0] "%d 季"
-
-msgid "Season %d"
-msgstr "第 %d 季"
-
-msgid "Specials"
-msgstr "特别篇"
-
-msgid "%d min"
-msgstr "%d 分钟"
-
-msgid "Watched"
-msgstr "已看"
-
-msgid "%d of %d"
-msgstr "已看 %d/%d"
-
-msgid "%d episode"
-msgid_plural "%d episodes"
-msgstr[0] "%d 集"
-
-msgid "Nothing here yet. Ask an agent on the headset to fill it, or add folders to %s"
-msgstr "这里还没有内容。可以让头显上的代理来填充，或把文件夹添加到 %s"
-
-msgid "Flat 2D"
-msgstr "平面 2D"
-
-msgid "Flat 3D, side by side (full)"
-msgstr "平面 3D，左右（全宽）"
-
-msgid "Flat 3D, side by side (half)"
-msgstr "平面 3D，左右（半宽）"
-
-msgid "Flat 3D, top/bottom (full)"
-msgstr "平面 3D，上下（全高）"
-
-msgid "Flat 3D, top/bottom (half)"
-msgstr "平面 3D，上下（半高）"
-
-msgid "180° mono"
-msgstr "180° 单目"
-
-msgid "180° 3D, side by side"
-msgstr "180° 3D，左右"
-
-msgid "360° mono"
-msgstr "360° 单目"
-
-msgid "360° 3D, top/bottom"
-msgstr "360° 3D，上下"
-
-msgid "Fisheye 180° mono"
-msgstr "鱼眼 180° 单目"
-
-msgid "Fisheye 180° 3D, side by side"
-msgstr "鱼眼 180° 3D，左右"
-
-msgid "Fisheye 200° 3D, side by side"
-msgstr "鱼眼 200° 3D，左右"
-
-msgid "Dual fisheye 360° (front and back lens)"
-msgstr "双鱼眼 360°（前后镜头）"
-
-msgid "Per-eye alignment"
-msgstr "每眼对齐"
-
-msgid "Convergence and IPD"
-msgstr "会聚与瞳距"
-
-msgid "Judder 24 fps"
-msgstr "抖动 24 fps"
-
-msgid "Judder 30 fps"
-msgstr "抖动 30 fps"
-
-msgid "Judder 60 fps"
-msgstr "抖动 60 fps"
-
-msgid "A/V sync"
-msgstr "音画同步"
-
-msgid "Zone plate, flat 4K"
-msgstr "波带片，平面 4K"
-
-msgid "Zone plate, 360° 8K"
-msgstr "波带片，360° 8K"
-
-msgid "Starfield, 360° 8K"
-msgstr "星空，360° 8K"
-
-msgid "Dark gradient, flat 4K"
-msgstr "暗部渐变，平面 4K"
-
-msgid "List"
-msgstr "列表"
-
-msgid "Grid"
-msgstr "网格"
-
-msgid "GRAB"
-msgstr "抓取"
-
-msgid "LET GO: THROW"
-msgstr "松开：扔出"
-
-msgid "NEAR-FAR / TURN"
-msgstr "远近 / 转动"
-
-msgid "CANCEL"
-msgstr "取消"
-
-msgid "Tidy up"
-msgstr "整理"
-
-msgid "Pick up: point at an object and hold the grip. Let go to drop it, or throw it. Tidy up puts everything back."
-msgstr "拿起：指向物体并按住握把。松开即放下，也可以把它扔出去。整理会把一切放回原处。"
-
-msgid "Attach"
-msgstr "附着"
-
-msgid "Detach"
-msgstr "分离"
-
-msgid "Put back"
-msgstr "放回"
-
-msgid "Follows %s"
-msgstr "跟随 %s"
-
-msgid "Follows:"
-msgstr "跟随："
-
-msgid "%s follows %s"
-msgstr "%s 跟随 %s"
-
-msgid "%s stays where it is"
-msgstr "%s 留在原处"
-
-msgid "%s is back where it was placed"
-msgstr "%s 已放回原处"
-
-msgid "Tidied up: %d object back"
-msgid_plural "Tidied up: %d objects back"
-msgstr[0] "已整理：%d 个物体放回原处"
-
-# --- Fab in the app (ui/fab_panel.gd) ---
-msgid "Fab"
-msgstr "Fab"
-
-msgid "Search and import Quixel Megascans' free 3D objects from Fab here. Fab's licence (its EULA) covers what you download: you may use the objects; you may not pass the files on. Read it, then accept it to start."
-msgstr "在这里从 Fab 搜索并导入 Quixel Megascans 的免费 3D 物品。你下载的内容受 Fab 的许可（其 EULA）约束：你可以使用这些物品，但不可以转交文件。请先阅读，然后接受即可开始。"
-
-msgid "Read Fab's licence"
-msgstr "阅读 Fab 的许可"
-
-msgid "Accept"
-msgstr "接受"
-
-msgid "Search Fab"
-msgstr "搜索 Fab"
-
-msgid "More"
-msgstr "更多"
-
-msgid "Import"
-msgstr "导入"
-
-msgid "Clear Fab's cache"
-msgstr "清除 Fab 缓存"
-
-msgid "Withdraw"
-msgstr "撤回"
-
-msgid "Results for “%s”"
-msgstr "“%s”的结果"
-
-msgid "Search for an object by its name, in English."
-msgstr "用英文按名称搜索物品。"
-
-msgid "Searching Fab..."
-msgstr "正在搜索 Fab..."
-
-msgid "Nothing found. Try other words, in English."
-msgstr "什么也没找到。请换些英文词再试。"
-
-msgid "It is in your objects already."
-msgstr "它已在你的物品中。"
-
-msgid "Pick one, then Import."
-msgstr "选择一个，然后导入。"
-
-msgid "You accepted Fab's licence on %s."
-msgstr "你已于 %s 接受 Fab 的许可。"
-
-msgid "Asking Fab for %s..."
-msgstr "正在向 Fab 请求 %s..."
-
-msgid "Downloading %s: %.1f of %.1f MB"
-msgstr "正在下载 %s：%.1f / %.1f MB"
-
-msgid "Downloading %s: %.1f MB"
-msgstr "正在下载 %s：%.1f MB"
-
-msgid "Cancelled."
-msgstr "已取消。"
-
-msgid "Fab is busy: the app waits %d s before it asks again."
-msgstr "Fab 正忙：应用会等待 %d 秒后再请求。"
-
-msgid "Fab can't be reached. Is the headset online?"
-msgstr "无法连接 Fab。头显联网了吗？"
-
-msgid "Fab answered with an error (HTTP %d). Try again later."
-msgstr "Fab 返回了错误（HTTP %d）。请稍后再试。"
-
-msgid "Fab's answer was not as expected. Try again later."
-msgstr "Fab 的回复与预期不符。请稍后再试。"
-
-msgid "This object has no download the app can use."
-msgstr "这个物品没有应用能用的下载文件。"
-
-msgid "This object's download is too big for the headset."
-msgstr "这个物品的下载文件对头显来说太大。"
-
-msgid "A download is under way."
-msgstr "正在下载中。"
-
-msgid "The import failed: %s"
-msgstr "导入失败：%s"
-
-msgid "Fab's licence accepted. Search Fab to find objects."
-msgstr "已接受 Fab 的许可。搜索 Fab 来查找物品。"
-
-msgid "Fab's licence withdrawn: the app asks Fab nothing until you accept it again."
-msgstr "已撤回 Fab 的许可：在你再次接受之前，应用不会向 Fab 请求任何内容。"
-
-msgid "Fab's cache is cleared."
-msgstr "Fab 缓存已清除。"
-
-msgid "Search Fab's free Megascans"
-msgstr "搜索 Fab 的免费 Megascans"
-
-msgid "words in English, such as rock or chair"
-msgstr "英文词，例如 rock 或 chair"
-
-msgid "POINTER"
-msgstr "光标"
-
-msgid "That is a password field. Voice never types into one."
-msgstr "这是密码框。语音从不输入到密码框。"
-
-msgid "No microphone, so nothing was typed."
-msgstr "没有麦克风，所以没有输入任何内容。"
-
-msgid "Select a text field on the page first, then hold the talk button."
-msgstr "请先选中网页上的文本框，再按住说话键。"
-
-msgid "The page changed, so nothing was typed."
-msgstr "网页已更换，所以没有输入任何内容。"
-
-msgid "The browser window closed, so nothing was typed."
-msgstr "浏览器窗口已关闭，所以没有输入任何内容。"
-
-msgid "Speech to text isn't working on the headset, so nothing was typed."
-msgstr "头显上的语音转文字不可用，所以没有输入任何内容。"
-
-#. The one-time speech model download (scripts/voice/whisper_backend.gd).
-msgid "Voice needs a one-time download of about %d MB. Downloaded: %d %%. The rest of the player works as usual."
-msgstr "语音功能需要一次性下载约 %d MB。已下载：%d %%。播放器的其他功能照常可用。"
-
-msgid "Speech model download: %d %%"
-msgstr "语音模型下载：%d %%"
-
-msgid "Voice needs the network once, for a download of about %d MB. The rest of the player works as usual."
-msgstr "语音功能需要联网一次，下载约 %d MB。播放器的其他功能照常可用。"
-
-msgid "The speech model did not download. Voice tries again when you use it next."
-msgstr "语音模型没有下载成功。下次使用语音时会再试一次。"
-
-msgid "Voice is starting."
-msgstr "语音功能正在启动。"
-
-msgid "Voice is ready."
-msgstr "语音功能已可用。"
-
-msgid "Didn't catch that. Try again."
-msgstr "没听清，请再说一次。"
-
-msgid "The page didn't answer, so nothing was typed."
-msgstr "网页没有响应，所以没有输入任何内容。"
-
-msgid "The text field lost focus, so nothing was typed."
-msgstr "文本框已失去焦点，所以没有输入任何内容。"
-
-msgid "Laser on the browser"
-msgstr "在浏览器上使用激光"
-
-msgid "The laser points and clicks on the page too, as well as the stick"
-msgstr "除摇杆外，激光也能在网页上指向和点击"
-
-msgid "KEEP PICTURE"
-msgstr "保存图片"
-
-msgid "APPLY"
-msgstr "应用"
-
-msgid "SIZE / TURN"
-msgstr "大小 / 旋转"
-
-msgid "%s is in your materials."
-msgstr "%s 已加入你的材质。"
-
-msgid "Poster"
-msgstr "海报"
-
-msgid "Canvas"
-msgstr "画布"
-
-msgid "Cut-out"
-msgstr "立牌"
-
-msgid "No picture under the pointer"
-msgstr "指针下没有图片"
-
-msgid "That picture could not be kept"
-msgstr "无法保存这张图片"
-
-msgid "Picture kept: %s"
-msgstr "已保存图片：%s"
-
-msgid "Already in your pictures: %s"
-msgstr "已在你的图片中：%s"
-
-msgid "Point at a part first"
-msgstr "请先指向一个部件"
-
-msgid "Pictures"
-msgstr "图片"
-
-msgid "Surfaces"
-msgstr "表面"
-
-msgid "Find pictures"
-msgstr "查找图片"
-
-msgid "Browse yourself. On an image, the right stick click keeps it; Copy image and saving to Downloads keep it too."
-msgstr "请自行浏览。在图片上按下右摇杆即可保存；“复制图片”和保存到“下载”也能保存。"
-
-msgid "Place as:"
-msgstr "放置为："
-
-msgid "Framed"
-msgstr "装框"
-
-msgid "Apply to a part"
-msgstr "应用到部件"
-
-msgid "Kept pictures stay on this headset, for your own use: the app never uploads or shares them."
-msgstr "保存的图片只留在这台头显上，供你自己使用：应用从不上传或共享它们。"
-
-msgid "Pick a picture, then place it or apply it."
-msgstr "选择一张图片，然后放置或应用它。"
-
-msgid "On an image, the right stick click keeps it."
-msgstr "在图片上按下右摇杆即可保存。"
-
-msgid "Delete %s from your pictures?"
-msgstr "从你的图片中删除 %s？"
-
-msgid "words to search for, such as autumn forest"
-msgstr "要搜索的词，例如 autumn forest"
-
-msgid "Find surfaces"
-msgstr "查找表面"
-
-msgid "Apply: point at a wall, the floor, a seat or an object's part; the trigger puts it there. Stick: size and turn the pattern."
-msgstr "应用：指向墙、地面、座位或物品的部件，扳机即可放上。摇杆：调整图案大小和旋转。"
-
-msgid "Search for a surface by its name, in English."
-msgstr "用英文名称搜索表面。"
-
-msgid "It is in your materials already."
-msgstr "它已在你的材质中。"
-
-msgid "Asking for %s..."
-msgstr "正在请求 %s……"
-
-msgid "Accept Fab's licence in Your objects first."
-msgstr "请先在“你的物品”中接受 Fab 的许可。"
-
-msgid "The site is busy: the app waits %d s before it asks again."
-msgstr "该网站繁忙：应用将等待 %d 秒后再请求。"
-
-msgid "The site can't be reached. Is the headset online?"
-msgstr "无法连接该网站。头显是否已联网？"
-
-msgid "The site answered with an error (HTTP %d). Try again later."
-msgstr "该网站返回错误（HTTP %d）。请稍后再试。"
-
-msgid "The site's answer was not as expected. Try again later."
-msgstr "该网站的回复不符合预期。请稍后再试。"
-
-msgid "This surface has no download the app can use."
-msgstr "这个表面没有应用可用的下载。"
-
-msgid "This surface's download is too big for the headset."
-msgstr "这个表面的下载对头显来说太大。"
-
-msgid "Pick a material, then Apply to a part."
-msgstr "选择一种材质，然后点“应用到部件”。"
-
-msgid "%.1f m a repeat"
-msgstr "每 %.1f 米重复一次"
-
-msgid "Delete %s from your materials?"
-msgstr "从你的材质中删除 %s？"
-
-msgid "words in English, such as brick or oak floor"
-msgstr "英文词语，例如 brick 或 oak floor"
-
-msgid "That can't be applied here"
-msgstr "无法应用到这里"
-
-msgid "Point at a part and pull the trigger. Stick: size and turn the pattern. B cancels."
-msgstr "指向一个部件并扣动扳机。摇杆：调整图案大小和旋转。B 键取消。"
-
-msgid "Point at a part and pull the trigger. B cancels."
-msgstr "指向一个部件并扣动扳机。B 键取消。"
-
-msgid "Nothing changed"
-msgstr "没有任何更改"
-
-msgid "Dim during the film"
-msgstr "放映时调暗"
-
-msgid "The room's light goes down while the film plays."
-msgstr "影片播放时，房间的灯光变暗。"
-
-msgid "Ambience"
-msgstr "环境声"
-
-msgid "This room's sound against the Environment sound slider. At the bottom: off."
-msgstr "本房间的声音，相对于“环境声音”滑块。拉到最低：关闭。"
-
-msgid "Ambient life"
-msgstr "环境中的生物"
-
-msgid "Animals and other life in the room."
-msgstr "房间里的动物和其他生物。"
-
-msgid "Pre-show"
-msgstr "开场仪式"
-
-msgid "Curtains before the film, and the room's start of the show."
-msgstr "影片开始前的幕布，以及本房间的开场仪式。"
-
-msgid "Flickering lights"
-msgstr "闪烁的灯光"
-
-msgid "Off: lights that flicker stay steady."
-msgstr "关闭：闪烁的灯光保持稳定。"
-
-msgid "Motion"
-msgstr "动态"
-
-msgid "How much things in the room move: sways, tilts, weave."
-msgstr "房间里物体的运动幅度：摇摆、倾斜、抖动。"
-
-msgid "%+d dB"
-msgstr "%+d dB"
-
-msgid "Back to defaults"
-msgstr "恢复默认"
-
-msgid "Environment sound"
-msgstr "环境声音"
-
-msgid "The room's own sound: rain, birds, the projector. It always stays under the film."
-msgstr "房间自身的声音：雨声、鸟叫、放映机。它始终低于影片的声音。"
-
-msgid "House lights in the film"
-msgstr "放映中的场灯"
-
-msgid "Ripple"
-msgstr "波纹"
-
-msgid "How bright the house lamps stay once the film has started."
-msgstr "影片开始后场灯保持的亮度。"
-
-msgid "A faint ring on the floor where you move. At the bottom: none."
-msgstr "你移动时地面上出现的淡淡波纹。拉到最低：无。"
-
-msgid "On; this room draws the film itself, for the look of its screen."
-msgstr "开；此房间自己绘制影片，以呈现它的屏幕效果。"
-
-#. The Room tab: the group of cinema rooms.
-msgid "Cinemas"
-msgstr "影院"
-
-#. The Room tab: the group of television rooms (the history of television).
-msgid "Television"
-msgstr "电视"
 
 #. A room: an atmospheric picture palace of 1928, a courtyard open to the twilight sky.
 msgid "Atmospheric 1928"
 msgstr "星空庭院影院 1928"
 
+#. The Room tab: a room, a glass dome hall in deep water.
+msgid "Bathysphere"
+msgstr "深海球舱"
+
+#. The Room tab: a room, a Moon base's cinema under a geodesic glass dome.
+msgid "Crater"
+msgstr "环形山"
+
+#. A room: a drive-in cinema of 1958, seen from a car (the room list).
+msgid "Drive-in - 1958"
+msgstr "汽车影院 - 1958"
+
 #. A room: a large modern cinema with a steep rake and a huge curved screen.
 msgid "Flagship"
 msgstr "旗舰影院"
+
+msgid "Ice cinema"
+msgstr "冰雪影院"
+
+msgid "Nave"
+msgstr "中殿"
 
 #. A room: the cinema hall of a 1970s palace of culture (a civic arts centre).
 msgid "Palace of Culture 1974"
 msgstr "文化宫 1974"
 
-msgid "Clouds"
-msgstr "云"
+#. A room's name: a child's bedroom with a fort of pillows, 1993.
+msgid "Pillow Fort 1993"
+msgstr "枕头城堡 1993"
 
-msgid "How much of the open sky the clouds cover. They catch the film's light."
-msgstr "露天天空中云的多少。云会映出影片的光。"
+#. A room: a pink and blue picture palace.
+msgid "Pink Palace"
+msgstr "粉色宫殿"
 
-msgid "Organ before the film"
-msgstr "影片开始前的管风琴"
+msgid "Reclaimed"
+msgstr "荒野影院"
 
-msgid "The theatre organ behind the grilles plays for a minute or so when the room opens and between films, and finishes as the film starts."
-msgstr "格栅后的剧院管风琴会在放映厅开场时和两部影片之间演奏一分钟左右，并在影片开始时收尾。"
+#. A room's name: an open-air summer cinema on a roof in Athens.
+msgid "Athens rooftop"
+msgstr "雅典屋顶影院"
 
-msgid "Snow"
-msgstr "雪"
+#. A room: a small multiplex screen of 1983 (the room list).
+msgid "Screen 3 - 1983"
+msgstr "3 号厅 - 1983"
 
-msgid "Snow through the open back of the roof, over the birches outside."
-msgstr "雪从屋顶敞开的后部飘进来，也落在外面的树林里。"
-
-msgid "No snow"
-msgstr "无雪"
-
-msgid "Light snow"
-msgstr "小雪"
-
-msgid "Heavy snow"
-msgstr "大雪"
+#. A room's name: a private screening room in a house, 1962.
+msgid "Screening room 1962"
+msgstr "放映室 1962"
 
 #. A room: a narrow picture house of 1906 in a shop.
 msgid "Shopfront 1906"
@@ -3030,203 +3321,19 @@ msgstr "1906 年店面影院"
 msgid "Streamline 1937"
 msgstr "1937 年流线型影院"
 
-#. A room: a pink and blue picture palace.
-msgid "Pink Palace"
-msgstr "粉色宫殿"
-
-msgid "Player piano"
-msgstr "自动钢琴"
-
-msgid "A player piano by the screen plays along with the film. Off: no piano."
-msgstr "银幕旁的自动钢琴随影片弹奏。关：没有钢琴。"
-
-msgid "Cove colours"
-msgstr "灯槽颜色"
-
-msgid "The cove lights' colour before the film. Changing: they move through the colours. In the film they take the film's colour."
-msgstr "影片开始前灯槽灯光的颜色。变换：在各种颜色之间轮换。影片放映时它们取影片的颜色。"
-
-#. A colour choice: the colours change in turn.
-msgid "Changing"
-msgstr "变换"
-
-msgid "Gold"
-msgstr "金色"
-
-msgid "Rose"
-msgstr "玫瑰色"
-
-msgid "Jade"
-msgstr "玉绿色"
-
-#. A room: a small multiplex screen of 1983 (the room list).
-msgid "Screen 3 - 1983"
-msgstr "3 号厅 - 1983"
-
-msgid "Weave and tilt"
-msgstr "画面抖动与倾斜"
-
-msgid "How much the worn print drifts in the gate, and how crooked the projector stands. At the bottom: steady and straight."
-msgstr "旧拷贝在片门中漂移的程度，以及放映机歪斜的程度。拉到最低：稳定且端正。"
-
-#. A room: a drive-in cinema of 1958, seen from a car (the room list).
-msgid "Drive-in - 1958"
-msgstr "汽车影院 - 1958"
-
-msgid "Window speaker"
-msgstr "车窗扬声器"
-
-msgid "The film's sound from the little speaker hung on the car's window: tinny, mono, a little rattle."
-msgstr "影片声音来自挂在车窗上的小扬声器：单薄、单声道，略带杂音。"
-
-#. A room's name: a private screening room in a house, 1962.
-msgid "Screening room 1962"
-msgstr "放映室 1962"
-
-msgid "Wall lamps in the film"
-msgstr "影片中的壁灯"
-
-msgid "How bright the brass wall lamps stay once the film has started."
-msgstr "影片开始后黄铜壁灯保持的亮度。"
-
-#. A room's name: an open-air summer cinema on a roof in Athens.
-msgid "Athens rooftop"
-msgstr "雅典屋顶影院"
-
-msgid "Floodlights on the hill"
-msgstr "山上的泛光灯"
-
-msgid "How brightly the temple on the hill is lit. At the bottom: dark."
-msgstr "山上的神庙被照亮的程度。拉到最低：熄灭。"
-
-#. A room's name: a child's bedroom with a fort of pillows, 1993.
-msgid "Pillow Fort 1993"
-msgstr "枕头城堡 1993"
-
-msgid "Rain on the window"
-msgstr "窗上的雨"
-
-msgid "Rain on the glass and in the street, a drizzle, rain that comes and goes, or a dry night."
-msgstr "玻璃上和街上的雨、毛毛雨、时下时停的雨，或无雨的夜晚。"
-
-#. Rain on the window: the choices.
-msgid "Rain"
-msgstr "雨"
-
-msgid "Drizzle"
-msgstr "毛毛雨"
-
-msgid "Coming and going"
-msgstr "时下时停"
-
-msgid "Nave"
-msgstr "中殿"
-
-msgid "Candles"
-msgstr "蜡烛"
-
-msgid "None: the church by moonlight and the film alone. A few: two candle stands either side of the screen, the coronae over the nave and the votive lights. Many: four stands a side."
-msgstr "无：只有月光下的教堂和影片。少量：银幕两侧各两座烛台，中殿上方的吊冠和许愿烛。多：每侧四座烛台。"
-
-msgid "None"
-msgstr "无"
-
-msgid "The telly's own speaker"
-msgstr "电视机自带的扬声器"
-
-msgid "The film's sound as the telly's small speaker gives it: thin, boxy and in mono."
-msgstr "影片的声音如同电视机的小扬声器播放：单薄、发闷，且为单声道。"
-
-msgid "A few"
-msgstr "少量"
-
-msgid "Many"
-msgstr "大量"
-
-msgid "Reclaimed"
-msgstr "荒野影院"
-
-msgid "Weather"
-msgstr "天气"
-
-msgid "Rain through the broken roof, a misty drizzle, a clear night, or each in turn."
-msgstr "雨从破屋顶落下、带雾的细雨、晴朗的夜晚，或依次轮换。"
-
-msgid "Mist"
-msgstr "薄雾"
-
-msgid "Clear"
-msgstr "晴朗"
-
-msgid "Ice cinema"
-msgstr "冰雪影院"
-
-msgid "Aurora"
-msgstr "极光"
-
-msgid "The northern lights in the window and the skylights: lively before the film and swelling in its quiet scenes, glowing all the time, or staying away."
-msgstr "窗外和天窗里的北极光：影片开始前活跃，在安静的场景中增强；或一直发光，或不出现。"
-
-msgid "In quiet scenes"
-msgstr "安静场景中"
-
-msgid "Always"
-msgstr "始终"
-
-#. The Room tab: a room, a glass dome hall in deep water.
-msgid "Bathysphere"
-msgstr "深海球舱"
-
-#. The Bathysphere's setting: how often the whale comes.
-msgid "Whale"
-msgstr "鲸鱼"
-
-msgid "How often a whale swims past behind the screen in a quiet scene."
-msgstr "安静的场景中，鲸鱼从屏幕后方游过的频率。"
-
-#. The Bathysphere's settings: how deep the dome lies, and the floodlights in the film.
-msgid "How deep the dome lies: sunlit shallows with shafts of light and caustics, the blue twilight, or the black abyss where only the lamps and what glows show."
-msgstr "圆顶所在的深度：有光柱和焦散光纹的阳光浅海、蓝色的暮光层，或只有灯光和发光生物可见的漆黑深渊。"
-
-msgid "Sunlit shallows"
-msgstr "阳光浅海"
-
-msgid "Twilight"
-msgstr "暮光层"
-
-msgid "Abyss"
-msgstr "深渊"
-
-msgid "Lights outside in the film"
-msgstr "放映时的外部灯光"
-
-msgid "How bright the floodlights on the sea floor stay once the film has started. Before the film they are full."
-msgstr "影片开始后，照向海底的探照灯保持的亮度。影片开始前为全亮。"
-
-#. The Whale setting's choices.
-msgid "Never"
-msgstr "从不"
-
-msgid "Rarely"
-msgstr "很少"
-
-msgid "Sometimes"
-msgstr "有时"
-
-#. The Room tab: a room, a Moon base's cinema under a geodesic glass dome.
-msgid "Crater"
-msgstr "环形山"
-
-#. The Crater's setting: how fast Earth turns in the sky.
-msgid "Earth's speed"
-msgstr "地球转速"
-
-msgid "How fast Earth turns in the sky. At 1 x it turns once in two hours, about once a film."
-msgstr "地球在天空中转动的速度。1 倍时两小时转一圈，大约一部影片转一圈。"
-
 #. The TV-era rooms (app/environments/tv_*.env.json): names and settings.
 msgid "TV 1930 - glowing box"
 msgstr "电视 1930 - 发光的盒子"
+
+#. The rest of the TV-era rooms (app/environments/tv_*.env.json): names, descriptions and settings.
+msgid "TV 1937 - mirror lid"
+msgstr "电视 1937 - 镜面翻盖"
+
+msgid "TV 1953 - coronation day"
+msgstr "电视 1953 - 加冕日"
+
+msgid "TV 1966 - rented set"
+msgstr "电视 1966 - 租来的电视机"
 
 msgid "TV 1972 - first colour"
 msgstr "电视 1972 - 第一台彩电"
@@ -3240,109 +3347,17 @@ msgstr "电视 1987 - 租来的录像带"
 msgid "TV 1993 - bedroom telly"
 msgstr "电视 1993 - 卧室里的电视"
 
+msgid "TV 2002 - rear projection"
+msgstr "电视 2002 - 背投电视"
+
 msgid "TV 2005 - flat screen"
 msgstr "电视 2005 - 平板电视"
 
-msgid "Lines in the picture"
-msgstr "画面线数"
+msgid "TV tomorrow - the wall"
+msgstr "电视 明天 - 那面墙"
 
-msgid "Fire in the grate"
-msgstr "壁炉里的火"
-
-msgid "Snow from the aerial"
-msgstr "天线雪花噪点"
-
-msgid "Aerial lead noise"
-msgstr "天线连接线噪点"
-
-msgid "Bold lines"
-msgstr "粗扫描线"
-
-msgid "The tape"
-msgstr "录像带"
-
-msgid "Weather at the window"
-msgstr "窗外天气"
-
-msgid "Fairy lights over the telly"
-msgstr "电视上方的彩灯"
-
-msgid "Backlight bleed"
-msgstr "背光漏光"
-
-msgid "The set drew its picture in 30 glowing lines. More lines show the film more clearly than it ever could."
-msgstr "这台电视用 30 条发光的线绘出画面。线数越多，影片就越清晰，远胜当年。"
-
-msgid "A coal fire burns in the grate. Off: the grate is cold and the set's glow lights the room."
-msgstr "壁炉里燃着煤火。关：壁炉是冷的，只有电视的光照亮房间。"
-
-msgid "Snow on the picture from a weak signal on the roof aerial. At the bottom: a clean picture."
-msgstr "屋顶天线信号弱，画面上出现雪花。拉到最低：画面干净。"
-
-msgid "A coal fire burns in the grate, and the cat likes the hearth."
-msgstr "壁炉里燃着煤火，猫喜欢待在炉前。"
-
-msgid "A little snow from the aerial. At the bottom: a clean picture."
-msgstr "天线带来一点雪花。拉到最低：画面干净。"
-
-msgid "The set's colour knob. New colour sets were often turned up rich and warm."
-msgstr "电视的色彩旋钮。新的彩色电视常被调得浓郁温暖。"
-
-msgid "The computer and the telly share the aerial lead, and a little noise comes with it."
-msgstr "电脑和电视共用天线连接线，因此带来一点噪点。"
-
-msgid "The dark gaps between the picture's lines, as a small portable showed them close up."
-msgstr "画面扫描线之间的暗缝，就像近看小型便携电视时那样。"
-
-msgid "How many times the tape has been played: noise, smeared colour and the tear at the bottom."
-msgstr "录像带被播放过多少次：噪点、模糊的色彩和底部的撕裂。"
-
-msgid "How bright the wall lamps stay once the film has started."
-msgstr "影片开始后壁灯保持的亮度。"
-
-msgid "Rain on the window, a clear night, or each in turn."
-msgstr "雨打窗户、晴朗的夜晚，或两者轮流。"
-
-msgid "How bright the fairy lights over the telly are. At the bottom: off."
-msgstr "电视上方彩灯的亮度。拉到最低：关。"
-
-msgid "The early panel's backlight glowing through the dark scenes, most at the corners."
-msgstr "早期平板电视的背光在暗场景中透出，角落最明显。"
-
-msgid "30 lines"
-msgstr "30 线"
-
-msgid "60 lines"
-msgstr "60 线"
-
-msgid "120 lines"
-msgstr "120 线"
-
-msgid "Fresh"
-msgstr "全新"
-
-msgid "Rented"
-msgstr "租来的"
-
-msgid "Worn out"
-msgstr "磨损的"
-
-msgid "Raining"
-msgstr "下雨"
-
-msgid "A dry night"
-msgstr "无雨的夜晚"
-
-msgid "Showers"
-msgstr "阵雨"
-
-#. Pillow Fort 1993: a room setting.
-msgid "The telly fills the opening"
-msgstr "电视填满入口"
-
-#. Pillow Fort 1993: the setting's description.
-msgid "The telly stands just beyond the fort's opening and fills it; off, it is back on its chest of drawers across the room."
-msgstr "电视就放在枕头堡入口外，正好填满入口；关闭时，它回到房间另一头的抽屉柜上。"
+msgid "TV today - the present"
+msgstr "电视 今天 - 当下"
 
 msgid "A picture palace built as a Mediterranean courtyard at dusk: lit windows, iron balconies, a palace gate with an organ, a crescent moon and real stars."
 msgstr "一座建成地中海庭院模样的电影宫，正值黄昏：亮灯的窗户、铁艺阳台、带管风琴的宫门、一弯新月和真实的星空。"
@@ -3359,6 +3374,8 @@ msgstr "月球基地里网格玻璃圆顶下的影院：地球在银幕上方缓
 msgid "A drive-in lot at dusk, seen from a convertible's bench seat: the stars come out over the film, moths in the beam, mesas on the horizon."
 msgstr "黄昏时的汽车影院，从敞篷车的长椅上观看：星星在影片上方出现，光束里有飞蛾，地平线上是平顶山。"
 
+msgid "A big modern cinema: a steep rake, folded acoustic walls washed in amber, recliners, a starlit ceiling of baffles and a huge curved screen in velvet."
+msgstr "大型现代影院：陡峭的阶梯、暖黄灯光洗亮的折板吸音墙、躺椅、星光点点的吸音板天花，以及镶在丝绒中的巨大弧形银幕。"
 
 msgid "An ice hotel's cinema of sawn blocks and carvings under an ice vault: candles glowing inside the ice, hides on ice benches, the polar night and the northern lights outside."
 msgstr "冰酒店里的影院，由切割的冰块和冰雕砌成，顶上也是冰：烛光在冰中闪烁，冰凳上铺着兽皮，窗外是极夜和北极光。"
@@ -3396,6 +3413,15 @@ msgstr "1937年的流线型影院：发光变色的灯槽、环绕旭日的阶�
 msgid "The first television, 1930: a small glowing picture in a cabinet, the chair pulled up close."
 msgstr "1930年最早的电视：柜子里一块发光的小画面，椅子拉得很近。"
 
+msgid "A drawing room in 1937: a tall cabinet whose lid holds a mirror, the picture seen in the mirror, a marble fireplace and a tea tray."
+msgstr "1937年的客厅：一个高高的柜子，盖子里装着镜子，画面在镜子里看，还有大理石壁炉和茶盘。"
+
+msgid "Coronation day, June 1953: every chair in the house round one small set, bunting across the ceiling, sandwiches and tea, rain at the window."
+msgstr "1953年6月的加冕日：家里所有的椅子都围着一台小电视，天花板下挂着彩旗，有三明治和茶，窗外下着雨。"
+
+msgid "A living room in 1966: the rented set on splayed legs with its channel dial, a teak sideboard, an orange settee."
+msgstr "1966年的起居室：租来的电视机立在外撇的腿上，带着换台旋钮，木质餐边柜，橙色沙发。"
+
 msgid "The first colour set, 1972: the television in the corner and the chairs in a row."
 msgstr "1972年第一台彩电：电视放在角落，椅子排成一排。"
 
@@ -3408,212 +3434,266 @@ msgstr "1987年的家庭电视：一盘租来的录像带，沙发正对着电�
 msgid "A bedroom telly in 1993, seen from a bean bag on the floor."
 msgstr "1993年卧室里的电视，从地上的懒人沙发看过去。"
 
-msgid "The first flat screen, 2005: a wide picture on a stand, the sofa further back."
-msgstr "2005年第一台平板电视：架子上一块宽屏，沙发离得更远。"
-
-msgid "Nothing but black and a mirror floor that gives back the film, with a ripple where you move."
-msgstr "只有黑暗和一面映出影片的镜面地板，你移动的地方会泛起波纹。"
-
-msgid "A small dark room with nothing in it to look at but the film."
-msgstr "一间昏暗的小房间，除了影片别无可看。"
-
-msgid "Your own room through the headset's cameras, with the film in front of you."
-msgstr "通过头显摄像头看到你自己的房间，影片就在你面前。"
-
-msgid "A small home theatre: a sofa in a dark room, the screen above a low cabinet, tower speakers either side."
-msgstr "小型家庭影院：昏暗房间里的沙发，矮柜上方的银幕，两侧是落地音箱。"
-
-msgid "A drive-in at night, seen from a car in the middle of the lot: other cars, speaker posts and stars."
-msgstr "夜晚的汽车影院，从停车场中间的一辆车里观看：周围的车、扬声器柱和星星。"
-
-msgid "A planetarium: reclined seats under a dark dome full of stars, a skyline round its foot."
-msgstr "天文馆：深色圆顶下的躺椅，满天星斗，圆顶脚下一圈城市剪影。"
-
-msgid "An open geodesic dome on a wide plain at dusk, the first stars coming out overhead."
-msgstr "黄昏时宽阔平原上一座敞开的网格球顶，头顶第一批星星正在出现。"
-
-msgid "Time travel"
-msgstr "时光旅行"
-
-msgid "Over the film"
-msgstr "贯穿整部影片"
-
-msgid "Every 5 minutes"
-msgstr "每5分钟"
-
-msgid "Every 10 minutes"
-msgstr "每10分钟"
-
-msgid "Every 15 minutes"
-msgstr "每15分钟"
-
-msgid "One film, and the room moves forward through the history of television, an era at a time while it plays."
-msgstr "一部影片，播放时房间沿着电视的历史向前推进，一次一个年代。"
-
-#. The rest of the TV-era rooms (app/environments/tv_*.env.json): names, descriptions and settings.
-msgid "TV 1937 - mirror lid"
-msgstr "电视 1937 - 镜面翻盖"
-
-msgid "TV 1953 - coronation day"
-msgstr "电视 1953 - 加冕日"
-
-msgid "TV 1966 - rented set"
-msgstr "电视 1966 - 租来的电视机"
-
-msgid "TV 2002 - rear projection"
-msgstr "电视 2002 - 背投电视"
-
-msgid "TV today - the present"
-msgstr "电视 今天 - 当下"
-
-msgid "A drawing room in 1937: a tall cabinet whose lid holds a mirror, the picture seen in the mirror, a marble fireplace and a tea tray."
-msgstr "1937年的客厅：一个高高的柜子，盖子里装着镜子，画面在镜子里看，还有大理石壁炉和茶盘。"
-
-msgid "Coronation day, June 1953: every chair in the house round one small set, bunting across the ceiling, sandwiches and tea, rain at the window."
-msgstr "1953年6月的加冕日：家里所有的椅子都围着一台小电视，天花板下挂着彩旗，有三明治和茶，窗外下着雨。"
-
-msgid "A living room in 1966: the rented set on splayed legs with its channel dial, a teak sideboard, an orange settee."
-msgstr "1966年的起居室：租来的电视机立在外撇的腿上，带着换台旋钮，木质餐边柜，橙色沙发。"
-
 msgid "A lounge in 2002: a big deep rear projection set filling the end of the room, a leather sofa, a glass coffee table."
 msgstr "2002年的客厅：一台又大又深的背投电视占满房间的一头，皮沙发，玻璃茶几。"
 
-msgid "A living room today: a thin panel on a dark wall, a soundbar under it, a floor lamp by the sofa. The film at its best."
-msgstr "今天的起居室：深色墙上一块薄薄的屏幕，下面是条形音箱，沙发旁一盏落地灯。影片在这里最好看。"
-
-msgid "A coal fire burns in the grate."
-msgstr "壁炉里燃着煤火。"
-
-msgid "Lamp in the set"
-msgstr "机内投影灯"
-
-msgid "The projection lamp inside the set: an old lamp makes a dimmer picture."
-msgstr "电视机里的投影灯：灯用旧了，画面就更暗。"
-
-msgid "Floor lamp in the film"
-msgstr "影片中的落地灯"
-
-msgid "How bright the floor lamp by the sofa stays once the film has started."
-msgstr "影片开始后沙发旁落地灯保持的亮度。"
-
-msgid "TV tomorrow - the wall"
-msgstr "电视 明天 - 那面墙"
+msgid "The first flat screen, 2005: a wide picture on a stand, the sofa further back."
+msgstr "2005年第一台平板电视：架子上一块宽屏，沙发离得更远。"
 
 msgid "A calm bare room some day to come: no set at all, a part of the wall wakes and becomes the picture."
 msgstr "未来某一天一间安静空旷的房间：根本没有电视机，墙的一部分醒来，变成画面。"
 
-msgid "Stars in the window"
-msgstr "窗外的星星"
+msgid "A living room today: a thin panel on a dark wall, a soundbar under it, a floor lamp by the sofa. The film at its best."
+msgstr "今天的起居室：深色墙上一块薄薄的屏幕，下面是条形音箱，沙发旁一盏落地灯。影片在这里最好看。"
 
-msgid "How many stars the night shows through the long window."
-msgstr "长窗外的夜空里有多少星星。"
+msgid "Nothing but black and a mirror floor that gives back the film, with a ripple where you move."
+msgstr "只有黑暗和一面映出影片的镜面地板，你移动的地方会泛起波纹。"
 
-msgid "Wrong way round"
-msgstr "左右颠倒"
+msgid "Clouds"
+msgstr "云"
 
-msgid "The picture as the mirror shows it, left and right swapped. Off: the set turns it round."
-msgstr "画面如镜中所见，左右互换。关闭：由电视机把它转回来。"
+msgid "Organ before the film"
+msgstr "影片开始前的管风琴"
 
-msgid "Current"
-msgstr "当前"
+msgid "Lights outside in the film"
+msgstr "放映时的外部灯光"
 
-msgid "Default seat"
-msgstr "默认座位"
+#. The Bathysphere's setting: how often the whale comes.
+msgid "Whale"
+msgstr "鲸鱼"
 
-msgid "Then"
-msgstr "然后"
+msgid "House lights in the film"
+msgstr "放映中的场灯"
 
-msgid "Pause the film"
-msgstr "暂停影片"
+#. The Crater's setting: how fast Earth turns in the sky.
+msgid "Earth's speed"
+msgstr "地球转速"
 
-msgid "Close the app"
-msgstr "关闭应用"
-
-msgid "Turn the headset off"
-msgstr "关闭头显"
-
-msgid "The sound and the room fade out over a minute, then the film pauses with its place kept; the room stays dim until you play again."
-msgstr "声音和房间在一分钟内渐弱，然后影片暂停并记住位置；房间保持昏暗，直到你再次播放。"
-
-msgid "The sound and the room fade out over a minute, the film pauses with its place kept, then the app closes."
-msgstr "声音和房间在一分钟内渐弱，影片暂停并记住位置，然后应用关闭。"
-
-msgid "The sound and the room fade out over a minute, the film pauses with its place kept, then the headset turns itself off."
-msgstr "声音和房间在一分钟内渐弱，影片暂停并记住位置，然后头显自动关机。"
-
-#. PC windows (scripts/pc/, ui/pc_windows_row.gd, ui/pc_place.gd).
-msgid "PC window"
-msgstr "电脑窗口"
-
-msgid "On the PC, run the PC windows app and type this code (%d min left)."
-msgstr "在电脑上运行电脑窗口程序，并输入此代码（还剩 %d 分钟）。"
-
-msgid "No PC yet. Press Add a PC, then run the PC windows app on the PC."
-msgstr "还没有电脑。按“添加电脑”，然后在电脑上运行电脑窗口程序。"
-
-msgid "Waiting for a paired PC on this network."
-msgstr "正在等待此网络上已配对的电脑。"
-
-msgid "%d PC connected."
-msgid_plural "%d PCs connected."
-msgstr[0] "已连接 %d 台电脑。"
-
-msgid "Can't make the certificate: %s."
-msgstr "无法生成证书：%s。"
-
-msgid "Close"
-msgstr "关闭"
-
-msgid "Back to a pane"
-msgstr "回到窗格"
-
-msgid "Show on the big screen"
-msgstr "在大屏幕上显示"
-
-msgid "PC windows"
-msgstr "电脑窗口"
-
-msgid "PC windows is off. Turn it on in System, PC windows, and add your PC there."
-msgstr "电脑窗口已关闭。请在“系统”的“电脑窗口”中打开，并在那里添加你的电脑。"
-
-msgid "No windows yet."
-msgstr "还没有窗口。"
-
-msgid "Monitor"
-msgstr "显示器"
-
-msgid "Type into the window in focus"
-msgstr "输入到当前焦点窗口"
-
-msgid "Text to type"
-msgstr "要输入的文字"
-
-msgid "Send"
-msgstr "发送"
-
-msgid "Keyboard"
-msgstr "键盘"
-
-msgid "Your PC's windows as panes here, used with a mouse and keyboard paired with the headset. Run the PC windows app on the PC."
-msgstr "把电脑的窗口作为窗格显示在这里，用与头显配对的鼠标和键盘操作。请在电脑上运行电脑窗口程序。"
-
-msgid "Add a PC"
-msgstr "添加电脑"
-
-msgid "Type this code on the PC when it asks. Five wrong codes stop it."
-msgstr "电脑要求时，在电脑上输入此代码。输错五次即停止。"
-
-msgid "connected"
-msgstr "已连接"
-
-msgid "A big modern cinema: a steep rake, folded acoustic walls washed in amber, recliners, a starlit ceiling of baffles and a huge curved screen in velvet."
-msgstr "大型现代影院：陡峭的阶梯、暖黄灯光洗亮的折板吸音墙、躺椅、星光点点的吸音板天花，以及镶在丝绒中的巨大弧形银幕。"
+msgid "Window speaker"
+msgstr "车窗扬声器"
 
 msgid "Starlight ceiling"
 msgstr "星光天花"
 
+msgid "Aurora"
+msgstr "极光"
+
+msgid "Candles"
+msgstr "蜡烛"
+
+msgid "Snow"
+msgstr "雪"
+
+msgid "Rain on the window"
+msgstr "窗上的雨"
+
+#. Pillow Fort 1993: a room setting.
+msgid "The telly fills the opening"
+msgstr "电视填满入口"
+
+msgid "The telly's own speaker"
+msgstr "电视机自带的扬声器"
+
+msgid "Weather"
+msgstr "天气"
+
+msgid "Floodlights on the hill"
+msgstr "山上的泛光灯"
+
+msgid "Weave and tilt"
+msgstr "画面抖动与倾斜"
+
+msgid "Wall lamps in the film"
+msgstr "影片中的壁灯"
+
+msgid "Player piano"
+msgstr "自动钢琴"
+
+msgid "Cove colours"
+msgstr "灯槽颜色"
+
+msgid "Lines in the picture"
+msgstr "画面线数"
+
+msgid "Fire in the grate"
+msgstr "壁炉里的火"
+
+msgid "Snow from the aerial"
+msgstr "天线雪花噪点"
+
+msgid "Wrong way round"
+msgstr "左右颠倒"
+
+msgid "Aerial lead noise"
+msgstr "天线连接线噪点"
+
+msgid "Bold lines"
+msgstr "粗扫描线"
+
+msgid "The tape"
+msgstr "录像带"
+
+msgid "Weather at the window"
+msgstr "窗外天气"
+
+msgid "Fairy lights over the telly"
+msgstr "电视上方的彩灯"
+
+msgid "Lamp in the set"
+msgstr "机内投影灯"
+
+msgid "Backlight bleed"
+msgstr "背光漏光"
+
+msgid "Stars in the window"
+msgstr "窗外的星星"
+
+msgid "Floor lamp in the film"
+msgstr "影片中的落地灯"
+
+msgid "Ripple"
+msgstr "波纹"
+
+msgid "How much of the open sky the clouds cover. They catch the film's light."
+msgstr "露天天空中云的多少。云会映出影片的光。"
+
+msgid "The theatre organ behind the grilles plays for a minute or so when the room opens and between films, and finishes as the film starts."
+msgstr "格栅后的剧院管风琴会在放映厅开场时和两部影片之间演奏一分钟左右，并在影片开始时收尾。"
+
+#. The Bathysphere's settings: how deep the dome lies, and the floodlights in the film.
+msgid "How deep the dome lies: sunlit shallows with shafts of light and caustics, the blue twilight, or the black abyss where only the lamps and what glows show."
+msgstr "圆顶所在的深度：有光柱和焦散光纹的阳光浅海、蓝色的暮光层，或只有灯光和发光生物可见的漆黑深渊。"
+
+msgid "How bright the floodlights on the sea floor stay once the film has started. Before the film they are full."
+msgstr "影片开始后，照向海底的探照灯保持的亮度。影片开始前为全亮。"
+
+msgid "How often a whale swims past behind the screen in a quiet scene."
+msgstr "安静的场景中，鲸鱼从屏幕后方游过的频率。"
+
+msgid "How bright the house lamps stay once the film has started."
+msgstr "影片开始后场灯保持的亮度。"
+
+msgid "How fast Earth turns in the sky. At 1 x it turns once in two hours, about once a film."
+msgstr "地球在天空中转动的速度。1 倍时两小时转一圈，大约一部影片转一圈。"
+
+msgid "The film's sound from the little speaker hung on the car's window: tinny, mono, a little rattle."
+msgstr "影片声音来自挂在车窗上的小扬声器：单薄、单声道，略带杂音。"
+
 msgid "Pinholes of light in the ceiling between the baffles."
 msgstr "吸音板之间的天花上点点针孔光。"
+
+msgid "The northern lights in the window and the skylights: lively before the film and swelling in its quiet scenes, glowing all the time, or staying away."
+msgstr "窗外和天窗里的北极光：影片开始前活跃，在安静的场景中增强；或一直发光，或不出现。"
+
+msgid "None: the church by moonlight and the film alone. A few: two candle stands either side of the screen, the coronae over the nave and the votive lights. Many: four stands a side."
+msgstr "无：只有月光下的教堂和影片。少量：银幕两侧各两座烛台，中殿上方的吊冠和许愿烛。多：每侧四座烛台。"
+
+msgid "Snow through the open back of the roof, over the birches outside."
+msgstr "雪从屋顶敞开的后部飘进来，也落在外面的树林里。"
+
+msgid "Rain on the glass and in the street, a drizzle, rain that comes and goes, or a dry night."
+msgstr "玻璃上和街上的雨、毛毛雨、时下时停的雨，或无雨的夜晚。"
+
+#. Pillow Fort 1993: the setting's description.
+msgid "The telly stands just beyond the fort's opening and fills it; off, it is back on its chest of drawers across the room."
+msgstr "电视就放在枕头堡入口外，正好填满入口；关闭时，它回到房间另一头的抽屉柜上。"
+
+msgid "The film's sound as the telly's small speaker gives it: thin, boxy and in mono."
+msgstr "影片的声音如同电视机的小扬声器播放：单薄、发闷，且为单声道。"
+
+msgid "Rain through the broken roof, a misty drizzle, a clear night, or each in turn."
+msgstr "雨从破屋顶落下、带雾的细雨、晴朗的夜晚，或依次轮换。"
+
+msgid "How brightly the temple on the hill is lit. At the bottom: dark."
+msgstr "山上的神庙被照亮的程度。拉到最低：熄灭。"
+
+msgid "How much the worn print drifts in the gate, and how crooked the projector stands. At the bottom: steady and straight."
+msgstr "旧拷贝在片门中漂移的程度，以及放映机歪斜的程度。拉到最低：稳定且端正。"
+
+msgid "How bright the brass wall lamps stay once the film has started."
+msgstr "影片开始后黄铜壁灯保持的亮度。"
+
+msgid "A player piano by the screen plays along with the film. Off: no piano."
+msgstr "银幕旁的自动钢琴随影片弹奏。关：没有钢琴。"
+
+msgid "The cove lights' colour before the film. Changing: they move through the colours. In the film they take the film's colour."
+msgstr "影片开始前灯槽灯光的颜色。变换：在各种颜色之间轮换。影片放映时它们取影片的颜色。"
+
+msgid "The set drew its picture in 30 glowing lines. More lines show the film more clearly than it ever could."
+msgstr "这台电视用 30 条发光的线绘出画面。线数越多，影片就越清晰，远胜当年。"
+
+msgid "A coal fire burns in the grate. Off: the grate is cold and the set's glow lights the room."
+msgstr "壁炉里燃着煤火。关：壁炉是冷的，只有电视的光照亮房间。"
+
+msgid "Snow on the picture from a weak signal on the roof aerial. At the bottom: a clean picture."
+msgstr "屋顶天线信号弱，画面上出现雪花。拉到最低：画面干净。"
+
+msgid "The picture as the mirror shows it, left and right swapped. Off: the set turns it round."
+msgstr "画面如镜中所见，左右互换。关闭：由电视机把它转回来。"
+
+msgid "A coal fire burns in the grate."
+msgstr "壁炉里燃着煤火。"
+
+msgid "A coal fire burns in the grate, and the cat likes the hearth."
+msgstr "壁炉里燃着煤火，猫喜欢待在炉前。"
+
+msgid "How bright the wall lamps stay once the film has started."
+msgstr "影片开始后壁灯保持的亮度。"
+
+msgid "A little snow from the aerial. At the bottom: a clean picture."
+msgstr "天线带来一点雪花。拉到最低：画面干净。"
+
+msgid "The set's colour knob. New colour sets were often turned up rich and warm."
+msgstr "电视的色彩旋钮。新的彩色电视常被调得浓郁温暖。"
+
+msgid "The computer and the telly share the aerial lead, and a little noise comes with it."
+msgstr "电脑和电视共用天线连接线，因此带来一点噪点。"
+
+msgid "The dark gaps between the picture's lines, as a small portable showed them close up."
+msgstr "画面扫描线之间的暗缝，就像近看小型便携电视时那样。"
+
+msgid "How many times the tape has been played: noise, smeared colour and the tear at the bottom."
+msgstr "录像带被播放过多少次：噪点、模糊的色彩和底部的撕裂。"
+
+msgid "Rain on the window, a clear night, or each in turn."
+msgstr "雨打窗户、晴朗的夜晚，或两者轮流。"
+
+msgid "How bright the fairy lights over the telly are. At the bottom: off."
+msgstr "电视上方彩灯的亮度。拉到最低：关。"
+
+msgid "The projection lamp inside the set: an old lamp makes a dimmer picture."
+msgstr "电视机里的投影灯：灯用旧了，画面就更暗。"
+
+msgid "The early panel's backlight glowing through the dark scenes, most at the corners."
+msgstr "早期平板电视的背光在暗场景中透出，角落最明显。"
+
+msgid "How many stars the night shows through the long window."
+msgstr "长窗外的夜空里有多少星星。"
+
+msgid "How bright the floor lamp by the sofa stays once the film has started."
+msgstr "影片开始后沙发旁落地灯保持的亮度。"
+
+msgid "A faint ring on the floor where you move. At the bottom: none."
+msgstr "你移动时地面上出现的淡淡波纹。拉到最低：无。"
+
+msgid "Sunlit shallows"
+msgstr "阳光浅海"
+
+msgid "Twilight"
+msgstr "暮光层"
+
+msgid "Abyss"
+msgstr "深渊"
+
+#. The Whale setting's choices.
+msgid "Never"
+msgstr "从不"
+
+msgid "Rarely"
+msgstr "很少"
+
+msgid "Sometimes"
+msgstr "有时"
 
 msgid "Before the film"
 msgstr "影片开始前"
@@ -3621,159 +3701,83 @@ msgstr "影片开始前"
 msgid "Always (faint in the film)"
 msgstr "始终（放映时微弱）"
 
-#. Updates (scripts/update/updater.gd, ui/update_row.gd).
-msgid "Updates"
-msgstr "更新"
+msgid "In quiet scenes"
+msgstr "安静场景中"
 
-msgid "Check for updates"
-msgstr "检查更新"
+msgid "Always"
+msgstr "始终"
 
-msgid "Restart now"
-msgstr "立即重启"
+msgid "None"
+msgstr "无"
 
-msgid "Once a day the player asks GitHub for a new version and downloads it in the background. Only your IP address goes to GitHub."
-msgstr "播放器每天向 GitHub 查询一次新版本，并在后台下载。只有你的 IP 地址会发送给 GitHub。"
+msgid "A few"
+msgstr "少量"
 
-msgid "This copy does not run from an install: no updates."
-msgstr "此副本不是从安装目录运行的：不会更新。"
+msgid "Many"
+msgstr "大量"
 
-msgid "Version %s"
-msgstr "版本 %s"
+msgid "No snow"
+msgstr "无雪"
 
-msgid "Downloading version %s: %d %%"
-msgstr "正在下载版本 %s：%d %%"
+msgid "Light snow"
+msgstr "小雪"
 
-msgid "Preparing version %s..."
-msgstr "正在准备版本 %s……"
+msgid "Heavy snow"
+msgstr "大雪"
 
-msgid "Version %s is ready. It goes in at the next start."
-msgstr "版本 %s 已就绪，下次启动时生效。"
+#. Rain on the window: the choices.
+msgid "Rain"
+msgstr "雨"
 
-msgid "Updated to version %s"
-msgstr "已更新到版本 %s"
+msgid "Drizzle"
+msgstr "毛毛雨"
 
-msgid "Restart now to update to %s?"
-msgstr "立即重启以更新到 %s？"
+msgid "Coming and going"
+msgstr "时下时停"
 
-msgid "Quit now to update to %s? Then start the player again."
-msgstr "现在退出以更新到 %s？然后再次启动播放器。"
+#. A colour choice: the colours change in turn.
+msgid "Changing"
+msgstr "变换"
 
-msgid "Restart"
-msgstr "重启"
+msgid "Mist"
+msgstr "薄雾"
 
-msgid "Quit"
-msgstr "退出"
+msgid "Clear"
+msgstr "晴朗"
 
-msgid "Later"
-msgstr "稍后"
+msgid "Gold"
+msgstr "金色"
 
-msgid "Development AI assistant"
-msgstr "开发用 AI 助手"
+msgid "Rose"
+msgstr "玫瑰色"
 
-msgid "The translations other than English were made automatically, by AI."
-msgstr "英语以外的翻译均由 AI 自动生成。"
+msgid "Jade"
+msgstr "玉绿色"
 
-msgid "Show the introduction again"
-msgstr "再次显示介绍"
+msgid "30 lines"
+msgstr "30 线"
 
-msgid "Step %d of %d"
-msgstr "第 %d 步，共 %d 步"
+msgid "60 lines"
+msgstr "60 线"
 
-msgid "Calibrate your eyes"
-msgstr "校准你的眼睛"
+msgid "120 lines"
+msgstr "120 线"
 
-msgid "The headset sees where you look. Look at a window or at the agent's terminal, and the controller's keys go to it."
-msgstr "头显能看到你在看哪里。看着一个窗口或代理的终端，手柄的按键就会交给它。"
+msgid "Fresh"
+msgstr "全新"
 
-msgid "A short calibration makes this exact. Look at each dot and pull the trigger. It takes about a minute."
-msgstr "简短的校准能让它更准确。看着每个点，然后扣动扳机。大约需要一分钟。"
+msgid "Rented"
+msgstr "租来的"
 
-msgid "Skip"
-msgstr "跳过"
+msgid "Worn out"
+msgstr "磨损的"
 
-msgid "The controls"
-msgstr "操作方法"
+msgid "Raining"
+msgstr "下雨"
 
-msgid "Hold the right bumper and speak instead of typing. It types into a text field in the browser, a PC window or the agent's terminal, or talks to a connected assistant. Its label says TALK when it can."
-msgstr "按住右侧肩键说话，代替打字。它会输入到浏览器的文本框、电脑窗口或代理的终端，或者与已连接的助手对话。可以说话时，它的标签显示“说话”。"
+msgid "A dry night"
+msgstr "无雨的夜晚"
 
-msgid "Hold the left bumper and speak instead of typing. It types into a text field in the browser, a PC window or the agent's terminal, or talks to a connected assistant. Its label says TALK when it can."
-msgstr "按住左侧肩键说话，代替打字。它会输入到浏览器的文本框、电脑窗口或代理的终端，或者与已连接的助手对话。可以说话时，它的标签显示“说话”。"
+msgid "Showers"
+msgstr "阵雨"
 
-msgid "Menu button: this menu. Hold it to bring the menu in front of you."
-msgstr "菜单键：打开这个菜单。按住它，菜单会来到你面前。"
-
-msgid "Trigger: play and pause. On the menu it clicks."
-msgstr "扳机：播放和暂停。在菜单上用于点击。"
-
-msgid "Stick: seek and screen distance. On the menu it scrolls."
-msgstr "摇杆：快进快退和屏幕距离。在菜单上用于滚动。"
-
-msgid "A and B: the next and the previous video."
-msgstr "A 和 B：下一个和上一个视频。"
-
-msgid "Back"
-msgstr "返回"
-
-msgid "In the agent's terminal"
-msgstr "在代理的终端里"
-
-msgid "Only for Claude Code and Codex on the headset, on the pane at your controller."
-msgstr "仅用于头显上的 Claude Code 和 Codex，显示在你手柄旁的面板上。"
-
-msgid "X is Enter while the terminal shows."
-msgstr "终端显示时，X 是回车键。"
-
-msgid "Y shows and hides it. A quick tap of the bumper hides it too."
-msgstr "Y 显示和隐藏它。快速按一下肩键也能隐藏它。"
-
-msgid "When it asks you something (an amber edge), when you look at it (a blue edge) or while you hold the squeeze: the trigger is Enter, the stick is the arrow keys, A is Space and B is Escape."
-msgstr "当它问你问题时（琥珀色边框）、当你看着它时（蓝色边框）或按住握把时：扳机是回车键，摇杆是方向键，A 是空格键，B 是 Esc 键。"
-
-msgid "Squeeze held: the stick scrolls back."
-msgstr "按住握把：摇杆向回滚动。"
-
-msgid "A keyboard paired to the headset types into it."
-msgstr "与头显配对的键盘也能在里面打字。"
-
-msgid "The print on the controllers always shows what each button does now."
-msgstr "手柄上的印字始终显示每个按键当前的作用。"
-
-msgid "To see this again: System, Test and setup, Show the introduction again."
-msgstr "要再次查看：系统，测试和设置，再次显示介绍。"
-
-msgid "Start"
-msgstr "开始"
-
-msgid "Eye calibration done."
-msgstr "眼动校准完成。"
-
-msgid "No calibration: the gaze still works, but less exactly."
-msgstr "未校准：视线仍然可用，但不太准确。"
-
-msgid "The calibration could not start: the headset gave no eye gaze. Try again later from System, Show the introduction again."
-msgstr "校准无法开始：头显没有提供眼动数据。稍后可在“系统”中点“再次显示介绍”重试。"
-
-msgid "Install"
-msgstr "安装"
-
-msgid "Downloading the speech model for voice (about 264 MB): %d %%"
-msgstr "正在下载语音识别模型（约 264 MB）：%d %%"
-
-msgid "Start comes on when the speech model is here: %d %%"
-msgstr "语音模型下载完成后即可开始：%d %%"
-
-msgid "The speech model for voice is here."
-msgstr "语音识别模型已就绪。"
-
-msgid "The speech model for voice did not download."
-msgstr "语音识别模型未能下载。"
-
-msgid "The speech model for voice did not download: no network. Connect to Wi-Fi and press Retry."
-msgstr "语音识别模型未能下载：没有网络。请连接 Wi-Fi 后点“重试”。"
-
-msgid "Retry"
-msgstr "重试"
-
-msgid "Start without voice"
-msgstr "不使用语音，直接开始"

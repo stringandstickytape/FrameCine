@@ -26,6 +26,7 @@ const SIZE := 128
 const SIZES := {"quarry_tiles": 256, "deco_carpet": 256, "hex_pavers": 256, "board_concrete": 256,
 		"shell_carpet": 256}
 const GLASS_SHADER := preload("res://scripts/env/systems/kit/env_glass.gdshader")
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
 static var _maps := {}
 static var _pictures := {}
@@ -383,6 +384,15 @@ static func _noise2(u: float, v: float, pu: int, pv: int, seed_value: int) -> fl
 static func maps(pattern: String) -> Dictionary:
 	if _maps.has(pattern):
 		return _maps[pattern]
+	var drawn := ProcCache.images("procedural.gd:_maps:" + pattern, func() -> Array: return _draw_maps(pattern))
+	var out := {"albedo": ImageTexture.create_from_image(drawn[0]), "normal": ImageTexture.create_from_image(drawn[1]),
+			"orm": ImageTexture.create_from_image(drawn[2]), "mean": drawn[3].get_pixel(0, 0)}
+	_maps[pattern] = out
+	return out
+
+
+## The pattern's albedo, normal and packed maps (mipmapped), and the albedo's mean as one pixel.
+static func _draw_maps(pattern: String) -> Array:
 	var size: int = SIZES.get(pattern, SIZE)
 	var heights := PackedFloat32Array()
 	heights.resize(size * size)
@@ -414,10 +424,10 @@ static func maps(pattern: String) -> Dictionary:
 					0.35 if pattern in ["pressed_tin", "corrugated"] else 0.0))
 	for img: Image in [albedo, normal, orm]:
 		img.generate_mipmaps()
-	var out := {"albedo": ImageTexture.create_from_image(albedo), "normal": ImageTexture.create_from_image(normal),
-			"orm": ImageTexture.create_from_image(orm), "mean": mean}
-	_maps[pattern] = out
-	return out
+	# The mean is a number, not a picture: kept beside the maps as one float pixel, which reads back exactly.
+	var mean_px := Image.create_empty(1, 1, false, Image.FORMAT_RGBAF)
+	mean_px.set_pixel(0, 0, mean)
+	return [albedo, normal, orm, mean_px]
 
 
 ## The house material `m` (a library material from the light system) shows the pattern, `colour` on average.
@@ -450,6 +460,12 @@ static func glass(colour: Color, alpha: float, house_reference: float) -> Shader
 static func rose_window() -> Texture2D:
 	if _pictures.has("rose"):
 		return _pictures["rose"]
+	var t := ImageTexture.create_from_image(ProcCache.image("procedural.gd:_pictures:rose", _draw_rose_window))
+	_pictures["rose"] = t
+	return t
+
+
+static func _draw_rose_window() -> Image:
 	var n := 128
 	var img := Image.create_empty(n, n, false, Image.FORMAT_RGB8)
 	var glass := [Color(0.12, 0.2, 0.62), Color(0.62, 0.1, 0.12), Color(0.75, 0.55, 0.15), Color(0.15, 0.45, 0.25)]
@@ -476,9 +492,7 @@ static func rose_window() -> Texture2D:
 				if absf(r - 0.22) < 0.015 or absf(r - 0.78) < 0.015:
 					c = Color(0.03, 0.03, 0.035)
 			img.set_pixel(x, y, c)
-	var t := ImageTexture.create_from_image(img)
-	_pictures["rose"] = t
-	return t
+	return img
 
 
 ## Upper-case letters and a space in a 5 x 7 face, colour on back (a sign's lettering; nothing borrowed).
@@ -508,6 +522,13 @@ static func letters(text: String, colour: Color, back: Color) -> Texture2D:
 	var key := "%s %s %s" % [text, colour, back]
 	if _pictures.has(key):
 		return _pictures[key]
+	var t := ImageTexture.create_from_image(ProcCache.image("procedural.gd:_pictures:" + key,
+			func() -> Image: return _draw_letters(text, colour, back)))
+	_pictures[key] = t
+	return t
+
+
+static func _draw_letters(text: String, colour: Color, back: Color) -> Image:
 	var w := 2
 	for ch in text:
 		w += (GLYPHS.get(ch, GLYPHS[" "])[0] as String).length() + 1
@@ -522,9 +543,7 @@ static func letters(text: String, colour: Color, back: Color) -> Texture2D:
 				if line[i] == "1":
 					img.set_pixel(x + i, 2 + y, colour)
 		x += (rows[0] as String).length() + 1
-	var t := ImageTexture.create_from_image(img)
-	_pictures[key] = t
-	return t
+	return img
 
 
 ## A vertical gradient (UV.y 0 at the top), for the water round a glass dome.
@@ -532,14 +551,19 @@ static func gradient(top: Color, bottom: Color) -> Texture2D:
 	var key := "gradient %s %s" % [top, bottom]
 	if _pictures.has(key):
 		return _pictures[key]
+	var t := ImageTexture.create_from_image(ProcCache.image("procedural.gd:_pictures:" + key,
+			func() -> Image: return _draw_gradient(top, bottom)))
+	_pictures[key] = t
+	return t
+
+
+static func _draw_gradient(top: Color, bottom: Color) -> Image:
 	var img := Image.create_empty(4, 64, false, Image.FORMAT_RGB8)
 	for y in 64:
 		var f := float(y) / 63.0
 		for x in 4:
 			img.set_pixel(x, y, top.lerp(bottom, pow(f, 0.7)))
-	var t := ImageTexture.create_from_image(img)
-	_pictures[key] = t
-	return t
+	return img
 
 
 ## Caustics' map (the light system's `caustics`, the sea floor's, env_water.gdshaderinc): a seamless cellular pattern,
@@ -549,6 +573,12 @@ static func gradient(top: Color, bottom: Color) -> Texture2D:
 static func caustic_map() -> Texture2D:
 	if _pictures.has("caustics"):
 		return _pictures["caustics"]
+	var t := ImageTexture.create_from_image(ProcCache.image("procedural.gd:_pictures:caustics", _draw_caustic_map))
+	_pictures["caustics"] = t
+	return t
+
+
+static func _draw_caustic_map() -> Image:
 	var noise := FastNoiseLite.new()
 	noise.seed = 1934
 	noise.noise_type = FastNoiseLite.TYPE_CELLULAR
@@ -559,9 +589,7 @@ static func caustic_map() -> Texture2D:
 	var img := noise.get_seamless_image(256, 256, false, false, 0.15, true)
 	img.convert(Image.FORMAT_L8)
 	img.generate_mipmaps()
-	var t := ImageTexture.create_from_image(img)
-	_pictures["caustics"] = t
-	return t
+	return img
 
 
 ## An abstract painting of our own: soft blocks of colour on a ground, a few bands across (a mid-century canvas or
@@ -570,6 +598,13 @@ static func abstract(seed_value: int, palette: Array) -> Texture2D:
 	var key := "abstract %d %s" % [seed_value, palette]
 	if _pictures.has(key):
 		return _pictures[key]
+	var t := ImageTexture.create_from_image(ProcCache.image("procedural.gd:_pictures:" + key,
+			func() -> Image: return _draw_abstract(seed_value, palette)))
+	_pictures[key] = t
+	return t
+
+
+static func _draw_abstract(seed_value: int, palette: Array) -> Image:
 	var w := 96
 	var h := 64
 	var img := Image.create_empty(w, h, false, Image.FORMAT_RGB8)
@@ -593,9 +628,7 @@ static func abstract(seed_value: int, palette: Array) -> Texture2D:
 				c = c.lerp(bl[1], a * 0.85)
 			img.set_pixel(x, y, c)
 	img.generate_mipmaps()
-	var t := ImageTexture.create_from_image(img)
-	_pictures[key] = t
-	return t
+	return img
 
 
 ## A canvas of our own for a 1962 collector (since 2026-11-08, the Screening room 1962's painting): a hard-edged
@@ -606,6 +639,15 @@ static func colour_field(aspect: float) -> Texture2D:
 	var key := "colour_field %.3f" % aspect
 	if _pictures.has(key):
 		return _pictures[key]
+	# Drawn from the aspect as the key has it (to 0.001), so the key is all the picture depends on: two callers
+	# a hair apart get one picture, the same in every run, whichever asked first.
+	var t := ImageTexture.create_from_image(ProcCache.image("procedural.gd:_pictures:" + key,
+			func() -> Image: return _draw_colour_field(snappedf(aspect, 0.001))))
+	_pictures[key] = t
+	return t
+
+
+static func _draw_colour_field(aspect: float) -> Image:
 	var w := 512
 	var h := maxi(64, roundi(w / maxf(aspect, 0.2)))
 	var img := Image.create_empty(w, h, false, Image.FORMAT_RGB8)
@@ -641,9 +683,7 @@ static func colour_field(aspect: float) -> Texture2D:
 			var weave := 0.97 + 0.03 * sin(x * 2.2) * sin(y * 2.2)
 			img.set_pixel(x, y, c * weave)
 	img.generate_mipmaps()
-	var t := ImageTexture.create_from_image(img)
-	_pictures[key] = t
-	return t
+	return img
 
 
 ## A flame from the side (UV.y 0 at the top): bright yellow at its root, orange, fading to nothing at the tip and the
@@ -651,6 +691,12 @@ static func colour_field(aspect: float) -> Texture2D:
 static func flame() -> Texture2D:
 	if _pictures.has("flame"):
 		return _pictures["flame"]
+	var t := ImageTexture.create_from_image(ProcCache.image("procedural.gd:_pictures:flame", _draw_flame))
+	_pictures["flame"] = t
+	return t
+
+
+static func _draw_flame() -> Image:
 	var w := 32
 	var h := 48
 	var img := Image.create_empty(w, h, false, Image.FORMAT_RGB8)
@@ -663,6 +709,4 @@ static func flame() -> Texture2D:
 			var c := Color(1.0, 0.85, 0.4).lerp(Color(0.9, 0.35, 0.08), smoothstep(0.1, 0.6, v))
 			img.set_pixel(x, y, c * a * (1.0 - smoothstep(0.6, 1.0, v)))
 	img.generate_mipmaps()
-	var t := ImageTexture.create_from_image(img)
-	_pictures["flame"] = t
-	return t
+	return img

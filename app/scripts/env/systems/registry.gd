@@ -26,19 +26,21 @@ const SYSTEMS := {
 	"terrace": "res://scripts/env/systems/terrace.gd",
 	"domestic": "res://scripts/env/systems/domestic.gd",
 	"vehicle": "res://scripts/env/systems/vehicle.gd",
+	"cabin": "res://scripts/env/systems/cabin.gd",
 	"kit": "res://scripts/env/systems/kit.gd",
 	"atmosphere": "res://scripts/env/systems/atmosphere.gd",
 	"weather": "res://scripts/env/systems/weather.gd",
 	"life": "res://scripts/env/systems/life.gd",
 	"sky": "res://scripts/env/systems/sky.gd",
 	"vista": "res://scripts/env/systems/vista.gd",
+	"passing": "res://scripts/env/systems/passing.gd",
 	"sound_bed": "res://scripts/env/systems/sound_bed.gd",
 	"acoustics": "res://scripts/env/systems/acoustics.gd",
 	"music": "res://scripts/env/systems/music.gd",
 }
 ## The kinds a system may be (spec().kind).
 const KINDS: Array[String] = ["builder", "kit", "light", "sky", "atmosphere", "life", "sound", "music", "screen",
-		"seats", "motion", "showing"]
+		"seats", "motion", "showing", "journey"]
 
 static var _specs := {}
 

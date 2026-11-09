@@ -25,6 +25,7 @@ const Strokes := preload("res://scripts/env/systems/kit/strokes.gd")
 const IceHall := preload("res://scripts/env/systems/kit/ice_hall.gd")
 const U := preload("res://scripts/env/systems/kit/build_util.gd")
 const RoomSchemaRef := preload("res://scripts/assistant/room_schema.gd")
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
 ## The arcade's wall, thick: its faces either side of the columns' line.
 const WALL_T := 0.8
@@ -1976,8 +1977,18 @@ static var _maps_cache := {}
 static func _stone_maps(kind: String) -> Dictionary:
 	if _maps_cache.has(kind):
 		return _maps_cache[kind]
-	var size := 256 if kind == "ashlar" else 128
 	var span := 2.4 if kind == "ashlar" else (1.1 if kind == "grain" else 1.5)
+	var drawn := ProcCache.images("nave_gothic.gd:_maps_cache:" + kind,
+			func() -> Array: return _draw_stone_maps(kind, span))
+	var out := {"albedo": ImageTexture.create_from_image(drawn[0]), "normal": ImageTexture.create_from_image(drawn[1]),
+			"orm": ImageTexture.create_from_image(drawn[2]), "mean": drawn[3].get_pixel(0, 0), "span": span}
+	_maps_cache[kind] = out
+	return out
+
+
+## The stone's maps of `kind` (mipmapped), one repeat `span` metres, and the albedo's mean as one pixel.
+static func _draw_stone_maps(kind: String, span: float) -> Array:
+	var size := 256 if kind == "ashlar" else 128
 	var courses: Array[float] = [0.31, 0.27, 0.33, 0.29, 0.32, 0.28, 0.3, 0.3]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 731
@@ -2073,10 +2084,10 @@ static func _stone_maps(kind: String) -> Dictionary:
 			orm.set_pixel(px, py, Color(clampf(0.6 + 0.4 * heights[py * size + px], 0.0, 1.0), rough[py * size + px], 0.0))
 	for img: Image in [albedo, normal, orm]:
 		img.generate_mipmaps()
-	var out := {"albedo": ImageTexture.create_from_image(albedo), "normal": ImageTexture.create_from_image(normal),
-			"orm": ImageTexture.create_from_image(orm), "mean": mean, "span": span}
-	_maps_cache[kind] = out
-	return out
+	# The mean is a number, not a picture: kept beside the maps as one float pixel, which reads back exactly.
+	var mean_px := Image.create_empty(1, 1, false, Image.FORMAT_RGBAF)
+	mean_px.set_pixel(0, 0, mean)
+	return [albedo, normal, orm, mean_px]
 
 
 ## Seamless noise over a square of `size` pixels, about `cells` features across (0..1).
@@ -2326,6 +2337,11 @@ static var _rose_tex: ImageTexture
 static func _rose_picture() -> ImageTexture:
 	if _rose_tex != null:
 		return _rose_tex
+	_rose_tex = ImageTexture.create_from_image(ProcCache.image("nave_gothic.gd:_rose_picture", _draw_rose_picture))
+	return _rose_tex
+
+
+static func _draw_rose_picture() -> Image:
 	const N := 320
 	var img := Image.create_empty(N, N, false, Image.FORMAT_RGB8)
 	var rng := RandomNumberGenerator.new()
@@ -2338,8 +2354,7 @@ static func _rose_picture() -> ImageTexture:
 		for px in N:
 			var d := Vector2((px + 0.5) / N * 2.0 - 1.0, 1.0 - (py + 0.5) / N * 2.0) / scale
 			img.set_pixel(px, py, _rose_colour(d, tones).linear_to_srgb())
-	_rose_tex = ImageTexture.create_from_image(img)
-	return _rose_tex
+	return img
 
 
 static func _rose_colour(d: Vector2, tones: Array[float]) -> Color:

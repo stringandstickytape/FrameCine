@@ -30,6 +30,7 @@ const Procedural := preload("res://scripts/env/systems/kit/procedural.gd")
 const Pictures := preload("res://scripts/env/systems/kit/shopfront_pictures.gd")
 const U := preload("res://scripts/env/systems/kit/build_util.gd")
 const Builder := preload("res://scripts/env/systems/kit/builder.gd")
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
 ## Metres a lightmap texel covers: the big plain surfaces, the joinery and the small parts.
 const SHELL_TEXEL := 0.1
@@ -275,10 +276,15 @@ static var _orms := {}
 static func _orm(rough: float) -> Texture2D:
 	if _orms.has(rough):
 		return _orms[rough]
-	var img := Image.create_empty(4, 4, false, Image.FORMAT_RGB8)
-	img.fill(Color(1.0, rough, 0.0))
+	var img := ProcCache.image("shopfront_edwardian.gd:_orms:" + str(rough), func() -> Image: return _draw_orm(rough))
 	_orms[rough] = ImageTexture.create_from_image(img)
 	return _orms[rough]
+
+
+static func _draw_orm(rough: float) -> Image:
+	var img := Image.create_empty(4, 4, false, Image.FORMAT_RGB8)
+	img.fill(Color(1.0, rough, 0.0))
+	return img
 
 
 static func _lin(c: Color) -> Color:

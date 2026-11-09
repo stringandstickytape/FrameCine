@@ -149,8 +149,35 @@ func _run() -> void:
 	_check("let go: the analyser off again", react._analyzer == null and AudioServer.get_bus_effect_count(film) == before)
 	main.queue_free()
 	await process_frame
+	_progress()
 	print("test_env_signals: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	quit(_failures)
+
+
+## A source's progress (EnvSignals.progress()): the position over its length; with no length, by the time watched,
+## half way after an hour, three quarters after two, rising for ever and never at the end.
+func _progress() -> void:
+	_check("progress: half way (%.3f)" % EnvSignals.progress(300.0, 600.0),
+			EnvSignals.progress(300.0, 600.0) == 0.5)
+	_check("progress: past the end, 1 (%.3f)" % EnvSignals.progress(900.0, 600.0),
+			EnvSignals.progress(900.0, 600.0) == 1.0)
+	_check("progress: before the start, 0 (%.3f)" % EnvSignals.progress(-5.0, 600.0),
+			EnvSignals.progress(-5.0, 600.0) == 0.0)
+	_check("no length, at its start: 0 (%.3f)" % EnvSignals.progress(0.0, 0.0), EnvSignals.progress(0.0, 0.0) == 0.0)
+	_check("no length, an hour in: half way (%.6f)" % EnvSignals.progress(3600.0, 0.0),
+			absf(EnvSignals.progress(3600.0, 0.0) - 0.5) < 1e-6)
+	_check("no length, two hours in: three quarters (%.6f)" % EnvSignals.progress(7200.0, 0.0),
+			absf(EnvSignals.progress(7200.0, 0.0) - 0.75) < 1e-6)
+	var rising := true
+	var last := -1.0
+	for i in 100:
+		var p := EnvSignals.progress(36000.0 * i / 99.0, 0.0)
+		if p <= last:
+			rising = false
+		last = p
+	_check("no length: it rises with the position", rising)
+	_check("no length, ten hours in: still under 1 (%.6f)" % EnvSignals.progress(36000.0, 0.0),
+			EnvSignals.progress(36000.0, 0.0) < 1.0)
 
 
 func _check(what: String, ok: bool) -> void:

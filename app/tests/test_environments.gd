@@ -24,6 +24,7 @@ func _run() -> void:
 		if f.ends_with(".env.json"):
 			files.append(f)
 	_check("rooms as documents: %s" % [files], files.has("cinema.env.json") and files.has("void.env.json"))
+	print("  this machine's pace: %.1f ms (a build is counted in these)" % EnvChecks.pace())
 	for f in files:
 		var r := EnvDoc.load_file("res://environments/" + f)
 		var doc: Dictionary = r["doc"]
@@ -33,14 +34,43 @@ func _run() -> void:
 		var s := EnvChecks.static_checks(doc)
 		for k: String in s:
 			_check("%s: %s %s" % [f, k, s[k]], (s[k] as Array).is_empty())
+		# Built twice: the first build also draws the room's pictures (kept from then on); the second is what
+		# choosing the room costs after that, and the one the build budget is for.
+		var first: Node3D = EnvRoom.new()
+		first.doc = doc
+		var t0 := Time.get_ticks_usec()
+		root.add_child(first)
+		var first_ms := (Time.get_ticks_usec() - t0) / 1000.0
+		root.remove_child(first)
+		first.free()
 		var room: Node3D = EnvRoom.new()
 		room.doc = doc
+		t0 = Time.get_ticks_usec()
 		root.add_child(room)
+		var build_ms := (Time.get_ticks_usec() - t0) / 1000.0
 		await process_frame
 		var stats := EnvChecks.measure(room)
-		print("  %s: %s" % [f, stats])
+		var blend: Dictionary = await EnvChecks.blend_layers(self, room)
+		var units := EnvChecks.build_units(build_ms)
+		print("  %s: %s  blend %s (peak %d)  build %s (%d ms; %d ms the first time)" % [f, stats, blend["mean"],
+				blend["peak"], units, roundi(build_ms), roundi(first_ms)])
 		var over := EnvChecks.budget(stats)
 		_check("%s: within the headset's budget %s" % [f, over], over.is_empty())
+		_check("%s: %s blended layers over the view, at most %s" % [f, blend["mean"], EnvChecks.BLEND_BUDGET],
+				float(blend["mean"]) <= EnvChecks.BLEND_BUDGET)
+		var id := f.trim_suffix(".env.json")
+		if id in EnvChecks.BUILD_WAIVED:
+			var slowest := ""
+			for k: String in room.host.build_ms:
+				if slowest == "" or float(room.host.build_ms[k]) > float(room.host.build_ms[slowest]):
+					slowest = k
+			print("      waived: builds in %s, over the budget of %s (its slowest system: %s, %d ms)" % [units,
+					EnvChecks.BUILD_BUDGET, slowest, roundi(float(room.host.build_ms.get(slowest, 0.0)))])
+		else:
+			_check("%s: builds in %s (%d ms here), at most %s" % [f, units, roundi(build_ms), EnvChecks.BUILD_BUDGET],
+					units <= EnvChecks.BUILD_BUDGET)
+		var flow: Array = await EnvChecks.flow_clear(self, room)
+		_check("%s: nothing that goes by shows beside the picture %s" % [f, flow], flow.is_empty())
 		var blocked: Array = await EnvChecks.sight_line(self, room)
 		_check("%s: a clear sight line from every seat (%d seats) %s" % [f, maxi(room.get_seats().size(), 1),
 				blocked], blocked.is_empty())

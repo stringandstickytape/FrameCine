@@ -33,6 +33,7 @@ const Shapes := preload("res://scripts/env/systems/kit/shapes.gd")
 const PhysicsShapes := preload("res://scripts/play/physics_shapes.gd")
 const Auditorium := preload("res://scripts/env/systems/auditorium.gd")
 const LAMP_SHADER := preload("res://shaders/room_lamp.gdshader")
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
 ## The side walls' folded panels: a bay's length (about), how far a ridge stands out, where in the bay the fold
 ## meets the wall (the broad face turned to the seats before it, the return after); the panels' top (under the cove
@@ -245,6 +246,11 @@ class Glyphs:
 	static func atlas(lit: bool) -> Texture2D:
 		if _atlas.has(lit):
 			return _atlas[lit]
+		var img := ProcCache.image("flagship.gd:_atlas:" + str(lit), func() -> Image: return _draw_atlas(lit))
+		_atlas[lit] = ImageTexture.create_from_image(img)
+		return _atlas[lit]
+
+	static func _draw_atlas(lit: bool) -> Image:
 		var w := COLS * CELL.x * SCALE
 		var h := ROWS * CELL.y * SCALE
 		var img := Image.create_empty(w, h, false, Image.FORMAT_RGB8)
@@ -264,8 +270,7 @@ class Glyphs:
 						if line[x] == "1":
 							img.fill_rect(Rect2i((ox + ch_i * 6 + x) * SCALE, (oy + y) * SCALE, SCALE, SCALE), ink)
 		img.generate_mipmaps()
-		_atlas[lit] = ImageTexture.create_from_image(img)
-		return _atlas[lit]
+		return img
 
 
 static func build(piece: String, c: Object, _xf: Transform3D, _size: Vector3, e: Dictionary) -> void:

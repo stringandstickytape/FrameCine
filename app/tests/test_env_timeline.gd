@@ -44,6 +44,7 @@ func _run() -> void:
 	_cues()
 	_ritual()
 	_stopping()
+	_seeks()
 	print("test_env_timeline: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	quit(_failures)
 
@@ -263,6 +264,73 @@ func _stopping() -> void:
 	_steps(h, 3.0)
 	_check("which never sets the signs (%.2f)" % h.param("light.signs"), not is_equal_approx(float(h.param("light.signs")), 0.9))
 	room.queue_free()
+
+
+## A seek (env_timeline.gd `seeked`): the position jumping on or back, or a file opened at a place far from its start.
+## Not playback going on, a small step back, fast forward, a pause or a file opened at its start. It is no change of
+## state and fires no cue; a system of the room hears it (on_seek).
+func _seeks() -> void:
+	var room := _room({"schema": 4, "name": "States", "systems": [{"system": "light"}],
+			"timeline": {"starting_seconds": 2.0, "credits_minutes": 5.0}})
+	var h: Node = room.host
+	var seeks: Array = []
+	h.timeline.seeked.connect(func(a: float, b: float) -> void: seeks.append([a, b]))
+	var dt := 1.0 / 30.0
+	var pos := 0.0
+	for i in 150:
+		pos += dt
+		_at(h, pos, true, dt)
+	_check("playing for 5 s: no seek (%s)" % [seeks], seeks.is_empty())
+	var gs := GDScript.new()
+	gs.source_code = "extends Node\nvar id := \"stub\"\nvar seeks: Array = []\n" \
+			+ "func on_seek(a: float, b: float) -> void:\n\tseeks.append([a, b])\n" \
+			+ "func tick(_d: float) -> void:\n\tpass\n" \
+			+ "func on_state(_s: String, _p: String) -> void:\n\tpass\n" \
+			+ "func on_screen_changed(_l: Transform3D, _s: Vector2) -> void:\n\tpass\n"
+	gs.reload()
+	var stub: Node = gs.new()
+	h.order.append(stub)
+	var state_before := str(h.timeline.state)
+	var fired_before: int = h.timeline.fired.size()
+	var old := pos
+	pos += 600.0
+	_at(h, pos, true, dt)
+	_check("on by 600: one seek, from the old position to the new (%s)" % [seeks], seeks.size() == 1
+			and absf(float(seeks[0][0]) - old) < 0.1 and is_equal_approx(float(seeks[0][1]), pos))
+	_check("a seek changes no state (%s, then %s) and fires no cue" % [state_before, h.timeline.state],
+			state_before == "playing" and h.timeline.state == "playing" and h.timeline.fired.size() == fired_before)
+	_check("a system hears it (%s)" % [stub.seeks], stub.seeks.size() == 1
+			and absf(float(stub.seeks[0][0]) - old) < 0.1 and is_equal_approx(float(stub.seeks[0][1]), pos))
+	pos -= 300.0
+	_at(h, pos, true, dt)
+	_check("back by 300: one more (%s)" % [seeks], seeks.size() == 2)
+	pos -= 0.1
+	_at(h, pos, true, dt)
+	_check("a step back of 0.1 s: none (%d)" % seeks.size(), seeks.size() == 2)
+	pos += 3.0 * dt
+	_at(h, pos, true, dt)
+	_check("on by three frames' time (fast forward): none (%d)" % seeks.size(), seeks.size() == 2)
+	for i in 60:
+		_at(h, pos, false, dt)
+	_check("paused, the position held for 2 s: none (%d)" % seeks.size(), seeks.size() == 2)
+	h.snapshot_override = {"open": false}
+	h.step(dt)
+	_at(h, 1200.0, true, dt)
+	_check("a file opened at 1200: one seek, from 0 (%s)" % [seeks], seeks.size() == 3
+			and is_equal_approx(float(seeks[2][0]), 0.0) and is_equal_approx(float(seeks[2][1]), 1200.0))
+	h.snapshot_override = {"open": false}
+	h.step(dt)
+	_at(h, 0.5, true, dt)
+	_check("a file opened at 0.5: none (%d)" % seeks.size(), seeks.size() == 3)
+	h.order.erase(stub)
+	stub.free()
+	room.queue_free()
+
+
+## One step of the seek test: the film open at a position, playing or paused.
+func _at(h: Node, pos: float, playing: bool, dt: float) -> void:
+	h.snapshot_override = {"open": true, "playing": playing, "position": pos, "duration": 6000.0}
+	h.step(dt)
 
 
 func _check(what: String, ok: bool) -> void:

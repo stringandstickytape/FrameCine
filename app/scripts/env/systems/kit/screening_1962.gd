@@ -35,6 +35,7 @@ const Procedural := preload("res://scripts/env/systems/kit/procedural.gd")
 const SkySys := preload("res://scripts/env/systems/sky.gd")
 const OUTSIDE_SHADER := preload("res://shaders/env_screening_outside.gdshader")
 const GLOW_SHADER := preload("res://shaders/env_screening_glow.gdshader")
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
 ## The room: the domestic builder's walnut_1962 box (half width, the screen's wall, the back wall, the height).
 const HW := 3.2
@@ -1842,6 +1843,12 @@ static var _city_picture: ImageTexture
 static func city_picture() -> ImageTexture:
 	if _city_picture != null:
 		return _city_picture
+	var img := ProcCache.image("screening_1962.gd:city_picture", _draw_city_picture)
+	_city_picture = ImageTexture.create_from_image(img)
+	return _city_picture
+
+
+static func _draw_city_picture() -> Image:
 	var w := 1024
 	var hgt := 128
 	var img := Image.create_empty(w, hgt, false, Image.FORMAT_RGB8)
@@ -1919,8 +1926,7 @@ static func city_picture() -> ImageTexture:
 			img.set_pixel(x, y, Color(minf(buf[i] * keep + hz, 1.0), minf(buf[i + 1] * keep + hz * 0.62, 1.0),
 					minf(buf[i + 2] * keep + hz * 0.36, 1.0)))
 	img.generate_mipmaps()
-	_city_picture = ImageTexture.create_from_image(img)
-	return _city_picture
+	return img
 
 
 ## The pool's light inside: its rippling web on the ceiling and the beams by the window (the glows, strongest at the

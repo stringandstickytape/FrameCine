@@ -14,8 +14,18 @@ extends RefCounted
 ##   signal state_changed(state, previous)
 
 signal state_changed(state: String, previous: String)
+## The film's position jumped: a seek, a chapter, a file opened at the place it was left, another file. from and to
+## in seconds. It is not a change of state and fires no cue. A system that keeps a place along the film hears it
+## (env_system.gd on_seek()): the passing scenery goes dark, moves and comes back, where before 2026-11-09 a room
+## could only have jumped in plain sight. A binding with `smooth` needs nothing: it glides to its new value.
+signal seeked(from: float, to: float)
 
 const STARTING_WINDOW := 10.0
+## A step of the position is a seek when it goes back by more than SEEK_BACK, or on by more than the frame's time at
+## the fastest playback (SEEK_RATE) and SEEK_SLACK besides (a decoder's timestamps arrive in small steps of their own).
+const SEEK_BACK := 0.25
+const SEEK_RATE := 4.0
+const SEEK_SLACK := 1.5
 ## Credits only in films at least this long.
 const CREDITS_MIN_FILM := 20.0 * 60.0
 
@@ -36,6 +46,8 @@ var _signal_armed := {}
 var _every := {}
 var _starting_left := 0.0
 var _started := false
+## The position at the last step (-1: nothing was open).
+var _last_position := -1.0
 
 
 func setup(p_host: Node, doc: Dictionary) -> void:
@@ -60,6 +72,7 @@ func channels() -> Array[String]:
 
 func observe(snap: Dictionary, delta: float) -> void:
 	clock += delta
+	_watch_for_seek(snap, delta)
 	var s := _state_for(snap, delta)
 	if s != state:
 		previous = state
@@ -68,6 +81,19 @@ func observe(snap: Dictionary, delta: float) -> void:
 		_on_state(state)
 	_triggers(delta)
 	_run(delta)
+
+
+func _watch_for_seek(snap: Dictionary, delta: float) -> void:
+	if not bool(snap.get("open", false)):
+		_last_position = -1.0
+		return
+	var pos := float(snap.get("position", 0.0))
+	# A file that opens where it was left starts with a jump too (from its start).
+	var from := _last_position if _last_position >= 0.0 else 0.0
+	var step := pos - from
+	_last_position = pos
+	if step < -SEEK_BACK or step > delta * SEEK_RATE + SEEK_SLACK:
+		seeked.emit(from, pos)
 
 
 func _state_for(snap: Dictionary, delta: float) -> String:
