@@ -453,8 +453,6 @@ func _set_b() -> void:
 	_check("the size presets in Chinese (%s)" % [presets], presets == ["巨幕", "客厅", "床上"])
 	_check("the sound tab's status in Chinese (%s)" % pui.sound._speakers_status.text,
 			_cjk(pui.sound._speakers_status.text))
-	_check("the PC's address in Chinese (%s)" % pui.sound._pc_address.text,
-			str(pui.sound._pc_address.text).begins_with("电脑："))
 	_check("a track flag in Chinese", tr("SDH") == "听障" and SoundTab.track_flags({"hearing_impaired": true}) == ["SDH"])
 	_check("the subtitle files line in Chinese (%s)" % pui.subtitles._files_label.text,
 			_cjk(pui.subtitles._files_label.text))

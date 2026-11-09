@@ -164,6 +164,7 @@ func bind(p_app: Node) -> void:
 	W.content(_language_row)
 	box.add_child(_language_row)
 	box.add_child(W.help("The menus and the controller labels. Names of films and files stay as they are."))
+	box.add_child(W.help("The translations other than English were made automatically, by AI."))
 
 	box.add_child(W.section("Accessibility"))
 	_ui_scale = W.slider_row("Larger panel", 1.0, 2.0, 0.05, func(v: float) -> String: return "%.2fx" % v,
@@ -286,7 +287,11 @@ func bind(p_app: Node) -> void:
 		_window_laser.tooltip_text = "The laser points and clicks on the page too, as well as the stick"
 		box.add_child(W.flow([_window_laser]))
 
-	box.add_child(W.section("Phone remote"))
+	# The phone remote is not in the menu (2026-11-09: no use in VR); its widgets stay hidden so that the shared
+	# server code (Share files) keeps one path. --remote still starts it.
+	var remote_head := W.section("Phone remote")
+	remote_head.visible = false
+	box.add_child(remote_head)
 	_remote_toggle = W.toggle("Phone remote", func(on: bool) -> void:
 		if on:
 			Remote.start(app, true)
@@ -295,17 +300,21 @@ func bind(p_app: Node) -> void:
 			if _live_server() == null:
 				_remote_server = null
 		_sync_remote())
-	box.add_child(W.flow([_remote_toggle, W.button("Unpair phones", func() -> void:
+	var remote_row := W.flow([_remote_toggle, W.button("Unpair phones", func() -> void:
 		var server := Remote.instance()
 		if server != null:
 			server.new_key()
-			_show_address())]))
+			_show_address())])
+	remote_row.visible = false
+	box.add_child(remote_row)
 	_remote_url = W.label("", &"TimeLabel")
 	W.content(_remote_url)
+	_remote_url.visible = false
 	box.add_child(_remote_url)
 	_remote_qr = TextureRect.new()
 	_remote_qr.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
 	_remote_qr.custom_minimum_size = Vector2(0, 0)
+	_remote_qr.visible = false
 	box.add_child(_remote_qr)
 
 	box.add_child(W.section("Share files"))
@@ -329,7 +338,7 @@ func bind(p_app: Node) -> void:
 	_share_qr.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
 	box.add_child(_share_qr)
 
-	box.add_child(W.section("Assistant"))
+	box.add_child(W.section("Development AI assistant"))
 	assistant_row = AssistantRow.new()
 	box.add_child(assistant_row)
 	assistant_row.bind(app)

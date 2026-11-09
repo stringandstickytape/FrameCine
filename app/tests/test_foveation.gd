@@ -45,7 +45,7 @@ func _run() -> void:
 	await _frames(5)
 	CommandHost.ensure(self)
 	await _frames(2)
-	_check("defaults: low, sharp while the panel shows", main.foveation == "low" and main.foveation_sharp_panel)
+	_check("defaults: medium, sharp while the panel shows", main.foveation == "medium" and main.foveation_sharp_panel)
 	_check("the project starts with a foveated swapchain", main.foveation_available())
 	_check("no XR: nothing to set foveation on", main.foveation_xr == null)
 	main.foveation_xr = fake
@@ -119,7 +119,7 @@ func _test_round_trip() -> void:
 	var old: RefCounted = main.settings
 	main.settings = fresh
 	main.load_foveation()
-	_check("round trip: no keys -> low, sharp", main.foveation == "low" and main.foveation_sharp_panel)
+	_check("round trip: no keys -> medium, sharp", main.foveation == "medium" and main.foveation_sharp_panel)
 	main.set_foveation("medium")
 	main.set_foveation_sharp_panel(false)
 	_check("round trip: written", fresh.get_value("view", "foveation", "") == "medium"
@@ -137,7 +137,7 @@ func _test_round_trip() -> void:
 	_check("round trip: read back medium, not sharp", main.foveation == "medium" and not main.foveation_sharp_panel)
 	back.set_value("view", "foveation", "ultra")
 	main.load_foveation()
-	_check("round trip: an unknown word in the file reads as low", main.foveation == "low")
+	_check("round trip: an unknown word in the file reads as medium", main.foveation == "medium")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(TMP_PATH))
 	main.settings = old
 	main.load_foveation()

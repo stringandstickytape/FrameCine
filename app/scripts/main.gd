@@ -278,7 +278,7 @@ var screen_turn := NAN
 var overlay_on := false
 var volume := 1.0
 ## [view] foveation: one of FOVEATION_LEVELS (D22).
-var foveation := "low"
+var foveation := "medium"
 ## [view] foveation_sharp_panel: foveation off while the panel or the agent pane shows.
 var foveation_sharp_panel := true
 ## What foveation is set on: the OpenXR interface in XR (_setup_view), else null. Tests put a stand-in here.
@@ -1100,10 +1100,10 @@ func set_menu_shown(shown: bool) -> void:
 	update_controller_labels()
 
 
-## [view] foveation and foveation_sharp_panel (the System tab's Foveation row, D22). Unknown words read as "low".
+## [view] foveation and foveation_sharp_panel (the System tab's Foveation row, D22). Unknown words read as "medium" (the default since 2026-11-09).
 func load_foveation() -> void:
-	var level := str(settings.get_value("view", "foveation", "low"))
-	foveation = level if level in FOVEATION_LEVELS else "low"
+	var level := str(settings.get_value("view", "foveation", "medium"))
+	foveation = level if level in FOVEATION_LEVELS else "medium"
 	foveation_sharp_panel = bool(settings.get_value("view", "foveation_sharp_panel", true))
 
 

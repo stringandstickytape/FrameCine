@@ -82,11 +82,12 @@ var _copied := {}
 var _frame_key := NAN
 var _dirty := false
 var _cylinder := -1
-## Curved screens as cylinder layers when the runtime has them ([view] cylinder_layers): off by default. SteamOS
+## Curved screens as cylinder layers when the runtime has them ([view] cylinder_layers): on by default (the user,
+## 2026-11-09; it was off by default before, for this reason:). SteamOS
 ## 0.5.7 (SteamVR 2.19.1) brought cylinder layers to the Frame, and the runtime drew them over everything in the
 ## room (an icicle in front of the screen, the user, 2026-11-04): the hole punch that keeps a quad layer behind the
 ## scene did not hold for them. The mesh draws a curved screen in the right place; this is for trying the layers.
-var cylinder_layers := false
+var cylinder_layers := true
 ## Who asks for the film in the scene (request_scene): {who: true}.
 var scene_requests := {}
 
@@ -95,7 +96,7 @@ func _ready() -> void:
 	# After the player's update and the features that set the screen's uniforms each frame.
 	process_priority = 100
 	enabled = bool(main.settings.get_value("view", "film_layer", true))
-	cylinder_layers = bool(main.settings.get_value("view", "cylinder_layers", false))
+	cylinder_layers = bool(main.settings.get_value("view", "cylinder_layers", true))
 	for u: Dictionary in LAYER_SHADER.get_shader_uniform_list():
 		if str(u["name"]) != "force_eye":
 			_names.append(str(u["name"]))
@@ -126,7 +127,7 @@ func request_scene(who: String, on: bool) -> void:
 ## Curved screens as cylinder layers (see cylinder_layers), kept in the settings.
 func set_cylinder_layers(on: bool) -> void:
 	cylinder_layers = on
-	main.settings.set_value("view", "cylinder_layers", true if on else null)
+	main.settings.set_value("view", "cylinder_layers", null if on else false)
 	_update()
 
 

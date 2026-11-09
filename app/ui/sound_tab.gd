@@ -157,7 +157,7 @@ func bind(p_app: Node) -> void:
 			return tr("Fetched; choose it above.") if error == "" else tr("Could not fetch %s: %s") % [id, error]
 		_hrtf_offer = ""
 		_sync_speakers())
-	_build_pc_audio()
+	# "Play on a PC" (#9) is not in the menu (2026-11-09): a dev tool, started with --pc-audio=HOST instead.
 	app.audio_settings_changed.connect(sync)
 	app.file_opened.connect(func(_p: String) -> void:
 		sync_tracks()

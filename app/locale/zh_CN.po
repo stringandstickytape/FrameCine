@@ -3666,3 +3666,9 @@ msgstr "退出"
 
 msgid "Later"
 msgstr "稍后"
+
+msgid "Development AI assistant"
+msgstr "开发用 AI 助手"
+
+msgid "The translations other than English were made automatically, by AI."
+msgstr "英语以外的翻译均由 AI 自动生成。"

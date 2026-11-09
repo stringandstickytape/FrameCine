@@ -42,10 +42,10 @@ const VREnv := preload("res://environments/vr_environment.gd")
 signal changed(active: bool)
 signal download_finished(id: String, error: String)
 
-## Opt-in until the headset check (docs/features.md, #21, "On the headset") has passed; then this becomes true and
-## spatial audio is on by default.
-const DEFAULT_ON := false
-const DEFAULT_HRTF := "sadie2_d1"
+## On by default since the headset check passed (front/back, height and head turns, 2026-11-04; docs/features.md #21).
+const DEFAULT_ON := true
+## Listener H5 by default (the user's pick on the headset, 2026-11-09).
+const DEFAULT_HRTF := "sadie2_h5"
 const PROFILES := ["speakers", "headphones"]
 ## The binaural mix against the stereo downmix: about the same loudness (tests/test_spatial_audio.gd measures it).
 const GAIN := 0.7

@@ -885,7 +885,7 @@ func _places_checks(ui: PaneUI) -> void:
 	await _room_batch_checks(ui)
 	await _media_server_checks(ui)
 	await _share_checks(ui)
-	await _pc_audio_checks(ui)
+	_check("Sound: no Play on a PC section (a dev tool, --pc-audio)", _find_where(ui, func(c: Button) -> bool: return c.text == "Play sound on a PC") == null)
 	await _speakers_and_jog_checks(ui)
 	await _batch3_checks(ui)
 	await _stream_checks(ui)
