@@ -37,6 +37,8 @@ const BLACK := [Color(0.07, 0.07, 0.08), 0.0]
 const COSMOS := 0
 const EARTH := 1
 
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
+
 static var _atlas := {}
 
 
@@ -137,6 +139,14 @@ static func atlas(width_m: float, height_m: float, tessera_m: float) -> ImageTex
 	var key := "%s %s %s" % [width_m, height_m, tessera_m]
 	if _atlas.has(key):
 		return _atlas[key]
+	var img := ProcCache.image("mosaics.gd:_atlas:" + key,
+			func() -> Image: return _draw_atlas(width_m, height_m, tessera_m))
+	var tex := ImageTexture.create_from_image(img)
+	_atlas[key] = tex
+	return tex
+
+
+static func _draw_atlas(width_m: float, height_m: float, tessera_m: float) -> Image:
 	var w := int(round(width_m / tessera_m))
 	var h := int(round(height_m / tessera_m))
 	var data := PackedByteArray()
@@ -145,10 +155,7 @@ static func atlas(width_m: float, height_m: float, tessera_m: float) -> ImageTex
 	_cosmos(cosmos, width_m, height_m)
 	var earth := Canvas.new(w, h, tessera_m, h, cosmos.data, w)
 	_earth(earth, width_m, height_m)
-	var img := Image.create_from_data(w, h * 2, false, Image.FORMAT_RGBA8, earth.data)
-	var tex := ImageTexture.create_from_image(img)
-	_atlas[key] = tex
-	return tex
+	return Image.create_from_data(w, h * 2, false, Image.FORMAT_RGBA8, earth.data)
 
 
 ## A hash in 0..1 for a tessera (the background's speckle: no two tesserae of a field quite alike).

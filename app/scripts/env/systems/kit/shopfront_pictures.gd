@@ -16,6 +16,7 @@ extends RefCounted
 ##   roll() -> Texture2D        a player piano's roll: its paper, the perforations, the printed tempo line
 
 const Strokes := preload("res://scripts/env/systems/kit/strokes.gd")
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
 const FONT_DIR := "res://ui/fonts/FiraSansCondensed-%s.ttf"
 const BILLS_SIZE := Vector2i(1024, 1024)
@@ -50,6 +51,15 @@ static func maps(kind: String) -> Dictionary:
 	var key := "maps " + kind
 	if _cache.has(key):
 		return _cache[key]
+	var drawn := ProcCache.images("shopfront_pictures.gd:_cache:" + key, func() -> Array: return _draw_maps(kind))
+	var out := {"albedo": ImageTexture.create_from_image(drawn[0]), "normal": ImageTexture.create_from_image(drawn[1]),
+			"orm": ImageTexture.create_from_image(drawn[2]), "mean": drawn[3].get_pixel(0, 0)}
+	_cache[key] = out
+	return out
+
+
+## The maps of `kind` (mipmapped), and the albedo's mean as one pixel.
+static func _draw_maps(kind: String) -> Array:
 	var size := 256 if kind in ["ceiling"] else 128
 	var heights := PackedFloat32Array()
 	heights.resize(size * size)
@@ -88,10 +98,10 @@ static func maps(kind: String) -> Dictionary:
 			orm.set_pixel(x, y, Color(clampf(0.7 + 0.3 * heights[i] - 0.4 * cavity, 0.0, 1.0), rough[i], metal))
 	for img: Image in [albedo, normal, orm]:
 		img.generate_mipmaps()
-	var out := {"albedo": ImageTexture.create_from_image(albedo), "normal": ImageTexture.create_from_image(normal),
-			"orm": ImageTexture.create_from_image(orm), "mean": mean}
-	_cache[key] = out
-	return out
+	# UNDECIDED (brief): the mean is a number, not a picture; it is kept beside the maps as one float pixel (exact).
+	var mean_px := Image.create_empty(1, 1, false, Image.FORMAT_RGBAF)
+	mean_px.set_pixel(0, 0, mean)
+	return [albedo, normal, orm, mean_px]
 
 
 ## The house material `m` shows the maps of `kind`, `colour` on average (procedural.gd apply()'s way).
@@ -464,6 +474,12 @@ const CREAM := Color(0.92, 0.88, 0.76)
 static func bills() -> Texture2D:
 	if _cache.has("bills"):
 		return _cache["bills"]
+	var t := ImageTexture.create_from_image(ProcCache.image("shopfront_pictures.gd:_cache:bills", _draw_bills))
+	_cache["bills"] = t
+	return t
+
+
+static func _draw_bills() -> Image:
 	var img := Image.create_empty(BILLS_SIZE.x, BILLS_SIZE.y, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0.3, 0.25, 0.2))
 	_bill(img, BILL_RECTS["kettle"], 11, RED, "A MOST AMUSING TRICK PICTURE", ["THE MAGIC", "KETTLE"],
@@ -483,9 +499,7 @@ static func bills() -> Texture2D:
 	_roll_boxes(img, BILL_RECTS["roll_boxes"])
 	_clock_face(img, BILL_RECTS["clock"])
 	img.generate_mipmaps()
-	var t := ImageTexture.create_from_image(img)
-	_cache["bills"] = t
-	return t
+	return img
 
 
 ## A bill: the house's line at the top, a red or blue line, the title in two lines, a picture in the second colour
@@ -754,15 +768,19 @@ static func _clock_face(img: Image, cell: Rect2i) -> void:
 static func street() -> Texture2D:
 	if _cache.has("street"):
 		return _cache["street"]
+	var t := ImageTexture.create_from_image(ProcCache.image("shopfront_pictures.gd:_cache:street", _draw_street))
+	_cache["street"] = t
+	return t
+
+
+static func _draw_street() -> Image:
 	var img := Image.create_empty(STREET_SIZE.x, STREET_SIZE.y, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0.02, 0.02, 0.03))
 	_facade(img, STREET_RECTS["facade"])
 	_ground(img, STREET_RECTS["ground"])
 	_sky(img, STREET_RECTS["sky"])
 	img.generate_mipmaps()
-	var t := ImageTexture.create_from_image(img)
-	_cache["street"] = t
-	return t
+	return img
 
 
 ## Metres to the façade cell's pixels: x across (0 at the street's middle, our window's x), y up from the pavement.
@@ -993,6 +1011,12 @@ const LETTERING_SIZE := Vector2i(1024, 256)
 static func lettering() -> Texture2D:
 	if _cache.has("lettering"):
 		return _cache["lettering"]
+	var t := ImageTexture.create_from_image(ProcCache.image("shopfront_pictures.gd:_cache:lettering", _draw_lettering))
+	_cache["lettering"] = t
+	return t
+
+
+static func _draw_lettering() -> Image:
 	var img := Image.create_empty(LETTERING_SIZE.x, LETTERING_SIZE.y, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 0))
 	var back := Color(0.08, 0.05, 0.03, 1.0)
@@ -1018,9 +1042,7 @@ static func lettering() -> Texture2D:
 	_backing(img, back)
 	img.flip_x()
 	img.generate_mipmaps()
-	var t := ImageTexture.create_from_image(img)
-	_cache["lettering"] = t
-	return t
+	return img
 
 
 ## A glyph image drawn into img, turned by `angle` round its middle, centred at `at`.
@@ -1072,6 +1094,12 @@ const ROLL_SIZE := Vector2i(128, 512)
 static func roll() -> Texture2D:
 	if _cache.has("roll"):
 		return _cache["roll"]
+	var tex := ImageTexture.create_from_image(ProcCache.image("shopfront_pictures.gd:_cache:roll", _draw_roll))
+	_cache["roll"] = tex
+	return tex
+
+
+static func _draw_roll() -> Image:
 	var img := Image.create_empty(ROLL_SIZE.x, ROLL_SIZE.y, false, Image.FORMAT_RGB8)
 	img.fill(Color(0.86, 0.82, 0.7))
 	var rng := RandomNumberGenerator.new()
@@ -1099,6 +1127,4 @@ static func roll() -> Texture2D:
 	img.fill_rect(Rect2i(0, 0, 3, ROLL_SIZE.y), Color(0.7, 0.66, 0.55))
 	img.fill_rect(Rect2i(ROLL_SIZE.x - 3, 0, 3, ROLL_SIZE.y), Color(0.7, 0.66, 0.55))
 	img.generate_mipmaps()
-	var t := ImageTexture.create_from_image(img)
-	_cache["roll"] = t
-	return t
+	return img

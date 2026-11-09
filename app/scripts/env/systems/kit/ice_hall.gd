@@ -33,6 +33,7 @@ const PhysicsShapes := preload("res://scripts/play/physics_shapes.gd")
 const Domestic := preload("res://scripts/env/systems/domestic.gd")
 const ICE_SHADER := preload("res://shaders/room_material_house_ice.gdshader")
 const OUTSIDE_SHADER := preload("res://shaders/env_ice_outside.gdshader")
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
 const PIECES: Array[String] = ["ice_shell", "ice_screen", "ice_benches", "ice_outside"]
 
@@ -345,6 +346,11 @@ static var _flame_picture: ImageTexture
 static func flame_picture() -> ImageTexture:
 	if _flame_picture != null:
 		return _flame_picture
+	_flame_picture = ImageTexture.create_from_image(ProcCache.image("ice_hall.gd:flame_picture", _draw_flame_picture))
+	return _flame_picture
+
+
+static func _draw_flame_picture() -> Image:
 	const N := 64
 	var img := Image.create_empty(N, N, false, Image.FORMAT_RGB8)
 	for y in N:
@@ -365,8 +371,7 @@ static func flame_picture() -> ImageTexture:
 			# Worked out in linear light; the picture is read as sRGB.
 			img.set_pixel(x, y, Color(minf(c.r, 1.0), minf(c.g, 1.0), minf(c.b, 1.0)).linear_to_srgb())
 	img.generate_mipmaps()
-	_flame_picture = ImageTexture.create_from_image(img)
-	return _flame_picture
+	return img
 
 
 # --- The ice map --------------------------------------------------------------------------------------------------
@@ -378,6 +383,11 @@ static var _ice_map: ImageTexture
 static func ice_map() -> ImageTexture:
 	if _ice_map != null:
 		return _ice_map
+	_ice_map = ImageTexture.create_from_image(ProcCache.image("ice_hall.gd:ice_map", _draw_ice_map))
+	return _ice_map
+
+
+static func _draw_ice_map() -> Image:
 	const N := 256
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1909
@@ -456,8 +466,7 @@ static func ice_map() -> ImageTexture:
 			bytes[i * 4 + 3] = int(clampf(mk, 0.0, 1.0) * 255.0)
 	var img := Image.create_from_data(N, N, false, Image.FORMAT_RGBA8, bytes)
 	img.generate_mipmaps()
-	_ice_map = ImageTexture.create_from_image(img)
-	return _ice_map
+	return img
 
 
 static func _plot(a: PackedFloat32Array, n: int, q: Vector2, v: float) -> void:

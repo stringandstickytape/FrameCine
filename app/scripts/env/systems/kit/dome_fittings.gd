@@ -16,6 +16,7 @@ extends RefCounted
 
 const RoomMesh := preload("res://scripts/env/room_mesh.gd")
 const Shapes := preload("res://scripts/env/systems/kit/shapes.gd")
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
 ## Ports and gauges keep out of this sector in front (degrees either side of the screen's direction).
 const FRONT_CLEAR := 50.0
@@ -205,6 +206,11 @@ static var _face: Texture2D
 static func gauge_face() -> Texture2D:
 	if _face != null:
 		return _face
+	_face = ImageTexture.create_from_image(ProcCache.image("dome_fittings.gd:gauge_face", _draw_gauge_face))
+	return _face
+
+
+static func _draw_gauge_face() -> Image:
 	var n := 64
 	var img := Image.create_empty(n, n, false, Image.FORMAT_RGB8)
 	for y in n:
@@ -228,8 +234,7 @@ static func gauge_face() -> Texture2D:
 					col = Color(0.2, 0.15, 0.08)
 			img.set_pixel(x, y, col)
 	img.generate_mipmaps()
-	_face = ImageTexture.create_from_image(img)
-	return _face
+	return img
 
 
 ## A needle: a thin tapering blade from its hub up its local +Y, a little proud of the face (local +Z).

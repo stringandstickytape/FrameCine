@@ -22,6 +22,7 @@ const CarShape := preload("res://scripts/env/systems/kit/car_shape.gd")
 const Reflect := preload("res://scripts/env/systems/kit/reflect.gd")
 const Strokes := preload("res://scripts/env/systems/kit/strokes.gd")
 const DASH_SHADER := preload("res://shaders/env_dash.gdshader")
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
 static func spec() -> Dictionary:
 	return {
@@ -612,6 +613,13 @@ static func _dial_picture(glow: Color) -> ImageTexture:
 	var key := str(glow)
 	if _pictures.has(key):
 		return _pictures[key]
+	var t := ImageTexture.create_from_image(ProcCache.image("vehicle.gd:_pictures:" + key,
+			func() -> Image: return _draw_dial_picture(glow)))
+	_pictures[key] = t
+	return t
+
+
+static func _draw_dial_picture(glow: Color) -> Image:
 	var img := Image.create_empty(DIAL_W, DIAL_H, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0, 0, 0, 1))
 	var ground := glow * 0.07
@@ -672,9 +680,7 @@ static func _dial_picture(glow: Color) -> ImageTexture:
 		Strokes.line(img, CLOCK_PX + dir * (CLOCK_R_PX * (0.7 if k % 3 == 0 else 0.8)), CLOCK_PX + dir * CLOCK_R_PX * 0.92,
 				mark, 4.0 if k % 3 == 0 else 2.5)
 	img.generate_mipmaps()
-	var t := ImageTexture.create_from_image(img)
-	_pictures[key] = t
-	return t
+	return img
 
 
 static func _disc(img: Image, c: Vector2, r: float, col: Color) -> void:
