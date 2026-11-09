@@ -16,6 +16,7 @@ extends RefCounted
 ##   ProcCache.image(key, make) -> Image            one picture (make() -> Image)
 ##   ProcCache.enabled                              false: always drawn, nothing read or written (the test compares)
 ##   ProcCache.hits, misses, made_ms                this run's count (the test, the dev link's perf)
+##   ProcCache.verify, mismatches                   the test's: what is read is also drawn, and the two compared
 ##
 ## The key says which picture: "<the generator's file>:<its own memory's name>:<that memory's key>". A generator that
 ## already keeps its pictures in memory by a key has decided what tells one picture from another; the same key
@@ -35,6 +36,10 @@ static var enabled := true
 static var hits := 0
 static var misses := 0
 static var made_ms := 0.0
+## The test's: every picture read from disk is also drawn, and the two compared (`mismatches` counts those that
+## differ). A key that leaves out something its picture depends on shows up here and nowhere else.
+static var verify := false
+static var mismatches := 0
 static var _stamp := ""
 
 
@@ -48,6 +53,9 @@ static func images(key: String, make: Callable) -> Array[Image]:
 		out = _read(key)
 		if not out.is_empty():
 			hits += 1
+			if verify and not _same(out, make.call()):
+				mismatches += 1
+				push_error("ProcCache: the pictures kept for \"%s\" are not what is drawn now" % key)
 			return out
 	var t0 := Time.get_ticks_usec()
 	for img: Variant in make.call():
@@ -57,6 +65,19 @@ static func images(key: String, make: Callable) -> Array[Image]:
 	if enabled:
 		_write(key, out)
 	return out
+
+
+## Whether two lists of pictures are the same, pixel for pixel.
+static func _same(a: Array, b: Variant) -> bool:
+	if not (b is Array) or a.size() != (b as Array).size():
+		return false
+	for i in a.size():
+		var x: Image = a[i]
+		var y: Image = b[i]
+		if y == null or x.get_size() != y.get_size() or x.get_format() != y.get_format() \
+				or x.has_mipmaps() != y.has_mipmaps() or x.get_data() != y.get_data():
+			return false
+	return true
 
 
 ## This run's stamp: the scripts' MD5s in one (the app's version where the scripts cannot be listed).
