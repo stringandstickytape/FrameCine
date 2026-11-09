@@ -383,13 +383,13 @@ static func _media_unit(c: Object, xf: Transform3D, size: Vector3, e: Dictionary
 ## flue straight up to the roof with a collar near its top. Plain painted metal (`iron`, tinted). Drawn at its own
 ## size ([0.4, 2.0, 0.38]); another size stretches it along each axis.
 static func _boat_stove(c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
-	# UNDECIDED (brief): how the parts follow a size other than its own: here each axis stretches by its share.
+	# Another size stretches each axis by its share: a taller cabin asks for a taller size and gets a longer flue.
 	var k := size / STOVE_SIZE
 	var body := _colour(e, "colour", STOVE_BODY)
 	var b: RoomMesh = c.s
 	b.surface(c.mat("iron", STOVE_PLATE))
 	_box(b, xf, Vector3(0, 0.0075, 0.03) * k, Vector3(0.5, 0.015, 0.48) * k)
-	# UNDECIDED (brief): the legs, the top plate and the collar have no colour given: the body's.
+	# The legs, the top plate and the collar are the body's colour: one casting, blacked all over.
 	b.surface(c.mat("iron", body))
 	for sx: float in [-1.0, 1.0]:
 		for sz: float in [-1.0, 1.0]:
@@ -400,13 +400,16 @@ static func _boat_stove(c: Object, xf: Transform3D, size: Vector3, e: Dictionary
 	var s := xf.basis.get_scale().x
 	Shapes.cylinder(b, xf * flue, 0.05 * minf(k.x, k.z) * s, (2.0 - 0.535) * k.y * s, 8, xf.basis.orthonormalized(),
 			false)
-	_box(b, xf, Vector3(0, 1.93, -0.08) * k, Vector3(0.16, 0.02, 0.16) * k)
+	# The collar is 0.16 under the flue's top, not at it: the flue's top is given as the highest the roof is, and a
+	# roof that arches is lower where a stove stands by the wall (the Narrowboat's is 1.86 there). At 1.93, where it
+	# was first drawn, the collar was inside that roof and never seen.
+	_box(b, xf, Vector3(0, 1.84, -0.08) * k, Vector3(0.16, 0.02, 0.16) * k)
 	b.surface(c.mat("iron", body * 1.3))
 	_box(b, xf, Vector3(0, 0.33, 0.166) * k, Vector3(0.22, 0.2, 0.012) * k)
 	# The door's window: a glow quad [centre, half across, half up, facing], 0.007 in front of the door.
-	# UNDECIDED (brief): the brief names the "display" glow, but that one flashes once a second (a video recorder's
-	# clock) at 1.6 in `display_colour`; the lit windows' glow ("window") is steady at 0.9 in `window_colour`, which
-	# the room's kit sets to the stove's colour.
+	# The lit windows' glow ("window": steady, 0.9, in `window_colour`, which the room's kit sets to a fire's
+	# colour), not the "display" glow: that one flashes once a second, a video recorder's clock, and a stove that
+	# blinks is an alarm.
 	var g: Array = c.glows.get("window", [])
 	g.append([xf * (Vector3(0, 0.33, 0.179) * k), xf.basis.x * 0.07 * k.x, xf.basis.y * 0.05 * k.y,
 			xf.basis.z.normalized()])

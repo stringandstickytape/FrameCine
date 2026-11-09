@@ -127,15 +127,18 @@ picture from the seat (`flow_clear()`).
 
 The kit `fittings` (after the cabin; every piece placed in the room's frame, no slot):
 
-- `boat_stove` at [-0.66, 0, 2.2], turned 90 degrees so its front faces +X, into the cabin: the left wall behind it,
-  by the rear door. Its flue goes up through the roof's edge. Its door's window glows in the kit's `window_colour`,
+- `boat_stove` at [-0.6, 0, 2.2], turned 90 degrees so its front faces +X, into the cabin: the left wall behind it,
+  by the rear door. Its flue goes up through the roof's edge, 5 cm clear of the wall, which leans in (at -0.66,
+  where it first stood, the flue's collar was in the wall). Its door's window glows in the kit's `window_colour`,
   set to [1.0, 0.45, 0.15]; it lights nothing.
 - `rug` on the floor, its middle at [0, 0, -0.75], 0.8 wide and 1.7 long, [0.32, 0.08, 0.07].
 - `sideboard` against the front bulkhead under the picture: its back at z -1.97 (its foot at z -1.82), its middle at
   x 0, 1.3 wide, 0.7 high and 0.3 deep. The picture's bottom edge is at 0.92.
 
-Left out: the `stool` at [0.56, 0, -0.15] and the `tea_set` on it. Nothing but the rug may come within 0.45 m of the
-seat, and both would: the stool's legs reach to x 0.37 and its box to 0.42, and the tea set (0.5 wide) to 0.31.
+No table by the seat. A stool with a tea set was tried at [0.56, 0, -0.15] and left out: nothing but the rug may come
+within 0.45 m of the seat, and both would (the stool's legs reach to x 0.37, the tea set to 0.31). That rule stands
+over the furniture: within arm's reach of the seat is where the viewer's hands and controllers are, and a cabin
+0.95 m to each wall has no other place for a table.
 
 No club chair is drawn at the origin, though the cabin draws its seat (`seating` none, `seat_model` club): the seat
 the viewer sits in is folded away (`kit/builder.gd _hide_occupied_seat()` scales the seat under the viewer to
