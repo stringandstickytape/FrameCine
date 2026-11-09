@@ -6,132 +6,132 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: scripts/main.gd:806
+#: scripts/main.gd:807
 msgid "PC window"
 msgstr ""
 
-#: scripts/main.gd:1426
+#: scripts/main.gd:1427
 msgid "TALK"
 msgstr ""
 
-#: scripts/main.gd:1477
+#: scripts/main.gd:1478
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
 
-#: scripts/main.gd:153
+#: scripts/main.gd:154
 msgid "PLAY / PAUSE"
 msgstr ""
 
-#: scripts/main.gd:153 scripts/main.gd:176 scripts/main.gd:185
+#: scripts/main.gd:154 scripts/main.gd:177 scripts/main.gd:186
 msgid "CLICK"
 msgstr ""
 
-#: scripts/main.gd:155
+#: scripts/main.gd:156
 msgid "SEEK / DIST"
 msgstr ""
 
-#: scripts/main.gd:155
+#: scripts/main.gd:156
 msgid "SCROLL"
 msgstr ""
 
-#: scripts/main.gd:156 scripts/main.gd:158
+#: scripts/main.gd:157 scripts/main.gd:159
 msgid "MENU"
 msgstr ""
 
-#: scripts/main.gd:156 scripts/main.gd:158
+#: scripts/main.gd:157 scripts/main.gd:159
 msgid "CLOSE"
 msgstr ""
 
-#: scripts/main.gd:159
+#: scripts/main.gd:160
 msgid "INFO"
 msgstr ""
 
-#: scripts/main.gd:160
+#: scripts/main.gd:161
 msgid "NEXT"
 msgstr ""
 
-#: scripts/main.gd:161
+#: scripts/main.gd:162
 msgid "PREV"
 msgstr ""
 
-#: scripts/main.gd:162
+#: scripts/main.gd:163
 msgid "LABELS"
 msgstr ""
 
-#: scripts/main.gd:164
+#: scripts/main.gd:165
 msgid "CHAPTER -"
 msgstr ""
 
-#: scripts/main.gd:165
+#: scripts/main.gd:166
 msgid "CHAPTER +"
 msgstr ""
 
-#: scripts/main.gd:166
+#: scripts/main.gd:167
 msgid "REPLAY"
 msgstr ""
 
-#: scripts/main.gd:171 scripts/main.gd:215
+#: scripts/main.gd:172 scripts/main.gd:216
 msgid "ENTER"
 msgstr ""
 
-#: scripts/main.gd:177
+#: scripts/main.gd:178
 msgid "R-CLICK"
 msgstr ""
 
-#: scripts/main.gd:178 scripts/main.gd:205
+#: scripts/main.gd:179 scripts/main.gd:206
 msgid "SCROLL / KEYS"
 msgstr ""
 
-#: scripts/main.gd:179 scripts/main.gd:188 scripts/main.gd:206 scripts/main.gd:218
+#: scripts/main.gd:180 scripts/main.gd:189 scripts/main.gd:207 scripts/main.gd:219
 msgid "SPACE"
 msgstr ""
 
-#: scripts/main.gd:180 scripts/main.gd:189 scripts/main.gd:207
+#: scripts/main.gd:181 scripts/main.gd:190 scripts/main.gd:208
 msgid "BACK"
 msgstr ""
 
-#: scripts/main.gd:186 scripts/main.gd:216
+#: scripts/main.gd:187 scripts/main.gd:217
 msgid "HOLD: SCROLL"
 msgstr ""
 
-#: scripts/main.gd:187
+#: scripts/main.gd:188
 msgid "POINTER"
 msgstr ""
 
-#: scripts/main.gd:194
+#: scripts/main.gd:195
 msgid "KEEP PICTURE"
 msgstr ""
 
-#: scripts/main.gd:197
+#: scripts/main.gd:198
 msgid "APPLY"
 msgstr ""
 
-#: scripts/main.gd:198
+#: scripts/main.gd:199
 msgid "SIZE / TURN"
 msgstr ""
 
-#: scripts/main.gd:199 scripts/main.gd:228
+#: scripts/main.gd:200 scripts/main.gd:229
 msgid "CANCEL"
 msgstr ""
 
-#: scripts/main.gd:217
+#: scripts/main.gd:218
 msgid "ARROWS"
 msgstr ""
 
-#: scripts/main.gd:219
+#: scripts/main.gd:220
 msgid "ESC"
 msgstr ""
 
-#: scripts/main.gd:223
+#: scripts/main.gd:224
 msgid "GRAB"
 msgstr ""
 
-#: scripts/main.gd:226
+#: scripts/main.gd:227
 msgid "LET GO: THROW"
 msgstr ""
 
-#: scripts/main.gd:227
+#: scripts/main.gd:228
 msgid "NEAR-FAR / TURN"
 msgstr ""
 
@@ -1176,7 +1176,7 @@ msgstr ""
 msgid "An AI assistant on a computer on this network sees what plays, answers you on a card, and hears you while you hold the bumper. No program to install."
 msgstr ""
 
-#: ui/assistant_row.gd:80 ui/fab_panel.gd:104 ui/files_tab.gd:861 ui/host_form.gd:60
+#: ui/assistant_row.gd:80 ui/fab_panel.gd:104 ui/files_tab.gd:866 ui/host_form.gd:60
 #: ui/pc_windows_row.gd:55 ui/search_form.gd:42 ui/url_form.gd:59
 msgid "Cancel"
 msgstr ""
@@ -1385,7 +1385,7 @@ msgstr ""
 msgid "Search Fab's free Megascans"
 msgstr ""
 
-#: ui/fab_panel.gd:120 ui/files_tab.gd:1340 ui/files_tab.gd:399 ui/picture_panel.gd:75
+#: ui/fab_panel.gd:120 ui/files_tab.gd:1347 ui/files_tab.gd:399 ui/picture_panel.gd:75
 #: ui/search_form.gd:16 ui/surface_panel.gd:125
 msgid "Search"
 msgstr ""
@@ -1566,125 +1566,129 @@ msgstr ""
 msgid "Not installed"
 msgstr ""
 
-#: ui/files_tab.gd:833
-msgid "Show on the controller"
-msgstr ""
-
 #: ui/files_tab.gd:834
-msgid "Restart, briefed on the player"
-msgstr ""
-
-#: ui/files_tab.gd:835
-msgid "Restart plain, no briefing"
-msgstr ""
-
-#: ui/files_tab.gd:837
-msgid "Start, briefed on the player"
+msgid "Install"
 msgstr ""
 
 #: ui/files_tab.gd:838
-msgid "Start plain, no briefing"
+msgid "Show on the controller"
+msgstr ""
+
+#: ui/files_tab.gd:839
+msgid "Restart, briefed on the player"
 msgstr ""
 
 #: ui/files_tab.gd:840
+msgid "Restart plain, no briefing"
+msgstr ""
+
+#: ui/files_tab.gd:842
+msgid "Start, briefed on the player"
+msgstr ""
+
+#: ui/files_tab.gd:843
+msgid "Start plain, no briefing"
+msgstr ""
+
+#: ui/files_tab.gd:845
 msgid "Hide from the controller (it keeps working)"
 msgstr ""
 
-#: ui/files_tab.gd:841
+#: ui/files_tab.gd:846
 msgid "Put it on the big screen"
 msgstr ""
 
-#: ui/files_tab.gd:849 ui/files_tab.gd:402
+#: ui/files_tab.gd:854 ui/files_tab.gd:402
 msgid "Android apps"
 msgstr ""
 
-#: ui/files_tab.gd:863
+#: ui/files_tab.gd:868
 #, c-format
 msgid "Stop %s"
 msgstr ""
 
-#: ui/files_tab.gd:870
+#: ui/files_tab.gd:875
 #, c-format
 msgid "%s: its APK's file name has spaces, so it can't run yet"
 msgstr ""
 
-#: ui/files_tab.gd:971
+#: ui/files_tab.gd:976
 #, c-format
 msgid "PICTURE %s"
 msgstr ""
 
-#: ui/files_tab.gd:971
+#: ui/files_tab.gd:976
 msgid "PICTURE"
 msgstr ""
 
-#: ui/files_tab.gd:973
+#: ui/files_tab.gd:978
 msgid "MUSIC"
 msgstr ""
 
-#: ui/files_tab.gd:989
+#: ui/files_tab.gd:994
 msgid "FISHEYE"
 msgstr ""
 
-#: ui/files_tab.gd:991
+#: ui/files_tab.gd:996
 msgid "DUAL 360"
 msgstr ""
 
-#: ui/files_tab.gd:994 ui/picture_tab.gd:22
+#: ui/files_tab.gd:999 ui/picture_tab.gd:22
 msgid "SBS"
 msgstr ""
 
-#: ui/files_tab.gd:996 ui/picture_tab.gd:22
+#: ui/files_tab.gd:1001 ui/picture_tab.gd:22
 msgid "TB"
 msgstr ""
 
-#: ui/files_tab.gd:1291
+#: ui/files_tab.gd:1298
 msgid "Queue: pick a file to remove"
 msgstr ""
 
-#: ui/files_tab.gd:1291 ui/files_tab.gd:398
+#: ui/files_tab.gd:1298 ui/files_tab.gd:398
 msgid "Queue"
 msgstr ""
 
-#: ui/files_tab.gd:1304
+#: ui/files_tab.gd:1311
 msgid "(nothing queued: open a file from a folder)"
 msgstr ""
 
-#: ui/files_tab.gd:1310
+#: ui/files_tab.gd:1317
 #, c-format
 msgid "Playing: %s"
 msgstr ""
 
-#: ui/files_tab.gd:1312 ui/files_tab.gd:1333
+#: ui/files_tab.gd:1319 ui/files_tab.gd:1340
 #, c-format
 msgid "Remove: %s"
 msgstr ""
 
-#: ui/files_tab.gd:1321
+#: ui/files_tab.gd:1328
 msgid "Favourites: pick one to remove"
 msgstr ""
 
-#: ui/files_tab.gd:1321 ui/files_tab.gd:398
+#: ui/files_tab.gd:1328 ui/files_tab.gd:398
 msgid "Favourites"
 msgstr ""
 
-#: ui/files_tab.gd:1325
+#: ui/files_tab.gd:1332
 msgid "+ Add the playing file"
 msgstr ""
 
-#: ui/files_tab.gd:1328
+#: ui/files_tab.gd:1335
 msgid "(no favourites yet: open a folder and press Favourite)"
 msgstr ""
 
-#: ui/files_tab.gd:1340 ui/files_tab.gd:1341
+#: ui/files_tab.gd:1347 ui/files_tab.gd:1348
 #, c-format
 msgid "Search: %s"
 msgstr ""
 
-#: ui/files_tab.gd:1341
+#: ui/files_tab.gd:1348
 msgid "type a name..."
 msgstr ""
 
-#: ui/files_tab.gd:1352
+#: ui/files_tab.gd:1359
 msgid "(nothing found yet)"
 msgstr ""
 
@@ -2036,7 +2040,7 @@ msgstr ""
 msgid "Hardware 10-bit video: %s"
 msgstr ""
 
-#: ui/intro.gd:269
+#: ui/intro.gd:272
 #, c-format
 msgid "Step %d of %d"
 msgstr ""

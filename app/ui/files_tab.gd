@@ -829,6 +829,11 @@ func _list_agent(id: String) -> void:
 	if not AgentTerminal.installed(id):
 		state = tr("Not installed")
 	_add_row(state, {"kind": "none", "path": ""})
+	if not running and not AgentTerminal.installed(id):
+		# Not there: one way on, the install card (it downloads the agent and starts it).
+		_add_row(tr("Install"), {"kind": "agent_install", "path": id})
+		listing_changed.emit()
+		return
 	if running:
 		_add_row(tr("Show on the controller"), {"kind": "agent_pane", "path": id})
 		_add_row(tr("Restart, briefed on the player"), {"kind": "agent_restart", "path": id})
@@ -1065,6 +1070,8 @@ func _on_row_pressed(index: int) -> void:
 		"agent_plain":
 			get_tree().current_scene.local_agents.open_agent(row["path"], true)
 			_refresh()
+		"agent_install":
+			get_tree().current_scene.local_agents.install_agent(row["path"])
 		"agent_restart":
 			get_tree().current_scene.local_agents.restart_agent(row["path"])
 		"agent_restart_plain":

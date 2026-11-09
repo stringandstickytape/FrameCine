@@ -3753,3 +3753,6 @@ msgstr "未校准：视线仍然可用，但不太准确。"
 
 msgid "The calibration could not start: the headset gave no eye gaze. Try again later from System, Show the introduction again."
 msgstr "校准无法开始：头显没有提供眼动数据。稍后可在“系统”中点“再次显示介绍”重试。"
+
+msgid "Install"
+msgstr "安装"

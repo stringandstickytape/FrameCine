@@ -232,7 +232,8 @@ func cancel_calibration() -> void:
 
 
 func _show_dot() -> void:
-	for i in _cal_holder.get_child_count():
+	# The dots are the holder's first children; the instructions' label comes after them.
+	for i in CAL_POINTS.size():
 		var d := _cal_holder.get_child(i) as MeshInstance3D
 		d.material_override = _hot_mat if i == _cal_index else _dot_mat
 		d.scale = Vector3.ONE * (1.6 if i == _cal_index else 0.6)

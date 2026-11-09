@@ -224,7 +224,17 @@ func restart_agent(id: String, plain := false) -> void:
 	_restarting.erase(id)
 
 
+## Asks (a card) to install the agent, then starts it with its installer: the Files entry's Install row.
+func install_agent(id: String) -> void:
+	if AgentTerminal.AGENTS.has(id) and _open_x():
+		_ask_install(id)
+
+
 func _begin(id: String, install: bool, plain := false, fresh := false) -> void:
+	# Never a terminal that can only say "not installed" (a restart, or a start racing a removal): the card asks.
+	if not install and not AgentTerminal.installed(id) and AgentTerminal.find_window(x, id) == 0:
+		_ask_install(id)
+		return
 	set_active(id)
 	if AgentTerminal.find_window(x, id) == 0 and not _starting.has(id):
 		_starting[id] = Time.get_ticks_msec()

@@ -98,7 +98,12 @@ if [ "$YES" != 1 ]; then echo "(dry run: --yes removes these)"; exit 0; fi
 
 echo "== stopping the player"
 pkill -f -- '--path app --display-driver' 2>/dev/null; pkill -f 'spike0[0-9]/' 2>/dev/null; pkill -f 'vr-video-player' 2>/dev/null; pkill -f 'framevrvideo' 2>/dev/null; pkill -f 'framecine' 2>/dev/null
-pkill -f 'whisper-server' 2>/dev/null; sleep 2
+pkill -f 'whisper-server' 2>/dev/null
+# The agents' terminals run outside the player's process tree (systemd-run units, the window class on the command
+# line), so they outlive it: a Claude Code left running from a deleted install looked like a working one to the next
+# install (2026-11-09).
+systemctl --user stop 'frame-claude-*' 'frame-codex-*' 2>/dev/null
+pkill -f 'frame-claude|frame-codex' 2>/dev/null; pkill -x claude 2>/dev/null; pkill -x codex 2>/dev/null; sleep 2
 
 # Its output holds Steam's session token: never shown, only whether it worked.
 for g in "${titles[@]}"; do
