@@ -255,8 +255,11 @@ Crater's lunar lights are: its radius in metres, never under a tenth of a degree
 wide and never shimmers. A soft round point added over what is behind, dimmed by mist.
 
 **`env_passing_ground.gdshader`** (the ground, one draw). The strips stand still; their noise pattern goes by with the
-travel (it repeats every 64 m). Nearer the way's line than `FLOW_NEAREST` the pattern fades out, so the ground that
-passes closest shows nothing moving. Ground takes the sky's light from above, and the screen's and the cabin's
+travel (it repeats every 64 m). Nearer the way's line than `still_within(speed)` the pattern fades out, so the ground
+that passes closest shows nothing moving. That distance is where the pattern would cross the eye faster than
+`FLOW_MAX_DEG` at the fastest the journey goes, and never under `FLOW_NEAREST`: 3.3 m at 1 m/s, 6.6 m at 2 m/s, 40 m
+at 12 m/s. A band or a landmark that near is refused; the ground is everywhere and cannot be, so it is quietened
+instead. Ground takes the sky's light from above, and the screen's and the cabin's
 through the windows. **Water mirrors:** it does not take light as ground does. It shows its own colour and, by
 Fresnel, what it mirrors: looked at steeply, the sky overhead; looked along (the far water), what stands low on the
 far side, the bank and its trees, dark (the water's colour at 0.6). The ripples (a noise texture going by) move the

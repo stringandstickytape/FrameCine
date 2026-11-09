@@ -238,7 +238,7 @@ func setup() -> void:
 		_ground_mat = ShaderMaterial.new()
 		_ground_mat.shader = GROUND_SHADER
 		_ground_mat.set_shader_parameter("noise_tex", SkySystem.noise_texture())
-		_ground_mat.set_shader_parameter("nearest", EnvChecks.FLOW_NEAREST)
+		_ground_mat.set_shader_parameter("nearest", still_within(float(params["speed"])))
 		_ground = MeshInstance3D.new()
 		_ground.name = "PassingGround"
 		_ground.mesh = _ground_mesh()
@@ -622,6 +622,19 @@ func _uniforms() -> void:
 	if _ground_mat != null:
 		_ground_mat.set_shader_parameter("ground_phase", fposmod(travel, GROUND_PERIOD))
 		_ground_mat.set_shader_parameter("far", FAR)
+		_ground_mat.set_shader_parameter("nearest", still_within(own_speed))
+
+
+## How far from the way's line the ground's pattern is held still (metres), for a journey of this speed: where the
+## pattern would cross the eye faster than FLOW_MAX_DEG at the fastest the journey goes, and never nearer than
+## FLOW_NEAREST. A band or a landmark that near is refused (comfort_for()); the ground cannot be refused, it is
+## everywhere, so it is quietened instead: no pattern on it moves inside this distance. Measured across the way and
+## not up to the eyes, which is the safe side for a deck high over the water. At a narrowboat's 1 m/s it is 3.3 m;
+## at a river boat's 2 m/s 6.6 m; at 12 m/s, the fastest a journey goes, 40 m. (Until 2026-11-09 it was
+## FLOW_NEAREST whatever the speed: right at walking pace, and a stream of water at 100 degrees a second beside
+## anything faster.)
+static func still_within(speed: float) -> float:
+	return maxf(EnvChecks.FLOW_NEAREST, speed * (1.0 + CATCH_UP) / deg_to_rad(EnvChecks.FLOW_MAX_DEG))
 
 
 ## The materials (tests): "Passing", "PassingLights", "PassingGround"; null when not made.

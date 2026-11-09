@@ -1,6 +1,6 @@
 // The passing system's ground (scripts/env/systems/passing.gd; docs/environments/passing.md): strips of grass, field,
 // path, snow, sand, stone or water beside the way. The strips stand still; their pattern goes by with the journey
-// (it repeats over GROUND_PERIOD metres). Nearer the way's line than FLOW_NEAREST the pattern fades out, so the ground
+// (it repeats over GROUND_PERIOD metres). Nearer the way's line than `nearest` (passing.gd still_within(): FLOW_NEAREST, more for a faster journey) the pattern fades out, so the ground
 // that passes closest shows nothing moving: the comfort limit holds for the ground too. Water takes the sky by
 // Fresnel, rippled. Lit as the scenery is; the same mist and horizon.
 shader_type spatial;
@@ -24,7 +24,7 @@ uniform float spill = 1.0;
 uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
 // fposmod(travel, GROUND_PERIOD): how far the pattern has gone by.
 uniform float ground_phase = 0.0;
-// env_checks.gd FLOW_NEAREST.
+// passing.gd still_within(): where the pattern would cross the eye too fast, it is not shown.
 uniform float nearest = 3.0;
 uniform float far = 188.0;
 

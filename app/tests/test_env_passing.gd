@@ -113,6 +113,14 @@ func _comfort() -> void:
 	var wood: Array = Passing.comfort_for(EnvDoc.with_defaults(spec, {"speed": 1.0,
 			"bands": [{"shape": "tree", "near": 12, "far": 20}]}))
 	check("comfort_for: at 12 m its crown is clear %s" % [wood], wood.is_empty())
+	# The ground cannot be refused, so its pattern is held still where it would cross the eye too fast.
+	check("still_within: at walking pace the ground is still inside %.2f m" % Passing.still_within(1.0),
+			absf(Passing.still_within(1.0) - 1.15 / deg_to_rad(EnvChecks.FLOW_MAX_DEG)) < 0.001
+			and Passing.still_within(1.0) > EnvChecks.FLOW_NEAREST)
+	check("still_within: slower than that, never nearer than FLOW_NEAREST (%.2f)" % Passing.still_within(0.5),
+			Passing.still_within(0.5) == EnvChecks.FLOW_NEAREST)
+	check("still_within: at 12 m/s, 40 m (%.1f)" % Passing.still_within(12.0),
+			absf(Passing.still_within(12.0) - 39.5) < 0.5)
 	var moored: Array = Passing.comfort_for(EnvDoc.with_defaults(spec, {"speed": 1.0,
 			"landmarks": [{"shape": "boat", "at": 0.5, "distance": 3.5}]}))
 	check("comfort_for: a moored boat 3.5 m off is judged by its side, a metre nearer %s" % [moored],
