@@ -10,6 +10,9 @@ extends Node
 ##   act(action, args)                    a cue's "do"
 ##   tick(delta)                          every frame the room shows (the host calls it)
 ##   on_state(state, previous)            the timeline's state changed
+##   on_seek(from, to)                    the film's position jumped (seconds)
+##   static comfort_for(params) -> Array  optional: what is wrong with these parameters for comfort, judged from them
+##                                        alone ([] when nothing); the comfort check asks every system that has it
 ##   on_screen_changed(local, size)       the screen moved: its centre in the room's frame, its size
 ## Optional hooks (the host asks each system that has them): seats(), collision_shapes(), sound_room(),
 ## static_meshes(), bake_lights(), set_baking(on), set_baked(on).
@@ -52,6 +55,11 @@ func tick(_delta: float) -> void:
 
 
 func on_state(_state: String, _previous: String) -> void:
+	pass
+
+
+## The film's position jumped (env_timeline.gd `seeked`): from and to, in seconds.
+func on_seek(_from: float, _to: float) -> void:
 	pass
 
 

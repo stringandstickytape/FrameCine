@@ -11,6 +11,7 @@ const Registry := preload("res://scripts/env/systems/registry.gd")
 const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const ScreenFrame := preload("res://scripts/env/systems/screen_frame.gd")
+const RoomMesh := preload("res://scripts/env/room_mesh.gd")
 
 ## The headset budget per room (the Frame at 72 Hz with a film playing; docs/environments.md has the table).
 const BUDGET := {"draws": 40, "triangles": 400000, "lights": 2, "particles": 4000, "texture_mb": 96.0}
@@ -32,6 +33,27 @@ const PEOPLE_WORDS: Array[String] = ["person", "people", "crowd", "audience", "h
 ## Comfort: a brightness may change no faster than the photosensitivity ceiling.
 static var MIN_SMOOTH: float = 1.0 / (TAU * RoomSchema.MAX_HZ)
 static var MIN_FADE: float = 1.0 / (2.0 * RoomSchema.MAX_HZ)
+## Comfort: scenery that goes by (the passing system). The viewer sits still and the world outside the windows
+## moves, which gives the feeling of moving with nothing felt to match it. "No system moves the viewer" is there to
+## prevent exactly that feeling, so scenery that goes by has limits of its own, and no room can loosen them:
+##   - it goes straight, at a steady height: no turn, no tilt, no rise or fall of the horizon. (The system has no
+##     parameter that could ask for one; this line is why.)
+##   - at its nearest, nothing crosses the eye faster than FLOW_MAX_DEG degrees a second
+##   - nothing passes nearer than FLOW_NEAREST metres from the line the room's own seat travels along
+##   - its speed changes no faster than FLOW_ACCEL (the motion system's limit for a thing in the room, kept)
+##   - from the room's own seat none of it shows within FLOW_CLEAR_DEG degrees of the picture's edges: the eye that
+##     rests on the film has still wall beside it, not movement
+##   - the room's Motion setting scales the speed, and under a quarter the journey does not go at all
+## FLOW_MAX_DEG is a judgment, not a finding. It is the motion system's turning limit for one thing in a room,
+## which scenery in a window is not: it fills more of the view. A canal bank four metres off at a narrowboat's
+## walking pace comes to 18. Whether that is right is what the first journey on the headset is for; change it here.
+const FLOW_MAX_DEG := 20.0
+const FLOW_NEAREST := 3.0
+const FLOW_ACCEL := 0.3
+const FLOW_CLEAR_DEG := 10.0
+## Under this much of the Motion setting scenery does not go by at all (the motion system's own threshold for a
+## travel: under it a thing snaps or fades to its end instead of moving).
+const FLOW_MOTION_FLOOR := 0.25
 
 
 # --- Schema ------------------------------------------------------------------------------------------------------------
@@ -121,6 +143,199 @@ static func budget(stats: Dictionary, limits := BUDGET) -> Array:
 		if float(stats.get(k, 0)) > float(limits[k]):
 			out.append("%s: %s, over the headset's budget of %s" % [k, stats[k], limits[k]])
 	return out
+
+
+# --- Build time -------------------------------------------------------------------------------------------------------
+
+## A room is built on the main thread when the viewer chooses it, and no frame is drawn until it is done. How long
+## that takes depends on the machine, so the check measures the machine first: pace() is the time a fixed piece of
+## the same kind of work takes here (a RoomMesh of PACE_BOXES boxes, committed with its lightmap atlas), and a
+## room's build is counted in those. Measured 2026-11-09 on the desktop the tests run on, where pace() is about
+## 75 ms: a television room builds in 0.1 to 0.3, the cinema in 0.2, the Nave (the slowest of the others) in 3.1,
+## the Crater in 7.1 and Reclaimed in 13.9. The first time a room is built in a run it also draws its pictures,
+## and that is the longer wait: 1.3 s here for the Shopfront against 0.04 s after it. Those are kept between runs
+## (scripts/env/proc_cache.gd), so the budget is for the second build.
+const PACE_BOXES := 2000
+## The longest a room may take to build, in pace() units, once its pictures are made. A third over the slowest
+## room that makes no trouble (the Nave): room for a new room as rich as that one, and no more.
+const BUILD_BUDGET := 4.0
+## Rooms over BUILD_BUDGET when the check came in (2026-11-09), by id: their geometry is made again, slowly, at
+## every visit. A list to shorten, never to add to: a new room builds within the budget.
+const BUILD_WAIVED: Array[String] = ["crater", "reclaimed"]
+static var _pace := 0.0
+
+
+## How long the reference work takes on this machine, in milliseconds (the least of three runs; measured once).
+static func pace() -> float:
+	if _pace > 0.0:
+		return _pace
+	var best := INF
+	for run in 3:
+		var t0 := Time.get_ticks_usec()
+		var b := RoomMesh.new()
+		b.surface(StandardMaterial3D.new())
+		for i in PACE_BOXES:
+			b.box(Vector3(float(i % 50), float(i / 50), 0.0), Vector3(0.5, 0.5, 0.5))
+		b.commit(true)
+		best = minf(best, (Time.get_ticks_usec() - t0) / 1000.0)
+	_pace = best
+	return _pace
+
+
+## A build time in milliseconds as pace() units.
+static func build_units(ms: float) -> float:
+	return snappedf(ms / maxf(pace(), 0.001), 0.1)
+
+
+# --- Blended layers ---------------------------------------------------------------------------------------------------
+
+## The view the blended layers are counted over: this far to each side of the line from the room's own seat to the
+## screen's centre, and this far above and below it (degrees: about what the headset shows of someone watching the
+## film), in cells this many degrees across. Equal angles, not pixels: the lenses give the middle more pixels a degree
+## and foveation gives the edges fewer, and neither is known here.
+const VIEW_HALF := Vector2(55.0, 50.0)
+const VIEW_CELL := 2.5
+## How far a ray looks (the ground of a lot or a plain goes on to 400 m).
+const VIEW_FAR := 450.0
+## A ray stops counting here (two faces lying in one plane could otherwise hold it for ever).
+const BLEND_STOP := 24
+## The most blended layers a room may put over its view, on average. Not a measured limit of the headset. Measured
+## on 2026-11-09, no room that ships puts more than 0.6 there (the Bathysphere's glass dome: 0.57; the Crater's:
+## 0.43), and the Bathysphere already runs at the frame's edge on the headset, though for its water's shading more
+## than for its glass. One whole layer leaves room for a dome like those and for scenery behind a window, and stops
+## a room that stacks glass on haze on glass before it reaches the headset.
+const BLEND_BUDGET := 1.0
+static var _blend_re: RegEx
+static var _blends := {}
+
+
+## Whether a material's surface is blended over what is behind it (the frame is filled again where it shows), as
+## glass, haze, a glow and a flame are; a cut-out (alpha scissor or hash) is not.
+static func blends(m: Material) -> bool:
+	if m is ShaderMaterial:
+		var sh := (m as ShaderMaterial).shader
+		if sh == null:
+			return false
+		if not _blends.has(sh):
+			if _blend_re == null:
+				_blend_re = RegEx.create_from_string(
+						"\\bblend_(add|sub|mul|premul_alpha)\\b|\\bALPHA\\s*[*+\\-]?=[^=]")
+			var code := sh.code
+			_blends[sh] = _blend_re.search(code) != null and not code.contains("ALPHA_SCISSOR_THRESHOLD") \
+					and not code.contains("ALPHA_HASH_SCALE")
+		return _blends[sh]
+	if m is BaseMaterial3D:
+		var b := m as BaseMaterial3D
+		return b.blend_mode != BaseMaterial3D.BLEND_MODE_MIX or b.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA \
+				or b.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_DEPTH_PRE_PASS
+	return false
+
+
+## The room's drawn triangles as two physics bodies for rays from the eyes: what is solid on layer 1, what is
+## blended (glass, haze, glows) on layer 2, back faces too. Awaitable (a shape needs a physics frame). Returns
+## {space, bodies, blended}: the space to cast in, the bodies to free afterwards, and whether anything is blended.
+static func _view_bodies(tree: SceneTree, room: Node3D) -> Dictionary:
+	var solid := PackedVector3Array()
+	var blended := PackedVector3Array()
+	var inv := room.global_transform.affine_inverse()
+	for n: Node in room.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if not mi.is_visible_in_tree() or mi.mesh == null:
+			continue
+		var xf: Transform3D = inv * mi.global_transform
+		for s in mi.mesh.get_surface_count():
+			# Lines and points have no area (a primitive mesh is always triangles, and has no such question to ask).
+			if mi.mesh is ArrayMesh and (mi.mesh as ArrayMesh).surface_get_primitive_type(s) != Mesh.PRIMITIVE_TRIANGLES:
+				continue
+			var out := blended if blends(mi.get_active_material(s)) else solid
+			var a := mi.mesh.surface_get_arrays(s)
+			var verts: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+			var idx: Variant = a[Mesh.ARRAY_INDEX]
+			if idx != null and (idx as PackedInt32Array).size() > 0:
+				for i: int in idx as PackedInt32Array:
+					out.append(xf * verts[i])
+			else:
+				for v in verts:
+					out.append(xf * v)
+	var bodies: Array = []
+	for part: Array in [[solid, 1], [blended, 2]]:
+		if (part[0] as PackedVector3Array).is_empty():
+			continue
+		var body := StaticBody3D.new()
+		body.collision_layer = int(part[1])
+		var cs := CollisionShape3D.new()
+		var shape := ConcavePolygonShape3D.new()
+		shape.backface_collision = true
+		shape.set_faces(part[0])
+		cs.shape = shape
+		body.add_child(cs)
+		tree.root.add_child(body)
+		body.global_transform = room.global_transform
+		bodies.append(body)
+	await tree.physics_frame
+	await tree.physics_frame
+	return {"space": tree.root.get_world_3d().direct_space_state, "bodies": bodies, "blended": not blended.is_empty()}
+
+
+## The blended layers over the view from the room's own seat towards the screen: for every cell of the view, how
+## many blended surfaces a ray from the eyes crosses before the first solid one. It is what the triangle count cannot
+## see and what fills the frame on the headset: a glass dome is a few thousand triangles and the whole view, twice
+## where a beam's haze hangs in it. Every crossing counts, a volume's far side as its near one (both are drawn).
+## Not counted: particles (the budget has their number), a MultiMesh (headless it keeps no transforms), and quads a
+## vertex shader turns to the eye (halos: no size until they are drawn). Awaitable. Returns {mean, peak, share}: the
+## layers a cell on average, the most in one cell, and the share of the view with any.
+## room: the built room, in the tree at the origin.
+static func blend_layers(tree: SceneTree, room: Node3D) -> Dictionary:
+	var view := await _view_bodies(tree, room)
+	var bodies: Array = view["bodies"]
+	if not bool(view["blended"]):
+		for body: Node in bodies:
+			body.queue_free()
+		return {"mean": 0.0, "peak": 0, "share": 0.0}
+	var space: PhysicsDirectSpaceState3D = view["space"]
+	var eye: Vector3 = room.global_transform * (Vector3.UP * EYE_HEIGHT)
+	var anchor: Transform3D = room.call("get_screen_anchor")
+	var ahead: Vector3 = room.global_transform * anchor.origin - eye
+	ahead = ahead.normalized() if ahead.length() > 0.01 else -room.global_transform.basis.z
+	var right := ahead.cross(Vector3.UP)
+	right = right.normalized() if right.length() > 0.01 else room.global_transform.basis.x
+	var up := right.cross(ahead)
+	var total := 0
+	var peak := 0
+	var any := 0
+	var cells := 0
+	var yaw := -VIEW_HALF.x + VIEW_CELL * 0.5
+	while yaw < VIEW_HALF.x:
+		var pitch := -VIEW_HALF.y + VIEW_CELL * 0.5
+		while pitch < VIEW_HALF.y:
+			var dir := (ahead * cos(deg_to_rad(yaw)) + right * sin(deg_to_rad(yaw))) * cos(deg_to_rad(pitch)) \
+					+ up * sin(deg_to_rad(pitch))
+			var reach := VIEW_FAR
+			var q := PhysicsRayQueryParameters3D.create(eye, eye + dir * reach, 1)
+			q.hit_back_faces = true
+			var wall := space.intersect_ray(q)
+			if not wall.is_empty():
+				reach = eye.distance_to(wall["position"])
+			var layers := 0
+			var from := 0.0
+			while layers < BLEND_STOP and from < reach:
+				var b := PhysicsRayQueryParameters3D.create(eye + dir * from, eye + dir * reach, 2)
+				b.hit_back_faces = true
+				var hit := space.intersect_ray(b)
+				if hit.is_empty():
+					break
+				layers += 1
+				from = eye.distance_to(hit["position"]) + 0.01
+			total += layers
+			peak = maxi(peak, layers)
+			any += 1 if layers > 0 else 0
+			cells += 1
+			pitch += VIEW_CELL
+		yaw += VIEW_CELL
+	for body: Node in bodies:
+		body.queue_free()
+	return {"mean": snappedf(float(total) / maxi(cells, 1), 0.01), "peak": peak,
+			"share": snappedf(float(any) / maxi(cells, 1), 0.01)}
 
 
 # --- Sight line -----------------------------------------------------------------------------------------------------------
@@ -231,6 +446,24 @@ static func comfort(doc: Dictionary, spec_of := Callable()) -> Array:
 				if not ch.begins_with(EnvDoc.SETTING_PREFIX) and float(v.get("smooth", 0.0)) < MIN_SMOOTH:
 					out.append("%s.%s follows %s with smooth %s: at least %.3f s (the photosensitivity ceiling)" % [
 							entry.get("id", n), k, ch, v.get("smooth", 0.0), MIN_SMOOTH])
+		# What only the system can judge of its own parameters (scenery that goes by: how fast across the eye, how
+		# near): its script's static comfort_for(params), from the parameters alone.
+		var script := Registry.script_of(n) if not spec_of.is_valid() else null
+		if script != null and script.has_method("comfort_for"):
+			for problem: Variant in script.call("comfort_for", EnvDoc.with_defaults(ps, _plain(given))):
+				out.append("%s: %s" % [entry.get("id", n), problem])
+	# A film-time track is a binding too (by film.minutes or film.progress). The film moves it slowly, but a seek
+	# takes it from one key to another in a frame, so on a brightness it needs the same smoothing. (Before
+	# 2026-11-09 the tracks were not read here, and one with no `smooth` passed.)
+	var timeline: Dictionary = doc.get("timeline", {}) if doc.get("timeline") is Dictionary else {}
+	for track: Variant in timeline.get("tracks", []):
+		if not (track is Dictionary):
+			continue
+		var bits := str(track.get("target", "")).split(".")
+		if bits.size() == 2 and bool(by_id.get(bits[0], {}).get("params", {}).get(bits[1], {}).get("brightness", false)) \
+				and float(track.get("smooth", 0.0)) < MIN_SMOOTH:
+			out.append("track %s follows %s with smooth %s: at least %.3f s (a seek moves it in one frame)" % [
+					track["target"], track.get("by"), track.get("smooth", 0.0), MIN_SMOOTH])
 	for c: Dictionary in doc.get("cues", []):
 		for s: Dictionary in c.get("steps", []):
 			if s.has("set") or s.has("release"):
@@ -242,6 +475,93 @@ static func comfort(doc: Dictionary, spec_of := Callable()) -> Array:
 					out.append("cue %s: %s changes in %s s: at least %.3f s (the photosensitivity ceiling)" % [c["name"],
 							t, s.get("seconds", 0.0), MIN_FADE])
 	return out
+
+
+## A system's given parameters with every binding at its strongest (its range's or its keys' largest value; a map's
+## largest number): what comfort_for() judges, since a binding may take the parameter that far.
+static func _plain(given: Dictionary) -> Dictionary:
+	var out := {}
+	for k: Variant in given:
+		var v: Variant = given[k]
+		if EnvDoc.is_binding(v):
+			if (v as Dictionary).has("range") or (v as Dictionary).has("keys") or (v as Dictionary).has("map"):
+				out[k] = _max_value(v)
+		else:
+			out[k] = v
+	return out
+
+
+## From the room's own seat, no scenery that goes by shows within FLOW_CLEAR_DEG degrees of the picture's edges
+## (the comment at FLOW_MAX_DEG has why). Every system with flow_volumes() gives the boxes its moving scenery
+## keeps to, in the room's frame; a ray from the eyes that reaches one before it reaches anything solid is a
+## problem (glass is not solid). Awaitable. [] when clear, or when nothing in the room goes by.
+## room: the built room, in the tree at the origin.
+static func flow_clear(tree: SceneTree, room: Node3D) -> Array:
+	var volumes: Array[AABB] = []
+	var host: Node = room.get("host")
+	if host != null:
+		for s: Node in host.order:
+			if s.has_method("flow_volumes"):
+				volumes.append_array(s.call("flow_volumes"))
+	if volumes.is_empty():
+		return []
+	var view := await _view_bodies(tree, room)
+	var space: PhysicsDirectSpaceState3D = view["space"]
+	var eye: Vector3 = room.global_transform * (Vector3.UP * EYE_HEIGHT)
+	var anchor: Transform3D = room.global_transform * (room.call("get_screen_anchor") as Transform3D)
+	var w := float(room.get("default_screen_width"))
+	var doc: Dictionary = room.get("doc") if room.get("doc") is Dictionary else {}
+	var h := w * 9.0 / 16.0
+	if doc.get("screen") is Dictionary and (doc["screen"]["size"] as Array).size() > 1:
+		h = float(doc["screen"]["size"][1])
+	var dist := maxf(eye.distance_to(anchor.origin), 0.1)
+	# The picture grown so its edges stand FLOW_CLEAR_DEG further out as the eye sees them.
+	var margin := deg_to_rad(FLOW_CLEAR_DEG)
+	var half := Vector2(dist * tan(atan(w * 0.5 / dist) + margin), dist * tan(atan(h * 0.5 / dist) + margin))
+	var inv := room.global_transform.affine_inverse()
+	var out: Array = []
+	for ix in range(-6, 7):
+		for iy in range(-4, 5):
+			var p := anchor * Vector3(half.x * ix / 6.0, half.y * iy / 4.0, 0.0)
+			var dir := (p - eye).normalized()
+			var reach := VIEW_FAR
+			var q := PhysicsRayQueryParameters3D.create(eye, eye + dir * reach, 1)
+			q.hit_back_faces = true
+			var wall := space.intersect_ray(q)
+			if not wall.is_empty():
+				reach = eye.distance_to(wall["position"])
+			for box in volumes:
+				var enters := _ray_enters(inv * eye, inv.basis * dir, box)
+				if enters >= 0.0 and enters < reach:
+					out.append("scenery that goes by shows %.0f degrees from the picture's middle (within %.0f of its edge)"
+							% [rad_to_deg(dir.angle_to((anchor.origin - eye).normalized())), FLOW_CLEAR_DEG]
+							+ ": no window that close to the screen")
+					break
+			if out.size() >= 4:
+				break
+		if out.size() >= 4:
+			break
+	for body: Node in view["bodies"]:
+		body.queue_free()
+	return out
+
+
+## How far along a ray it enters a box (0 when it starts inside); -1 when it misses.
+static func _ray_enters(from: Vector3, dir: Vector3, box: AABB) -> float:
+	var t0 := 0.0
+	var t1 := INF
+	for axis in 3:
+		var lo := box.position[axis]
+		var hi := box.end[axis]
+		if absf(dir[axis]) < 1e-9:
+			if from[axis] < lo or from[axis] > hi:
+				return -1.0
+			continue
+		var a := (lo - from[axis]) / dir[axis]
+		var b := (hi - from[axis]) / dir[axis]
+		t0 = maxf(t0, minf(a, b))
+		t1 = minf(t1, maxf(a, b))
+	return t0 if t0 <= t1 else -1.0
 
 
 static func _max_value(v: Variant) -> float:

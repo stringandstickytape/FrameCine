@@ -14,6 +14,7 @@ extends RefCounted
 const SkyboxRoom := preload("res://scripts/env/skybox_room.gd")
 const GltfRoom := preload("res://scripts/env/gltf_room.gd")
 const ImageSource := preload("res://scripts/play/image_source.gd")
+const EnvDoc := preload("res://scripts/env/env_doc.gd")
 
 const SKY_DIR := "user://skyboxes"
 const ROOM_DIR := "user://rooms"
@@ -57,11 +58,11 @@ static func document_rooms() -> Array:
 	return out
 
 
-## A room's group in the Room tab: its document's `room.category` (cinema, tv or other; EnvDoc.ROOM_CATEGORIES),
-## "other" for a room with no document. Read once per id.
+## A room's group in the Room tab: its document's `room.category` (one of EnvDoc.ROOM_GROUPS), EnvDoc.OTHER for a
+## room with no document or none of those. Read once per id.
 static func category_of(id: String) -> String:
-	var v := str(_room_section(id).get("category", "other"))
-	return v if v in ["cinema", "tv", "other"] else "other"
+	var v := str(_room_section(id).get("category", EnvDoc.OTHER))
+	return v if EnvDoc.ROOM_GROUPS.has(v) else EnvDoc.OTHER
 
 
 ## A shipped room's line about itself (its document's room.description, a key; the scene rooms' own below; "" when

@@ -33,6 +33,12 @@ const BASS_FULL_DB := -10.0
 const JUMP_DB := 14.0
 const LOUD_DB := -24.0
 const AVERAGE_SECONDS := 2.0
+## A source with no length (a live stream, a camera) has no place along itself. Its progress goes by the time
+## watched and never reaches the end: half way after this many minutes, three quarters after twice as many. So a
+## room that follows film.progress (dusk falling, a journey) still moves through its evening, ever more slowly, and
+## never arrives: a film with no end is a journey with no arrival. Before 2026-11-09 the progress stayed at 0, and
+## such a room would have stood at its start for good.
+const ENDLESS_HALF_MINUTES := 60.0
 
 var values := {
 	"film.colour": Color(0, 0, 0), "film.brightness": 0.0, "film.bass": 0.0, "film.transient": 0.0,
@@ -72,6 +78,14 @@ func value(channel: String) -> Variant:
 	return values.get(channel, 0.0)
 
 
+## A source's progress (0..1) at a position: the position over its length, or, with no length, by the time watched
+## (ENDLESS_HALF_MINUTES). The same sum wherever a place along the film is wanted (the passing system's route).
+static func progress(position: float, duration: float) -> float:
+	if duration > 0.0:
+		return clampf(position / duration, 0.0, 1.0)
+	return 1.0 - pow(2.0, -maxf(position, 0.0) / (ENDLESS_HALF_MINUTES * 60.0))
+
+
 func update(main: Node, delta: float, wanted: Dictionary) -> void:
 	var playing := false
 	if main != null and main.get("player") != null:
@@ -79,7 +93,7 @@ func update(main: Node, delta: float, wanted: Dictionary) -> void:
 		playing = p.is_playing()
 		var d: float = p.get_duration() if p.has_source() else 0.0
 		var pos: float = p.get_position() if p.has_source() else 0.0
-		values["film.progress"] = clampf(pos / d, 0.0, 1.0) if d > 0.0 else 0.0
+		values["film.progress"] = progress(pos, d) if p.has_source() else 0.0
 		values["film.minutes"] = pos / 60.0
 		var tod: Node = main.features.get("time_of_day") if main.get("features") != null else null
 		if tod != null:

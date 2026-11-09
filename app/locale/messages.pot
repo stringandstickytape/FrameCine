@@ -394,79 +394,91 @@ msgstr ""
 msgid "The sound and the room fade out over a minute, then the film pauses with its place kept; the room stays dim until you play again."
 msgstr ""
 
-#: scripts/env/env_doc.gd:69
+#: scripts/env/env_doc.gd:72
 msgid "Dim during the film"
 msgstr ""
 
-#: scripts/env/env_doc.gd:69
+#: scripts/env/env_doc.gd:72
 msgid "The room's light goes down while the film plays."
 msgstr ""
 
-#: scripts/env/env_doc.gd:69
+#: scripts/env/env_doc.gd:72
 msgid "Ambience"
 msgstr ""
 
-#: scripts/env/env_doc.gd:70
+#: scripts/env/env_doc.gd:73
 msgid "This room's sound against the Environment sound slider. At the bottom: off."
 msgstr ""
 
-#: scripts/env/env_doc.gd:70
+#: scripts/env/env_doc.gd:73
 msgid "Ambient life"
 msgstr ""
 
-#: scripts/env/env_doc.gd:71
+#: scripts/env/env_doc.gd:74
 msgid "Animals and other life in the room."
 msgstr ""
 
-#: scripts/env/env_doc.gd:71
+#: scripts/env/env_doc.gd:74
 msgid "Pre-show"
 msgstr ""
 
-#: scripts/env/env_doc.gd:71
+#: scripts/env/env_doc.gd:74
 msgid "Curtains before the film, and the room's start of the show."
 msgstr ""
 
-#: scripts/env/env_doc.gd:72
+#: scripts/env/env_doc.gd:75
 msgid "Flickering lights"
 msgstr ""
 
-#: scripts/env/env_doc.gd:72
+#: scripts/env/env_doc.gd:75
 msgid "Off: lights that flicker stay steady."
 msgstr ""
 
-#: scripts/env/env_doc.gd:72
+#: scripts/env/env_doc.gd:75
 msgid "Motion"
 msgstr ""
 
-#: scripts/env/env_doc.gd:73
+#: scripts/env/env_doc.gd:76
 msgid "How much things in the room move: sways, tilts, weave."
 msgstr ""
 
-#: scripts/env/env_library.gd:78
-msgid "A small dark room with nothing in it to look at but the film."
+#: scripts/env/env_doc.gd:84
+msgid "Cinemas"
+msgstr ""
+
+#: scripts/env/env_doc.gd:84
+msgid "Television"
+msgstr ""
+
+#: scripts/env/env_doc.gd:84
+msgid "Journeys"
 msgstr ""
 
 #: scripts/env/env_library.gd:79
-msgid "Your own room through the headset's cameras, with the film in front of you."
+msgid "A small dark room with nothing in it to look at but the film."
 msgstr ""
 
 #: scripts/env/env_library.gd:80
-msgid "A small home theatre: a sofa in a dark room, the screen above a low cabinet, tower speakers either side."
+msgid "Your own room through the headset's cameras, with the film in front of you."
 msgstr ""
 
 #: scripts/env/env_library.gd:81
-msgid "A drive-in at night, seen from a car in the middle of the lot: other cars, speaker posts and stars."
+msgid "A small home theatre: a sofa in a dark room, the screen above a low cabinet, tower speakers either side."
 msgstr ""
 
 #: scripts/env/env_library.gd:82
-msgid "A planetarium: reclined seats under a dark dome full of stars, a skyline round its foot."
+msgid "A drive-in at night, seen from a car in the middle of the lot: other cars, speaker posts and stars."
 msgstr ""
 
 #: scripts/env/env_library.gd:83
+msgid "A planetarium: reclined seats under a dark dome full of stars, a skyline round its foot."
+msgstr ""
+
+#: scripts/env/env_library.gd:84
 msgid "An open geodesic dome on a wide plain at dusk, the first stars coming out overhead."
 msgstr ""
 
-#: scripts/env/room_settings.gd:204 ui/room_tab.gd:272 ui/sound_tab.gd:76
+#: scripts/env/room_settings.gd:204 ui/room_tab.gd:286 ui/sound_tab.gd:76
 msgid "off"
 msgstr ""
 
@@ -480,7 +492,7 @@ msgstr ""
 msgid "%.1f s"
 msgstr ""
 
-#: scripts/env/room_settings.gd:213 ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:263
+#: scripts/env/room_settings.gd:213 ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:277
 #, c-format
 msgid "%d min"
 msgstr ""
@@ -1069,30 +1081,30 @@ msgstr ""
 msgid "Dual fisheye 360° (front and back lens)"
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:63
+#: scripts/voice/whisper_backend.gd:64
 #, c-format
 msgid "Voice needs a one-time download of about %d MB. Downloaded: %d %%. The rest of the player works as usual."
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:64
+#: scripts/voice/whisper_backend.gd:65
 #, c-format
 msgid "Speech model download: %d %%"
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:65
+#: scripts/voice/whisper_backend.gd:66
 #, c-format
 msgid "Voice needs the network once, for a download of about %d MB. The rest of the player works as usual."
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:66
+#: scripts/voice/whisper_backend.gd:67
 msgid "The speech model did not download. Voice tries again when you use it next."
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:67
+#: scripts/voice/whisper_backend.gd:68
 msgid "Voice is starting."
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:68
+#: scripts/voice/whisper_backend.gd:69
 msgid "Voice is ready."
 msgstr ""
 
@@ -2960,7 +2972,7 @@ msgstr ""
 msgid "Each picture"
 msgstr ""
 
-#: ui/picture_tab.gd:337 ui/room_tab.gd:260 ui/room_tab.gd:272
+#: ui/picture_tab.gd:337 ui/room_tab.gd:274 ui/room_tab.gd:286
 #, c-format
 msgid "%d s"
 msgstr ""
@@ -3117,7 +3129,7 @@ msgstr ""
 msgid "Polynomial"
 msgstr ""
 
-#: ui/picture_tab.gd:31 ui/room_tab.gd:22 ui/sound_tab.gd:129 ui/system_tab.gd:44
+#: ui/picture_tab.gd:31 ui/room_tab.gd:23 ui/sound_tab.gd:129 ui/system_tab.gd:44
 #: environments/flagship.env.json environments/ice_cinema.env.json
 msgid "Off"
 msgstr ""
@@ -3165,313 +3177,309 @@ msgstr ""
 msgid "%s (the folder's rule)"
 msgstr ""
 
-#: ui/room_tab.gd:118
+#: ui/room_tab.gd:123
 msgid "Environment"
 msgstr ""
 
-#: ui/room_tab.gd:124
+#: ui/room_tab.gd:134
+msgid "A journey is as long as the film: it leaves when the film starts and arrives with the credits. Pause, and it waits."
+msgstr ""
+
+#: ui/room_tab.gd:138
 msgid "Time travel"
 msgstr ""
 
-#: ui/room_tab.gd:126
+#: ui/room_tab.gd:140
 msgid "Over the film"
 msgstr ""
 
-#: ui/room_tab.gd:126
+#: ui/room_tab.gd:140
 msgid "Every 5 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:126
+#: ui/room_tab.gd:140
 msgid "Every 10 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:126
+#: ui/room_tab.gd:140
 msgid "Every 15 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:129
+#: ui/room_tab.gd:143
 msgid "One film, and the room moves forward through the history of television, an era at a time while it plays."
 msgstr ""
 
-#: ui/room_tab.gd:137
+#: ui/room_tab.gd:151
 msgid "Use this picture as the room"
 msgstr ""
 
-#: ui/room_tab.gd:148
+#: ui/room_tab.gd:162
 msgid "Current"
 msgstr ""
 
-#: ui/room_tab.gd:153
+#: ui/room_tab.gd:167
 msgid "Back to defaults"
 msgstr ""
 
-#: ui/room_tab.gd:171
+#: ui/room_tab.gd:185
 msgid "Pick a seat"
 msgstr ""
 
-#: ui/room_tab.gd:175 ui/seat_plan.gd:183
+#: ui/room_tab.gd:189 ui/seat_plan.gd:183
 msgid "Default seat"
 msgstr ""
 
-#: ui/room_tab.gd:182
+#: ui/room_tab.gd:196
 msgid "Reset room"
 msgstr ""
 
-#: ui/room_tab.gd:183
+#: ui/room_tab.gd:197
 msgid "Reset screen"
 msgstr ""
 
-#: ui/room_tab.gd:184
+#: ui/room_tab.gd:198
 msgid "Reset room: back to the room's own seat, facing the screen, view recentred."
 msgstr ""
 
-#: ui/room_tab.gd:190
+#: ui/room_tab.gd:204
 msgid "Floor reflection"
 msgstr ""
 
-#: ui/room_tab.gd:192
+#: ui/room_tab.gd:206
 msgid "Reflection"
 msgstr ""
 
-#: ui/room_tab.gd:198
+#: ui/room_tab.gd:212
 msgid "Effects"
 msgstr ""
 
-#: ui/room_tab.gd:200 ui/room_tab.gd:212
+#: ui/room_tab.gd:214 ui/room_tab.gd:226
 msgid "Bias light"
 msgstr ""
 
-#: ui/room_tab.gd:204
+#: ui/room_tab.gd:218
 msgid "React to the film"
 msgstr ""
 
-#: ui/room_tab.gd:208
+#: ui/room_tab.gd:222
 msgid "Projector beam"
 msgstr ""
 
-#: ui/room_tab.gd:215
+#: ui/room_tab.gd:229
 msgid "Reaction"
 msgstr ""
 
-#: ui/room_tab.gd:229
+#: ui/room_tab.gd:243
 msgid "Time of day"
 msgstr ""
 
-#: ui/room_tab.gd:230
+#: ui/room_tab.gd:244
 msgid "Night"
 msgstr ""
 
-#: ui/room_tab.gd:230
+#: ui/room_tab.gd:244
 msgid "Now"
 msgstr ""
 
-#: ui/room_tab.gd:230
+#: ui/room_tab.gd:244
 msgid "Dusk"
 msgstr ""
 
-#: ui/room_tab.gd:230
+#: ui/room_tab.gd:244
 msgid "Day"
 msgstr ""
 
-#: ui/room_tab.gd:234
+#: ui/room_tab.gd:248
 msgid "Latitude"
 msgstr ""
 
-#: ui/room_tab.gd:237
+#: ui/room_tab.gd:251
 msgid "Room light"
 msgstr ""
 
-#: ui/room_tab.gd:241
+#: ui/room_tab.gd:255
 msgid "Dim while playing"
 msgstr ""
 
-#: ui/room_tab.gd:243
+#: ui/room_tab.gd:257
 msgid "Dimmed to"
 msgstr ""
 
-#: ui/room_tab.gd:247
+#: ui/room_tab.gd:261
 msgid "The showing"
 msgstr ""
 
-#: ui/room_tab.gd:249
+#: ui/room_tab.gd:263
 msgid "Curtains"
 msgstr ""
 
-#: ui/room_tab.gd:251
+#: ui/room_tab.gd:265
 msgid "Up next countdown"
 msgstr ""
 
-#: ui/room_tab.gd:253 ui/room_tab.gd:262
+#: ui/room_tab.gd:267 ui/room_tab.gd:276
 msgid "Intermission"
 msgstr ""
 
-#: ui/room_tab.gd:259
+#: ui/room_tab.gd:273
 msgid "Up next in"
 msgstr ""
 
-#: ui/room_tab.gd:273
+#: ui/room_tab.gd:287
 msgid "Crossfade music"
 msgstr ""
 
-#: ui/room_tab.gd:276
+#: ui/room_tab.gd:290
 msgid "Crossfade films"
 msgstr ""
 
-#: ui/room_tab.gd:280
+#: ui/room_tab.gd:294
 msgid "Sleep timer"
 msgstr ""
 
-#: ui/room_tab.gd:295
+#: ui/room_tab.gd:309
 msgid "Then"
 msgstr ""
 
-#: ui/room_tab.gd:396 ui/room_tab.gd:412
+#: ui/room_tab.gd:410 ui/room_tab.gd:426
 #, c-format
 msgid "%s (photo)"
 msgstr ""
 
-#: ui/room_tab.gd:526
+#: ui/room_tab.gd:540
 msgid "This picture can't be a room (only local pictures)."
 msgstr ""
 
-#: ui/room_tab.gd:544
+#: ui/room_tab.gd:558
 #, c-format
 msgid "%s (moved) (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:544
+#: ui/room_tab.gd:558
 #, c-format
 msgid "%s (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:547
+#: ui/room_tab.gd:561
 #, c-format
 msgid "Where %s was (%d seat)"
 msgid_plural "Where %s was (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:549
+#: ui/room_tab.gd:563
 #, c-format
 msgid "The room's own spot (%d seat)"
 msgid_plural "The room's own spot (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:551
+#: ui/room_tab.gd:565
 #, c-format
 msgid "Go to %s"
 msgstr ""
 
-#: ui/room_tab.gd:564
+#: ui/room_tab.gd:578
 msgid "Flashes only in rooms that react, such as the drive-in; the room pulses with the bass."
 msgstr ""
 
-#: ui/room_tab.gd:578 ui/seat_plan.gd:186
+#: ui/room_tab.gd:592 ui/seat_plan.gd:186
 #, c-format
 msgid "Seat %d"
 msgstr ""
 
-#: ui/room_tab.gd:586
+#: ui/room_tab.gd:600
 msgid "Curtains: in the cinema and the home theatre, flat screen."
 msgstr ""
 
-#: ui/room_tab.gd:596
+#: ui/room_tab.gd:610
 #, c-format
 msgid "Intermission: %s left. Play ends it."
 msgstr ""
 
-#: ui/room_tab.gd:599
+#: ui/room_tab.gd:613
 #, c-format
 msgid "This film stops at %s."
 msgstr ""
 
-#: ui/room_tab.gd:600
+#: ui/room_tab.gd:614
 #, c-format
 msgid "Films over %d min with chapters stop once, near the middle."
 msgstr ""
 
-#: ui/room_tab.gd:22
+#: ui/room_tab.gd:23
 msgid "15 min"
 msgstr ""
 
-#: ui/room_tab.gd:22
+#: ui/room_tab.gd:23
 msgid "30 min"
 msgstr ""
 
-#: ui/room_tab.gd:22
+#: ui/room_tab.gd:23
 msgid "60 min"
 msgstr ""
 
-#: ui/room_tab.gd:22
+#: ui/room_tab.gd:23
 msgid "90 min"
 msgstr ""
 
-#: ui/room_tab.gd:22
+#: ui/room_tab.gd:23
 msgid "End of file"
 msgstr ""
 
-#: ui/room_tab.gd:24
+#: ui/room_tab.gd:25
 msgid "Pause the film"
 msgstr ""
 
-#: ui/room_tab.gd:24
+#: ui/room_tab.gd:25
 msgid "Close the app"
 msgstr ""
 
-#: ui/room_tab.gd:24
+#: ui/room_tab.gd:25
 msgid "Turn the headset off"
 msgstr ""
 
-#: ui/room_tab.gd:29 environments/void.env.json
+#: ui/room_tab.gd:30 environments/void.env.json
 msgid "Void"
 msgstr ""
 
-#: ui/room_tab.gd:29
+#: ui/room_tab.gd:30
 msgid "Dim room"
 msgstr ""
 
-#: ui/room_tab.gd:29 environments/cinema.env.json
+#: ui/room_tab.gd:30 environments/cinema.env.json
 msgid "Cinema"
 msgstr ""
 
-#: ui/room_tab.gd:29
+#: ui/room_tab.gd:30
 msgid "Passthrough"
 msgstr ""
 
-#: ui/room_tab.gd:29
+#: ui/room_tab.gd:30
 msgid "Home theatre"
 msgstr ""
 
-#: ui/room_tab.gd:29
+#: ui/room_tab.gd:30
 msgid "Drive-in"
 msgstr ""
 
-#: ui/room_tab.gd:29
+#: ui/room_tab.gd:30
 msgid "Planetarium"
 msgstr ""
 
-#: ui/room_tab.gd:30
+#: ui/room_tab.gd:31
 msgid "Dome"
 msgstr ""
 
-#: ui/room_tab.gd:55
-msgid "Cinemas"
-msgstr ""
-
-#: ui/room_tab.gd:55
-msgid "Television"
-msgstr ""
-
-#: ui/room_tab.gd:55
+#: ui/room_tab.gd:60
 msgid "Built in"
 msgstr ""
 
-#: ui/room_tab.gd:55 ui/surface_panel.gd:27
+#: ui/room_tab.gd:60 ui/surface_panel.gd:27
 msgid "Yours"
 msgstr ""
 
-#: ui/room_tab.gd:55
+#: ui/room_tab.gd:60
 msgid "Showrooms"
 msgstr ""
 

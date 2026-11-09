@@ -50,6 +50,9 @@ var _screen_local := Transform3D()
 var _screen_size := Vector2.ZERO
 ## Played sounds (tests): [[sound, gain_db, at]]
 var sounds: Array = []
+## How long each system took to build, in milliseconds by its id (the main thread is held for their sum: the build
+## time check, env_checks.gd BUILD_BUDGET_MS).
+var build_ms := {}
 
 
 static func attach(p_room: Node3D, p_doc: Dictionary) -> Node:
@@ -73,6 +76,7 @@ func build(p_room: Node3D, p_doc: Dictionary) -> void:
 	timeline = EnvTimeline.new()
 	timeline.setup(self, doc)
 	timeline.state_changed.connect(_on_state)
+	timeline.seeked.connect(_on_seek)
 	_build_systems()
 
 
@@ -116,8 +120,11 @@ func _build_systems() -> void:
 		e["value"] = _evaluate(e, 0.0)
 		s.params[bits[1]] = _comfort(spec, e["value"])
 		_bindings.append(e)
+	build_ms.clear()
 	for s: Node in order:
+		var t0 := Time.get_ticks_usec()
 		s.call("setup")
+		build_ms[str(s.get("id"))] = (Time.get_ticks_usec() - t0) / 1000.0
 
 
 func _system_name(sid: String) -> String:
@@ -240,6 +247,11 @@ func _wanted() -> Dictionary:
 func _on_state(s: String, prev: String) -> void:
 	for sys: Node in order:
 		sys.call("on_state", s, prev)
+
+
+func _on_seek(from: float, to: float) -> void:
+	for sys: Node in order:
+		sys.call("on_seek", from, to)
 
 
 # --- Bindings -------------------------------------------------------------------------------------------------------

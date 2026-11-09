@@ -13,6 +13,7 @@ extends ScrollContainer
 
 const W := preload("res://ui/pane_widgets.gd")
 const EnvLibrary := preload("res://scripts/env/env_library.gd")
+const EnvDoc := preload("res://scripts/env/env_doc.gd")
 const Recipes := preload("res://scripts/dev/recipes.gd")
 const Showrooms := preload("res://scripts/env/showrooms.gd")
 const Icons := preload("res://ui/icons.gd")
@@ -39,8 +40,11 @@ var _envs: HFlowContainer
 var _yours_box: VBoxContainer
 var _yours: HFlowContainer
 var _env_ids: Array[String] = []
-## The cinemas and the television rooms (a room document's room.category, EnvLibrary.category_of()): their own
-## groups above the other rooms.
+## The rooms' categories (a room document's room.category, EnvLibrary.category_of()): a folding group each above the
+## other rooms, made from EnvDoc.ROOM_GROUPS. Category -> its group's box, and -> its rows.
+var _category_boxes := {}
+var _category_rows := {}
+## The first two by name (the Television group has controls of its own; tests read these).
 var _cinema_box: VBoxContainer
 var _cinemas: HFlowContainer
 var _tv_box: VBoxContainer
@@ -52,7 +56,8 @@ var _showrooms: HFlowContainer
 var _built_in_box: VBoxContainer
 ## The rooms' groups fold: closed when the app starts, one open at a time (the user, 2026-11-08: "less
 ## impenetrable"). Title -> {head: Button, body: VBoxContainer, rows: HFlowContainer}; _open_group: the open one's.
-const GROUP_TITLES: Array[String] = ["Cinemas", "Television", "Built in", "Yours", "Showrooms"] # i18n
+## The groups that are not a category (the categories' headings are EnvDoc.ROOM_GROUPS' own keys).
+const GROUP_TITLES: Array[String] = ["Built in", "Yours", "Showrooms"] # i18n
 var _groups := {}
 var _open_group := ""
 ## Every environment row, the rooms' then the showrooms', in _env_ids' order.
@@ -116,11 +121,20 @@ func _init() -> void:
 func bind(p_app: Node) -> void:
 	app = p_app
 	box.add_child(W.section("Environment"))
-	_cinema_box = _group("Cinemas")
-	_cinemas = _groups["Cinemas"]["rows"]
-	_tv_box = _group("Television")
-	_tvs = _groups["Television"]["rows"]
-	var tv_body: VBoxContainer = _groups["Television"]["body"]
+	for category: String in EnvDoc.ROOM_GROUPS:
+		var title := str(EnvDoc.ROOM_GROUPS[category])
+		_category_boxes[category] = _group(title)
+		_category_rows[category] = _groups[title]["rows"]
+	_cinema_box = _category_boxes["cinema"]
+	_cinemas = _category_rows["cinema"]
+	_tv_box = _category_boxes["tv"]
+	_tvs = _category_rows["tv"]
+	# What a category has of its own goes in its group's body, under its rows: the Television group's time travel,
+	# the Journeys group's line about what a journey is.
+	(_groups[EnvDoc.ROOM_GROUPS["journey"]]["body"] as VBoxContainer).add_child(W.help(
+			"A journey is as long as the film: it leaves when the film starts and arrives with the credits. "
+			+ "Pause, and it waits."))
+	var tv_body: VBoxContainer = _groups[EnvDoc.ROOM_GROUPS["tv"]]["body"]
 	_time_travel = W.toggle("Time travel", _on_time_travel)
 	tv_body.add_child(W.hbox([_time_travel]))
 	_time_travel_every = W.choices(["Over the film", "Every 5 minutes", "Every 10 minutes", "Every 15 minutes"],
@@ -369,8 +383,8 @@ func _sync_time_travel() -> void:
 
 
 ## The environment rows: rebuilt when the list changed (a photo room or a glTF room added), else only the mark moves.
-## The viewer's own rooms go under Yours, the showrooms in their own group (Showrooms), the cinemas and the
-## television rooms under Cinemas and Television (EnvLibrary.category_of()); one mark for all.
+## The viewer's own rooms go under Yours, the showrooms in their own group (Showrooms), a room with a category under
+## its category's heading (EnvLibrary.category_of(): Cinemas, Television, Journeys); one mark for all.
 func _sync_envs() -> void:
 	var list: Array = app.get_environment_list()
 	var ids: Array[String] = []
@@ -379,7 +393,7 @@ func _sync_envs() -> void:
 	if ids != _env_ids:
 		_env_ids = ids
 		_env_rows.clear()
-		for holder: HFlowContainer in [_cinemas, _tvs, _envs, _yours, _showrooms]:
+		for holder: HFlowContainer in _category_rows.values() + [_envs, _yours, _showrooms]:
 			for c in holder.get_children():
 				holder.remove_child(c)
 				c.queue_free()
@@ -397,14 +411,14 @@ func _sync_envs() -> void:
 					b.set_meta("photo", id.trim_prefix(EnvLibrary.SKY_PREFIX).get_basename())
 			var holder := _showrooms if Showrooms.is_showroom(id) else (_yours if is_yours(id) else _envs)
 			if holder == _envs:
-				var category := EnvLibrary.category_of(id)
-				holder = _cinemas if category == "cinema" else (_tvs if category == "tv" else _envs)
+				holder = _category_rows.get(EnvLibrary.category_of(id), _envs)
 			holder.add_child(b)
 			_env_rows.append(b)
 		_yours_box.visible = _yours.get_child_count() > 0
 		_showroom_box.visible = _showrooms.get_child_count() > 0
-		_cinema_box.visible = _cinemas.get_child_count() > 0
-		_tv_box.visible = _tvs.get_child_count() > 0
+		# A category with no room yet shows no heading.
+		for category: String in _category_boxes:
+			(_category_boxes[category] as Control).visible = (_category_rows[category] as Node).get_child_count() > 0
 		_built_in_box.visible = _envs.get_child_count() > 0
 	for i in _env_rows.size():
 		_env_rows[i].set_pressed_no_signal(_env_ids[i] == str(app.env_id))

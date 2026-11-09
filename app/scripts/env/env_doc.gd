@@ -26,7 +26,10 @@ const CHANNELS := {
 	"film.colour": "color", "film.brightness": "unit", "film.bass": "unit", "film.transient": "unit",
 	"film.quiet": "unit", "film.progress": "unit", "film.minutes": "raw", "time.of_day": "unit",
 	"playback.state": "name", "playback.playing": "unit", "comfort.motion": "unit",
-	"weather.rain": "unit", "weather.snow": "unit", "weather.wet": "unit"}
+	"weather.rain": "unit", "weather.snow": "unit", "weather.wet": "unit",
+	# The passing system's (systems/passing.gd): how fast the journey goes now against its own speed, and how far
+	# along its route it is. 0 without one.
+	"journey.speed": "unit", "journey.progress": "unit"}
 const SETTING_PREFIX := "setting."
 ## The timeline's states (env_timeline.gd).
 const STATES: Array[String] = ["preshow", "starting", "playing", "paused", "intermission", "credits", "ended"]
@@ -73,9 +76,18 @@ const COMMON_TEXTS := ["Dim during the film", "The room's light goes down while 
 		"How much things in the room move: sways, tilts, weave."]
 # i18n: end
 
-## The Room tab's groups a room document may choose (room.category), in the tab's order.
-const ROOM_CATEGORIES: Array[String] = ["cinema", "tv", "other"]
-const ROOM_OPTIONS := {
+## The Room tab's groups a room document may choose (room.category), in the tab's order, each with its heading (a
+## key). The one table: ui/room_tab.gd makes a folding group for each line and env_library.gd category_of() reads it,
+## so a new category is a line here and nothing else. Before 2026-11-09 the list was written out in three files, and
+## the library's copy did not follow this one.
+# i18n: begin
+const ROOM_GROUPS := {"cinema": "Cinemas", "tv": "Television", "journey": "Journeys"}
+# i18n: end
+## A room that names no category: listed with the other rooms that ship.
+const OTHER := "other"
+static var ROOM_CATEGORIES: Array = ROOM_GROUPS.keys() + [OTHER]
+## (Not a constant: its category's values come from ROOM_GROUPS.)
+static var ROOM_OPTIONS := {
 	"ambient": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0},
 	"screen_glow": {"type": "float", "min": 0.0, "max": 2.0, "default": 0.0},
 	"curtains": {"type": "bool", "default": false},
@@ -85,8 +97,8 @@ const ROOM_OPTIONS := {
 	"reacts_to_film": {"type": "bool", "default": false},
 	"reflection": {"type": "bool", "default": false},
 	"reflection_floor": {"type": "float", "min": -20.0, "max": 20.0, "default": null, "nullable": true},
-	# Where the Room tab lists it (ui/room_tab.gd): under Cinemas, under Television, or with the other rooms.
-	"category": {"type": "enum", "values": ROOM_CATEGORIES, "default": "other"},
+	# Where the Room tab lists it (ui/room_tab.gd): under one of ROOM_GROUPS' headings, or with the other rooms.
+	"category": {"type": "enum", "values": ROOM_CATEGORIES, "default": OTHER},
 	# A line about the room under "This room" (a key: a room that ships translates it; env_library.gd description_of()).
 	"description": {"type": "string", "max": 200},
 }
