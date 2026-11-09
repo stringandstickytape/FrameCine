@@ -5,9 +5,20 @@ extends "res://scripts/env/systems/life/creature.gd"
 ## ends. It never sits in the sight line and goes through it at a trot. settle: it sits now; pass: it walks the wall
 ## end to end; scatter: it trots off to the far end; call: a purr (an event; a sound only where the synthesiser has one).
 ## Sitting down it purrs too.
+## It faces the way it walks. At an end, or wherever its way bends by more than TURN_AT, it stops and turns on the spot
+## (TURN_SECONDS, eased, its legs stepping round); a gentler bend it steers through as it walks.
 
 const COLOUR := Color(0.24, 0.21, 0.19)
 const WALK := 0.35
+## A turn on the spot: from this bend (radians) up; it takes TURN_SECONDS[0] (a small turn) to [1] (turning round).
+const TURN_AT := 1.0
+const TURN_SECONDS: Array[float] = [0.35, 0.55]
+## A quick turn (it hurries, or turns in the sight line).
+const TURN_QUICK := 0.3
+## Steering through a gentle bend as it walks (radians per second).
+const STEER := 3.0
+## Its legs while it turns on the spot: shorter steps than walking.
+const TURN_STRIDE := 0.6
 const DIMS := {"length": 0.42, "height": 0.26, "leg": 0.13, "width": 0.12, "neck": 0.0, "head": 0.1, "tail": 0.28,
 		"ears": 0.045}
 enum { WALKING, SITTING }
@@ -22,9 +33,21 @@ var pose := 0.0
 var phase := 0.0
 var face := Vector3.FORWARD
 var hurry := 1.0
-## Times it sat down (tests).
+## Where it faces: the angle about up from -Z (Vector3.FORWARD), and its pitch along a sloping way.
+var yaw := 0.0
+var slope := 0.0
+## Turning on the spot: from, to (radians), how far through (0..1), how long (s).
+var turning := false
+var _turn_from := 0.0
+var _turn_to := 0.0
+var _turn_t := 0.0
+var _turn_len := 0.5
+var _gait := 0.0
+## Times it sat down, times it turned on the spot (tests).
 var sits := 0
+var turns := 0
 var _pos := Vector3.ZERO
+var _tan := Vector3.FORWARD
 
 
 static func defaults() -> Dictionary:
@@ -49,6 +72,10 @@ func build() -> void:
 	single(quadruped(DIMS), m, "Cat")
 	s = rng.randf() * length
 	goal = rng.randf() * length
+	_at(s)
+	var d := _tan * (signf(goal - s) if goal != s else 1.0)
+	yaw = yaw_of(d)
+	slope = d.y
 	_place(0.0)
 
 
@@ -66,20 +93,39 @@ func step(delta: float) -> void:
 	match state:
 		WALKING:
 			pose = move_toward(pose, 0.0, delta / 1.0)
+			_gait = 0.0
 			if pose <= 0.0:
 				var v: float = WALK * speed() * hurry * (life.THROUGH_SPEED if in_view else 1.0)
 				var dir := signf(goal - s)
-				s = move_toward(s, goal, v * delta)
-				phase = fmod(phase + delta * v / 0.25, 1.0)
-				if absf(goal - s) < 0.01:
-					hurry = 1.0
-					if not in_view and rng.randf() < 0.75:
-						_sit()
-					else:
-						_new_goal()
-				elif dir != 0.0:
-					var d: Vector3 = along(path, s)[1] * dir
-					face = face.lerp(d, clampf(delta * 3.0, 0.0, 1.0)).normalized()
+				var want := _tan * dir
+				if not turning and dir != 0.0:
+					var bend := angle_difference(yaw, yaw_of(want))
+					if absf(bend) > TURN_AT:
+						_start_turn(bend, in_view)
+				if turning:
+					# On the spot: eased round, the legs stepping at the walk's cadence.
+					_turn_t = minf(_turn_t + delta / _turn_len, 1.0)
+					yaw = lerpf(_turn_from, _turn_to, smoothstep(0.0, 1.0, _turn_t))
+					slope = move_toward(slope, want.y, delta / _turn_len)
+					phase = fmod(phase + delta * WALK * speed() / 0.25, 1.0)
+					_gait = TURN_STRIDE
+					if _turn_t >= 1.0:
+						turning = false
+						yaw = wrapf(_turn_to, -PI, PI)
+				else:
+					if dir != 0.0:
+						yaw = rotate_toward(yaw, yaw_of(want), STEER * delta)
+						slope = move_toward(slope, want.y, STEER * delta)
+					s = move_toward(s, goal, v * delta)
+					phase = fmod(phase + delta * v / 0.25, 1.0)
+					_gait = 1.0
+					if absf(goal - s) < 0.01:
+						_gait = 0.0
+						hurry = 1.0
+						if not in_view and rng.randf() < 0.75:
+							_sit()
+						else:
+							_new_goal()
 		SITTING:
 			pose = move_toward(pose, 1.0, delta / 1.2)
 			timer -= delta
@@ -90,9 +136,47 @@ func step(delta: float) -> void:
 
 
 func _place(_delta: float) -> void:
-	_pos = along(path, s)[0]
-	var moving := 1.0 if state == WALKING and pose <= 0.0 and absf(goal - s) > 0.01 else 0.0
+	_at(s)
+	var h := sqrt(maxf(0.0, 1.0 - slope * slope))
+	face = Vector3(-sin(yaw) * h, slope, -cos(yaw) * h)
+	var moving := _gait if state == WALKING else 0.0
 	put_single(facing(_pos, face, size()), Color(1, 1, 1, life.fade), Color(phase, moving, 0.0, pose))
+
+
+## The angle about up from -Z of a direction (facing()'s: -Z along it).
+static func yaw_of(d: Vector3) -> float:
+	return atan2(-d.x, -d.z)
+
+
+## A turn on the spot by bend radians: turning round (a bend of about half a turn) goes either way.
+func _start_turn(bend: float, in_view: bool) -> void:
+	var b := bend
+	if absf(absf(b) - PI) < 0.05:
+		b = PI * (1.0 if rng.randf() < 0.5 else -1.0)
+	turning = true
+	turns += 1
+	_turn_from = yaw
+	_turn_to = yaw + b
+	_turn_t = 0.0
+	var f := clampf((absf(b) - TURN_AT) / (PI - TURN_AT), 0.0, 1.0)
+	_turn_len = lerpf(TURN_SECONDS[0], TURN_SECONDS[1], f)
+	if hurry > 1.0 or in_view:
+		_turn_len = TURN_QUICK
+
+
+## Where along the way s is, and the way's direction there (_pos, _tan), without an array (creature.along()'s).
+func _at(d: float) -> void:
+	var left := maxf(d, 0.0)
+	var last := path.size() - 2
+	for i in path.size() - 1:
+		var a: Vector3 = path[i]
+		var b: Vector3 = path[i + 1]
+		var seg := a.distance_to(b)
+		if left <= seg or i == last:
+			_tan = (b - a).normalized()
+			_pos = a + _tan * minf(left, seg)
+			return
+		left -= seg
 
 
 func _sit() -> void:
