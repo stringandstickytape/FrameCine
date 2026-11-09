@@ -1,4 +1,4 @@
-# Frame VR Video: assistant service
+# FrameCine: assistant service
 
 You reached a VR video player running on a headset on this network. The person wearing it (the viewer) is watching a
 film and cannot see your chat or terminal. Through this API you can see what they watch, hear what they say

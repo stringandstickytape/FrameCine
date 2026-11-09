@@ -55,7 +55,7 @@ names who added it and the feature. Tick items off by editing `[ ]` to `[x]` and
 - [ ] Play a real film past a minute, open another file, then the first again. It should continue about 3 s
       before where it was, with the picture and sound in step (the seek happens right after the open).
 - [ ] Quit the app mid-film (or take the headset off and kill it over ssh), start it with the same `--file=`: it
-      resumes. `~/.local/share/godot/app_userdata/Frame VR Video/resume.cfg` holds the entry.
+      resumes. `~/.local/share/godot/app_userdata/FrameCine/resume.cfg` holds the entry.
 - [ ] B (previous) after a resume goes back to the start.
 
 ### Subtitles (stand-in display)
@@ -494,7 +494,7 @@ The old menu is gone. All of this is untested in the headset. Start with `-- --d
 
 ### #91 Tours and kiosk mode (`docs/tours.md`)
 
-- [ ] Copy a tour file to `~/.local/share/godot/app_userdata/Frame VR Video/tours/demo.json` with two local files,
+- [ ] Copy a tour file to `~/.local/share/godot/app_userdata/FrameCine/tours/demo.json` with two local files,
       a screen move with `"async": true` and a `{"environment": "cinema"}` step. Start with `-- --tour=demo`. The
       files play in turn, the screen glides, the pane stays out of the view. Note any judder during the screen move.
 - [ ] The same with `--kiosk`: it loops. Raise the pane and use it: the tour goes on. Then `send tour stop=true`.
@@ -645,7 +645,7 @@ pass. Details in `spikes/03-player/README.md`, "Discrete channels".
 
 - [ ] Each new room from the environment list: Home theatre, Drive-in, Planetarium, Dome. Is the scale right (car,
       sofa, seats)? Is the screen at a comfortable size and height? Note any frame drops in the overlay.
-- [ ] Photo room: copy a phone 360 photo into ~/.local/share/godot/app_userdata/Frame VR Video/skyboxes/ and pick
+- [ ] Photo room: copy a phone 360 photo into ~/.local/share/godot/app_userdata/FrameCine/skyboxes/ and pick
       it. The photo's horizon is level at eye height, it isn't mirrored (text in the photo reads right), and room
       light dims it.
 - [ ] glTF room: export a simple room from Blender as .glb with an empty named ScreenAnchor (X scale = screen
@@ -712,14 +712,14 @@ Tested in WSL only: package, install, update, wrong-architecture refusal, uninst
 fake Steam folder. Nothing of this is tested on the device.
 
 - [ ] On the PC: `tools/package.sh`, then `tools/install-on-frame.sh`. It ends with "installed in
-      /home/steamos/framevrvideo (engine 4.7.2...)".
-- [ ] In the desktop session, the menu has "Frame VR Video" (and the Desktop has the icon). It starts the player in
-      the headset. The log is in `~/.local/state/framevrvideo/last.log`.
-- [ ] `~/framevrvideo/run.sh --file=<a film>` over ssh plays the film.
-- [ ] Run the install again: the old one is in `~/framevrvideo.old` and the settings are kept.
-- [ ] Read-only: `python3 ~/framevrvideo/tools/steam_shortcuts.py --list` lists the existing shortcuts, without
+      /home/steamos/framecine (engine 4.7.2...)".
+- [ ] In the desktop session, the menu has "FrameCine" (and the Desktop has the icon). It starts the player in
+      the headset. The log is in `~/.local/state/framecine/last.log`.
+- [ ] `~/framecine/run.sh --file=<a film>` over ssh plays the film.
+- [ ] Run the install again: the old one is in `~/framecine.old` and the settings are kept.
+- [ ] Read-only: `python3 ~/framecine/tools/steam_shortcuts.py --list` lists the existing shortcuts, without
       an error.
-- [ ] `tools/install-on-frame.sh --steam`, then restart Steam: the library has "Frame VR Video", and it starts the
+- [ ] `tools/install-on-frame.sh --steam`, then restart Steam: the library has "FrameCine", and it starts the
       player. Note if it starts in VR, or if `--openvr` is needed. A backup `shortcuts.vdf.bak-*` is next to the file.
 - [ ] `tools/install-on-frame.sh --uninstall --steam` removes the folder, the menu entry and the shortcut.
 
@@ -761,7 +761,7 @@ Desktop tests only (`app/tests/test_hands.gd`, the settings file round trip). No
 
 - [ ] Any XR start: copy the log's `OpenXR capabilities:` line (hand tracking, hand interaction profile, eye gaze,
       refresh rates, blend modes).
-- [ ] The runtime's full extension list, once: `./bin/framevrvideo-engine --path app --display-driver x11
+- [ ] The runtime's full extension list, once: `./bin/framecine-engine --path app --display-driver x11
       --xr-mode on --verbose -- --quit-after=300 2>&1 | grep "Found OpenXR extension"`. Note XR_EXT_hand_tracking,
       XR_EXT_hand_interaction, XR_FB_passthrough, XR_HTC_passthrough, XR_EXT_dpad_binding and any XR_VALVE_* or
       XR_MNDX_* extension.

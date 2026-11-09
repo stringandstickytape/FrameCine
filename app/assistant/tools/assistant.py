@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""A command line and a small client for the Frame VR Video's assistant service on the headset (docs/assistant.md).
+"""A command line and a small client for the FrameCine's assistant service on the headset (docs/assistant.md).
 Python 3.8+, standard library only. The headset serves this file at https://<headset>:47801/tools/assistant.py.
 
     python assistant.py --url https://192.168.1.50:47801 guide              # the guide (no token needed)

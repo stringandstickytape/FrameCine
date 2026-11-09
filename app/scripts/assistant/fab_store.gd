@@ -46,7 +46,7 @@ const EULA_URL := "https://www.fab.com/eula"
 const WHERE := "Objects → Your objects → Fab"
 const EULA_MESSAGE := "Ask the user to accept Fab's licence in Objects → Your objects → Fab first. Only the user " \
 		+ "can, in the headset's menu; no command can."
-const PROJECT_URL := "https://github.com/stringandstickytape/FrameVRVideo"
+const PROJECT_URL := "https://github.com/stringandstickytape/FrameCine"
 
 const API_GAP := 1.0
 const THUMB_GAP := 0.25
@@ -190,7 +190,7 @@ static func _err(code: String, message: String, more := {}) -> Dictionary:
 
 ## The app's own name and version, and where it comes from: not a browser's.
 static func user_agent() -> String:
-	return "FrameVRVideo/%s (+%s)" % [app_version(), PROJECT_URL]
+	return "FrameCine/%s (+%s)" % [app_version(), PROJECT_URL]
 
 
 ## The release's version (tools/package.sh writes VERSION beside the app), else "dev".

@@ -17,24 +17,24 @@ tools/package.sh --engine godot.linuxbsd.template_debug.arm64.PLAYER_PCWIN --ver
 tools/package.sh --arch x86_64 --engine-src src/godot-pcwindows   # a desktop Linux build (the WSL fork build)
 ```
 
-The result is `build/dist/framevrvideo-<version>-<arch>.tar.gz`, and with `--zip` also `.zip` beside it (both
+The result is `build/dist/framecine-<version>-<arch>.tar.gz`, and with `--zip` also `.zip` beside it (both
 about 94 MB for 0.1.0; the engine is 108 MB unpacked and the room textures 55 MB). The version defaults to
 `git describe`; releases pass it (`tools/release.sh`, below). Run it from Git Bash or WSL. It needs Python 3 (to write
 the archives with the right file modes) and the WSL build tree at `~/src` for the licence files, the engine's revision
 and the x86_64 engine. In a linked git worktree it takes the engine and whisper from the main checkout's `build/out`.
 
-Both archives hold one top folder, `framevrvideo-<version>-<arch>/`, with the same entries and modes: folders,
-`bin/framevrvideo-engine`, `*.sh` and the whisper programs 755, everything else 644, owner 0/0. The zip is made on
+Both archives hold one top folder, `framecine-<version>-<arch>/`, with the same entries and modes: folders,
+`bin/framecine-engine`, `*.sh` and the whisper programs 755, everything else 644, owner 0/0. The zip is made on
 "Unix" with the modes in each entry's `external_attr`, so `unzip`, Python's `zipfile` and Frame Control apply them.
 Frame Control and FrameDrop step into the one top folder; the launch file is `run.sh` (no space in the name).
 
 | In the package | What it is |
 |---|---|
-| `bin/framevrvideo-engine` | The engine fork, renamed. `VERSION` gives its build name, source branch and revision, and SHA-256. |
+| `bin/framecine-engine` | The engine fork, renamed. `VERSION` gives its build name, source branch and revision, and SHA-256. |
 | `app/` | The project as committed in `HEAD` (LF line ends from any PC), without `app/tests`, `app/docs` and `app/tools`. |
 | `run.sh` | The launcher. Arguments after it go to the app (`./run.sh --file=/path/film.mkv`). |
 | `whisper/` | `whisper-server` (speech to text, CPU build) and `BUILDINFO`; `models/` is empty unless `--whisper-model STEM` (the player is to download the model on first use, `docs/framedrop.md`). `--no-whisper` leaves the folder out; `--whisper-bench` adds the benchmark kit and every model. |
-| `framevrvideo.desktop.in` | The menu entry. The installer puts in the install folder. |
+| `framecine.desktop.in` | The menu entry. The installer puts in the install folder. |
 | `icon.svg` | A neutral icon (a screen with a play mark). |
 | `tools/steam_shortcuts.py` | The library shortcut helper, for `--steam`. |
 | `LICENSES/` | This app (MIT), the engine (MIT and its COPYRIGHT notices), FFmpeg (LGPL-2.1), dav1d (BSD-2-Clause), libsmb2 (LGPL-2.1), whisper.cpp and the models (MIT), the controller models (CC BY-NC-SA 4.0), the room textures (CC0), and `THIRD-PARTY.md`. |
@@ -59,11 +59,11 @@ once at start. That is harmless.
 `run.sh` is the known-good launch line from `app/README.md`:
 
 ```
-DISPLAY=:0 XDG_RUNTIME_DIR=/run/user/$(id -u) bin/framevrvideo-engine --path app --display-driver x11 --xr-mode on -- <app arguments>
+DISPLAY=:0 XDG_RUNTIME_DIR=/run/user/$(id -u) bin/framecine-engine --path app --display-driver x11 --xr-mode on -- <app arguments>
 ```
 
 It keeps `DISPLAY` and `XDG_RUNTIME_DIR` when they are already set (as in the desktop session). The log goes to
-`~/.local/state/framevrvideo/last.log`. The log of the run before is `previous.log`.
+`~/.local/state/framecine/last.log`. The log of the run before is `previous.log`.
 
 ### Licences
 
@@ -108,9 +108,9 @@ to match (a name in the engine's credits) goes in `~/.config/vrvp/private-allow`
 
 | File | What |
 |---|---|
-| `framevrvideo-<V>-arm64.tar.gz` | The package. The player's updater downloads this one. |
-| `framevrvideo-<V>-arm64.zip` | The same files, for Frame Control and FrameDrop. |
-| `framevrvideo-pc-<V>-windows-x64.zip` | `framevrvideo-pc-<V>-windows-x64/`: `pc-windows.exe` (build paths neutralised), `README.txt` (from `tools/release-pc-readme.txt`), `LICENSES/` (this project's MIT, and `THIRD-PARTY.txt` for C++/WinRT and the static MSVC runtime). |
+| `framecine-<V>-arm64.tar.gz` | The package. The player's updater downloads this one. |
+| `framecine-<V>-arm64.zip` | The same files, for Frame Control and FrameDrop. |
+| `framecine-pc-<V>-windows-x64.zip` | `framecine-pc-<V>-windows-x64/`: `pc-windows.exe` (build paths neutralised), `README.txt` (from `tools/release-pc-readme.txt`), `LICENSES/` (this project's MIT, and `THIRD-PARTY.txt` for C++/WinRT and the static MSVC runtime). |
 | `latest.json`, `latest.json.sig` | The update file (below) and its signature. |
 | `install-manifest.json` | For Frame Control and FrameDrop (below). |
 | `SHA256SUMS` | Every file above, `sha256sum` format. |
@@ -132,7 +132,7 @@ once and signed byte for byte as written:
   "version": "0.1.0",
   "tag": "v0.1.0",
   "package": {
-    "url": "https://github.com/stringandstickytape/FrameVRVideo/releases/download/v0.1.0/framevrvideo-0.1.0-arm64.tar.gz",
+    "url": "https://github.com/stringandstickytape/FrameCine/releases/download/v0.1.0/framecine-0.1.0-arm64.tar.gz",
     "size": 98123456,
     "sha256": "<64 lowercase hex>"
   },
@@ -143,7 +143,7 @@ once and signed byte for byte as written:
 `latest.json.sig` is the raw RSA PKCS#1 v1.5 signature over the SHA-256 of `latest.json`'s bytes
 (`openssl dgst -sha256 -sign`). The player checks it with `Crypto.verify(HashingContext.HASH_SHA256, sha256, sig,
 key)`, the key loaded from `app/update/release-key.pub.pem` (`CryptoKey.load(path, true)`). `release.sh` verifies the
-signature with that file before it finishes. The tarball unpacks to one folder, `framevrvideo-<V>-arm64/`.
+signature with that file before it finishes. The tarball unpacks to one folder, `framecine-<V>-arm64/`.
 
 ### The signing key
 
@@ -161,8 +161,8 @@ in a release signed with the old one.
 ```json
 {
   "schema": "framedrop.install/v1",
-  "name": "Frame VR Video",
-  "files": [ { "url": "https://github.com/stringandstickytape/FrameVRVideo/releases/download/v0.1.0/framevrvideo-0.1.0-arm64.zip",
+  "name": "FrameCine",
+  "files": [ { "url": "https://github.com/stringandstickytape/FrameCine/releases/download/v0.1.0/framecine-0.1.0-arm64.zip",
                "sha256": "<sha256 of the zip>", "size": 98234567, "exe": "run.sh" } ]
 }
 ```
@@ -187,7 +187,7 @@ folder from `name`: `~/devkit-game/VR_Video_Player/`. Its rules: HTTPS, public h
 
 ```
 tools/install-on-frame.sh                          # the newest arm64 tarball in build/dist
-tools/install-on-frame.sh build/dist/framevrvideo-0.4.0-arm64.tar.gz --steam
+tools/install-on-frame.sh build/dist/framecine-0.4.0-arm64.tar.gz --steam
 tools/install-on-frame.sh --uninstall [--steam]
 ```
 
@@ -197,14 +197,14 @@ script with `bash -s`, so no quoting goes through PowerShell.
 
 On the headset it:
 
-1. unpacks into a temporary folder next to the install folder (default `~/framevrvideo`);
+1. unpacks into a temporary folder next to the install folder (default `~/framecine`);
 2. runs the engine with `--version` and stops, with nothing changed, if it does not start (wrong architecture or a
    missing library);
-3. moves the old install to `~/framevrvideo.old` (one level) and puts the new one in its place;
-4. writes `~/.local/share/applications/framevrvideo.desktop`, and a copy on `~/Desktop` if that folder exists;
+3. moves the old install to `~/framecine.old` (one level) and puts the new one in its place;
+4. writes `~/.local/share/applications/framecine.desktop`, and a copy on `~/Desktop` if that folder exists;
 5. with `--steam`, adds the library shortcut (below).
 
-Settings (`~/.local/share/godot/app_userdata/Frame VR Video/`) and logs are outside the install folder, so an update
+Settings (`~/.local/share/godot/app_userdata/FrameCine/`) and logs are outside the install folder, so an update
 keeps them, and so does `--uninstall`.
 
 ### The sudo-free path
@@ -213,10 +213,10 @@ Everything the player needs is in the user's home folder:
 
 | Path | What |
 |---|---|
-| `~/framevrvideo/` | The engine, the app, the launcher |
-| `~/.local/share/applications/framevrvideo.desktop` | The menu entry (and the copy on `~/Desktop`) |
-| `~/.local/share/godot/app_userdata/Frame VR Video/` | Settings, recents, bookmarks |
-| `~/.local/state/framevrvideo/` | Logs |
+| `~/framecine/` | The engine, the app, the launcher |
+| `~/.local/share/applications/framecine.desktop` | The menu entry (and the copy on `~/Desktop`) |
+| `~/.local/share/godot/app_userdata/FrameCine/` | Settings, recents, bookmarks |
+| `~/.local/state/framecine/` | Logs |
 | `~/.local/share/Steam/userdata/<id>/config/shortcuts.vdf` | Only with `--steam`; backed up first |
 
 The root file system of SteamOS is read-only and updates replace it. Nothing here writes to it, so a system update
@@ -233,8 +233,8 @@ device test. The default user can.
 the standard library of Python 3.
 
 ```
-python3 ~/framevrvideo/tools/steam_shortcuts.py --list
-python3 ~/framevrvideo/tools/steam_shortcuts.py --add --exe ~/framevrvideo/run.sh --dry-run
+python3 ~/framecine/tools/steam_shortcuts.py --list
+python3 ~/framecine/tools/steam_shortcuts.py --add --exe ~/framecine/run.sh --dry-run
 ```
 
 - **Backup.** Before each write it copies the file to `shortcuts.vdf.bak-<date-time>`. It writes to a temporary file
@@ -272,4 +272,4 @@ gives a shortcut it makes itself an id of its own. The helper uses the id that o
 quoted exe and the name, with the top bit set. `tools/test_steam_shortcuts.py` tests the round trip, all value
 types, add, update, remove, renumbering, the backup and `--dry-run` on synthetic files.
 
-To check on the device (read-only): `python3 ~/framevrvideo/tools/steam_shortcuts.py --list`.
+To check on the device (read-only): `python3 ~/framecine/tools/steam_shortcuts.py --list`.

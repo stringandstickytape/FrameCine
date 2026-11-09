@@ -17,7 +17,7 @@ BEGIN
       VALUE "InternalName", "pc-windows"
       VALUE "LegalCopyright", "MIT License"
       VALUE "OriginalFilename", "pc-windows.exe"
-      VALUE "ProductName", "Frame VR Video"
+      VALUE "ProductName", "FrameCine"
       VALUE "ProductVersion", "0.1"
     END
   END

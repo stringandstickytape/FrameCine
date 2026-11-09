@@ -23,7 +23,7 @@ extends RefCounted
 ## Flag (after `--`): --model-url=URL takes the model from URL instead (tests, a mirror).
 
 ## The project's releases. The rename touches this line only (and fab_store.gd's PROJECT_URL).
-const RELEASES := "https://github.com/stringandstickytape/FrameVRVideo/releases/download"
+const RELEASES := "https://github.com/stringandstickytape/FrameCine/releases/download"
 ## A release only for the models; it never changes and is never marked latest (tools/upload-model.sh).
 const MODEL_RELEASE := "models-1"
 const MODEL_FILE := "ggml-small.en-q8_0.bin"
@@ -33,7 +33,7 @@ const MODEL_SHA256 := "67a179f608ea6114bd3fdb9060e762b588a3fb3bd00c4387971be4d17
 const MAX_REDIRECTS := 5
 ## Room kept free on the disk beyond the model.
 const KEEP_FREE := 200 * 1024 * 1024
-const USER_AGENT := "FrameVRVideo-model/1"
+const USER_AGENT := "FrameCine-model/1"
 
 var connect_timeout := 15.0
 var stall_timeout := 30.0

@@ -156,7 +156,7 @@ ssh frame 'cd ~/spike03 && DISPLAY=:0 XDG_RUNTIME_DIR=/run/user/1000 ./godot_pla
 ssh frame 'cd ~/spike03 && bash tools/whisper-bench.sh --quick --builds "cpu vulkan" --tag film-4k'   # session 2
 ```
 
-From a package made with `tools/package.sh --whisper-bench`: `cd ~/framevrvideo && bash tools/whisper-bench.sh`.
+From a package made with `tools/package.sh --whisper-bench`: `cd ~/framecine && bash tools/whisper-bench.sh`.
 What to decide from it: the default model (`base.en` unless `small.en` finals stay well under real time with a film
 playing), the default thread count, and CPU or Vulkan.
 
@@ -165,7 +165,7 @@ playing), the default thread count, and CPU or Vulkan.
 `app/tests/test_whisper.gd` (desktop, WSL, the x86_64 build and `tiny.en-q5_1`):
 
 ```
-wsl -d Ubuntu -- bash -lc 'cd /mnt/c/path/to/FrameVRVideo && \
+wsl -d Ubuntu -- bash -lc 'cd /mnt/c/path/to/FrameCine && \
   ~/src/godot-player/bin/godot.linuxbsd.template_debug.x86_64 --headless --xr-mode off --path app \
   --script res://tests/test_whisper.gd'
 ```

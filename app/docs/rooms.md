@@ -6,7 +6,7 @@ in the environment list, and the screen goes where the room says.
 ## A glTF room
 
 Put a `.glb` (or `.gltf` with its files) in the app's `rooms` folder:
-`~/.local/share/godot/app_userdata/Frame VR Video/rooms/` on the device. Its name in the list is the file name.
+`~/.local/share/godot/app_userdata/FrameCine/rooms/` on the device. Its name in the list is the file name.
 
 The convention is the same as the built-in rooms:
 
@@ -46,7 +46,7 @@ A room that can't be read shows the void instead, and the log says why.
 ## A photo as the room
 
 Put a 360 photo (equirectangular JPEG, PNG or WebP, 2:1) in the app's `skyboxes` folder:
-`~/.local/share/godot/app_userdata/Frame VR Video/skyboxes/`. It shows in the list as "<name> (photo)". The photo
+`~/.local/share/godot/app_userdata/FrameCine/skyboxes/`. It shows in the list as "<name> (photo)". The photo
 surrounds the viewer with its horizon at eye level. The middle of the photo is straight ahead. Phone photo spheres
 work, including partial ones. For a 3D panorama, the left eye is used. A narrower picture is centred ahead, with
 black around it. The room light setting sets the photo's brightness.

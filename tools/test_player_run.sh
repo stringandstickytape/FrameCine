@@ -35,14 +35,14 @@ make_install() {  # dir version ok|crash
   cp "$LAUNCHER" "$dir/run.sh"
   chmod +x "$dir/run.sh"
   printf 'version %s\narch x86_64\n' "$v" > "$dir/VERSION"
-  cat > "$dir/bin/framevrvideo-engine" <<EOF
+  cat > "$dir/bin/framecine-engine" <<EOF
 #!/bin/bash
 echo "$v \$*" >> "\$HOME/runs.log"
-ST=\${XDG_STATE_HOME:-\$HOME/.local/state}/framevrvideo
+ST=\${XDG_STATE_HOME:-\$HOME/.local/state}/framecine
 if [ "$how" = ok ] && [ -f "\$ST/swapped" ]; then echo "$v" > "\$ST/started"; fi
 [ "$how" = ok ] || exit 134
 EOF
-  chmod +x "$dir/bin/framevrvideo-engine"
+  chmod +x "$dir/bin/framecine-engine"
 }
 
 stage() {  # version ok|crash [no-marker]
@@ -56,8 +56,8 @@ fresh() {
   export HOME="$TMP/my home"
   unset XDG_STATE_HOME XDG_DATA_HOME
   INSTALL="$HOME/devkit-game/probe1"
-  ST="$HOME/.local/state/framevrvideo"
-  UPD="$HOME/.local/share/framevrvideo/update"
+  ST="$HOME/.local/state/framecine"
+  UPD="$HOME/.local/share/framecine/update"
   mkdir -p "$HOME" "$UPD"
   make_install "$INSTALL" 1.0.0 ok
 }

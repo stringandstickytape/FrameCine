@@ -402,7 +402,7 @@ def write_entry(f, e, obsolete=False):
 POT_HEADER = """# The menus' text: every key of app/, written by tools/i18n.py extract. Do not edit; see docs/i18n.md.
 msgid ""
 msgstr ""
-"Project-Id-Version: Frame VR Video\\n"
+"Project-Id-Version: FrameCine\\n"
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=UTF-8\\n"
 "Content-Transfer-Encoding: 8-bit\\n"

@@ -6,7 +6,7 @@ The plan in short:
 
 1. **First install through FrameDrop.** A user clicks "Install with FrameDrop" on the README. FrameDrop copies a zip
    to the headset and adds it to Steam. No ssh, no terminal.
-2. **The first launch installs the player into the home folder** (`~/framevrvideo`), outside the Steam Linux
+2. **The first launch installs the player into the home folder** (`~/framecine`), outside the Steam Linux
    Runtime container, and adds the normal Steam library entry. From then on the player runs as it does now.
 3. **The player updates itself** from GitHub Releases. FrameDrop is not necessary again.
 4. **The speech model is not in the package.** The player downloads it once, the first time voice is used, into
@@ -34,18 +34,18 @@ The install:
 5. Start Steam on the headset.
 6. On the README, click "Install with FrameDrop". FrameDrop opens and asks for a confirmation.
 7. FrameDrop downloads the zip from our release (well under 100 MB without the model), copies it to the headset
-   and adds "Frame VR Video (installer)" to the Steam library.
-8. On the headset, start "Frame VR Video (installer)". It installs the player into the home folder and adds
-   "Frame VR Video" to the library (some seconds), then tells the user to restart Steam.
+   and adds "FrameCine (installer)" to the Steam library.
+8. On the headset, start "FrameCine (installer)". It installs the player into the home folder and adds
+   "FrameCine" to the library (some seconds), then tells the user to restart Steam.
 9. Restart Steam (or the headset). Not known: whether the installer can restart Steam itself.
-10. Start "Frame VR Video". After this: updates come in the player ("Restart now to update?"), and voice
+10. Start "FrameCine". After this: updates come in the player ("Restart now to update?"), and voice
     downloads its model when it is first used.
 
 About five steps once, then six to install. The rough parts:
 
 - **The Steam restart (step 9).** If a Devkit Game can run without the container, steps 8 and 9 are not
   necessary (see "To find out on the device"). This is the first thing to test.
-- **Two library entries.** The manifest's `name` is "Frame VR Video (installer)", so that the two entries are
+- **Two library entries.** The manifest's `name` is "FrameCine (installer)", so that the two entries are
   different. The installer can offer to remove its own entry after the install, if a Devkit Game entry can be
   removed from the headset (not known; it is not in `shortcuts.vdf`).
 - **The order on the README.** If FrameDrop is not installed, the link only opens the FrameDrop site, and the user
@@ -106,8 +106,8 @@ Manifest (these are all the fields that the site documents):
 ```json
 {
   "schema": "framedrop.install/v1",
-  "name": "Frame VR Video (installer)",
-  "files": [ { "url": "https://github.com/stringandstickytape/FrameVRVideo/releases/download/<tag>/framevrvideo-<version>-arm64.zip",
+  "name": "FrameCine (installer)",
+  "files": [ { "url": "https://github.com/stringandstickytape/FrameCine/releases/download/<tag>/framecine-<version>-arm64.zip",
                "sha256": "<sha256 of the zip>" } ]
 }
 ```
@@ -168,16 +168,16 @@ The FrameDrop zip is the normal release package. Its `run.sh` does a check befor
 
 1. **In the container?** (`/run/pressure-vessel` or `/.flatpak-info` exists, or `/usr` is not the host's.) If not,
    start the engine as usual. This keeps `run.sh` correct for every other install path.
-2. **In the container:** copy the package to `~/framevrvideo.new`, then do the same steps as
+2. **In the container:** copy the package to `~/framecine.new`, then do the same steps as
    `tools/install-on-frame.sh` (start the new engine with `--version`, move the old install to
-   `~/framevrvideo.old`, put the new one in its place, write the desktop entry).
-3. Add the Steam library entry with `tools/steam_shortcuts.py --add --exe ~/framevrvideo/run.sh`.
+   `~/framecine.old`, put the new one in its place, write the desktop entry).
+3. Add the Steam library entry with `tools/steam_shortcuts.py --add --exe ~/framecine/run.sh`.
 4. Show the user what to do next. Steam reads `shortcuts.vdf` only when it starts, so Steam must restart once. If the
    container can show a window, a short message; else a line in the log and a notification. The best case: Steam
    restarts by itself (find out if the Devkit service or `steam://` can do this).
 
-After this, the user starts "Frame VR Video" from the library entry, which runs outside the container. The
-FrameDrop entry ("Frame VR Video (installer)") can stay (it installs again, which is harmless) or be removed.
+After this, the user starts "FrameCine" from the library entry, which runs outside the container. The
+FrameDrop entry ("FrameCine (installer)") can stay (it installs again, which is harmless) or be removed.
 
 Checked on the device 2026-11-09, without FrameDrop: the headset already has `SteamLinuxRuntime_4-arm64` (steamrt4
 4.0.20261021, pressure-vessel 0.20261007), and its `run -- <command>` starts a command in the same container.
@@ -232,33 +232,33 @@ installs made with `tools/install-on-frame.sh`.
 ### Folders
 
 - **The install folder** is the folder that holds `run.sh`, wherever the PC tool put it: usually
-  `~/devkit-game/<id>/`, or `~/framevrvideo/` after an ssh install. Nothing has it as a fixed path. The app
+  `~/devkit-game/<id>/`, or `~/framecine/` after an ssh install. Nothing has it as a fixed path. The app
   finds it as the parent of its own `app/` folder, and it updates only when `run.sh` and `VERSION` are there. A run
   from the repository has neither, so it never checks.
-- **The staging folder** is `${XDG_DATA_HOME:-~/.local/share}/framevrvideo/update/`, not in `~/devkit-game/`
+- **The staging folder** is `${XDG_DATA_HOME:-~/.local/share}/framecine/update/`, not in `~/devkit-game/`
   (Valve's tools treat each folder there as a title). It is on the same file system as the home folder, so a swap
   is a `mv`. It holds `package.part` and `package.part.json` (the download and the version it is for), `unpack/`
   while tar runs, `new/` (the staged version), `new.complete` (written last) and `old/` (the install before the
   last swap, one level).
-- **The state folder** is `${XDG_STATE_HOME:-~/.local/state}/framevrvideo/`, with the logs. `run.sh` writes
+- **The state folder** is `${XDG_STATE_HOME:-~/.local/state}/framecine/`, with the logs. `run.sh` writes
   `swapped` and `bad-versions` there, and `update.log` (one line for each swap or rollback). The new version writes
   `started`.
 
-Settings (`~/.local/share/godot/app_userdata/Frame VR Video/`) and logs are outside the install folder, so an
+Settings (`~/.local/share/godot/app_userdata/FrameCine/`) and logs are outside the install folder, so an
 update keeps them.
 
 ### The steps
 
 1. **Check** (`updater.gd`, a feature: `main.features.update`). 8 s after the first frame, then once a day while
    the player runs. It gets `latest.json` and `latest.json.sig` from
-   `https://github.com/stringandstickytape/FrameVRVideo/releases/latest/download/`. GitHub redirects
+   `https://github.com/stringandstickytape/FrameCine/releases/latest/download/`. GitHub redirects
    this to the newest release that is not a draft or a pre-release. It is not the REST API, so the API's limit
    does not apply. `--update-url=URL` sets another base address, for tests. The format (shared with
    `tools/release.sh`):
 
    ```json
    { "version": "0.1.0", "tag": "v0.1.0",
-     "package": { "url": "https://github.com/stringandstickytape/FrameVRVideo/releases/download/v0.1.0/framevrvideo-0.1.0-arm64.tar.gz",
+     "package": { "url": "https://github.com/stringandstickytape/FrameCine/releases/download/v0.1.0/framecine-0.1.0-arm64.tar.gz",
                   "size": 61234567, "sha256": "<64 lowercase hex>" },
      "notes": "One line for the update prompt." }
    ```
@@ -274,8 +274,8 @@ update keeps them.
    Range request). A `.part` for another version is deleted first. It stops after 30 s with no bytes and keeps what
    it has. Then the size and the SHA-256 must agree with `latest.json`; a wrong hash deletes the file.
 4. **Stage.** The host's `tar` unpacks it into `unpack/` (the modes are kept). The package's one top folder
-   (`framevrvideo-<version>-<arch>/`) becomes `new/`; a package without a top folder works too. Its `VERSION`
-   must say the version of `latest.json`, and `bin/framevrvideo-engine --version` must start and print. Then
+   (`framecine-<version>-<arch>/`) becomes `new/`; a package without a top folder works too. Its `VERSION`
+   must say the version of `latest.json`, and `bin/framecine-engine --version` must start and print. Then
    `new.complete` (the version) is written, last. A `new/` without it is deleted.
 5. **Ask.** "Restart now to update to 0.2.0?" with the release's one-line notes, in the menu's footer, with Restart
    and Later. Never during a film: the question shows when the menu opens with nothing open, or when the film ends
@@ -393,9 +393,9 @@ The default model (`ggml-small.en-q8_0.bin`) is 264 MB (264477561 bytes, SHA-256
 - **Progress:** a notice at 25, 50 and 75 %, the same line again at each use of voice while it downloads, and "Voice
   is ready." when the server answers with the new model. Notices go through `ui_layer.notify()`: the panel's footer
   when it is open, else the quiet line in the world. The assistant's status (`describe()`) shows the percentage.
-- **From where:** `https://github.com/stringandstickytape/FrameVRVideo/releases/download/models-1/ggml-small.en-q8_0.bin`.
+- **From where:** `https://github.com/stringandstickytape/FrameCine/releases/download/models-1/ggml-small.en-q8_0.bin`.
   The address, the size and the SHA-256 are constants in `app/scripts/voice/model_download.gd` (`RELEASES`,
-  `MODEL_RELEASE`, `MODEL_FILE`, `MODEL_SIZE`, `MODEL_SHA256`); the rename to FrameVRVideo changes `RELEASES` only.
+  `MODEL_RELEASE`, `MODEL_FILE`, `MODEL_SIZE`, `MODEL_SHA256`); the rename to FrameCine changes `RELEASES` only.
   `--model-url=URL` takes it from elsewhere (tests, a mirror).
 - **How** (`model_download.gd`, one worker thread; the main thread only reads the progress): the bytes go to
   `ggml-small.en-q8_0.bin.part`; a part from an earlier try continues with `Range: bytes=N-` (206 appends; a 200

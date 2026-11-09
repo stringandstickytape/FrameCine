@@ -279,7 +279,7 @@ func _test_search() -> void:
 	var ua_ok := true
 	for e: Dictionary in fake.log:
 		var h := "\n".join(e["headers"])
-		ua_ok = ua_ok and h.contains("User-Agent: FrameVRVideo/") and h.contains("github.com")
+		ua_ok = ua_ok and h.contains("User-Agent: FrameCine/") and h.contains("github.com")
 	_check("every request names the app in its User-Agent", ua_ok and not fake.log.is_empty())
 	_check("no key, account or token in any request", fake.log.all(func(e: Dictionary) -> bool:
 		var u := str(e["url"]).to_lower()

@@ -1,4 +1,4 @@
-# Frame VR Video (app)
+# FrameCine (app)
 
 The application: the VR shell around the hardware video texture. It is a project for our engine (4.7) with the Mobile
 renderer, XR and scripts only. It runs on the headset with our engine fork, which decodes in hardware through
@@ -82,7 +82,7 @@ a file. Over ssh, give everything as arguments after `--`:
 
 Every flag and every setting, in one place: `../docs/USAGE.md`.
 
-Settings are stored in `~/.local/share/godot/app_userdata/Frame VR Video/settings.cfg`. They hold the screen size,
+Settings are stored in `~/.local/share/godot/app_userdata/FrameCine/settings.cfg`. They hold the screen size,
 distance and height per environment, the environment, its room light, the volume, the A/V offset, the overlay
 setting, the last folder, the saved network hosts, and the mode you chose for each file. An argument overrides its
 setting for that run.

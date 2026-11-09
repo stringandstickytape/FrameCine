@@ -304,7 +304,7 @@ static func _stage_job(version: String, staging: String, part: String) -> Dictio
 	if code != 0:
 		Core.remove_tree(unpack)
 		return {"error": "tar could not unpack the package (%d): %s" % [code, "".join(out).strip_edges().left(200)]}
-	# tools/package.sh puts one top folder (framevrvideo-<version>-<arch>/) in the archive; a flat one works too.
+	# tools/package.sh puts one top folder (framecine-<version>-<arch>/) in the archive; a flat one works too.
 	var root := unpack
 	if not FileAccess.file_exists(unpack.path_join("run.sh")):
 		var dirs := DirAccess.get_directories_at(unpack)
@@ -322,7 +322,7 @@ static func _stage_job(version: String, staging: String, part: String) -> Dictio
 	if v != version:
 		Core.remove_tree(new_dir)
 		return {"error": "the package says version %s, latest.json %s" % [v, version]}
-	var engine := new_dir.path_join("bin/framevrvideo-engine")
+	var engine := new_dir.path_join("bin/framecine-engine")
 	out = []
 	code = OS.execute("timeout", ["30", engine, "--version"], out, true) if FileAccess.file_exists(engine) else -1
 	var said := "".join(out).strip_edges()
@@ -481,14 +481,14 @@ func _launch_relauncher() -> void:
 
 
 static func relauncher_args(pid: int, game_id: String) -> PackedStringArray:
-	var a := PackedStringArray(["--user", "--quiet", "--collect", "--unit=framevrvideo-restart-%d" % pid,
+	var a := PackedStringArray(["--user", "--quiet", "--collect", "--unit=framecine-restart-%d" % pid,
 			"--description=Starts the VR video player again after an update"])
 	for v in ["DISPLAY", "XAUTHORITY", "WAYLAND_DISPLAY", "XDG_RUNTIME_DIR", "PATH", "HOME"]:
 		if OS.get_environment(v) != "":
 			a.append("--setenv=%s=%s" % [v, OS.get_environment(v)])
 	a.append_array(["--", "/bin/sh", "-c",
 			'while kill -0 "$1" 2>/dev/null; do sleep 0.5; done; sleep 3; exec steam "steam://rungameid/$2"',
-			"framevrvideo-restart", str(pid), game_id])
+			"framecine-restart", str(pid), game_id])
 	return a
 
 

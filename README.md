@@ -1,4 +1,4 @@
-# Frame VR Video
+# FrameCine
 
 A free, standalone VR video player for the Steam Frame (SteamOS, ARM64, Snapdragon 8 Gen 3 / Adreno via Turnip).
 Plays local and network video, flat / SBS / TB / 180 / 360 / fisheye / EAC, in selectable environments.

@@ -1,4 +1,4 @@
-PC windows @VERSION@, for Frame VR Video on the Steam Frame
+PC windows @VERSION@, for FrameCine on the Steam Frame
 
 pc-windows.exe sends the windows and monitors of this PC to the headset, with the PC's sound. In the headset each
 window is a pane that you can move and resize, or put on the big screen. A mouse and keyboard paired with the headset
@@ -38,4 +38,4 @@ Stop or uninstall
   delete %APPDATA%\pc-windows, and delete the shortcut in shell:startup if you made one.
   In the headset, System, PC windows: Forget removes this PC there.
 
-More: https://github.com/stringandstickytape/FrameVRVideo/blob/main/docs/install.md
+More: https://github.com/stringandstickytape/FrameCine/blob/main/docs/install.md

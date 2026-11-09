@@ -30,19 +30,21 @@ shopt -s nullglob
 
 paths=(
   # installs
-  framevrvideo framevrvideo.old vr-video-player vr-video-player.old vr-video-player.new vr-video-player.new.part
+  framecine framecine.old framevrvideo framevrvideo.old vr-video-player vr-video-player.old vr-video-player.new vr-video-player.new.part
   spike01 spike02 spike03 spike04 spike05 iris-module
   # the player's data, logs and dev leftovers
+  .local/share/godot/app_userdata/"FrameCine"
   .local/share/godot/app_userdata/"Frame VR Video"
   .local/share/godot/app_userdata/"VR Video Player"
   .local/share/godot/app_userdata/"Frame VR Player"
   .local/share/godot/app_userdata/"Spike "*
   .local/share/godot/app_userdata/fovtest
   .local/share/vrvp-user-objects
-  .local/share/framevrvideo .local/state/framevrvideo .local/state/vr-video-player .local/share/vr-video-player
+  .local/share/framecine .local/state/framecine .local/share/framevrvideo .local/state/framevrvideo .local/state/vr-video-player .local/share/vr-video-player
   q10c-out q10c-out-p010 vr-player-dump vr-player-snaps turn.start turn.wav whisper-bench-*.tsv
   Claude
   # menu entries
+  .local/share/applications/framecine.desktop Desktop/framecine.desktop
   .local/share/applications/framevrvideo.desktop Desktop/framevrvideo.desktop
   .local/share/applications/vr-video-player.desktop Desktop/vr-video-player.desktop
   # the share login
@@ -60,7 +62,7 @@ paths=(
 # has paired).
 titles=()
 for d in devkit-game/*/; do
-  if [ -e "$d/bin/framevrvideo-engine" ] || [ -e "$d/bin/vr-video-player-engine" ]; then
+  if [ -e "$d/bin/framecine-engine" ] || [ -e "$d/bin/framevrvideo-engine" ] || [ -e "$d/bin/vr-video-player-engine" ]; then
     g=$(basename "$d"); titles+=("$g"); paths+=("devkit-game/$g" devkit-game/"$g"-*.json)
   fi
 done
@@ -76,7 +78,7 @@ for p in "${found[@]}"; do printf '%8s  ~/%s\n' "$(du -sh -- "$p" 2>/dev/null | 
 # Library entries: non-Steam shortcuts whose Exe is one of ours.
 SC=$(cat <<'PY'
 import glob, os, re, sys
-ours = re.compile(r'(spike0\d/|vr-video-player|framevrvideo|devkit-game/.*/run\.sh|godot_player)')
+ours = re.compile(r'(spike0\d/|vr-video-player|framevrvideo|framecine|devkit-game/.*/run\.sh|godot_player)')
 for f in glob.glob(os.path.expanduser('~/.local/share/Steam/userdata/*/config/shortcuts.vdf')):
     b = open(f, 'rb').read()
     for name, exe in zip(re.findall(rb'\x01(?:AppName|appname)\x00([^\x00]*)\x00', b),
@@ -95,7 +97,7 @@ for e in "${exes[@]}"; do echo "  -> ${e/#$HOME/~}"; done
 if [ "$YES" != 1 ]; then echo "(dry run: --yes removes these)"; exit 0; fi
 
 echo "== stopping the player"
-pkill -f -- '--path app --display-driver' 2>/dev/null; pkill -f 'spike0[0-9]/' 2>/dev/null; pkill -f 'vr-video-player' 2>/dev/null; pkill -f 'framevrvideo' 2>/dev/null
+pkill -f -- '--path app --display-driver' 2>/dev/null; pkill -f 'spike0[0-9]/' 2>/dev/null; pkill -f 'vr-video-player' 2>/dev/null; pkill -f 'framevrvideo' 2>/dev/null; pkill -f 'framecine' 2>/dev/null
 pkill -f 'whisper-server' 2>/dev/null; sleep 2
 
 # Its output holds Steam's session token: never shown, only whether it worked.
@@ -133,7 +135,7 @@ def wr(items):
         o.append(t); o += k.encode() + b'\0'
         o += (wr(v) + b'\x08') if t == 0 else (v + b'\0' if t == 1 else v)
     return bytes(o)
-ours = re.compile(r'(spike0\d/|vr-video-player|framevrvideo|devkit-game/.*/run\.sh|godot_player)')
+ours = re.compile(r'(spike0\d/|vr-video-player|framevrvideo|framecine|devkit-game/.*/run\.sh|godot_player)')
 for f in glob.glob(os.path.expanduser('~/.local/share/Steam/userdata/*/config/shortcuts.vdf')):
     b = open(f, 'rb').read()
     root, _ = rd(b, 0)

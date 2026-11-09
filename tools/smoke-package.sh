@@ -27,7 +27,7 @@ if grep -E "Parse Error|Failed to load script|Compilation failed|Preload file .*
   head -20 "$TMP/bad" >&2
   exit 1
 fi
-grep -q -E "main\.gd|Frame VR Video|OpenXR|Recentered|Dev link|HW video" "$LOG" || {
+grep -q -E "main\.gd|FrameCine|OpenXR|Recentered|Dev link|HW video" "$LOG" || {
   echo "smoke: the app printed nothing it normally prints; the log:" >&2
   tail -20 "$LOG" >&2
   exit 1

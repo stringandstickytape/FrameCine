@@ -227,7 +227,7 @@ func _test_rules() -> void:
 	_check("the link: https only", FabStore.download_url({"downloadInfo": [{"downloadUrl": "http://x/y.zip"}]}) == ""
 			and FabStore.download_url({"downloadInfo": [{"downloadUrl": "https://x/y.zip"}]}) == "https://x/y.zip")
 	var ua := FabStore.user_agent()
-	_check("the User-Agent is the app's own name and version (%s)" % ua, ua.begins_with("FrameVRVideo/")
+	_check("the User-Agent is the app's own name and version (%s)" % ua, ua.begins_with("FrameCine/")
 			and ua.contains("github.com") and not ua.contains("Mozilla"))
 	_check("the search: Megascans, free, 3D models", FabStore.search_url("a b").contains("seller=Quixel%20Megascans")
 			and FabStore.search_url("a b").contains("is_free=1") and FabStore.search_url("a b").contains("q=a%20b"))

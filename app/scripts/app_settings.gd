@@ -1,6 +1,6 @@
 extends RefCounted
 
-## Persistent settings in user://settings.cfg (on the headset: ~/.local/share/godot/app_userdata/Frame VR Video/).
+## Persistent settings in user://settings.cfg (on the headset: ~/.local/share/godot/app_userdata/FrameCine/).
 ## Writes are batched: set() marks the file dirty, save_if_dirty() (called every second and on exit) writes it.
 
 const PATH := "user://settings.cfg"

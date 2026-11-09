@@ -144,7 +144,7 @@ class McpTest(unittest.TestCase):
         r = self.c.request("server/discover", modern=True)["result"]
         self.assertEqual(r["resultType"], "complete")
         self.assertIn("2026-07-28", r["supportedVersions"])
-        self.assertEqual(r["_meta"]["io.modelcontextprotocol/serverInfo"]["name"], "framevrvideo-assistant")
+        self.assertEqual(r["_meta"]["io.modelcontextprotocol/serverInfo"]["name"], "framecine-assistant")
         r = self.c.request("tools/list", modern=True)["result"]
         self.assertEqual(r["resultType"], "complete")
         r = self.c.request("tools/call", {"name": "card", "arguments": {"text": "Hello"}}, modern=True)

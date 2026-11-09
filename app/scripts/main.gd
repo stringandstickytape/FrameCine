@@ -1,6 +1,6 @@
 extends Node3D
 
-## Frame VR Video: the app core. The view (XR, or a flat camera when there is no runtime), the PlaybackController,
+## FrameCine: the app core. The view (XR, or a flat camera when there is no runtime), the PlaybackController,
 ## the VideoScreen, environments, the info overlay, settings, the playlist, command-line arguments and the direct
 ## controller / keyboard bindings. The menu is the panel (docs/ui-design.md), a separate, optional layer
 ## (app/ui/ui_layer.gd, node "UILayer"): it uses only the public functions and signals below and the features hub, and

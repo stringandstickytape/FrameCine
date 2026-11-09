@@ -42,7 +42,7 @@ const EVENTS := [
 static func guide(url: String, status: String, pin := "") -> String:
 	var text := FileAccess.get_file_as_string(GUIDE)
 	if text == "":
-		text = "# Frame VR Video: assistant service\n\n**Now:** <<STATUS>>\n\n(The guide file is missing.)\n"
+		text = "# FrameCine: assistant service\n\n**Now:** <<STATUS>>\n\n(The guide file is missing.)\n"
 	var host := url.trim_prefix("https://").get_slice("/", 0)
 	var port := "47801"
 	if host.begins_with("["):
@@ -148,7 +148,7 @@ static func openapi(url: String) -> Dictionary:
 			"type": "object", "properties": {"path": {"type": "string"}, "error": {"type": "string"}}}}}}
 	return {
 		"openapi": "3.1.0",
-		"info": {"title": "Frame VR Video assistant service", "version": "2",
+		"info": {"title": "FrameCine assistant service", "version": "2",
 				"description": "A VR video player on a headset on this network. Read %s/ first." % url},
 		"servers": [{"url": url}],
 		"components": {"schemas": schemas, "securitySchemes": {"token": {"type": "http", "scheme": "bearer",
