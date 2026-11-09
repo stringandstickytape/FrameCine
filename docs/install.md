@@ -34,8 +34,10 @@ The install:
      - Frame Control: <https://stringandstickytape.github.io/FrameCine/frame-control.html> (the page opens
        `frame-control://install?manifest=…` with the latest release's manifest; GitHub doesn't keep that kind of link
        in its own pages)
-     - FrameDrop:
-       <https://framedropvr.com/install?manifest=https%3A%2F%2Fgithub.com%2Fstringandstickytape%2FFrameCine%2Freleases%2Flatest%2Fdownload%2Finstall-manifest.json>
+     - FrameDrop: not yet. Its install link
+       (<https://framedropvr.com/install?manifest=https%3A%2F%2Fgithub.com%2Fstringandstickytape%2FFrameCine%2Freleases%2Flatest%2Fdownload%2Finstall-manifest.json>)
+       downloads the file but names it after GitHub's storage ID, not `framecine-…-arm64.zip`, and then refuses it
+       ("isn't an APK, zip, Windows exe, or Linux binary"; tested 2026-11-10). Use the zip below instead.
    - Or download `framecine-<version>-arm64.zip` from the releases page and drag it onto the PC program.
      Do not unzip it first.
 6. On the headset, open the Steam library. **FrameCine** is under **Non-Steam** (Steam shows Devkit titles by their id). Start it.

@@ -8,8 +8,10 @@ spatial sound. It plays files on the headset and on your PC or NAS, flat or 3D, 
 
 <p align="center">
   <a href="https://stringandstickytape.github.io/FrameCine/frame-control.html"><img src="docs/images/install-frame-control.svg" alt="Install with Frame Control" width="260"></a>
-  &nbsp;
+  <!-- FrameDrop's install link names a GitHub download after the storage address's ID, not the file, and refuses it
+       (tested 2026-11-10). Back once FrameDrop is fixed:
   <a href="https://framedropvr.com/install?manifest=https%3A%2F%2Fgithub.com%2Fstringandstickytape%2FFrameCine%2Freleases%2Flatest%2Fdownload%2Finstall-manifest.json"><img src="docs/images/install-framedrop.svg" alt="Install with FrameDrop" width="260"></a>
+  -->
 </p>
 
 > **No AI unless you ask for it.** FrameCine has no AI of its own. Its AI assistant features do nothing until you
@@ -41,9 +43,12 @@ You need a Steam Frame and, once, a PC on the same network.
 2. **On the PC:** install [Frame Control](https://github.com/saphid/frame-control) (Windows, macOS, Linux; open
    source) or [FrameDrop](https://framedropvr.com/) (Windows), start it, and pair the headset with it (on the
    headset: Settings > Developer > **Pair new host**).
-3. **Press one of the buttons above** on the PC (the program asks before it installs), or download
+3. **Press the button above** on the PC (Frame Control asks before it installs), or download
    `framecine-<version>-arm64.zip` from the [latest release](https://github.com/stringandstickytape/FrameCine/releases/latest)
-   and drop it on the program.
+   and drop it on Frame Control or FrameDrop.
+   > **FrameDrop:** its one-click install links can't download from GitHub at the moment (it names the download
+   > after GitHub's storage ID instead of the file, then refuses it), so it has no button here yet. Dropping the
+   > downloaded zip on FrameDrop is the way meanwhile.
 4. **On the headset:** FrameCine is in the Steam library under **Non-Steam**. The first start shows a short
    introduction: eye calibration, the controls, and a one-time download of the speech model for voice typing.
 
