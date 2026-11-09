@@ -3,6 +3,12 @@
 A free, standalone VR video player for the Steam Frame (SteamOS, ARM64, Snapdragon 8 Gen 3 / Adreno via Turnip).
 Plays local and network video, flat / SBS / TB / 180 / 360 / fisheye / EAC, in selectable environments.
 
+> **No AI unless you ask for it.** FrameCine has no AI of its own. Its AI assistant features do nothing until you
+> install Claude Code or Codex yourself (on the headset or on a PC) and turn them on; the assistant service is off
+> by default. Voice commands use speech recognition that runs on the headset, offline; your voice leaves the headset
+> only if you pair an AI assistant and speak to it.
+> (The menu translations other than English were made with AI, and say so.)
+
 ## Stack (decided)
 
 - **Engine:** our Godot fork, patched directly (no GDExtension indirection). Mobile renderer (Vulkan).
