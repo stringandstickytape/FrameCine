@@ -93,6 +93,8 @@ const STEPS := {
 }
 const GAZE_DONE := "Eye calibration done."
 const GAZE_SKIPPED := "No calibration: the gaze still works, but less exactly."
+## Calibrate pressed, but the headset gave no eye gaze then (scripts/xr/eye_gaze.gd available() false).
+const GAZE_UNAVAILABLE := "The calibration could not start: the headset gave no eye gaze. Try again later from System, Show the introduction again."
 # i18n: end
 
 ## scripts/main.gd
@@ -103,7 +105,7 @@ var steps: Array[String] = []
 var active := false
 var _index := 0
 var _guard := 0.0
-## The calibration started from the gaze step runs; how it ended ("done", "skipped" or "").
+## The calibration started from the gaze step runs; how it ended ("done", "skipped", "unavailable" or "").
 var _calibrating := false
 var _cal_seen := false
 var _cal_wait := 0.0
@@ -262,7 +264,8 @@ func _show_step() -> void:
 		_lines.add_child(l)
 	# The gaze step's outcome, on the step after it.
 	_note.visible = _gaze_result != "" and _index > 0 and steps[_index - 1] == "gaze"
-	_note.text = tr(GAZE_DONE if _gaze_result == "done" else GAZE_SKIPPED)
+	_note.text = tr(GAZE_DONE if _gaze_result == "done" else (GAZE_UNAVAILABLE if _gaze_result == "unavailable"
+			else GAZE_SKIPPED))
 	_primary.text = s["primary"]
 	_secondary.text = s["secondary"]
 	_secondary.visible = not (s["secondary"] == "Back" and _index == 0)
@@ -301,7 +304,10 @@ func _process(delta: float) -> void:
 		if not running and (_cal_seen or _cal_wait >= CAL_START_WAIT):
 			_calibrating = false
 			var now := str(app.settings.get_value("gaze", "calibrated_at", ""))
-			_gaze_result = "done" if now != "" and now != _cal_before else "skipped"
+			if not _cal_seen:
+				_gaze_result = "unavailable"
+			else:
+				_gaze_result = "done" if now != "" and now != _cal_before else "skipped"
 			_go(_index + 1)
 			calibration_ended.emit()
 

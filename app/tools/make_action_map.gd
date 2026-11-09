@@ -21,6 +21,11 @@ extends SceneTree
 ##   enter (bool)             Enter in the agent's terminal while it shows (headset profile: X, on the right controller
 ##                            only; scripts/agents/local_agents.gd on_enter_button(); otherwise it does nothing)
 ##   haptic                   click feedback
+##   eye_gaze_pose (pose)     the eye gaze, on /user/eyes_ext in its own profile (/interaction_profiles/ext/
+##                            eye_gaze_interaction, the engine's XR_EXT_eye_gaze_interaction). The engine reads this
+##                            action by name: without it there is no gaze tracker pose (scripts/xr/eye_gaze.gd), so
+##                            no calibration, no looking at the agent's pane and no gaze-driven foveation (missing
+##                            until 2026-11-09).
 ## It also writes res://xr/openxr_action_map_dpad.tres, the same map plus the left d-pad on the headset's own profile
 ## (chapter_prev / chapter_next on left / right, replay on down; scripts/play/chapters.gd, catch_up.gd). That map is
 ## opt-in until a device run shows the runtime accepts the d-pad paths, because one rejected path voids the whole
@@ -32,6 +37,7 @@ const OUT := "res://xr/openxr_action_map.tres"
 const OUT_DPAD := "res://xr/openxr_action_map_dpad.tres"
 const LEFT := "/user/hand/left"
 const RIGHT := "/user/hand/right"
+const EYES := "/user/eyes_ext"
 ## OpenXRAction.OPENXR_ACTION_HAPTIC: in the C++ enum but not bound to scripts in 4.7.
 const ACTION_HAPTIC := 4
 
@@ -81,7 +87,19 @@ func _build(dpad: bool) -> OpenXRActionMap:
 		action.toplevel_paths = hands
 		action_set.add_action(action)
 		actions[spec[0]] = action
+	var gaze := OpenXRAction.new()
+	gaze.resource_name = "eye_gaze_pose"
+	gaze.localized_name = "Eye gaze pose"
+	gaze.action_type = OpenXRAction.OPENXR_ACTION_POSE
+	gaze.toplevel_paths = PackedStringArray([EYES])
+	action_set.add_action(gaze)
+	actions["eye_gaze_pose"] = gaze
 	action_map.add_action_set(action_set)
+	# The eye gaze's own profile: one binding, the gaze pose.
+	var eyes := OpenXRInteractionProfile.new()
+	eyes.interaction_profile_path = "/interaction_profiles/ext/eye_gaze_interaction"
+	eyes.set_bindings([_binding(gaze, EYES + "/input/gaze_ext/pose")])
+	action_map.add_interaction_profile(eyes)
 
 	var both_hands := {
 		"aim_pose": "input/aim/pose",

@@ -2145,6 +2145,10 @@ msgstr ""
 msgid "No calibration: the gaze still works, but less exactly."
 msgstr ""
 
+#: ui/intro.gd:97
+msgid "The calibration could not start: the headset gave no eye gaze. Try again later from System, Show the introduction again."
+msgstr ""
+
 #: ui/library_view.gd:73
 msgid "TV shows"
 msgstr ""
