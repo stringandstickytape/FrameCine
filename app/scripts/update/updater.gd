@@ -8,11 +8,13 @@ extends Node
 ##    CHECK_TIMEOUT seconds in all. The signature is checked first (res://update/release-key.pub.pem), then the
 ##    version against the install's VERSION, and the versions run.sh rolled back from. A failure is one log line.
 ## 2. Download: the package to <staging>/package.part, continued with a Range request after a break; it stops after
-##    STALL_TIMEOUT seconds with no bytes and continues at the next check. Then the size and the SHA-256.
+##    STALL_TIMEOUT seconds with no bytes and continues at the next check. Then the size and the SHA-256. A notice
+##    ("Downloading version X") says it starts, and another when the version is ready; none while a film plays.
 ## 3. Stage: tar unpacks it into <staging>/new, the new engine must start with --version, and new.complete is
-##    written last. run.sh swaps it in at the next start (never while the engine runs) and rolls back if the new
-##    version shows no frame.
-## 4. Ask: "Restart now to update?" in the menu's footer, only with nothing in progress (Core.may_prompt()). Yes saves
+##    written last. Nothing is installed yet: run.sh swaps it in at a start only after the user's yes (step 4,
+##    APPROVED), never while the engine runs, and rolls back if the new version shows no frame.
+## 4. Ask: "Restart now to update?" in the menu's footer, only with nothing in progress (Core.may_prompt()). Later
+##    keeps the download and asks again at the next start. Yes writes APPROVED, saves
 ##    what is open (file, position, paused, room) to RESTART_PATH, then the player quits and Steam starts it again
 ##    (steam://rungameid/$SteamGameId, from a unit outside Steam's process tree). The next start opens it again there.
 ##
@@ -32,6 +34,8 @@ const CHECK_TIMEOUT := 10.0
 const STALL_TIMEOUT := 30.0
 ## What was open when the user said yes; read and removed at the next start.
 const RESTART_PATH := "user://update_restart.cfg"
+## The user's yes to the staged version (its version, one line), beside new.complete. run.sh swaps only with it.
+const APPROVED := "new.approved"
 ## A restart state older than this (seconds) is not used: the restart did not happen then.
 const RESTART_MAX_AGE := 900
 ## The question stays this long in the footer.
@@ -174,7 +178,7 @@ func status_text() -> String:
 		"staging":
 			return v + "  ·  " + tr("Preparing version %s...") % str(latest.get("version", ""))
 		"ready":
-			return v + "  ·  " + tr("Version %s is ready. It goes in at the next start.") % staged_version
+			return v + "  ·  " + tr("Version %s is downloaded. It installs when you say yes in the menu.") % staged_version
 	return v
 
 
@@ -241,6 +245,7 @@ func _on_checked(r: Dictionary) -> void:
 		return
 	latest = l
 	_result("Update check: %s is out (installed %s); downloading" % [l["version"], installed])
+	notice(tr("Downloading version %s") % l["version"])
 	state = "downloading"
 	_progress = Fetch.Progress.new()
 	_last_percent = -1
@@ -295,6 +300,8 @@ static func _stage_job(version: String, staging: String, part: String) -> Dictio
 	var unpack := staging.path_join("unpack")
 	var marker := staging.path_join("new.complete")
 	DirAccess.remove_absolute(marker)
+	# A yes was for the version staged before; this one needs its own.
+	DirAccess.remove_absolute(staging.path_join(APPROVED))
 	Core.remove_tree(new_dir)
 	Core.remove_tree(unpack)
 	DirAccess.make_dir_recursive_absolute(unpack)
@@ -344,7 +351,22 @@ func _on_staged(r: Dictionary) -> void:
 		return
 	staged_version = str(latest["version"])
 	state = "ready"
-	_result("Update: %s is ready (engine %s); it goes in at the next start" % [staged_version, r.get("engine", "")])
+	_result("Update: %s is ready (engine %s); it goes in after the user's yes" % [staged_version, r.get("engine", "")])
+	# With the menu open and nothing in progress, the question ("Restart now...?") takes the footer right after.
+	notice(tr("Version %s is downloaded. It installs when you say yes in the menu.") % staged_version)
+
+
+## A short notice of the update (ui_layer.notify: the footer with the menu open, else a quiet line where the head
+## looks). None while a film plays; the System tab's row still shows it.
+func notice(text: String) -> bool:
+	var layer: Node = main.get("ui")
+	if layer == null or not layer.has_method("notify"):
+		return false
+	var p: Node = main.player
+	if p != null and p.has_source() and p.is_playing() and not p.source.is_ended():
+		return false
+	layer.notify(text)
+	return true
 
 
 ## A complete <staging>/new from an earlier run (run.sh swaps it at start, so only when the app started another way).
@@ -440,6 +462,9 @@ func ask() -> void:
 func restart_now() -> void:
 	if state != "ready":
 		return
+	if not approve():
+		push_warning("Updates: can't write %s; nothing installed" % staging_dir.path_join(APPROVED))
+		return
 	save_restart_state()
 	main.settings.save_if_dirty()
 	if main.features.get("resume") != null:
@@ -449,6 +474,11 @@ func restart_now() -> void:
 	else:
 		print("Updates: quit for the update; start the player again to finish it")
 	get_tree().create_timer(0.3).timeout.connect(func() -> void: get_tree().quit())
+
+
+## The user's yes: run.sh swaps the staged version in at the next start (and only this version).
+func approve() -> bool:
+	return staged_version != "" and Core.write_text(staging_dir.path_join(APPROVED), staged_version + "\n")
 
 
 ## What plays, for the next start: file, position, paused, room. A finished film or a window: the room only.

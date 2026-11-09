@@ -272,6 +272,37 @@ func _test_prompt_in_app(up: Node) -> void:
 	up.declined = false
 	up.state = "idle"
 	up.staged_version = ""
+	# The notices: downloading, and ready.
+	main.ui.ui.hide_toast()
+	main.ui.show_panel()
+	await _seconds(0.3)
+	_check("notice: downloading, in the footer with the menu open", up.notice("Downloading version 0.2.0")
+			and _toast_text() == "Downloading version 0.2.0")
+	main.ui.ui.hide_toast()
+	main.open_path("stub://flat_mono")
+	await _frames(5)
+	_check("notice: none while a film plays", not up.notice("Downloading version 0.2.0") and _toast_text() == "")
+	main.player.pause()
+	up.latest = {"version": "0.2.0"}
+	up._on_staged({"ok": true, "engine": "test"})
+	await _seconds(0.5)
+	t = _toast_text()
+	_check("notice: ready, over a paused film (no question there) (%s)" % t,
+			t == "Version 0.2.0 is downloaded. It installs when you say yes in the menu.")
+	main.close_media()
+	main.ui.ui.hide_toast()
+	# The yes: run.sh swaps only with new.approved naming the staged version (tools/test_player_run.sh).
+	var keep_staging: String = up.staging_dir
+	up.staging_dir = _tmp.path_join("staging")
+	var approved: String = up.staging_dir.path_join(Updater.APPROVED)
+	_check("yes: written with the staged version", up.approve()
+			and Core.read_text(approved) == "0.2.0\n")
+	up.staged_version = ""
+	DirAccess.remove_absolute(approved)
+	_check("yes: nothing staged, nothing written", not up.approve() and not FileAccess.file_exists(approved))
+	up.staging_dir = keep_staging
+	up.state = "idle"
+	up.latest = {}
 	up.install_dir = ""
 	main.ui.hide_panel()
 
@@ -326,7 +357,7 @@ func _test_row(up: Node) -> void:
 	up.latest = {"version": "0.2.0", "notes": "Faster menus.", "size": 10}
 	up.changed.emit()
 	_check("row: ready, with Restart now and the notes (%s)" % row._status.text, row._restart.visible
-			and row._status.text == "Version 0.1.0  ·  Version 0.2.0 is ready. It goes in at the next start.\nFaster menus.")
+			and row._status.text == "Version 0.1.0  ·  Version 0.2.0 is downloaded. It installs when you say yes in the menu.\nFaster menus.")
 	row._toggle.button_pressed = false
 	_check("row: the toggle turns the check off", up.enabled == false
 			and main.settings.get_value("update", "check", true) == false)

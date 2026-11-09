@@ -5,7 +5,8 @@
 #
 #   bash tools/test_player_run.sh
 #
-# Cases: a plain start; a swap, then the next start keeps it; a crash before the first frame, rolled back at the
+# Cases: a plain start; a swap, then the next start keeps it; no swap without the user's yes (new.approved), or with
+# a yes for another version; a crash before the first frame, rolled back at the
 # next start and recorded as bad; a new/ without new.complete; a staged version that is in bad-versions; the run.sh
 # file rewritten in place while the swap moves its folder; a start from inside the folder with a relative ./run.sh;
 # a rollback with no old/; only forwards (an older stage, 0.10.0 after 0.9.0, an install named by a commit).
@@ -45,9 +46,10 @@ EOF
   chmod +x "$dir/bin/framecine-engine"
 }
 
-stage() {  # version ok|crash [no-marker]
+stage() {  # version ok|crash [no-marker|no-yes]: no-yes stages it without the user's yes (new.approved)
   make_install "$UPD/new" "$1" "$2"
   [ "${3:-}" = no-marker ] || printf '%s\n' "$1" > "$UPD/new.complete"
+  [ -n "${3:-}" ] || printf '%s\n' "$1" > "$UPD/new.approved"
 }
 
 fresh() {
@@ -96,6 +98,24 @@ check "swap, next start: the marker is removed" [ ! -e "$ST/started" ]
 check "swap, next start: nothing is bad" [ ! -e "$ST/bad-versions" ]
 check "swap, next start: old/ kept for one level" [ "$(version_in "$UPD/old")" = 1.0.0 ]
 check "swap: update.log has the lines" grep -q "swapped in 1.1.0 (was 1.0.0)" "$ST/update.log"
+check "swap: the yes is used up" [ ! -e "$UPD/new.approved" ]
+
+# 2b. Staged without the user's yes: nothing is swapped, the stage stays for the next question.
+fresh
+stage 1.1.0 ok no-yes
+launch
+check "no yes: 1.0.0 runs" [ "$(last_run)" = "1.0.0 --path $INSTALL/app --display-driver x11 --xr-mode on --" ]
+check "no yes: the install folder holds 1.0.0" [ "$(version_in "$INSTALL")" = 1.0.0 ]
+check "no yes: new/ and new.complete stay" [ -d "$UPD/new" ] && [ -f "$UPD/new.complete" ]
+check "no yes: no record" [ ! -e "$ST/swapped" ]
+check "no yes: update.log says it waits" grep -q "staged 1.1.0 waits for the user's yes" "$ST/update.log"
+echo 1.0.9 > "$UPD/new.approved"
+launch
+check "a yes for another version: still 1.0.0" [ "$(version_in "$INSTALL")" = 1.0.0 ]
+echo 1.1.0 > "$UPD/new.approved"
+launch
+check "the yes: 1.1.0 swapped in at the next start" [ "$(version_in "$INSTALL")" = 1.1.0 ] \
+  && [ "$(last_run)" = "1.1.0 --path $INSTALL/app --display-driver x11 --xr-mode on --" ]
 
 # 3. A crash before the first frame: the next start puts 1.0.0 back and records 1.2.0 as bad.
 fresh

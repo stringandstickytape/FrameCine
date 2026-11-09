@@ -902,54 +902,59 @@ msgstr ""
 msgid "CIPIC subject 003"
 msgstr ""
 
-#: scripts/update/updater.gd:169
+#: scripts/update/updater.gd:173
 msgid "This copy does not run from an install: no updates."
 msgstr ""
 
-#: scripts/update/updater.gd:170
+#: scripts/update/updater.gd:174
 #, c-format
 msgid "Version %s"
 msgstr ""
 
-#: scripts/update/updater.gd:173
+#: scripts/update/updater.gd:177
 #, c-format
 msgid "Downloading version %s: %d %%"
 msgstr ""
 
-#: scripts/update/updater.gd:175
+#: scripts/update/updater.gd:179
 #, c-format
 msgid "Preparing version %s..."
 msgstr ""
 
-#: scripts/update/updater.gd:177
+#: scripts/update/updater.gd:181 scripts/update/updater.gd:356
 #, c-format
-msgid "Version %s is ready. It goes in at the next start."
+msgid "Version %s is downloaded. It installs when you say yes in the menu."
 msgstr ""
 
-#: scripts/update/updater.gd:394
+#: scripts/update/updater.gd:248
+#, c-format
+msgid "Downloading version %s"
+msgstr ""
+
+#: scripts/update/updater.gd:416
 #, c-format
 msgid "Updated to version %s"
 msgstr ""
 
-#: scripts/update/updater.gd:431
+#: scripts/update/updater.gd:453
 #, c-format
 msgid "Restart now to update to %s?"
 msgstr ""
 
-#: scripts/update/updater.gd:432
+#: scripts/update/updater.gd:454
 #, c-format
 msgid "Quit now to update to %s? Then start the player again."
 msgstr ""
 
-#: scripts/update/updater.gd:435
+#: scripts/update/updater.gd:457
 msgid "Restart"
 msgstr ""
 
-#: scripts/update/updater.gd:435
+#: scripts/update/updater.gd:457
 msgid "Quit"
 msgstr ""
 
-#: scripts/update/updater.gd:435
+#: scripts/update/updater.gd:457
 msgid "Later"
 msgstr ""
 
