@@ -3646,8 +3646,11 @@ msgstr "正在下载版本 %s：%d %%"
 msgid "Preparing version %s..."
 msgstr "正在准备版本 %s……"
 
-msgid "Version %s is ready. It goes in at the next start."
-msgstr "版本 %s 已就绪，下次启动时生效。"
+msgid "Version %s is downloaded. It installs when you say yes in the menu."
+msgstr "版本 %s 已下载。在菜单中确认后才会安装。"
+
+msgid "Downloading version %s"
+msgstr "正在下载版本 %s"
 
 msgid "Updated to version %s"
 msgstr "已更新到版本 %s"

@@ -279,20 +279,28 @@ update keeps them.
    `new.complete` (the version) is written, last. A `new/` without it is deleted.
 5. **Ask.** "Restart now to update to 0.2.0?" with the release's one-line notes, in the menu's footer, with Restart
    and Later. Never during a film: the question shows when the menu opens with nothing open, or when the film ends
-   (the end opens the menu). A paused film is still a film. Later means no more questions in this run. The System
-   tab (Updates) shows the version, the download's progress and "Version 0.2.0 is ready. It goes in at the next
-   start", with Restart now. The swap happens at the next start in any case, with no question.
-6. **Restart.** On yes, the player writes what is open to `user://update_restart.cfg` (file, position, paused,
-   room), saves the settings and the resume positions, and quits. A unit of the user's service manager
+   (the end opens the menu). A paused film is still a film. Later means no more questions in this run; the download
+   stays, and the next start asks again. A short notice says when the download starts ("Downloading version 0.2.0")
+   and when it is ready (not during a film). The System tab (Updates) shows the version, the download's progress and
+   "Version 0.2.0 is downloaded. It installs when you say yes in the menu.", with Restart now. Nothing is installed
+   without a yes (2026-11-09: an update is never forced).
+6. **Restart.** On yes, the player writes `new.approved` (the version) beside `new.complete`, writes what is open to
+   `user://update_restart.cfg` (file, position, paused, room), saves the settings and the resume positions, and
+   quits. A unit of the user's service manager
    (`systemd-run --user`, outside Steam's process tree, because Steam waits for every descendant of the title) waits
-   for the player to end, then runs `steam steam://rungameid/$SteamGameId`. When Steam did not start the player
+   for the player to end, then runs `steam steam://rungameid/<id>`, the id written into the script as digits.
+   (`OS.execute` with output runs its command through `popen()` with each argument in double quotes, so `"$1"` in the
+   script came out empty and Steam got no id.) When Steam did not start the player
    (no `SteamGameId`), the question says "Quit now to update to 0.2.0? Then start the player again." The next start
    reads the file (only if it is less than 15 minutes old, and only if no `--file` was given), deletes it, opens the
    room and the file, and seeks to the position.
-7. **Swap** (`run.sh`, before the engine starts; no network). If `new.complete` is there: the install folder moves to
+7. **Swap** (`run.sh`, before the engine starts; no network). If `new.complete` is there and `new.approved` names
+   the same version: the install folder moves to
    `old/`, `new/` moves into its place, `swapped` records the two versions, and the new `run.sh` runs. That first
-   launch adds `launched` to `swapped`. Only forwards: a stage that is not newer than the install (it was installed
-   again by hand since), or an install named by a commit, is deleted instead.
+   launch adds `launched` to `swapped`. Without the yes the stage stays and the old version starts. Only forwards: a
+   stage that is not newer than the install (it was installed again by hand since), or an install named by a commit,
+   is deleted instead. (Installs from before 0.1.4 have a `run.sh` that swaps without the yes; the yes counts from
+   the update after 0.1.4 is in.)
 8. **Keep or roll back.** The new version writes `started` at its second frame. At the next launch, `run.sh` finds
    `swapped`: with `started`, the update is kept and both files go. Without it (the version was launched and showed no
    frame), it puts `old/` back into the install folder, deletes the failed version and adds its version to

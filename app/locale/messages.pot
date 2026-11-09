@@ -890,54 +890,59 @@ msgstr ""
 msgid "CIPIC subject 003"
 msgstr ""
 
-#: scripts/update/updater.gd:169
+#: scripts/update/updater.gd:173
 msgid "This copy does not run from an install: no updates."
 msgstr ""
 
-#: scripts/update/updater.gd:170
+#: scripts/update/updater.gd:174
 #, c-format
 msgid "Version %s"
 msgstr ""
 
-#: scripts/update/updater.gd:173
+#: scripts/update/updater.gd:177
 #, c-format
 msgid "Downloading version %s: %d %%"
 msgstr ""
 
-#: scripts/update/updater.gd:175
+#: scripts/update/updater.gd:179
 #, c-format
 msgid "Preparing version %s..."
 msgstr ""
 
-#: scripts/update/updater.gd:177
+#: scripts/update/updater.gd:181 scripts/update/updater.gd:356
 #, c-format
-msgid "Version %s is ready. It goes in at the next start."
+msgid "Version %s is downloaded. It installs when you say yes in the menu."
 msgstr ""
 
-#: scripts/update/updater.gd:394
+#: scripts/update/updater.gd:248
+#, c-format
+msgid "Downloading version %s"
+msgstr ""
+
+#: scripts/update/updater.gd:416
 #, c-format
 msgid "Updated to version %s"
 msgstr ""
 
-#: scripts/update/updater.gd:426
+#: scripts/update/updater.gd:453
 #, c-format
 msgid "Restart now to update to %s?"
 msgstr ""
 
-#: scripts/update/updater.gd:427
+#: scripts/update/updater.gd:454
 #, c-format
 msgid "Quit now to update to %s? Then start the player again."
 msgstr ""
 
-#: scripts/update/updater.gd:430
+#: scripts/update/updater.gd:457
 msgid "Restart"
 msgstr ""
 
-#: scripts/update/updater.gd:430
+#: scripts/update/updater.gd:457
 msgid "Quit"
 msgstr ""
 
-#: scripts/update/updater.gd:430
+#: scripts/update/updater.gd:457
 msgid "Later"
 msgstr ""
 
@@ -1069,30 +1074,30 @@ msgstr ""
 msgid "Dual fisheye 360° (front and back lens)"
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:63
+#: scripts/voice/whisper_backend.gd:64
 #, c-format
 msgid "Voice needs a one-time download of about %d MB. Downloaded: %d %%. The rest of the player works as usual."
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:64
+#: scripts/voice/whisper_backend.gd:65
 #, c-format
 msgid "Speech model download: %d %%"
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:65
+#: scripts/voice/whisper_backend.gd:66
 #, c-format
 msgid "Voice needs the network once, for a download of about %d MB. The rest of the player works as usual."
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:66
+#: scripts/voice/whisper_backend.gd:67
 msgid "The speech model did not download. Voice tries again when you use it next."
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:67
+#: scripts/voice/whisper_backend.gd:68
 msgid "Voice is starting."
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:68
+#: scripts/voice/whisper_backend.gd:69
 msgid "Voice is ready."
 msgstr ""
 

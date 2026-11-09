@@ -76,8 +76,10 @@ The player updates itself from the releases page. You do not need the PC program
 
 - Some seconds after it starts, and once a day while it runs, the player looks for a new release. This never delays
   start-up or playback. With no network it simply tries again later.
-- When there is a new version, it downloads it in the background, checks its signature and checksum, and asks
-  **Restart now to update?** It does not ask during a film.
+- When there is a new version, it downloads it in the background (a short notice says so), checks its signature and
+  checksum, and asks **Restart now to update?** It does not ask during a film.
+- Nothing is installed until you say yes. **Later** keeps the download, and the player asks again the next time it
+  starts.
 - If the new version does not start, the player goes back to the previous version by itself.
 - To turn the check off: Menu > System, the update setting. Only your IP address goes to GitHub with each check.
 - Your settings, bookmarks and logs are kept through updates.
