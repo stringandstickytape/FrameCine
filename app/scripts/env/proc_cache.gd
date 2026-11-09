@@ -40,6 +40,8 @@ static var made_ms := 0.0
 ## differ). A key that leaves out something its picture depends on shows up here and nowhere else.
 static var verify := false
 static var mismatches := 0
+## How long another stamp's folder is left alone after its last write (_forget_other_stamps()).
+static var keep_seconds := 86400.0
 static var _stamp := ""
 
 
@@ -105,15 +107,24 @@ static func _scripts(dir: String, out: Array[String]) -> void:
 			out.append(dir.path_join(f))
 
 
-## The folders of older stamps go: their pictures can never be asked for again.
+## The folders of other stamps go, once nothing in them has been written for keep_seconds. Not at once: on a
+## developer's machine two checkouts of the app (two stamps) can run at the same time, and each would empty the
+## other's folder under it. On the headset there is one app, and an old folder is gone a day after an update.
 static func _forget_other_stamps() -> void:
 	if not DirAccess.dir_exists_absolute(DIR):
 		return
+	var now := Time.get_unix_time_from_system()
 	for d in DirAccess.get_directories_at(DIR):
 		if d == _stamp:
 			continue
 		var old := DIR.path_join(d)
-		for f in DirAccess.get_files_at(old):
+		var files := DirAccess.get_files_at(old)
+		var newest := 0
+		for f in files:
+			newest = maxi(newest, FileAccess.get_modified_time(old.path_join(f)))
+		if now - newest < keep_seconds:
+			continue
+		for f in files:
 			DirAccess.remove_absolute(old.path_join(f))
 		DirAccess.remove_absolute(old)
 
