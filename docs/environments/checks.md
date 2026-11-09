@@ -116,6 +116,53 @@ that: `user://env_cache/<stamp>/<key's hash>.pic`.
 - A file is written beside its place and moved into it; a file that is not whole is drawn again.
 - `ProcCache.enabled = false` draws every time (`tests/test_env_proc_cache.gd` compares the two).
 
+The generators that keep their pictures on disk (since 2026-11-09; each under its own memory, `scripts/env/systems/`):
+
+| File | Memory | What it holds |
+|---|---|---|
+| `kit/procedural.gd` | `_maps` | a pattern's albedo, normal and packed maps, and their mean (one float pixel) |
+| `kit/procedural.gd` | `_pictures` | the rose window, a sign's letters, gradients, caustics, the abstract canvases, the colour-field canvas, a flame |
+| `kit/shopfront_pictures.gd` | `_cache` | the Shopfront's maps (and their mean), the bills, the street, the window's lettering, the roll |
+| `kit/shopfront_edwardian.gd` | `_orms` | a flat packed map for each roughness |
+| `kit/nave_gothic.gd` | `_maps_cache`, `_rose_tex` | the stone's maps (and their mean); the rose's glass |
+| `kit/mosaics.gd` | `_atlas` | both murals in one map |
+| `kit/earth_map.gd` | `_texture` | Earth's face |
+| `kit/ice_hall.gd` | `_flame_picture`, `_ice_map` | a candle's flame and halo; what is frozen in the ice |
+| `kit/lunar_surface.gd` | `_detail` | the regolith's fine relief |
+| `kit/screening_1962.gd` | `_city_picture` | the city's lights |
+| `kit/dome_fittings.gd` | `_face` | a gauge's face |
+| `kit/flagship.gd` | `_atlas` | the seat numbers and row letters, lit and engraved |
+| `kit/reflect.gd` | `_flat` | flat maps for paint and chrome |
+| `sky.gd` | `_noise` | the noise every sky layer draws from |
+| `vehicle.gd` | `_pictures` | the dials' faces, by their glow |
+
+Left alone:
+
+- `kit/nave_gothic.gd` `_atlas_cache` (the windows' glass, 596 ms on the desktop): its key is the windows' names, but
+  each window's picture is drawn from its tracery's shape, which the nave's widths change.
+- Pictures drawn at every build, with no memory: `kit/athens_roof.gd` `poster_picture()` (12 ms),
+  `kit/drive_in_lot.gd` `board_picture()` (4 ms), `halo_picture()`, `bulb_picture()`, `window_picture()`,
+  `auditorium.gd` `exit_picture()`, `booth_picture()`, `port_picture()` (each 1 ms or less); `projector.gd`'s motes
+  (random points, not a picture).
+- Memories of other things: fonts and glyph pages (`kit/shopfront_pictures.gd` `_fonts`, `_glyph_pages`), noise
+  generators (`kit/reclaimed.gd` `_noises`, `kit/nave_gothic.gd` `_fnl`), meshes (`kit/seabed.gd` `_ico_cache`),
+  materials and shaders (`kit/builder.gd` `GLASS`, `gltf_room.gd` `_cut_shaders`), textures from files
+  (`material_library.gd`), star data (`sky.gd` `_catalogue`, `_field`), sounds and levels (`env_synth.gd`,
+  `sound_bed.gd`, `presentation.gd`).
+- Two keys round their argument (`kit/reflect.gd` `_flat` to 0.01, `kit/procedural.gd` `colour_field()` to 0.001)
+  and a colour in a key is written to 4 decimals; they are kept all the same, as the memory decided.
+
+Measured headless on the desktop (2026-11-09, `test_env_proc_cache.gd`): every room built once in a fresh process,
+first with an empty cache (58 pictures drawn), then in a second process that reads them all.
+
+| | Every room built |
+|---|---|
+| Drawn (the first run after an update) | 9201 ms |
+| Read from disk | 4975 ms (54 %) |
+
+The largest savings: Shopfront 1906 1319 to 67 ms, Screening room 1962 935 to 95 ms, Palace of Culture 1974 794 to
+120 ms, Crater 1050 to 514 ms, Athens rooftop 507 to 225 ms.
+
 ## On the headset
 
 `tools/room-perf.sh` writes `docs/environments/perf.md`: each room's GPU time (mean and p95) and dropped frames, from

@@ -21,6 +21,7 @@ extends RefCounted
 
 const REGOLITH_SHADER := preload("res://shaders/env_regolith.gdshader")
 const LIGHTS_SHADER := preload("res://shaders/env_lunar_lights.gdshader")
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
 ## The shader's materials (UV2.x).
 const M_REGOLITH := 0
@@ -868,6 +869,11 @@ static func _lights_mesh(lights: Array) -> Array:
 static func detail_texture() -> ImageTexture:
 	if _detail != null:
 		return _detail
+	_detail = ImageTexture.create_from_image(ProcCache.image("lunar_surface.gd:detail_texture", _draw_detail_texture))
+	return _detail
+
+
+static func _draw_detail_texture() -> Image:
 	var n := 256
 	var h := PackedFloat32Array()
 	h.resize(n * n)
@@ -912,5 +918,4 @@ static func detail_texture() -> ImageTexture:
 			data[i * 4 + 3] = 255 if rng.randf() < 0.012 else int(rng.randf() * 90.0)
 	var img := Image.create_from_data(n, n, false, Image.FORMAT_RGBA8, data)
 	img.generate_mipmaps()
-	_detail = ImageTexture.create_from_image(img)
-	return _detail
+	return img

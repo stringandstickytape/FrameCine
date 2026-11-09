@@ -14,6 +14,7 @@ extends RefCounted
 
 const W := 512
 const H := 256
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
 static var _texture: ImageTexture
 
@@ -206,6 +207,11 @@ const CITIES := [
 static func texture() -> ImageTexture:
 	if _texture != null:
 		return _texture
+	_texture = ImageTexture.create_from_image(ProcCache.image("earth_map.gd:texture", _draw_texture))
+	return _texture
+
+
+static func _draw_texture() -> Image:
 	var land := PackedFloat32Array()
 	land.resize(W * H)
 	for poly: Array in LAND:
@@ -244,8 +250,7 @@ static func texture() -> ImageTexture:
 	img.resize(W / 2, H / 2, Image.INTERPOLATE_BILINEAR)
 	img.resize(W, H, Image.INTERPOLATE_CUBIC)
 	img.generate_mipmaps()
-	_texture = ImageTexture.create_from_image(img)
-	return _texture
+	return img
 
 
 ## Fills a polygon ([lon, lat, ...]) into `out` with `value`, row by row (even-odd crossings); longitudes past 180

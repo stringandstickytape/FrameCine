@@ -20,6 +20,7 @@ const EARTH_SHADER := preload("res://shaders/env_sky_earth.gdshader")
 const EARTH_DETAIL_SHADER := preload("res://shaders/env_sky_earth_detail.gdshader")
 const EarthMap := preload("res://scripts/env/systems/kit/earth_map.gd")
 const MOON_SHADER := preload("res://shaders/env_sky_moon.gdshader")
+const ProcCache := preload("res://scripts/env/proc_cache.gd")
 ## The Moon's layer: nearer than the stars (it hides them), beyond Earth's. Its quad reaches HALO times its radius,
 ## for the halo round it.
 const MOON_RADIUS := 178.0
@@ -264,6 +265,11 @@ static func faint_field(count: int) -> Array:
 static func noise_texture() -> ImageTexture:
 	if _noise != null:
 		return _noise
+	_noise = ImageTexture.create_from_image(ProcCache.image("sky.gd:noise_texture", _draw_noise_texture))
+	return _noise
+
+
+static func _draw_noise_texture() -> Image:
 	var size := 256
 	var chans: Array[PackedByteArray] = []
 	var freqs := [0.012, 0.03, 0.022, 0.06]
@@ -290,8 +296,7 @@ static func noise_texture() -> ImageTexture:
 		data[i * 4 + 3] = a[i]
 	var out := Image.create_from_data(size, size, false, Image.FORMAT_RGBA8, data)
 	out.generate_mipmaps()
-	_noise = ImageTexture.create_from_image(out)
-	return _noise
+	return out
 
 
 ## A star's colour from its B-V colour index (a blue-white to orange ramp, softened as the eye sees it).
