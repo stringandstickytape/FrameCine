@@ -184,6 +184,12 @@ static func _options(spec: Dictionary, v: Variant, path: String, errors: Array, 
 			errors.append(_e("%s.%s" % [path, k], "unknown (known: %s)" % ", ".join(spec.keys())))
 		else:
 			check_value(spec[str(k)], v[k], "%s.%s" % [path, k], errors, ctx)
+	# A field with no sensible default says so ("required": true): a band of scenery with no shape is a mistake in
+	# the document, not a row of whatever the system would draw in its place.
+	for k: Variant in spec:
+		if spec[k] is Dictionary and bool((spec[k] as Dictionary).get("required", false)) \
+				and not (v as Dictionary).has(k):
+			errors.append(_e("%s.%s" % [path, k], "missing"))
 
 
 ## One value against a parameter's spec. A binding ({"bind": ...}) is checked against the parameter (ctx: the room's

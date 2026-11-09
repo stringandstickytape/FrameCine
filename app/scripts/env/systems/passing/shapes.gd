@@ -33,6 +33,74 @@ const COLOURS := {
 ## A far village's lights: this share warm, the rest cool.
 const WARM := Color(1.0, 0.79, 0.54)
 const COOL := Color(0.81, 0.89, 1.0)
+## A scattered band's items are this much smaller and larger than the band's size (a row's pieces are all its size).
+const VARY := Vector2(0.8, 1.25)
+## How far each shape reaches from its foot towards the way, and how high: what comfort needs to know of a shape
+## (nearest()). A band's `near` says where its feet stand, and that is not how near it comes: a tree whose foot is
+## 9 m off has a crown that reaches to 3, and a moored boat's side is a metre nearer than its middle. Three lengths,
+## each as [metres whatever the size, metres times the size]:
+##   stem   how far its solid part stands out from its foot at any height (a trunk, a wall, half a hedge)
+##   wide   how far its widest part reaches (a crown, a willow's shoots, a lamp's arm, the eaves)
+##   over   the height over its foot under which that widest part never comes (0: it reaches at the ground)
+## Worked out from the drawing functions below at the largest each draws; change a shape and change its line here.
+const REACH := {
+	"reeds": {"stem": [0.25, 0.7], "wide": [0.25, 0.7], "over": [0.0, 0.0]},
+	"willow": {"stem": [0.0, 0.8], "wide": [0.0, 3.75], "over": [0.0, 2.8]},
+	"tree": {"stem": [0.0, 0.42], "wide": [0.0, 6.0], "over": [0.0, 3.2]},
+	"poplar": {"stem": [0.0, 0.24], "wide": [0.0, 1.7], "over": [0.0, 1.4]},
+	"hedge": {"stem": [0.68, 0.0], "wide": [0.68, 0.0], "over": [0.0, 0.0]},
+	"fence": {"stem": [0.05, 0.0], "wide": [0.05, 0.0], "over": [0.0, 0.0]},
+	"cottage": {"stem": [0.0, 2.25], "wide": [0.0, 2.4], "over": [0.0, 2.6]},
+	"post": {"stem": [0.07, 0.0], "wide": [0.07, 0.0], "over": [0.0, 0.0]},
+	"lamp": {"stem": [0.06, 0.0], "wide": [0.61, 0.0], "over": [0.0, 2.85]},
+	"boat": {"stem": [0.0, 1.0], "wide": [0.0, 1.0], "over": [0.0, 0.0]},
+	"tower": {"stem": [0.0, 3.5], "wide": [0.0, 3.5], "over": [0.0, 0.0]},
+}
+
+
+## The nearest any part of a shape comes to the line the viewer's eyes go along (metres): the least of its stem's
+## distance and its widest part's, that one measured up to where it hangs. A bridge goes over the way: its nearest is
+## its arch.
+## distance: its foot from the way's line; foot: its foot's height; eye: the eyes' height (both in the room's frame)
+static func nearest(shape: String, size: float, distance: float, foot: float, eye: float) -> float:
+	if shape == "bridge":
+		# Its piers stand at its distance; the arch springs 1.4 over its foot and rises 2.6 more over the way.
+		var best := distance
+		for k in 9:
+			var t := PI * k / 8.0
+			best = minf(best, Vector2(distance * cos(t), foot + (1.4 + 2.6 * sin(t)) * size - eye).length())
+		return best
+	if not REACH.has(shape):
+		return distance
+	var r: Dictionary = REACH[shape]
+	var stem := distance - (float(r["stem"][0]) + float(r["stem"][1]) * size)
+	var wide := maxf(distance - (float(r["wide"][0]) + float(r["wide"][1]) * size), 0.0)
+	var over := maxf(foot + (float(r["over"][0]) + float(r["over"][1]) * size) - eye, 0.0)
+	return maxf(minf(stem, Vector2(wide, over).length()), 0.0)
+
+
+## The ground a landmark stands on, which no band's item may stand on too (a hedge through a wharf's shed, reeds
+## through a moored boat, a willow on a bridge's road): Vector3(half its length along the way, its nearest and its
+## furthest edge across the way, signed as the way's frame is: left negative). ZERO: none. The passing shaders leave
+## out every band item whose foot is inside it; the margins past the shape itself are for what reaches (REACH).
+## side: -1 left, 1 right; distance: its foot from the way's line
+static func clearing(shape: String, size: float, side: float, distance: float) -> Vector3:
+	match shape:
+		"bridge":
+			# Both sides of the way: its piers, its abutments (1.2 m) and what would reach over its parapet.
+			return Vector3(4.25, -(distance + 9.0), distance + 9.0)
+		"wharf":
+			# Its deck is 20 m long and 6 m deep from its wall; reeds do not stand before a quay wall.
+			return _clearing(11.5, side, distance - 2.0, distance + 11.0)
+		"boat":
+			return _clearing(8.5 * size, side, distance - 1.0 * size - 0.5, distance + 1.0 * size + 0.5)
+		"tower":
+			return _clearing(20.0 * size, side, distance - 8.0 * size, distance + 8.0 * size)
+	return Vector3.ZERO
+
+
+static func _clearing(half: float, side: float, a: float, b: float) -> Vector3:
+	return Vector3(half, minf(side * a, side * b), maxf(side * a, side * b))
 
 
 static func draw(shape: String, m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color,

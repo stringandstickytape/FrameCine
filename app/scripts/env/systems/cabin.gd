@@ -12,6 +12,10 @@ extends "res://scripts/env/systems/kit/builder.gd"
 const ROOF_STEPS := 10
 ## Steps of a window's round corner (CORNER_STEPS + 1 points).
 const CORNER_STEPS := 4
+## The least height a window has (metres): where the walls leave less over the sill, the cabin has no windows.
+const MIN_WINDOW := 0.1
+## How far inside a bulkhead a bay's mark must be for a rib, a wall lamp or a side_walls slot to stand at it.
+const MARK_MARGIN := 0.1
 
 
 static func spec() -> Dictionary:
@@ -142,7 +146,10 @@ static func resolved(p: Dictionary) -> Dictionary:
 	out["rise"] = rise
 	var headroom := wall_h + rise
 	out["headroom"] = headroom
-	out["cx"] = -_own_offset(p) if str(p["seating"]) == "rows" else float(p["centre_x"])
+	# Rows with no seat in either block are no rows: the viewer's own seat alone, on centre_x.
+	if str(p["seating"]) == "rows" and int(p["seats_left"]) + int(p["seats_right"]) <= 0:
+		out["seating"] = "none"
+	out["cx"] = -_own_offset(p) if str(out["seating"]) == "rows" else float(p["centre_x"])
 	# The windows: those that stay clear of the bulkheads, no higher than the walls allow.
 	var fz := float(p["front_z"])
 	var bz := float(p["back_z"])
@@ -161,15 +168,18 @@ static func resolved(p: Dictionary) -> Dictionary:
 			var z := float(p["window_from_z"]) + k * float(p["bay_pitch"])
 			if z - ww / 2.0 >= fz + 0.15 and z + ww / 2.0 <= bz - 0.15:
 				zs.append(z)
+	var sill := float(p["window_sill"])
+	var wh := float(p["window_height"])
+	if sill + wh > wall_h - 0.05:
+		wh = maxf(wall_h - 0.05 - sill, 0.0)
+	# A sill so high that the wall leaves a window under a hand's height: no windows, not slits and not openings
+	# with nothing in them.
+	if wh < MIN_WINDOW:
+		zs.clear()
 	if zs.is_empty():
 		sides = []
 	out["window_zs"] = zs
 	out["window_sides_s"] = sides
-	var sill := float(p["window_sill"])
-	var wh := float(p["window_height"])
-	if sill + wh > wall_h - 0.05:
-		# UNDECIDED (brief): a sill above wall_height - 0.05 leaves no height at all; kept at 0 (an empty opening).
-		wh = maxf(wall_h - 0.05 - sill, 0.0)
 	out["window_height"] = wh
 	out["r"] = minf(float(p["window_round"]), minf(ww / 2.0, wh / 2.0))
 	out["dado"] = minf(float(p["dado_height"]), sill) if not zs.is_empty() else float(p["dado_height"])
@@ -177,13 +187,18 @@ static func resolved(p: Dictionary) -> Dictionary:
 	var ss := U.v2(p["screen_size"])
 	var w := ss.x
 	var h := ss.y
-	# UNDECIDED (brief): a screen_size with one of the two at 0 is taken as given; only [0, 0] is its own.
+	# A 0 in screen_size is worked out. Both: the cabin's own picture. One: 16:9 from the other, so a room can ask
+	# for a width and let the height follow.
 	if w == 0.0 and h == 0.0:
 		w = clampf(top_half * 2.0 - 0.5, 0.6, 3.2)
 		h = w * 9.0 / 16.0
 		if h > headroom - 0.95:
 			h = headroom - 0.95
 			w = h * 16.0 / 9.0
+	elif h == 0.0:
+		h = w * 9.0 / 16.0
+	elif w == 0.0:
+		w = h * 16.0 / 9.0
 	out["screen_size"] = [w, h]
 	var bottom := float(p["screen_bottom"])
 	if bottom == 0.0:
@@ -199,7 +214,7 @@ static func _own_offset(p: Dictionary) -> float:
 	if n <= 0:
 		right = not right
 		n = int(p["seats_right"]) if right else int(p["seats_left"])
-	# UNDECIDED (brief): with no seats in either block the offset is still worked out as for index 0.
+	# (Rows with no seat in either block are seating none: resolved() never asks then.)
 	var idx := clampi(int(p["own_index"]), 0, maxi(n - 1, 0))
 	var o := float(p["aisle"]) / 2.0 + float(p["seat_pitch"]) * (idx + 0.5)
 	return o if right else -o
@@ -257,13 +272,16 @@ static func _bay_marks(q: Dictionary) -> Array[float]:
 	if zs.is_empty():
 		out.append((float(q["front_z"]) + float(q["back_z"])) * 0.5)
 		return out
-	# UNDECIDED (brief): the marks before the first and after the last window can fall beyond a bulkhead (the
-	# default's last at z 2.55, behind back_z 2.4); kept where the rule puts them (ribs, wall lamps, side_walls slots).
 	var bay := float(q["bay_pitch"])
-	out.append(zs[0] - bay * 0.5)
+	var marks: Array[float] = [zs[0] - bay * 0.5]
 	for i in range(1, zs.size()):
-		out.append((zs[i - 1] + zs[i]) * 0.5)
-	out.append(zs[-1] + bay * 0.5)
+		marks.append((zs[i - 1] + zs[i]) * 0.5)
+	marks.append(zs[-1] + bay * 0.5)
+	# A mark is kept only where it is inside the cabin with room for what stands at it (a rib, a wall lamp, a
+	# side_walls slot): the first and the last can fall in a bulkhead or beyond it.
+	for z in marks:
+		if z >= float(q["front_z"]) + MARK_MARGIN and z <= float(q["back_z"]) - MARK_MARGIN:
+			out.append(z)
 	return out
 
 
@@ -378,7 +396,7 @@ static func slots_for(p: Dictionary) -> Dictionary:
 	var bay_size := [float(q["bay_pitch"]) - ww, wall_h - dado, 0.3]
 	if (q["window_zs"] as Array).is_empty() or (q["window_sides_s"] as Array).is_empty():
 		bay_size = [1.0, wall_h - dado, 0.3]
-	# UNDECIDED (brief): with windows on one side only, the side_walls slots are on both walls, at the same bays.
+	# On both walls, also with windows on one side only: the wall without them has the same bays to dress.
 	for s: float in [-1.0, 1.0]:
 		for z: float in _bay_marks(q):
 			walls.append({"transform": Transform3D(_wall_basis(q, s), _pt(q, s, z, dado / cos(lean))),
@@ -596,7 +614,7 @@ func _build_ribs(q: Dictionary, trim: RoomMesh) -> void:
 	var wall_len := float(q["wall_len"])
 	if vd > 0.0:
 		for s: float in [-1.0, 1.0]:
-			# UNDECIDED (brief): the rail is centred on the dado's top.
+			# The rail sits across the join: half on the dado, half on the wall above.
 			trim.box(_pt(q, s, (fz + bz) * 0.5, vd) + _n(q, s) * 0.02, Vector3(bz - fz, 0.03, 0.04), _wall_basis(q, s),
 					[RoomMesh.FRONT])
 	if not bool(q["ribs"]) or (q["window_zs"] as Array).is_empty():
@@ -634,8 +652,8 @@ func _build_screen_frame(q: Dictionary, trim: RoomMesh) -> void:
 	var size := U.v2(sc["size"])
 	var t := 0.04
 	var z := float(q["front_z"]) + 0.015
-	# UNDECIDED (brief): shopfront.gd leaves 0.08 between the picture and its frame; here the frame is at the
-	# picture's edge (with the margin the default's frame would cut through the arched roof).
+	# At the picture's edge, with none of the 0.08 a hall's frame leaves round its picture: a cabin's picture
+	# is as large as its bulkhead allows, and a frame stood off from it would cut into the roof's arch.
 	var half := size * 0.5
 	for s: float in [-1.0, 1.0]:
 		trim.box(Vector3(c.x + s * (half.x + t * 0.5), c.y, z), Vector3(t, half.y * 2.0 + t * 2.0, 0.03), Basis(),
@@ -683,13 +701,13 @@ func _build_lamps(q: Dictionary, trim: RoomMesh) -> void:
 		for z in zs:
 			lamps.box(Vector3(cx, top - 0.002 - 0.0175, z), Vector3(0.16, 0.035, 0.16), Basis(), [RoomMesh.UP])
 			trim.box(Vector3(cx, top - 0.001 - 0.01, z), Vector3(0.2, 0.02, 0.2), Basis(), [RoomMesh.UP])
-			# UNDECIDED (brief): "0.12 under the lamp" is taken from the lamp's bottom face.
+			# The bake's light hangs 0.12 under the lamp's glass, clear of the roof it would otherwise burn out.
 			_bake_omni("CabinLamp%d" % i, Vector3(cx, top - 0.037 - 0.12, z), 3.5, 0.6, colour)
 			i += 1
 	else:
 		var v := float(q["lamp_height"]) / cos(float(q["L"]))
-		# UNDECIDED (brief): with no windows the wall lamps are one a side at the cabin's middle (as the side_walls
-		# slots); "standing 0.06 out" is taken as the lamp's back 0.06 out, at the arm's end.
+		# At the bays' marks (with no windows: one a side at the cabin's middle, as the side_walls slots). A lamp
+		# stands at the end of its arm, its back 0.06 out from the wall.
 		for s: float in [-1.0, 1.0]:
 			var n := _n(q, s)
 			var basis := _wall_basis(q, s)

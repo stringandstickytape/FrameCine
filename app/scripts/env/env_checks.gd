@@ -205,6 +205,12 @@ const BLEND_STOP := 24
 ## than for its glass. One whole layer leaves room for a dome like those and for scenery behind a window, and stops
 ## a room that stacks glass on haze on glass before it reaches the headset.
 const BLEND_BUDGET := 1.0
+## The group of a mesh whose vertices are not where it is drawn: a vertex shader carries them there (the passing
+## system's scenery lies about each item's own foot in its mesh, and is spread along the way when it is drawn). No
+## check here that casts rays reads such a mesh: read as it is, it is a heap at the room's origin, round the viewer's
+## head, and it would hide everything behind it from the sight line, the blended layers and the flow check alike.
+## What it costs is still counted (draws, triangles); where it can be is its system's to say (flow_volumes()).
+const PLACED_IN_SHADER := "env_placed_in_shader"
 static var _blend_re: RegEx
 static var _blends := {}
 
@@ -240,7 +246,7 @@ static func _view_bodies(tree: SceneTree, room: Node3D) -> Dictionary:
 	var inv := room.global_transform.affine_inverse()
 	for n: Node in room.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
-		if not mi.is_visible_in_tree() or mi.mesh == null:
+		if not mi.is_visible_in_tree() or mi.mesh == null or mi.is_in_group(PLACED_IN_SHADER):
 			continue
 		var xf: Transform3D = inv * mi.global_transform
 		for s in mi.mesh.get_surface_count():
@@ -281,8 +287,8 @@ static func _view_bodies(tree: SceneTree, room: Node3D) -> Dictionary:
 ## many blended surfaces a ray from the eyes crosses before the first solid one. It is what the triangle count cannot
 ## see and what fills the frame on the headset: a glass dome is a few thousand triangles and the whole view, twice
 ## where a beam's haze hangs in it. Every crossing counts, a volume's far side as its near one (both are drawn).
-## Not counted: particles (the budget has their number), a MultiMesh (headless it keeps no transforms), and quads a
-## vertex shader turns to the eye (halos: no size until they are drawn). Awaitable. Returns {mean, peak, share}: the
+## Not counted: particles (the budget has their number), a MultiMesh (headless it keeps no transforms), quads a
+## vertex shader turns to the eye (halos: no size until they are drawn), and a mesh in PLACED_IN_SHADER. Awaitable. Returns {mean, peak, share}: the
 ## layers a cell on average, the most in one cell, and the share of the view with any.
 ## room: the built room, in the tree at the origin.
 static func blend_layers(tree: SceneTree, room: Node3D) -> Dictionary:
@@ -348,7 +354,7 @@ static func sight_line(tree: SceneTree, room: Node3D, max_reports := 8) -> Array
 	var inv := room.global_transform.affine_inverse()
 	for mi: Node in room.find_children("*", "MeshInstance3D", true, false):
 		if not (mi as MeshInstance3D).is_visible_in_tree() or mi.is_in_group(ScreenFrame.SEE_THROUGH) \
-				or (mi as MeshInstance3D).mesh == null:
+				or mi.is_in_group(PLACED_IN_SHADER) or (mi as MeshInstance3D).mesh == null:
 			continue
 		var xf: Transform3D = inv * (mi as MeshInstance3D).global_transform
 		for v: Vector3 in (mi as MeshInstance3D).mesh.get_faces():

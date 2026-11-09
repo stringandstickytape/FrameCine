@@ -180,11 +180,14 @@ func _layers() -> void:
 	_check("layers: the Void has none (%s)" % [l], float(l["mean"]) == 0.0 and int(l["peak"]) == 0)
 	var eye := Vector3(0.0, EnvChecks.EYE_HEIGHT, 0.0)
 	var ahead: Vector3 = ((room.call("get_screen_anchor") as Transform3D).origin - eye).normalized()
-	var first := _pane(room, eye + ahead * 2.0, ahead)
+	# Half a metre off, not further: the Void's floor is solid, and a ray that looks down reaches it 1.2 m and more
+	# from the eyes. A pane further off than that is behind the floor for the low part of the view, and rightly not
+	# counted there (a layer behind something solid is never filled).
+	var first := _pane(room, eye + ahead * 0.5, ahead)
 	l = await EnvChecks.blend_layers(self, room)
-	_check("layers: a glass pane 2 m off fills the view, one layer (%s)" % [l], absf(float(l["mean"]) - 1.0) <= 0.03
-			and int(l["peak"]) == 1 and absf(float(l["share"]) - 1.0) <= 0.03)
-	_pane(room, eye + ahead * 3.0, ahead)
+	_check("layers: a glass pane half a metre off fills the view, one layer (%s)" % [l],
+			absf(float(l["mean"]) - 1.0) <= 0.03 and int(l["peak"]) == 1 and absf(float(l["share"]) - 1.0) <= 0.03)
+	_pane(room, eye + ahead * 0.8, ahead)
 	l = await EnvChecks.blend_layers(self, room)
 	_check("layers: a second behind it, two (%s)" % [l], absf(float(l["mean"]) - 2.0) <= 0.06 and int(l["peak"]) == 2)
 	first.material_override = StandardMaterial3D.new()
@@ -214,8 +217,7 @@ func _shipped_layers() -> void:
 	var room := _build(EnvDoc.load_file("res://environments/bathysphere.env.json")["doc"])
 	await process_frame
 	var l: Dictionary = await EnvChecks.blend_layers(self, room)
-	# UNDECIDED (brief): "peak at least 1, and at most EnvChecks.BLEND_BUDGET": read as the mean at most the budget
-	# (the budget is a mean), not the peak.
+	# The budget is on the mean (a layer over the whole view); the peak is what one cell has at most.
 	_check("layers: the Bathysphere's dome (%s)" % [l], float(l["mean"]) >= 0.4 and float(l["mean"]) <= 0.75
 			and int(l["peak"]) >= 1 and float(l["mean"]) <= EnvChecks.BLEND_BUDGET)
 	room.queue_free()
@@ -252,7 +254,10 @@ func _rays() -> void:
 func _flow() -> void:
 	var screen: Dictionary = Registry.script_of("shopfront").call("screen_for",
 			EnvDoc.with_defaults(Registry.spec("shopfront")["params"], {}))
-	var room := _build(_doc([{"system": "shopfront", "id": "hall"}], {"screen": screen}))
+	# (The light system: the shopfront's materials ask it for the room's light. The host stepped by hand: the stub
+	# below is no whole system, and a host that ran on its own would call what it does not have.)
+	var room := _build(_doc([{"system": "light"}, {"system": "shopfront", "id": "hall"}], {"screen": screen}))
+	(room.get("host") as Node).set("auto", false)
 	await process_frame
 	var f: Array = await EnvChecks.flow_clear(self, room)
 	_check("flow: nothing goes by, nothing to report (%s)" % [f], f.is_empty())

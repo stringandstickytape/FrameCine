@@ -37,6 +37,9 @@ varying vec3 world_pos;
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	// Written as every colour of a document is (sRGB): to linear light, as env_passing_place.gdshaderinc does it.
+	COLOR.rgb = mix(pow((COLOR.rgb + vec3(0.055)) / 1.055, vec3(2.4)), COLOR.rgb / 12.92,
+			lessThan(COLOR.rgb, vec3(0.04045)));
 }
 
 void fragment() {

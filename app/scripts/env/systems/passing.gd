@@ -18,7 +18,6 @@ const EnvSignals := preload("res://scripts/env/env_signals.gd")
 const ShapeMesh := preload("res://scripts/env/systems/passing/shape_mesh.gd")
 const Shapes := preload("res://scripts/env/systems/passing/shapes.gd")
 const SkySystem := preload("res://scripts/env/systems/sky.gd")
-const ScreenFrame := preload("res://scripts/env/systems/screen_frame.gd")
 const SHADER := preload("res://shaders/env_passing.gdshader")
 const LIGHTS_SHADER := preload("res://shaders/env_passing_lights.gdshader")
 const GROUND_SHADER := preload("res://shaders/env_passing_ground.gdshader")
@@ -53,7 +52,7 @@ const KIND_COLOURS := {"water": "#0c1218", "grass": "#1a2414", "path": "#3b362c"
 
 static func spec() -> Dictionary:
 	var band := {
-		"shape": {"type": "enum", "values": Shapes.BANDS, "description": "what stands in the band"},
+		"shape": {"type": "enum", "values": Shapes.BANDS, "required": true, "description": "what stands in the band"},
 		"side": {"type": "enum", "values": ["left", "right", "both"], "default": "both",
 				"description": "which side of the way"},
 		"near": {"type": "float", "min": 3.0, "max": 170.0, "default": 6.0,
@@ -76,8 +75,9 @@ static func spec() -> Dictionary:
 				"description": "[[route fraction, how much of it]]: where along the route it stands"},
 	}
 	var landmark := {
-		"shape": {"type": "enum", "values": Shapes.LANDMARKS, "description": "what it is"},
-		"at": {"type": "float", "min": 0.0, "max": 1.0, "description": "its place on the route, as a fraction"},
+		"shape": {"type": "enum", "values": Shapes.LANDMARKS, "required": true, "description": "what it is"},
+		"at": {"type": "float", "min": 0.0, "max": 1.0, "required": true,
+				"description": "its place on the route, as a fraction"},
 		"side": {"type": "enum", "values": ["left", "right"], "default": "left",
 				"description": "which side of the way"},
 		"distance": {"type": "float", "min": 3.0, "max": 170.0, "default": 8.0,
@@ -91,8 +91,10 @@ static func spec() -> Dictionary:
 	var strip := {
 		"side": {"type": "enum", "values": ["left", "right", "both"], "default": "both",
 				"description": "which side of the way"},
-		"from": {"type": "float", "min": 0.0, "max": 175.0, "description": "its near edge, metres from the way's line"},
-		"to": {"type": "float", "min": 0.0, "max": 175.0, "description": "its far edge, metres from the way's line"},
+		"from": {"type": "float", "min": 0.0, "max": 175.0, "required": true,
+				"description": "its near edge, metres from the way's line"},
+		"to": {"type": "float", "min": 0.0, "max": 175.0, "required": true,
+				"description": "its far edge, metres from the way's line"},
 		"height_from": {"type": "float", "min": -20.0, "max": 40.0, "default": 0.0,
 				"description": "its height at its near edge"},
 		"height_to": {"type": "float", "min": -20.0, "max": 40.0, "default": 0.0,
@@ -242,8 +244,7 @@ func setup() -> void:
 		_ground.mesh = _ground_mesh()
 		_ground.material_override = _ground_mat
 		_ground.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		# UNDECIDED (brief): the brief sets shadows and gi only for Passing and PassingLights; the ground takes the
-		# same (gi static would put it in the lightmap bake's meshes, which need UV2 for an atlas).
+		# Not in the lightmap bake: it is lit in its shader, and its pattern moves.
 		_ground.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 		own(_ground)
 	_uniforms()
@@ -251,7 +252,7 @@ func setup() -> void:
 
 ## A band with its defaults filled in; `far` made at least `near`.
 static func band_with_defaults(raw: Dictionary) -> Dictionary:
-	# UNDECIDED (brief): a band without a shape; "post" (the simplest shape) stands in.
+	# The schema asks for a shape ("required"); a caller that skips the schema gets the plainest one.
 	var out := {"shape": "post", "side": "both", "near": 6.0, "far": 12.0, "count": 40, "length": 240.0,
 			"seems": 1.0, "height": 0.0, "size": 1.0, "colour": null, "seed": 0, "presence": [[0.0, 1.0]]}
 	out.merge(raw, true)
@@ -260,7 +261,7 @@ static func band_with_defaults(raw: Dictionary) -> Dictionary:
 
 
 static func landmark_with_defaults(raw: Dictionary) -> Dictionary:
-	# UNDECIDED (brief): a landmark without a shape or `at`; "lamp" and 0 (the journey's start) stand in.
+	# The schema asks for a shape and a place ("required"); without it, a lamp at the journey's start.
 	var out := {"shape": "lamp", "at": 0.0, "side": "left", "distance": 8.0, "height": 0.0, "size": 1.0,
 			"colour": null, "seed": 0}
 	out.merge(raw, true)
@@ -268,7 +269,7 @@ static func landmark_with_defaults(raw: Dictionary) -> Dictionary:
 
 
 static func strip_with_defaults(raw: Dictionary) -> Dictionary:
-	# UNDECIDED (brief): `from` and `to` have no defaults; a strip that leaves one out takes 0 there.
+	# The schema asks for both edges ("required"); without it the strip has no width and nothing is drawn.
 	var out := {"side": "both", "from": 0.0, "to": 0.0, "height_from": 0.0, "height_to": 0.0, "kind": "grass",
 			"colour": null}
 	out.merge(raw, true)
@@ -284,13 +285,13 @@ static func _sides(side: String) -> Array[float]:
 	return [-1.0, 1.0]
 
 
-## A document's colour, or the fallback, as the shaders take it: linear, as vista.gd gives its vertices.
-# UNDECIDED (brief): vertex colours go in linear (as vista.gd's do); the shapes' own constants (Shapes.COOL) go in
-# as written.
-static func _linear(c: Variant, fallback: String) -> Color:
+## A document's colour, or the fallback, as it is written. Every colour in these meshes goes in as written (sRGB),
+## the document's and the shapes' own (a willow's bark, a roof, a lit window) alike, and the shaders take them all
+## to linear light in one place (env_passing_place.gdshaderinc passing_colour()). Converting some here and not the
+## others would draw a shape's own colours far lighter than the colour its document gave it.
+static func _written(c: Variant, fallback: String) -> Color:
 	var col := RoomSchemaRef.to_color(c if c != null else fallback)
-	var l := col.srgb_to_linear()
-	return Color(l.r, l.g, l.b, 1.0)
+	return Color(col.r, col.g, col.b, 1.0)
 
 
 static func _default_presence(presence: Variant) -> bool:
@@ -302,7 +303,7 @@ static func _default_presence(presence: Variant) -> bool:
 
 func _build_band(m: ShapeMesh, b: int, band: Dictionary) -> void:
 	var shape := str(band["shape"])
-	var colour := _linear(band["colour"], str(Shapes.COLOURS.get(shape, "#808080")))
+	var colour := _written(band["colour"], str(Shapes.COLOURS.get(shape, "#808080")))
 	var seems := float(band["seems"])
 	var pace := 1.0 / seems
 	var near := float(band["near"])
@@ -320,8 +321,7 @@ func _build_band(m: ShapeMesh, b: int, band: Dictionary) -> void:
 		for i in n:
 			var threshold := 0.0 if all_show else (i + 0.5) / n
 			for side in _sides(str(band["side"])):
-				# UNDECIDED (brief): the random numbers of a shape that stands in a row; seeded as a scattered item's,
-				# hash([seed, b, i]), the same on both sides.
+				# Seeded as a scattered item is; the same on both sides (a row's shapes take nothing from it today).
 				rng.seed = hash([seed, b, i])
 				m.begin_item(side * near, height, i * seg, threshold, loop, pace, b, false)
 				Shapes.draw(shape, m, rng, size, colour, {"along": i * seg, "length": loop, "side": int(side),
@@ -339,7 +339,7 @@ func _build_band(m: ShapeMesh, b: int, band: Dictionary) -> void:
 					side = -1.0
 				"both":
 					side = -1.0 if rng.randf() < 0.5 else 1.0
-			var item_size := size * rng.randf_range(0.8, 1.25)
+			var item_size := size * rng.randf_range(Shapes.VARY.x, Shapes.VARY.y)
 			var threshold := 0.0 if all_show else (i + 0.5) / count
 			m.begin_item(side * across, height, along, threshold, loop, pace, b, false)
 			Shapes.draw(shape, m, rng, item_size, colour, {"along": along, "length": loop, "side": int(side),
@@ -354,10 +354,9 @@ func _build_landmark(m: ShapeMesh, k: int, lm: Dictionary) -> void:
 	var side := -1.0 if str(lm["side"]) == "left" else 1.0
 	var distance := float(lm["distance"])
 	var rng := RandomNumberGenerator.new()
-	# UNDECIDED (brief): a landmark's random numbers; seeded with hash([seed, k]).
 	rng.seed = hash([int(lm["seed"]), k])
 	m.begin_item(side * distance, float(lm["height"]), 0.0, 0.0, 0.0, 1.0, k, true)
-	Shapes.draw(shape, m, rng, float(lm["size"]), _linear(lm["colour"], str(Shapes.COLOURS.get(shape, "#808080"))),
+	Shapes.draw(shape, m, rng, float(lm["size"]), _written(lm["colour"], str(Shapes.COLOURS.get(shape, "#808080"))),
 			{"along": 0.0, "length": 0.0, "side": int(side), "distance": distance})
 	_landmarks.append(lm)
 
@@ -372,7 +371,7 @@ func _presence() -> void:
 		for k: Variant in _bands[b]["presence"]:
 			if k is Array and (k as Array).size() == 2:
 				keys.append(Vector2(float(k[0]), float(k[1])))
-		# UNDECIDED (brief): keys given out of order are sorted by their route fraction first.
+		# Keys given out of order are put in order: a document's list is not a trap.
 		keys.sort_custom(func(p: Vector2, q: Vector2) -> bool: return p.x < q.x)
 		for x in PRESENCE_WIDTH:
 			_presence_img.set_pixel(x, b, Color(presence_at(keys, (x + 0.5) / PRESENCE_WIDTH), 0.0, 0.0))
@@ -400,6 +399,20 @@ func _material(shader: Shader) -> ShaderMaterial:
 	mat.set_shader_parameter("band_count", float(maxi(_bands.size(), 1)))
 	mat.set_shader_parameter("far", FAR)
 	mat.set_shader_parameter("edge", EDGE)
+	# What does not change while the room stands: how far a row's piece runs on from its foot, and the ground each
+	# landmark stands on, which no band's item may stand on too (Shapes.clearing()).
+	var extent := PackedFloat32Array()
+	extent.resize(MAX_BANDS)
+	for b in _bands.size():
+		extent[b] = float(Shapes.SEGMENT.get(str(_bands[b]["shape"]), 0.0))
+	mat.set_shader_parameter("band_extent", extent)
+	var clear := PackedVector3Array()
+	clear.resize(MAX_LANDMARKS)
+	for k in _landmarks.size():
+		var lm: Dictionary = _landmarks[k]
+		clear[k] = Shapes.clearing(str(lm["shape"]), float(lm["size"]), -1.0 if str(lm["side"]) == "left" else 1.0,
+				float(lm["distance"]))
+	mat.set_shader_parameter("landmark_clear", clear)
 	return mat
 
 
@@ -411,9 +424,9 @@ func _instance(node_name: String, mesh: ArrayMesh, mat: ShaderMaterial) -> MeshI
 	mi.custom_aabb = SCENERY_AABB
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
-	# UNDECIDED (brief): the mesh's vertices are about each item's foot (the shader places them), so the sight-line
-	# check, which reads the vertices as they are, would see every item heaped at the origin. It looks through them.
-	mi.add_to_group(ScreenFrame.SEE_THROUGH)
+	# Its vertices lie about each item's foot and the shader carries them to their places: the checks that cast
+	# rays must not read them as they are (env_checks.gd PLACED_IN_SHADER).
+	mi.add_to_group(EnvChecks.PLACED_IN_SHADER)
 	own(mi)
 	return mi
 
@@ -429,7 +442,7 @@ func _ground_mesh() -> ArrayMesh:
 	var idx := PackedInt32Array()
 	for s: Dictionary in _strips:
 		var kind := str(s["kind"])
-		var col := _linear(s["colour"], str(KIND_COLOURS.get(kind, KIND_COLOURS["grass"])))
+		var col := _written(s["colour"], str(KIND_COLOURS.get(kind, KIND_COLOURS["grass"])))
 		var k := float(maxi(GROUND_KINDS.find(kind), 0))
 		for side in _sides(str(s["side"])):
 			var edges := [[float(s["from"]), float(s["height_from"])], [float(s["to"]), float(s["height_to"])]]
@@ -517,8 +530,8 @@ func tick(delta: float) -> void:
 		dark = minf(dark + delta / BLINK_OUT, 1.0)
 		if dark >= 1.0:
 			travel = target
-			# UNDECIDED (brief): the speed after the jump is step 6's want without the catch-up, its slowing for the
-			# route's end taken from the new place (so a jump to the end leaves it stopped).
+			# The speed after the jump: what it wants at the new place, without the catch-up (it is where the film
+			# is), and slowed for the route's end from there, so a jump to the end leaves it stopped at the wharf.
 			var plain := cruise if going else 0.0
 			if route > 0.0:
 				plain = minf(plain, sqrt(maxf(2.0 * BRAKE * (route - travel), 0.0)))
@@ -608,7 +621,6 @@ func _uniforms() -> void:
 		_lights_mat.set_shader_parameter("lights", float(params["lights"]))
 	if _ground_mat != null:
 		_ground_mat.set_shader_parameter("ground_phase", fposmod(travel, GROUND_PERIOD))
-		# UNDECIDED (brief): the ground's uniforms do not list `far`, but its horizon is the scenery's, which needs it.
 		_ground_mat.set_shader_parameter("far", FAR)
 
 
@@ -635,10 +647,11 @@ func presence_texture() -> ImageTexture:
 
 # --- Comfort ----------------------------------------------------------------------------------------------------------
 
-## What is wrong with these parameters for comfort (env_checks.gd FLOW_*), judged from them alone: a band or landmark
-## nearer the way's line than FLOW_NEAREST, or one that crosses the eye faster than FLOW_MAX_DEG at its nearest at
-## the fastest the journey goes (its speed and the catch-up). Ground nearer than FLOW_NEAREST is fine: the ground's
-## shader holds its pattern still there.
+## What is wrong with these parameters for comfort (env_checks.gd FLOW_*), judged from them alone: a band or a
+## landmark any part of which comes nearer the line the eyes go along than FLOW_NEAREST, or crosses the eye faster
+## than FLOW_MAX_DEG there, at the fastest the journey goes (its speed and the catch-up). "Any part": a shape's
+## crown, shoots, eaves and arm are measured (Shapes.nearest()), at the largest the band draws it; where its foot
+## stands is not how near it comes. Ground nearer than FLOW_NEAREST is fine: its shader holds its pattern still.
 static func comfort_for(p: Dictionary) -> Array:
 	var out: Array = []
 	var top := float(p.get("speed", 1.0)) * (1.0 + CATCH_UP)
@@ -646,26 +659,32 @@ static func comfort_for(p: Dictionary) -> Array:
 	for i in bands.size():
 		if bands[i] is Dictionary:
 			var band := band_with_defaults(bands[i])
-			_judge(out, "band %d (%s)" % [i, band["shape"]], float(band["near"]), float(band["seems"]), top)
+			var shape := str(band["shape"])
+			var largest := float(band["size"]) * (1.0 if Shapes.SEGMENT.has(shape) else Shapes.VARY.y)
+			_judge(out, "band %d (%s)" % [i, shape], Shapes.nearest(shape, largest, float(band["near"]),
+					float(band["height"]), EnvChecks.EYE_HEIGHT), float(band["seems"]), top)
 	var landmarks: Array = p.get("landmarks", []) if p.get("landmarks") is Array else []
 	for k in landmarks.size():
 		if landmarks[k] is Dictionary:
 			var lm := landmark_with_defaults(landmarks[k])
-			_judge(out, "landmark %d (%s)" % [k, lm["shape"]], float(lm["distance"]), 1.0, top)
+			var shape := str(lm["shape"])
+			_judge(out, "landmark %d (%s)" % [k, shape], Shapes.nearest(shape, float(lm["size"]),
+					float(lm["distance"]), float(lm["height"]), EnvChecks.EYE_HEIGHT), 1.0, top)
 	return out
 
 
-static func _judge(out: Array, what: String, near: float, seems: float, top: float) -> void:
-	if near < EnvChecks.FLOW_NEAREST:
-		out.append("%s: %s m from the way's line, nearer than %s" % [what, near, EnvChecks.FLOW_NEAREST])
-	var rate := rad_to_deg(top / maxf(seems, 0.001) / maxf(near, 0.001))
+static func _judge(out: Array, what: String, nearest: float, seems: float, top: float) -> void:
+	if nearest < EnvChecks.FLOW_NEAREST:
+		out.append("%s: comes within %.1f m of the line the eyes go along, nearer than %s" % [what, nearest,
+				EnvChecks.FLOW_NEAREST])
+	var rate := rad_to_deg(top / maxf(seems, 0.001) / maxf(nearest, 0.001))
 	if rate > EnvChecks.FLOW_MAX_DEG:
 		out.append("%s: crosses the eye at %.1f degrees a second at its nearest, over %s (slower, or further off)"
 				% [what, rate, EnvChecks.FLOW_MAX_DEG])
 
 
-## Where moving scenery can be, as boxes in the room's frame (env_checks.gd flow_clear()): each band's side from near
-## to far across, half its loop (at most GROUND_REACH) each way along, from 2 m under its feet to 30 m over; each
+## Where moving scenery can be, as boxes in the room's frame (env_checks.gd flow_clear()): each band's side from
+## where its largest item reaches to (its near less Shapes.REACH) to its far across, half its loop (at most GROUND_REACH) each way along, from 2 m under its feet to 30 m over; each
 ## landmark 15 m either side of its distance (never under FLOW_NEAREST); each ground strip's part beyond FLOW_NEAREST.
 func flow_volumes() -> Array:
 	var out: Array = []
@@ -674,12 +693,12 @@ func flow_volumes() -> Array:
 		var reach := minf(_loops[b] * 0.5, GROUND_REACH)
 		var h := float(band["height"])
 		for side in _sides(str(band["side"])):
-			out.append(_volume(side, float(band["near"]), float(band["far"]), reach, h - 2.0, h + 30.0))
+			out.append(_volume(side, maxf(float(band["near"]) - _reach(band), 0.0), float(band["far"]), reach,
+					h - 2.0, h + 30.0))
 	for lm: Dictionary in _landmarks:
 		var d := float(lm["distance"])
 		var h := float(lm["height"])
-		# UNDECIDED (brief): "the same along" for a landmark, whose loop is 0: it comes by along the whole way that is
-		# drawn, so GROUND_REACH each way.
+		# A landmark comes by along the whole way that is drawn.
 		out.append(_volume(-1.0 if str(lm["side"]) == "left" else 1.0, maxf(d - 15.0, EnvChecks.FLOW_NEAREST),
 				d + 15.0, GROUND_REACH, h - 2.0, h + 30.0))
 	for s: Dictionary in _strips:
@@ -690,9 +709,18 @@ func flow_volumes() -> Array:
 		var lo := minf(float(s["height_from"]), float(s["height_to"])) - 0.1
 		var hi := maxf(float(s["height_from"]), float(s["height_to"])) + 0.1
 		for side in _sides(str(s["side"])):
-			# UNDECIDED (brief): a strip's box along is the strip's own length, GROUND_REACH each way.
 			out.append(_volume(side, from, to, GROUND_REACH, lo, hi))
 	return out
+
+
+## How far towards the way a band's largest item reaches from its foot (Shapes.REACH).
+static func _reach(band: Dictionary) -> float:
+	var shape := str(band["shape"])
+	if not Shapes.REACH.has(shape):
+		return 0.0
+	var wide: Array = Shapes.REACH[shape]["wide"]
+	return float(wide[0]) + float(wide[1]) * float(band["size"]) * (1.0 if Shapes.SEGMENT.has(shape)
+			else Shapes.VARY.y)
 
 
 func _volume(side: float, a0: float, a1: float, reach: float, y0: float, y1: float) -> AABB:

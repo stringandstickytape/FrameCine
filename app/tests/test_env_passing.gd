@@ -9,6 +9,7 @@ extends "res://tests/env_builder_harness.gd"
 ## godot --headless --xr-mode off --path app --script res://tests/test_env_passing.gd
 
 const Passing := preload("res://scripts/env/systems/passing.gd")
+const Shapes := preload("res://scripts/env/systems/passing/shapes.gd")
 const DT := 1.0 / 30.0
 
 ## The film as the timeline sees it (the host's snapshot_override); _step() moves its position on while it plays.
@@ -94,8 +95,8 @@ func _comfort() -> void:
 	var spec: Dictionary = Registry.spec("passing")["params"]
 	var ok: Array = Passing.comfort_for(EnvDoc.with_defaults(spec, _params()))
 	check("comfort_for: the test room's parameters are fine %s" % [ok], ok.is_empty())
-	# UNDECIDED (brief): "a band with near 2 gives one problem": at the test room's speed a post 2 m off also crosses
-	# the eye at 33 degrees a second (a second problem), so this band seems twice as far as it is (16 degrees).
+	# (This band seems twice as far as it is: at the test room's speed a post 2 m off would also cross the eye at
+	# 33 degrees a second, a second problem; so only the first shows.)
 	var near: Array = Passing.comfort_for(EnvDoc.with_defaults(spec, {"speed": 1.0,
 			"bands": [{"shape": "post", "near": 2, "seems": 2}]}))
 	check("comfort_for: a band 2 m off is one problem %s" % [near], near.size() == 1
@@ -104,6 +105,36 @@ func _comfort() -> void:
 	var fast: Array = Passing.comfort_for(EnvDoc.with_defaults(spec, fast_params))
 	check("comfort_for: at 5 m/s a band 4 m off crosses the eye too fast %s" % [fast], fast.size() == 1
 			and str(fast[0]).contains("crosses the eye"))
+	# A shape is judged by how near any part of it comes, not by where its foot stands (Shapes.nearest()).
+	var crown: Array = Passing.comfort_for(EnvDoc.with_defaults(spec, {"speed": 1.0,
+			"bands": [{"shape": "tree", "near": 9, "far": 20}]}))
+	check("comfort_for: a tree whose foot is 9 m off is judged by its crown %s" % [crown], crown.size() == 1
+			and str(crown[0]).contains("crosses the eye"))
+	var wood: Array = Passing.comfort_for(EnvDoc.with_defaults(spec, {"speed": 1.0,
+			"bands": [{"shape": "tree", "near": 12, "far": 20}]}))
+	check("comfort_for: at 12 m its crown is clear %s" % [wood], wood.is_empty())
+	var moored: Array = Passing.comfort_for(EnvDoc.with_defaults(spec, {"speed": 1.0,
+			"landmarks": [{"shape": "boat", "at": 0.5, "distance": 3.5}]}))
+	check("comfort_for: a moored boat 3.5 m off is judged by its side, a metre nearer %s" % [moored],
+			moored.size() >= 1 and str(moored[0]).contains("nearer than"))
+	var arch: Array = Passing.comfort_for(EnvDoc.with_defaults(spec, {"speed": 1.0,
+			"landmarks": [{"shape": "bridge", "at": 0.5, "distance": 4.5, "height": 0.5, "size": 1.3}]}))
+	check("comfort_for: a bridge whose piers stand 4.5 m off goes over well clear %s" % [arch], arch.is_empty())
+	check("nearest: a lamp's lantern hangs over the eyes' height, so its post is what comes near (%.2f)"
+			% Shapes.nearest("lamp", 1.0, 5.0, 0.0, 1.2), absf(Shapes.nearest("lamp", 1.0, 5.0, 0.0, 1.2) - 4.69) < 0.01)
+	# The ground a landmark stands on (Shapes.clearing()).
+	var wharf := Shapes.clearing("wharf", 1.0, 1.0, 4.5)
+	check("clearing: a wharf on the right, 4.5 m off: 11.5 m each way, from 2.5 to 15.5 across %s" % [wharf],
+			wharf.is_equal_approx(Vector3(11.5, 2.5, 15.5)))
+	var left := Shapes.clearing("wharf", 1.0, -1.0, 4.5)
+	check("clearing: the same on the left is its mirror %s" % [left], left.is_equal_approx(Vector3(11.5, -15.5, -2.5)))
+	var bridge := Shapes.clearing("bridge", 1.0, 1.0, 6.0)
+	check("clearing: a bridge clears both sides of the way %s" % [bridge], bridge.y == -bridge.z and bridge.z == 15.0)
+	check("clearing: a lamp stands on nothing", Shapes.clearing("lamp", 1.0, 1.0, 5.0) == Vector3.ZERO)
+	# A document without a shape is a mistake in the document.
+	var errors: Array = EnvDoc.validate(_doc("Passing with no shape", {"bands": [{"near": 6}]}))["errors"]
+	check("a band without a shape does not pass the schema %s" % [errors.slice(0, 1)],
+			errors.any(func(e: Variant) -> bool: return str(e).contains("shape") and str(e).contains("missing")))
 	var all: Array = EnvChecks.comfort(_doc("Passing too fast", fast_params))
 	check("the comfort check carries it, the system's id in front %s" % [all],
 			all.any(func(s: Variant) -> bool: return str(s).begins_with("passing: band 0 (post): crosses the eye")))
@@ -119,8 +150,9 @@ func _flow(room: Node3D, sys: Node) -> void:
 	if ok:
 		var left: AABB = boxes[0]
 		var right: AABB = boxes[1]
-		ok = is_equal_approx(left.position.x, -9.0) and is_equal_approx(left.end.x, -6.0) \
-				and is_equal_approx(right.position.x, 6.0) and is_equal_approx(right.end.x, 9.0)
+		# From where a post reaches to (its near less 0.07) to its far.
+		ok = is_equal_approx(left.position.x, -9.0) and is_equal_approx(left.end.x, -5.93) \
+				and is_equal_approx(right.position.x, 5.93) and is_equal_approx(right.end.x, 9.0)
 	check("flow_volumes: the first band's left and right boxes %s" % [boxes.slice(0, 2)], ok)
 
 

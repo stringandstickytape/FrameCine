@@ -43,7 +43,7 @@ def room_ids():
 
 
 def cell(v):
-    # UNDECIDED (brief): how a number is shown: as the result gives it; a value the row lacks (no frames) is blank.
+    # A number as the result gives it; a value the row lacks (a room that drew no frames) is a blank cell.
     return "" if v is None else str(v)
 
 
@@ -70,7 +70,6 @@ def format_markdown(result, today=None):
         if not mine:
             continue
         mine.sort(key=lambda r: float(r.get("gpu_ms_p95", -1.0)), reverse=True)
-        # UNDECIDED (brief): each table under a heading naming its foveation level.
         out.append("## Foveation %s" % level)
         out.append("")
         out.append("| %s |" % " | ".join(c[0] for c in COLUMNS))
