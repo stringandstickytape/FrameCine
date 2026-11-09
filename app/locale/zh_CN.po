@@ -3756,3 +3756,24 @@ msgstr "校准无法开始：头显没有提供眼动数据。稍后可在“系
 
 msgid "Install"
 msgstr "安装"
+
+msgid "Downloading the speech model for voice (about 264 MB): %d %%"
+msgstr "正在下载语音识别模型（约 264 MB）：%d %%"
+
+msgid "Start comes on when the speech model is here: %d %%"
+msgstr "语音模型下载完成后即可开始：%d %%"
+
+msgid "The speech model for voice is here."
+msgstr "语音识别模型已就绪。"
+
+msgid "The speech model for voice did not download."
+msgstr "语音识别模型未能下载。"
+
+msgid "The speech model for voice did not download: no network. Connect to Wi-Fi and press Retry."
+msgstr "语音识别模型未能下载：没有网络。请连接 Wi-Fi 后点“重试”。"
+
+msgid "Retry"
+msgstr "重试"
+
+msgid "Start without voice"
+msgstr "不使用语音，直接开始"

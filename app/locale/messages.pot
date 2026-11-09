@@ -207,7 +207,7 @@ msgstr ""
 msgid "Opening the app"
 msgstr ""
 
-#: scripts/android/android_apps.gd:386 ui/intro.gd:86
+#: scripts/android/android_apps.gd:386 ui/intro.gd:90
 msgid "Ready"
 msgstr ""
 
@@ -2040,117 +2040,147 @@ msgstr ""
 msgid "Hardware 10-bit video: %s"
 msgstr ""
 
-#: ui/intro.gd:272
+#: ui/intro.gd:356
 #, c-format
 msgid "Step %d of %d"
 msgstr ""
 
-#: ui/intro.gd:52
+#: ui/intro.gd:56
 msgid "Calibrate your eyes"
 msgstr ""
 
-#: ui/intro.gd:54
+#: ui/intro.gd:58
 msgid "The headset sees where you look. Look at a window or at the agent's terminal, and the controller's keys go to it."
 msgstr ""
 
-#: ui/intro.gd:55
+#: ui/intro.gd:59
 msgid "A short calibration makes this exact. Look at each dot and pull the trigger. It takes about a minute."
 msgstr ""
 
-#: ui/intro.gd:57 ui/sound_tab.gd:83
+#: ui/intro.gd:61 ui/sound_tab.gd:83
 msgid "Calibrate"
 msgstr ""
 
-#: ui/intro.gd:57
+#: ui/intro.gd:61
 msgid "Skip"
 msgstr ""
 
-#: ui/intro.gd:60
+#: ui/intro.gd:64
 msgid "The controls"
 msgstr ""
 
-#: ui/intro.gd:62
+#: ui/intro.gd:66
 msgid "Hold the right bumper and speak instead of typing. It types into a text field in the browser, a PC window or the agent's terminal, or talks to a connected assistant. Its label says TALK when it can."
 msgstr ""
 
-#: ui/intro.gd:63
+#: ui/intro.gd:67
 msgid "Menu button: this menu. Hold it to bring the menu in front of you."
 msgstr ""
 
-#: ui/intro.gd:64
+#: ui/intro.gd:68
 msgid "Trigger: play and pause. On the menu it clicks."
 msgstr ""
 
-#: ui/intro.gd:65
+#: ui/intro.gd:69
 msgid "Stick: seek and screen distance. On the menu it scrolls."
 msgstr ""
 
-#: ui/intro.gd:66
+#: ui/intro.gd:70
 msgid "A and B: the next and the previous video."
 msgstr ""
 
-#: ui/intro.gd:69
+#: ui/intro.gd:73
 msgid "Hold the left bumper and speak instead of typing. It types into a text field in the browser, a PC window or the agent's terminal, or talks to a connected assistant. Its label says TALK when it can."
 msgstr ""
 
-#: ui/intro.gd:71 ui/intro.gd:83 ui/pane_ui.gd:55
+#: ui/intro.gd:75 ui/intro.gd:87 ui/pane_ui.gd:55
 msgid "Next"
 msgstr ""
 
-#: ui/intro.gd:71 ui/intro.gd:83 ui/intro.gd:91
+#: ui/intro.gd:75 ui/intro.gd:87 ui/intro.gd:95
 msgid "Back"
 msgstr ""
 
-#: ui/intro.gd:74
+#: ui/intro.gd:78
 msgid "In the agent's terminal"
 msgstr ""
 
-#: ui/intro.gd:76
+#: ui/intro.gd:80
 msgid "Only for Claude Code and Codex on the headset, on the pane at your controller."
 msgstr ""
 
-#: ui/intro.gd:77
+#: ui/intro.gd:81
 msgid "X is Enter while the terminal shows."
 msgstr ""
 
-#: ui/intro.gd:78
+#: ui/intro.gd:82
 msgid "Y shows and hides it. A quick tap of the bumper hides it too."
 msgstr ""
 
-#: ui/intro.gd:79
+#: ui/intro.gd:83
 msgid "When it asks you something (an amber edge), when you look at it (a blue edge) or while you hold the squeeze: the trigger is Enter, the stick is the arrow keys, A is Space and B is Escape."
 msgstr ""
 
-#: ui/intro.gd:80
+#: ui/intro.gd:84
 msgid "Squeeze held: the stick scrolls back."
 msgstr ""
 
-#: ui/intro.gd:81
+#: ui/intro.gd:85
 msgid "A keyboard paired to the headset types into it."
 msgstr ""
 
-#: ui/intro.gd:88
+#: ui/intro.gd:92
 msgid "The print on the controllers always shows what each button does now."
 msgstr ""
 
-#: ui/intro.gd:89
+#: ui/intro.gd:93
 msgid "To see this again: System, Test and setup, Show the introduction again."
 msgstr ""
 
-#: ui/intro.gd:91
+#: ui/intro.gd:95
 msgid "Start"
 msgstr ""
 
-#: ui/intro.gd:94
+#: ui/intro.gd:98
 msgid "Eye calibration done."
 msgstr ""
 
-#: ui/intro.gd:95
+#: ui/intro.gd:99
 msgid "No calibration: the gaze still works, but less exactly."
 msgstr ""
 
-#: ui/intro.gd:97
+#: ui/intro.gd:101
 msgid "The calibration could not start: the headset gave no eye gaze. Try again later from System, Show the introduction again."
+msgstr ""
+
+#: ui/intro.gd:102
+#, c-format
+msgid "Downloading the speech model for voice (about 264 MB): %d %%"
+msgstr ""
+
+#: ui/intro.gd:103
+#, c-format
+msgid "Start comes on when the speech model is here: %d %%"
+msgstr ""
+
+#: ui/intro.gd:104
+msgid "The speech model for voice is here."
+msgstr ""
+
+#: ui/intro.gd:105
+msgid "The speech model for voice did not download."
+msgstr ""
+
+#: ui/intro.gd:106
+msgid "The speech model for voice did not download: no network. Connect to Wi-Fi and press Retry."
+msgstr ""
+
+#: ui/intro.gd:107
+msgid "Retry"
+msgstr ""
+
+#: ui/intro.gd:108
+msgid "Start without voice"
 msgstr ""
 
 #: ui/library_view.gd:73

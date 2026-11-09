@@ -14,6 +14,9 @@ extends VBoxContainer
 ##          stick, A and B
 ##   agent  the agent's terminal's own keys: X Enter while it shows, Y, and the keys while it has the input
 ##   start  Start: done ([intro] done = true), the tabs come back
+## The speech model (about 264 MB, scripts/voice/whisper_backend.gd) downloads from the moment the introduction opens,
+## not at the first use of voice (the user, 2026-11-09: waiting for it then is a horrible experience). Every step says
+## how far it is; Start waits for it. A failed download: Retry, or Start without voice (voice then fetches it when used).
 ## A step goes forward with its main button (the laser and the trigger, or the trigger on the focused button) or with
 ## A; B goes back a step. For GUARD seconds after a step shows, its buttons are off and A does nothing, so a press
 ## already on its way (the one that opened the menu, a double press) can't tap through it.
@@ -32,6 +35,7 @@ signal calibrate_requested
 signal calibration_ended
 
 const W := preload("res://ui/pane_widgets.gd")
+const WhisperBackend := preload("res://scripts/voice/whisper_backend.gd")
 const PaneStyle := preload("res://ui/pane_style.gd")
 const SECTION := "intro"
 ## Seconds a step takes no input after it shows.
@@ -95,6 +99,13 @@ const GAZE_DONE := "Eye calibration done."
 const GAZE_SKIPPED := "No calibration: the gaze still works, but less exactly."
 ## Calibrate pressed, but the headset gave no eye gaze then (scripts/xr/eye_gaze.gd available() false).
 const GAZE_UNAVAILABLE := "The calibration could not start: the headset gave no eye gaze. Try again later from System, Show the introduction again."
+const MODEL_RUNNING := "Downloading the speech model for voice (about 264 MB): %d %%"
+const MODEL_WAIT := "Start comes on when the speech model is here: %d %%"
+const MODEL_READY := "The speech model for voice is here."
+const MODEL_FAILED := "The speech model for voice did not download."
+const MODEL_OFFLINE := "The speech model for voice did not download: no network. Connect to Wi-Fi and press Retry."
+const MODEL_RETRY := "Retry"
+const MODEL_WITHOUT := "Start without voice"
 # i18n: end
 
 ## scripts/main.gd
@@ -118,6 +129,13 @@ var _scroll: ScrollContainer
 var _progress: Label
 var _primary: Button
 var _secondary: Button
+## The speech model's line, its Start without voice button, and the backend (null: none here, as in tests).
+var _model: Label
+var _without: Button
+var _voice: Node = null
+## The model was fetched at this showing; its state at the last look ("" none to fetch).
+var _model_asked := false
+var _model_state := ""
 
 
 ## Show it at this start: not done yet, and the app not started for something else (or headless).
@@ -158,13 +176,21 @@ func _init() -> void:
 	_lines = s[1]
 	_lines.add_theme_constant_override("separation", 10)
 	add_child(_scroll)
+	_model = W.label("", &"MutedLabel")
+	W.content(_model)
+	_model.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_model.visible = false
+	add_child(_model)
 	_progress = W.label("", &"MutedLabel")
 	W.content(_progress)
 	_secondary = W.button("", func() -> void: _on_secondary())
 	_primary = W.button("", func() -> void: _on_primary())
+	_without = W.button(MODEL_WITHOUT, func() -> void: _finish())
+	_without.visible = false
 	_primary.name = "IntroPrimary"
 	_secondary.name = "IntroSecondary"
-	add_child(W.hbox([_progress, W.spacer(), _secondary, _primary]))
+	_without.name = "IntroWithoutVoice"
+	add_child(W.hbox([_progress, W.spacer(), _without, _secondary, _primary]))
 
 
 func _notification(what: int) -> void:
@@ -179,6 +205,10 @@ func begin(p_steps: Array[String]) -> void:
 	_index = 0
 	_gaze_result = ""
 	_calibrating = false
+	_model_asked = false
+	_model_state = ""
+	if _voice == null and app != null and is_inside_tree() and not _headless():
+		_voice = WhisperBackend.ensure(get_tree())
 	_show_step()
 
 
@@ -220,12 +250,66 @@ func _on_primary() -> void:
 			_set_buttons(false)
 			calibrate_requested.emit()
 		"start":
-			active = false
-			if app != null:
-				app.settings.set_value(SECTION, "done", true)
-			finished.emit()
+			if _model_state == "failed":
+				_voice.call("fetch_model")
+				_update_model()
+			elif not _model_busy():
+				_finish()
 		_:
 			_go(_index + 1)
+
+
+func _finish() -> void:
+	active = false
+	if is_instance_valid(_voice):
+		_voice.set("quiet", false)
+	if app != null:
+		app.settings.set_value(SECTION, "done", true)
+	finished.emit()
+
+
+static func _headless() -> bool:
+	return DisplayServer.get_name() == "headless"
+
+
+## The download runs (or is about to): Start waits.
+func _model_busy() -> bool:
+	return _model_state in ["needed", "running"]
+
+
+## Fetches the model the first time it's seen missing, then keeps the line, Start and Retry up to date.
+func _update_model() -> void:
+	var st := ""
+	var pct := 0
+	var offline := false
+	if is_instance_valid(_voice) and _voice.has_method("model_status"):
+		var m: Dictionary = _voice.call("model_status")
+		st = str(m["state"])
+		pct = int(m["percent"])
+		offline = bool(m["offline"])
+		if st == "needed" and not _model_asked:
+			_model_asked = true
+			_voice.set("quiet", true)
+			_voice.call("fetch_model")
+			st = str(_voice.call("model_status")["state"])
+	var changed := st != _model_state
+	_model_state = st
+	_model.visible = _model_asked and st != ""
+	match st:
+		"needed", "running":
+			_model.text = tr(MODEL_WAIT if step() == "start" else MODEL_RUNNING) % pct
+		"failed":
+			_model.text = tr(MODEL_OFFLINE if offline else MODEL_FAILED)
+		_:
+			_model.text = tr(MODEL_READY)
+	var on_start := step() == "start"
+	_without.visible = on_start and st == "failed"
+	if on_start:
+		_primary.text = tr(MODEL_RETRY) if st == "failed" else tr(STEPS["start"]["primary"])
+		if _guard <= 0.0 and not _calibrating:
+			_primary.disabled = _model_busy()
+	if changed:
+		_apply_sizes()
 
 
 func _on_secondary() -> void:
@@ -271,9 +355,10 @@ func _show_step() -> void:
 	_secondary.visible = not (s["secondary"] == "Back" and _index == 0)
 	_progress.text = tr("Step %d of %d") % [_index + 1, steps.size()]
 	_scroll.scroll_vertical = 0
-	_apply_sizes()
 	_guard = GUARD
 	_set_buttons(false)
+	_update_model()
+	_apply_sizes()
 
 
 func _left_pointing() -> bool:
@@ -282,8 +367,9 @@ func _left_pointing() -> bool:
 
 
 func _set_buttons(on: bool) -> void:
-	_primary.disabled = not on
+	_primary.disabled = not on or (step() == "start" and _model_busy())
 	_secondary.disabled = not on
+	_without.disabled = not on
 	if on and is_visible_in_tree():
 		_primary.grab_focus()
 
@@ -291,6 +377,7 @@ func _set_buttons(on: bool) -> void:
 func _process(delta: float) -> void:
 	if not active:
 		return
+	_update_model()
 	if _guard > 0.0:
 		_guard -= delta
 		if _guard <= 0.0 and not _calibrating:
@@ -320,8 +407,9 @@ func _apply_sizes() -> void:
 	var text_px := roundi(body * TEXT_SCALE)
 	_title.add_theme_font_size_override("font_size", roundi(body * TITLE_SCALE))
 	_note.add_theme_font_size_override("font_size", text_px)
+	_model.add_theme_font_size_override("font_size", text_px)
 	for l in _lines.get_children():
 		(l as Control).add_theme_font_size_override("font_size", text_px)
-	for b: Button in [_primary, _secondary]:
+	for b: Button in [_primary, _secondary, _without]:
 		b.add_theme_font_size_override("font_size", text_px)
 		b.custom_minimum_size = Vector2(maxf(160.0, text_px * 6.0), PaneStyle.constant(&"button_height") * 1.4)

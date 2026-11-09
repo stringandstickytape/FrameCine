@@ -9,8 +9,8 @@ The plan in short:
 2. **The first launch installs the player into the home folder** (`~/framecine`), outside the Steam Linux
    Runtime container, and adds the normal Steam library entry. From then on the player runs as it does now.
 3. **The player updates itself** from GitHub Releases. FrameDrop is not necessary again.
-4. **The speech model is not in the package.** The player downloads it once, the first time voice is used, into
-   its data folder. The package is about 264 MB smaller, and updates do not carry the model.
+4. **The speech model is not in the package.** The player downloads it once, during the introduction at the
+   first start (or, if that was skipped or failed, the first time voice is used), into its data folder. The package is about 264 MB smaller, and updates do not carry the model.
 
 ## What the user does
 
@@ -382,9 +382,10 @@ The default model (`ggml-small.en-q8_0.bin`) is 264 MB (264477561 bytes, SHA-256
 - **Where the model is looked for** (`app/scripts/voice/whisper_backend.gd`): `whisper/models/` next to the server
   first, as before (a package made with `--whisper-model`, the benchmark kit, an old package), then
   `user://whisper-models/`. A file there of the wrong size is deleted and downloaded again.
-- **When it downloads:** the first time voice is used (push-to-talk in the assistant, the browser, an agent pane or
-  a PC window) with the server there and no model. Nothing happens at start-up: the backend only notes that the
-  model is missing. Only the default model downloads; another `[voice] whisper_model` that is missing stays off,
+- **When it downloads:** as soon as the introduction at the first start opens (`app/ui/intro.gd`): every step shows
+  how far it is, Start waits for it, and a failure offers Retry or Start without voice. Otherwise (Start without voice,
+  or a model deleted later) the first time voice is used (push-to-talk in the assistant, the browser, an agent pane
+  or a PC window) with the server there and no model. Only the default model downloads; another `[voice] whisper_model` that is missing stays off,
   with the log line as before.
 - **No confirmation.** Pressing the talk button is the request, as the app does its own setup elsewhere (no step for
   the user). Before any byte comes, the notice says what it is and how big: "Voice needs a one-time download of

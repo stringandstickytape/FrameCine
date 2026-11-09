@@ -22,7 +22,8 @@ extends Node
 ## The model: whisper/models/ next to the server first (a package made with a model, the benchmark kit), then
 ## user://whisper-models/. The release package has none (docs/framedrop.md "The speech model"): with the server there
 ## but no model, the backend waits (Transcriber.waiting) and downloads the default model (scripts/voice/
-## model_download.gd, about 264 MB) the first time voice is used, then starts the server. The viewer sees a notice
+## model_download.gd, about 264 MB) when the first start's introduction opens (ui/intro.gd: model_status(),
+## fetch_model(), quiet), else the first time voice is used, then starts the server. The viewer sees a notice
 ## when it starts, at each quarter, and when voice is ready; with no network, one notice says so, and the next use of
 ## voice tries again, not sooner than RETRY_SECONDS later. Nothing else waits for it. Only the default model is
 ## downloaded: another whisper_model that is missing stays off with the line as before.
@@ -113,6 +114,8 @@ var _need_download := false
 var _download: RefCounted = null
 var _download_t0 := 0
 var _failed_at := -1
+## No notices while the introduction shows the download itself (ui/intro.gd).
+var quiet := false
 var _quarter := 0
 var _announce_ready := false
 var _notice := ""
@@ -490,6 +493,19 @@ func why(localised := false) -> String:
 	return ""
 
 
+## For the introduction at the first start (ui/intro.gd), which fetches the model at once rather than at the first
+## use of voice: download_state ("" when the model is there or isn't one the player downloads; "needed", "running",
+## "failed", "done"), the percent, and whether the failure was the network.
+func model_status() -> Dictionary:
+	return {"state": download_state, "percent": _percent(), "offline": download_offline}
+
+
+## Starts the download now, without RETRY_SECONDS' wait (the introduction's Retry); nothing when it isn't needed.
+func fetch_model() -> void:
+	if download_state in ["needed", "failed"]:
+		_begin_download()
+
+
 func _t(text: String, localised: bool) -> String:
 	return tr(text) if localised else text
 
@@ -562,6 +578,8 @@ func _poll_download() -> void:
 ## Shows `text` (translated) as a notice after `delay` s; a newer one replaces it, and each call starts the delay
 ## again. "" shows why(true) as it is when the delay ends (nothing if voice works by then).
 func _queue(text: String, delay: float) -> void:
+	if quiet:
+		return
 	_notice = text
 	_notice_left = delay
 	_notice_pending = true
