@@ -188,6 +188,7 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 | `[pc_windows]` | `enabled` (false), `port` (47803), `delay` (0.15: seconds behind the PC's own time that its pictures and sound play) | PC windows (`docs/pc-windows.md`). The paired PCs (token hashes) are in `pc_clients.cfg` (owner-only, never logged); the TLS key and certificate are the assistant's. Also in System, PC windows. |
 | `[dev]` | `listener_host` (""), `listener_port` (47800), `hot_reload` (false), `remote_changes` ("ask"; or "allow", "deny"), `remote_code` (false) | `docs/dev/permission-ring.md` |
 | `[benchmark]` | `auto` (true), `result`, `tries`, `last_error` | `docs/benchmark.md` |
+| `[intro]` | `done` (false) | The introduction at the first start (eye calibration, the controls, the agent's terminal) has been gone through. Not shown on a run with `--file`, `--dir`, `--tour`, `--no-ui`, a test or read-only settings. System, Test and setup: Show the introduction again. |
 | `[hwvideo]` | `hw_vp9` (true) | VP9 in hardware, one video at a time (a second VP9 video, such as picture in picture, decodes in software); false: VP9 always in software. Read at start. The removed setup's `iris_bundle` and `iris_setup_prompt` are ignored if still there. 10-bit needs no setting (`docs/features.md`, "Hardware 10-bit video"). |
 | `[voice]` | `whisper_dir` (""; empty: `whisper/` next to the engine or the app), `whisper_model` ("small.en": q8_0, else q5_1, else f16; or a stem such as "small.en-q5_1", or a `.bin` path), `whisper_threads` (4), `whisper_backend` ("cpu"; or "vulkan"), `live_partials` (false: the text shows when you let go; true: live text while you hold the button, which costs CPU the film needs) | On-device speech to text: whisper.cpp's server on 127.0.0.1, started when the assistant needs it. Its output: `whisper-server.log` in this folder. `build/whisper/README.md` |
 | `[files]`, `[stereo_depth_files]`, `[zoom_files]`, `[horizon_files]`, `[subtitle_delay_files]` | one key per file (a hash of the path) | What you chose for each file: mode, depth, zoom, horizon, subtitle delay |
@@ -223,6 +224,7 @@ While a form with the keyboard is open, it has the whole main pane.
 | A (right) | Next video | Same | N |
 | B (right) | Previous video, or the start of this one after 3 s | Same | P |
 | Y (right), the sparkle on its cap, while the right hand points | An agent's terminal on or off. With none running, start the last one used. It keeps working while hidden. | Nothing | |
+| X (right) | Enter in an agent's terminal while it shows, whichever hand points (its legend says ENTER then); nothing otherwise | Same | |
 | Menu (right) or view (left); right stick click | Open the panel in front; this controller points. With the browser's cursor on an image: keep the picture (below) | Short press: close it. Hold 0.6 s: move it to the front of the head again | M, F3 (hold: recentre); Esc closes |
 | Left stick click | Info overlay on or off | Same | Tab, F1 |
 | Grip, hold, pointing at an object or in one | Pick it up (`docs/physics.md`): stick up or down nearer or farther, left or right turns it, let go to drop it or throw it, B puts it back where it was picked up; the trigger does nothing meanwhile | Same, with the laser off the panel | |
@@ -234,9 +236,10 @@ While a form with the keyboard is open, it has the whole main pane.
 | - | - | - | V, O, H, X: next projection, layout, half, swap eyes. E: next environment. Drag: look. |
 
 Claude Code or Codex on the headset (Files, `docs/assistant.md`, "Agents on the headset"): talk shows its terminal on
-the pointer controller and types what you say into it. The stick, trigger, A and B stay the film's unless a prompt
-waits (the pane's edge turns amber), you look at the pane (its edge turns blue, after eye calibration) or you hold
-squeeze: then they are arrows, Enter, Space and Escape, and squeeze and stick scroll back. A terminal on the big screen
+the pointer controller and types what you say into it. X is Enter whenever the terminal shows. The stick, trigger, A
+and B stay the film's unless a prompt waits (the pane's edge turns amber), you look at the pane (its edge turns blue;
+within 3 degrees of its edge with eye calibration, 5 without) or you hold squeeze: then they are arrows, Enter, Space
+and Escape, and squeeze and stick scroll back. A terminal on the big screen
 takes the trigger as Enter, the stick as arrows, and B as Escape. Say "one" to "four", "up", "down", "enter" or "escape"
 for that key at any time, and "yes" or "no" while a prompt waits. Other words are not typed while a prompt waits. A
 keyboard paired to the headset types into the terminal while the pane shows. With a window on the big screen as well,

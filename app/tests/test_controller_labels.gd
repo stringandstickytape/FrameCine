@@ -46,6 +46,19 @@ func _init() -> void:
 			if binding.action.resource_name == "agent":
 				y.append(binding.binding_path)
 		_check("%s: Y on the right is the agent" % path.get_file(), y == ["/user/hand/right/input/y/click"])
+		var x := []
+		for i in profile.get_binding_count():
+			if profile.get_binding(i).action.resource_name == "enter":
+				x.append(profile.get_binding(i).binding_path)
+		_check("%s: X on the right is Enter" % path.get_file(), x == ["/user/hand/right/input/x/click"])
+	# X: no legend until an agent's terminal shows, then ENTER, the menu open or not; the left has no X.
+	_check("X: no legend normally", not right.has("x"))
+	var enter: Dictionary = app.controller_labels(HEADSET_PROFILE, "right", false, false, false, false, false, {}, false, true)
+	var enter_menu: Dictionary = app.controller_labels(HEADSET_PROFILE, "right", true, false, false, false, false, {}, false, true)
+	_check("X: ENTER while the terminal shows, the menu open too", enter.get("x") == "ENTER" and enter_menu.get("x") == "ENTER")
+	_check("X: the other legends stay", enter.get("trigger") == right.get("trigger") and enter.get("a") == right.get("a"))
+	_check("left: no X", not app.controller_labels(HEADSET_PROFILE, "left", false, false, false, false, false, {}, false, true).has("x"))
+	_check("X's legend has its place in the layout", ControllerVisual.layout_entry("right", "x").get("line_height", 0.0) > 0.003)
 	var left_menu: Dictionary = app.controller_labels(HEADSET_PROFILE, "left", true)
 	_check("menu shown: the left view button closes", left_menu.get("view") == "CLOSE")
 	# Every profile with a menu action has one on each hand, so one controller is enough.

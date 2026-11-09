@@ -325,6 +325,11 @@ stands where the letter stood, at the letter's height, with about its ink. It us
 own, runs nothing per frame and moves with the cap. The Y mesh's UVs tell whether this is the atlas we know: another
 atlas keeps its letter, in white. Our own model keeps its printed Y.
 
+X has a legend only while an agent's terminal shows: ENTER (`ENTER_LABEL` in `scripts/main.gd`). X sits between the
+stick and A, Y and B, so the face has no room for five letters beside it at A's size. The legend goes behind X, between
+the stick and A, on a 3.5 mm line (capitals about 2.1 mm). `tools/label_layout.tscn --place-x` lays it out alone, clear
+of the legends the layout has.
+
 On the face, the text's top points forward, so it reads from above and behind as you hold the controller. On the
 walls, the text's top points up. A legend first turns to the surface under it, so a slope does not stretch it, and its
 glyphs are spaced along that surface, so a curve does not either. What breaks away from the smooth surface is a step

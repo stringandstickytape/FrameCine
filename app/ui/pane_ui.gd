@@ -16,6 +16,7 @@ extends PanelContainer
 ## selector on the right). The title, the time and the time bar are on the tablet's now playing pane, and so is the
 ## header (the chapter; the clock, time left with the end time, the battery, low controllers and "Listening": made
 ## here, chapter_text() and status_line_text(), and shown there; the user, 2026-11-06: the menu must fit its pane).
+## At the first start the introduction (ui/intro.gd, show_intro()) fills it instead, until it is gone through.
 ##
 ## Everything looks the way the theme says (ui/pane_style.gd, the tablet's theme); this file sets no colour and no
 ## font. No backdrop of its own: the tablet's pane shows through. The tabs talk to the app directly; the transport
@@ -37,6 +38,7 @@ const ObjectsTab := preload("res://ui/objects_tab.gd")
 const MixedRealityTab := preload("res://ui/mixed_reality_tab.gd")
 const SystemTab := preload("res://ui/system_tab.gd")
 const EndTime := preload("res://scripts/play/end_time.gd")
+const Intro := preload("res://ui/intro.gd")
 
 signal play_pause_pressed
 signal previous_requested
@@ -76,6 +78,8 @@ var mixed_reality: MixedRealityTab
 var system: SystemTab
 var tabs: Array[Control] = []
 var current_tab := 0
+## The first start's introduction (ui/intro.gd), made when first shown.
+var intro: Intro
 
 var _content: VBoxContainer
 var _open: VBoxContainer
@@ -372,9 +376,36 @@ func default_focus() -> Control:
 	return null
 
 
-## Where the stick starts when nothing has the focus: the tab's row on the rail.
+## Where the stick starts when nothing has the focus: the tab's row on the rail (the introduction's main button while it
+## shows).
 func stick_focus() -> Control:
+	if intro_showing():
+		return intro.primary()
 	return tablet_tab_buttons[current_tab]
+
+
+# --- The first start's introduction (ui/intro.gd) ---------------------------------------------------------------------
+
+## Shows the introduction in place of the menu, at its first step.
+func show_intro(steps: Array[String]) -> void:
+	if intro == null:
+		intro = Intro.new()
+		intro.app = app
+		_content.add_child(intro)
+		intro.finished.connect(_end_intro)
+	intro.begin(steps)
+	_open.visible = false
+	intro.visible = true
+
+
+func _end_intro() -> void:
+	intro.visible = false
+	_open.visible = true
+
+
+## The introduction fills the menu now.
+func intro_showing() -> bool:
+	return intro != null and intro.active and intro.visible
 
 
 # --- Layout ---------------------------------------------------------------------------------------------------------

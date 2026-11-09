@@ -14,6 +14,7 @@ extends Node3D
 ##   menu (either hand)  open the panel in front / close it; hold 0.6 s: recentre it        M, F3 (Esc closes)
 ##   overlay (left stick click) show / hide the info overlay                                Tab, F1
 ##   Y (right)           the agent's terminal on or off, while the right hand points        -
+##   X (right)           Enter in the agent's terminal while it shows; nothing otherwise     -
 ##   grip                quick squeeze: right click on a captured window (no longer moves the screen); a desktop
 ##                       still moves it with G (hold) + mouse
 ##   grip + trigger      180 / 360: the zoom lens on the aimed part of the picture (hold)   -
@@ -93,6 +94,7 @@ const WindowPointer := preload("res://scripts/window_pointer.gd")
 const BrowserDictation := preload("res://scripts/video/browser_dictation.gd")
 const PictureKeeper := preload("res://scripts/pictures/picture_keeper.gd")
 const LocalAgents := preload("res://scripts/agents/local_agents.gd")
+const Intro := preload("res://ui/intro.gd")
 const AndroidApps := preload("res://scripts/android/android_apps.gd")
 const VREnvironment := preload("res://environments/vr_environment.gd")
 const ScreenshotTour := preload("res://scripts/dev/screenshot_tour.gd")
@@ -163,7 +165,11 @@ const CONTROL_LABELS := {
 	"chapter_prev": ["CHAPTER -", "CHAPTER -"],
 	"chapter_next": ["CHAPTER +", "CHAPTER +"],
 	"replay": ["REPLAY", "REPLAY"],
+	# X: no legend until an agent's terminal shows (ENTER_LABEL).
+	"enter": ["", ""],
 }
+## X's legend while an agent's terminal shows (scripts/agents/local_agents.gd enter_ready()), menu open or not.
+const ENTER_LABEL := "ENTER"
 ## The right controller's legends while a captured window has the input (scripts/window_pointer.gd); actions not
 ## listed keep CONTROL_LABELS. The left controller drops trigger, NEXT and PREV then (they do nothing on a window).
 ## These are the laser's ([browser] laser, while the viewer looks away); the stick pointer has the two below.
@@ -404,6 +410,9 @@ func _ready() -> void:
 			if snapshots != null and h == right_hand and _labels_holders.has(left_hand):
 				snapshots.take()
 				return
+			# A on the first start's introduction (ui/intro.gd): its next step.
+			if ui != null and ui.on_intro_next(h as XRHand):
+				return
 			if local_agents.on_button(h, "next_file"):
 				return
 			if not window_pointer.on_button(h as XRHand, "next_file"):
@@ -425,6 +434,8 @@ func _ready() -> void:
 				return
 			set_labels_held(h, held))
 		hand.agent_pressed.connect(func(h: XRController3D) -> void: local_agents.on_agent_button(h))
+		# X (headset profile, right controller): Enter in the agent's terminal while it shows; nothing otherwise.
+		hand.enter_pressed.connect(func(h: XRController3D) -> void: local_agents.on_enter_button(h))
 		hand.bound_profile_changed.connect(func(_h: XRController3D, _p: String) -> void: update_controller_labels())
 		# Our model (printed legends) shows at once; with "runtime" (the default in XR) the runtime's model replaces it
 		# when it arrives, with our layout's printed labels.
@@ -496,6 +507,10 @@ func _ready() -> void:
 	# The panel starts open in front (docs/ui-design.md), unless --no-ui.
 	if ui != null and not _args.has("no-ui"):
 		ui.show_panel()
+	# The first start's introduction in the panel (ui/intro.gd), until it is gone through; not on a run started for a
+	# file, a tour or a test, nor with read-only settings.
+	if ui != null and Intro.wanted(settings, _args):
+		ui.show_intro()
 	# Hardware 10-bit video (scripts/play/hw_video.gd): reads the decoder's formats once on a worker thread.
 	features.hwvideo.start(_args)
 	if _args.has("shots"):
@@ -1398,6 +1413,7 @@ func update_controller_labels() -> void:
 	var on_window := window_pointer != null and window_pointer.is_active()
 	var terminal := local_agents != null and (local_agents.waiting() and local_agents.pane_shown()
 			or local_agents.looking() or local_agents.on_big_screen())
+	var enter := local_agents != null and local_agents.enter_ready()
 	_grab_labelled = features != null and features.physics.available()
 	# The stick pointer's mode: pointer (looking at the screen) or away (scripts/window_pointer.gd).
 	var window_texts: Dictionary = window_pointer.window_labels() if on_window else {}
@@ -1406,7 +1422,7 @@ func update_controller_labels() -> void:
 		var holding := features != null and features.grab.holding(hand) != ""
 		var applying: bool = ui != null and ui.is_applying() and hand == ui.pointer_hand
 		var texts := controller_labels(hand.profile if use_xr else PREVIEW_PROFILE, side, menu_shown, on_window,
-				terminal, _grab_labelled, holding, window_texts, applying)
+				terminal, _grab_labelled, holding, window_texts, applying, enter)
 		if ui != null and ui.talk_hand() == hand and texts.has("bumper"):
 			texts["bumper"] = tr("TALK")
 		hand.visual.set_texts(texts)
@@ -1428,8 +1444,10 @@ func set_labels_held(holder: Variant, held: bool) -> void:
 ## grab: the room has objects to pick up (the squeeze says GRAB_LABEL, menu hidden); holding: this controller holds
 ## one, HOLD_LABELS apply (over everything else). window_texts: the window's legends for its mode now
 ## (WINDOW_POINTER_LABELS or WINDOW_AWAY_LABELS, window_pointer.gd's window_labels()); {}: WINDOW_LABELS.
+## enter: an agent's terminal shows, X is Enter (ENTER_LABEL), the menu open or not.
 static func controller_labels(profile: String, side: String, p_menu_shown: bool, on_window := false,
-		terminal := false, grab := false, holding := false, window_texts := {}, applying := false) -> Dictionary:
+		terminal := false, grab := false, holding := false, window_texts := {}, applying := false,
+		enter := false) -> Dictionary:
 	var out := {}
 	var window_map: Dictionary = window_texts if not window_texts.is_empty() else WINDOW_LABELS
 	for b: Array in _profile_bindings(profile, side):
@@ -1450,6 +1468,8 @@ static func controller_labels(profile: String, side: String, p_menu_shown: bool,
 			legend = HOLD_LABELS[b[1]]
 		if applying and APPLY_LABELS.has(b[1]):
 			legend = APPLY_LABELS[b[1]]
+		if enter and b[1] == "enter":
+			legend = ENTER_LABEL
 		# Last: an action with no legend of its own can have one on a window or a terminal.
 		if legend == "":
 			continue

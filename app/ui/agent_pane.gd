@@ -22,10 +22,11 @@ signal faded
 const WatchCard := preload("res://ui/watch_card.gd")
 const VideoScreen := preload("res://scripts/video_screen.gd")
 
-## The pane's width, metres: at arm's length (about 45 cm) 66 columns are about the card's text size, and the 940 px
-## window a little over the display's own pixel density, so nothing is lost to the texture
-## (docs/shots/assistant/agent-pane-headset-density.png).
-const PANE_WIDTH_M := 0.26
+## The pane's width, metres. The window is 1920 x 1080 on the headset (agent_terminal.gd, COLUMNS, FONT_PX): at 30 cm
+## by 17 it is about 37 x 21 degrees at arm's length (about 45 cm), and its 28 px type is 0.56 degrees an em, a capital
+## 0.41. It grew from 26 cm when the type went from 40 px to 28 (Claude Code's first screen needs about 100 columns), so
+## the text shrank by less than the font did.
+const PANE_WIDTH_M := 0.30
 const FADE_SECONDS := 0.2
 ## Its size at the far end of the fade.
 const FADE_SCALE := 0.92

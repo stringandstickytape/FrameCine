@@ -663,10 +663,30 @@ func _gaze_checks(hand: Node) -> void:
 	fake_gaze.gone = false
 	fake_gaze.fitted = false
 	await _seconds(agents.GAZE_ON + 0.1)
-	_check("no calibration, no look", not agents.looking())
+	_check("no calibration: the raw gaze looks too (a new install)", agents.looking() and agents.has_input(hand))
+	_check("with the wider margin (%.1f, calibrated %.1f)" % [agents.GAZE_MARGIN_RAW_DEG, agents.GAZE_MARGIN_DEG],
+			agents.gaze_margin() == agents.GAZE_MARGIN_RAW_DEG and agents.GAZE_MARGIN_RAW_DEG > agents.GAZE_MARGIN_DEG)
+	# 4 degrees past the edge, seen from a metre: within the raw margin, past the calibrated one.
+	var four := tan(deg_to_rad(4.0))
+	_look_at_pane(pane, half.x + four, 0)
+	_check("4 degrees off the edge meets it uncalibrated", pane.looked_at(fake_gaze.origin, fake_gaze.dir,
+			agents.gaze_margin()))
 	fake_gaze.fitted = true
-	fake_gaze.calibrating = true
+	_check("but not calibrated", not pane.looked_at(fake_gaze.origin, fake_gaze.dir, agents.gaze_margin()))
+	fake_gaze.fitted = false
+	_look_at_pane(pane, half.x + tan(deg_to_rad(6.0)), 0)
+	await _seconds(agents.GAZE_OFF + 0.15)
+	_check("6 degrees off, uncalibrated: not looking", not agents.looking())
+	_look_at_pane(pane, 0, 0)
+	main.set_menu_shown(true)
 	await _seconds(agents.GAZE_ON + 0.1)
+	_check("the menu open: the look takes nothing from it", not agents.looking() and not agents.has_input(hand))
+	main.set_menu_shown(false)
+	fake_gaze.fitted = true
+	await _seconds(agents.GAZE_ON + 0.1)
+	_check("looking, calibrated", agents.looking())
+	fake_gaze.calibrating = true
+	await _seconds(agents.GAZE_OFF + 0.15)
 	_check("nor while calibrating", not agents.looking())
 	fake_gaze.calibrating = false
 	await _seconds(agents.GAZE_ON + 0.1)
@@ -805,6 +825,61 @@ func _input_checks() -> void:
 	agents._talk_down -= LocalAgents.TAP_MSEC + 100
 	agents.on_talk(false)
 	_check("a long press (speech) leaves it showing", agents.pane_shown())
+	await _x_checks(hand)
+
+
+## X (the action map's "enter", the right controller): Enter whenever the terminal shows, whichever hand points, the
+## menu open or not; its legend ENTER then, none otherwise.
+func _x_checks(hand: Node) -> void:
+	var right: Node = main.right_hand
+	var texts := func() -> Dictionary: return right.visual.get("_texts")
+	if not agents.pane_shown():
+		agents.toggle_pane()
+	await _frames(2)
+	fake.keys.clear()
+	_check("the pane shows: X is Enter", agents.enter_ready() and agents.on_enter_button(right) and fake.keys == ["Enter"])
+	_check("no prompt, no look, no squeeze needed", not agents.has_input(hand))
+	_check("its legend says ENTER (%s)" % texts.call().get("x", ""), texts.call().get("x", "") == "ENTER")
+	main.ui.set_pointer_hand(main.left_hand)
+	fake.keys.clear()
+	_check("the left hand pointing: X is still Enter", agents.on_enter_button(right) and fake.keys == ["Enter"])
+	main.ui.set_pointer_hand(main.right_hand)
+	main.set_menu_shown(true)
+	fake.keys.clear()
+	_check("the menu open: X is still Enter, the legend too", agents.on_enter_button(right) and fake.keys == ["Enter"]
+			and texts.call().get("x", "") == "ENTER")
+	main.set_menu_shown(false)
+	FileAccess.open(AgentTerminal.player_dir("claude").path_join("waiting"), FileAccess.WRITE).close()
+	await _seconds(0.7)
+	agents.on_enter_button(right)
+	_check("X answers a waiting prompt", not agents.waiting())
+	agents.hide_pane()
+	await _frames(2)
+	fake.keys.clear()
+	_check("the pane hidden: X does nothing", not agents.enter_ready() and not agents.on_enter_button(right)
+			and fake.keys.is_empty())
+	_check("and its legend goes (%s)" % [texts.call()], not texts.call().has("x"))
+	_check("the spoken enter stays", agents.spoken_key("Enter.") == "enter")
+	agents.toggle_pane()
+	await _frames(2)
+	# The first start's introduction (ui/intro.gd) not gone through: the terminal takes no controller keys.
+	main.ui.show_intro()
+	await _frames(2)
+	hand.set("grip_down", true)
+	fake.keys.clear()
+	_check("the introduction pending: no X, no squeeze keys, no keyboard", main.ui.intro_pending()
+			and not agents.on_enter_button(right) and not agents.has_input(hand) and not agents.on_trigger(hand, true)
+			and not agents.on_key(_key_event(KEY_H, 104)) and fake.keys.is_empty())
+	hand.set("grip_down", false)
+	main.ui.hide_panel()
+	agents.on_agent_button(hand)
+	_check("Y opens the menu at the introduction", main.ui.is_open() and main.ui.ui.intro_showing())
+	main.ui.ui.intro.active = false
+	main.ui.ui.intro.finished.emit()
+	main.ui.hide_panel()
+	await _frames(2)
+	fake.keys.clear()
+	_check("gone through: X is Enter again", agents.on_enter_button(right) and fake.keys == ["Enter"])
 
 
 func _context_checks() -> void:

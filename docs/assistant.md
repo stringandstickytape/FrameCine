@@ -936,14 +936,25 @@ holds.
 
 ### The pane
 
-It is 26 cm wide (`PANE_WIDTH_M`), and the window is 66 columns by 34 lines (`COLUMNS`, `LINES`, 24 pixel font), 940 x
-1002 pixels. It sits on the pointer controller where the card sits; the card moves out of the way while the pane shows.
+It is 30 cm wide (`PANE_WIDTH_M`). The headset's window manager makes the window 1920 x 1080 pixels whatever it asks
+for, so the font sets what fits: at 28 pixels (`FONT_PX`) that is 112 columns by 32 lines (`COLUMNS`, `LINES`, a
+DejaVu Sans Mono cell of 17 x 33 pixels inside an 8 pixel border). Claude Code's first-run theme preview needs about
+100 columns, and both agents assume at least 80. At 40 pixels it was 79 by 22, and Claude Code's first screen did not
+fit. The pane grew from 26 cm so that the text shrank less than the font did. At 45 cm the pane is about 37 by 21
+degrees. A character is 0.56 degrees from the top of its em to the bottom, a capital 0.41 degrees, an x 0.31 degrees and
+a line 0.66 degrees (at 40 pixels on 26 cm: 0.69, 0.50, 0.38 and 0.83). Bring the controller nearer for more. The pane
+sits on the pointer controller where the card sits; the card moves out of the way while the pane shows.
 
 - **Talk** shows it, and it stays until you hide it. A quick tap of talk while it shows hides it.
 - **Y** on the right controller, the button with the sparkle, shows or hides it, while the right hand is the pointer hand.
   With no agent running it starts the last one used, or the first one installed, or asks to install one. It does nothing
   while a calibration has the controller; with the menu open the pane still toggles, and the menu keeps the stick and
   trigger until it closes. Hiding leaves the agent working.
+- **X** on the right controller is Enter whenever the terminal shows, on the pane or on the big screen. This is so
+  whichever hand points and with the menu open too. No prompt, look or squeeze is necessary. Its printed legend says
+  ENTER while the terminal shows and nothing otherwise. Before, X had no binding on the headset's own controllers and
+  did nothing. The legend has a 3.5 mm line (capitals about 2.1 mm), behind X between the stick and A. This is the
+  nearest room on the face for five letters, smaller than A's and B's 5.2 mm. The spoken "enter" still works.
 - It comes and goes in 0.2 s: its opacity eases and it grows a little out of its controller end. A press in the middle
   turns it back from where it is, and the gaze's hit test follows the size it is at.
 - The capture is a second `X11WindowSource` beside the screen's. It updates only while the pane shows, so a hidden pane
@@ -974,9 +985,13 @@ Code also `PreToolUse` on `AskUserQuestion` and the `elicitation_dialog` notific
 the pane's edge turns amber and the hand buzzes. If the pane is hidden a note says so, and talk shows it. It does not
 jump up by itself.
 
-Some lists have no hook behind them, such as the folder trust question. Look at the pane: with eye calibration done, a
-look held for 0.15 s, within 3 degrees of its edge, turns the edge blue and gives the pointer hand to the terminal as in
-the first column, with stick left and right as arrows too. It lasts 0.4 s beyond the look, and while the stick is held.
+Some lists have no hook behind them, such as the folder trust question. Look at the pane: a look held for 0.15 s
+turns the edge blue and gives the pointer hand to the terminal as in the first column, with stick left and right as
+arrows too. With eye calibration done, the look must be within 3 degrees of the pane's edge (`GAZE_MARGIN_DEG`). On a
+new install there is no calibration: the headset's own reading is used, which is off by a median of 1.8 degrees (0.45
+to 3.9, measured), within 5 degrees of the edge (`GAZE_MARGIN_RAW_DEG`). The look never takes the stick or the trigger
+while the menu is open or a calibration runs, so the margin can take the film's keys only while the pane shows and you
+look near it, and the blue edge then shows it. It lasts 0.4 s beyond the look, and while the stick is held.
 A keyboard paired to the headset types into the terminal whenever the pane shows. With a window on the big screen as
 well, such as the browser, the look decides: on the pane the terminal has it, anywhere else the window does. A key
 finishes where it was pressed.
@@ -987,6 +1002,30 @@ finishes where it was pressed.
 | Trigger | Enter | Enter | The film's |
 | A | Space | Space | The film's |
 | B | Escape | Escape | The film's |
+| X (right controller) | Enter | Enter | Enter while the pane shows; nothing when it is hidden |
+
+Until the introduction of the first start is gone through (see below), the controllers and a keyboard give the terminal
+nothing, and Y opens the menu at the introduction.
+
+### The introduction at the first start
+
+The first time FrameCine starts, the menu shows an introduction in big type in place of the tabs (`ui/intro.gd`). It
+stays until you go through it to its end. Close the menu and it is there again when the menu opens. Its steps:
+
+1. **Calibrate your eyes**, only on a headset with eye gaze. It says why: the controller's keys go to what you look at,
+   such as a window or the agent's terminal. **Calibrate** starts the eye calibration: the menu goes while the dots
+   show and comes back after. **Skip** goes on. Skipped or cancelled, the next step says that the gaze still works,
+   but less exactly.
+2. **The controls** of the whole app. Push to talk on the pointer hand's bumper (right, or left when left-handed) types
+   into a text field in the browser, a PC window or the agent's terminal, or talks to a connected assistant. Then the
+   menu button, trigger, stick, A and B.
+3. **In the agent's terminal**: X is Enter while it shows, Y shows and hides it, and the keys in the table above.
+4. **Start** ends it, keeps `[intro] done`, and the tabs come back.
+
+A step goes on with its main button (the laser and the trigger, or the trigger on the focused button) or with A. B
+goes back a step. For 0.6 s after a step shows, its buttons are off and A does nothing, so a press already on its way
+does not go through it. It is not shown on a run with `--file`, `--dir`, `--tour`, `--no-ui`, a test or read-only
+settings. System, Test and setup, **Show the introduction again** shows it at any time.
 
 Said alone, "one" to "four" and "escape" are always that key. "Yes" and "no" are the prompt's keys while one waits, and
 ordinary words otherwise, because a "yes" to a question the agent asks in plain text has to reach it as text.

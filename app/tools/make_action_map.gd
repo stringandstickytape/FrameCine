@@ -18,6 +18,8 @@ extends SceneTree
 ##   next_file / prev_file    next / previous video in the folder (or test pattern)
 ##   labels (bool)            the bumper: the left half of the snapshot chord (headset profile: either bumper)
 ##   agent (bool)             the agent's pane on or off (headset profile: Y, on the right controller only)
+##   enter (bool)             Enter in the agent's terminal while it shows (headset profile: X, on the right controller
+##                            only; scripts/agents/local_agents.gd on_enter_button(); otherwise it does nothing)
 ##   haptic                   click feedback
 ## It also writes res://xr/openxr_action_map_dpad.tres, the same map plus the left d-pad on the headset's own profile
 ## (chapter_prev / chapter_next on left / right, replay on down; scripts/play/chapters.gd, catch_up.gd). That map is
@@ -64,6 +66,7 @@ func _build(dpad: bool) -> OpenXRActionMap:
 			["prev_file", "Previous video", OpenXRAction.OPENXR_ACTION_BOOL],
 			["labels", "Show controller labels (hold)", OpenXRAction.OPENXR_ACTION_BOOL],
 			["agent", "Show / hide the agent's terminal", OpenXRAction.OPENXR_ACTION_BOOL],
+			["enter", "Enter in the agent's terminal", OpenXRAction.OPENXR_ACTION_BOOL],
 			["haptic", "Haptic", ACTION_HAPTIC]]
 	if dpad:
 		specs.append_array([
@@ -91,8 +94,9 @@ func _build(dpad: bool) -> OpenXRActionMap:
 
 	# The headset's own controller profile. Only paths the engine registers for the profile (its controller
 	# extension in modules/openxr), and only the ones we need: one path the runtime rejects voids the whole profile's
-	# suggestion. The engine lists A/B/X/Y on the right controller and the d-pad and "view" on the left; X and the d-pad
-	# are left out until the device shows what it reports. Profile paths are protocol identifiers.
+	# suggestion. The engine lists A/B/X/Y on the right controller and the d-pad and "view" on the left (Valve's input
+	# reference too); the d-pad is left out until the device shows what it reports. X joined Y on 2026-11-09 (Enter in
+	# the agent's terminal), the same kind of path as Y, which the device takes. Profile paths are protocol identifiers.
 	# The menu is on both controllers' buttons at the front of the face (right: menu, left: view), so one controller is
 	# enough for the panel; the overlay moves to the left stick click.
 	var frame_single: Array = [
@@ -104,6 +108,7 @@ func _build(dpad: bool) -> OpenXRActionMap:
 		["next_file", RIGHT + "/input/a/click"],
 		["prev_file", RIGHT + "/input/b/click"],
 		["agent", RIGHT + "/input/y/click"],
+		["enter", RIGHT + "/input/x/click"],
 	]
 	if dpad:
 		# The engine registers the d-pad on the left controller only (modules/openxr, the controller extension).

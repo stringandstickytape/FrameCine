@@ -22,6 +22,7 @@ extends Node3D
 ## anything with a collider, the floor, else PIP_FAR metres out. Smoothed over PIP_SMOOTH seconds.
 ##
 ##   available() -> bool                       the runtime gives a gaze pose with tracking data now
+##   supported() -> bool                       the runtime has eye gaze at all (the first start's introduction)
 ##   raw_ray() -> [origin, dir] or []          world space, as the runtime gives it
 ##   ray() -> [origin, dir] or []              with the calibration applied
 ##   calibrated() -> bool, calibrate(), cancel_calibration(), calibrating
@@ -52,6 +53,8 @@ const NUDGE_DEAD := 0.12
 
 var main: Node3D
 var calibrating := false
+## Tests: what supported() says (null: ask the runtime).
+var supported_override: Variant = null
 var pip := false
 ## [msec, yaw, pitch] of the raw gaze, head-relative, for the last second.
 var _recent: Array = []
@@ -97,6 +100,15 @@ static func _unlit(c: Color) -> StandardMaterial3D:
 
 func available() -> bool:
 	return not raw_ray().is_empty()
+
+
+## The headset has eye gaze at all (the runtime offers XR_EXT_eye_gaze_interaction), tracked now or not. Tests set
+## supported_override.
+func supported() -> bool:
+	if supported_override != null:
+		return bool(supported_override)
+	var xr := XRServer.find_interface("OpenXR") as OpenXRInterface
+	return xr != null and xr.is_initialized() and xr.is_eye_gaze_interaction_supported()
 
 
 func raw_ray() -> Array:

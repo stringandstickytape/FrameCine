@@ -8,7 +8,8 @@ extends Node3D
 ##   godot --path app res://tools/label_layout.tscn -- [--model-dir=DIR] [--side=right|left] [--auto] [--save]
 ##                                                     [--render=DIR] [--quit]
 ##   --auto     lay out every legend by rule, for both sides
-##   --save     save the layout after --auto
+##   --place-x  lay out X's legend alone (ENTER, while an agent's terminal shows), clear of the legends the layout has
+##   --save     save the layout after --auto or --place-x
 ##   --render   write <DIR>/labels_<side>_face.png, _outer.png, _inner.png (1024x1024) for both sides
 ##
 ## Text rule: on the face, the text lies flat on the surface, its baseline along that hand's menu or view button, measured
@@ -54,9 +55,13 @@ const READ_VIEWS := [[65.0, 0.0], [55.0, 0.0], [65.0, 20.0]]
 const MIN_FACING := 0.25
 ## Line heights tried, largest first.
 const FACE_LINES: Array[float] = [0.006, 0.0058, 0.0056, 0.0054, 0.0052, 0.005, 0.0048, 0.0046, 0.0044, 0.0042]
-const WALL_LINES: Array[float] = [0.008, 0.0075, 0.007, 0.0065, 0.006, 0.0056, 0.005]
-## The state flags of Main.controller_labels(): normal, menu open, a captured window has the input, a terminal has it.
-const STATES := [[false, false, false], [true, false, false], [false, true, false], [false, false, true]]
+## X's legend may go below the face sizes: the diamond and the stick leave it the least room.
+const X_LINES: Array[float] = [0.004, 0.0038, 0.0036, 0.0035, 0.0034, 0.0033, 0.0032, 0.0031, 0.003]
+const WALL_LINES: Array[float] =[0.008, 0.0075, 0.007, 0.0065, 0.006, 0.0056, 0.005]
+## The state flags of Main.controller_labels(): normal, menu open, a captured window has the input, a terminal has it,
+## an agent's terminal shows (X is Enter).
+const STATES := [[false, false, false, false], [true, false, false, false], [false, true, false, false],
+		[false, false, true, false], [false, false, false, true]]
 const FACE_CONTROLS: Array[String] = ["a", "b", "x", "y", "menu", "view", "system", "thumbstick", "dpad"]
 ## Round controls count as circles; the rest as their bounds.
 const ROUND_CONTROLS: Array[String] = ["a", "b", "x", "y", "system", "thumbstick"]
@@ -135,7 +140,11 @@ func _ready() -> void:
 	# Trimesh collision needs a physics frame before rays hit it.
 	await get_tree().physics_frame
 	await get_tree().physics_frame
-	if args.has("auto"):
+	if args.has("place-x"):
+		place_x_only()
+		if args.has("save"):
+			save()
+	elif args.has("auto"):
 		auto_layout()
 		if args.has("save"):
 			save()
@@ -348,6 +357,12 @@ func auto_layout() -> void:
 		var size := Vector2(e["size"].x, e["size"].z)
 		taken.append(Rect2((e["at"] as Vector2) - size * 0.5, size))
 	_place_pair(m, controls, taken, placed)
+	for input: String in ["a", "b"]:
+		if placed.has(input):
+			var e: Dictionary = placed[input]
+			taken.append(Rect2((e["at"] as Vector2) - Vector2(e["size"].x, e["size"].z) * 0.5,
+					Vector2(e["size"].x, e["size"].z)))
+	_place_x(m, controls, taken, placed, float(placed["a"]["line"]) if placed.has("a") else FACE_LINES[0])
 	var report := PackedStringArray()
 	for s: String in _models:
 		var texts := _all_texts(s)
@@ -409,6 +424,64 @@ func _place_pair(m: Dictionary, controls: Dictionary, taken: Array, placed: Dict
 					for input: String in sizes:
 						placed[input] = {"at": (controls[input]["c"] as Vector2) + offset, "line": line, "size": sizes[input]}
 					return
+
+
+## X: its legend (ENTER while an agent's terminal shows), no larger than A's and B's: behind the button as theirs are, or
+## the nearest spot round that, at most 8 mm off, where it lies on the plastic clear of the controls and of `taken`.
+## X sits between the stick and A, Y and B: the nearest room for the five letters is behind it, between the stick
+## and A, at a 3.5 mm line (2026-11-09, the Frame's model); the face has no room for them at A's size near X.
+func _place_x(m: Dictionary, controls: Dictionary, taken: Array, placed: Dictionary, top: float) -> void:
+	if not controls.has("x"):
+		return
+	var c: Dictionary = controls["x"]
+	for line: float in FACE_LINES + X_LINES:
+		if line > top + 1e-6:
+			continue
+		var size := _largest("x", line)
+		if size.x <= 0.0:
+			return
+		var from: Vector2 = (c["c"] as Vector2) + Vector2(0.0, -(float(c["r"]) + GAP + size.z * 0.5))
+		for at: Vector2 in _offsets(from, -0.008, 0.006, -0.008, 0.002):
+			if _first_spot(m, controls, taken, size, [at]).is_empty():
+				continue
+			var frame := _face_frame("right", at)
+			if _quality("right", "x", frame, line, DEPTH) < INF and _conforms("right", "x", frame, line, DEPTH):
+				placed["x"] = {"at": at, "line": line, "size": size}
+				return
+
+
+## --place-x: X's legend alone, clear of the face legends the layout has now (theirs as saved, at their own line).
+func place_x_only() -> void:
+	var m: Dictionary = _models["right"]
+	var right: Vector3 = m["text_right"]
+	var front: Vector3 = m["text_front"]
+	var controls := {}
+	for input: String in m["nodes"]:
+		if input in FACE_CONTROLS:
+			controls[input] = _footprint(m["root"], m["nodes"][input], right, front)
+	var taken: Array[Rect2] = []
+	var top := FACE_LINES[0]
+	for e: Dictionary in layout.entries:
+		if e.get("side") != "right" or not (str(e.get("input")) in FACE_CONTROLS) or e.get("input") == "x":
+			continue
+		var o: Vector3 = (e["transform"] as Transform3D).origin
+		var size := _largest(str(e["input"]), float(e["line_height"]))
+		var at := Vector2(o.dot(right), o.dot(front))
+		taken.append(Rect2(at - Vector2(size.x, size.z) * 0.5, Vector2(size.x, size.z)))
+		if e.get("input") == "a":
+			top = float(e["line_height"])
+	var placed := {}
+	_place_x(m, controls, taken, placed, top)
+	if not placed.has("x"):
+		push_error("X: no spot for its legend")
+		return
+	var e: Dictionary = placed["x"]
+	layout.set_entry("right", "x", _node_name("right", "x"), _face_frame("right", e["at"]), e["line"], DEPTH,
+			(e["size"] as Vector3).x)
+	print("X legend: line %.1f mm, %.1f x %.1f mm, at %s (X at %s)" % [float(e["line"]) * 1000.0,
+			e["size"].x * 1000.0, e["size"].z * 1000.0, (e["at"] as Vector2).snapped(Vector2.ONE * 0.0001),
+			(controls["x"]["c"] as Vector2).snapped(Vector2.ONE * 0.0001)])
+	_apply("x")
 
 
 ## Candidates round a point, the nearest to it first.
@@ -522,7 +595,7 @@ func _quality(s: String, input: String, frame: Transform3D, line: float, depth: 
 	var scale := LabelLayout.metres_per_em(line)
 	var worst := 1.0
 	for state: Array in STATES:
-		var texts := Main.controller_labels(Main.PREVIEW_PROFILE, s, state[0], state[1], state[2])
+		var texts := _labels_in(s, state)
 		if not texts.has(input):
 			continue
 		var shaped := LabelFont.shape(texts[input])
@@ -552,11 +625,16 @@ func _node_name(s: String, input: String) -> String:
 	return str((nodes[input] as Node).name) if nodes.has(input) else ""
 
 
+## The legends of a hand in one of STATES.
+static func _labels_in(s: String, state: Array) -> Dictionary:
+	return Main.controller_labels(Main.PREVIEW_PROFILE, s, state[0], state[1], state[2], false, false, {}, false, state[3])
+
+
 ## Every legend a hand can print, by input: the longest text of each.
 func _all_texts(s: String) -> Dictionary:
 	var out := {}
 	for state: Array in STATES:
-		var texts := Main.controller_labels(Main.PREVIEW_PROFILE, s, state[0], state[1], state[2])
+		var texts := _labels_in(s, state)
 		for input: String in texts:
 			if str(texts[input]).length() > str(out.get(input, "")).length():
 				out[input] = texts[input]
@@ -569,7 +647,7 @@ func _largest(input: String, line_height: float) -> Vector3:
 	var entry := {"line_height": line_height, "depth": DEPTH}
 	for s: String in _models:
 		for state: Array in STATES:
-			var texts := Main.controller_labels(Main.PREVIEW_PROFILE, s, state[0], state[1], state[2])
+			var texts := _labels_in(s, state)
 			if texts.has(input):
 				out = out.max(LabelLayout.print_size(entry, texts[input]))
 	return out
