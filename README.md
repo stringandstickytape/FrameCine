@@ -1,83 +1,79 @@
 # FrameCine
 
-A free, standalone VR video player for the Steam Frame (SteamOS, ARM64, Snapdragon 8 Gen 3 / Adreno via Turnip).
-Plays local and network video, flat / SBS / TB / 180 / 360 / fisheye / EAC, in selectable environments.
+A free VR video player for the Steam Frame, cinema first: your films on a big screen in a real room, with
+spatial sound. It plays files on the headset and on your PC or NAS, flat or 3D, and 180 and 360 video too.
+
+[![Latest release](https://img.shields.io/github/v/release/stringandstickytape/FrameCine?style=flat&label=release)](https://github.com/stringandstickytape/FrameCine/releases/latest)
+[![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue?style=flat)](LICENSE)
+
+<p align="center">
+  <a href="https://stringandstickytape.github.io/FrameCine/frame-control.html"><img src="docs/images/install-frame-control.svg" alt="Install with Frame Control" width="260"></a>
+  &nbsp;
+  <a href="https://framedropvr.com/install?manifest=https%3A%2F%2Fgithub.com%2Fstringandstickytape%2FFrameCine%2Freleases%2Flatest%2Fdownload%2Finstall-manifest.json"><img src="docs/images/install-framedrop.svg" alt="Install with FrameDrop" width="260"></a>
+</p>
 
 > **No AI unless you ask for it.** FrameCine has no AI of its own. Its AI assistant features do nothing until you
 > install Claude Code or Codex yourself (on the headset or on a PC) and turn them on; the assistant service is off
-> by default. Voice commands use speech recognition that runs on the headset, offline; your voice leaves the headset
+> by default. Voice typing uses speech recognition that runs on the headset, offline; your voice leaves the headset
 > only if you pair an AI assistant and speak to it.
 > (The menu translations other than English were made with AI, and say so.)
 
-## Stack (decided)
+## What it does
 
-- **Engine:** our Godot fork, patched directly (no GDExtension indirection). Mobile renderer (Vulkan).
-- **XR:** OpenXR only. SteamVR on the Frame (2.19.0) exposes only projection and quad layers, no equirect/cylinder.
-  So: 180/360/fisheye/EAC are meshes drawn in the projection layer; flat video and UI go in quad layers.
-  Refresh rate is not switchable at runtime; it is set per package in `vrpreferences.json` (`preferMinRefreshRate`).
-- **Decode:** hardware only for anything above 1080p. Our own V4L2 stateful M2M client against `/dev/video-dec0`
-  (Valve's fork of Qualcomm's `iris` driver). FFmpeg demuxes and decodes audio, never video. Turnip has no Vulkan Video; FFmpeg `v4l2m2m`
-  can't export dmabufs; GStreamer `v4l2videodec` crashes on the fork's SOURCE_CHANGE quirk. See `docs/research-device.md`.
-- **Frame transport:** decoder → dmabuf → VkImage imported into RenderingDevice, **imported once per buffer and cached**
-  (per-frame import oopses the 6.18 kernel). One shader does YUV→RGB, tone-map and projection.
-- **Codec limits (confirmed on device, kernel 6.18, 2026-10-30 — see `spikes/01-decode/results/SUMMARY.md`):**
-  HEVC 8-bit decodes 7680x3840 at 129 fps and 8192x4096 at 118 fps to NV12 (Q08C ~5% faster), bit-exact. 8K60 has ~2x headroom.
-  HEVC 10-bit decodes to Q10C (UBWC), which the GPU reads through a YCbCr sampler (`docs/decisions.md` D14);
-  mainline Linux 7.2 also offers P010. VP9 crashes firmware (per reports; not tested). AV1 not exposed. Two concurrent
-  sessions work.
-- **Containers and audio:** a static LGPL FFmpeg inside the engine module (`MediaSource`): MKV/WebM, MP4, TS, AVI;
-  audio decoded and downmixed to stereo into an `AudioStreamMedia`, the master clock. Ambisonics via Steam Audio or
-  libspatialaudio later.
-- **Files:** local, or straight from a PC or NAS file share (`smb://host/share/file.mkv`, SMB2/3 through a static libsmb2
-  with a readahead thread; `MediaBrowser` lists shares and folders).
-- **Subtitles:** `MediaSource` delivers the events (text and ASS lines, or raw PGS/VobSub packets); libass → quad layer
-  later.
-- **Not supported:** DRM streaming, DVD/BD menus.
+- **Rooms to watch in.** Cinemas from several eras, a screening room, a drive-in, a planetarium, a home theatre,
+  outdoor terraces and stranger places, or your own room through the cameras. The room's light follows the film.
+- **Sound that stays put.** Spatial audio on by default: the sound comes from the screen and the room's speakers,
+  and stays there when you turn your head. Each room sounds like itself (its echo can be turned down).
+- **Every kind of video.** Flat, side-by-side and top-bottom 3D, 180 and 360 (also fisheye and dual fisheye),
+  HEVC up to 8K and 10-bit HDR in hardware, MKV, MP4, TS, AVI and WebM, with subtitles, chapters,
+  resume, playlists and live streams.
+- **Your library where it is.** Files on the headset, shares on your PC or NAS (SMB), and media servers on your
+  network (UPnP/DLNA). Nothing is uploaded anywhere.
+- **Your PC's windows in the headset** (optional): a small Windows app sends a window or a whole screen to the
+  headset, and a mouse and keyboard paired with the headset use it.
+- **Updates itself** from this page's releases, and asks before it installs one.
 
-## Design constraints
+## Install
 
-Battery-powered, tile-based GPU, LCD panels. Memory bandwidth is the cost to watch, not FLOPs.
-See the conversation notes in `docs/decisions.md` once written.
+You need a Steam Frame and, once, a PC on the same network.
+
+1. **On the headset:** Steam Settings > System > turn on **Developer Mode**.
+2. **On the PC:** install [Frame Control](https://github.com/saphid/frame-control) (Windows, macOS, Linux; open
+   source) or [FrameDrop](https://framedropvr.com/) (Windows), start it, and pair the headset with it (on the
+   headset: Settings > Developer > **Pair new host**).
+3. **Press one of the buttons above** on the PC (the program asks before it installs), or download
+   `framecine-<version>-arm64.zip` from the [latest release](https://github.com/stringandstickytape/FrameCine/releases/latest)
+   and drop it on the program.
+4. **On the headset:** FrameCine is in the Steam library under **Non-Steam**. The first start shows a short
+   introduction: eye calibration, the controls, and a one-time download of the speech model for voice typing.
+
+After that it updates itself; the PC program isn't needed again. [docs/install.md](docs/install.md) has the details,
+installing over ssh, how updates work, and how to uninstall.
+
+### Your PC's windows in the headset (optional)
+
+Download `framecine-pc-<version>-windows-x64.zip` from the [latest release](https://github.com/stringandstickytape/FrameCine/releases/latest),
+unzip it and run `pc-windows.exe`. It sits in the tray and pairs with the headset once; then choose a window or a
+screen from the headset's menu. [docs/install.md](docs/install.md#pc-windows-your-pcs-windows-in-the-headset) has
+the pairing, privacy and how to stop it.
 
 ## Documentation
 
 | Page | What |
 |---|---|
-| [`docs/USAGE.md`](docs/USAGE.md) | Running on a desktop and on the headset, every command-line flag, every setting, the controls, the PC tools |
-| [`docs/BUILD.md`](docs/BUILD.md) | Building the engine fork for arm64 and x86_64: toolchain, FFmpeg, libsmb2, binary names |
-| [`docs/packaging.md`](docs/packaging.md) | A release tarball, and installing it on the headset without root |
+| [`docs/install.md`](docs/install.md) | Installing, updating, uninstalling; the PC windows app |
+| [`docs/USAGE.md`](docs/USAGE.md) | Every setting, the controls, command-line flags, the PC tools |
 | [`docs/features.md`](docs/features.md) | The playback features, one section each |
-| [`docs/ui-design.md`](docs/ui-design.md) | The pane: the interface carried by the left hand |
-| [`docs/dev/control-protocol.md`](docs/dev/control-protocol.md) | The dev link: the headset connects out to a listener on a PC |
-| [`app/README.md`](app/README.md) | The app's structure, controls in detail, and its tests |
-| [`docs/decisions.md`](docs/decisions.md), `docs/research-*.md` | Why the stack is what it is |
-| [`docs/morning-checklist.md`](docs/morning-checklist.md) | What still needs a test on the device |
+| [`docs/environments.md`](docs/environments.md) | The rooms |
+| [`docs/assistant.md`](docs/assistant.md) | The optional AI assistant link (off by default) |
 
-## Layout
+## For developers
 
-```
-app/                 the player: a project for the engine fork (scripts, shaders, scenes; no compiled code)
-tools/               PC tools: dev listener, cast, voice, audio sink, packaging and install
-docs/                documentation (above)
-build/               engine cross-build (build-frame.sh, build-player.sh), the static FFmpeg (ffmpeg-build.sh) and
-                     libsmb2 (libsmb2-build.sh, patches in libsmb2-patches/)
-spikes/00-probe/     device survey script and results (powershell -File spikes/00-probe/run-probe.ps1)
-spikes/01-decode/    minimal V4L2 stateful client: HEVC 8-bit up to 8192x4096 at 60, SOURCE_CHANGE, dmabufs
-spikes/02-import/    decoder dmabuf to VkImage in the engine (import once, cache by buffer index), NV12 and Q08C
-spikes/03-player/    the engine's video module tests (container input, SMB, seeks, HDR)
-spikes/04-power/     battery drain and thermals over a sustained session
-```
-
-## Status
-
-The player plays local and network files in the headset with hardware decode, in every projection mode, with the
-pane, the environments and the playback features. The results behind each part:
-
-- Decoder limits: `spikes/01-decode/results/SUMMARY.md`.
-- Zero-copy textures, and the engine's aarch64 strict-aliasing fix: `spikes/02-import/results/FINDINGS.md`.
-- Container input, SMB, seeks, subtitles, HDR: `spikes/03-player/README.md`.
-- Power (about 9 W, about 2.5 h projected, no throttling): `spikes/04-power/results/SUMMARY.md`.
-- What is built but not yet tried on the device: `docs/morning-checklist.md`.
+The player is a project for our fork of the Godot engine (OpenXR, hardware video decode through V4L2, FFmpeg for
+containers and audio). [`docs/dev/architecture.md`](docs/dev/architecture.md) has the stack, the constraints, the
+repository's layout and the results behind each part; [`docs/BUILD.md`](docs/BUILD.md) builds the engine;
+[`docs/packaging.md`](docs/packaging.md) makes a release; [`docs/dev/README.md`](docs/dev/README.md) has the tools
+for working on the app in the headset; [`app/README.md`](app/README.md) the app's structure and its tests.
 
 ## Licences
 

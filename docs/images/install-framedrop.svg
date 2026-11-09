@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="52" viewBox="0 0 260 52" role="img" aria-label="Install with FrameDrop">
+  <!-- README button (docs/images): the FrameDrop install, through FrameDrop's own install page. -->
+  <rect x="1" y="1" width="258" height="50" rx="10" fill="#1f1418" stroke="#e8a33d" stroke-width="2"/>
+  <g fill="#e8a33d">
+    <path d="M22 16 h14 v3 h-14z M22 33 h14 v3 h-14z"/>
+    <path d="M27.5 18 h3 v8 h3.5 l-5 6 l-5 -6 h3.5z"/>
+  </g>
+  <text x="146" y="32" text-anchor="middle" fill="#efe9e2" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="17" font-weight="700">Install with FrameDrop</text>
+</svg>

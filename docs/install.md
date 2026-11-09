@@ -1,9 +1,5 @@
 # Install FrameCine
 
-Draft, 2026-11-09, for release 0.1.0. The README does not link here yet. The steps with Frame Control and FrameDrop
-follow those tools' own documentation and our tests of the same install path over ssh; a full install through each
-tool on the headset is still to be done.
-
 FrameCine runs on the Steam Frame. It is free, and all of it is on GitHub. Install it from a PC once; after
 that it updates itself.
 
@@ -35,8 +31,9 @@ The install:
 4. Start Steam on the headset (it must be open during the install).
 5. Do one of these:
    - Click the install link for your program (the PC program asks you to confirm):
-     - Frame Control:
-       `frame-control://install?manifest=https%3A%2F%2Fgithub.com%2Fstringandstickytape%2FFrameCine%2Freleases%2Flatest%2Fdownload%2Finstall-manifest.json`
+     - Frame Control: <https://stringandstickytape.github.io/FrameCine/frame-control.html> (the page opens
+       `frame-control://install?manifest=…` with the latest release's manifest; GitHub doesn't keep that kind of link
+       in its own pages)
      - FrameDrop:
        <https://framedropvr.com/install?manifest=https%3A%2F%2Fgithub.com%2Fstringandstickytape%2FFrameCine%2Freleases%2Flatest%2Fdownload%2Finstall-manifest.json>
    - Or download `framecine-<version>-arm64.zip` from the releases page and drag it onto the PC program.

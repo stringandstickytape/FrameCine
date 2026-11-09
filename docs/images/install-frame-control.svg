@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="52" viewBox="0 0 260 52" role="img" aria-label="Install with Frame Control">
+  <!-- README button (docs/images): the Frame Control install, through the project's GitHub Pages link page. -->
+  <rect width="260" height="52" rx="10" fill="#e8a33d"/>
+  <g fill="#1a1208">
+    <path d="M22 16 h14 v3 h-14z M22 33 h14 v3 h-14z"/>
+    <path d="M27.5 18 h3 v8 h3.5 l-5 6 l-5 -6 h3.5z"/>
+  </g>
+  <text x="148" y="32" text-anchor="middle" fill="#1a1208" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="17" font-weight="700">Install with Frame Control</text>
+</svg>
