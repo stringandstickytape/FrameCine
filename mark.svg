@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <!-- FrameCine's mark: a curved cinema screen in a dark room, lit warm. -->
+  <rect width="96" height="96" rx="20" fill="#1f1418"/>
+  <path d="M16 30 Q48 22 80 30 L80 60 Q48 52 16 60 Z" fill="#e8a33d"/>
+  <path d="M16 30 Q48 22 80 30 L80 36 Q48 28 16 36 Z" fill="#f6c97a"/>
+  <g fill="#3a2a26">
+    <rect x="18" y="70" width="12" height="9" rx="3"/>
+    <rect x="34" y="70" width="12" height="9" rx="3"/>
+    <rect x="50" y="70" width="12" height="9" rx="3"/>
+    <rect x="66" y="70" width="12" height="9" rx="3"/>
+  </g>
+</svg>

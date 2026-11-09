@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Install FrameCine</title>
+  <meta name="description" content="Install FrameCine, a free VR video player for the Steam Frame.">
+  <link rel="icon" href="mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <img class="mark" src="mark.svg" alt="" width="88" height="88">
+    <h1>Install FrameCine</h1>
+    <p>A free VR video player for the Steam Frame, cinema first: your films on a big screen in a real room, with
+      spatial sound.</p>
+    <div class="buttons">
+      <a class="button" href="frame-control.html">Install with Frame Control</a>
+      <a class="button alt" id="framedrop" href="https://framedropvr.com/">Install with FrameDrop</a>
+    </div>
+    <p class="fine">Both install from a PC: turn on Developer Mode on the headset (Steam Settings, System, Developer
+      Mode) and pair it once with the installer. Each asks before it installs. FrameCine then shows in the Steam
+      library under Non-Steam, and updates itself from then on.</p>
+    <div class="steps">
+      <h2>By hand</h2>
+      <p>Download <code>framecine-…-arm64.zip</code> from
+        <a href="https://github.com/stringandstickytape/FrameCine/releases/latest">the latest release</a> and drop it
+        on Frame Control or FrameDrop. The <a href="https://github.com/stringandstickytape/FrameCine/blob/main/docs/install.md">install guide</a>
+        has every way, and how to remove it.</p>
+    </div>
+    <footer>
+      <a href="https://github.com/stringandstickytape/FrameCine">FrameCine on GitHub</a>
+      · MIT licence · Free, no account, no AI unless you install it yourself
+    </footer>
+  </main>
+  <script>
+    (() => {
+      const MANIFEST = "https://github.com/stringandstickytape/FrameCine/releases/latest/download/install-manifest.json";
+      document.getElementById("framedrop").href =
+        "https://framedropvr.com/install?manifest=" + encodeURIComponent(MANIFEST);
+    })();
+  </script>
+</body>
+</html>

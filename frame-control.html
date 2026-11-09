@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Install FrameCine with Frame Control</title>
+  <meta name="description" content="Opens Frame Control on this PC to install the latest FrameCine on a paired Steam Frame.">
+  <link rel="icon" href="mark.svg" type="image/svg+xml">
+  <!-- The README's Frame Control button lands here. GitHub removes links that open apps (frame-control://) from a
+       README; a web page can open them. This page opens Frame Control with the latest release's install manifest
+       (Frame Control's docs/web-install.md), and says how to get Frame Control if nothing opened. -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <img class="mark" src="mark.svg" alt="" width="88" height="88">
+    <h1>Install FrameCine</h1>
+    <p>Opening Frame Control on this PC, to install the latest FrameCine on your Steam Frame.</p>
+    <a class="button" id="install" href="https://github.com/stringandstickytape/FrameCine/releases/latest">Install with Frame Control</a>
+    <p class="fine">Needs Frame Control running on this PC, and the headset in Developer Mode and paired with it.
+      Frame Control asks before it installs anything.</p>
+    <div class="missing" id="missing" hidden>
+      <p>Frame Control didn't open.
+        <a href="https://github.com/saphid/steam-frame/releases/latest">Get Frame Control</a>, pair your headset,
+        then press the button again.</p>
+    </div>
+    <footer>
+      <a href="./">Other ways to install</a>
+      · <a href="https://github.com/stringandstickytape/FrameCine">FrameCine on GitHub</a>
+      · <a href="https://github.com/stringandstickytape/FrameCine/releases/latest">The latest release</a>
+    </footer>
+  </main>
+  <script>
+    (() => {
+      const MANIFEST = "https://github.com/stringandstickytape/FrameCine/releases/latest/download/install-manifest.json";
+      const link = "frame-control://install?manifest=" + encodeURIComponent(MANIFEST);
+      const button = document.getElementById("install");
+      button.href = link;
+      // When Frame Control opens, this page loses focus; when it doesn't, say how to get it.
+      const watch = () => {
+        let left = false;
+        const away = () => { left = true; };
+        window.addEventListener("blur", away, { once: true });
+        setTimeout(() => {
+          window.removeEventListener("blur", away);
+          if (!left) document.getElementById("missing").hidden = false;
+        }, 2000);
+      };
+      button.addEventListener("click", watch);
+      watch();
+      location.href = link;
+    })();
+  </script>
+</body>
+</html>
