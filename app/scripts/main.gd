@@ -1127,8 +1127,10 @@ func set_foveation_sharp_panel(on: bool) -> void:
 ## [controllers] look and look_options (the System tab's Controllers section, the controller_look command). A look or
 ## options that no longer check out (a preset since renamed, a bound since narrowed) read as the default.
 func load_controller_look() -> void:
-	var id := str(settings.get_value("controllers", "look", ControllerLook.DEFAULT))
-	var options: Variant = settings.get_value("controllers", "look_options", {})
+	var initial: bool = settings.get_value("controllers", "look", null) == null
+	var id := str(settings.get_value("controllers", "look", ControllerLook.INITIAL))
+	var options: Variant = settings.get_value("controllers", "look_options",
+			ControllerLook.INITIAL_OPTIONS if initial else {})
 	if not ControllerLook.validate(id, options).is_empty():
 		id = ControllerLook.DEFAULT
 		options = {}
@@ -1145,8 +1147,11 @@ func set_controller_look(id: String, options := {}) -> String:
 		return "; ".join(errors.map(func(e: Dictionary) -> String: return "%s: %s" % [e["path"], e["error"]]))
 	controller_look = id
 	controller_look_options = options.duplicate(true)
-	settings.set_value("controllers", "look", null if id == ControllerLook.DEFAULT else id)
-	settings.set_value("controllers", "look_options", null if options.is_empty() else controller_look_options)
+	# Nothing saved for the initial look (so a later change of the initial look reaches it); any other look,
+	# black too, is saved.
+	var initial := id == ControllerLook.INITIAL and options == ControllerLook.INITIAL_OPTIONS
+	settings.set_value("controllers", "look", null if initial else id)
+	settings.set_value("controllers", "look_options", null if initial or options.is_empty() else controller_look_options)
 	_apply_controller_look()
 	return ""
 

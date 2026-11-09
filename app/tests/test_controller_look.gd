@@ -405,9 +405,10 @@ func _test_settings_and_command() -> void:
 	current_scene = main
 	for i in 5:
 		await process_frame
-	_check("the default look at start", main.controller_look == "black")
+	_check("a new install starts with red liquid chrome", main.controller_look == "liquid_chrome"
+			and main.controller_look_options == {"color": "#c0392b"})
 	_check("a bad look is refused and changes nothing", main.set_controller_look("plasma", {"speed": 9}) != ""
-			and main.controller_look == "black")
+			and main.controller_look == "liquid_chrome")
 	_check("a look is set", main.set_controller_look("cold_plasma", {"speed": 0.2}) == "")
 	_check("it is kept in the settings", main.settings.get_value("controllers", "look", "") == "cold_plasma"
 			and main.settings.get_value("controllers", "look_options", {}) == {"speed": 0.2})
@@ -421,7 +422,10 @@ func _test_settings_and_command() -> void:
 	main.settings.set_value("controllers", "look_options", {"speed": 7.0})
 	main.load_controller_look()
 	_check("a saved look out of bounds reads as the default", main.controller_look == "black")
-	_check("the default leaves nothing in the settings", main.set_controller_look("black") == ""
+	_check("black is kept when chosen", main.set_controller_look("black") == ""
+			and main.settings.get_value("controllers", "look", "") == "black")
+	_check("the initial look leaves nothing in the settings",
+			main.set_controller_look("liquid_chrome", {"color": "#c0392b"}) == ""
 			and not main.settings.has_value("controllers", "look")
 			and not main.settings.has_value("controllers", "look_options"))
 
@@ -450,7 +454,7 @@ func _test_settings_and_command() -> void:
 	bad = await DevCommands.execute("controller_look", {"look": "gold_sparkle"}, true)
 	_check("controller_look: an unknown look refused", not bad["ok"])
 	(r["call"] as DevCommands.Call).undo.call()
-	_check("controller_look: undo", main.controller_look == "black")
+	_check("controller_look: undo (back to the initial look)", main.controller_look == "liquid_chrome")
 	main.queue_free()
 	for i in 2:
 		await process_frame

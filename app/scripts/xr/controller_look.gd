@@ -33,7 +33,13 @@ const EffectLibrary := preload("res://scripts/effects/effect_library.gd")
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
 const MODEL_SHADER := preload("res://shaders/controller_model.gdshader")
 
+## "black" is the model's own material (controller_visual.gd keeps it, no shader of ours): the fallback for a look
+## that no longer checks out.
 const DEFAULT := "black"
+## What a new install shows (no [controllers] look in the settings): red liquid chrome (the user, 2026-11-09). The
+## colour is the menu palette's red (ui/object_section.gd PALETTE).
+const INITIAL := "liquid_chrome"
+const INITIAL_OPTIONS := {"color": "#c0392b"}
 ## A preset:
 ##   name, description   what the picker and the assistant show
 ##   kind                "plastic" (a colour), "metal" (a library material's picture, reflecting) or "effect"
