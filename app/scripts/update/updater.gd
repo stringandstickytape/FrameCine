@@ -413,8 +413,13 @@ func _update_prompt() -> void:
 
 ## Whether the player can start itself again: through Steam (SteamGameId), from outside Steam's process tree.
 static func can_restart() -> bool:
-	return OS.get_name() == "Linux" and OS.get_environment("SteamGameId") != "" \
+	return OS.get_name() == "Linux" and is_game_id(OS.get_environment("SteamGameId")) \
 			and FileAccess.file_exists("/usr/bin/systemd-run") and OS.get_environment("XDG_RUNTIME_DIR") != ""
+
+
+## Steam's game id: digits only (a library shortcut's is 64-bit, more than an int holds).
+static func is_game_id(s: String) -> bool:
+	return s != "" and s.length() <= 20 and s.lstrip("0123456789") == ""
 
 
 ## "Restart now to update?" in the menu's footer (or quit, when the player cannot start itself again).
@@ -477,19 +482,35 @@ func _launch_relauncher() -> void:
 	var args := relauncher_args(OS.get_process_id(), OS.get_environment("SteamGameId"))
 	var out := []
 	var code := OS.execute("/usr/bin/systemd-run", args, out, true)
-	print("Updates: restart through Steam asked (%d)" % code)
+	print("Updates: restart through Steam asked (%d)%s" % [code,
+			"" if code == 0 or out.is_empty() else ": " + str(out[0]).strip_edges()])
 
 
+## OS.execute with output runs the command through popen(): each argument in double quotes, nothing escaped. So the
+## shell there expands $, ` and \ and ends the argument at a ". The script carries the pid and the game id as
+## digits, not as "$1" "$2" (those came out empty: steam://rungameid/ with no id, and no wait), and an environment
+## value with any of those characters is left out.
 static func relauncher_args(pid: int, game_id: String) -> PackedStringArray:
 	var a := PackedStringArray(["--user", "--quiet", "--collect", "--unit=framecine-restart-%d" % pid,
 			"--description=Starts the VR video player again after an update"])
 	for v in ["DISPLAY", "XAUTHORITY", "WAYLAND_DISPLAY", "XDG_RUNTIME_DIR", "PATH", "HOME"]:
-		if OS.get_environment(v) != "":
-			a.append("--setenv=%s=%s" % [v, OS.get_environment(v)])
+		var value := OS.get_environment(v)
+		if value != "" and shell_safe(value):
+			a.append("--setenv=%s=%s" % [v, value])
+	if not is_game_id(game_id):
+		game_id = "0"
 	a.append_array(["--", "/bin/sh", "-c",
-			'while kill -0 "$1" 2>/dev/null; do sleep 0.5; done; sleep 3; exec steam "steam://rungameid/$2"',
-			"framecine-restart", str(pid), game_id])
+			"while kill -0 %d 2>/dev/null; do sleep 0.5; done; sleep 3; exec steam steam://rungameid/%s"
+			% [pid, game_id]])
 	return a
+
+
+## Passes through OS.execute's double quotes unchanged.
+static func shell_safe(s: String) -> bool:
+	for c in ["\"", "$", "`", "\\"]:
+		if s.contains(c):
+			return false
+	return true
 
 
 ## The next start: what played before the restart opens again (when nothing else was asked for on the command line).

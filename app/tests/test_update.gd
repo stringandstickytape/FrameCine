@@ -189,9 +189,27 @@ func _test_relauncher() -> void:
 	var joined := " ".join(a)
 	_check("relauncher: a collected user unit (%s)" % joined, a[0] == "--user" and "--collect" in a
 			and "--unit=framecine-restart-4242" in a)
-	_check("relauncher: waits for this process, then Steam's rungameid", joined.contains('kill -0 "$1"')
-			and joined.contains("steam://rungameid/$2") and a[a.size() - 2] == "4242"
-			and a[a.size() - 1] == "12345678901234567890")
+	var script := a[a.size() - 1]
+	_check("relauncher: waits for this process, then Steam's rungameid (%s)" % script,
+			script.begins_with("while kill -0 4242 2>/dev/null;")
+			and script.ends_with("exec steam steam://rungameid/12345678901234567890"))
+	_check("relauncher: no $, quote, backtick or backslash in any argument (OS.execute runs them through popen)",
+			Array(a).all(func(s: String) -> bool: return Updater.shell_safe(s)))
+	# The path that failed on the headset: OS.execute with output. Every argument comes back as it went in.
+	if OS.get_name() == "Linux":
+		var out := []
+		var code := OS.execute("printf", ["%s\n"] + Array(a), out, true)
+		var back := str(out[0]).trim_suffix("\n").split("\n") if not out.is_empty() else PackedStringArray()
+		_check("relauncher: the arguments pass OS.execute unchanged (%d; %s)" % [code, script],
+				code == 0 and back == a)
+	_check("game id: a library shortcut's 64-bit id", Updater.is_game_id("13009753868613976064"))
+	_check("game id: not empty, not text, not a script", not Updater.is_game_id("")
+			and not Updater.is_game_id("12a") and not Updater.is_game_id("1; rm -rf ~")
+			and not Updater.is_game_id("-5") and not Updater.is_game_id("123456789012345678901"))
+	_check("relauncher: a bad game id never reaches the script",
+			Updater.relauncher_args(1, "1; reboot")[-1].ends_with("rungameid/0"))
+	_check("environment: a value with a quote or $ is left out", not Updater.shell_safe('a"b')
+			and not Updater.shell_safe("$HOME") and Updater.shell_safe("/usr/local/bin:/usr/bin"))
 	_check("relauncher: no SteamGameId in this test run, so no restart through Steam",
 			OS.get_environment("SteamGameId") != "" or not Updater.can_restart())
 
