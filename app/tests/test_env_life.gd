@@ -103,6 +103,7 @@ func _run() -> void:
 	_schooling(h)
 	_birds(h)
 	_cat_deer_planes(h)
+	_cat_turns(h)
 	_life_off(h)
 	room.queue_free()
 	await process_frame
@@ -359,6 +360,47 @@ func _birds(h: Node) -> void:
 	_steps(h, 30.0)
 	var perched := Array(bird.mode).filter(func(m: int) -> bool: return m == 0).size()
 	_check("birds: back on their perches (%d of %d)" % [perched, bird.count], perched >= bird.count - 1)
+
+
+## The cat faces the way it walks, both ways along its wall: at each end it stops and turns round on the spot, eased,
+## in 0.3 to 0.6 s, its legs stepping; it never walks backwards.
+func _cat_turns(h: Node) -> void:
+	var c: Node = h.system("cat")
+	var cat: RefCounted = c.creature
+	var dt := 1.0 / 30.0
+	var backwards := 0
+	var walked := 0
+	var ways := {}
+	var turns_before: int = cat.turns
+	var run := 0
+	var runs: Array = []
+	var still_legs := 0
+	for i in int(120.0 / dt):
+		if cat.state != 0 and i % 30 == 0:
+			c.act("pass", {})
+		var s0: float = cat.s
+		h.step(dt)
+		var ds: float = cat.s - s0
+		if cat.turning:
+			run += 1
+			var custom: Vector4 = cat.material.get_shader_parameter("single_custom")
+			if custom.y <= 0.0:
+				still_legs += 1
+		elif run > 0:
+			runs.append(run * dt)
+			run = 0
+		if absf(ds) > 1e-5:
+			walked += 1
+			ways[signf(ds)] = true
+			var travel: Vector3 = cat.get("_tan") * signf(ds)
+			if (cat.face as Vector3).dot(travel) < 0.95:
+				backwards += 1
+	var turns: int = cat.turns - turns_before
+	_check("cat: walked both ways along the wall (%d frames)" % walked, walked > 300 and ways.size() == 2)
+	_check("cat: faced the way it walked every step (%d frames not)" % backwards, backwards == 0)
+	_check("cat: turned round on the spot at the ends (%d turns)" % turns, turns >= 2 and runs.size() >= 2)
+	_check("cat: each turn 0.3 to 0.6 s %s" % [runs], runs.all(func(t: float) -> bool: return t >= 0.29 and t <= 0.62))
+	_check("cat: its legs step as it turns (%d frames still)" % still_legs, still_legs == 0)
 
 
 func _cat_deer_planes(h: Node) -> void:

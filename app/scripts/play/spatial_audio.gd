@@ -52,6 +52,10 @@ const GAIN := 0.7
 ## The standard layout's room (no room, an assistant's room): late reverb only, a small neutral room.
 const STANDARD_ROOM := {"box": AABB(Vector3(-2.5, 0, -3), Vector3(5, 2.6, 5.5)), "ring": true, "distance": 2.5,
 		"reflect": 0.0, "rt60": 0.35, "wet": 0.35}
+## The late reverb's level against the reflections' for a room that gives none (the renderer's own default). wet
+## scales both. The renderer keeps the late reverb's energy the same whatever the rt60, so a live room needs a higher
+## late and a dry one a lower (docs/environments.md, `acoustics`).
+const DEFAULT_LATE := 0.5
 ## 180 / 360: the picture is the room; a little late reverb keeps the sound out of the head.
 const SPHERE_ROOM := {"reflect": 0.0, "rt60": 0.3, "wet": 0.25}
 const DETECT_SECONDS := 10.0
@@ -403,7 +407,7 @@ func _room(no_walls: bool) -> Dictionary:
 		box = env.global_transform * box
 	var reflect: Variant = room.get("reflect", 0.4)
 	return {"min": box.position, "max": box.end, "reflect": reflect, "rt60": float(room.get("rt60", 0.4)), "wet": wet,
-			"enabled": wet > 0.0}
+			"late": float(room.get("late", DEFAULT_LATE)), "enabled": wet > 0.0}
 
 
 func _profile_hrtf() -> String:
