@@ -26,6 +26,7 @@ const SYSTEMS := {
 	"terrace": "res://scripts/env/systems/terrace.gd",
 	"domestic": "res://scripts/env/systems/domestic.gd",
 	"vehicle": "res://scripts/env/systems/vehicle.gd",
+	"cabin": "res://scripts/env/systems/cabin.gd",
 	"kit": "res://scripts/env/systems/kit.gd",
 	"atmosphere": "res://scripts/env/systems/atmosphere.gd",
 	"weather": "res://scripts/env/systems/weather.gd",
