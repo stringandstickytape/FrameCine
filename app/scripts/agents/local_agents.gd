@@ -10,12 +10,18 @@ extends Node
 ## Talk (the bumper on the pointer hand) shows the pane; a quick tap while it shows hides it (the agent keeps working).
 ## Y on the right controller, while that is the pointer hand, shows or hides it too, and with no agent running starts the
 ## last one used.
+## X on the right controller is Enter whenever the terminal shows (on the pane or the big screen), whichever hand points,
+## the menu open or not; its printed legend says ENTER then, and nothing otherwise (X has no other job on the headset's
+## own profile). on_enter_button(), enter_ready().
 ## While it shows, the stick and the trigger stay the film's, except:
 ##   an agent's prompt is waiting (its hook said so, .player/waiting; the pane's edge turns amber, the hand buzzes, and a
 ##   note says so if the pane is hidden): stick up / down are arrows, trigger Enter, A Space, B Escape
-##   the viewer looks at the pane (a calibrated gaze, within GAZE_MARGIN_DEG of its edge; the edge turns blue): the same
-##   keys, and stick left / right are arrows too. No hook is needed, so this answers a list no hook told of
+##   the viewer looks at the pane (the gaze within GAZE_MARGIN_DEG of its edge when calibrated, GAZE_MARGIN_RAW_DEG when
+##   not; the edge turns blue): the same keys, and stick left / right are arrows too. No hook is needed, so this answers a
+##   list no hook told of. Never with the menu open (the menu keeps its stick and trigger), never while a calibration runs
 ##   squeeze held: trigger Enter, stick up / down scroll back (Shift + Page Up / Down)
+## Until the first start's introduction is gone through (ui/intro.gd), the controllers give the terminal nothing: Y opens
+## the menu at the introduction instead.
 ## A keyboard paired to the headset types into the terminal while the pane shows. With a window on the big screen as
 ## well (a browser), the look decides: on the pane the terminal has it, anywhere else the window does.
 ## Spoken alone, "one" to "four", "up", "down", "enter" and "escape" are always that key (a list no hook told of, such as
@@ -32,7 +38,7 @@ extends Node
 ##   running() -> Array of ids; active -> id or ""; pane_shown(); waiting() -> bool
 ##   push_to_talk() -> Node or null, for ui_layer.voice_target()
 ##   on_talk(held), on_trigger(hand, pressed), on_stick(hand, stick, delta), on_button(hand, action) -> bool,
-##   on_agent_button(hand)
+##   on_agent_button(hand), on_enter_button(hand) -> bool, enter_ready() -> bool
 ##   status(), agent_of(client), register_commands(cmd_host): the Files rows as commands (agents, agent_start, ...)
 
 signal changed
@@ -63,6 +69,9 @@ const STICK_THRESHOLD := 0.7
 const STICK_REPEAT := 0.3
 ## The margin round the pane for the gaze, degrees: a calibrated reading is about 1.3 off (scripts/xr/eye_gaze.gd).
 const GAZE_MARGIN_DEG := 3.0
+## The same with no calibration (a new install): the headset's own reading is off by a median 1.8 degrees, 3.9 at the
+## worst measured (eye_gaze.gd), so 5 still finds the pane. The pane is about 37 x 21 degrees at 45 cm.
+const GAZE_MARGIN_RAW_DEG := 5.0
 ## A look counts after GAZE_ON seconds and lasts GAZE_OFF seconds beyond the last reading on the pane: a blink drops the
 ## reading, and a glance away mustn't hand the stick to the film mid-press. A held stick keeps it.
 const GAZE_ON := 0.15
@@ -274,6 +283,9 @@ func set_active(id: String) -> void:
 		_set_waiting(false)
 		if _pane != null and x != null:
 			x.call("stop_capture")
+		# X's legend follows the terminal (enter_ready()).
+		if main.has_method("update_controller_labels"):
+			main.update_controller_labels()
 	if id != "":
 		_ensure_ptt()
 		main.settings.set_value("assistant", "voice_to", id)
@@ -389,7 +401,7 @@ func _process(delta: float) -> void:
 
 
 func _update_look(delta: float) -> void:
-	if not pane_shown() or main.menu_shown:
+	if not pane_shown() or main.menu_shown or _intro_pending():
 		_set_looking(false)
 		return
 	var on := _gaze_on_pane() or (_looking and _stick_hold >= 0.0)
@@ -404,12 +416,25 @@ func _gaze() -> Object:
 	return main.features.gaze if main.features != null else null
 
 
+## The look on the pane: calibrated or not (ray() is the raw reading without a calibration), with the margin for it.
 func _gaze_on_pane() -> bool:
 	var g := _gaze()
-	if g == null or g.calibrating or not g.calibrated():
+	if g == null or g.calibrating:
 		return false
 	var r: Array = g.ray()
-	return not r.is_empty() and _pane.looked_at(r[0], r[1], GAZE_MARGIN_DEG)
+	return not r.is_empty() and _pane.looked_at(r[0], r[1], gaze_margin())
+
+
+## The margin round the pane the gaze gets now, degrees.
+func gaze_margin() -> float:
+	var g := _gaze()
+	return GAZE_MARGIN_DEG if g != null and g.calibrated() else GAZE_MARGIN_RAW_DEG
+
+
+## The first start's introduction (ui/intro.gd) is waiting to be gone through: the terminal takes no controller keys.
+func _intro_pending() -> bool:
+	var layer: Variant = main.get("ui")
+	return layer != null and layer.has_method("intro_pending") and layer.intro_pending()
 
 
 func _set_looking(on: bool) -> void:
@@ -700,6 +725,9 @@ func on_agent_button(hand: Node) -> void:
 	var gaze := _gaze()
 	if hand != _pointer_hand() or (gaze != null and gaze.calibrating):
 		return
+	if _intro_pending():
+		main.ui.show_panel(hand)
+		return
 	if active != "" and (is_running(active) or _starting.has(active)):
 		toggle_pane()
 	else:
@@ -745,7 +773,7 @@ func on_key(event: InputEventKey) -> bool:
 
 
 func _takes_keyboard() -> bool:
-	if not pane_shown() or main.menu_shown:
+	if not pane_shown() or main.menu_shown or _intro_pending():
 		return false
 	return _looking or not (window_override or main.window_pointer.is_active())
 
@@ -753,9 +781,32 @@ func _takes_keyboard() -> bool:
 ## The stick and the trigger belong to the agent now: its pane shows, on the pointer hand, and a prompt waits, the
 ## squeeze is held or the viewer looks at it.
 func has_input(hand: Node) -> bool:
-	if not pane_shown() or hand != _pointer_hand() or main.menu_shown:
+	if not pane_shown() or hand != _pointer_hand() or main.menu_shown or _intro_pending():
 		return false
 	return _waiting or _looking or bool(hand.get("grip_down"))
+
+
+## X is Enter now: an agent's terminal shows, on the pane or the big screen (whichever hand points, the menu open or
+## not), outside a calibration and the first start's introduction.
+func enter_ready() -> bool:
+	var gaze := _gaze()
+	if active == "" or (gaze != null and gaze.calibrating) or _intro_pending():
+		return false
+	return pane_shown() or on_big_screen()
+
+
+## X on the right controller (the action map's "enter"): Enter into the terminal while enter_ready(). True when taken.
+func on_enter_button(hand: Node) -> bool:
+	if not enter_ready():
+		return false
+	var t := _target()
+	if t == null:
+		return false
+	_key(t, KEY_ENTER)
+	if hand != null and hand.has_method("pulse"):
+		hand.pulse()
+	_answered()
+	return true
 
 
 func on_trigger(hand: Node, pressed: bool) -> bool:

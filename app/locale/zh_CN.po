@@ -3672,3 +3672,81 @@ msgstr "开发用 AI 助手"
 
 msgid "The translations other than English were made automatically, by AI."
 msgstr "英语以外的翻译均由 AI 自动生成。"
+
+msgid "Show the introduction again"
+msgstr "再次显示介绍"
+
+msgid "Step %d of %d"
+msgstr "第 %d 步，共 %d 步"
+
+msgid "Calibrate your eyes"
+msgstr "校准你的眼睛"
+
+msgid "The headset sees where you look. Look at a window or at the agent's terminal, and the controller's keys go to it."
+msgstr "头显能看到你在看哪里。看着一个窗口或代理的终端，手柄的按键就会交给它。"
+
+msgid "A short calibration makes this exact. Look at each dot and pull the trigger. It takes about a minute."
+msgstr "简短的校准能让它更准确。看着每个点，然后扣动扳机。大约需要一分钟。"
+
+msgid "Skip"
+msgstr "跳过"
+
+msgid "The controls"
+msgstr "操作方法"
+
+msgid "Hold the right bumper and speak instead of typing. It types into a text field in the browser, a PC window or the agent's terminal, or talks to a connected assistant. Its label says TALK when it can."
+msgstr "按住右侧肩键说话，代替打字。它会输入到浏览器的文本框、电脑窗口或代理的终端，或者与已连接的助手对话。可以说话时，它的标签显示“说话”。"
+
+msgid "Hold the left bumper and speak instead of typing. It types into a text field in the browser, a PC window or the agent's terminal, or talks to a connected assistant. Its label says TALK when it can."
+msgstr "按住左侧肩键说话，代替打字。它会输入到浏览器的文本框、电脑窗口或代理的终端，或者与已连接的助手对话。可以说话时，它的标签显示“说话”。"
+
+msgid "Menu button: this menu. Hold it to bring the menu in front of you."
+msgstr "菜单键：打开这个菜单。按住它，菜单会来到你面前。"
+
+msgid "Trigger: play and pause. On the menu it clicks."
+msgstr "扳机：播放和暂停。在菜单上用于点击。"
+
+msgid "Stick: seek and screen distance. On the menu it scrolls."
+msgstr "摇杆：快进快退和屏幕距离。在菜单上用于滚动。"
+
+msgid "A and B: the next and the previous video."
+msgstr "A 和 B：下一个和上一个视频。"
+
+msgid "Back"
+msgstr "返回"
+
+msgid "In the agent's terminal"
+msgstr "在代理的终端里"
+
+msgid "Only for Claude Code and Codex on the headset, on the pane at your controller."
+msgstr "仅用于头显上的 Claude Code 和 Codex，显示在你手柄旁的面板上。"
+
+msgid "X is Enter while the terminal shows."
+msgstr "终端显示时，X 是回车键。"
+
+msgid "Y shows and hides it. A quick tap of the bumper hides it too."
+msgstr "Y 显示和隐藏它。快速按一下肩键也能隐藏它。"
+
+msgid "When it asks you something (an amber edge), when you look at it (a blue edge) or while you hold the squeeze: the trigger is Enter, the stick is the arrow keys, A is Space and B is Escape."
+msgstr "当它问你问题时（琥珀色边框）、当你看着它时（蓝色边框）或按住握把时：扳机是回车键，摇杆是方向键，A 是空格键，B 是 Esc 键。"
+
+msgid "Squeeze held: the stick scrolls back."
+msgstr "按住握把：摇杆向回滚动。"
+
+msgid "A keyboard paired to the headset types into it."
+msgstr "与头显配对的键盘也能在里面打字。"
+
+msgid "The print on the controllers always shows what each button does now."
+msgstr "手柄上的印字始终显示每个按键当前的作用。"
+
+msgid "To see this again: System, Test and setup, Show the introduction again."
+msgstr "要再次查看：系统，测试和设置，再次显示介绍。"
+
+msgid "Start"
+msgstr "开始"
+
+msgid "Eye calibration done."
+msgstr "眼动校准完成。"
+
+msgid "No calibration: the gaze still works, but less exactly."
+msgstr "未校准：视线仍然可用，但不太准确。"

@@ -77,12 +77,15 @@ const AGENTS := {
 }
 const TERMINALS: Array[String] = ["xterm", "konsole", "lxterminal"]
 ## The window. The Frame's window manager (gamescope) makes every top-level window 1920 x 1080 whatever it asks for
-## (seen on the headset, 2026-11-01), so the size asked for only matters elsewhere: FONT_PX sets what fits, about 80
-## columns by 23 lines there. On the pane (PANE_WIDTH_M, 26 cm, in agent_pane.gd) 40 px is about 0.7 degrees at arm's
-## length, the card's text size.
-const COLUMNS := 80
-const LINES := 23
-const FONT_PX := 40
+## (seen on the headset, 2026-11-01), so the size asked for only matters elsewhere: FONT_PX sets what fits there. At
+## 28 px a DejaVu Sans Mono cell is 17 x 33 pixels, so the 1904 x 1064 inside the border holds 112 columns by 32 lines:
+## room for Claude Code's first-run theme preview (about 100 columns) and both agents' 80-column screens, with the
+## lines to show a whole list. 40 px held 79 x 22, and Claude Code's first screen did not fit (the user, 2026-11-09).
+## On the pane (PANE_WIDTH_M, 30 cm, in agent_pane.gd) at 45 cm a 28 px em is 0.56 degrees, a capital 0.41, an x 0.31,
+## a line 0.66 (40 px on the 26 cm pane was 0.69, 0.50, 0.38, 0.83); nearer, more.
+const COLUMNS := 112
+const LINES := 32
+const FONT_PX := 28
 const BACKGROUND := "#0d1117"
 const FOREGROUND := "#e6edf3"
 const SCROLLBACK := 10000

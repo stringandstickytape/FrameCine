@@ -17,6 +17,8 @@ const NetworkHosts := preload("res://scripts/net/network_hosts.gd")
 const DirectoryLister := preload("res://scripts/net/directory_lister.gd")
 const Remote := preload("res://scripts/remote/remote.gd")
 const PCAudio := preload("res://scripts/dev/pc_audio.gd")
+const Intro := preload("res://ui/intro.gd")
+const AppSettings := preload("res://scripts/app_settings.gd")
 
 var main: Node
 var _failures := 0
@@ -191,6 +193,7 @@ func _run() -> void:
 	_check("Esc closes the panel", not main.ui.is_open() and not main.ui.panel.visible and not main.menu_shown)
 
 	await _focus_checks()
+	await _intro_checks(ui)
 
 	print("UI input test: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	main.get_tree().quit(_failures)
@@ -1374,6 +1377,87 @@ func _help_and_curve_checks(ui: PaneUI) -> void:
 	_check("no Curve to distance button (100 % is that)",
 			_buttons_or_labels(ui, PaneUI.Tab.PICTURE, ["Curve to distance"]).is_empty())
 	ui.show_tab(PaneUI.Tab.FILES)
+
+
+## The first start's introduction (ui/intro.gd): not on this run (read-only settings); when it would show; then from
+## System, walked through as the controllers would: nothing taps through a step as it shows, Skip notes the rough gaze,
+## A forward, B back, the trigger on the focused button, Start ends it and keeps the flag; Calibrate puts the menu
+## aside and back (no gaze to calibrate here, so it ends at once); no gaze step on a headset without eye gaze.
+func _intro_checks(ui: PaneUI) -> void:
+	var gaze: Node = main.features.gaze
+	var hand: Node = main.ui.pointer_hand
+	_check("a test run has no introduction", ui.intro == null and not main.ui.intro_pending()
+			and not Intro.wanted(main.settings, {}))
+	var fresh := AppSettings.new()
+	_check("it would show on a first start", Intro.wanted(fresh, {}, false))
+	_check("not with --file, a tour or --no-ui", not Intro.wanted(fresh, {"file": "x.mkv"}, false)
+			and not Intro.wanted(fresh, {"tour": "t"}, false) and not Intro.wanted(fresh, {"no-ui": true}, false))
+	_check("nor headless", not Intro.wanted(fresh, {}, true))
+	fresh.set_value("intro", "done", true)
+	_check("nor once gone through", not Intro.wanted(fresh, {}, false))
+
+	gaze.supported_override = true
+	main.ui.show_panel()
+	await _seconds(0.3)
+	await _rail(ui, PaneUI.Tab.SYSTEM)
+	await _click(_find_button(ui, "Show the introduction again"))
+	await _frames(2)
+	var intro: Intro = ui.intro
+	_check("System shows it again, filling the menu", intro != null and ui.intro_showing() and not ui._open.visible
+			and main.ui.is_open() and intro.step() == "gaze" and main.ui.intro_pending())
+	var body := ui.get_theme_default_font_size()
+	_check("in big type (%d px on %d)" % [intro._lines.get_child(0).get_theme_font_size("font_size"), body],
+			intro._lines.get_child(0).get_theme_font_size("font_size") >= body * 1.4)
+	await _click(intro._secondary)
+	main.ui.on_intro_next(hand)
+	_check("nothing taps through as it shows (Skip, A)", intro.step() == "gaze" and intro._secondary.disabled)
+	_check("A is taken while it shows, the film's next stays", main.ui.on_intro_next(hand))
+	await _seconds(Intro.GUARD + 0.1)
+	await _click(intro._secondary)
+	_check("Skip: the controls, the gaze rough (%s)" % intro._note.text, intro.step() == "keys" and intro._note.visible
+			and intro._note.text.contains("less exactly"))
+	_check("talk is named on the pointer hand", intro._lines.get_child(0).text.contains("right bumper"))
+	await _seconds(Intro.GUARD + 0.1)
+	main.ui.on_intro_next(hand)
+	_check("A: the agent's terminal, X Enter in it", intro.step() == "agent"
+			and intro._lines.get_children().any(func(l: Label) -> bool: return l.text.contains("X is Enter")))
+	await _seconds(Intro.GUARD + 0.1)
+	main.ui.on_back(hand)
+	_check("B: back a step", intro.step() == "keys")
+	await _seconds(Intro.GUARD + 0.1)
+	main.ui.on_intro_next(hand)
+	await _seconds(Intro.GUARD + 0.1)
+	_check("the main button has the focus", main.ui.panel.focus_owner() == intro.primary())
+	main.ui.panel.push_action(&"ui_accept")
+	await _frames(2)
+	_check("the trigger on it goes on (%s)" % intro.step(), intro.step() == "start")
+	await _seconds(Intro.GUARD + 0.1)
+	_check("its last button is Start", intro.primary().text == "Start")
+	await _click(intro.primary())
+	await _frames(2)
+	_check("Start: the menu is back, the flag kept", not ui.intro_showing() and ui._open.visible
+			and not main.ui.intro_pending() and bool(main.settings.get_value("intro", "done", false)))
+
+	main.ui.show_intro()
+	await _seconds(Intro.GUARD + 0.1)
+	await _click(intro.primary())
+	await _frames(1)
+	_check("Calibrate: the menu steps aside", not main.ui.is_open())
+	await _seconds(Intro.CAL_START_WAIT + 0.3)
+	_check("no gaze to calibrate here: back, at the next step, rough", main.ui.is_open() and intro.step() == "keys"
+			and intro._note.visible)
+
+	gaze.supported_override = false
+	main.ui.show_intro()
+	await _frames(2)
+	_check("no eye gaze: no calibration step (%s)" % [intro.steps], not intro.steps.has("gaze")
+			and intro.step() == "keys")
+	intro.active = false
+	intro.finished.emit()
+	gaze.supported_override = null
+	main.settings.set_value("intro", "done", null)
+	main.ui.hide_panel()
+	await _seconds(0.3)
 
 
 ## The help line right after a control row, or null.

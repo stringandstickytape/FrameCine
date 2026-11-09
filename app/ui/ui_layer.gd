@@ -24,7 +24,8 @@ extends Node3D
 ## on_mouse() return true when the panel used the input.
 ##
 ## For other agents: show_panel(hand = null) opens it in front of the head (also when open: a recentre),
-## hide_panel() closes it, toggle_panel(), recentre(), is_open(), reload_theme(). `docked` is kept as an alias of
+## hide_panel() closes it, toggle_panel(), recentre(), is_open(), reload_theme(); show_intro() opens it at the first
+## start's introduction (ui/intro.gd), intro_pending() says it isn't gone through yet. `docked` is kept as an alias of
 ## is_open() (the panel used to have a docked state; now that is the only one). `panel` is the quad (ui/pane.gd), `ui`
 ## its controls (ui/pane_ui.gd).
 ##
@@ -46,6 +47,7 @@ const HandHint := preload("res://ui/hand_hint.gd")
 const WatchCard := preload("res://ui/watch_card.gd")
 const Assistant := preload("res://scripts/assistant/assistant.gd")
 const I18n := preload("res://scripts/i18n.gd")
+const Intro := preload("res://ui/intro.gd")
 ## The header lists the controller batteries at or below this.
 const CONTROLLER_BATTERY_HEADER := 20
 
@@ -842,9 +844,52 @@ func cancel_seat_pick() -> bool:
 
 
 ## The main.gd hook for B (the right hand's "previous file" button): cancels seat picking, placing an object or marking
-## a window.
+## a window; on the introduction, a step back (taken even on its first step, so B doesn't change the film under it).
 func on_back(_hand: XRHand) -> bool:
+	if _open and ui.intro_showing():
+		ui.intro.back()
+		return true
 	return cancel_seat_pick() or cancel_object_place() or cancel_window_mark()
+
+
+# --- The first start's introduction (ui/intro.gd) ---------------------------------------------------------------------
+
+## Opens the menu at the introduction's first step (main.gd at the first start; System, "Show the introduction again").
+## The gaze step only on a headset with eye gaze.
+func show_intro() -> void:
+	var gaze: Node = app.features.get("gaze") if app.features != null else null
+	var first := ui.intro == null
+	ui.show_intro(Intro.steps_for(gaze != null and gaze.supported()))
+	if first:
+		ui.intro.calibrate_requested.connect(_on_intro_calibrate)
+		ui.intro.calibration_ended.connect(func() -> void: show_panel(pointer_hand))
+		ui.intro.finished.connect(func() -> void:
+			app.update_controller_labels()
+			ui.show_tab(ui.current_tab))
+	show_panel()
+	app.update_controller_labels()
+
+
+## Not gone through yet this run: the agents' terminals take no controller keys meanwhile (local_agents.gd).
+func intro_pending() -> bool:
+	return ui != null and ui.intro != null and ui.intro.active
+
+
+## A on the introduction: its next step (after its guard). True while it shows, so A does nothing else then.
+func on_intro_next(_hand: XRHand) -> bool:
+	if not _open or not ui.intro_showing():
+		return false
+	ui.intro.next()
+	return true
+
+
+## Calibrate on the introduction: the menu steps aside for the dots (scripts/xr/eye_gaze.gd), and comes back when the
+## calibration ends (the intro's calibration_ended).
+func _on_intro_calibrate() -> void:
+	hide_panel()
+	var gaze: Node = app.features.get("gaze") if app.features != null else null
+	if gaze != null:
+		gaze.calibrate()
 
 
 ## Place (the Room tab's objects): the panel goes, and the object follows the laser on the walls and the floor until

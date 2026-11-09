@@ -3,7 +3,7 @@ extends XRController3D
 ## One controller. Posed at the aim pose: the action map's "aim_pose" action, which the engine's XR interface puts on
 ## the tracker under the name "aim" (and "grip_pose" under "grip"), so `pose` must be "aim"; with "aim_pose" the
 ## node never becomes active. The laser points along -Z. Reads the app's action map (xr/openxr_action_map.tres):
-## trigger and squeeze as floats with hysteresis, the thumbstick, the menu, overlay, next_file, prev_file and agent buttons;
+## trigger and squeeze as floats with hysteresis, the thumbstick, the menu, overlay, next_file, prev_file, agent and enter buttons;
 ## draws the menu laser and its hit dot when told to. main.gd and the UI layer decide what the inputs do.
 ## Button input does not depend on the pose: a controller whose pose isn't tracked still plays / pauses.
 ## The controller itself, with its input labels, is `visual` (controller_visual.gd): the runtime's render model when
@@ -27,6 +27,8 @@ signal prev_pressed(hand: XRController3D)
 signal labels_held(hand: XRController3D, held: bool)
 ## The "agent" button (headset profile: Y, on the right controller).
 signal agent_pressed(hand: XRController3D)
+## The "enter" button (headset profile: X, on the right controller): Enter in the agent's terminal while it shows.
+signal enter_pressed(hand: XRController3D)
 ## The runtime bound another interaction profile for this hand ("": none).
 signal bound_profile_changed(hand: XRController3D, profile: String)
 ## Tracking started for the first time, or again after a gap of more than RETRACK_SECONDS.
@@ -245,6 +247,8 @@ func _on_button_pressed(action: String) -> void:
 			prev_pressed.emit(self)
 		"agent":
 			agent_pressed.emit(self)
+		"enter":
+			enter_pressed.emit(self)
 
 
 ## When the runtime offers render models (XR_EXT_render_model + XR_EXT_interaction_render_model, project setting

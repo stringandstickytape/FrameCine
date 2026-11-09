@@ -2,7 +2,7 @@ extends ScrollContainer
 
 ## The System tab (docs/ui-design.md): the info overlay and the stats view; the panel's layout (size, distance,
 ## recentre hold, follow the head, left-handed, reset) so the numbers can be tuned in the headset; accessibility (#74);
-## test patterns, calibration cards and the bandwidth meter (#48); the benchmark (#82); hardware 10-bit video (which way
+## the first start's introduction again (ui/intro.gd); test patterns, calibration cards and the bandwidth meter (#48); the benchmark (#82); hardware 10-bit video (which way
 ## it plays, read-only, ui/hw_video_row.gd); foveation (D22) and the film layer (#70, a prototype); the controllers' look
 ## and haptics; the phone remote with its address and QR code (#13); the assistant (ui/assistant_row.gd); PC windows
 ## (ui/pc_windows_row.gd); updates (ui/update_row.gd); the dev tools when dev mode is on (theme, remote changes and
@@ -178,6 +178,11 @@ func bind(p_app: Node) -> void:
 	access.changed.connect(func(_k: String, _v: Variant) -> void: sync())
 
 	box.add_child(W.section("Test and setup"))
+	# The first start's introduction again (ui/intro.gd): the eye calibration and the controls.
+	box.add_child(W.flow([W.button("Show the introduction again", func() -> void:
+		var layer: Node = app.get("ui")
+		if layer != null and layer.has_method("show_intro"):
+			layer.show_intro())]))
 	box.add_child(W.flow([W.button("Test patterns", func() -> void: open_place.emit("stub://")),
 			W.button("Network hosts", func() -> void: open_place.emit("network://"))]))
 	var cards := W.hbox()

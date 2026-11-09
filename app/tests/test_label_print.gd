@@ -17,7 +17,8 @@ const Main := preload("res://scripts/main.gd")
 const CONFORM := 0.00025
 ## Largest allowed stretch of the text along any edge of its patches: 1.12 = 12 % longer than flat.
 const STRETCH := 1.12
-const STATES := [[false, false], [true, false], [false, true]]
+## [menu shown, on a window, an agent's terminal shows (X is Enter)].
+const STATES := [[false, false, false], [true, false, false], [false, true, false], [false, false, true]]
 
 var _failures := 0
 var _checks := 0
@@ -288,6 +289,11 @@ func _test_text_changes() -> void:
 	hand.free()
 
 
+## A hand's legends in one of STATES.
+static func _labels(side: String, state: Array) -> Dictionary:
+	return Main.controller_labels(Main.PREVIEW_PROFILE, side, state[0], state[1], false, false, false, {}, false, state[2])
+
+
 ## Every input of every profile state on the hand-built body, at the computed placement.
 func _test_fallback_body() -> void:
 	var legends := 0
@@ -298,7 +304,7 @@ func _test_fallback_body() -> void:
 		hand.add_child(visual)
 		visual.configure(side)
 		for state: Array in STATES:
-			var texts := Main.controller_labels(Main.PREVIEW_PROFILE, side, state[0], state[1])
+			var texts := _labels(side, state)
 			visual.set_texts(texts)
 			await process_frame
 			for input: String in texts:
@@ -369,7 +375,7 @@ func _measure(surface: LabelSurface, side: String, report := false) -> Dictionar
 	var out := {"gap": 0.0, "bridge": 0.0, "stretch": 1.0, "cover": 1.0, "bridged": 0.0, "missing": 0}
 	var seen := {}
 	for state: Array in STATES:
-		var texts := Main.controller_labels(Main.PREVIEW_PROFILE, side, state[0], state[1])
+		var texts := _labels(side, state)
 		for input: String in texts:
 			var entry := ControllerVisual.layout_entry(side, input)
 			if entry.is_empty():
@@ -490,7 +496,7 @@ func _measure_runtime_models(dir: String) -> void:
 		var legends := 0
 		t0 = Time.get_ticks_usec()
 		for st: Array in STATES:
-			var texts := Main.controller_labels(Main.PREVIEW_PROFILE, side, st[0], st[1])
+			var texts := _labels(side, st)
 			for input: String in texts:
 				var entry := ControllerVisual.layout_entry(side, input)
 				if not entry.is_empty():
