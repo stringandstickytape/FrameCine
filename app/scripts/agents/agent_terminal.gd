@@ -491,7 +491,7 @@ static func terminal_args(id: String, terminal_path: String) -> Array[String]:
 			return ["--no-remote", "--class=%s" % a["class"], "--name=%s" % a["class"],
 					"--title=%s" % a["name"], "--geometry=%dx%d" % [COLUMNS, LINES], "-e", "/bin/sh %s" % run]
 	return ["-class", str(a["class"]), "-title", str(a["name"]), "-u8", "-fa", "monospace:pixelsize=%d" % FONT_PX,
-			"-geometry", "%dx%d+0+0" % [COLUMNS, LINES], "-bg", BACKGROUND, "-fg", FOREGROUND, "-cr", FOREGROUND,
+			"-geometry", "%dx%d+0+0" % [columns(), lines()], "-bg", BACKGROUND, "-fg", FOREGROUND, "-cr", FOREGROUND,
 			"-sl", str(SCROLLBACK), "-tn", "xterm-256color", "+sb", "-b", "8",
 			# No window border: on the Frame the capture's dmabuf import takes the buffer with the border (1922 x 1082)
 			# against the window's 1920 x 1080 and the texture fails, a black pane.
@@ -513,11 +513,26 @@ static func stop(id: String) -> void:
 
 ## The private display's number: free of the session's own (:0, :1).
 const DISPLAY_NUMBER := 47
-## Room for the terminal as it asks to be (COLUMNS x LINES at FONT_PX is 2020 x 1252 on the Frame): with no window
-## manager there, nothing resizes it.
+## Room for the terminal as it asks to be, even at COLUMNS x LINES (2032 x 1264 at FONT_PX on the Frame): with no
+## window manager there, nothing resizes it.
 const DISPLAY_SCREEN := "2560x1440x24"
 ## Tests: "" for the rule below, else "private" or "desktop".
 static var display_override := ""
+
+
+## The terminal's size in cells. On the private display nothing resizes it, and each change to it is copied whole
+## (no shared buffer there): at COLUMNS x LINES that is 2032 x 1264, 10 MB a copy, and an agent's once-a-second timer
+## made the picture stutter (the user, 2026-11-10). So there it is the 1280 x 720 that gamescope made it before.
+const PRIVATE_COLUMNS := 74
+const PRIVATE_LINES := 21
+
+
+static func columns() -> int:
+	return PRIVATE_COLUMNS if use_private_display() else COLUMNS
+
+
+static func lines() -> int:
+	return PRIVATE_LINES if use_private_display() else LINES
 
 
 ## Whether the terminals go to a display of their own: under gamescope, with Xvfb and xhost to make one.
