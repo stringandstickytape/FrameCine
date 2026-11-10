@@ -62,7 +62,7 @@ sections of `user://settings.cfg`; `<environment id>` and `<id>` sections hold o
 | [Fisheye lens profiles, folder rules, light sharpen, deinterlace](#73-fisheye-lens-profiles-83-folder-rules-90-light-sharpen-95-deinterlace) | #73, #83, #90, #95 | `[lens]`, `[lens_files]`, `[folder_modes]`, `[picture_<environment id>]`, `[picture]` | on (sharpen and deinterlace off by default) |
 | [Dual fisheye 360](#dual-fisheye-360) | none | `[dual_fisheye]`, `[dual_fisheye_files]`, `[dual_fisheye_<profile>]` | on (guessed for 360 camera names and dual fisheye tags) |
 | [Virtual cinema speakers, world-locked sound for 180 / 360](#21-virtual-cinema-speakers-47-world-locked-sound-for-180--360) (spatial audio) | #21, #47 | `[speakers]`, `[spatial]` | off by default (until the headset check) |
-| [Bias light from the picture](#29-bias-light-from-the-picture) | #29 | `[bias_light]` | off by default |
+| [Bias light from the picture](#29-bias-light-from-the-picture) | #29 | `[bias_light]` | on by default |
 | [Night mode and dialogue boost](#26-night-mode-and-dialogue-boost) | #26 | `[sound]` | off by default |
 | [Quad layers (a spike behind flags)](#70-quad-layers-a-spike-behind-flags) | #70 | none (flags `--pane-layer`, `--video-layer`) | spike behind flags |
 | [Film layer](#70-film-layer) | #70 | `[view] film_layer` | on by default (flat films) |

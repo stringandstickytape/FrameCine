@@ -198,6 +198,8 @@ func _test_effects() -> void:
 	r = await _run_cmd("floor_reflection", {})
 	_check("floor_reflection: nothing to change refused", not r["ok"])
 
+	# The bias light is on by default: start from off, so the undo has something to put back.
+	f.bias.set_enabled(false)
 	r = await _run_cmd("bias_light", {"on": true, "strength": 0.5})
 	_check("bias_light: on at 50 %", r["ok"] and f.bias.enabled and is_equal_approx(f.bias.strength, 0.5))
 	var room_tab: Node = _tab("room")

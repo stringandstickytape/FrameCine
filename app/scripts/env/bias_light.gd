@@ -10,7 +10,7 @@ extends Node
 ## as the global screen_thumb (shaders/env_spill.gdshaderinc), scaled so a typical film lights the room as designed.
 ## Flat screens only (180 / 360 hide the room); the void has no spill to colour.
 ##
-##   enabled, set_enabled(on)        [bias_light] enabled (default off until its cost is measured on the headset)
+##   enabled, set_enabled(on)        [bias_light] enabled (default on; only an "off" is stored)
 ##   strength, set_strength(v)       [bias_light] strength, 0..1 (default 1): how far the spill follows the picture
 ##   active()                        the tint is applied now
 ##   tint, axis                      the globals screen_tint and screen_axis as last set
@@ -39,7 +39,7 @@ var axis := Vector3.ZERO
 
 
 func _ready() -> void:
-	enabled = bool(main.settings.get_value("bias_light", "enabled", false))
+	enabled = bool(main.settings.get_value("bias_light", "enabled", true))
 	strength = clampf(float(main.settings.get_value("bias_light", "strength", 1.0)), 0.0, 1.0)
 	_vp = SubViewport.new()
 	_vp.name = "BiasLightSampler"
@@ -77,7 +77,7 @@ func _ready() -> void:
 
 func set_enabled(on: bool) -> void:
 	enabled = on
-	main.settings.set_value("bias_light", "enabled", true if on else null)
+	main.settings.set_value("bias_light", "enabled", null if on else false)
 	changed.emit()
 
 

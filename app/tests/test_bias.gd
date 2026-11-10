@@ -22,7 +22,7 @@ func _init() -> void:
 func _run() -> void:
 	await _frames(5)
 	var b: Node = main.features.bias
-	_check("off by default", not b.enabled)
+	_check("on by default", b.enabled)
 	b.set_enabled(true)
 	main.set_environment("cinema")
 	main.open_path("stub://flat_mono")
