@@ -33,6 +33,8 @@ var _pokes := {}
 var _tips := {}
 var _lit := {}
 var _placed := false
+## What the two pictures last showed (_redraw()).
+var _drawn := []
 ## Desktop tests can supply tracked hand poses without an XR session, as pc_windows.gd does.
 var test_xr := false
 
@@ -106,8 +108,9 @@ func set_shown(on: bool) -> void:
 		recentre()
 	visible = on
 	if _viewport != null:
-		_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
-		_light_viewport.render_target_update_mode = _viewport.render_target_update_mode
+		_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		_light_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+		_drawn = []
 
 
 func recentre() -> void:
@@ -195,9 +198,30 @@ func step(delta: float) -> void:
 		elif bool(_lit.get(hand, false)):
 			hand.set_laser(false)
 		_lit[hand] = on
-	if _surface != null:
-		_surface.queue_redraw()
-		_light_surface.queue_redraw()
+	_redraw()
+
+
+## Two pictures of 2300 x 725 with 104 legends each are not free: draw them only when what they show has changed,
+## not on every frame the keyboard is open.
+func _redraw() -> void:
+	if _surface == null:
+		return
+	var hovered := []
+	for a: Dictionary in aims.values():
+		hovered.append(int(a.get("key", -1)))
+	var lit := []
+	for i in state.keys.size():
+		if state.lit(i):
+			lit.append(i)
+	var now := [hovered, lit, state.modifiers.duplicate(), state.caps, state.modifier_on(KEY_SHIFT),
+			router.target_name(), Style.active().get_instance_id(), Style.active().default_font_size]
+	if now == _drawn:
+		return
+	_drawn = now
+	_surface.queue_redraw()
+	_light_surface.queue_redraw()
+	_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	_light_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
 func on_trigger(hand: Node, down: bool) -> bool:

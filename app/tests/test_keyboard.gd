@@ -375,6 +375,17 @@ func _pane() -> void:
 	main.ui.hide_panel()
 	main.camera.position.x += 0.2
 	main.ui.show_panel()
+	kb.aims.clear()
+	kb.state.cancel()
+	kb._redraw()
+	kb._viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	kb._redraw()
+	_check("an unchanged keyboard is not drawn again", kb._viewport.render_target_update_mode == SubViewport.UPDATE_DISABLED)
+	kb.aims[hand] = {"key": 3, "point": Vector2.ZERO, "distance": 1.0}
+	kb._redraw()
+	_check("a newly pointed-at key draws once", kb._viewport.render_target_update_mode == SubViewport.UPDATE_ONCE
+			and kb._light_viewport.render_target_update_mode == SubViewport.UPDATE_ONCE)
+	kb.aims.clear()
 	_check("opening the menu leaves the keyboard world-locked", kb.global_transform.is_equal_approx(world_pose))
 	main.ui.recentre()
 	_check("menu recentre also replaces the open keyboard", not kb.global_position.is_equal_approx(moved)
@@ -388,6 +399,8 @@ func _pane() -> void:
 	_check("dev keyboard command closes without content", not kb.visible and answer is Dictionary)
 	if "--keyboard-shot" in OS.get_cmdline_user_args() and DisplayServer.get_name() != "headless":
 		kb.set_shown(true)
+		kb._viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		kb._light_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 		kb._surface.queue_redraw()
 		kb.aims[hand] = {"key": kb.state.find_key(KEY_G), "point": Vector2.ZERO, "distance": 1.0}
 		kb._light_surface.queue_redraw()
