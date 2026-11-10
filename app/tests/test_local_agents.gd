@@ -56,6 +56,18 @@ class FakeX extends RefCounted:
 			keys.append(OS.get_keycode_string(key))
 
 
+## A hand for holding the window: the ray along its -Z, the laser calls ignored (as in test_pc_windows.gd).
+class FakeHand extends Node3D:
+	func get_ray_origin() -> Vector3:
+		return global_position
+
+	func get_ray_direction() -> Vector3:
+		return -global_basis.z
+
+	func set_laser(_on: bool, _length := 3.0, _hit := false, _beam := Color(), _dot := Color()) -> void:
+		pass
+
+
 class FakeGaze extends RefCounted:
 	var calibrating := false
 	var fitted := true
@@ -108,6 +120,7 @@ func _run() -> void:
 	await _small_checks()
 	_locale_checks()
 	_detached_checks()
+	_window_checks()
 	agents.set_active("")
 	agents.hide_pane()
 	AgentTerminal.home_override = ""
@@ -904,6 +917,61 @@ func _context_checks() -> void:
 
 ## The terminal starts outside the app's process tree where the user's service manager is there (Steam's launch wrapper
 ## would wait for it); elsewhere as it is.
+## The terminal's window (the user, 2026-11-10: off the controller, a window that floats): it comes up ahead of the
+## head facing it, and is held and sized as a PC window's pane.
+func _window_checks() -> void:
+	var pane: Node3D = agents._pane
+	var cam: Node3D = main.camera
+	pane.placed = false
+	pane.set_shown(true)
+	var ahead := -cam.global_basis.z
+	ahead.y = 0.0
+	ahead = ahead.normalized()
+	var want: Vector3 = ahead * LocalAgents.AgentPane.DISTANCE_M + Vector3.DOWN * LocalAgents.AgentPane.DROP_M
+	var to: Vector3 = pane.global_position - cam.global_position
+	_check("window: comes up ahead of the head, a little low (%.2f m)" % to.length(), pane.placed
+			and to.distance_to(want) < 0.001)
+	var flat_back := -to
+	flat_back.y = 0.0
+	_check("window: faces the head, level", pane.global_basis.z.dot(flat_back.normalized()) > 0.999
+			and absf(pane.global_basis.x.y) < 0.001)
+	var hand := FakeHand.new()
+	root.add_child(hand)
+	hand.global_position = cam.global_position + Vector3(0.15, -0.3, 0.0)
+	hand.look_at(pane.global_position, Vector3.UP)
+	var d := hand.global_position.distance_to(pane.global_position)
+	var aim: Dictionary = pane.hit(hand.get_ray_origin(), hand.get_ray_direction())
+	_check("window: a laser meets it (%s)" % [aim], not aim.is_empty() and absf(float(aim["distance"]) - d) < 0.01)
+	var away := FakeHand.new()
+	root.add_child(away)
+	away.global_position = hand.global_position
+	away.look_at(hand.global_position + Vector3.UP, Vector3.BACK)
+	_check("window: a laser pointing away misses it", pane.hit(away.get_ray_origin(), away.get_ray_direction()).is_empty())
+	away.free()
+	agents._aims[hand] = aim
+	_check("window: the squeeze takes it", agents.on_grip(hand, true) and agents.holding(hand) and agents.owns_laser(hand))
+	hand.rotate_y(deg_to_rad(15.0))
+	agents._hold(hand)
+	_check("window: it rides the ray", pane.global_position.distance_to(hand.get_ray_origin()
+			+ hand.get_ray_direction() * d) < 0.001)
+	_check("window: held, it stays level", absf(pane.global_basis.x.y) < 0.001)
+	var w: float = pane.width
+	agents.on_stick(hand, Vector2(1.0, 0.0), 0.5)
+	_check("window: stick right while holding, bigger (%.2f to %.2f)" % [w, pane.width], pane.width > w)
+	agents.on_stick(hand, Vector2(0.0, 1.0), 0.5)
+	_check("window: stick up while holding, further", float(agents._holds[hand]["distance"]) > d)
+	_check("window: while held, the stick isn't the terminal's", not agents.has_input(hand))
+	agents.on_grip(hand, false)
+	_check("window: letting go; its width is kept", not agents.holding(hand)
+			and absf(float(main.settings.get_value("agent_window", "width", 0.0)) - snappedf(pane.width, 0.01)) < 0.001)
+	pane.set_width(100.0)
+	_check("window: the width has limits", pane.width == LocalAgents.AgentPane.MAX_WIDTH_M)
+	agents._aims.erase(hand)
+	hand.free()
+	pane.set_width(LocalAgents.AgentPane.WIDTH_M)
+	agents.hide_pane()
+
+
 func _detached_checks() -> void:
 	var kept := OS.get_environment("XDG_RUNTIME_DIR")
 	var args: Array[String] = ["-class", "frame-claude", "-e", "/bin/sh", "run.sh"]
@@ -974,7 +1042,7 @@ func _small_checks() -> void:
 	_check("the entry's rows: the second action is the big screen", rows.any(func(r: Dictionary) -> bool:
 			return r["kind"] == "agent_screen"))
 	_check("a running agent: both starts are just Show", rows.any(func(r: Dictionary) -> bool:
-			return r["kind"] == "agent_pane" and str(r["text"]) == "Show on the controller")
+			return r["kind"] == "agent_pane" and str(r["text"]) == "Show the window")
 			and not rows.any(func(r: Dictionary) -> bool: return r["kind"] == "agent_plain"))
 	_check("a running agent: restart, briefed or plain", rows.any(func(r: Dictionary) -> bool:
 			return r["kind"] == "agent_restart") and rows.any(func(r: Dictionary) -> bool:

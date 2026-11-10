@@ -1,38 +1,41 @@
 extends Node3D
 
-## The terminal of an agent on the headset (scripts/agents/local_agents.gd), held on the pointer controller where the
-## card sits (watch_card.hand_transform): in the plane of the X, Y and B buttons, its sides parallel to the laser, its
-## bottom edge just past the controller's front. It shows the window's picture as it is: sRGB values in a UNORM texture,
-## decoded here. Its size is its window's shape at PANE_WIDTH_M; on a render layer the snapshots for assistants don't
-## see (VideoScreen.PRIVATE_LAYER), so its contents stay in the headset.
+## The terminal of an agent on the headset (scripts/agents/local_agents.gd) in a window of its own that stays where it
+## is put in the room, like a PC window's pane (scripts/pc/pc_pane.gd; the user, 2026-11-10: off the controller, a
+## window that floats, to place and size). The first time it shows in a run it comes up in front of the head, a little
+## below the eyes, facing it; after that it opens where it was left. local_agents moves it (squeeze and hold with the
+## laser on it) and sizes it (the stick while holding). It shows the window's picture as it is: sRGB values in a UNORM
+## texture, decoded here. Its shape is its window's; on a render layer the snapshots for assistants don't see
+## (VideoScreen.PRIVATE_LAYER), so its contents stay in the headset.
 ##
 ## Three small signs in the shader: a red dot in the corner while recording, an amber edge while the agent waits on a
-## prompt, a blue edge while the viewer's look gives the hand to it (the stick and the trigger go to it either way). With
-## both, the blue runs inside the amber.
+## prompt, a blue edge while the viewer's look (or a laser) gives the hand to it (the stick and the trigger go to it
+## either way). With both, the blue runs inside the amber.
 ##
-## It comes and goes with an ease of its opacity and a small growth out of its bottom edge, the controller's end. One
-## amount runs both ways, so a press in the middle turns it back from where it is.
+## It comes and goes with an ease of its opacity and a small growth out of its bottom edge. One amount runs both ways,
+## so a press in the middle turns it back from where it is.
 ##
 ##   app, set_texture(tex, size), set_shown(on), set_recording(on), set_waiting(on), set_looked_at(on), is_shown()
-##   looked_at(origin, dir, margin_deg) -> bool; faded: gone from sight
-## Without XR (a desktop, a picture) it floats in front of the camera.
+##   set_width(m), width, place_in_front(), face(head_pos), face_along(front)
+##   looked_at(origin, dir, margin_deg) -> bool; hit(origin, dir) -> {distance} or {}; faded: gone from sight
 
 signal faded
 
-const WatchCard := preload("res://ui/watch_card.gd")
 const VideoScreen := preload("res://scripts/video_screen.gd")
 
-## The pane's width, metres. The window is 1920 x 1080 on the headset (agent_terminal.gd, COLUMNS, FONT_PX): at 30 cm
-## by 17 it is about 37 x 21 degrees at arm's length (about 45 cm), and its 28 px type is 0.56 degrees an em, a capital
-## 0.41. It grew from 26 cm when the type went from 40 px to 28 (Claude Code's first screen needs about 100 columns), so
-## the text shrank by less than the font did.
-const PANE_WIDTH_M := 0.30
+## The window's width when it first shows, metres, and how far ahead. The terminal is 1920 x 1080 (agent_terminal.gd,
+## COLUMNS, FONT_PX): 60 cm at 90 cm is about 37 x 21 degrees, the size it had on the controller (30 cm at about
+## 45 cm), so its 28 px type is about 0.56 degrees an em, a capital 0.41.
+const WIDTH_M := 0.60
+const DISTANCE_M := 0.90
+## How far below the eyes its middle comes up, metres.
+const DROP_M := 0.12
+## The stick's limits for its width.
+const MIN_WIDTH_M := 0.2
+const MAX_WIDTH_M := 4.0
 const FADE_SECONDS := 0.2
 ## Its size at the far end of the fade.
 const FADE_SCALE := 0.92
-## Where it floats without XR: this far ahead and this far down.
-const DESK_DISTANCE := 0.55
-const DESK_DROP := 0.04
 const Pane := preload("res://ui/pane.gd")
 
 const SHADER := """
@@ -67,7 +70,12 @@ var _mesh: MeshInstance3D
 var _target := 0.0
 ## 0 gone to 1 shown, even in time; _apply_fade() eases it.
 var _amount := 0.0
-var _height := PANE_WIDTH_M
+## Metres across; the height follows the window's shape.
+var width := WIDTH_M
+var _aspect := 9.0 / 16.0
+var _height := WIDTH_M * 9.0 / 16.0
+## It has been put somewhere in this run (the first show places it in front).
+var placed := false
 
 
 func _ready() -> void:
@@ -92,16 +100,27 @@ func set_texture(tex: Texture2D, size: Vector2i) -> void:
 	_mat.set_shader_parameter("tex", tex)
 	if size.x > 0 and size.y > 0:
 		_mat.set_shader_parameter("pixels", Vector2(size))
-		_height = PANE_WIDTH_M * float(size.y) / size.x
-		(_mesh.mesh as QuadMesh).size = Vector2(PANE_WIDTH_M, _height)
-		_apply_fade()
+		_aspect = float(size.y) / size.x
+		_layout()
+
+
+func set_width(w: float) -> void:
+	width = clampf(w, MIN_WIDTH_M, MAX_WIDTH_M)
+	_layout()
+
+
+func _layout() -> void:
+	_height = width * _aspect
+	(_mesh.mesh as QuadMesh).size = Vector2(width, _height)
+	_apply_fade()
 
 
 func set_shown(on: bool) -> void:
 	_target = 1.0 if on else 0.0
 	if on:
 		visible = true
-		place()
+		if not placed:
+			place_in_front()
 
 
 func is_shown() -> bool:
@@ -133,6 +152,18 @@ func looked_at(origin: Vector3, dir: Vector3, margin_deg: float) -> bool:
 	return absf(hit.x) <= half.x + margin and absf(hit.y - _mesh.position.y) <= half.y + margin
 
 
+## Where a ray (a laser) meets the window: {distance} along the ray, or {} when it misses or comes from behind.
+func hit(origin: Vector3, dir: Vector3) -> Dictionary:
+	if not visible or _target <= 0.0 or not looked_at(origin, dir, 0.0):
+		return {}
+	var n := global_basis.z.normalized()
+	var denom := n.dot(dir)
+	if absf(denom) < 1e-5:
+		return {}
+	var t := n.dot(global_position - origin) / denom
+	return {"distance": t} if t > 0.0 else {}
+
+
 func _apply_fade() -> void:
 	var eased := smoothstep(0.0, 1.0, _amount)
 	var size := lerpf(FADE_SCALE, 1.0, eased)
@@ -142,21 +173,38 @@ func _apply_fade() -> void:
 	_mesh.position.y = -0.5 * (1.0 - size) * _height
 
 
-func place() -> void:
-	if app == null:
-		return
-	if app.use_xr and app.ui != null and app.ui.pointer_hand != null:
-		global_transform = WatchCard.hand_transform(app.ui.pointer_hand, _height)
+## In front of the head (level, whatever the head's tilt), a little below the eyes, facing it.
+func place_in_front() -> void:
+	if app == null or app.camera == null:
 		return
 	var cam: Node3D = app.camera
-	var at: Vector3 = cam.global_position - cam.global_basis.z * DESK_DISTANCE - cam.global_basis.y * DESK_DROP
-	global_transform = Transform3D(cam.global_basis, at)
+	var fwd := -cam.global_basis.z
+	fwd.y = 0.0
+	fwd = fwd.normalized() if fwd.length() > 0.01 else Vector3.FORWARD
+	global_position = cam.global_position + fwd * DISTANCE_M + Vector3.DOWN * DROP_M
+	face(cam.global_position)
+	placed = true
+
+
+## Turns the picture's front (+Z) toward the head, level (no tilt, no roll).
+func face(head_pos: Vector3) -> void:
+	var to := head_pos - global_position
+	to.y = 0.0
+	if to.length() < 0.01:
+		return
+	global_basis = Basis.looking_at(-to.normalized(), Vector3.UP)
+
+
+## Turns the picture's front (+Z) to `front`, kept level (no roll); a front almost straight up or down is left alone.
+func face_along(front: Vector3) -> void:
+	if front.length() < 0.01 or absf(front.normalized().y) > 0.97:
+		return
+	global_basis = Basis.looking_at(-front.normalized(), Vector3.UP)
 
 
 func _process(delta: float) -> void:
 	if not visible:
 		return
-	place()
 	if _amount != _target:
 		_amount = move_toward(_amount, _target, delta / FADE_SECONDS)
 		_apply_fade()

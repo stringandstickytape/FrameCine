@@ -1297,6 +1297,10 @@ func _on_grip(hand: XRController3D, pressed: bool) -> void:
 	if features != null and features.pc_windows.on_grip(h, pressed):
 		_grip_down.erase(h)
 		return
+	# On an agent's terminal window: the same (scripts/agents/local_agents.gd).
+	if local_agents.on_grip(h, pressed):
+		_grip_down.erase(h)
+		return
 	# Squeeze no longer moves the screen or turns it to the gaze (the user, in the headset, 2026-10-31: the Room and
 	# Picture controls and Reset room do that in terms of the room). A quick squeeze is still a right click on a
 	# captured window; a held squeeze is the zoom lens's modifier in 180 / 360 (zoom_lens.gd reads it itself).

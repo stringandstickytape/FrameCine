@@ -719,6 +719,18 @@ msgstr "版本 %s 已下载。在菜单中确认后才会安装。"
 msgid "Downloading version %s"
 msgstr "正在下载版本 %s"
 
+msgid "Check now"
+msgstr "立即检查"
+
+msgid "Looking for a new version..."
+msgstr "正在查找新版本..."
+
+msgid "Version %s is the newest."
+msgstr "版本 %s 已是最新。"
+
+msgid "Could not check for updates. Try again later."
+msgstr "无法检查更新，请稍后再试。"
+
 msgid "Updated to version %s"
 msgstr "已更新到版本 %s"
 
@@ -1191,8 +1203,8 @@ msgstr "未安装"
 msgid "Install"
 msgstr "安装"
 
-msgid "Show on the controller"
-msgstr "在手柄上显示"
+msgid "Show the window"
+msgstr "显示窗口"
 
 msgid "Restart, briefed on the player"
 msgstr "重新启动，附带播放器说明"
@@ -1206,8 +1218,8 @@ msgstr "启动，附带播放器说明"
 msgid "Start plain, no briefing"
 msgstr "直接启动，不附说明"
 
-msgid "Hide from the controller (it keeps working)"
-msgstr "从手柄上隐藏（它会继续工作）"
+msgid "Hide the window (it keeps working)"
+msgstr "隐藏窗口（它会继续工作）"
 
 msgid "Put it on the big screen"
 msgstr "放到大屏幕上"
@@ -3197,8 +3209,8 @@ msgstr "检查更新"
 msgid "Restart now"
 msgstr "立即重启"
 
-msgid "Once a day the player asks GitHub for a new version and downloads it in the background. Only your IP address goes to GitHub."
-msgstr "播放器每天向 GitHub 查询一次新版本，并在后台下载。只有你的 IP 地址会发送给 GitHub。"
+msgid "At each start, and once a day while it runs, the player asks GitHub for a new version and downloads it in the background. It installs only when you say yes. Only your IP address goes to GitHub."
+msgstr "每次启动时，以及运行期间每天一次，播放器会向 GitHub 查询新版本，并在后台下载。只有在你确认后才会安装。只有你的 IP 地址会发送给 GitHub。"
 
 msgid "example.com, https://.../film.mkv or udp://@:1234"
 msgstr "example.com、https://.../film.mkv 或 udp://@:1234"

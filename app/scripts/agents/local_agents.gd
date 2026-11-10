@@ -1,11 +1,16 @@
 extends Node
 
 ## Agents running on the headset itself (docs/assistant.md, "Agents on the headset"; the table and the files are in
-## agent_terminal.gd). The terminal IS the conversation: its window shows on the pane on the pointer controller
-## (ui/agent_pane.gd) while the film carries on, and push-to-talk types straight into it. One agent is active: on the
-## pane and taking the voice. A second X11WindowSource alongside the screen's source captures it, and only while the
-## pane shows. The terminals outlive the player and film changes: nothing here closes one, and each is found again by
-## its window class.
+## agent_terminal.gd). The terminal IS the conversation: it shows in a window that floats where it is put
+## (ui/agent_pane.gd; "the pane" below) while the film carries on, and push-to-talk types straight into it. One agent is
+## active: in the window and taking the voice. A second X11WindowSource alongside the screen's source captures it, and
+## only while the window shows. The terminals outlive the player and film changes: nothing here closes one, and each is
+## found again by its window class.
+##
+## The window is moved and sized as a PC window's pane is (scripts/pc/pc_windows.gd; the user, 2026-11-10): squeeze and
+## hold with a laser on it, and it follows the laser at that distance, turning with the hand; the stick while holding
+## makes it bigger or smaller (right, left) and further or nearer (up, down). Its width is kept ([agent_window] width);
+## where it is, for the run. A laser on it gives it the hand as the look does.
 ##
 ## Talk (the bumper on the pointer hand) shows the pane; a quick tap while it shows hides it (the agent keeps working).
 ## Y on the right controller, while that is the pointer hand, shows or hides it too, and with no agent running starts the
@@ -78,6 +83,11 @@ const GAZE_ON := 0.15
 const GAZE_OFF := 0.4
 const SUBTITLE_LINES := 4
 const INSTALL_CARD := "agent_install"
+## The window's stick while holding it, as a PC pane's (scripts/pc/pc_windows.gd); its width is kept in
+## [agent_window] width.
+const STICK_DEAD := 0.2
+const RESIZE_RATE := 0.8
+const SECTION_WINDOW := "agent_window"
 const WORDS := {"one": "1", "two": "2", "three": "3", "four": "4", "escape": "escape", "1": "1", "2": "2", "3": "3",
 		"4": "4", "up": "up", "down": "down", "enter": "enter"}
 
@@ -113,6 +123,13 @@ var _looking := false
 var _look_time := 0.0
 ## Keys down in the terminal: their release follows them, wherever the viewer looks by then.
 var _keys_down := {}
+## The window, as a PC window's pane (scripts/pc/pc_windows.gd): hand -> {distance} while its laser is on it, hand ->
+## {distance, rel} while it holds it, hand -> whether we lit its laser.
+var _aims := {}
+var _holds := {}
+var _lit := {}
+## Tests: hands count as tracked without XR.
+var test_xr := false
 
 
 func _ready() -> void:
@@ -120,6 +137,8 @@ func _ready() -> void:
 	_pane.name = "AgentPane"
 	_pane.app = main
 	add_child(_pane)
+	if main.get("settings") != null:
+		_pane.set_width(float(main.settings.get_value(SECTION_WINDOW, "width", AgentPane.WIDTH_M)))
 	_pane.faded.connect(_on_pane_faded)
 	_open_x()
 	_refresh_running()
@@ -407,14 +426,109 @@ func _process(delta: float) -> void:
 			_write_context()
 	if pane_shown() and _window != 0 and x != null:
 		x.call("update")
+	_update_hands()
 	_update_look(delta)
+
+
+# --- The window: lasers, holding, sizing (as a PC window's pane) ---------------------------------------------------
+
+## The laser is free for the window on this hand (the menu, a held object or a PC pane don't have it).
+func _hand_free(hand: Node) -> bool:
+	var ui: Node = main.get("ui")
+	if ui != null and ui.has_method("laser_in_use") and ui.laser_in_use(hand):
+		return false
+	var f: Node = main.get("features")
+	for name: String in ["grab", "pc_windows"]:
+		var other: Node = f.get(name) if f != null else null
+		if other != null and other.owns_laser(hand):
+			return false
+	return true
+
+
+func _update_hands() -> void:
+	var hands: Array = main.get("hands") if main.get("hands") != null else []
+	if not (main.use_xr or test_xr):
+		return
+	for hand: Node in hands:
+		if _holds.has(hand):
+			_hold(hand)
+			continue
+		var aim := {}
+		if pane_shown() and (hand.get_is_active() or test_xr) and _hand_free(hand):
+			aim = _pane.hit(hand.get_ray_origin(), hand.get_ray_direction())
+		if aim.is_empty():
+			_aims.erase(hand)
+		else:
+			_aims[hand] = aim
+		var want := not aim.is_empty()
+		if want:
+			hand.set_laser(true, float(aim["distance"]), true)
+		elif bool(_lit.get(hand, false)):
+			var ui: Node = main.get("ui")
+			if ui == null or not ui.has_method("laser_in_use") or not ui.laser_in_use(hand):
+				hand.set_laser(false)
+		_lit[hand] = want
+
+
+## The squeeze with the laser on the window takes hold of it; letting go puts it there. True when used.
+func on_grip(hand: Node, pressed: bool) -> bool:
+	if not pressed:
+		if _holds.has(hand):
+			_holds.erase(hand)
+			_save_width()
+			return true
+		return false
+	if not _aims.has(hand):
+		return false
+	# The window's turn against the controller's, so turning the hand turns it, as if held on the end of the ray.
+	var rel: Basis = (hand.global_basis as Basis).orthonormalized().inverse() * _pane.global_basis.orthonormalized()
+	_holds[hand] = {"distance": float(_aims[hand]["distance"]), "rel": rel}
+	return true
+
+
+func _hold(hand: Node) -> void:
+	if not pane_shown():
+		_holds.erase(hand)
+		return
+	var hold: Dictionary = _holds[hand]
+	_pane.global_position = hand.get_ray_origin() + hand.get_ray_direction() * float(hold["distance"])
+	var turned: Basis = (hand.global_basis as Basis).orthonormalized() * (hold["rel"] as Basis)
+	_pane.face_along(turned.z)
+	_pane.placed = true
+	hand.set_laser(true, float(hold["distance"]), true)
+
+
+## The stick while holding the window, as for a PC pane: right bigger, left smaller; up further, down nearer. The
+## stronger direction only. True when used.
+func _hold_stick(hand: Node, stick: Vector2, delta: float) -> bool:
+	if not _holds.has(hand):
+		return false
+	if absf(stick.x) > STICK_DEAD and absf(stick.x) >= absf(stick.y):
+		_pane.set_width(_pane.width * (1.0 + stick.x * RESIZE_RATE * delta))
+	elif absf(stick.y) > STICK_DEAD:
+		_holds[hand]["distance"] = clampf(float(_holds[hand]["distance"]) * (1.0 + stick.y * 1.5 * delta), 0.3, 6.0)
+	return true
+
+
+func holding(hand: Node) -> bool:
+	return _holds.has(hand)
+
+
+func owns_laser(hand: Node) -> bool:
+	return _holds.has(hand) or _aims.has(hand)
+
+
+func _save_width() -> void:
+	if main.get("settings") != null:
+		main.settings.set_value(SECTION_WINDOW, "width", snappedf(_pane.width, 0.01))
 
 
 func _update_look(delta: float) -> void:
 	if not pane_shown() or main.menu_shown or _intro_pending():
 		_set_looking(false)
 		return
-	var on := _gaze_on_pane() or (_looking and _stick_hold >= 0.0)
+	# A laser on the window gives it the hand as the look does.
+	var on := _gaze_on_pane() or not _aims.is_empty() or not _holds.is_empty() or (_looking and _stick_hold >= 0.0)
 	_look_time = _look_time + delta if on != _looking else 0.0
 	if on != _looking and _look_time >= (GAZE_OFF if _looking else GAZE_ON):
 		_set_looking(on)
@@ -788,10 +902,10 @@ func _takes_keyboard() -> bool:
 	return _looking or not (window_override or main.window_pointer.is_active())
 
 
-## The stick and the trigger belong to the agent now: its pane shows, on the pointer hand, and a prompt waits, the
-## squeeze is held or the viewer looks at it.
+## The stick and the trigger belong to the agent now: its window shows, on the pointer hand, and a prompt waits, the
+## squeeze is held or the viewer looks at it. Not while that hand holds the window (its stick sizes it then).
 func has_input(hand: Node) -> bool:
-	if not pane_shown() or hand != _pointer_hand() or main.menu_shown or _intro_pending():
+	if not pane_shown() or hand != _pointer_hand() or main.menu_shown or _intro_pending() or _holds.has(hand):
 		return false
 	return _waiting or _looking or bool(hand.get("grip_down"))
 
@@ -836,6 +950,8 @@ func on_trigger(hand: Node, pressed: bool) -> bool:
 
 
 func on_stick(hand: Node, stick: Vector2, delta: float) -> bool:
+	if _hold_stick(hand, stick, delta):
+		return true
 	if not has_input(hand):
 		return false
 	if maxf(absf(stick.x), absf(stick.y)) < STICK_THRESHOLD:
@@ -977,7 +1093,7 @@ static func register_commands(cmd_host: Node) -> void:
 			if la.active == id and la.is_running(id):
 				la.open_agent(id)
 		return {"active": la.active, "pane_shown": la.pane_shown()}, {
-		"description": "Hides the agent's pane from the controller, as Hide from the controller does; the agent keeps "
+		"description": "Hides the agent's window, as Hide the window does; the agent keeps "
 				+ "working and keeps the voice.",
 		"level": "control", "returns": "{active, pane_shown}", "assistant": "apps"})
 	DevCommands.register("agent_big_screen", func(args: Dictionary, ctx: DevCommands.Call) -> Variant:

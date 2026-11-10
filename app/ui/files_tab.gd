@@ -835,14 +835,14 @@ func _list_agent(id: String) -> void:
 		listing_changed.emit()
 		return
 	if running:
-		_add_row(tr("Show on the controller"), {"kind": "agent_pane", "path": id})
+		_add_row(tr("Show the window"), {"kind": "agent_pane", "path": id})
 		_add_row(tr("Restart, briefed on the player"), {"kind": "agent_restart", "path": id})
 		_add_row(tr("Restart plain, no briefing"), {"kind": "agent_restart_plain", "path": id})
 	else:
 		_add_row(tr("Start, briefed on the player"), {"kind": "agent_pane", "path": id})
 		_add_row(tr("Start plain, no briefing"), {"kind": "agent_plain", "path": id})
 	if agents.active == id and agents.pane_shown():
-		_add_row(tr("Hide from the controller (it keeps working)"), {"kind": "agent_hide", "path": id})
+		_add_row(tr("Hide the window (it keeps working)"), {"kind": "agent_hide", "path": id})
 	_add_row(tr("Put it on the big screen"), {"kind": "agent_screen", "path": id})
 	listing_changed.emit()
 
