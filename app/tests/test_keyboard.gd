@@ -1,12 +1,11 @@
 ## The floating keyboard without XR: physical layout, balanced events, modifier chords, repeat, routing, the real
-## menu's fields, geometry and persistence, two-hand pokes, synthetic swipes and their release-time cost.
+## menu's fields, geometry and persistence, and two-hand pokes.
 ## godot --headless --xr-mode off --path app --script res://tests/test_keyboard.gd
 extends SceneTree
 
 const Layout := preload("res://keyboard/key_layout.gd")
 const Router := preload("res://keyboard/keyboard_router.gd")
 const State := preload("res://keyboard/key_state.gd")
-const Decoder := preload("res://keyboard/swipe_decoder.gd")
 const Keyboard := preload("res://keyboard/floating_keyboard.gd")
 const Commands := preload("res://scripts/dev/dev_commands.gd")
 const CommandHost := preload("res://scripts/dev/command_host.gd")
@@ -52,7 +51,6 @@ func _run() -> void:
 	await _fields_and_routing()
 	await _pane()
 	await _provider_order()
-	await _swipes()
 	await _window_paths()
 	main.queue_free()
 	harness.queue_free()
@@ -284,10 +282,10 @@ func _pane() -> void:
 	var pose := kb.global_transform
 	var head: Vector3 = main.camera.global_position
 	_check("first placement below and in front of the head", pose.origin.y < head.y and pose.origin.distance_to(head) < 1.0)
-	_check("ordinary board with private candidates and gestures", kb._mesh.get_layer_mask_value(1)
-			and not kb._candidate_mesh.get_layer_mask_value(1)
-			and kb._candidate_mesh.get_layer_mask_value(kb.VideoScreen.PRIVATE_LAYER)
-			and kb._candidate_surface.candidates_only)
+	_check("ordinary board with private key lights", kb._mesh.get_layer_mask_value(1)
+			and not kb._light_mesh.get_layer_mask_value(1)
+			and kb._light_mesh.get_layer_mask_value(kb.VideoScreen.PRIVATE_LAYER)
+			and kb._light_surface.lights_only)
 	_check("keyboard tilts its front towards the head", pose.basis.z.dot((head - pose.origin).normalized()) > 0.999)
 	var ray := kb.hit(pose.origin + pose.basis.z, -pose.basis.z)
 	_check("ray hits the face", not ray.is_empty() and is_equal_approx(float(ray.distance), 1.0))
@@ -344,25 +342,34 @@ func _pane() -> void:
 			and kb._pokes.is_empty() and not kb.owns_laser(hand))
 	kb.set_shown(true)
 	_check("reopening preserves the world pose", kb.global_transform.is_equal_approx(pose))
-	# Buffered case belongs to trigger down, even if the modifier comes up before the letter is released.
+	# A letter goes down with the trigger: no wait for the release.
 	recorder.events.clear()
 	kb.state.press("shift", kb.state.find_key(KEY_SHIFT))
 	index = kb.state.find_key(KEY_A)
 	kb.aims[hand] = {"key": index, "point": (kb.state.keys[index].rect as Rect2).get_center(), "distance": 1.0}
 	kb.on_trigger(hand, true)
+	_check("laser letter is sent on trigger down", _typed(recorder.events) == "A")
 	kb.state.release("shift")
 	kb.on_trigger(hand, false)
-	_check("buffered tap keeps held Shift's original case", _typed(recorder.events) == "A" and not kb.state.modifier_on(KEY_SHIFT))
+	_check("laser tap keeps held Shift's case", _typed(recorder.events) == "A" and not kb.state.modifier_on(KEY_SHIFT)
+			and not recorder.events[-1].pressed)
+	kb.aims[hand] = {"key": -1, "point": kb.CLOSE.get_center(), "distance": 1.0}
+	kb.on_trigger(hand, true)
+	_check("Close box in the bar closes the keyboard", not kb.visible)
+	kb.on_trigger(hand, false)
+	kb.set_shown(true)
+	_check("no key lies under the bar", kb.state.keys.all(func(k: Dictionary) -> bool: return (k.rect as Rect2).position.y >= 1.0))
+	kb.aims[hand] = {"key": index, "point": (kb.state.keys[index].rect as Rect2).get_center(), "distance": 1.0}
 	kb.state.press("shift", kb.state.find_key(KEY_SHIFT))
 	kb.state.release("shift")
+	recorder.events.clear()
 	kb.on_trigger(hand, true)
 	var other_index := kb.state.find_key(KEY_B)
 	kb.aims[other] = {"key": other_index, "point": (kb.state.keys[other_index].rect as Rect2).get_center(), "distance": 1.0}
 	kb.on_trigger(other, true)
-	recorder.events.clear()
 	kb.on_trigger(hand, false)
 	kb.on_trigger(other, false)
-	_check("only the first of two gestures consumes one-shot Shift", _typed(recorder.events) == "Ab")
+	_check("only the first of two taps consumes one-shot Shift", _typed(recorder.events) == "Ab")
 	var moved := kb.global_position
 	var world_pose := kb.global_transform
 	main.ui.hide_panel()
@@ -382,21 +389,23 @@ func _pane() -> void:
 	if "--keyboard-shot" in OS.get_cmdline_user_args() and DisplayServer.get_name() != "headless":
 		kb.set_shown(true)
 		kb._surface.queue_redraw()
-		kb.alternatives.assign(["hello", "help", "hill", "held"])
-		kb._candidate_surface.queue_redraw()
+		kb.aims[hand] = {"key": kb.state.find_key(KEY_G), "point": Vector2.ZERO, "distance": 1.0}
+		kb._light_surface.queue_redraw()
 		for i in 8:
 			kb._surface.queue_redraw()
-			kb._candidate_surface.queue_redraw()
+			kb._light_surface.queue_redraw()
 			await _frames(1)
 		RenderingServer.force_draw()
 		var board := kb._viewport.get_texture().get_image()
 		var ink := 0
 		for x in range(205, 295):
-			for y in range(205, 295):
+			for y in range(105, 195):
 				if board.get_pixel(x, y).r > 0.4: ink += 1
 		_check("rendered ordinary F1 legend has visible ink", ink > 30)
+		_check("the board has a solid ground between keys", board.get_pixel(1150, 205).a > 0.8
+				and board.get_pixel(1450, 150).a > 0.8)
 		board.save_png("/tmp/framecine-keyboard.png")
-		kb._candidate_viewport.get_texture().get_image().save_png("/tmp/framecine-keyboard-gestures.png")
+		kb._light_viewport.get_texture().get_image().save_png("/tmp/framecine-keyboard-gestures.png")
 		kb.set_shown(false)
 
 
@@ -476,63 +485,6 @@ func _provider_order() -> void:
 	_check("X11 releases the shared modifier once", terminal.events == [[KEY_SHIFT, true], [KEY_SHIFT, false]])
 	fixture.queue_free()
 	await _frames(1)
-
-
-func _swipes() -> void:
-	var kb: Keyboard = main.ui.keyboard
-	while not kb._ready_words:
-		kb.step(0.0)
-		await _frames(1)
-	_check("shipped dictionary has 30,000 to 60,000 words", kb.decoder.word_count >= 30000 and kb.decoder.word_count <= 60000)
-	var centres := Layout.letters()
-	var worst := 0
-	for word in ["hello", "the", "keyboard", "frame"]:
-		var points := PackedVector2Array()
-		for ch in word: points.append(centres[ch])
-		var start := Time.get_ticks_usec()
-		var words := kb.decoder.decode(points)
-		var elapsed := Time.get_ticks_usec() - start
-		worst = maxi(worst, elapsed)
-		print("Swipe decode %s: %.3f ms (%d words)" % [word, elapsed / 1000.0, kb.decoder.word_count])
-		_check("ideal swipe %s ranks first" % word, not words.is_empty() and words[0] == word)
-		_check("swipe %s below 100 ms on this desktop" % word, elapsed < 100000)
-		# Slight tracking noise must not need points exactly on the centres.
-		for i in points.size(): points[i] += Vector2(0.08, -0.06)
-		var noisy := kb.decoder.decode(points)
-		_check("noisy swipe %s still ranks first" % word, not noisy.is_empty() and noisy[0] == word)
-		for i in points.size(): points[i] += Vector2(0.31, 0.42)
-		var edge := kb.decoder.decode(points)
-		_check("swipe from key edges %s still ranks first (%s)" % [word, str(edge)], not edge.is_empty() and edge[0] == word)
-	print("Worst desktop swipe decode: %.3f ms; arm64 needs a worn test" % (worst / 1000.0))
-	kb.set_shown(true)
-	kb.router = router
-	kb.state.router = router
-	recorder.events.clear()
-	var hand: Node = main.right_hand
-	var index := kb.state.find_key(KEY_H)
-	kb.aims[hand] = {"key": index, "point": centres.h, "distance": 1.0}
-	kb.on_trigger(hand, true)
-	_check("ambiguous swipe letter buffered until release", recorder.events.is_empty())
-	for ch in "ello":
-		kb._trace(hand, {"point": centres[ch], "key": kb.state.find_key(ch.to_upper().unicode_at(0))})
-	kb.on_trigger(hand, false)
-	_check("swipe sends a word with its trailing space", _typed(recorder.events) == "hello ")
-	_check("best three alternatives available", kb.alternatives.size() == 4)
-	var old_count := recorder.events.size()
-	kb.choose_alternative(1)
-	var replacement := kb.alternatives[1] + " "
-	_check("alternative erases the previous word", recorder.events.slice(old_count).filter(func(e: InputEventKey) -> bool:
-		return e.keycode == KEY_BACKSPACE and e.pressed).size() == 6)
-	_check("alternative types its replacement", _typed(recorder.events.slice(old_count)) == replacement)
-	recorder.events.clear()
-	kb._press("back", kb.state.find_key(KEY_BACKSPACE))
-	kb.state.release("back")
-	_check("Backspace immediately after swipe erases the whole replacement", recorder.events.filter(func(e: InputEventKey) -> bool:
-		return e.keycode == KEY_BACKSPACE and e.pressed).size() == replacement.length())
-	kb.set_shown(false)
-	kb.router = Router.new()
-	kb.router.setup(main)
-	kb.state.router = kb.router
 
 
 func _typed(events: Array) -> String:

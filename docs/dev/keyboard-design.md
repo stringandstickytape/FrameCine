@@ -1,5 +1,8 @@
 # The keyboard: design (2026-11-10)
 
+> Swipe typing (below) was built and then removed on 2026-11-10: on the headset it was not accurate enough.
+> Keys now go down with the trigger. This page is the first build's brief, kept as written.
+
 A full PC keyboard in the headset, in a window of its own, that types into whatever has the focus: a field in the
 menu, a PC window (docs/pc-windows.md), an agent's terminal (docs/assistant.md, "Agents on the headset") and the
 browser on the big screen. Keys are pressed with the lasers and triggers, or by poking them with the controllers'

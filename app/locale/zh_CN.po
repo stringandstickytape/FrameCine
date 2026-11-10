@@ -3037,8 +3037,8 @@ msgstr "本网络中的手机和电脑可以下载和上传文件。扫描二维
 msgid "Development AI assistant"
 msgstr "开发用 AI 助手"
 
-msgid "Type with either laser or controller tip. Swipe words; hold the grip to move, the stick to resize."
-msgstr "用任一激光或手柄前端按键。滑动输入单词；按住握键移动，用摇杆调整大小。"
+msgid "Type with either laser or controller tip. Hold the grip to move it, and the stick to resize it."
+msgstr "用任一激光或手柄前端按键。按住握键移动，用摇杆调整大小。"
 
 #. Updates (scripts/update/updater.gd, ui/update_row.gd).
 msgid "Updates"

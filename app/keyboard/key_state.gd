@@ -162,42 +162,8 @@ func cancel() -> void:
 	modifiers.clear()
 
 
-## Words use the same physical keys as taps, so shells and remote windows get shortcuts and text by one route.
-func type_text(text: String, target: Dictionary) -> void:
-	for ch in text:
-		var upper := ch.to_upper()
-		var code := upper.unicode_at(0)
-		var index := find_key(code)
-		if index < 0:
-			continue
-		var letter := code >= KEY_A and code <= KEY_Z
-		var flags := {"shift": (ch != ch.to_lower()) != caps if letter else false}
-		var shift := find_key(KEY_SHIFT)
-		if bool(flags.shift):
-			router.key(event(shift, true, flags), target)
-		var e := event(index, true, flags)
-		# Word case is already chosen; Caps is a local light as well as a physical toggle in windows.
-		e.unicode = ch.unicode_at(0)
-		router.key(e, target)
-		e = e.duplicate()
-		e.pressed = false
-		router.key(e, target)
-		if bool(flags.shift):
-			router.key(event(shift, false, flags), target)
-
-
 func find_key(code: int) -> int:
 	for i in keys.size():
 		if int(keys[i].code) == code:
 			return i
 	return -1
-
-
-func erase(count: int, target: Dictionary) -> void:
-	var back := find_key(KEY_BACKSPACE)
-	for i in count:
-		var e := event(back, true)
-		router.key(e, target)
-		e = e.duplicate()
-		e.pressed = false
-		router.key(e, target)

@@ -31,7 +31,7 @@ msgstr ""
 msgid "the browser"
 msgstr ""
 
-#: keyboard/keyboard_surface.gd:30 scripts/pc/pc_windows.gd:267
+#: keyboard/keyboard_surface.gd:26 scripts/pc/pc_windows.gd:267
 msgid "Close"
 msgstr ""
 
@@ -4147,7 +4147,7 @@ msgid "Development AI assistant"
 msgstr ""
 
 #: ui/system_tab.gd:358
-msgid "Type with either laser or controller tip. Swipe words; hold the grip to move, the stick to resize."
+msgid "Type with either laser or controller tip. Hold the grip to move it, and the stick to resize it."
 msgstr ""
 
 #: ui/system_tab.gd:360

@@ -1,53 +1,53 @@
 ## The floating keyboard's ANSI US layout (docs/dev/keyboard-design.md). Positions and sizes are in key units;
-## drawing, pointing and the swipe dictionary all use these same centres. Legends are physical, never translated.
+## drawing and pointing both use these same boxes. Row 0 is the bar. Legends are physical, never translated.
 extends RefCounted
 
-const SIZE := Vector2(23, 8.25)
+const SIZE := Vector2(23, 7.25)
 const MODIFIERS := [KEY_SHIFT, KEY_CTRL, KEY_ALT, KEY_META]
 
 
 static func keys() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
-	_add(out, KEY_ESCAPE, "Esc", 0, 2)
+	_add(out, KEY_ESCAPE, "Esc", 0, 1)
 	for i in 12:
-		_add(out, KEY_F1 + i, "F%d" % (i + 1), 2 + i + floori(i / 4.0) * 0.5, 2)
+		_add(out, KEY_F1 + i, "F%d" % (i + 1), 2 + i + floori(i / 4.0) * 0.5, 1)
 	for i in 3:
-		_add(out, [KEY_PRINT, KEY_SCROLLLOCK, KEY_PAUSE][i], ["Print\nScreen", "Scroll\nLock", "Pause"][i], 15.5 + i, 2)
-	_row(out, "`1234567890-=", "~!@#$%^&*()_+", 0, 3.25)
-	_add(out, KEY_BACKSPACE, "Backspace", 13, 3.25, 2)
-	_add(out, KEY_TAB, "Tab", 0, 4.25, 1.5)
-	_row(out, "qwertyuiop[]", "QWERTYUIOP{}", 1.5, 4.25)
-	_add(out, KEY_BACKSLASH, "\\", 13.5, 4.25, 1.5, 1, KEY_LOCATION_UNSPECIFIED, "|")
-	_add(out, KEY_CAPSLOCK, "Caps Lock", 0, 5.25, 1.75)
-	_row(out, "asdfghjkl;'", "ASDFGHJKL:\"", 1.75, 5.25)
-	_add(out, KEY_ENTER, "Enter", 12.75, 5.25, 2.25)
-	_add(out, KEY_SHIFT, "Shift", 0, 6.25, 2.25, 1, KEY_LOCATION_LEFT)
-	_row(out, "zxcvbnm,./", "ZXCVBNM<>?", 2.25, 6.25)
-	_add(out, KEY_SHIFT, "Shift", 12.25, 6.25, 2.75, 1, KEY_LOCATION_RIGHT)
+		_add(out, [KEY_PRINT, KEY_SCROLLLOCK, KEY_PAUSE][i], ["Print\nScreen", "Scroll\nLock", "Pause"][i], 15.5 + i, 1)
+	_row(out, "`1234567890-=", "~!@#$%^&*()_+", 0, 2.25)
+	_add(out, KEY_BACKSPACE, "Backspace", 13, 2.25, 2)
+	_add(out, KEY_TAB, "Tab", 0, 3.25, 1.5)
+	_row(out, "qwertyuiop[]", "QWERTYUIOP{}", 1.5, 3.25)
+	_add(out, KEY_BACKSLASH, "\\", 13.5, 3.25, 1.5, 1, KEY_LOCATION_UNSPECIFIED, "|")
+	_add(out, KEY_CAPSLOCK, "Caps Lock", 0, 4.25, 1.75)
+	_row(out, "asdfghjkl;'", "ASDFGHJKL:\"", 1.75, 4.25)
+	_add(out, KEY_ENTER, "Enter", 12.75, 4.25, 2.25)
+	_add(out, KEY_SHIFT, "Shift", 0, 5.25, 2.25, 1, KEY_LOCATION_LEFT)
+	_row(out, "zxcvbnm,./", "ZXCVBNM<>?", 2.25, 5.25)
+	_add(out, KEY_SHIFT, "Shift", 12.25, 5.25, 2.75, 1, KEY_LOCATION_RIGHT)
 	var x := 0.0
 	for item: Array in [[KEY_CTRL, "Ctrl", 1.25, KEY_LOCATION_LEFT], [KEY_META, "Super", 1.25, KEY_LOCATION_LEFT],
 			[KEY_ALT, "Alt", 1.25, KEY_LOCATION_LEFT], [KEY_SPACE, "Space", 6.25, KEY_LOCATION_UNSPECIFIED],
 			[KEY_ALT, "Alt", 1.25, KEY_LOCATION_RIGHT], [KEY_META, "Super", 1.25, KEY_LOCATION_RIGHT],
 			[KEY_MENU, "Menu", 1.25, KEY_LOCATION_UNSPECIFIED], [KEY_CTRL, "Ctrl", 1.25, KEY_LOCATION_RIGHT]]:
-		_add(out, item[0], item[1], x, 7.25, item[2], 1, item[3])
+		_add(out, item[0], item[1], x, 6.25, item[2], 1, item[3])
 		x += float(item[2])
 	for i in 6:
 		_add(out, [KEY_INSERT, KEY_HOME, KEY_PAGEUP, KEY_DELETE, KEY_END, KEY_PAGEDOWN][i],
-				["Insert", "Home", "Page\nUp", "Delete", "End", "Page\nDown"][i], 15.5 + i % 3, 3.25 + floori(i / 3.0))
-	_add(out, KEY_UP, "Up", 16.5, 6.25)
+				["Insert", "Home", "Page\nUp", "Delete", "End", "Page\nDown"][i], 15.5 + i % 3, 2.25 + floori(i / 3.0))
+	_add(out, KEY_UP, "Up", 16.5, 5.25)
 	for i in 3:
-		_add(out, [KEY_LEFT, KEY_DOWN, KEY_RIGHT][i], ["Left", "Down", "Right"][i], 15.5 + i, 7.25)
+		_add(out, [KEY_LEFT, KEY_DOWN, KEY_RIGHT][i], ["Left", "Down", "Right"][i], 15.5 + i, 6.25)
 	for i in 4:
 		_add(out, [KEY_NUMLOCK, KEY_KP_DIVIDE, KEY_KP_MULTIPLY, KEY_KP_SUBTRACT][i],
-				["Num\nLock", "/", "*", "-"][i], 19 + i, 3.25)
+				["Num\nLock", "/", "*", "-"][i], 19 + i, 2.25)
 	for row in 3:
 		for col in 3:
 			var n := 7 - row * 3 + col
-			_add(out, KEY_KP_0 + n, str(n), 19 + col, 4.25 + row)
-	_add(out, KEY_KP_ADD, "+", 22, 4.25, 1, 2)
-	_add(out, KEY_KP_ENTER, "Enter", 22, 6.25, 1, 2)
-	_add(out, KEY_KP_0, "0", 19, 7.25, 2)
-	_add(out, KEY_KP_PERIOD, ".", 21, 7.25)
+			_add(out, KEY_KP_0 + n, str(n), 19 + col, 3.25 + row)
+	_add(out, KEY_KP_ADD, "+", 22, 3.25, 1, 2)
+	_add(out, KEY_KP_ENTER, "Enter", 22, 5.25, 1, 2)
+	_add(out, KEY_KP_0, "0", 19, 6.25, 2)
+	_add(out, KEY_KP_PERIOD, ".", 21, 6.25)
 	return out
 
 
@@ -60,14 +60,6 @@ static func _add(out: Array[Dictionary], code: int, legend: String, x: float, y:
 		location := KEY_LOCATION_UNSPECIFIED, shifted := "") -> void:
 	out.append({"code": code, "location": location, "legend": legend, "shifted": shifted,
 			"rect": Rect2(x + 0.045, y + 0.045, w - 0.09, h - 0.09)})
-
-
-static func letters() -> Dictionary:
-	var out := {}
-	for k in keys():
-		if int(k.code) >= KEY_A and int(k.code) <= KEY_Z:
-			out[str(k.legend)] = (k.rect as Rect2).get_center()
-	return out
 
 
 static func character(k: Dictionary, shift: bool, caps: bool, num: bool) -> int:

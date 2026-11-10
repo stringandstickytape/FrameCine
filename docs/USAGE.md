@@ -4,8 +4,8 @@ How to run the player on a desktop and on the headset, every command-line flag, 
 bindings, and the PC tools. To build the engine, see `docs/BUILD.md`. To install a release, see
 `docs/packaging.md`. Each feature has its own page in `docs/`; this page links to them.
 
-The floating [keyboard](keyboard.md) opens from **System → Keyboard**: use either laser, poke the keys, or swipe
-words into the focused menu field, PC window, terminal or browser. Hold the grip to move it and the stick to resize.
+The floating [keyboard](keyboard.md) opens from **System → Keyboard**: use either laser or poke the keys to type
+into the focused menu field, PC window, terminal or browser. Hold the grip to move it and the stick to resize.
 
 ## Run on a desktop
 
@@ -140,7 +140,7 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 | `[env_<env>]` | `light` (1.0), `reflection` (on where the room has a floor that can reflect) | Room light; floor reflection |
 | `[reflection]` | `strength` (0 to 0.6, 0.25) | Floor reflection (#62) |
 | `[room]` | `follow_playback` (true), `play_level` (0.35) | Lights dim while a film plays |
-| `[bias_light]` | `enabled` (false), `strength` (0 to 1, 1.0) | Room light from the picture's colours (#29) |
+| `[bias_light]` | `enabled` (true), `strength` (0 to 1, 1.0) | Room light from the picture's colours (#29) |
 | `[react]` | `enabled` (false), `strength` (0.5) | The room reacts to the film (#81) |
 | `[projector]` | `beam` (false), `grain` (0 to 1, 0), `weave` (0 to 1, 0) | Projector mode (#92) |
 | `[time_of_day]` | `mode` ("night"; or "clock", "dusk", "day"), `latitude` (50), `longitude` (from the time zone) | Time of day in the rooms (#84) |

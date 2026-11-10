@@ -355,7 +355,7 @@ func bind(p_app: Node) -> void:
 	box.add_child(W.button("Keyboard", func() -> void:
 		if app.ui != null and app.ui.keyboard != null:
 			app.ui.keyboard.set_shown(not app.ui.keyboard.visible)))
-	box.add_child(W.help("Type with either laser or controller tip. Swipe words; hold the grip to move, the stick to resize."))
+	box.add_child(W.help("Type with either laser or controller tip. Hold the grip to move it, and the stick to resize it."))
 
 	box.add_child(W.section("Updates"))
 	update_row = UpdateRow.new()

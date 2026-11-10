@@ -1,12 +1,12 @@
 ## A world-locked keyboard, made by ui_layer.gd, with the same grip and stick rules as a PC pane. Both hands can
-## aim and poke independently. The ordinary picture contains only keys; typed content stays in the target and is
-## never included in status or dev events. Closing, losing tracking or losing the XR session releases every key.
+## aim and poke independently. A key goes down when the trigger or the tip does, and up when it leaves. The ordinary
+## picture contains only the panel and the legends; typed content stays in the target and is never included in
+## status or dev events. Closing, losing tracking or losing the XR session releases every key.
 extends Node3D
 
 const Layout := preload("res://keyboard/key_layout.gd")
 const Router := preload("res://keyboard/keyboard_router.gd")
 const State := preload("res://keyboard/key_state.gd")
-const Decoder := preload("res://keyboard/swipe_decoder.gd")
 const Surface := preload("res://keyboard/keyboard_surface.gd")
 const Style := preload("res://ui/pane_style.gd")
 const VideoScreen := preload("res://scripts/video_screen.gd")
@@ -15,28 +15,23 @@ const MIN_WIDTH := 0.35
 const MAX_WIDTH := 1.6
 const POKE_DOWN := -0.006
 const POKE_UP := 0.012
+## The Close box in the bar, in key units.
+const CLOSE := Rect2(20.5, 0.17, 2.3, 0.66)
 var app: Node
 var router := Router.new()
 var state := State.new()
-var decoder := Decoder.new()
 var width := 0.85
 var aims := {}
-var alternatives: Array[String] = []
-var trails := {}
-var _worker: Thread
-var _ready_words := false
 var _viewport: SubViewport
 var _surface: Control
 var _mesh: MeshInstance3D
-var _candidate_mesh: MeshInstance3D
-var _candidate_viewport: SubViewport
-var _candidate_surface: Control
+var _light_mesh: MeshInstance3D
+var _light_viewport: SubViewport
+var _light_surface: Control
 var _holds := {}
-var _strokes := {}
 var _pokes := {}
 var _tips := {}
 var _lit := {}
-var _last_word := {}
 var _placed := false
 ## Desktop tests can supply tracked hand poses without an XR session, as pc_windows.gd does.
 var test_xr := false
@@ -71,36 +66,34 @@ func setup(p_app: Node) -> void:
 	_mesh.material_override = mat
 	_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_mesh)
-	# Suggestions and gestures reveal words. Keep their ink on the same private layer as windows, while the board
-	# and its generic target label remain ordinary room furniture in snapshots.
-	_candidate_viewport = SubViewport.new()
-	_candidate_viewport.size = _viewport.size
-	_candidate_viewport.transparent_bg = true
-	_candidate_viewport.disable_3d = true
-	_candidate_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
-	add_child(_candidate_viewport)
-	_candidate_surface = Surface.new()
-	_candidate_surface.keyboard = self
-	_candidate_surface.candidates_only = true
-	_candidate_surface.size = _surface.size
-	_candidate_viewport.add_child(_candidate_surface)
-	_candidate_mesh = MeshInstance3D.new()
-	_candidate_mesh.mesh = QuadMesh.new()
-	var candidate_mat := mat.duplicate() as StandardMaterial3D
-	candidate_mat.albedo_texture = _candidate_viewport.get_texture()
-	_candidate_mesh.material_override = candidate_mat
-	_candidate_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_candidate_mesh.set_layer_mask_value(1, false)
-	_candidate_mesh.set_layer_mask_value(VideoScreen.PRIVATE_LAYER, true)
-	_candidate_mesh.position.z = 0.001
-	add_child(_candidate_mesh)
+	# Lit and hovered keys reveal what is typed. Keep their ink on the same private layer as windows, while the
+	# board and its generic target label remain ordinary room furniture in snapshots.
+	_light_viewport = SubViewport.new()
+	_light_viewport.size = _viewport.size
+	_light_viewport.transparent_bg = true
+	_light_viewport.disable_3d = true
+	_light_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	add_child(_light_viewport)
+	_light_surface = Surface.new()
+	_light_surface.keyboard = self
+	_light_surface.lights_only = true
+	_light_surface.size = _surface.size
+	_light_viewport.add_child(_light_surface)
+	_light_mesh = MeshInstance3D.new()
+	_light_mesh.mesh = QuadMesh.new()
+	var light_mat := mat.duplicate() as StandardMaterial3D
+	light_mat.albedo_texture = _light_viewport.get_texture()
+	_light_mesh.material_override = light_mat
+	_light_mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_light_mesh.set_layer_mask_value(1, false)
+	_light_mesh.set_layer_mask_value(VideoScreen.PRIVATE_LAYER, true)
+	_light_mesh.position.z = 0.001
+	add_child(_light_mesh)
 	set_width(width)
-	_worker = Thread.new()
-	_worker.start(decoder.build)
 	Commands.register("keyboard", func(a: Dictionary, _ctx: Commands.Call) -> Variant:
 		set_shown(bool(a.get("show", true)))
 		return {"shown": visible, "width": width}, {
-			"description": "Shows or closes the floating keyboard. Keys and typed words are never returned.",
+			"description": "Shows or closes the floating keyboard. Keys and typed text are never returned.",
 			"params": [{"name": "show", "type": "bool", "default": true}],
 			"level": "control", "assistant": "control"})
 
@@ -114,7 +107,7 @@ func set_shown(on: bool) -> void:
 	visible = on
 	if _viewport != null:
 		_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
-		_candidate_viewport.render_target_update_mode = _viewport.render_target_update_mode
+		_light_viewport.render_target_update_mode = _viewport.render_target_update_mode
 
 
 func recentre() -> void:
@@ -134,7 +127,7 @@ func set_width(value: float) -> void:
 	width = clampf(value, MIN_WIDTH, MAX_WIDTH)
 	if _mesh != null:
 		(_mesh.mesh as QuadMesh).size = Vector2(width, width * Layout.SIZE.y / Layout.SIZE.x)
-		(_candidate_mesh.mesh as QuadMesh).size = (_mesh.mesh as QuadMesh).size
+		(_light_mesh.mesh as QuadMesh).size = (_mesh.mesh as QuadMesh).size
 
 
 func _save() -> void:
@@ -169,25 +162,17 @@ func key_at(point: Vector2) -> int:
 
 
 func owns_laser(hand: Node) -> bool:
-	return visible and (aims.has(hand) or _holds.has(hand) or _strokes.has(hand) or _pokes.has(hand))
+	return visible and (aims.has(hand) or _holds.has(hand) or state.held.has(hand) or _pokes.has(hand))
 
 
 ## ui_layer calls this before its own pointer, giving each hand one owner for this frame.
 func step(delta: float) -> void:
-	if _worker != null and not _worker.is_alive():
-		_worker.wait_to_finish()
-		_worker = null
-		_ready_words = true
 	if not visible:
 		return
 	if not app.session_focused:
 		cancel()
 		return
 	state.step(delta)
-	if not _last_word.is_empty():
-		var target := router.capture()
-		if target.is_empty() or target.identity != (_last_word.target as Dictionary).get("identity"):
-			_clear_word()
 	for hand: Node in app.hands:
 		if not (app.use_xr or test_xr) or not (hand.get_is_active() or test_xr):
 			_release_hand(hand)
@@ -203,15 +188,6 @@ func step(delta: float) -> void:
 			aims.erase(hand)
 		else:
 			aims[hand] = h
-			if _strokes.has(hand):
-				_trace(hand, h)
-		if _strokes.has(hand):
-			var s: Dictionary = _strokes[hand]
-			s.age = float(s.age) + delta
-			if not bool(s.swipe) and not bool(s.sent) and float(s.age) >= State.REPEAT_DELAY:
-				state.press(hand, int(s.index), s.target, s.modifiers)
-				(state.held[hand] as Dictionary).wait = State.REPEAT_INTERVAL
-				s.sent = true
 		_poke(hand, controller_tip(hand))
 		var on := owns_laser(hand)
 		if on:
@@ -219,18 +195,12 @@ func step(delta: float) -> void:
 		elif bool(_lit.get(hand, false)):
 			hand.set_laser(false)
 		_lit[hand] = on
-	for trail: Array in trails.values():
-		while not trail.is_empty() and Time.get_ticks_msec() / 1000.0 - float(trail[0].time) > 0.7:
-			trail.pop_front()
 	if _surface != null:
 		_surface.queue_redraw()
-		_candidate_surface.queue_redraw()
+		_light_surface.queue_redraw()
 
 
 func on_trigger(hand: Node, down: bool) -> bool:
-	if not down and _strokes.has(hand):
-		_finish(hand)
-		return true
 	if not down and state.held.has(hand):
 		state.release(hand)
 		return true
@@ -238,91 +208,12 @@ func on_trigger(hand: Node, down: bool) -> bool:
 	if h.is_empty() or not visible:
 		return false
 	if down and not _holds.has(hand):
-		var point: Vector2 = h.point
-		if Rect2(20.5, 0.12, 2.3, 0.65).has_point(point):
+		if CLOSE.has_point(h.point):
 			set_shown(false)
-		elif point.y >= 1.0 and point.y <= 1.7:
-			choose_alternative(clampi(int(point.x / 7.6) + 1, 1, 3))
-		else:
-			var index := int(h.key)
-			if index >= 0:
-				var code := int(state.keys[index].code)
-				if code >= KEY_A and code <= KEY_Z and not state.modifier_on(KEY_CTRL) \
-						and not state.modifier_on(KEY_ALT) and not state.modifier_on(KEY_META):
-					var modifiers := state.capture_modifiers()
-					_strokes[hand] = {"index": index, "target": router.capture(), "path": PackedVector2Array([point]),
-							"crossed": {index: true}, "swipe": false, "sent": false, "age": 0.0,
-							"capital": bool(modifiers.flags.shift), "caps": state.caps, "modifiers": modifiers}
-				else:
-					_press(hand, index)
+		elif int(h.key) >= 0:
+			state.press(hand, int(h.key))
 		_pulse(hand, false)
 	return true
-
-
-func _press(source: Variant, index: int) -> void:
-	if int(state.keys[index].code) == KEY_BACKSPACE and not _last_word.is_empty():
-		state.erase(int(_last_word.count), _last_word.target)
-		_clear_word()
-		return
-	if not state.is_modifier(index):
-		_clear_word()
-	state.press(source, index)
-
-
-func _trace(hand: Node, h: Dictionary) -> void:
-	var s: Dictionary = _strokes[hand]
-	if bool(s.sent):
-		return
-	var path: PackedVector2Array = s.path
-	var point: Vector2 = h.point
-	if path[-1].distance_to(point) < 0.08:
-		return
-	path.append(point)
-	s.path = path
-	var index := int(h.key)
-	if index >= 0 and int(state.keys[index].code) >= KEY_A and int(state.keys[index].code) <= KEY_Z:
-		s.crossed[index] = true
-		s.swipe = (s.crossed as Dictionary).size() >= 3
-	if not trails.has(hand):
-		trails[hand] = []
-	trails[hand].append({"point": point, "time": Time.get_ticks_msec() / 1000.0})
-
-
-func _finish(hand: Node) -> void:
-	var s: Dictionary = _strokes[hand]
-	_strokes.erase(hand)
-	if bool(s.sent):
-		state.release(hand)
-	elif bool(s.swipe) and _ready_words:
-		var words := decoder.decode(s.path)
-		if not words.is_empty():
-			alternatives = words
-			var word := _case(words[0], bool(s.capital), bool(s.caps)) + " "
-			state.type_text(word, s.target)
-			_last_word = {"target": s.target, "count": word.length(), "capital": s.capital, "caps": s.caps}
-	else:
-		_clear_word()
-		state.press(hand, int(s.index), s.target, s.modifiers)
-		state.release(hand)
-
-
-func _case(word: String, capital: bool, caps: bool) -> String:
-	return word.to_upper() if caps else (word.capitalize() if capital else word)
-
-
-func choose_alternative(index: int) -> void:
-	if _last_word.is_empty() or index >= alternatives.size():
-		return
-	var target: Dictionary = _last_word.target
-	state.erase(int(_last_word.count), target)
-	var word := _case(alternatives[index], bool(_last_word.capital), bool(_last_word.caps)) + " "
-	state.type_text(word, target)
-	_last_word.count = word.length()
-
-
-func _clear_word() -> void:
-	_last_word.clear()
-	alternatives.clear()
 
 
 func on_grip(hand: Node, down: bool) -> bool:
@@ -367,23 +258,19 @@ func _poke(hand: Node, world_tip: Vector3) -> void:
 		return
 	var index := _touch_at(point)
 	if index == -1 or tip.z < -0.06 or previous.z < POKE_DOWN or tip.z > POKE_DOWN or tip.z >= previous.z \
-			or _pokes.values().has(index) or _strokes.has(hand) or state.held.has(hand):
+			or _pokes.values().has(index) or state.held.has(hand):
 		return
 	_pokes[hand] = index
 	if index == -2:
 		set_shown(false)
-	elif index < -2:
-		choose_alternative(-index - 2)
 	else:
-		_press("poke%d" % hand.get_instance_id(), index)
+		state.press("poke%d" % hand.get_instance_id(), index)
 	_pulse(hand, true)
 
 
 func _touch_at(point: Vector2) -> int:
-	if Rect2(20.5, 0.12, 2.3, 0.65).has_point(point):
+	if CLOSE.has_point(point):
 		return -2
-	if point.x >= 0.0 and point.x < Layout.SIZE.x and point.y >= 1.0 and point.y <= 1.7:
-		return -3 - clampi(int(point.x / 7.6), 0, 2)
 	return key_at(point)
 
 
@@ -427,7 +314,6 @@ func _pulse(hand: Node, poke: bool) -> void:
 
 
 func _release_hand(hand: Node) -> void:
-	_strokes.erase(hand)
 	state.release(hand)
 	state.release("poke%d" % hand.get_instance_id())
 	_pokes.erase(hand)
@@ -445,16 +331,11 @@ func cancel() -> void:
 	state.cancel()
 	for hand: Node in _lit.keys():
 		_release_hand(hand)
-	_strokes.clear()
 	_pokes.clear()
 	_tips.clear()
 	aims.clear()
 	_holds.clear()
-	trails.clear()
-	_clear_word()
 
 
 func _exit_tree() -> void:
 	cancel()
-	if _worker != null:
-		_worker.wait_to_finish()
