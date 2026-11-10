@@ -19,7 +19,7 @@ extends RefCounted
 const ShapeMesh := preload("res://scripts/env/systems/passing/shape_mesh.gd")
 
 const BANDS: Array[String] = ["reeds", "willow", "tree", "poplar", "hedge", "fence", "ridge", "lights", "cottage",
-		"post"]
+		"post", "buoy"]
 const LANDMARKS: Array[String] = ["lamp", "bridge", "boat", "wharf", "tower", "steamer"]
 ## Shapes that stand end to end in a row, each this long along the way (metres): such a band's count is its loop's
 ## length over this, and its items stand at even steps, all at the band's `near`.
@@ -29,7 +29,7 @@ const COLOURS := {
 	"reeds": "#3a4127", "willow": "#2f3a22", "tree": "#1f2a1b", "poplar": "#1b2618", "hedge": "#1c2617",
 	"fence": "#4a4337", "ridge": "#10141c", "lights": "#ffc98a", "cottage": "#26221d", "post": "#2e2a24",
 	"lamp": "#1b1b1d", "bridge": "#4a3329", "boat": "#17301f", "wharf": "#3a3632", "tower": "#15171c",
-	"steamer": "#cfc8b8",
+	"steamer": "#cfc8b8", "buoy": "#5a1512",
 }
 ## A far village's lights: this share warm, the rest cool.
 const WARM := Color(1.0, 0.79, 0.54)
@@ -57,6 +57,7 @@ const REACH := {
 	"boat": {"stem": [0.0, 1.0], "wide": [0.0, 1.0], "over": [0.0, 0.0]},
 	"tower": {"stem": [0.0, 3.5], "wide": [0.0, 3.5], "over": [0.0, 0.0]},
 	"steamer": {"stem": [0.0, 4.5], "wide": [0.0, 4.5], "over": [0.0, 0.0]},
+	"buoy": {"stem": [0.0, 0.45], "wide": [0.0, 0.45], "over": [0.0, 0.0]},
 }
 
 
@@ -142,6 +143,8 @@ static func draw(shape: String, m: ShapeMesh, rng: RandomNumberGenerator, size: 
 			_tower(m, size, colour)
 		"steamer":
 			_steamer(m, rng, size, colour, info)
+		"buoy":
+			_buoy(m, rng, size)
 
 
 ## A colour with its r, g and b multiplied by k.
@@ -521,7 +524,7 @@ static func _steamer(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colo
 		m.tube(Vector3(x, 6.07, 9.0) * size, Vector3(x, 13.0, 9.0) * size, 0.45 * size, 0.45 * size, 8,
 				stack, stack)
 		m.box(Vector3(x, 12.9, 9.0) * size, Vector3(1.2, 0.3, 1.2) * size, stack)
-	m.ball(Vector3(0.0, 1.8, -24.8) * size, 2.6 * size, 4, 10, Color("#5a1a14"))
+	_wheel(m, Vector3(0.0, 1.8, -24.8) * size, 2.6 * size, 3.3 * size, Color("#5a1a14"))
 	var x1 := -side * 3.81 * size
 	var x2 := -side * 3.01 * size
 	for i in 10:
@@ -551,3 +554,49 @@ static func _steamer(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colo
 	for i in 5:
 		m.light(Vector3(-side * 4.3, 3.4, -16.0 + 8.0 * i) * size, WARM, 0.8, 0.35 * size)
 	m.light(Vector3(0.0, 9.2, 4.0) * size, COOL, 1.0, 0.3 * size)
+
+
+## A paddle wheel on an axle across the way, seen from the side as two rims, spokes and twelve paddles.
+static func _wheel(m: ShapeMesh, centre: Vector3, radius: float, half_width: float, colour: Color) -> void:
+	m.material(ShapeMesh.M_PLAIN)
+	var across := Vector3.RIGHT * half_width
+	for k in 12:
+		var a := TAU * k / 12.0
+		var dir := Vector3(0.0, sin(a), cos(a))
+		m.quad(centre - across + dir * radius * 0.8, centre + across + dir * radius * 0.8,
+				centre + across + dir * radius, centre - across + dir * radius, colour)
+	var rim := _mul(colour, 0.8)
+	for x: float in [-half_width, half_width]:
+		var o := centre + Vector3.RIGHT * x
+		for k in 12:
+			var a0 := TAU * k / 12.0
+			var a1 := TAU * (k + 1) / 12.0
+			var d0 := Vector3(0.0, sin(a0), cos(a0))
+			var d1 := Vector3(0.0, sin(a1), cos(a1))
+			m.quad(o + d0 * radius * 0.88, o + d1 * radius * 0.88, o + d1 * radius, o + d0 * radius, rim)
+	for x: float in [-half_width, half_width]:
+		var o := centre + Vector3.RIGHT * x
+		for k in 6:
+			var a := PI * k / 6.0
+			var dir := Vector3(0.0, sin(a), cos(a))
+			var perp := Vector3(0.0, cos(a), -sin(a))
+			var t := radius * 0.03
+			m.quad(o - dir * radius - perp * t, o + dir * radius - perp * t, o + dir * radius + perp * t,
+					o - dir * radius + perp * t, rim)
+
+
+## A channel buoy on the water line: a can, a staff and one red or green light. Its colour marks the channel's side,
+## so the band's colour is not used.
+static func _buoy(m: ShapeMesh, rng: RandomNumberGenerator, size: float) -> void:
+	var red := rng.randf() < 0.5
+	var colour := Color("#5a1512") if red else Color("#123a22")
+	m.material(ShapeMesh.M_PLAIN)
+	m.tube(Vector3(0.0, -0.3, 0.0) * size, Vector3(0.0, 1.2, 0.0) * size, 0.45 * size, 0.3 * size, 6,
+			colour, colour)
+	var staff := Color("#0e0e10")
+	m.tube(Vector3(0.0, 1.2, 0.0) * size, Vector3(0.0, 2.0, 0.0) * size, 0.04 * size, 0.04 * size, 6,
+			staff, staff)
+	var c := Color(1.0, 0.25, 0.2) if red else Color(0.3, 1.0, 0.5)
+	# A navigation light is the brightest small thing on dark water, and is seen from 30 or 40 m: at a deck lamp's
+	# size (0.22) it was hardly a dot in the first pictures.
+	m.light(Vector3(0.0, 2.0, 0.0) * size, c, 1.0, 0.4 * size)

@@ -45,6 +45,8 @@ func run_tests() -> void:
 	await _fresh_motion()
 	await _arrival()
 	await _backward()
+	await _moon_road()
+	await _ahead()
 
 
 ## The test room's passing parameters: a row of posts near by, a far ridge that seems further off still, far lights
@@ -338,4 +340,66 @@ func _backward() -> void:
 	var across: Vector3 = m.get_shader_parameter("across_dir")
 	check("backward: along (0, 0, 1) %s, across (-1, 0, 0) %s" % [along, across],
 			along.is_equal_approx(Vector3(0, 0, 1)) and across.is_equal_approx(Vector3(-1, 0, 0)))
+	await done(room)
+
+
+## 17. The Moon's road on the water: the ground's shader has the sky's Moon, where it stands and how bright its road
+## is (sky.gd moon_shine()): less while the sky is light, none at `moon_road` 0, none under a sky with no Moon.
+func _moon_road() -> void:
+	var moon := {"moon": 0.8, "moon_bearing": 100.0, "moon_altitude": 14.0, "moon_phase": 0.9, "dusk": 1.0}
+	var room := await _build(_sky_doc(moon))
+	var sys: Node = room.host.system("passing")
+	var sky: Node = room.host.system("sky")
+	_snap = {"open": false}
+	_step(room, DT)
+	var m: ShaderMaterial = sys.material_of("PassingGround")
+	var want := 0.8 * lerpf(0.6, 1.0, smoothstep(0.05, 0.3, sin(deg_to_rad(14.0)))) * 0.9
+	var got := float(m.get_shader_parameter("moon"))
+	check("a Moon at night: its road on the water at %.3f (%.3f)" % [want, got], absf(got - want) < 0.001)
+	var dir: Vector3 = m.get_shader_parameter("moon_dir")
+	check("... towards the Moon %s, 14 degrees up" % dir, dir.is_equal_approx(sky.moon_direction())
+			and absf(rad_to_deg(asin(dir.y)) - 14.0) < 0.01)
+	sky.set_param("dusk", 0.0)
+	_step(room, DT)
+	var light := float(m.get_shader_parameter("moon"))
+	check("under a sky still light the road is at %.2f of that (%.3f)" % [sky.MOON_ROAD_IN_TWILIGHT, light],
+			absf(light - want * float(sky.MOON_ROAD_IN_TWILIGHT)) < 0.001)
+	sky.set_param("dusk", 1.0)
+	sys.set_param("moon_road", 0.0)
+	_step(room, DT)
+	check("moon_road 0: no road", float(m.get_shader_parameter("moon")) == 0.0)
+	await done(room)
+	var moonless := await _build(_sky_doc({"dusk": 1.0}))
+	_step(moonless, DT)
+	var none: ShaderMaterial = moonless.host.system("passing").material_of("PassingGround")
+	check("a sky with no Moon: no road", float(none.get_shader_parameter("moon")) == 0.0)
+	await done(moonless)
+
+
+## The test room under a sky (before the passing system, which takes its light from it).
+func _sky_doc(sky_params: Dictionary) -> Dictionary:
+	return room_doc("Passing test", [{"system": "shopfront", "id": "hall"}, {"system": "sky", "params": sky_params},
+			{"system": "passing", "params": _params()}], screen_of("shopfront"))
+
+
+## 18. A landmark's `ahead`: metres along the way from its place on the route. At the journey's start a lamp 20 m
+## ahead is 20 m ahead; when a film of 600 s ends, a lamp set 12 m before the route's end is 12 m astern, as it would
+## be for a film of any length.
+func _ahead() -> void:
+	var room := await _build(_doc("Passing test", _params({"landmarks": [
+			{"shape": "lamp", "at": 0.0, "ahead": 20.0, "distance": 8.0},
+			{"shape": "lamp", "at": 1.0, "ahead": -12.0, "distance": 8.0}]})))
+	var sys: Node = room.host.system("passing")
+	_snap = {"open": true, "playing": false, "position": 0.0, "duration": 600.0}
+	_step(room, DT)
+	var m: ShaderMaterial = sys.material_of("Passing")
+	var along: PackedFloat32Array = m.get_shader_parameter("landmark_along")
+	check("ahead 20 at the start: 20 m ahead (%.3f)" % along[0], absf(along[0] - 20.0) < 0.001)
+	check("ahead -12 at the end: the route's length less 12 away (%.3f)" % along[1],
+			absf(along[1] - (float(sys.route_length()) - 12.0)) < 0.001)
+	_snap = {"open": true, "playing": false, "ended": true, "position": 600.0, "duration": 600.0}
+	sys.travel = float(sys.route_length())
+	_step(room, DT)
+	along = m.get_shader_parameter("landmark_along")
+	check("arrived: that lamp is 12 m astern (%.3f)" % along[1], absf(along[1] + 12.0) < 0.05)
 	await done(room)

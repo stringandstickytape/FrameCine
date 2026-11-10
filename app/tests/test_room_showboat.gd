@@ -96,11 +96,11 @@ func _wheel(room: Node3D) -> void:
 			and absf(stopped - 0.05) <= 0.05)
 
 
-## The hall's fittings: inside the cabin and nothing within 0.45 m of the seat.
+## The hall's stage and proscenium: inside the cabin and nothing within 0.45 m of the seat.
 func _fittings(room: Node3D) -> void:
 	var host: Node = room.host
 	var kit: Node = host.system("fittings")
-	check("the hall's stage (the kit fittings)", kit != null)
+	check("the hall's stage and proscenium (the kit fittings)", kit != null)
 	if kit == null:
 		return
 	var cabin_box: AABB = Cabin._box(host.system("hall").params).grow(0.001)
@@ -115,7 +115,7 @@ func _fittings(room: Node3D) -> void:
 		var nearest := Vector2(clampf(0.0, box.position.x, box.end.x), clampf(0.0, box.position.z, box.end.z))
 		if nearest.length() < 0.45:
 			clear = false
-	check("its pieces' boxes (%d) inside the hall" % boxes.size(), boxes.size() > 0 and inside)
+	check("both pieces' boxes (%d) inside the hall" % boxes.size(), boxes.size() == 3 and inside)
 	check("nothing within 0.45 m of the seat", clear)
 	check("nothing the kit could not place (%s)" % [kit.problems()], kit.problems().is_empty())
 
@@ -164,6 +164,7 @@ func _render(doc: Dictionary) -> void:
 	RoomRender.set_light(screen, 0.04)
 	await RoomRender.shot(self, vc, Vector3(-0.7, 1.7, 4.0), screen, "showboat_preshow_back")
 	await RoomRender.shot(self, vc, Vector3(-0.7, 1.6, -3.6), Vector3(-0.7, 1.4, 4.6), "showboat_preshow_hall")
+	await RoomRender.shot(self, vc, Vector3(-0.7, 1.5, -2.0), Vector3(-0.7, 1.9, -5.5), "showboat_preshow_stage")
 	RoomRender.set_light(screen, 0.015)
 	for stage: Array in [["dusk", 0.03], ["steamer", 0.297], ["town", 0.52], ["night", 0.8], ["landing", 1.0]]:
 		var at := float(stage[1]) * FILM

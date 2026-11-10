@@ -25,6 +25,8 @@ const ProcCache := preload("res://scripts/env/proc_cache.gd")
 ## for the halo round it.
 const MOON_RADIUS := 178.0
 const MOON_HALO := 3.0
+## How much of its road on water the Moon keeps under a sky still light (`dusk` 0), against a night's (moon_shine()).
+const MOON_ROAD_IN_TWILIGHT := 0.3
 const CATALOGUE := "res://environments/sky/bright_stars.json"
 const DOME_RADIUS := 190.0
 const STAR_RADIUS := 185.0
@@ -381,6 +383,20 @@ func sky_light() -> Dictionary:
 	return {"zenith": color_param("twilight_zenith").lerp(color_param("night_zenith"), k),
 			"horizon": color_param("twilight_horizon").lerp(color_param("night_horizon"), k),
 			"dusk": float(params["dusk"])}
+
+
+## The Moon as a light on what lies under the sky (the passing system's water, passing.gd): {direction: towards it,
+## in the room's frame; level: how bright its road on water is}. The level is `moon`, less for the air low down as
+## the Moon's own shader dims it, less by how much of its face is dark (`moon_phase`), and less while the sky is
+## still light: a road under a Moon in a bright evening sky is barely there, and comes as the dusk deepens.
+## Level 0 without a Moon.
+func moon_shine() -> Dictionary:
+	if _moon == null or str(params["mode"]) != "sky":
+		return {"direction": Vector3.UP, "level": 0.0}
+	var dir := _moon_dir()
+	var dark := smoothstep(0.0, 1.0, float(params["dusk"]))
+	return {"direction": dir, "level": float(params["moon"]) * lerpf(0.6, 1.0, smoothstep(0.05, 0.3, dir.y))
+			* float(params["moon_phase"]) * lerpf(MOON_ROAD_IN_TWILIGHT, 1.0, dark)}
 
 
 # --- Building ------------------------------------------------------------------------------------------------------------

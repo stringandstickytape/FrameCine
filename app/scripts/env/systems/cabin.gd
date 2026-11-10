@@ -76,9 +76,13 @@ const PARAMS := {
 	"rib_width": {"type": "float", "min": 0.03, "max": 0.3, "default": 0.05, "description": "a rib's width along Z"},
 	"rib_depth": {"type": "float", "min": 0.01, "max": 0.2, "default": 0.025,
 			"description": "how far a rib stands out from the wall"},
+	"cornice": {"type": "float", "min": 0.0, "max": 0.3, "default": 0.0,
+			"description": "a moulding along each wall's top, this high, in the trim (0: none)"},
 	"lamps": {"type": "enum", "values": ["none", "ceiling", "wall"], "default": "ceiling",
 			"description": "lamps under the roof's middle, on the walls between the windows, or none"},
 	"lamp_height": {"type": "float", "min": 1.0, "max": 3.0, "default": 1.5, "description": "the wall lamps' height"},
+	"lamp_size": {"type": "float", "min": 0.5, "max": 3.0, "default": 1.0,
+			"description": "the lamps' size: 1 is a small cabin's (a wall lamp's glass 0.07 wide, 0.1 high)"},
 	"lamp_colour": {"type": "color", "default": [1.0, 0.82, 0.58], "description": "the lamps' glow"},
 	"rear_door": {"type": "enum", "values": ["none", "centre"], "default": "centre",
 			"description": "a door in the rear bulkhead"},
@@ -118,7 +122,11 @@ const PARAMS := {
 	"floor": {"type": "material", "default": {"library": "rustic_planks", "color": [0.3, 0.2, 0.13]},
 			"description": "the floor"},
 	"trim": {"type": "material", "default": {"library": "walnut_veneer", "color": [0.22, 0.13, 0.08]},
-			"description": "the window frames, rails, ribs, the screen's frame, the door, the lamps' fittings"},
+			"description": "the window frames, rails, ribs, the cornice, the screen's frame, the door, the lamps' "
+			+ "fittings"},
+	"door": {"type": "material", "default": {},
+			"description": "the rear door, when it is not the trim's material (left empty: the trim's, and no draw "
+			+ "more)"},
 	"bulkhead": {"type": "material", "default": {"library": "wood_panelling", "color": [0.3, 0.19, 0.11]},
 			"description": "the front and rear bulkheads"},
 	"hull": {"type": "material", "default": {"library": "dark_metal", "color": [0.06, 0.06, 0.07]},
@@ -473,8 +481,9 @@ func build() -> void:
 	_build_windows(q, trim)
 	_build_ribs(q, trim)
 	_build_screen_frame(q, trim)
-	_build_door(q, trim)
 	_build_lamps(q, trim)
+	# The door last: with a material of its own it begins a second surface in the trim's mesh.
+	_build_door(q, trim)
 	_add_static("Trim", trim)
 	_build_hull(q)
 	if str(params["seat_model"]) != "none":
@@ -630,6 +639,15 @@ func _build_ribs(q: Dictionary, trim: RoomMesh) -> void:
 			# The rail sits across the join: half on the dado, half on the wall above.
 			trim.box(_pt(q, s, (fz + bz) * 0.5, vd) + _n(q, s) * 0.02, Vector3(bz - fz, 0.03, 0.04), _wall_basis(q, s),
 					[RoomMesh.FRONT])
+	# The cornice: along each wall's top, under the roof's springing, in two steps, the upper standing out twice as
+	# far as the lower (0.6 and 0.3 of its height). The ribs run into it.
+	var ch := float(q["cornice"])
+	if ch > 0.0:
+		for s: float in [-1.0, 1.0]:
+			for part: Array in [[0.25, 0.6], [0.75, 0.3]]:
+				var out := ch * float(part[1])
+				trim.box(_pt(q, s, (fz + bz) * 0.5, wall_len - ch * float(part[0])) + _n(q, s) * out * 0.5,
+						Vector3(bz - fz, ch * 0.5, out), _wall_basis(q, s), [RoomMesh.FRONT])
 	if not bool(q["ribs"]) or (q["window_zs"] as Array).is_empty():
 		return
 	var rw := float(q["rib_width"])
@@ -682,6 +700,9 @@ func _build_door(q: Dictionary, trim: RoomMesh) -> void:
 	var cx := float(q["cx"])
 	var bz := float(q["back_z"])
 	var dh := minf(1.85, float(q["headroom"]) - 0.1)
+	# In the trim's material unless the document gives the door its own: a hall with gilt trim has a painted door.
+	if not (params["door"] as Dictionary).is_empty():
+		trim.surface(_mat("door"))
 	trim.box(Vector3(cx, dh * 0.5, bz - 0.01), Vector3(0.62, dh, 0.02), Basis(), [RoomMesh.BACK])
 	# Seen from inside (facing +Z), the right is -X.
 	trim.box(Vector3(cx - 0.24, 1.0, bz - 0.02 - 0.015), Vector3(0.02, 0.1, 0.03), Basis(), [RoomMesh.BACK])
@@ -701,6 +722,9 @@ func _build_lamps(q: Dictionary, trim: RoomMesh) -> void:
 	if kind == "none":
 		return
 	var colour := color_param("lamp_colour")
+	# The lamps' size: a narrowboat's are a hand high; a hall seven metres wide wants them twice that to be seen as
+	# lamps at all. The glass, its fitting and how far it stands from the wall or the roof all grow together.
+	var k := float(q["lamp_size"])
 	var lamps := RoomMesh.new()
 	lamps.surface(_lamp(colour, 1.0, 1.0, "house"))
 	var i := 0
@@ -712,10 +736,10 @@ func _build_lamps(q: Dictionary, trim: RoomMesh) -> void:
 		if zs.is_empty():
 			zs.append((float(q["front_z"]) + float(q["back_z"])) * 0.5)
 		for z in zs:
-			lamps.box(Vector3(cx, top - 0.002 - 0.0175, z), Vector3(0.16, 0.035, 0.16), Basis(), [RoomMesh.UP])
-			trim.box(Vector3(cx, top - 0.001 - 0.01, z), Vector3(0.2, 0.02, 0.2), Basis(), [RoomMesh.UP])
+			lamps.box(Vector3(cx, top - 0.002 - 0.0175 * k, z), Vector3(0.16, 0.035, 0.16) * k, Basis(), [RoomMesh.UP])
+			trim.box(Vector3(cx, top - 0.001 - 0.01 * k, z), Vector3(0.2, 0.02, 0.2) * k, Basis(), [RoomMesh.UP])
 			# The bake's light hangs 0.12 under the lamp's glass, clear of the roof it would otherwise burn out.
-			_bake_omni("CabinLamp%d" % i, Vector3(cx, top - 0.037 - 0.12, z), 3.5, 0.6, colour)
+			_bake_omni("CabinLamp%d" % i, Vector3(cx, top - 0.037 * k - 0.12, z), 3.5, 0.6, colour)
 			i += 1
 	else:
 		var v := float(q["lamp_height"]) / cos(float(q["L"]))
@@ -726,9 +750,9 @@ func _build_lamps(q: Dictionary, trim: RoomMesh) -> void:
 			var basis := _wall_basis(q, s)
 			for z: float in _bay_marks(q):
 				var at := _pt(q, s, z, v)
-				var lamp_at := at + n * (0.06 + 0.035)
-				lamps.box(lamp_at, Vector3(0.07, 0.1, 0.07), basis, [])
-				trim.box(at + n * 0.03, Vector3(0.02, 0.02, 0.06), basis, [RoomMesh.FRONT])
+				var lamp_at := at + n * (0.06 + 0.035) * k
+				lamps.box(lamp_at, Vector3(0.07, 0.1, 0.07) * k, basis, [])
+				trim.box(at + n * 0.03 * k, Vector3(0.02, 0.02, 0.06) * k, basis, [RoomMesh.FRONT])
 				_bake_omni("CabinLamp%d" % i, lamp_at, 2.5, 0.35, colour)
 				i += 1
 	_add_lamps("Lamps", lamps)

@@ -51,8 +51,10 @@ builder that every such room dresses, instead of one hand-made shell a room.
 | `ribs` | bool | | true | ribs between the bays, up the walls and under the roof |
 | `rib_width` | float | 0.03..0.3 | 0.05 | a rib's width along Z |
 | `rib_depth` | float | 0.01..0.2 | 0.025 | how far a rib stands out from the wall |
+| `cornice` | float | 0..0.3 | 0 | a moulding along each wall's top, this high, in the trim (0: none) |
 | `lamps` | enum | none, ceiling, wall | ceiling | lamps under the roof's middle, on the walls between the windows, or none |
 | `lamp_height` | float | 1.0..3 | 1.5 | the wall lamps' height |
+| `lamp_size` | float | 0.5..3 | 1.0 | the lamps' size: 1 is a small cabin's (a wall lamp's glass 0.07 wide, 0.1 high) |
 | `lamp_colour` | color | | [1.0, 0.82, 0.58] | the lamps' glow |
 | `rear_door` | enum | none, centre | centre | a door in the rear bulkhead |
 | `door_glow` | float | 0..2 | 0.3 | live, a brightness: the light in the door's window |
@@ -78,6 +80,10 @@ Materials: `walls` (rough plaster, [0.78, 0.74, 0.64]), `dado` (wood panelling, 
 plaster, [0.8, 0.78, 0.72]), `floor` (rustic planks, [0.3, 0.2, 0.13]), `trim` (walnut veneer, [0.22, 0.13, 0.08]),
 `bulkhead` (wood panelling, [0.3, 0.19, 0.11]), `hull` (dark metal, [0.06, 0.06, 0.07]), `seat_cover` (felt, [0.35,
 0.1, 0.1]), `seat_frame` (dark metal, [0.12, 0.12, 0.12]).
+
+`door` is a material too, empty by default: the rear door is then in the trim's material and costs nothing. Given a
+material of its own, the door and its handle are a second surface of `Trim`, one draw more: a hall with gilt trim has
+a painted door (the Showboat's).
 
 The spec: requires `light`; provides `seats`, `collision`, `sound_room`, `bake`, `slots`; cost 12 draws, 6000
 triangles, 30 MB; no actions.
@@ -120,10 +126,10 @@ The static functions, from parameters alone: `resolved`, `_box` (cx - hw, 0, fro
 |---|---|
 | `Floor` | static: one face, `floor` |
 | `Lining` | static: `dado` (both walls up to the dado), `walls` (above it, cut round the windows), `ceiling` (the roof: a face, or a strip along the arc), `bulkhead` (front and rear, each a polygon of the section) |
-| `Trim` | static, `trim`: each window's frame (a strip from the opening out by frame_width, frame_depth into the room) and its reveal (a strip through the wall's thickness); the dado's rail; the ribs (at the bays' marks, up both walls and under the roof); the screen's frame (four boxes 0.04 wide and 0.03 deep, at the picture's edge); the rear door (0.62 wide, up to 1.85 high) and its handle; the ceiling lamps' roses and the wall lamps' arms |
+| `Trim` | static, `trim`: each window's frame (a strip from the opening out by frame_width, frame_depth into the room) and its reveal (a strip through the wall's thickness); the dado's rail; the ribs (at the bays' marks, up both walls and under the roof); the cornice (`cornice`: along each wall's top in two steps, the upper standing 0.6 of its height out from the wall and the lower 0.3; the ribs run into it); the screen's frame (four boxes 0.04 wide and 0.03 deep, at the picture's edge); the rear door (0.62 wide, up to 1.85 high) and its handle; the ceiling lamps' roses and the wall lamps' arms |
 | `Glass` | each window's pane at the wall's outer face; in `env_see_through`. Tinted `GLASS_TINT` (0.62, 0.74, 0.8), `GLASS_ALPHA` 0.02 square on and `GLASS_RIM` 0.06 more where the view grazes it |
 | `DoorGlow` | the light in the door's window (0.3 x 0.4, its middle 1.5 m up), group `accent`; follows `door_glow` |
-| `Lamps` | ceiling: a lamp under the roof's middle at each window (the cabin's middle without windows); wall: on both walls at the bays' marks, `lamp_height` up, on an arm; group `house`, a hidden bake light each |
+| `Lamps` | ceiling: a lamp under the roof's middle at each window (the cabin's middle without windows); wall: on both walls at the bays' marks, `lamp_height` up, on an arm; the glass, its fitting and how far it stands out all times `lamp_size`; group `house`, a hidden bake light each |
 | `Hull` | not baked, `hull`, with `ledge`: outside each windowed wall a ledge at `ledge_y` from front_z - 2 to back_z + 2, an upstand at its outer edge |
 | `Seats` | the plain seats (one MultiMesh), unless `seat_model` is none or the room has a seats system |
 

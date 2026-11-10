@@ -19,7 +19,7 @@ as the film ends. The journey is as long as the film (the passing system: `docs/
   The viewer's own seat is at the origin; no seat is drawn there (below, "Furniture").
 - **The light** (`light`): warm lamps, a low baked fill, warm above and darker below.
 - **The sky** (`sky`): latitude 52.5, day 250, the boat heading 20 degrees, 20:15 at the start; the sunset's glow at
-  290 degrees, the evening star, a little of the Milky Way, a few clouds, the Moon (0.8 full) low at 110 degrees.
+  290 degrees, the evening star, a little of the Milky Way, a few clouds, the Moon (0.8 full) low at 110 degrees, its road on the water under it.
 - **The canal** (`passing`, id `canal`): forward (the way goes towards the picture) at 1.0 m/s, the cabin's glow 0.6
   in `#ffbe78` reaching 9 m out and 3 m ahead and astern, the mist `#39424f`, the screen's spill 0.4.
 
@@ -54,17 +54,21 @@ Metres from the way's line; the ground's heights are over the room's floor (the 
 | Fraction | What | Side |
 |---|---|---|
 | 0 | a lamp on a post (5.6 m) | right |
-| 0.004 | a narrowboat moored (6 m) | left |
+| 0, 29 m ahead | a narrowboat moored (6 m) | left |
 | 0.14 | a brick bridge over the way (6.8 m, size 1.3) | right |
 | 0.48 | a narrowboat moored, red | left |
 | 0.61 | a brick bridge, grey | right |
 | 0.75 | a church tower far off (110 m) | left |
-| 0.984 | a lamp on a post | right |
-| 0.99 | a narrowboat moored, blue | left |
+| 1.0, 45 m before | a narrowboat moored, blue | left |
+| 1.0, 2.5 m ahead | a lamp on a post, on the wharf | right |
 | 1.0 | the wharf (4.95 m) | right |
 
 With a film of two hours the route is 7 197 m: the film's length at 1 m/s, less the 3.3 m the slowing for the end
 saves.
+
+The moored boat by the start, and the boat and the lamp at the end, are set out in metres from the route's ends
+(a landmark's `ahead`), so the wharf has its lamp in a film of any length. (Until 2026-11-10 they were fractions of
+the route: in a film of two hours the last lamp stood 115 m short of the wharf.)
 
 ## The film's evening
 
@@ -101,8 +105,8 @@ Printed by `test_room_narrowboat.gd`. The limits: 3 m and 20 degrees a second (`
 | landmark 3, boat | left | 6.0 | 5.00 | 13.2 |
 | landmark 4, bridge | right | 6.8 | 4.55 | 14.5 |
 | landmark 5, tower | left | 110 | 106.50 | 0.6 |
-| landmark 6, lamp | right | 5.6 | 5.54 | 11.9 |
-| landmark 7, boat | left | 6.0 | 5.00 | 13.2 |
+| landmark 6, boat | left | 6.0 | 5.00 | 13.2 |
+| landmark 7, lamp | right | 5.6 | 5.54 | 11.9 |
 | landmark 8, wharf | right | 4.95 | 4.95 | 13.3 |
 
 The nearest is the right bank's reeds, 3.8 m off at 17.3 degrees a second. Nothing goes by within 10 degrees of the

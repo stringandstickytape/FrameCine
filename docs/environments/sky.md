@@ -72,6 +72,9 @@ Action: `shooting_star` (no args).
   Motion setting scales them). A change of `hour` turns the stars slowly, never in a jump: an hour of sky a minute at
   most.
 - **For the vista:** `sky_light()` gives the sky's colours overhead and at the horizon now.
+- **For water:** `moon_shine()` gives where the Moon is and how bright its road on water is now (`passing.md`, "The
+  shaders"): `moon`, less for the air low down as the Moon's own shader dims it, times `moon_phase`, and 0.3 of that
+  under a sky still light (`MOON_ROAD_IN_TWILIGHT`), rising to all of it as `dusk` goes to 1. Nothing without a Moon.
 
 Measured (`test_env_sky.gd`): the dome, the stars (395 and 1600 faint) and the lines: 3 draws, 7 842 triangles, 0.3
 MB (the shared noise, 256 x 256). With Earth: 4 draws, under 9 000 triangles.

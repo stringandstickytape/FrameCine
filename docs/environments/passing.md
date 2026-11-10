@@ -57,13 +57,15 @@ about its item's foot (`shape_mesh.gd` has the vertex format).
 | `glow_half_length` | float 0.5..30 | 3.0 | how far ahead and astern of the origin the cabin's windows reach |
 | `windows` | float 0..2, live, brightness | 1.0 | the lit windows of the scenery (`ShapeMesh.M_WINDOW`) |
 | `lights` | float 0..2, live, brightness | 1.0 | the scenery's points of light |
+| `moon_road` | float 0..2, live, brightness | 1.0 | the Moon's road on the water: 1 as the room's sky makes it (none without a Moon in that sky) |
 | `mist` | float 0..1, live, brightness | 0.0 | mist that takes the far scenery |
 | `mist_colour` | color, live | `#3a4250` | |
 | `spill` | float 0..4 | 1.0 | how much the near scenery catches the screen's light |
 
 ### A band
 
-Many of one shape on a loop that comes round again.
+Many of one shape on a loop that comes round again. `buoy` is a channel buoy on the water line: a can, a staff
+and a red or green light. Its colour marks the channel's side, so the band's `colour` is not used.
 
 | Field | Type | Default | What |
 |---|---|---|---|
@@ -89,11 +91,13 @@ Where a band's presence is under 1, items drop out in their order: at 0.5, half 
 
 Something that stands once on the route: it comes into view ahead, passes and goes astern. `steamer` is a
 sternwheel river steamer at anchor, with two deck houses, twin stacks, lit windows facing the way and six lights.
+Its stern wheel has twelve paddles, two rims and spokes on an axle across the way.
 
 | Field | Type | Default | What |
 |---|---|---|---|
 | `shape` | enum `Shapes.LANDMARKS`, required | | what it is |
 | `at` | float 0..1, required | | its place on the route, as a fraction |
+| `ahead` | float -400..400 | 0 | metres further along the way than `at` (negative: before it) |
 | `side` | left, right | left | which side of the way |
 | `distance` | float 3..170 | 8 | metres from the way's line |
 | `height` | float -20..40 | 0 | its foot's height |
@@ -101,8 +105,15 @@ sternwheel river steamer at anchor, with two deck houses, twin stacks, lit windo
 | `colour` | color | the shape's own | its main colour |
 | `seed` | int 0..100000 | 0 | another arrangement of the same |
 
-With no route's end (a film with no length), a landmark at 0 (the place the journey starts from) is there; the others
-never come.
+With no route's end (a film with no length), a landmark at 0 (the place the journey starts from) is there, with its
+`ahead`; the others never come.
+
+**A fraction is not a distance.** A place on the route is a fraction of it, and the route is as long as the film: at
+1 m/s, 0.99 is 72 m before the end of a film of two hours and 54 m before the end of one of ninety minutes. So what
+must stand together is set out from one place in metres, with `ahead`: a landing's lamp at `at` 1.0, `ahead` 5 stands
+5 m past the middle of its wharf in a film of any length. (Until 2026-11-10 there was no `ahead`. The Showboat's
+landing lamp at 0.985 and its moored steamer at 0.992 were 216 m and 115 m short of the wharf in a film of two hours:
+the hall tied up at a landing with nothing on it.)
 
 **A landmark's clearing.** No band's item stands on the ground a landmark stands on (a hedge through a wharf's shed,
 reeds through a moored boat, a willow on a bridge's road). `Shapes.clearing()` gives that ground as half its length
@@ -207,6 +218,7 @@ the size, metres times the size]:
 | `boat` | [0, 1.0] | [0, 1.0] | [0, 0] |
 | `tower` | [0, 3.5] | [0, 3.5] | [0, 0] |
 | `steamer` | [0, 4.5] | [0, 4.5] | [0, 0] |
+| `buoy` | [0, 0.45] | [0, 0.45] | [0, 0] |
 
 A shape not in the table (`ridge`, `lights`, `wharf`) comes no nearer than its foot. The table is worked out from the
 drawing functions at the largest each draws: a change to a shape is a change to its line here.
@@ -269,6 +281,15 @@ far side, the bank and its trees, dark (the water's colour at 0.6). The ripples 
 mirrored light where the pattern is not held still. What it mirrors towards someone inside the boat is never the
 boat's own windows, so the cabin's glow and the screen's light show on it only as a glint on the ripples' crests and
 a trace of scatter. The same mist and horizon as the scenery.
+
+**The Moon's road.** Under a sky with a Moon the water shows its road (`moon_road`; `sky.gd moon_shine()` says where
+the Moon is and how bright its road is). A ripple throws the Moon to the eye when it faces half way between the two;
+the further that is from straight up, the fewer ripples do (a bell curve of slopes, `MOON_ROUGH` 0.12, about 7
+degrees: quiet water). So the road lies under the Moon, narrow, and long towards the eye, at most half as bright as
+the Moon's face (`MOON_ROAD`). It goes with whoever looks at it, as the real one does: it is no place on the water,
+and nothing of it passes by. What passes is the glitter in it (the noise going by), and that is held still where
+the ground's pattern is. The road is less while the sky is light (0.3 of itself at `dusk` 0), less for a Moon low
+down and less for a thin one. It costs no draw and no texture.
 
 ## Choosing a band's loop
 

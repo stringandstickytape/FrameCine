@@ -78,6 +78,9 @@ static func spec() -> Dictionary:
 		"shape": {"type": "enum", "values": Shapes.LANDMARKS, "required": true, "description": "what it is"},
 		"at": {"type": "float", "min": 0.0, "max": 1.0, "required": true,
 				"description": "its place on the route, as a fraction"},
+		"ahead": {"type": "float", "min": -400.0, "max": 400.0, "default": 0.0,
+				"description": "metres further along the way than `at` (negative: before it): a landing's wharf, "
+				+ "lamp and moored boat are set out in metres, whatever the film's length"},
 		"side": {"type": "enum", "values": ["left", "right"], "default": "left",
 				"description": "which side of the way"},
 		"distance": {"type": "float", "min": 3.0, "max": 170.0, "default": 8.0,
@@ -142,6 +145,9 @@ static func spec() -> Dictionary:
 					"description": "the lit windows of the scenery"},
 			"lights": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
 					"description": "the scenery's points of light"},
+			"moon_road": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
+					"description": "the Moon's road on the water: 1 as the room's sky makes it (none without a Moon "
+					+ "in that sky)"},
 			"mist": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "brightness": true,
 					"description": "mist that takes the far scenery"},
 			"mist_colour": {"type": "color", "default": "#3a4250", "live": true, "description": "the mist's colour"},
@@ -262,7 +268,7 @@ static func band_with_defaults(raw: Dictionary) -> Dictionary:
 
 static func landmark_with_defaults(raw: Dictionary) -> Dictionary:
 	# The schema asks for a shape and a place ("required"); without it, a lamp at the journey's start.
-	var out := {"shape": "lamp", "at": 0.0, "side": "left", "distance": 8.0, "height": 0.0, "size": 1.0,
+	var out := {"shape": "lamp", "at": 0.0, "ahead": 0.0, "side": "left", "distance": 8.0, "height": 0.0, "size": 1.0,
 			"colour": null, "seed": 0}
 	out.merge(raw, true)
 	return out
@@ -587,10 +593,13 @@ func _uniforms() -> void:
 	landmark_along.fill(1e6)
 	for k in _landmarks.size():
 		var at := float(_landmarks[k]["at"])
+		# A fraction of the route is hundreds of metres in a long film and tens in a short one, so what must stand
+		# together (a landing) is set out from one place in metres (`ahead`).
+		var ahead := float(_landmarks[k]["ahead"])
 		if route_shown > 0.0:
-			landmark_along[k] = at * route_shown - travel
+			landmark_along[k] = at * route_shown + ahead - travel
 		elif at == 0.0:
-			landmark_along[k] = -travel
+			landmark_along[k] = ahead - travel
 	for mat: ShaderMaterial in [_mat, _lights_mat, _ground_mat]:
 		if mat == null:
 			continue
@@ -623,6 +632,12 @@ func _uniforms() -> void:
 		_ground_mat.set_shader_parameter("ground_phase", fposmod(travel, GROUND_PERIOD))
 		_ground_mat.set_shader_parameter("far", FAR)
 		_ground_mat.set_shader_parameter("nearest", still_within(own_speed))
+		# The Moon's road on the water, from the sky that lights the scenery.
+		var shine := {"direction": Vector3.UP, "level": 0.0}
+		if _sky != null and is_instance_valid(_sky) and _sky.has_method("moon_shine"):
+			shine = _sky.call("moon_shine")
+		_ground_mat.set_shader_parameter("moon_dir", shine["direction"])
+		_ground_mat.set_shader_parameter("moon", float(shine["level"]) * float(params["moon_road"]))
 
 
 ## How far from the way's line the ground's pattern is held still (metres), for a journey of this speed: where the

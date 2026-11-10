@@ -51,6 +51,31 @@ func run_tests() -> void:
 	_screen()
 	_slots()
 	_rulings()
+	await _dressing()
+
+
+## A hall's dressing (since 2026-11-10, the Showboat's): a cornice in the trim, lamps of another size, and a rear door
+## in a material of its own.
+func _dressing() -> void:
+	var plain := await _room("wall lamps", {"lamps": "wall"})
+	var trim := (plain.get_node("Trim") as MeshInstance3D).mesh
+	var triangles := trim.get_faces().size() / 3
+	var glass := (plain.get_node("Lamps") as MeshInstance3D).mesh.get_aabb().size.y
+	check("the door in the trim's own material: Trim is one surface (%d)" % trim.get_surface_count(),
+			trim.get_surface_count() == 1)
+	check("a wall lamp's glass is 0.1 high (%.3f)" % glass, absf(glass - 0.1) < 0.001)
+	await done(plain)
+	var dressed := await _room("dressed", {"lamps": "wall", "cornice": 0.12, "lamp_size": 2.0,
+			"door": {"library": "painted_wall", "color": [0.8, 0.78, 0.72]}})
+	trim = (dressed.get_node("Trim") as MeshInstance3D).mesh
+	check("a door in a material of its own: a second surface in Trim (%d)" % trim.get_surface_count(),
+			trim.get_surface_count() == 2)
+	# Two steps a wall, each a box less the face against the wall: 4 boxes of 10 triangles.
+	var more := trim.get_faces().size() / 3 - triangles
+	check("a cornice: two steps along each wall's top, 40 triangles more in Trim (%d)" % more, more == 40)
+	glass = (dressed.get_node("Lamps") as MeshInstance3D).mesh.get_aabb().size.y
+	check("lamp_size 2: the glass 0.2 high (%.3f)" % glass, absf(glass - 0.2) < 0.001)
+	await done(dressed)
 
 
 ## What the builder does where its rules run out.

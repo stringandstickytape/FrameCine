@@ -11,11 +11,14 @@ const ShapeMesh := preload("res://scripts/env/systems/passing/shape_mesh.gd")
 
 const BUDGET := {"reeds": 70, "willow": 400, "tree": 420, "poplar": 120, "hedge": 60, "fence": 50, "ridge": 2,
 		"lights": 0, "cottage": 80, "post": 12, "lamp": 70, "bridge": 140, "boat": 130, "wharf": 220, "tower": 130,
-		"steamer": 300}
+		"steamer": 340, "buoy": 40}
 ## The highest point of each shape at size 1 (metres): at least, at most.
 const HEIGHT := {"reeds": [1.2, 2.4], "willow": [3.0, 6.5], "tree": [9.0, 14.0], "poplar": [13.5, 20.5],
 		"hedge": [1.4, 2.2], "fence": [1.0, 1.2], "cottage": [5.3, 5.5], "post": [1.1, 1.3], "lamp": [3.1, 3.3],
-		"bridge": [5.1, 5.3], "boat": [1.9, 2.0], "wharf": [4.7, 4.9], "tower": [19.5, 19.7], "steamer": [13.0, 13.1]}
+		"bridge": [5.1, 5.3], "boat": [1.9, 2.0], "wharf": [4.7, 4.9], "tower": [19.5, 19.7], "steamer": [13.0, 13.1],
+		"buoy": [1.95, 2.05]}
+## The shapes no two of which are alike. (Not the buoy: it is one of two, red or green, and two seeds draw the same
+## one as often as not.)
 const VARIED: Array[String] = ["reeds", "willow", "tree", "cottage", "boat", "steamer"]
 
 var _failures := 0

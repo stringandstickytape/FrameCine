@@ -105,8 +105,8 @@ materials (`painted_wall`, `oak_veneer`, `oak_planks`, `dark_metal`, `oxblood_le
 
 ## Showboat 1927 (`showboat_1927.env.json`)
 
-No bundled asset. The hall, its seats and stage, the river and everything that goes by it (willows, trees, poplars,
-the fence, cottages, lights, ridges, steamers, the tower and wharves), the sky and its stars are made in code by the
-systems (`cabin.gd`, `kit.gd`, `passing.gd`, `sky.gd`; the stars from the catalogue under "Data") on library
-materials (`painted_wall`, `wood_panelling`, `oak_planks`, `velvet`, `felt`, `dark_metal`, the kit's `oak_veneer`,
-all CC0). Its sounds (the paddle wheel, water, crickets and train) are synthesised.
+No bundled asset. The hall, its seats, stage and proscenium, the river and everything that goes by it (willows,
+trees, poplars, the fence, cottages, lights, ridges, buoys, steamers, the tower and wharves), the sky and its stars
+are made in code by the systems (`cabin.gd`, `kit.gd`, `passing.gd`, `sky.gd`; the stars from the catalogue under
+"Data") on library materials (`painted_wall`, `wood_panelling`, `oak_planks`, `velvet`, `felt`, `dark_metal`,
+`brass`, the kit's `oak_veneer`, all CC0). Its sounds (the paddle wheel, water, crickets and train) are synthesised.
