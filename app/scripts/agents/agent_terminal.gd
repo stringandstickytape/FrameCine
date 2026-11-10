@@ -538,7 +538,8 @@ static func _display_ready_file() -> String:
 
 ## The private display is up and takes this user's clients.
 static func display_ready() -> bool:
-	return FileAccess.file_exists(_display_ready_file()) 			and FileAccess.file_exists("/tmp/.X11-unix/X%d" % DISPLAY_NUMBER)
+	# The socket by a listing: FileAccess.file_exists() is false for anything but a regular file.
+	return FileAccess.file_exists(_display_ready_file()) 			and ("X%d" % DISPLAY_NUMBER) in DirAccess.get_files_at("/tmp/.X11-unix")
 
 
 ## What the display's unit runs. The server starts with a cookie nobody else has, so that nothing can connect until
