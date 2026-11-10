@@ -80,6 +80,7 @@ The player updates itself from the releases page. You do not need the PC program
   checksum, and asks **Restart now to update?** It does not ask during a film.
 - Nothing is installed until you say yes. **Later** keeps the download, and the player asks again the next time it
   starts.
+- To look straight away: Menu > System, Updates, **Check now**.
 - If the new version does not start, the player goes back to the previous version by itself.
 - To turn the check off: Menu > System, the update setting. Only your IP address goes to GitHub with each check.
 - Your settings, bookmarks and logs are kept through updates.

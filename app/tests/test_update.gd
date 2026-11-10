@@ -291,6 +291,21 @@ func _test_prompt_in_app(up: Node) -> void:
 			t == "Version 0.2.0 is downloaded. It installs when you say yes in the menu.")
 	main.close_media()
 	main.ui.ui.hide_toast()
+	# Check now (System, Updates): its answer is a notice.
+	up.state = "idle"
+	up._by_hand = true
+	up._on_checked({"error": "test"})
+	await _seconds(0.3)
+	t = _toast_text()
+	_check("check now: a failure says so (%s)" % t, t == "Could not check for updates. Try again later.")
+	main.ui.ui.hide_toast()
+	up._on_checked({"error": "test"})
+	await _seconds(0.3)
+	_check("a timed check's failure: no notice", _toast_text() == "")
+	up.state = "ready"
+	_check("check now with a version ready: the ready notice", up.check_by_hand()
+			and _toast_text() == "Version 0.2.0 is downloaded. It installs when you say yes in the menu.")
+	main.ui.ui.hide_toast()
 	# The yes: run.sh swaps only with new.approved naming the staged version (tools/test_player_run.sh).
 	var keep_staging: String = up.staging_dir
 	up.staging_dir = _tmp.path_join("staging")
@@ -358,6 +373,16 @@ func _test_row(up: Node) -> void:
 	up.changed.emit()
 	_check("row: ready, with Restart now and the notes (%s)" % row._status.text, row._restart.visible
 			and row._status.text == "Version 0.1.0  ·  Version 0.2.0 is downloaded. It installs when you say yes in the menu.\nFaster menus.")
+	_check("row: ready, no Check now", not row._check.visible)
+	up.state = "checking"
+	up.changed.emit()
+	_check("row: checking, it says so, no Check now (%s)" % row._status.text, not row._check.visible
+			and row._status.text.ends_with("Looking for a new version...\nFaster menus."))
+	up.state = "idle"
+	up.changed.emit()
+	_check("row: idle in an install, Check now", row._check.visible)
+	up.state = "ready"
+	up.changed.emit()
 	row._toggle.button_pressed = false
 	_check("row: the toggle turns the check off", up.enabled == false
 			and main.settings.get_value("update", "check", true) == false)

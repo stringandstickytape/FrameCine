@@ -81,7 +81,7 @@ const TERMINALS: Array[String] = ["xterm", "konsole", "lxterminal"]
 ## 28 px a DejaVu Sans Mono cell is 17 x 33 pixels, so the 1904 x 1064 inside the border holds 112 columns by 32 lines:
 ## room for Claude Code's first-run theme preview (about 100 columns) and both agents' 80-column screens, with the
 ## lines to show a whole list. 40 px held 79 x 22, and Claude Code's first screen did not fit (the user, 2026-11-09).
-## On the pane (PANE_WIDTH_M, 30 cm, in agent_pane.gd) at 45 cm a 28 px em is 0.56 degrees, a capital 0.41, an x 0.31,
+## In its window (WIDTH_M, 60 cm at 90 cm, in agent_pane.gd) a 28 px em is 0.56 degrees, a capital 0.41, an x 0.31,
 ## a line 0.66 (40 px on the 26 cm pane was 0.69, 0.50, 0.38, 0.83); nearer, more.
 const COLUMNS := 112
 const LINES := 32

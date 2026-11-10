@@ -712,7 +712,10 @@ func _grab_owns(hand: XRHand) -> bool:
 	var grab: Node = app.features.get("grab") if app.features != null else null
 	# A PC window's pane draws its own laser too (scripts/pc/pc_windows.gd).
 	var pc: Node = app.features.get("pc_windows") if app.features != null else null
-	return (grab != null and grab.owns_laser(hand)) or (pc != null and pc.owns_laser(hand))
+	# So does an agent's terminal window (scripts/agents/local_agents.gd).
+	var agents: Node = app.get("local_agents")
+	return (grab != null and grab.owns_laser(hand)) or (pc != null and pc.owns_laser(hand)) \
+			or (agents != null and agents.owns_laser(hand))
 
 
 ## Whether this hand's laser is the menu's (or Place's, seat picking's, marking's) now: object physics' grab

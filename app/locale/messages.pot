@@ -39,11 +39,11 @@ msgstr ""
 msgid "PC window"
 msgstr ""
 
-#: scripts/main.gd:1436
+#: scripts/main.gd:1440
 msgid "TALK"
 msgstr ""
 
-#: scripts/main.gd:1487
+#: scripts/main.gd:1491
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
@@ -927,59 +927,72 @@ msgstr ""
 msgid "CIPIC subject 003"
 msgstr ""
 
-#: scripts/update/updater.gd:173
-msgid "This copy does not run from an install: no updates."
-msgstr ""
-
-#: scripts/update/updater.gd:174
-#, c-format
-msgid "Version %s"
-msgstr ""
-
-#: scripts/update/updater.gd:177
-#, c-format
-msgid "Downloading version %s: %d %%"
-msgstr ""
-
-#: scripts/update/updater.gd:179
-#, c-format
-msgid "Preparing version %s..."
-msgstr ""
-
-#: scripts/update/updater.gd:181 scripts/update/updater.gd:356
+#: scripts/update/updater.gd:132 scripts/update/updater.gd:197 scripts/update/updater.gd:386
 #, c-format
 msgid "Version %s is downloaded. It installs when you say yes in the menu."
 msgstr ""
 
+#: scripts/update/updater.gd:187
+msgid "This copy does not run from an install: no updates."
+msgstr ""
+
+#: scripts/update/updater.gd:188
+#, c-format
+msgid "Version %s"
+msgstr ""
+
+#: scripts/update/updater.gd:191
+msgid "Looking for a new version..."
+msgstr ""
+
+#: scripts/update/updater.gd:193
+#, c-format
+msgid "Downloading version %s: %d %%"
+msgstr ""
+
+#: scripts/update/updater.gd:195
+#, c-format
+msgid "Preparing version %s..."
+msgstr ""
+
 #: scripts/update/updater.gd:248
+msgid "Could not check for updates. Try again later."
+msgstr ""
+
+#: scripts/update/updater.gd:265
+#, c-format
+msgid "Version %s is the newest."
+msgstr ""
+
+#: scripts/update/updater.gd:278
 #, c-format
 msgid "Downloading version %s"
 msgstr ""
 
-#: scripts/update/updater.gd:416
+#: scripts/update/updater.gd:446
 #, c-format
 msgid "Updated to version %s"
 msgstr ""
 
-#: scripts/update/updater.gd:453
+#: scripts/update/updater.gd:483
 #, c-format
 msgid "Restart now to update to %s?"
 msgstr ""
 
-#: scripts/update/updater.gd:454
+#: scripts/update/updater.gd:484
 #, c-format
 msgid "Quit now to update to %s? Then start the player again."
 msgstr ""
 
-#: scripts/update/updater.gd:457
+#: scripts/update/updater.gd:487
 msgid "Restart"
 msgstr ""
 
-#: scripts/update/updater.gd:457
+#: scripts/update/updater.gd:487
 msgid "Quit"
 msgstr ""
 
-#: scripts/update/updater.gd:457
+#: scripts/update/updater.gd:487
 msgid "Later"
 msgstr ""
 
@@ -1613,7 +1626,7 @@ msgid "Install"
 msgstr ""
 
 #: ui/files_tab.gd:838
-msgid "Show on the controller"
+msgid "Show the window"
 msgstr ""
 
 #: ui/files_tab.gd:839
@@ -1633,7 +1646,7 @@ msgid "Start plain, no briefing"
 msgstr ""
 
 #: ui/files_tab.gd:845
-msgid "Hide from the controller (it keeps working)"
+msgid "Hide the window (it keeps working)"
 msgstr ""
 
 #: ui/files_tab.gd:846
@@ -2334,11 +2347,11 @@ msgid "%s deleted"
 msgstr ""
 
 #: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:682 ui/ui_layer.gd:234
-#: ui/ui_layer.gd:415 ui/ui_layer.gd:1019 ui/ui_layer.gd:1023 ui/ui_layer.gd:1057
+#: ui/ui_layer.gd:415 ui/ui_layer.gd:1022 ui/ui_layer.gd:1026 ui/ui_layer.gd:1060
 msgid "Undo"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:987
+#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:990
 msgid "The headset's cameras can't show here."
 msgstr ""
 
@@ -4157,7 +4170,7 @@ msgstr ""
 msgid "Allow for an hour"
 msgstr ""
 
-#: ui/system_tab.gd:381 ui/ui_layer.gd:817
+#: ui/system_tab.gd:381 ui/ui_layer.gd:820
 msgid "Revoke"
 msgstr ""
 
@@ -4321,94 +4334,98 @@ msgstr ""
 msgid "Controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:817
+#: ui/ui_layer.gd:820
 msgid "Remote changes allowed for an hour"
 msgstr ""
 
-#: ui/ui_layer.gd:830
+#: ui/ui_layer.gd:833
 msgid "Connecting..."
 msgstr ""
 
-#: ui/ui_layer.gd:840
+#: ui/ui_layer.gd:843
 msgid "Starting the browser..."
 msgstr ""
 
-#: ui/ui_layer.gd:854
+#: ui/ui_layer.gd:857
 msgid "Point at a seat and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:864
+#: ui/ui_layer.gd:867
 msgid "Seat unchanged"
 msgstr ""
 
-#: ui/ui_layer.gd:933
+#: ui/ui_layer.gd:936
 msgid "That can't be applied here"
 msgstr ""
 
-#: ui/ui_layer.gd:937
+#: ui/ui_layer.gd:940
 msgid "Point at a part and pull the trigger. Stick: size and turn the pattern. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:938
+#: ui/ui_layer.gd:941
 msgid "Point at a part and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:950
+#: ui/ui_layer.gd:953
 msgid "That object can't be placed here"
 msgstr ""
 
-#: ui/ui_layer.gd:954
+#: ui/ui_layer.gd:957
 msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:988
+#: ui/ui_layer.gd:991
 msgid "That's as many areas as there can be: delete one first."
 msgstr ""
 
-#: ui/ui_layer.gd:1005 ui/ui_layer.gd:1016
+#: ui/ui_layer.gd:1008 ui/ui_layer.gd:1019
 msgid "Nothing marked"
 msgstr ""
 
-#: ui/ui_layer.gd:1019
+#: ui/ui_layer.gd:1022
 #, c-format
 msgid "%s added: the cameras show there"
 msgstr ""
 
-#: ui/ui_layer.gd:1023
+#: ui/ui_layer.gd:1026
 #, c-format
 msgid "%s changed"
 msgstr ""
 
-#: ui/ui_layer.gd:1041
+#: ui/ui_layer.gd:1044
 msgid "Nothing changed"
 msgstr ""
 
-#: ui/ui_layer.gd:1041
+#: ui/ui_layer.gd:1044
 msgid "Nothing placed"
 msgstr ""
 
-#: ui/ui_layer.gd:1060
+#: ui/ui_layer.gd:1063
 msgid "Not placed"
 msgstr ""
 
-#: ui/ui_layer.gd:1074
+#: ui/ui_layer.gd:1077
 msgid "No seat there"
 msgstr ""
 
-#: ui/ui_layer.gd:1076
+#: ui/ui_layer.gd:1079
 msgid "Seat"
 msgstr ""
 
-#: ui/update_row.gd:25
+#: ui/update_row.gd:27
 msgid "Check for updates"
 msgstr ""
 
-#: ui/update_row.gd:28
+#: ui/update_row.gd:30
+msgid "Check now"
+msgstr ""
+
+#: ui/update_row.gd:34
 msgid "Restart now"
 msgstr ""
 
-#: ui/update_row.gd:36
-msgid "Once a day the player asks GitHub for a new version and downloads it in the background. Only your IP address goes to GitHub."
+#: ui/update_row.gd:42
+msgid "At each start, and once a day while it runs, the player asks GitHub for a new version and downloads it in the background. It installs only when you say yes. Only your IP address goes to GitHub."
 msgstr ""
 
 #: ui/url_form.gd:32

@@ -892,8 +892,8 @@ timeout, label, path, kind} follows, with `card_dismissed`.
 ## Agents on the headset
 
 Claude Code and Codex can run on the headset itself, each in a real terminal, while a film plays. The terminal is the
-conversation: nothing stands between you and the agent. It shows on a pane on the pointer controller, where the card
-sits, and what you say is typed straight into it. Everything else in this document (the guide, the API, rooms) works
+conversation: nothing stands between you and the agent. It shows in a window that floats where you put it, like a PC
+window, and what you say is typed straight into it. Everything else in this document (the guide, the API, rooms) works
 for these agents too, over the loopback.
 
 ![The pane at the headset's density](shots/assistant/agent-pane-headset-density.png)
@@ -922,10 +922,10 @@ Files has an entry for each agent. Its rows depend on whether a session runs:
 |---|---|---|
 | Start, briefed on the player | Not running | A new terminal. A new session gets a first message: read the guide, you are paired, say one line when ready, then wait. It is an ordinary interactive session with that message (`claude "<prompt>"`, `codex "<prompt>"`), not `-p`. If this folder had a session, the agent goes on from it instead, and starts afresh only if there is nothing to continue. |
 | Start plain, no briefing | Not running | The same terminal, folder, hooks and link, with no first message: the agent starts and waits for you. |
-| Show on the controller | Running | The pane shows that session. Nothing starts. |
+| Show the window | Running | The window shows that session. Nothing starts. |
 | Restart, briefed on the player | Running | Ends the session and starts a new one with the first message. The folder and its files stay. |
 | Restart plain, no briefing | Running | Ends the session and starts a new one with no first message. |
-| Hide from the controller (it keeps working) | Running | The pane goes. The agent goes on. |
+| Hide the window (it keeps working) | Running | The window goes. The agent goes on. |
 | Put it on the big screen | Running | The same terminal as the source on the big screen. Not the default. |
 
 The terminal outlives film changes and restarts of the player. The app finds it by its window class (`frame-claude`,
@@ -934,16 +934,24 @@ terminal then asks for Enter and closes. There is no shell behind the agent. Two
 folder. One is active: it is on the pane and takes the voice. "Voice goes to" lists the ones running, and your choice
 holds.
 
-### The pane
+### The window
 
-It is 30 cm wide (`PANE_WIDTH_M`). The headset's window manager makes the window 1920 x 1080 pixels whatever it asks
+The terminal shows in a window of its own (`app/ui/agent_pane.gd`; the user, 2026-11-10: it used to sit on the
+pointer controller). The first time it shows in a run it comes up 90 cm ahead, a little below the eyes, 60 cm wide
+(`WIDTH_M`, `DISTANCE_M`): the same 37 by 21 degrees it had on the controller. Then, as with a PC window:
+
+- **Move it**: point a laser at it, squeeze and hold; it follows the laser at that distance and turns with the hand.
+- **Size it**: while holding, the stick right makes it bigger, left smaller; up further away, down nearer.
+- It stays where you left it until the player closes; its width is kept for next time (`[agent_window] width`).
+- A laser on it gives it the stick and the trigger, as looking at it does (the edge turns blue).
+
+The headset's window manager makes the terminal 1920 x 1080 pixels whatever it asks
 for, so the font sets what fits: at 28 pixels (`FONT_PX`) that is 112 columns by 32 lines (`COLUMNS`, `LINES`, a
 DejaVu Sans Mono cell of 17 x 33 pixels inside an 8 pixel border). Claude Code's first-run theme preview needs about
 100 columns, and both agents assume at least 80. At 40 pixels it was 79 by 22, and Claude Code's first screen did not
-fit. The pane grew from 26 cm so that the text shrank less than the font did. At 45 cm the pane is about 37 by 21
-degrees. A character is 0.56 degrees from the top of its em to the bottom, a capital 0.41 degrees, an x 0.31 degrees and
-a line 0.66 degrees (at 40 pixels on 26 cm: 0.69, 0.50, 0.38 and 0.83). Bring the controller nearer for more. The pane
-sits on the pointer controller where the card sits; the card moves out of the way while the pane shows.
+fit. At its first size the window is about 37 by 21 degrees. A character is 0.56 degrees from the top of its em to the
+bottom, a capital 0.41 degrees, an x 0.31 degrees and a line 0.66 degrees (at 40 pixels on the old 26 cm pane: 0.69,
+0.50, 0.38 and 0.83). Make it bigger or bring it nearer for more.
 
 - **Talk** shows it, and it stays until you hide it. A quick tap of talk while it shows hides it.
 - **Y** on the right controller, the button with the sparkle, shows or hides it, while the right hand is the pointer hand.

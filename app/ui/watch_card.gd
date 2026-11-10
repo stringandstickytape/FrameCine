@@ -294,7 +294,7 @@ func place() -> void:
 	(_mesh.mesh as QuadMesh).size = size_m
 
 
-## On the hand: a pane of this height laid on the controller (the agents' pane uses it too).
+## On the hand: a pane of this height laid on the controller.
 static func hand_transform(hand: Node3D, height: float) -> Transform3D:
 	var face := face_of(hand)
 	# Its sides exactly parallel to the laser (the aim pose's -Z, the user's call): the face's plane turned about its
@@ -345,9 +345,6 @@ static func face_of(hand: XRController3D) -> Array:
 ## Held above the pointer controller now (see the top of this file).
 func on_hand() -> bool:
 	if not app.use_xr or _actions.visible or str(app.settings.get_value("card", "place", "hand")) != "hand":
-		return false
-	# The agents' pane has the hand while it shows: a card goes beside the screen then.
-	if app.get("local_agents") != null and app.local_agents.pane_shown():
 		return false
 	var hand: XRController3D = app.ui.pointer_hand if app.ui != null else null
 	return hand != null and hand.get_is_active()
