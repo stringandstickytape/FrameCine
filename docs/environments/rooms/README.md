@@ -32,7 +32,7 @@ people.
 
 A cabin that goes somewhere for as long as the film lasts: the scenery goes by outside its windows, a pause holds it,
 and a film of known length arrives as it ends (`cabin`, `passing`). The Room tab lists them under Journeys
-(`category` `journey`).
+(`category` `journey`). Fifteen were proposed and two are built: [`journeys.md`](journeys.md) has the whole list.
 
 | # | Room | Builders and kits | Light, sky, atmosphere | Life, sound, music | Timeline and cues | Screen | Settings |
 |---|---|---|---|---|---|---|---|
