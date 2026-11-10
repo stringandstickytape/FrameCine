@@ -37,6 +37,7 @@ and a film of known length arrives as it ends (`cabin`, `passing`). The Room tab
 | # | Room | Builders and kits | Light, sky, atmosphere | Life, sound, music | Timeline and cues | Screen | Settings |
 |---|---|---|---|---|---|---|---|
 | 1 | Narrowboat | `cabin` (a canal boat's saloon: leaning walls, an arched roof, round-cornered windows, wall lamps), a stove, a rug and a sideboard (`kit`) | dusk to night over the film (`sky`, film-time tracks); reeds, willows, a hedge, bridges, a village's lights and a wharf going by (`passing`), mist later on | an owl, a far church bell, the engine (following `journey.speed`) and water on the hull (`sound_bed`) | the lamps down with the film, the bell as the church comes by | on the front bulkhead | |
+| 2 | Showboat 1927 | `cabin` (a floating theatre: an arched roof, tall windows, wall lamps, seven rows of eight folding seats), a low stage with unlit footlight hoods (`kit`) | dusk to night over the film (`sky`, film-time tracks); a near bank's trees and town, open water, steamers at anchor and wharves going by (`passing`), mist later on | the paddle wheel (following `journey.speed`), water on the hull, crickets and a far train (`sound_bed`) | the lamps down with the film, up at the landing | on the front bulkhead above the stage | |
 
 ## TV-era rooms
 

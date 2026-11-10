@@ -9,7 +9,7 @@ extends "res://scripts/env/systems/kit/builder.gd"
 ## furniture (kit/furniture.gd): a desk, a computer, a video recorder whose clock flashes 12:00, a sideboard, a
 ## standard lamp, a rug, a coffee table; and the TV rooms' dressing (kit/dressing.gd): bunting, a tea set, sandwiches,
 ## a stool, a channel dial, a soundbar, a floor lamp, a glass table (its top in PieceGlass, see-through), a media unit,
-## a boat's stove (its door's window in PieceWindows);
+## a boat's stove (its door's window in PieceWindows), a showboat's low stage with unlit footlight hoods;
 ## and the moderne hall's (kit/streamline.gd, since 2026-11-08): its walls and coved ceiling, a stepped proscenium, an
 ## organ console (its coves in PieceCove, its clock in PieceClock); and the Palace of Culture's (kit/palace_culture.gd,
 ## since 2026-11-08): its board-marked concrete hall, wall mosaics, coffered ceiling and field of globes; and the
@@ -55,7 +55,7 @@ static func spec() -> Dictionary:
 				+ "a screen tower, bougainvillea, ivy, ferns, a swirling carpet, a plasterboard partition, curved bands; "
 				+ "furniture: a desk, a computer, a video recorder flashing 12:00, a sideboard, a standard lamp, a rug, "
 				+ "a coffee table; dressing: bunting, a tea set, sandwiches, a stool, a channel dial, a soundbar, a "
-				+ "floor lamp, a glass table, a media unit, a boat's stove.",
+				+ "floor lamp, a glass table, a media unit, a boat's stove, a low stage with unlit footlight hoods.",
 		"params": PARAMS,
 		"requires": ["light"],
 		"provides": ["collision", "bake"],

@@ -1,7 +1,7 @@
 extends RefCounted
 
 ## The kit's room dressing for the TV-era rooms (docs/environments.md, "The kit"): small things of a front room, a
-## lounge and a living room, and a boat's stove (the Narrowboat's saloon), each drawn into the kit's shared meshes in
+## lounge and a living room, a boat's stove and a showboat's stage, each drawn into the kit's shared meshes in
 ## its own frame (xf places it: the middle of its foot at local y 0, its front facing local +Z). Low-poly, plain
 ## shapes of our own: no maker's shape, no badge, no lettering, no crown, flag or arms. pieces.gd calls build(); ctx
 ## is kit.gd's Ctx.
@@ -18,6 +18,7 @@ extends RefCounted
 ##   media_unit    a long low cabinet on a recessed plinth, three handleless doors (`wood`)
 ##   boat_stove    a small solid-fuel stove on a hearth plate, its flue straight up to the roof (`iron`); its door's
 ##                 window glows (the kit's lit windows)
+##   show_stage    a low wooden stage with a front moulding and seven iron footlight hoods; nothing glows
 ##
 ## The china (`china`) and the cloth (`cloth`: bunting, bread and filling) are one material each, coloured per vertex
 ## (the house shader's instance tint): bunting, a tea set and three plates of sandwiches cost two draws.
@@ -28,7 +29,7 @@ const PhysicsShapes := preload("res://scripts/play/physics_shapes.gd")
 
 ## Its pieces (pieces.gd lists them with the others, their sizes and which stand on a floor).
 const PIECES: Array[String] = ["bunting", "tea_set", "sandwiches", "stool", "channel_dial", "soundbar", "floor_lamp",
-		"glass_table", "media_unit", "boat_stove"]
+		"glass_table", "media_unit", "boat_stove", "show_stage"]
 ## The bunting's colours when the entry gives none: a red, a white, a blue (cloth, faded a little).
 const RED := Color(0.62, 0.07, 0.09)
 const WHITE := Color(0.86, 0.84, 0.8)
@@ -40,6 +41,10 @@ const PENNANT_STEP := 0.26
 const STOVE_SIZE := Vector3(0.4, 2.0, 0.38)
 const STOVE_BODY := Color(0.05, 0.05, 0.055)
 const STOVE_PLATE := Color(0.16, 0.15, 0.14)
+## The show stage: its own size, the platform's wood colour and the footlight hoods' iron colour.
+const STAGE_SIZE := Vector3(7.2, 0.6, 1.2)
+const STAGE_WOOD := Color(0.2, 0.13, 0.08)
+const STAGE_IRON := Color(0.05, 0.05, 0.055)
 
 
 static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
@@ -64,6 +69,8 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			_media_unit(c, xf, size, e)
 		"boat_stove":
 			_boat_stove(c, xf, size, e)
+		"show_stage":
+			_show_stage(c, xf, size, e)
 
 
 # --- Helpers ---------------------------------------------------------------------------------------------------
@@ -417,3 +424,19 @@ static func _boat_stove(c: Object, xf: Transform3D, size: Vector3, e: Dictionary
 	_solid(c, xf, Vector3(0, 0.0075, 0.03) * k, Vector3(0.5, 0.015, 0.48) * k)
 	_solid(c, xf, Vector3(0, 0.275, 0) * k, Vector3(0.4, 0.52, 0.36) * k)
 	_solid(c, xf, Vector3(0, 1.2675, -0.08) * k, Vector3(0.1, 1.465, 0.1) * k)
+
+
+## A low stage under a hall's picture: a wooden platform, a front moulding and seven iron footlight hoods.
+## The hoods do not glow while a film plays. Another size stretches the stage along each axis.
+static func _show_stage(c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
+	var k := size / STAGE_SIZE
+	var wood := _colour(e, "colour", STAGE_WOOD)
+	var b: RoomMesh = c.s
+	b.surface(c.mat("wood", wood))
+	_box(b, xf, Vector3(0, 0.225, 0) * k, Vector3(7.2, 0.45, 1.2) * k)
+	b.surface(c.mat("wood", wood * 1.4))
+	_box(b, xf, Vector3(0, 0.42, 0.615) * k, Vector3(7.2, 0.06, 0.03) * k)
+	b.surface(c.mat("iron", STAGE_IRON))
+	for i in 7:
+		_box(b, xf, Vector3(-2.7 + 0.9 * i, 0.51, 0.5) * k, Vector3(0.18, 0.12, 0.14) * k)
+	_solid(c, xf, Vector3(0, 0.225, 0) * k, Vector3(7.2, 0.45, 1.2) * k)

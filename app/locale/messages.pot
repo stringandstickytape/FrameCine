@@ -4530,6 +4530,10 @@ msgstr ""
 msgid "Shopfront 1906"
 msgstr ""
 
+#: environments/showboat_1927.env.json
+msgid "Showboat 1927"
+msgstr ""
+
 #: environments/streamline_1937.env.json
 msgid "Streamline 1937"
 msgstr ""
@@ -4648,6 +4652,10 @@ msgstr ""
 
 #: environments/shopfront_1906.env.json
 msgid "A shopfront picture house, 1906: a pressed tin ceiling, folding chairs, gas lamps and a dusty beam from the tin booth."
+msgstr ""
+
+#: environments/showboat_1927.env.json
+msgid "A floating theatre drifting down a wide river: cottonwoods and a levee town slide past the tall windows at dusk, a steamer lies at anchor, and the show ties up at a lamp-lit landing with the credits."
 msgstr ""
 
 #: environments/streamline_1937.env.json

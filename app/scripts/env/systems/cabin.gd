@@ -356,11 +356,15 @@ static func layout(p: Dictionary) -> SeatList:
 	return SeatList.new(seat_slots_for(p))
 
 
+## The picture hangs flat on the front bulkhead and says so (`facing`). A screen that does not say which way it
+## faces is turned towards the room's own seat, and with rows that seat is beside the aisle, off the cabin's centre
+## line: the picture would turn a few degrees and one edge of it go through the bulkhead (the Showboat's did, by
+## 0.17 m, 2026-11-10). Someone in an aisle seat of a real hall sees the picture a little from the side too.
 static func screen_for(p: Dictionary) -> Dictionary:
 	var q := resolved(p)
 	var s := U.v2(q["screen_size"])
 	return {"center": [float(q["cx"]), float(q["screen_bottom"]) + s.y / 2.0, float(q["front_z"]) + 0.03],
-			"size": [s.x, s.y]}
+			"size": [s.x, s.y], "facing": [0.0, 0.0, 1.0]}
 
 
 static func collision_shapes_for(p: Dictionary, with_seats := true) -> Array:

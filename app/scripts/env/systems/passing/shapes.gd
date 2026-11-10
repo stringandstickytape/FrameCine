@@ -20,7 +20,7 @@ const ShapeMesh := preload("res://scripts/env/systems/passing/shape_mesh.gd")
 
 const BANDS: Array[String] = ["reeds", "willow", "tree", "poplar", "hedge", "fence", "ridge", "lights", "cottage",
 		"post"]
-const LANDMARKS: Array[String] = ["lamp", "bridge", "boat", "wharf", "tower"]
+const LANDMARKS: Array[String] = ["lamp", "bridge", "boat", "wharf", "tower", "steamer"]
 ## Shapes that stand end to end in a row, each this long along the way (metres): such a band's count is its loop's
 ## length over this, and its items stand at even steps, all at the band's `near`.
 const SEGMENT := {"hedge": 6.0, "fence": 2.4, "ridge": 12.0}
@@ -29,6 +29,7 @@ const COLOURS := {
 	"reeds": "#3a4127", "willow": "#2f3a22", "tree": "#1f2a1b", "poplar": "#1b2618", "hedge": "#1c2617",
 	"fence": "#4a4337", "ridge": "#10141c", "lights": "#ffc98a", "cottage": "#26221d", "post": "#2e2a24",
 	"lamp": "#1b1b1d", "bridge": "#4a3329", "boat": "#17301f", "wharf": "#3a3632", "tower": "#15171c",
+	"steamer": "#cfc8b8",
 }
 ## A far village's lights: this share warm, the rest cool.
 const WARM := Color(1.0, 0.79, 0.54)
@@ -55,6 +56,7 @@ const REACH := {
 	"lamp": {"stem": [0.06, 0.0], "wide": [0.61, 0.0], "over": [0.0, 2.85]},
 	"boat": {"stem": [0.0, 1.0], "wide": [0.0, 1.0], "over": [0.0, 0.0]},
 	"tower": {"stem": [0.0, 3.5], "wide": [0.0, 3.5], "over": [0.0, 0.0]},
+	"steamer": {"stem": [0.0, 4.5], "wide": [0.0, 4.5], "over": [0.0, 0.0]},
 }
 
 
@@ -96,6 +98,8 @@ static func clearing(shape: String, size: float, side: float, distance: float) -
 			return _clearing(8.5 * size, side, distance - 1.0 * size - 0.5, distance + 1.0 * size + 0.5)
 		"tower":
 			return _clearing(20.0 * size, side, distance - 8.0 * size, distance + 8.0 * size)
+		"steamer":
+			return _clearing(28.0 * size, side, distance - 4.5 * size - 1.0, distance + 4.5 * size + 1.0)
 	return Vector3.ZERO
 
 
@@ -136,6 +140,8 @@ static func draw(shape: String, m: ShapeMesh, rng: RandomNumberGenerator, size: 
 			_wharf(m, size, colour, info)
 		"tower":
 			_tower(m, size, colour)
+		"steamer":
+			_steamer(m, rng, size, colour, info)
 
 
 ## A colour with its r, g and b multiplied by k.
@@ -496,3 +502,52 @@ static func _tower(m: ShapeMesh, size: float, colour: Color) -> void:
 	for x: float in [-3.5, 3.5]:
 		m.quad(Vector3(x, 7.0, -16.5) * s, Vector3(x, 7.0, -2.5) * s, Vector3(0.0, 10.0, -2.5) * s,
 				Vector3(0.0, 10.0, -16.5) * s, _mul(colour, 0.8))
+
+
+## A sternwheel river steamer at anchor, its length along the way: two deck houses, a pilot house, twin stacks and
+## a stern wheel, with lit windows and deck lamps on the side that faces the way.
+static func _steamer(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	m.material(ShapeMesh.M_PLAIN)
+	m.box(Vector3(0.0, 0.3, 0.0) * size, Vector3(9.0, 1.2, 44.0) * size, Color("#1a1c1e"))
+	m.box(Vector3(0.0, 2.2, -2.0) * size, Vector3(7.6, 2.6, 32.0) * size, colour)
+	m.box(Vector3(0.0, 3.575, -2.0) * size, Vector3(8.6, 0.15, 36.0) * size, _mul(colour, 0.8))
+	m.box(Vector3(0.0, 4.8, -4.0) * size, Vector3(6.0, 2.3, 24.0) * size, colour)
+	m.box(Vector3(0.0, 6.01, -4.0) * size, Vector3(7.0, 0.12, 27.0) * size, _mul(colour, 0.8))
+	m.box(Vector3(0.0, 7.17, 4.0) * size, Vector3(3.0, 2.2, 3.4) * size, colour)
+	m.box(Vector3(0.0, 8.33, 4.0) * size, Vector3(3.6, 0.12, 4.0) * size, _mul(colour, 0.8))
+	var stack := Color("#0e0e10")
+	for x: float in [-1.4, 1.4]:
+		m.tube(Vector3(x, 6.07, 9.0) * size, Vector3(x, 13.0, 9.0) * size, 0.45 * size, 0.45 * size, 8,
+				stack, stack)
+		m.box(Vector3(x, 12.9, 9.0) * size, Vector3(1.2, 0.3, 1.2) * size, stack)
+	m.ball(Vector3(0.0, 1.8, -24.8) * size, 2.6 * size, 4, 10, Color("#5a1a14"))
+	var x1 := -side * 3.81 * size
+	var x2 := -side * 3.01 * size
+	for i in 10:
+		var z := -16.0 + 3.1 * i
+		var lit := rng.randf() < 0.7
+		var bright := rng.randf_range(0.7, 1.0)
+		var c := Color("#0a0a0c")
+		if lit:
+			m.material(ShapeMesh.M_WINDOW)
+			c = _mul(WARM, bright)
+		else:
+			m.material(ShapeMesh.M_PLAIN)
+		m.quad(Vector3(x1, 1.75 * size, (z - 0.45) * size), Vector3(x1, 1.75 * size, (z + 0.45) * size),
+				Vector3(x1, 2.85 * size, (z + 0.45) * size), Vector3(x1, 2.85 * size, (z - 0.45) * size), c)
+	for i in 7:
+		var z := -13.0 + 3.0 * i
+		var lit := rng.randf() < 0.5
+		var bright := rng.randf_range(0.7, 1.0)
+		var c := Color("#0a0a0c")
+		if lit:
+			m.material(ShapeMesh.M_WINDOW)
+			c = _mul(WARM, bright)
+		else:
+			m.material(ShapeMesh.M_PLAIN)
+		m.quad(Vector3(x2, 4.45 * size, (z - 0.4) * size), Vector3(x2, 4.45 * size, (z + 0.4) * size),
+				Vector3(x2, 5.35 * size, (z + 0.4) * size), Vector3(x2, 5.35 * size, (z - 0.4) * size), c)
+	for i in 5:
+		m.light(Vector3(-side * 4.3, 3.4, -16.0 + 8.0 * i) * size, WARM, 0.8, 0.35 * size)
+	m.light(Vector3(0.0, 9.2, 4.0) * size, COOL, 1.0, 0.3 * size)

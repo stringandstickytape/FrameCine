@@ -3323,6 +3323,9 @@ msgstr "放映室 1962"
 msgid "Shopfront 1906"
 msgstr "1906 年店面影院"
 
+msgid "Showboat 1927"
+msgstr "演艺船 1927"
+
 #. A room: a 1937 cinema in the streamline style.
 msgid "Streamline 1937"
 msgstr "1937 年流线型影院"
@@ -3415,6 +3418,9 @@ msgstr "1962年山间收藏家的私人影院：胡桃木与黄铜，悬空壁�
 
 msgid "A shopfront picture house, 1906: a pressed tin ceiling, folding chairs, gas lamps and a dusty beam from the tin booth."
 msgstr "1906年的店面电影院：压花锡板天花板、折叠椅、煤气灯，铁皮放映间射出满是尘埃的光束。"
+
+msgid "A floating theatre drifting down a wide river: cottonwoods and a levee town slide past the tall windows at dusk, a steamer lies at anchor, and the show ties up at a lamp-lit landing with the credits."
+msgstr "一座顺着宽阔大河漂流的水上剧场：黄昏时，杨树和堤岸小镇从高窗外缓缓滑过，一艘汽船停泊在河心，片尾字幕出现时，演艺船靠上灯火通明的码头。"
 
 msgid "A streamline cinema, 1937: coves that glow and change colour, a stepped proscenium round a rising sun, faience bands round the hall, an organ that rises from the pit, a festoon."
 msgstr "1937年的流线型影院：发光变色的灯槽、环绕旭日的阶梯式台口、环绕大厅的釉面砖带、从乐池升起的管风琴和一道花彩幕布。"

@@ -20,7 +20,7 @@ const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale
 		"rain_leaves", "gas_hiss", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain",
 		"clock", "tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load", "switch_clunk", "valve_hum",
 		"crt_off", "channel_clunk", "sonar", "bubbles", "far_car", "scops_owl", "church_bell", "city", "tawny_owl",
-		"hooves", "boat_engine", "water_lap"]
+		"hooves", "boat_engine", "water_lap", "paddle_wheel"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
@@ -29,18 +29,18 @@ const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise
 		"fountain": 6.0, "clock": 4.0, "tube_whine": 2.0, "three_bells": 3.2, "candle": 0.9, "ice_creak": 2.6,
 		"vcr": 4.5, "tape_load": 8.0, "switch_clunk": 0.6, "valve_hum": 8.0, "crt_off": 1.4, "channel_clunk": 0.45,
 		"sonar": 3.0, "bubbles": 6.0, "far_car": 34.0, "scops_owl": 9.0, "church_bell": 14.0, "city": 12.0,
-		"tawny_owl": 7.0, "hooves": 16.0, "boat_engine": 8.0, "water_lap": 12.0}
+		"tawny_owl": 7.0, "hooves": 16.0, "boat_engine": 8.0, "water_lap": 12.0, "paddle_wheel": 6.0}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
 		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles",
-		"city", "boat_engine", "water_lap"]
+		"city", "boat_engine", "water_lap", "paddle_wheel"]
 ## Sample rates below RATE for the far and low sounds (less to make, nothing lost above their band).
 const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiator": 22050, "moped": 32000,
 		"hull_creak": 32000, "purr": 22050, "crickets": 32000, "fire": 32000, "drips": 32000, "wind": 22050,
 		"hum": 22050, "deep_hum": 22050, "fountain": 32000, "candle": 32000, "ice_creak": 32000, "vcr": 32000,
 		"tape_load": 32000, "switch_clunk": 32000, "valve_hum": 22050, "crt_off": 32000, "channel_clunk": 32000,
 		"sonar": 32000, "bubbles": 32000, "far_car": 22050, "scops_owl": 32000, "church_bell": 22050, "city": 22050,
-		"tawny_owl": 22050, "hooves": 32000, "boat_engine": 22050, "water_lap": 32000}
+		"tawny_owl": 22050, "hooves": 32000, "boat_engine": 22050, "water_lap": 32000, "paddle_wheel": 22050}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -1262,6 +1262,31 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 			for i in total:
 				var x := rng.randf_range(-1.0, 1.0)
 				s[i] += (_lp(st, 0, x, a_hi) - _lp(st, 1, x, a_lo)) * 0.08
+		"paddle_wheel":
+			# A sternwheeler's buckets slap the water three times a second, with wash and a slow engine under them.
+			# Eighteen slaps and nine engine beats divide the loop; the lead-in lets the filters settle.
+			var strengths := PackedFloat32Array()
+			for k in 18:
+				strengths.append(rng.randf_range(0.7, 1.0))
+			var a_slap := _a(900.0, r)
+			var a_hi := _a(1500.0, r)
+			var a_lo := _a(200.0, r)
+			var a_out := _a(1800.0, r)
+			for i in total:
+				var t := float(i - lead) / r
+				var tt := t + 1.0
+				var beat := int(floor(tt * 3.0))
+				var dt := tt - beat / 3.0
+				var strength: float = strengths[posmod(beat, 18)]
+				var env := minf(dt / 0.04, 1.0) * exp(-maxf(dt - 0.04, 0.0) * 9.0)
+				var noise := rng.randf_range(-1.0, 1.0)
+				var slap := _lp(st, 0, noise, a_slap) * env * strength * 3.0
+				var n2 := rng.randf_range(-1.0, 1.0)
+				var wash := (_lp(st, 1, n2, a_hi) - _lp(st, 2, n2, a_lo)) * 0.5 \
+						* (1.0 + 0.3 * sin(TAU * tt / 3.0))
+				var dt2: float = tt - floor(tt * 1.5) / 1.5
+				var chuff := sin(TAU * 45.0 * dt2) * exp(-dt2 * 12.0) * 0.5
+				s[i] = _lp(st, 3, slap + wash + chuff, a_out)
 	return s
 
 

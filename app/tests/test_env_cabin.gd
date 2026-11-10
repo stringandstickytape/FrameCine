@@ -170,6 +170,10 @@ func _own_seat() -> void:
 			var cx := float(Cabin.screen_for(p)["center"][0])
 			check("own seat %s %d: at the origin (%d seats), the screen's centre x %.3f is %.3f" % [side, i, slots.size(),
 					cx, -o], own and absf(cx + o) < 0.0001)
+			# Off the centre line, and the picture still lies flat on the bulkhead: it does not turn to this seat.
+			var facing: Array = Cabin.screen_for(p).get("facing", [])
+			check("own seat %s %d: the picture faces straight down the cabin %s" % [side, i, facing],
+					facing.size() == 3 and float(facing[0]) == 0.0 and float(facing[2]) == 1.0)
 
 
 ## The default screen, worked out here from the parameters by the rules.

@@ -168,3 +168,9 @@ No live lights in any (the lamps' lights are the bake's).
 
 The picture the rules give is for a cabin with one seat or low ones. With rows of tall seats the rows behind do not
 see its bottom edge: such a room sets screen_bottom itself.
+
+The picture hangs flat on the front bulkhead: `screen_for()` gives it `facing` [0, 0, 1], and a room's document
+that writes its own `screen` with rows must give the same. A screen with no `facing` turns towards the room's own
+seat, which with rows is beside the aisle, off the cabin's centre line; turned, one edge of the picture goes
+through the bulkhead (the Showboat's did, by 0.17 m). The viewer sees the picture a little from the side, as from
+an aisle seat.

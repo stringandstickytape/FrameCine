@@ -87,7 +87,8 @@ Where a band's presence is under 1, items drop out in their order: at 0.5, half 
 
 ### A landmark
 
-Something that stands once on the route: it comes into view ahead, passes and goes astern.
+Something that stands once on the route: it comes into view ahead, passes and goes astern. `steamer` is a
+sternwheel river steamer at anchor, with two deck houses, twin stacks, lit windows facing the way and six lights.
 
 | Field | Type | Default | What |
 |---|---|---|---|
@@ -115,6 +116,7 @@ with none gives nothing. The margins past the shape itself are for what reaches 
 | `boat` | 8.5 x size | its distance -+ (size + 0.5) |
 | `tower` | 20 x size | its distance -+ 8 x size |
 | `lamp` | | none |
+| `steamer` | 28 x size | its distance -+ (4.5 x size + 1) |
 
 The scenery's shaders get them as `landmark_clear` (one a landmark), and `band_extent` for each band: how far one of
 its items runs on along the way from its foot (a row's piece: its `SEGMENT` length; else 0). An item whose run along
@@ -204,6 +206,7 @@ the size, metres times the size]:
 | `lamp` | [0.06, 0] | [0.61, 0] | [0, 2.85] |
 | `boat` | [0, 1.0] | [0, 1.0] | [0, 0] |
 | `tower` | [0, 3.5] | [0, 3.5] | [0, 0] |
+| `steamer` | [0, 4.5] | [0, 4.5] | [0, 0] |
 
 A shape not in the table (`ridge`, `lights`, `wharf`) comes no nearer than its foot. The table is worked out from the
 drawing functions at the largest each draws: a change to a shape is a change to its line here.

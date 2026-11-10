@@ -2,20 +2,21 @@ extends SceneTree
 
 ## The passing system's scenery shapes (scripts/env/systems/passing/shapes.gd): each band shape and landmark draws
 ## something, the same seed draws the same item, each keeps to its triangle budget and its size, a hedge's pieces
-## meet, a cottage's lit windows and a lamp's lights face the way, a bridge leaves the way open, and every material is
-## one of ShapeMesh's. No main scene.
+## meet, a cottage's and steamer's lit windows and a lamp's lights face the way, a bridge leaves the way open, and
+## every material is one of ShapeMesh's. A steamer has six lights. No main scene.
 ## godot --headless --xr-mode off --path app --script res://tests/test_env_passing_shapes.gd
 
 const Shapes := preload("res://scripts/env/systems/passing/shapes.gd")
 const ShapeMesh := preload("res://scripts/env/systems/passing/shape_mesh.gd")
 
 const BUDGET := {"reeds": 70, "willow": 400, "tree": 420, "poplar": 120, "hedge": 60, "fence": 50, "ridge": 2,
-		"lights": 0, "cottage": 80, "post": 12, "lamp": 70, "bridge": 140, "boat": 130, "wharf": 220, "tower": 130}
+		"lights": 0, "cottage": 80, "post": 12, "lamp": 70, "bridge": 140, "boat": 130, "wharf": 220, "tower": 130,
+		"steamer": 300}
 ## The highest point of each shape at size 1 (metres): at least, at most.
 const HEIGHT := {"reeds": [1.2, 2.4], "willow": [3.0, 6.5], "tree": [9.0, 14.0], "poplar": [13.5, 20.5],
 		"hedge": [1.4, 2.2], "fence": [1.0, 1.2], "cottage": [5.3, 5.5], "post": [1.1, 1.3], "lamp": [3.1, 3.3],
-		"bridge": [5.1, 5.3], "boat": [1.9, 2.0], "wharf": [4.7, 4.9], "tower": [19.5, 19.7]}
-const VARIED: Array[String] = ["reeds", "willow", "tree", "cottage", "boat"]
+		"bridge": [5.1, 5.3], "boat": [1.9, 2.0], "wharf": [4.7, 4.9], "tower": [19.5, 19.7], "steamer": [13.0, 13.1]}
+const VARIED: Array[String] = ["reeds", "willow", "tree", "cottage", "boat", "steamer"]
 
 var _failures := 0
 var _checks := 0
@@ -33,6 +34,7 @@ func _run() -> void:
 	_cottage()
 	_bridge()
 	_lamp()
+	_steamer()
 	var m := _draw("nothing", 1234, _info())
 	_check("an unknown shape draws nothing", m.triangle_count() == 0 and m.light_count() == 0)
 	print("test_env_passing_shapes: %d checks, %s" % [_checks,
@@ -191,6 +193,29 @@ func _lamp() -> void:
 			if absf(p.x - (-side * 0.5)) > 1e-5:
 				ok = false
 		_check("lamp (side %d): two lights at x = %.1f" % [side, -side * 0.5], ok)
+
+
+func _steamer() -> void:
+	for side: int in [1, -1]:
+		var m := _draw("steamer", 1234, _info(12.0, side))
+		_check("steamer (side %d): six lights" % side, m.light_count() == 6)
+		var a := _arrays(m)
+		var verts: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+		var uv2: PackedVector2Array = a[Mesh.ARRAY_TEX_UV2]
+		var ok := true
+		for i in verts.size():
+			if uv2[i].x == float(ShapeMesh.M_WINDOW) and signf(verts[i].x) != -side:
+				ok = false
+		_check("steamer (side %d): its lit windows face the way" % side, ok)
+		var found := false
+		for s in range(1, 21):
+			for v in _arrays(_draw("steamer", s, _info(12.0, side)))[Mesh.ARRAY_TEX_UV2] as PackedVector2Array:
+				if v.x == float(ShapeMesh.M_WINDOW):
+					found = true
+					break
+			if found:
+				break
+		_check("steamer (side %d): a seed of 1 to 20 has a lit window" % side, found)
 
 
 func _check(what: String, ok: bool) -> void:

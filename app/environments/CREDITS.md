@@ -102,3 +102,11 @@ trees, the hedge, the fence, cottages, bridges, boats, the tower, the wharf), th
 by the systems (`cabin.gd`, `kit.gd`, `passing.gd`, `sky.gd`; the stars from the catalogue under "Data") on library
 materials (`painted_wall`, `oak_veneer`, `oak_planks`, `dark_metal`, `oxblood_leather`, `walnut_veneer`, the kit's
 `woven_carpet` and `oak_veneer`, all CC0). Its sounds (the engine, the water, the owl, the bell) are synthesised.
+
+## Showboat 1927 (`showboat_1927.env.json`)
+
+No bundled asset. The hall, its seats and stage, the river and everything that goes by it (willows, trees, poplars,
+the fence, cottages, lights, ridges, steamers, the tower and wharves), the sky and its stars are made in code by the
+systems (`cabin.gd`, `kit.gd`, `passing.gd`, `sky.gd`; the stars from the catalogue under "Data") on library
+materials (`painted_wall`, `wood_panelling`, `oak_planks`, `velvet`, `felt`, `dark_metal`, the kit's `oak_veneer`,
+all CC0). Its sounds (the paddle wheel, water, crickets and train) are synthesised.
