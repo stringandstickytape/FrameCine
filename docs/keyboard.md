@@ -53,6 +53,6 @@ argument for left and right modifier locations, so those remain equivalent in X1
 shape distances with a small popularity prior, searching only words with nearby first and last letters. The 60,000
 word dictionary (`words.tsv.gz`) comes from the permissive SCOWL 2020.12.07 levels 10–50; these are popularity classes, not measured
 frequency counts. The recipe and checksum are in `tools/build_keyboard_words.py`, with credits and notices in
-`LICENSES/THIRD-PARTY.md` and `LICENSES/keyboard-words.txt`. Long rare entries are trimmed to cap memory use.
+`app/keyboard/LICENSE-words.txt` (in the package: `LICENSES/keyboard-words.txt` and `LICENSES/THIRD-PARTY.md`). Long rare entries are trimmed to cap memory use.
 The headless test prints desktop decode timings. Headset timing, tip placement, haptics and legibility need a worn
 test; desktop timings do not establish arm64 performance.

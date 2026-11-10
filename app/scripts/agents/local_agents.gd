@@ -432,10 +432,13 @@ func _process(delta: float) -> void:
 
 # --- The window: lasers, holding, sizing (as a PC window's pane) ---------------------------------------------------
 
-## The laser is free for the window on this hand (the menu, a held object or a PC pane don't have it).
+## The laser is free for the window on this hand (the menu, the keyboard, a held object or a PC pane don't have it).
 func _hand_free(hand: Node) -> bool:
 	var ui: Node = main.get("ui")
 	if ui != null and ui.has_method("laser_in_use") and ui.laser_in_use(hand):
+		return false
+	var keyboard: Node = ui.get("keyboard") if ui != null else null
+	if keyboard != null and keyboard.owns_laser(hand):
 		return false
 	var f: Node = main.get("features")
 	for name: String in ["grab", "pc_windows"]:

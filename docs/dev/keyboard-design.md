@@ -77,9 +77,9 @@ Both ways at once; each hand on its own, so two hands can type together.
 - With Shift latched the word gets a capital; with Caps Lock it is all capitals.
 - **The word list** must have a licence that lets it ship in an MIT app free of charge with only a credit: public
   domain, CC0, Unlicense, MIT or BSD style. About 30 000-60 000 English words with frequencies. Put it under
-  app/keyboard/ (or a folder that fits), and its source, version and licence in LICENSES/THIRD-PARTY.md (and the
-  package's LICENSES folder if tools/package.sh needs telling). No word list that forbids redistribution or needs
-  share-alike.
+  app/keyboard/, with its source, version and licence beside it (app/keyboard/LICENSE-words.txt);
+  tools/package.sh copies that into the package's LICENSES and lists it in THIRD-PARTY.md. No word list that
+  forbids redistribution or needs share-alike.
 
 ## Where the keys go: the targets
 

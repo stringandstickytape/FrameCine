@@ -223,7 +223,7 @@ EOF
 cp LICENSE "$STAGE/LICENSES/framecine-MIT.txt"
 cp app/models/controllers/LICENSE-controller.md "$STAGE/LICENSES/controller-models-CC-BY-NC-SA-4.0.md"
 cp app/materials/CREDITS.md "$STAGE/LICENSES/material-textures-CC0-credits.md"
-cp LICENSES/keyboard-words.txt "$STAGE/LICENSES/keyboard-words.txt"
+cp app/keyboard/LICENSE-words.txt "$STAGE/LICENSES/keyboard-words.txt"
 wsl_cat "$ENGINE_SRC/LICENSE.txt" > "$STAGE/LICENSES/engine-LICENSE.txt"
 wsl_cat "$ENGINE_SRC/COPYRIGHT.txt" > "$STAGE/LICENSES/engine-COPYRIGHT.txt"
 wsl_cat src/ffmpeg/COPYING.LGPLv2.1 > "$STAGE/LICENSES/FFmpeg-LGPL-2.1.txt"
