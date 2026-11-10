@@ -48,6 +48,8 @@ const WatchCard := preload("res://ui/watch_card.gd")
 const Assistant := preload("res://scripts/assistant/assistant.gd")
 const I18n := preload("res://scripts/i18n.gd")
 const Intro := preload("res://ui/intro.gd")
+const FloatingKeyboard := preload("res://keyboard/floating_keyboard.gd")
+var keyboard: FloatingKeyboard
 ## The header lists the controller batteries at or below this.
 const CONTROLLER_BATTERY_HEADER := 20
 
@@ -150,6 +152,10 @@ func setup(p_app: Node3D) -> void:
 	add_child(panel)
 	ui = panel.ui
 	ui.bind(app)
+	keyboard = FloatingKeyboard.new()
+	keyboard.name = "Keyboard"
+	add_child(keyboard)
+	keyboard.setup(app)
 	tablet = Tablet.new()
 	tablet.name = "Tablet"
 	tablet.app = app
@@ -511,7 +517,7 @@ func show_panel(hand: XRHand = null) -> void:
 	var was_open := _open
 	_open = true
 	tablet.show_at(_head())
-	recentre()
+	recentre(was_open)
 	if app.get("_frames") != null and int(app.get("_frames")) < 10:
 		_replace_left = LAUNCH_REPLACE_SECONDS
 	panel.fade_to(1.0)
@@ -548,11 +554,13 @@ func toggle_panel(hand: XRHand = null) -> void:
 
 
 ## Puts the tablet in front of the head again (its place for the head), and the panel onto it.
-func recentre() -> void:
+func recentre(include_keyboard := true) -> void:
 	if tablet == null:
 		return
 	tablet.place(_head())
 	panel.global_transform = tablet.panel_transform()
+	if include_keyboard and keyboard != null and keyboard.visible:
+		keyboard.recentre()
 
 
 ## The menu button of `hand` (null: the desktop's M key) pressed or released. A press opens a closed panel at once,
@@ -586,6 +594,8 @@ func _head() -> Transform3D:
 func _process(delta: float) -> void:
 	if app == null:
 		return
+	if keyboard != null:
+		keyboard.step(delta)
 	if menu.step(delta) == "recentre":
 		show_panel(menu.hand as XRHand)
 		if menu.hand != null:
@@ -593,7 +603,7 @@ func _process(delta: float) -> void:
 	if _replace_left > 0.0:
 		_replace_left -= delta
 		if _open:
-			recentre()
+			recentre(false)
 	_take_over_pointer()
 	_update_pointer()
 	_update_poke()
@@ -627,6 +637,13 @@ func _take_over_pointer() -> void:
 ## The pointer hand's ray against the panel: laser, hover, haptic tick.
 func _update_pointer() -> void:
 	if not app.use_xr or pointer_hand == null:
+		return
+	if keyboard != null and keyboard.owns_laser(pointer_hand):
+		_pointed = false
+		_card_pointed = false
+		_hit = {}
+		_tablet_hit = {}
+		panel.pointer_exit()
 		return
 	var hit := {}
 	if pointer_hand.get_is_active() and _open:
@@ -690,6 +707,8 @@ func _update_pointer() -> void:
 
 
 func _grab_owns(hand: XRHand) -> bool:
+	if keyboard != null and keyboard.owns_laser(hand):
+		return true
 	var grab: Node = app.features.get("grab") if app.features != null else null
 	# A PC window's pane draws its own laser too (scripts/pc/pc_windows.gd).
 	var pc: Node = app.features.get("pc_windows") if app.features != null else null
@@ -699,6 +718,8 @@ func _grab_owns(hand: XRHand) -> bool:
 ## Whether this hand's laser is the menu's (or Place's, seat picking's, marking's) now: object physics' grab
 ## (scripts/play/object_grab.gd) leaves it alone then.
 func laser_in_use(hand: XRHand) -> bool:
+	if keyboard != null and keyboard.owns_laser(hand):
+		return true
 	if _seat_pick or is_placing_object() or is_marking_window():
 		return true
 	return hand == pointer_hand and (_pointed or _card_pointed or not _tablet_hit.is_empty() or panel.is_pressed()
@@ -758,7 +779,8 @@ func _update_tablet_poke() -> void:
 
 
 func _update_panel_poke() -> void:
-	if not app.use_xr or pointer_hand == null or not pointer_hand.get_is_active() or not _open:
+	if not app.use_xr or pointer_hand == null or not pointer_hand.get_is_active() or not _open \
+			or (keyboard != null and keyboard.owns_laser(pointer_hand)):
 		if _poke_down:
 			_poke_down = false
 			panel.pointer_exit()
@@ -1114,6 +1136,8 @@ func seat_ring_shown() -> bool:
 ## Trigger of the pointer controller: with the laser on the panel, a click there; open and not aimed: activates the
 ## focused control. Closed: not used (the app's play / pause).
 func on_trigger(hand: XRHand, pressed: bool) -> bool:
+	if keyboard != null and keyboard.on_trigger(hand, pressed):
+		return true
 	if hand != pointer_hand:
 		return false
 	if is_marking_window():
@@ -1180,6 +1204,8 @@ func on_trigger(hand: XRHand, pressed: bool) -> bool:
 ## Thumbstick: either stick scrolls the list under the laser, or nudges the slider under it (up or right: more). Open
 ## and not aimed, the pointer controller's stick moves the focus.
 func on_stick(hand: XRHand, stick: Vector2, delta: float) -> bool:
+	if keyboard != null and keyboard.on_stick(hand, stick, delta):
+		return true
 	# The eye calibration moves its pip with the stick (scripts/xr/eye_gaze.gd reads it): no seeking meanwhile.
 	var gaze: Node = app.features.get_node_or_null("EyeGaze") if app.features != null else null
 	if gaze != null and gaze.calibrating:
@@ -1263,6 +1289,8 @@ func _ensure_visible(c: Control) -> void:
 ## Grip: held 2 s with the laser on the pane allows remote changes for an hour (dev mode). The grip on the pane does
 ## not move the screen.
 func on_grip(hand: XRHand, pressed: bool) -> bool:
+	if keyboard != null and keyboard.on_grip(hand, pressed):
+		return true
 	if hand != pointer_hand or not _pointed:
 		if not pressed:
 			_grip_held = -1.0
@@ -1278,7 +1306,7 @@ func on_key(event: InputEventKey) -> bool:
 	if not panel.visible:
 		return false
 	var focus := panel.focus_owner()
-	if focus is LineEdit and focus.is_visible_in_tree():
+	if (focus is LineEdit or focus is TextEdit) and focus.is_visible_in_tree():
 		panel.viewport.push_input(event, true)
 		return true
 	return false

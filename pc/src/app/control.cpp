@@ -475,7 +475,7 @@ void Session::handle(const json::Value& m) {
     } else if (t == "mouse" || t == "key" || t == "text" || t == "focus") {
         const std::string id = m.str("id");
         if (t == "key") {
-            if (!input::key(m.str("key"), m.flag("down"))) logf("input: unknown key name");
+            if (!input::key(m.str("key"), m.flag("down"), static_cast<int>(m.integer("location")))) logf("input: unknown key name");
             return;
         }
         if (t == "text") {

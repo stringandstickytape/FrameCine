@@ -727,6 +727,7 @@ godot --headless --xr-mode off --path app --script res://tests/test_features.gd 
 godot --headless --xr-mode off --path app --script res://tests/test_media_features.gd    # features on real files through MediaSource (WSL media)
 godot --headless --xr-mode off --path app --script res://tests/test_end_time.gd          # also test_battery_forecast.gd, test_container_mode.gd
 godot --headless --xr-mode off --path app --script res://tests/test_pane.gd             # front pose, head follow, menu hold, chips, theme rules
+godot --headless --xr-mode off --path app --script res://tests/test_keyboard.gd         # 104 keys, events, modifiers, routing, field input, pokes, placement, swipe timings
 godot --headless --xr-mode off --path app --script res://tests/test_assistant.gd         # assistant service: window, pairing, three strikes, token, whitelist, events, voice, Forget
 godot --headless --xr-mode off --path app --script res://tests/test_assistant_room.gd    # assistant rooms: permission, schema paths, model checks, Undo, Keep, restart
 godot --headless --xr-mode off --path app --script res://tests/test_controller_motion.gd # our controller model's moving parts
@@ -839,7 +840,8 @@ Each item below is a default I picked. All of them are easy to change.
   not yet tested.
 - **Render models:** they arrive on the device. Labels placed in model space and the unlit look await a worn check.
 - **Browser:** verified on the device by the user on 2026-10-31 (79aac6d): pages open, capture and take the
-  controller's input. There is no on-screen keyboard for the page yet; a paired keyboard works. Mipmaps for the window picture, against
+  controller's input. The floating keyboard (`../docs/keyboard.md`) shares the paired keyboard's input path;
+  its tips, haptics and legibility still need a worn check. Mipmaps for the window picture, against
   shimmer on small text, are an engine item.
 - **Ambisonics, equi-angular cubemaps:** not started.
 - **XR display latency** is not in the A/V clock, the same as in spike 03. A user A/V offset slider exists.

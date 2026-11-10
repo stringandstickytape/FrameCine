@@ -6,15 +6,44 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
+#: keyboard/keyboard_router.gd:18
+msgid "the text field"
+msgstr ""
+
+#: keyboard/keyboard_router.gd:33
+msgid "Nothing to type into"
+msgstr ""
+
+#: keyboard/keyboard_router.gd:33
+#, c-format
+msgid "Typing into: %s"
+msgstr ""
+
+#: keyboard/keyboard_router.gd:47
+msgid "the PC window"
+msgstr ""
+
+#: keyboard/keyboard_router.gd:54
+msgid "the terminal"
+msgstr ""
+
+#: keyboard/keyboard_router.gd:61
+msgid "the browser"
+msgstr ""
+
+#: keyboard/keyboard_surface.gd:30 scripts/pc/pc_windows.gd:267
+msgid "Close"
+msgstr ""
+
 #: scripts/main.gd:807
 msgid "PC window"
 msgstr ""
 
-#: scripts/main.gd:1427
+#: scripts/main.gd:1436
 msgid "TALK"
 msgstr ""
 
-#: scripts/main.gd:1478
+#: scripts/main.gd:1487
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
@@ -524,10 +553,6 @@ msgstr[1] ""
 #: scripts/pc/pc_service.gd:41
 #, c-format
 msgid "Can't make the certificate: %s."
-msgstr ""
-
-#: scripts/pc/pc_windows.gd:267
-msgid "Close"
 msgstr ""
 
 #: scripts/pc/pc_windows.gd:267
@@ -1185,7 +1210,7 @@ msgstr ""
 msgid "Carbon fibre"
 msgstr ""
 
-#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/ui_layer.gd:439
+#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/ui_layer.gd:445
 msgid "Assistant"
 msgstr ""
 
@@ -2308,12 +2333,12 @@ msgstr ""
 msgid "%s deleted"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:678 ui/ui_layer.gd:228
-#: ui/ui_layer.gd:409 ui/ui_layer.gd:997 ui/ui_layer.gd:1001 ui/ui_layer.gd:1035
+#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:682 ui/ui_layer.gd:234
+#: ui/ui_layer.gd:415 ui/ui_layer.gd:1019 ui/ui_layer.gd:1023 ui/ui_layer.gd:1057
 msgid "Undo"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:965
+#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:987
 msgid "The headset's cameras can't show here."
 msgstr ""
 
@@ -2612,7 +2637,7 @@ msgstr ""
 msgid "battery %d %%"
 msgstr ""
 
-#: ui/pane_ui.gd:657 ui/pane_ui.gd:696 ui/ui_layer.gd:475
+#: ui/pane_ui.gd:657 ui/pane_ui.gd:696 ui/ui_layer.gd:481
 msgid "Listening"
 msgstr ""
 
@@ -2709,7 +2734,7 @@ msgstr ""
 msgid "Send"
 msgstr ""
 
-#: ui/pc_place.gd:127
+#: ui/pc_place.gd:127 ui/system_tab.gd:355
 msgid "Keyboard"
 msgstr ""
 
@@ -3529,7 +3554,7 @@ msgstr ""
 msgid "Live delay"
 msgstr ""
 
-#: ui/sound_tab.gd:90 ui/system_tab.gd:566
+#: ui/sound_tab.gd:90 ui/system_tab.gd:570
 msgid "Speed"
 msgstr ""
 
@@ -4108,81 +4133,85 @@ msgstr ""
 msgid "Development AI assistant"
 msgstr ""
 
-#: ui/system_tab.gd:356
+#: ui/system_tab.gd:358
+msgid "Type with either laser or controller tip. Swipe words; hold the grip to move, the stick to resize."
+msgstr ""
+
+#: ui/system_tab.gd:360
 msgid "Updates"
 msgstr ""
 
-#: ui/system_tab.gd:363
+#: ui/system_tab.gd:367
 msgid "Dev tools"
 msgstr ""
 
-#: ui/system_tab.gd:367
+#: ui/system_tab.gd:371
 msgid "Reload theme"
 msgstr ""
 
-#: ui/system_tab.gd:368
+#: ui/system_tab.gd:372
 msgid "Remote changes"
 msgstr ""
 
-#: ui/system_tab.gd:373
+#: ui/system_tab.gd:377
 msgid "Allow for an hour"
 msgstr ""
 
-#: ui/system_tab.gd:377 ui/ui_layer.gd:795
+#: ui/system_tab.gd:381 ui/ui_layer.gd:817
 msgid "Revoke"
 msgstr ""
 
-#: ui/system_tab.gd:385
+#: ui/system_tab.gd:389
 msgid "About"
 msgstr ""
 
-#: ui/system_tab.gd:390
+#: ui/system_tab.gd:394
 #, c-format
 msgid "Engine %s, %s"
 msgstr ""
 
-#: ui/system_tab.gd:536
+#: ui/system_tab.gd:540
 msgid "Look"
 msgstr ""
 
-#: ui/system_tab.gd:653
+#: ui/system_tab.gd:657
 msgid "hot-reload on"
 msgstr ""
 
-#: ui/system_tab.gd:653
+#: ui/system_tab.gd:657
 msgid "hot-reload off"
 msgstr ""
 
-#: ui/system_tab.gd:655
+#: ui/system_tab.gd:659
 #, c-format
 msgid "%s; remote changes allowed for %d more min"
 msgstr ""
 
-#: ui/system_tab.gd:688
+#: ui/system_tab.gd:692
 #, c-format
 msgid "Measuring %s ..."
 msgstr ""
 
-#: ui/system_tab.gd:692
+#: ui/system_tab.gd:696
 #, c-format
 msgid "Can't measure: %s"
 msgstr ""
 
-#: ui/system_tab.gd:694
+#: ui/system_tab.gd:698
 #, c-format
 msgid "%.0f Mbit/s average, %.0f peak, opened in %d ms, %.0f MB read"
 msgstr ""
 
-#: ui/system_tab.gd:705
+#: ui/system_tab.gd:709
 msgid "This engine build can't run the benchmark."
 msgstr ""
 
-#: ui/system_tab.gd:727
+#: ui/system_tab.gd:731
 #, c-format
 msgid "Tour %s (kiosk): round %d, step %d of %d"
 msgstr ""
 
-#: ui/system_tab.gd:728
+#: ui/system_tab.gd:732
 #, c-format
 msgid "Tour %s: round %d, step %d of %d"
 msgstr ""
@@ -4243,130 +4272,130 @@ msgstr ""
 msgid "LIVE"
 msgstr ""
 
-#: ui/ui_layer.gd:193
+#: ui/ui_layer.gd:199
 #, c-format
 msgid "Resumed at %s"
 msgstr ""
 
-#: ui/ui_layer.gd:193
+#: ui/ui_layer.gd:199
 msgid "Start over"
 msgstr ""
 
-#: ui/ui_layer.gd:228
+#: ui/ui_layer.gd:234
 #, c-format
 msgid "Remote: %s"
 msgstr ""
 
-#: ui/ui_layer.gd:409 ui/ui_layer.gd:414
+#: ui/ui_layer.gd:415 ui/ui_layer.gd:420
 #, c-format
 msgid "Assistant: %s"
 msgstr ""
 
-#: ui/ui_layer.gd:452
+#: ui/ui_layer.gd:458
 #, c-format
 msgid "Left controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:454
+#: ui/ui_layer.gd:460
 #, c-format
 msgid "Right controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:455
+#: ui/ui_layer.gd:461
 #, c-format
 msgid "Controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:462
+#: ui/ui_layer.gd:468
 #, c-format
 msgid "Left controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:464
+#: ui/ui_layer.gd:470
 #, c-format
 msgid "Right controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:465
+#: ui/ui_layer.gd:471
 #, c-format
 msgid "Controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:795
+#: ui/ui_layer.gd:817
 msgid "Remote changes allowed for an hour"
 msgstr ""
 
-#: ui/ui_layer.gd:808
+#: ui/ui_layer.gd:830
 msgid "Connecting..."
 msgstr ""
 
-#: ui/ui_layer.gd:818
+#: ui/ui_layer.gd:840
 msgid "Starting the browser..."
 msgstr ""
 
-#: ui/ui_layer.gd:832
+#: ui/ui_layer.gd:854
 msgid "Point at a seat and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:842
+#: ui/ui_layer.gd:864
 msgid "Seat unchanged"
 msgstr ""
 
-#: ui/ui_layer.gd:911
+#: ui/ui_layer.gd:933
 msgid "That can't be applied here"
 msgstr ""
 
-#: ui/ui_layer.gd:915
+#: ui/ui_layer.gd:937
 msgid "Point at a part and pull the trigger. Stick: size and turn the pattern. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:916
+#: ui/ui_layer.gd:938
 msgid "Point at a part and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:928
+#: ui/ui_layer.gd:950
 msgid "That object can't be placed here"
 msgstr ""
 
-#: ui/ui_layer.gd:932
+#: ui/ui_layer.gd:954
 msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:966
+#: ui/ui_layer.gd:988
 msgid "That's as many areas as there can be: delete one first."
 msgstr ""
 
-#: ui/ui_layer.gd:983 ui/ui_layer.gd:994
+#: ui/ui_layer.gd:1005 ui/ui_layer.gd:1016
 msgid "Nothing marked"
 msgstr ""
 
-#: ui/ui_layer.gd:997
+#: ui/ui_layer.gd:1019
 #, c-format
 msgid "%s added: the cameras show there"
 msgstr ""
 
-#: ui/ui_layer.gd:1001
+#: ui/ui_layer.gd:1023
 #, c-format
 msgid "%s changed"
 msgstr ""
 
-#: ui/ui_layer.gd:1019
+#: ui/ui_layer.gd:1041
 msgid "Nothing changed"
 msgstr ""
 
-#: ui/ui_layer.gd:1019
+#: ui/ui_layer.gd:1041
 msgid "Nothing placed"
 msgstr ""
 
-#: ui/ui_layer.gd:1038
+#: ui/ui_layer.gd:1060
 msgid "Not placed"
 msgstr ""
 
-#: ui/ui_layer.gd:1052
+#: ui/ui_layer.gd:1074
 msgid "No seat there"
 msgstr ""
 
-#: ui/ui_layer.gd:1054
+#: ui/ui_layer.gd:1076
 msgid "Seat"
 msgstr ""
 

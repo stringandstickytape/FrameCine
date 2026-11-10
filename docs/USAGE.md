@@ -4,6 +4,9 @@ How to run the player on a desktop and on the headset, every command-line flag, 
 bindings, and the PC tools. To build the engine, see `docs/BUILD.md`. To install a release, see
 `docs/packaging.md`. Each feature has its own page in `docs/`; this page links to them.
 
+The floating [keyboard](keyboard.md) opens from **System → Keyboard**: use either laser, poke the keys, or swipe
+words into the focused menu field, PC window, terminal or browser. Hold the grip to move it and the stick to resize.
+
 ## Run on a desktop
 
 The app runs on any desktop build of the engine (4.7). Without the fork's video module it plays generated test

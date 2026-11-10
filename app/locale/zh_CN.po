@@ -22,6 +22,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgid "the text field"
+msgstr "文本框"
+
+msgid "Nothing to type into"
+msgstr "没有可输入的位置"
+
+msgid "Typing into: %s"
+msgstr "输入到：%s"
+
+msgid "the PC window"
+msgstr "电脑窗口"
+
+msgid "the terminal"
+msgstr "终端"
+
+msgid "the browser"
+msgstr "浏览器"
+
+msgid "Close"
+msgstr "关闭"
+
 #. PC windows (scripts/pc/, ui/pc_windows_row.gd, ui/pc_place.gd).
 msgid "PC window"
 msgstr "电脑窗口"
@@ -398,9 +419,6 @@ msgstr[0] "已连接 %d 台电脑。"
 
 msgid "Can't make the certificate: %s."
 msgstr "无法生成证书：%s。"
-
-msgid "Close"
-msgstr "关闭"
 
 msgid "Back to a pane"
 msgstr "回到窗格"
@@ -3006,6 +3024,9 @@ msgstr "本网络中的手机和电脑可以下载和上传文件。扫描二维
 
 msgid "Development AI assistant"
 msgstr "开发用 AI 助手"
+
+msgid "Type with either laser or controller tip. Swipe words; hold the grip to move, the stick to resize."
+msgstr "用任一激光或手柄前端按键。滑动输入单词；按住握键移动，用摇杆调整大小。"
 
 #. Updates (scripts/update/updater.gd, ui/update_row.gd).
 msgid "Updates"

@@ -682,17 +682,22 @@ func _wheel(pane: PcPane, px: Vector2, dx: float, dy: float) -> void:
 
 
 func _key(k: InputEventKey) -> bool:
-	if focused == null:
+	return keyboard_key(k, focused)
+
+
+## Shared with the floating keyboard; the captured pane keeps a release after focus changes.
+func keyboard_key(k: InputEventKey, pane: PcPane) -> bool:
+	if pane == null or not is_instance_valid(pane) or not panes.has(pane):
 		return false
-	var s := _session(focused.client_id)
+	var s := _session(pane.client_id)
 	if s == null:
 		return false
 	var name := PcProtocol.key_name(k)
 	if name == "":
 		return false
 	if k.pressed:
-		_ensure_pc_focus(focused)
-	s.send({"t": "key", "id": focused.window_id, "key": name, "down": k.pressed})
+		_ensure_pc_focus(pane)
+	s.send({"t": "key", "id": pane.window_id, "key": name, "down": k.pressed, "location": k.location})
 	return true
 
 

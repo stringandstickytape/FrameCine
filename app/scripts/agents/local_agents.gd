@@ -772,7 +772,25 @@ func on_key(event: InputEventKey) -> bool:
 		_keys_down[event.keycode] = true
 	else:
 		_keys_down.erase(event.keycode)
-	if event.unicode >= 32 and not event.ctrl_pressed and not event.alt_pressed and not event.meta_pressed:
+	return keyboard_key(event, t)
+
+
+## The floating keyboard can keep typing while the menu is open and the viewer looks down at the keys. The
+## terminal must still be showing; it never starts or focuses a hidden conversation just because a key was tapped.
+func keyboard_target() -> Object:
+	if not (pane_shown() or on_big_screen()) or _intro_pending():
+		return null
+	var t := _target()
+	# Keep the capture itself: another agent can replace our x while a key is held.
+	return x if t == self else t
+
+
+## One key path for paired and floating keyboards. Virtual physical keys must be held in X11 for native repeat;
+## paired keyboards retain their layout's Unicode path. The engine's X11 API has no left/right location argument.
+func keyboard_key(event: InputEventKey, t: Object, physical := false) -> bool:
+	if not is_instance_valid(t):
+		return false
+	if not physical and event.unicode >= 32 and not event.ctrl_pressed and not event.alt_pressed and not event.meta_pressed:
 		if event.pressed:
 			t.send_char(event.unicode)
 		return true

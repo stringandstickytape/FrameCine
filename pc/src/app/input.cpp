@@ -156,8 +156,8 @@ void mouse(const Target& t, MouseEvent ev, double x, double y, int sw, int sh, c
     send(v);
 }
 
-bool key(const std::string& name, bool down) {
-    const auto k = keys::lookup(name);
+bool key(const std::string& name, bool down, int location) {
+    const auto k = keys::lookup(name, location);
     if (!k) return false;
     if (!may_act()) return true;
     std::vector<INPUT> v{key_input(*k, !down)};

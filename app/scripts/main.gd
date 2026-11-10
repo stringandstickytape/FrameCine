@@ -1264,6 +1264,9 @@ func on_menu(hand: XRHand, pressed: bool) -> void:
 # --- Controllers -------------------------------------------------------------------------------------------------
 
 func _on_trigger(hand: XRController3D, pressed: bool) -> void:
+	# A keyboard stroke keeps its release even when the hand leaves the keys.
+	if ui != null and ui.keyboard != null and ui.keyboard.on_trigger(hand, pressed):
+		return
 	# Holding an object: the trigger does nothing (scripts/play/object_grab.gd).
 	if features != null and features.grab.on_trigger(hand, pressed):
 		return
@@ -1286,6 +1289,9 @@ func _on_trigger(hand: XRController3D, pressed: bool) -> void:
 
 func _on_grip(hand: XRController3D, pressed: bool) -> void:
 	var h := hand as XRHand
+	if ui != null and ui.keyboard != null and ui.keyboard.on_grip(h, pressed):
+		_grip_down.erase(h)
+		return
 	# Pointing at an object (or in one): the grip picks it up; letting go drops or throws it (object_grab.gd). Its
 	# release goes there first, so nothing else keeps it.
 	if features != null and features.grab.on_grip(h, pressed):
@@ -1359,6 +1365,9 @@ func _update_sticks(delta: float) -> void:
 		if _grab.get("hand") == hand:
 			continue
 		var stick := hand.get_stick()
+		if ui != null and ui.keyboard != null and ui.keyboard.on_stick(hand, stick, delta):
+			_seek_hold[hand] = -1.0
+			continue
 		# Holding an object: the stick brings it nearer or further and turns it (object_grab.gd).
 		if features != null and features.grab.on_stick(hand, stick, delta):
 			_seek_hold[hand] = -1.0

@@ -13,7 +13,7 @@ enum class MouseEvent { Move, Down, Up, Wheel };
 void mouse(const Target& t, MouseEvent ev, double x, double y, int stream_w, int stream_h, const std::string& button,
            double dx, double dy);
 // A key by Godot's name; false when the name is not known.
-bool key(const std::string& godot_name, bool down);
+bool key(const std::string& godot_name, bool down, int location = 0);
 // Text typed as it is (each character as a Unicode key press; new lines and tabs as Enter and Tab).
 void text(const std::string& utf8);
 // Brings the window to the front (restoring it when minimised). Windows lets a background process do that only

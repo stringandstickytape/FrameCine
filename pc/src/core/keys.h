@@ -18,7 +18,8 @@ struct KeyCode {
 
 // Case-insensitive. Also takes the macOS and Windows spellings of the modifiers ("Command", "Option",
 // "Windows"), and names that are only produced with Shift held ("Exclam"...) as the key that makes them.
-std::optional<KeyCode> lookup(std::string_view godot_name);
+// Godot KeyLocation: 0 unspecified (older peers), 1 left, 2 right. Only modifiers vary by location.
+std::optional<KeyCode> lookup(std::string_view godot_name, int location = 0);
 
 // Every name Godot's table has, for the tests: whether each is mapped is checked there.
 extern const char* const kGodotNames[];

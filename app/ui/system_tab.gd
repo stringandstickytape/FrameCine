@@ -352,6 +352,10 @@ func bind(p_app: Node) -> void:
 	pc_windows_row = PcWindowsRow.new()
 	box.add_child(pc_windows_row)
 	pc_windows_row.bind(app)
+	box.add_child(W.button("Keyboard", func() -> void:
+		if app.ui != null and app.ui.keyboard != null:
+			app.ui.keyboard.set_shown(not app.ui.keyboard.visible)))
+	box.add_child(W.help("Type with either laser or controller tip. Swipe words; hold the grip to move, the stick to resize."))
 
 	box.add_child(W.section("Updates"))
 	update_row = UpdateRow.new()

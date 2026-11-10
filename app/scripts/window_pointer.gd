@@ -220,7 +220,7 @@ func step(delta: float) -> void:
 		cursor.size = size
 	var hand: XRHand = main.right_hand
 	var laser_px: Variant = null
-	if laser and main.use_xr and hand.get_is_active():
+	if laser and main.use_xr and hand.get_is_active() and not (main.ui != null and main.ui.laser_in_use(hand)):
 		var hit := ray_to_window(hand.get_ray_origin(), hand.get_ray_direction())
 		hand.set_laser(true, float(hit.get("distance", 3.0)), not hit.is_empty())
 		if not hit.is_empty():
@@ -430,8 +430,16 @@ func on_key(event: InputEventKey) -> bool:
 	if not is_active() or event.keycode in RESERVED_KEYS:
 		return false
 	var src := get_source()
+	return keyboard_key(event, src)
+
+
+## Shared with the floating keyboard. Its physical keys are held for X11's own repeat and include the function
+## keys reserved for the player's paired keyboard. A captured source keeps the key up when the menu opens.
+func keyboard_key(event: InputEventKey, src: Object, physical := false) -> bool:
+	if not is_instance_valid(src):
+		return false
 	# Printable characters as text (the layout's shifted symbols stay right), the rest as keys.
-	if event.unicode >= 32 and not event.ctrl_pressed and not event.alt_pressed and not event.meta_pressed:
+	if not physical and event.unicode >= 32 and not event.ctrl_pressed and not event.alt_pressed and not event.meta_pressed:
 		if event.pressed:
 			src.send_char(event.unicode)
 		return true

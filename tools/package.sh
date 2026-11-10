@@ -223,6 +223,7 @@ EOF
 cp LICENSE "$STAGE/LICENSES/framecine-MIT.txt"
 cp app/models/controllers/LICENSE-controller.md "$STAGE/LICENSES/controller-models-CC-BY-NC-SA-4.0.md"
 cp app/materials/CREDITS.md "$STAGE/LICENSES/material-textures-CC0-credits.md"
+cp LICENSES/keyboard-words.txt "$STAGE/LICENSES/keyboard-words.txt"
 wsl_cat "$ENGINE_SRC/LICENSE.txt" > "$STAGE/LICENSES/engine-LICENSE.txt"
 wsl_cat "$ENGINE_SRC/COPYRIGHT.txt" > "$STAGE/LICENSES/engine-COPYRIGHT.txt"
 wsl_cat src/ffmpeg/COPYING.LGPLv2.1 > "$STAGE/LICENSES/FFmpeg-LGPL-2.1.txt"
@@ -247,6 +248,7 @@ cat > "$STAGE/LICENSES/THIRD-PARTY.md" <<EOF
 | Whisper speech models (ggml format; in whisper/models only when packaged with one, else fetched separately) | MIT (whisper-models-MIT.txt) | pinned in build/whisper-models.sh | OpenAI's Whisper (https://github.com/openai/whisper), converted to ggml: https://huggingface.co/ggerganov/whisper.cpp |
 | Controller models (app/models/controllers) | CC BY-NC-SA 4.0 (controller-models-CC-BY-NC-SA-4.0.md); non-commercial | see that file | see that file |
 | Room textures (app/materials) | CC0 1.0, public domain (material-textures-CC0-credits.md) | see that file | Poly Haven and ambientCG; each asset's page in that file |
+| Keyboard words (app/keyboard/words.tsv.gz) | permissive notices and public domain (keyboard-words.txt) | SCOWL 2020.12.07, modified levels 10-50 | https://wordlist.aspell.net/; tools/build_keyboard_words.py |
 
 The LGPL parts are linked statically. To relink the engine with a modified FFmpeg or libsmb2, use the build scripts
 named above with the same engine source revision; the source of every part is available as listed. Ask the

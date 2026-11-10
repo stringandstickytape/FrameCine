@@ -199,7 +199,14 @@ bool same(std::string_view a, std::string_view b) {
 
 }  // namespace
 
-std::optional<KeyCode> lookup(std::string_view name) {
+std::optional<KeyCode> lookup(std::string_view name, int location) {
+    // The floating keyboard has both modifiers; keep names compatible with paired keyboards and older peers.
+    if (location == 2) {
+        if (same(name, "Shift")) return S(0x36);
+        if (same(name, "Ctrl")) return E(0x1D);
+        if (same(name, "Alt") || same(name, "Option")) return E(0x38);
+        if (same(name, "Meta") || same(name, "Windows") || same(name, "Command")) return E(0x5C);
+    }
     for (const Entry& e : kTable) {
         if (same(e.name, name)) return e.code;
     }
