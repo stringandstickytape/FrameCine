@@ -945,6 +945,11 @@ pointer controller). The first time it shows in a run it comes up 90 cm ahead, a
 - It stays where you left it until the player closes; its width is kept for next time (`[agent_window] width`).
 - A laser on it gives it the stick and the trigger, as looking at it does (the edge turns blue).
 
+On the Frame the terminal runs on a display of its own (an in-memory X server, `Xvfb :47`, started by the player
+and open to your user only), not on the display Steam shows games on. Under Steam's session every window of the
+game's display is also handed to SteamVR as an overlay: a terminal there gave picture glitches and stopped SteamVR
+(2026-11-10). The player copies the terminal's picture from its own display and types into it there.
+
 The headset's window manager makes the terminal 1920 x 1080 pixels whatever it asks
 for, so the font sets what fits: at 28 pixels (`FONT_PX`) that is 112 columns by 32 lines (`COLUMNS`, `LINES`, a
 DejaVu Sans Mono cell of 17 x 33 pixels inside an 8 pixel border). Claude Code's first-run theme preview needs about

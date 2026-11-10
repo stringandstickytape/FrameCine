@@ -21,7 +21,7 @@ class FakeX extends RefCounted:
 	var captured := 0
 	var updates := 0
 
-	func open() -> int:
+	func open(_display := "") -> int:
 		return OK
 
 	func close() -> void:
@@ -121,6 +121,7 @@ func _run() -> void:
 	_locale_checks()
 	_detached_checks()
 	_window_checks()
+	_display_checks()
 	agents.set_active("")
 	agents.hide_pane()
 	AgentTerminal.home_override = ""
@@ -917,6 +918,38 @@ func _context_checks() -> void:
 
 ## The terminal starts outside the app's process tree where the user's service manager is there (Steam's launch wrapper
 ## would wait for it); elsewhere as it is.
+## The terminals' own display (2026-11-10): under gamescope a terminal on the game's display is forwarded to SteamVR
+## too, and killed its compositor. There they go to an X server gamescope never sees.
+func _display_checks() -> void:
+	AgentTerminal.display_override = "desktop"
+	_check("display: the desktop's own elsewhere", AgentTerminal.display() == "" and AgentTerminal.wait_display())
+	var plain: Array = AgentTerminal.detached("/usr/bin/xterm", [], "claude")
+	AgentTerminal.display_override = "private"
+	_check("display: a private one under gamescope", AgentTerminal.display() == ":%d" % AgentTerminal.DISPLAY_NUMBER)
+	var cmd: Array = AgentTerminal.detached("/usr/bin/xterm", [], "claude")
+	if str(cmd[0]) != "/usr/bin/xterm":
+		var envs: Array = (cmd[1] as Array).filter(func(a: String) -> bool: return a.begins_with("--setenv="))
+		_check("display: the terminal gets the private display, once", envs.count("--setenv=DISPLAY=" + AgentTerminal.display()) == 1
+				and envs.filter(func(a: String) -> bool: return a.begins_with("--setenv=DISPLAY=")).size() == 1)
+		_check("display: and nothing of the session's Wayland or X cookie", not envs.any(func(a: String) -> bool:
+			return a.begins_with("--setenv=WAYLAND_DISPLAY=") or a.begins_with("--setenv=XAUTHORITY=")))
+		_check("display: the desktop case keeps the session's display", not (plain[1] as Array).has(
+				"--setenv=DISPLAY=" + AgentTerminal.display()))
+	var script := AgentTerminal.display_script()
+	_check("display: the server takes no network clients and starts locked", script.contains("-nolisten tcp")
+			and script.contains("-auth \"$auth\"") and script.contains("umask 077"))
+	_check("display: only this user is let in, then it says ready", script.find("+SI:localuser:") > script.find("Xvfb")
+			and script.find(": > \"$ready\"") > script.find("+SI:localuser:"))
+	# From a file: OS.execute() with output goes through a shell, which would mangle the script's own $ and quotes.
+	var file := OS.get_cache_dir().path_join("framecine-display-test.sh")
+	var f := FileAccess.open(file, FileAccess.WRITE)
+	f.store_string(script)
+	f.close()
+	_check("display: the script is valid shell", OS.execute("/bin/sh", ["-n", file]) == 0)
+	DirAccess.remove_absolute(file)
+	AgentTerminal.display_override = ""
+
+
 ## The terminal's window (the user, 2026-11-10: off the controller, a window that floats): it comes up ahead of the
 ## head facing it, and is held and sized as a PC window's pane.
 func _window_checks() -> void:

@@ -149,8 +149,12 @@ func _open_x() -> bool:
 		return true
 	if not ClassDB.class_exists(ENGINE_CLASS):
 		return false
+	# The terminals may have a display of their own (agent_terminal.gd): started here, opened once it is up.
+	AgentTerminal.ensure_display()
+	if AgentTerminal.use_private_display() and not AgentTerminal.display_ready():
+		return false
 	var w: Object = ClassDB.instantiate(ENGINE_CLASS)
-	if w.call("open") != OK:
+	if w.call("open", AgentTerminal.display()) != OK:
 		return false
 	x = w
 	return true

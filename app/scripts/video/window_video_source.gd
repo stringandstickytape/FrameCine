@@ -155,7 +155,11 @@ func open(p: String) -> Error:
 		last_error = "this engine build has no window capture (X11WindowSource)"
 		return ERR_UNAVAILABLE
 	win = ClassDB.instantiate(ENGINE_CLASS)
-	var err: Error = win.call("open")
+	# An agent's terminal may be on a display of its own, not the desktop's (agent_terminal.gd).
+	var display := ""
+	if p.begins_with(TERMINAL_PREFIX) and AgentTerminal.wait_display():
+		display = AgentTerminal.display()
+	var err: Error = win.call("open", display)
 	if err != OK:
 		last_error = "no X display: %s" % win.call("get_last_error")
 		win = null

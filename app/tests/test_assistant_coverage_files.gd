@@ -54,7 +54,7 @@ class AsClient extends RefCounted:
 class FakeX extends RefCounted:
 	var windows: Array[Dictionary] = []
 
-	func open() -> int:
+	func open(_display := "") -> int:
 		return OK
 
 	func close() -> void:

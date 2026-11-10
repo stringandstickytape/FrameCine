@@ -2,7 +2,7 @@ extends RefCounted
 
 ## The AI agents that run on the headset itself, each in its own terminal window on the desktop's X display (docs/
 ## assistant.md, "Agents on the headset"). AGENTS is the table: add a row for another agent. This file knows what is on
-## disk and how to start a terminal; scripts/agents/local_agents.gd is the running side (the pane, voice, keys).
+## disk and how to start a terminal (on the Frame, on a display of their own: "The terminals' own display" below); scripts/agents/local_agents.gd is the running side (the pane, voice, keys).
 ##
 ## Each agent has a working folder of its own (~/Claude, ~/Codex) with an instructions file the app writes once (never
 ## over the user's), hook settings merged into the agent's own (never replacing the user's), and a folder .player/ with
@@ -504,6 +504,101 @@ static func stop(id: String) -> void:
 	OS.execute("pkill", ["-f", str(AGENTS[id]["class"])])
 
 
+# --- The terminals' own display --------------------------------------------------------------------------------------
+# Under gamescope (the Frame's Steam session) every top-level window of the game's display is also forwarded to
+# SteamVR as an overlay. A terminal there, redrawing while an agent works, gave picture glitches and then killed
+# SteamVR's compositor (its render thread over its realtime limit, SIGXCPU, four times on 2026-11-10; none with the
+# terminal closed). So there the terminals get an X server of their own that gamescope never sees: Xvfb, in memory,
+# captured by copy (MIT-SHM) and typed into with synthetic events, which need no focus and no window manager.
+
+## The private display's number: free of the session's own (:0, :1).
+const DISPLAY_NUMBER := 47
+## Room for the terminal as it asks to be (COLUMNS x LINES at FONT_PX is 2020 x 1252 on the Frame): with no window
+## manager there, nothing resizes it.
+const DISPLAY_SCREEN := "2560x1440x24"
+## Tests: "" for the rule below, else "private" or "desktop".
+static var display_override := ""
+
+
+## Whether the terminals go to a display of their own: under gamescope, with Xvfb and xhost to make one.
+static func use_private_display() -> bool:
+	if display_override != "":
+		return display_override == "private"
+	return OS.get_name() == "Linux" and OS.get_environment("GAMESCOPE_WAYLAND_DISPLAY") != "" 			and OS.get_environment("XDG_RUNTIME_DIR") != "" and FileAccess.file_exists("/usr/bin/Xvfb") 			and FileAccess.file_exists("/usr/bin/xhost") and FileAccess.file_exists("/usr/bin/systemd-run")
+
+
+## The display the terminals are on, for X11WindowSource.open(): "" is the desktop's own (DISPLAY).
+static func display() -> String:
+	return ":%d" % DISPLAY_NUMBER if use_private_display() else ""
+
+
+static func _display_ready_file() -> String:
+	return OS.get_environment("XDG_RUNTIME_DIR").path_join("framecine-display-%d.ready" % DISPLAY_NUMBER)
+
+
+## The private display is up and takes this user's clients.
+static func display_ready() -> bool:
+	return FileAccess.file_exists(_display_ready_file()) 			and FileAccess.file_exists("/tmp/.X11-unix/X%d" % DISPLAY_NUMBER)
+
+
+## What the display's unit runs. The server starts with a cookie nobody else has, so that nothing can connect until
+## xhost has let in this user alone (no cookie to hand to the terminal or to the app's own connection, and no other
+## user of the machine can look). The ready file says so. It ends with the server.
+static func display_script() -> String:
+	return "#!/bin/sh
+# Written by the VR video player: the agents' terminals get an X display of their own.
+" 			+ "umask 077
+n=%d
+ready=\"$XDG_RUNTIME_DIR/framecine-display-$n.ready\"
+" % DISPLAY_NUMBER 			+ "auth=\"$XDG_RUNTIME_DIR/framecine-display-$n.auth\"
+rm -f \"$ready\" \"$auth\"
+" 			+ "xauth -q -f \"$auth\" add \":$n\" . \"$(mcookie)\" || exit 1
+" 			+ "/usr/bin/Xvfb \":$n\" -screen 0 %s -nolisten tcp -noreset -auth \"$auth\" &
+pid=$!
+" % DISPLAY_SCREEN 			+ "i=0
+while [ ! -S \"/tmp/.X11-unix/X$n\" ] && [ $i -lt 200 ]; do sleep 0.05; i=$((i+1)); done
+" 			+ "DISPLAY=\":$n\" XAUTHORITY=\"$auth\" /usr/bin/xhost \"+SI:localuser:$(id -un)\" >/dev/null || " 			+ "{ kill $pid; exit 1; }
+: > \"$ready\"
+wait $pid
+rm -f \"$ready\" \"$auth\"
+"
+
+
+## Starts the private display if it is wanted and not up, outside the app's process tree like the terminals (it must
+## outlive the app with them). Does not wait: see display_ready(). The app calls this at its start, so that the
+## display is there long before a terminal is asked for.
+static func ensure_display() -> void:
+	if not use_private_display() or display_ready() or display_override != "":
+		return
+	var path := OS.get_user_data_dir().path_join("agents-display.sh")
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	if f == null:
+		return
+	f.store_string(display_script())
+	f.close()
+	var args: Array[String] = ["--user", "--quiet", "--collect", "--unit=framecine-display-%d" % DISPLAY_NUMBER,
+			"--description=The VR video player's display for its terminals"]
+	for v in ["XDG_RUNTIME_DIR", "PATH"]:
+		args.append("--setenv=%s=%s" % [v, OS.get_environment(v)])
+	args.append_array(["--", "/bin/sh", path])
+	# A unit of this name still there (the display is coming up) makes this a harmless failure.
+	OS.create_process("/usr/bin/systemd-run", PackedStringArray(args))
+	print("Agents: starting the terminals' own display (:%d)" % DISPLAY_NUMBER)
+
+
+## The display the terminals use is there (always so for the desktop's own). The private one is normally up since the
+## app started; else this starts it and waits a moment, up to 6 s (the server takes 1 to 4 s to come up on the Frame).
+static func wait_display() -> bool:
+	if not use_private_display() or display_override != "":
+		return true
+	ensure_display()
+	var waited := 0
+	while not display_ready() and waited < 6000:
+		OS.delay_msec(50)
+		waited += 50
+	return display_ready()
+
+
 ## Starts the agent's terminal. "" or the reason. Its window comes a moment later (find_window()).
 static func start(id: String, install := false, plain := false, fresh := false) -> String:
 	var why := prepare(id, install, plain, fresh)
@@ -512,6 +607,8 @@ static func start(id: String, install := false, plain := false, fresh := false) 
 	var t := terminal()
 	if t == "":
 		return "no terminal here (%s)" % ", ".join(TERMINALS)
+	if not wait_display():
+		return "the terminals' display did not start"
 	var args := terminal_args(id, t)
 	if terminal_override.size() > 1:
 		args = terminal_override.slice(1) + args
@@ -548,7 +645,11 @@ static func detached(terminal_path: String, args: Array[String], id: String) -> 
 	var out: Array[String] = ["--user", "--quiet", "--collect", "--unit=%s-%d" % [a["class"], Time.get_ticks_msec()],
 			"--description=%s for the VR video player" % a["name"]]
 	for v in DETACHED_ENV:
-		if OS.get_environment(v) != "":
+		if use_private_display() and v in ["DISPLAY", "XAUTHORITY", "WAYLAND_DISPLAY"]:
+			# The terminals' own display, and nothing of the session's: no cookie is needed there (display_script()).
+			if v == "DISPLAY":
+				out.append("--setenv=DISPLAY=%s" % display())
+		elif OS.get_environment(v) != "":
 			out.append("--setenv=%s=%s" % [v, OS.get_environment(v)])
 	out.append("--")
 	out.append(terminal_path)
