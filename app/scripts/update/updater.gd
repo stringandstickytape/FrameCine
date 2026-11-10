@@ -64,8 +64,10 @@ var latest := {}
 var staged_version := ""
 ## The last outcome, one line (also printed).
 var last_result := ""
-## "Later" was pressed: no more questions in this run (the swap still happens at the next start).
+## "Later" was pressed: no more questions in this run (the download stays, and the next start asks again).
 var declined := false
+## The check going now was asked for by hand (check_by_hand()): its answer gets a notice.
+var _by_hand := false
 ## The version run.sh just swapped in ("" when this start is not the first after an update).
 var just_updated := ""
 
@@ -123,6 +125,18 @@ func check_now() -> bool:
 	return true
 
 
+## System, Updates, Check now (works with the timed checks off too: the viewer asked). The answer is a notice: the
+## download's, "the newest", or "could not check". False when a check or a download is already going.
+func check_by_hand() -> bool:
+	if state == "ready":
+		notice(tr("Version %s is downloaded. It installs when you say yes in the menu.") % staged_version)
+		return true
+	if not check_now():
+		return false
+	_by_hand = true
+	return true
+
+
 func set_enabled(on: bool) -> void:
 	enabled = on
 	main.settings.set_value("update", "check", on)
@@ -173,6 +187,8 @@ func status_text() -> String:
 		return tr("This copy does not run from an install: no updates.")
 	var v := tr("Version %s") % (installed if installed != "" else "?")
 	match state:
+		"checking":
+			return v + "  ·  " + tr("Looking for a new version...")
 		"downloading":
 			return v + "  ·  " + tr("Downloading version %s: %d %%") % [str(latest.get("version", "")), maxi(percent(), 0)]
 		"staging":
@@ -227,21 +243,35 @@ static func _check_job(base: String, timeout: float, progress: Fetch.Progress) -
 
 func _on_checked(r: Dictionary) -> void:
 	state = "idle"
+	var by_hand := _by_hand
+	_by_hand = false
+	var failed := tr("Could not check for updates. Try again later.")
 	if r.has("error"):
 		_result("Update check failed: %s" % r["error"])
+		if by_hand:
+			notice(failed)
 		return
 	if not Core.verify(r["json"], r["sig"], key_path):
 		_result("Update check: the signature of latest.json does not verify; ignored")
+		if by_hand:
+			notice(failed)
 		return
 	var l := Core.parse_latest(r["json"])
 	if l.has("error"):
 		_result("Update check: %s" % l["error"])
+		if by_hand:
+			notice(failed)
 		return
+	var newest := tr("Version %s is the newest.") % installed
 	if not Core.is_newer(l["version"], installed):
 		_result("Update check: %s is the newest (installed %s)" % [l["version"], installed])
+		if by_hand:
+			notice(newest)
 		return
 	if l["version"] in Core.bad_versions(Core.read_text(state_dir.path_join("bad-versions"))):
 		_result("Update check: %s was rolled back on this headset before; skipped" % l["version"])
+		if by_hand:
+			notice(newest)
 		return
 	latest = l
 	_result("Update check: %s is out (installed %s); downloading" % [l["version"], installed])
