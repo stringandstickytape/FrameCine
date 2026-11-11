@@ -10,12 +10,13 @@ extends Node3D
 ## their own that touches the picture (never words floating in the room).
 ##
 ## The glow is outside the surface, never over its picture: nothing inside the outline of the picture, the bar and the
-## stack, then a soft light that falls away. Faint while a laser or the mouse is on the surface, stronger while it is
-## the selected one.
+## stack, then a soft light that falls away. It says which surface is selected, and only that (the user, in the
+## headset, 2026-11-11: where the laser is needs no highlight, it is plain; and blue, not the theme's accent, which is
+## yellow in the tablet's look).
 ##
 ##   set_content_size(metres), set_title(text), set_buttons([{id, text}]), has_close
 ##   set_shown(on)                 the UI is shown: off hides all three and hit() finds nothing
-##   set_state(pointed, selected)  the glow's level
+##   set_state(pointed, selected)  the glow: on for the selected surface
 ##   hover                         the part a pointer is on ("", "bar", "close" or a button's id): drawn lighter
 ##   hit(point) -> {} or {"part": "bar" | "close" | "button", "id": the button's}; point: metres, in the plane
 ##   bar_height(), stack_width(), outline() -> the rectangles of the picture with its bar, and of the stack
@@ -34,8 +35,9 @@ const STACK_WIDTHS := 5.5
 const TEXT_SHARE := 0.5
 ## How far the glow reaches, as a share of the picture's height.
 const GLOW_SHARE := 0.34
-const GLOW_POINTED := 0.3
-const GLOW_SELECTED := 1.0
+const GLOW_POINTED := 0.0
+const GLOW_SELECTED := 0.4
+const GLOW_COLOUR := Color(0.2, 0.5, 1.0)
 const FONT_SIZE := 64
 
 var content_size := Vector2(1.0, 0.5625)
@@ -254,7 +256,7 @@ func _paint() -> void:
 		return
 	var ground := PaneStyle.color(&"surface")
 	ground.a = 1.0
-	var lit := ground.lerp(PaneStyle.color(&"accent"), 0.22)
+	var lit := ground.lerp(GLOW_COLOUR, 0.3)
 	var ink := PaneStyle.color(&"text")
 	(_bar.material_override as StandardMaterial3D).albedo_color = lit if hover == "bar" else ground
 	(_close.material_override as StandardMaterial3D).albedo_color = lit if hover == "close" else ground.lerp(ink, 0.06)
@@ -264,7 +266,7 @@ func _paint() -> void:
 		var part: Array = _stack_parts[id]
 		((part[0] as MeshInstance3D).material_override as StandardMaterial3D).albedo_color = lit if hover == id else ground
 		(part[1] as Label3D).modulate = ink
-	_glow_mat.set_shader_parameter("colour", PaneStyle.color(&"accent"))
+	_glow_mat.set_shader_parameter("colour", GLOW_COLOUR)
 
 
 func _process(delta: float) -> void:

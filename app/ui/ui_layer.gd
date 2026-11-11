@@ -730,6 +730,16 @@ func point_holds(hand: Object) -> bool:
 	return hand == pointer_hand and (panel.is_pressed() or _scrub_hand == hand)
 
 
+## This hand's laser is on something that is not the menu's (a window, the terminal, an object): its trigger and stick
+## are that thing's, even with the menu open. Before, the open menu took every trigger pull off its panel as a click
+## on its focused control, so a window beside the menu could not be clicked (the user, 2026-11-11).
+func _elsewhere(hand: XRHand) -> bool:
+	if not (app.get("pointing") is Pointing):
+		return false
+	var has: Object = app.pointing.owner_of(hand)
+	return has != null and has != self
+
+
 func _grab_owns(hand: XRHand) -> bool:
 	if keyboard != null and keyboard.owns_laser(hand):
 		return true
@@ -1167,6 +1177,8 @@ func on_trigger(hand: XRHand, pressed: bool) -> bool:
 		return true
 	if hand != pointer_hand:
 		return false
+	if _elsewhere(hand):
+		return false
 	if is_marking_window():
 		var rw := _real_windows()
 		match rw.mode:
@@ -1233,6 +1245,8 @@ func on_trigger(hand: XRHand, pressed: bool) -> bool:
 func on_stick(hand: XRHand, stick: Vector2, delta: float) -> bool:
 	if keyboard != null and keyboard.on_stick(hand, stick, delta):
 		return true
+	if _elsewhere(hand):
+		return false
 	# The eye calibration moves its pip with the stick (scripts/xr/eye_gaze.gd reads it): no seeking meanwhile.
 	var gaze: Node = app.features.get_node_or_null("EyeGaze") if app.features != null else null
 	if gaze != null and gaze.calibrating:
