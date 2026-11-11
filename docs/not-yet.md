@@ -9,7 +9,7 @@ yet are in [ideas.md](ideas.md). An entry leaves this list when it is built and 
 |---|---|---|
 | **Keyboard layouts for other languages** | The floating keyboard in each language's own layout, not only ANSI US. The default is UK, or the layout that goes with Steam's language if the player can read that. A setting changes it. | Not started. To find out: how to read Steam's language on the headset. To decide: a PC window gets physical keys and applies the PC's own layout, so the legends there are right only when the two layouts match; menu fields, the terminal and the browser get the characters themselves. |
 | **Voice in other languages** | Dictation in the language of a setting (default: the menus' language), with the multilingual speech model where it is not English. | Not started. Planned with the surfaces work. A person can try English and French; the others would be offered as untried. |
-| **Surfaces: one way to point, select and type** | Every screen is a surface with a title bar, a side stack and a glow; the selection is explicit; A plays, B is the keyboard and voice, X shows and hides the UI, Y is the AI; the menu is one more pane. | In progress on branch `surfaces`: `docs/dev/surfaces-design.md` there. |
+| **Surfaces: one way to point, select and type** | Every screen is a surface with a title bar, a side stack and a glow; the selection is explicit; A plays, B is the keyboard and voice, X shows and hides the UI, Y is the AI; the menu is one more pane. | Steps 1 to 4 are in 0.1.10 (`docs/dev/surfaces-design.md`). To come: the film screen as a surface, and voice as dictation with a language setting. `docs/USAGE.md` still gives the old buttons. |
 | **The left controller** | What its buttons do under the surfaces model. | Put aside by the user for now. |
 
 ## Owed from work already done
@@ -19,7 +19,6 @@ yet are in [ideas.md](ideas.md). An entry leaves this list when it is built and 
 | The terminal at its full size | On the Frame the agents' terminal is 74 x 21 cells again (it was 112 x 32 for an hour, and stuttered). With the engine now copying only what changed, 112 x 32 may be fine: to try, then to choose. |
 | A PC window with no terminal open | The compositor crashes of 2026-11-10 had an agent's terminal showing every time. A PC window alone has not been watched for long since. |
 | The engine change in the public fork | "x11window: the copy path reads and uploads only the damaged box" is on the build machine only. |
-| A release with all of the above | 0.1.9 is the newest release. The keyboard changes, the bias light default, the terminals' own display and the new engine are on the test headset only. |
 | Speech to text on the graphics chip | `--whisper-backend=vulkan` exists and has not been proven on the headset. It decides whether a bigger speech model is usable. |
 | The agent window's place | It is kept for one run only; its width is kept for good. |
 | Updates: "Later" | Nobody has yet answered Later to an update on the headset and seen that it waits. |
