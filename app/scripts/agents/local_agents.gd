@@ -438,6 +438,10 @@ func _process(delta: float) -> void:
 			_write_context()
 	if pane_shown() and _window != 0 and x != null:
 		x.call("update")
+	# The frame goes and comes with the UI (X), with or without controllers.
+	var ui_shown: bool = not (main.get("pointing") is Pointing) or main.pointing.ui_shown
+	if _pane.frame.shown != ui_shown:
+		_pane.frame.set_shown(ui_shown)
 	_update_hands()
 	_update_look(delta)
 
@@ -534,9 +538,12 @@ func _frame_trigger(hand: Node, pressed: bool) -> bool:
 			_show_pane(false)
 		"button":
 			var t := _target()
-			if t != null:
-				_key(t, KEY_ENTER if str(aim.get("id", "")) == "enter" else KEY_ESCAPE)
-				_answered()
+			var key: Key = {"enter": KEY_ENTER, "escape": KEY_ESCAPE, "up": KEY_UP, "down": KEY_DOWN}.get(
+					str(aim.get("id", "")), KEY_NONE)
+			if t != null and key != KEY_NONE:
+				_key(t, key)
+				if key in [KEY_ENTER, KEY_ESCAPE]:
+					_answered()
 		_:
 			return false
 	if hand.has_method("pulse"):
@@ -583,7 +590,9 @@ func _save_width() -> void:
 
 
 func _update_look(delta: float) -> void:
-	if not pane_shown() or main.menu_shown or _intro_pending():
+	# A look no longer gives the terminal anything (docs/dev/surfaces-design.md: gaze never changes what a control
+	# does). The rest of this is kept for the tests that still drive it, and goes with them.
+	if true:
 		_set_looking(false)
 		return
 	# A laser on the window gives it the hand as the look does.
@@ -890,14 +899,10 @@ func _key(target: Object, key: Key, shift := false) -> void:
 # --- Controllers -------------------------------------------------------------------------------------------------
 
 ## The talk button: shows the pane; a quick tap while it was showing hides it.
+## Talking no longer shows or hides the window: B's tap is the keyboard now (main.gd), and Y and Close show and hide.
 func on_talk(held: bool) -> void:
 	if held:
 		_talk_down = Time.get_ticks_msec()
-		_talk_was_shown = pane_shown()
-		if not on_big_screen():
-			_show_pane(true)
-	elif _talk_was_shown and Time.get_ticks_msec() - _talk_down < TAP_MSEC:
-		_show_pane(false)
 
 
 ## Y on the right controller. The pointer hand only: the pane sits there, and the left has no Y for it to be the left's. Not
@@ -976,38 +981,27 @@ func keyboard_key(event: InputEventKey, t: Object, physical := false) -> bool:
 func _takes_keyboard() -> bool:
 	if not pane_shown() or main.menu_shown or _intro_pending():
 		return false
-	return _looking or not (window_override or main.window_pointer.is_active())
+	# The selected surface has the keys (docs/dev/surfaces-design.md): not the one looked at.
+	return is_selected() or not (window_override or main.window_pointer.is_active())
 
 
-## The stick and the trigger belong to the agent now: its window shows, on the pointer hand, and a prompt waits, the
-## squeeze is held or the viewer looks at it. Not while that hand holds the window (its stick sizes it then).
+## This hand's laser is on the terminal's picture: its stick scrolls it. Nothing else gives the terminal a hand now
+## (docs/dev/surfaces-design.md: not a look, not a waiting prompt, not the squeeze). Not while the hand holds the
+## window by its bar (its stick sizes it then).
 func has_input(hand: Node) -> bool:
-	if not pane_shown() or hand != _pointer_hand() or main.menu_shown or _intro_pending() or _holds.has(hand):
+	if not pane_shown() or _holds.has(hand):
 		return false
-	return _waiting or _looking or bool(hand.get("grip_down"))
+	var aim: Dictionary = _aims.get(hand, {})
+	return not aim.is_empty() and not aim.has("part")
 
 
-## X is Enter now: an agent's terminal shows, on the pane or the big screen (whichever hand points, the menu open or
-## not), outside a calibration and the first start's introduction.
+## X is the UI now (main.gd), never Enter: Enter is in the window's side stack and on the keyboard.
 func enter_ready() -> bool:
-	var gaze := _gaze()
-	if active == "" or (gaze != null and gaze.calibrating) or _intro_pending():
-		return false
-	return pane_shown() or on_big_screen()
+	return false
 
 
-## X on the right controller (the action map's "enter"): Enter into the terminal while enter_ready(). True when taken.
-func on_enter_button(hand: Node) -> bool:
-	if not enter_ready():
-		return false
-	var t := _target()
-	if t == null:
-		return false
-	_key(t, KEY_ENTER)
-	if hand != null and hand.has_method("pulse"):
-		hand.pulse()
-	_answered()
-	return true
+func on_enter_button(_hand: Node) -> bool:
+	return false
 
 
 func on_trigger(hand: Node, pressed: bool) -> bool:
@@ -1019,12 +1013,8 @@ func on_trigger(hand: Node, pressed: bool) -> bool:
 		return taken
 	if not has_input(hand):
 		return false
+	# A click on the terminal's picture selects it (_frame_trigger()): a terminal has nothing else to click.
 	_trigger_taken = true
-	var t := _target()
-	if t != null:
-		_key(t, KEY_ENTER)
-		hand.pulse()
-		_answered()
 	return true
 
 
@@ -1038,32 +1028,17 @@ func on_stick(hand: Node, stick: Vector2, delta: float) -> bool:
 		return true
 	if _stick_hold < 0.0 or _stick_hold >= STICK_REPEAT:
 		_stick_hold = 0.0
+		# The stick scrolls what the laser is on: the terminal's own history (Shift + Page Up / Down).
 		var t := _target()
-		var along := absf(stick.y) >= absf(stick.x)
-		if t != null:
-			if bool(hand.get("grip_down")):
-				if along:
-					_key(t, KEY_PAGEUP if stick.y > 0.0 else KEY_PAGEDOWN, true)
-			elif along:
-				_key(t, KEY_UP if stick.y > 0.0 else KEY_DOWN)
-			else:
-				_key(t, KEY_RIGHT if stick.x > 0.0 else KEY_LEFT)
+		if t != null and absf(stick.y) >= absf(stick.x):
+			_key(t, KEY_PAGEUP if stick.y > 0.0 else KEY_PAGEDOWN, true)
 	_stick_hold += delta
 	return true
 
 
-## next_file (A) and prev_file (B) while a prompt waits: Space and Escape.
-func on_button(hand: Node, action: String) -> bool:
-	if not has_input(hand):
-		return false
-	var t := _target()
-	if t != null:
-		if action == "next_file":
-			_key(t, KEY_SPACE)
-		else:
-			_key(t, KEY_ESCAPE)
-			_answered()
-	return true
+## A and B are play or pause and the keyboard or talking (main.gd), never keys for a terminal.
+func on_button(_hand: Node, _action: String) -> bool:
+	return false
 
 
 # --- Commands ----------------------------------------------------------------------------------------------------

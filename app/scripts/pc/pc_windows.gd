@@ -489,7 +489,10 @@ func step(delta: float) -> void:
 		sound.source = s.reader(0) if s != null else null
 	_update_hands(delta)
 	_update_cursor()
+	var ui_shown: bool = not (main != null and main.get("pointing") is Pointing) or main.pointing.ui_shown
 	for pane: PcPane in panes:
+		if pane.frame != null and pane.frame.shown != ui_shown:
+			pane.frame.set_shown(ui_shown)
 		pane.pointed = cursor_target.get("pane") == pane
 		for h: Object in _aims:
 			pane.pointed = pane.pointed or _aims[h]["pane"] == pane

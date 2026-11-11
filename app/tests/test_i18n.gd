@@ -120,7 +120,8 @@ func _switching() -> void:
 	_check("the pressed one is Chinese", row.get_children().any(func(b: Button) -> bool:
 			return b.button_pressed and b.get_meta("language") == "zh_CN"))
 	var legends: Dictionary = main.controller_labels(main.PREVIEW_PROFILE, "right", false)
-	_check("the controller legends in Chinese (%s)" % legends.get("trigger"), legends.get("trigger") == "播放 / 暂停")
+	_check("the controller legends in Chinese (%s)" % legends.get("trigger"), legends.get("trigger") == "点击"
+			and legends.values().has("播放 / 暂停") and legends.values().has("键盘 / 语音") and legends.values().has("界面"))
 	_check("a pushed stick says so in Chinese", str(legends.get("thumbstick", "")).contains("按下：菜单"))
 	_check("the header's times in Chinese", main.features.end_text(true) == "" or main.features.end_text(true).contains("结束"))
 	I18n.choose(main.settings, "en")
@@ -128,7 +129,7 @@ func _switching() -> void:
 	_check("back to English: Source", _shown(rail) == "Source" and _shown(heading) == "Language")
 	_check("the built line too", engine != null and str(engine.text).begins_with("Engine "))
 	_check("English is not written down", main.settings.get_value("language", "ui", "none") == "none")
-	_check("English legends", main.controller_labels(main.PREVIEW_PROFILE, "right", false).get("trigger") == "PLAY / PAUSE")
+	_check("English legends", main.controller_labels(main.PREVIEW_PROFILE, "right", false).get("trigger") == "CLICK")
 
 
 ## The pseudo-locale: every visible text of the shared parts and of each System section is pseudo, a number, or

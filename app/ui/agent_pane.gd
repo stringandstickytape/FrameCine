@@ -9,7 +9,7 @@ extends Node3D
 ## (VideoScreen.PRIVATE_LAYER), so its contents stay in the headset.
 ##
 ## It wears a surface's frame (ui/surface_frame.gd, docs/dev/surfaces-design.md): a title bar with the agent's name and
-## Close (which hides the window; the agent goes on), Enter and Esc in the stack beside it, and a glow outside it while
+## Close (which hides the window; the agent goes on), Enter, Esc, Up and Down in the stack beside it, and a glow outside it while
 ## it is pointed at or selected. The trigger on the bar moves it.
 ##
 ## Two small signs in the shader: a red dot in the corner while recording, an amber edge while the agent waits on a
@@ -102,7 +102,8 @@ func _ready() -> void:
 	frame = SurfaceFrame.new()
 	frame.name = "Frame"
 	add_child(frame)
-	frame.set_buttons([{"id": "enter", "text": tr("Enter")}, {"id": "escape", "text": tr("Esc")}])
+	frame.set_buttons([{"id": "enter", "text": tr("Enter")}, {"id": "escape", "text": tr("Esc")},
+			{"id": "up", "text": tr("Up")}, {"id": "down", "text": tr("Down")}])
 	_layout()
 	visible = false
 

@@ -19,6 +19,9 @@ extends Node
 
 ## The selected surface changed (null: none). The selection is where typing and voice go; it is explicit and it stays.
 signal selection_changed(surface: Object)
+## The UI was shown or hidden (X): title bars, side stacks and glows, and the menu with them. Hidden, nothing can be
+## moved, sized or closed: there is no bar to take.
+signal ui_changed(shown: bool)
 
 var _providers: Array[Object] = []
 var _claimants: Array[Callable] = []
@@ -26,6 +29,7 @@ var _frame := -1
 ## hand -> {"owner": Object or null, "hit": Dictionary, "claimed": bool}
 var _answers := {}
 var selected: Object
+var ui_shown := true
 
 
 func add(provider: Object) -> void:
@@ -75,6 +79,13 @@ static func hit_for(app: Object, provider: Object, hand: Object) -> Dictionary:
 	if s is Node and (s as Node).has_method("owner_of"):
 		return (s as Node).call("hit", provider, hand)
 	return provider.call("point_hit", hand, hand.call("get_ray_origin"), hand.call("get_ray_direction"))
+
+
+func set_ui_shown(on: bool) -> void:
+	if on == ui_shown:
+		return
+	ui_shown = on
+	ui_changed.emit(on)
 
 
 func select(surface: Object) -> void:

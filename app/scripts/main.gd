@@ -153,22 +153,24 @@ const OVERLAY_SCALE_PER_METRE := 0.9
 ## Printed in the menus' language (controller_labels(); the legends of the three tables are keys, docs/i18n.md).
 # i18n: begin
 const CONTROL_LABELS := {
-	"trigger": ["PLAY / PAUSE", "CLICK"],
+	"trigger": ["CLICK", "CLICK"],
 	"squeeze": ["", ""],
 	"thumbstick": ["SEEK / DIST", "SCROLL"],
 	"menu": ["MENU", "CLOSE"],
 	# The right stick click on the headset's own controllers: the menu, except on an image in the browser (below).
 	"stick_click": ["MENU", "CLOSE"],
 	"overlay": ["INFO", "INFO"],
-	"next_file": ["NEXT", "NEXT"],
-	"prev_file": ["PREV", "PREV"],
+	# A and B on the headset's controllers: fixed meanings (docs/dev/surfaces-design.md). B: tap for the keyboard,
+	# hold to talk.
+	"next_file": ["PLAY / PAUSE", "PLAY / PAUSE"],
+	"prev_file": ["KEYS / TALK", "KEYS / TALK"],
 	"labels": ["LABELS", "LABELS"],
 	# Only bound by the opt-in d-pad map, xr/openxr_action_map_dpad.tres (docs/features.md, #15).
 	"chapter_prev": ["CHAPTER -", "CHAPTER -"],
 	"chapter_next": ["CHAPTER +", "CHAPTER +"],
 	"replay": ["REPLAY", "REPLAY"],
-	# X: no legend until an agent's terminal shows (ENTER_LABEL).
-	"enter": ["", ""],
+	# X: the UI, shown or hidden.
+	"enter": ["UI", "UI"],
 }
 ## X's legend while an agent's terminal shows (scripts/agents/local_agents.gd enter_ready()), menu open or not.
 const ENTER_LABEL := "ENTER"
@@ -334,6 +336,9 @@ static var _binding_cache := {}
 ## Input for a captured window (browser) on the screen.
 ## What each hand's laser is on, and the selection (scripts/pointing/pointing.gd).
 var pointing: Pointing
+## B's press times, by hand: a tap is the keyboard, a hold is talking.
+var _talk_down := {}
+const TALK_TAP_MSEC := 300
 var window_pointer: WindowPointer
 ## Voice into the browser's selected field (scripts/video/browser_dictation.gd): the talk button asks the page first.
 var browser_dictation: BrowserDictation
@@ -422,29 +427,38 @@ func _ready() -> void:
 			# A on the first start's introduction (ui/intro.gd): its next step.
 			if ui != null and ui.on_intro_next(h as XRHand):
 				return
-			if local_agents.on_button(h, "next_file"):
-				return
-			if not window_pointer.on_button(h as XRHand, "next_file"):
-				next_file())
+			# A is play or pause, always (docs/dev/surfaces-design.md): not next file, not a key for a terminal.
+			player.toggle()
+			(h as XRHand).pulse())
 		hand.prev_pressed.connect(func(h: XRController3D) -> void:
 			# B while holding an object puts it back where it was picked up (object_grab.gd).
 			if features != null and features.grab.on_back(h):
 				return
-			# B cancels the pane's seat picking (ui_layer.gd) before it means "previous file".
+			# B cancels the pane's seat picking (ui_layer.gd).
 			if ui != null and ui.on_back(h as XRHand):
 				return
-			if local_agents.on_button(h, "prev_file"):
+			# B: a tap is the floating keyboard, a hold is talking. Recording starts now, so the first word is not
+			# cut; a tap's clip is under the recorder's shortest and is thrown away (push_to_talk.gd MIN_SECONDS).
+			_talk_down[h] = Time.get_ticks_msec()
+			if ui != null:
+				ui.on_bumper(h as XRHand, true))
+		hand.prev_released.connect(func(h: XRController3D) -> void:
+			if not _talk_down.has(h):
 				return
-			if not window_pointer.on_button(h as XRHand, "prev_file"):
-				previous_file())
-		hand.labels_held.connect(func(h: XRController3D, held: bool) -> void:
-			# With the dev link on, the pointer hand's bumper is push-to-talk (ui_layer.gd); the other shows labels.
-			if ui != null and ui.on_bumper(h as XRHand, held):
-				return
-			set_labels_held(h, held))
+			var held_msec := Time.get_ticks_msec() - int(_talk_down[h])
+			_talk_down.erase(h)
+			if ui != null:
+				ui.on_bumper(h as XRHand, false)
+				if held_msec < TALK_TAP_MSEC and ui.keyboard != null:
+					ui.keyboard.set_shown(not ui.keyboard.visible)
+					(h as XRHand).pulse())
+		# The bumper is no longer push-to-talk (B is): it is the "labels" button only (the snapshot chord with A).
+		hand.labels_held.connect(func(h: XRController3D, held: bool) -> void: set_labels_held(h, held))
 		hand.agent_pressed.connect(func(h: XRController3D) -> void: local_agents.on_agent_button(h))
-		# X (headset profile, right controller): Enter in the agent's terminal while it shows; nothing otherwise.
-		hand.enter_pressed.connect(func(h: XRController3D) -> void: local_agents.on_enter_button(h))
+		# X (headset profile, right controller): the UI, shown or hidden.
+		hand.enter_pressed.connect(func(h: XRController3D) -> void:
+			set_ui_shown(not pointing.ui_shown)
+			(h as XRHand).pulse())
 		hand.bound_profile_changed.connect(func(_h: XRController3D, _p: String) -> void: update_controller_labels())
 		# Our model (printed legends) shows at once; with "runtime" (the default in XR) the runtime's model replaces it
 		# when it arrives, with our layout's printed labels.
@@ -1266,8 +1280,20 @@ func toggle_menu() -> void:
 ## The menu button of a controller (or null: the M / F3 key) pressed or released: the UI layer decides (a press opens,
 ## a short press closes, a hold recentres). Without the layer, a press does nothing.
 func on_menu(hand: XRHand, pressed: bool) -> void:
+	# Menu with the UI hidden shows the UI, with the menu (docs/dev/surfaces-design.md).
+	if pressed and not pointing.ui_shown:
+		set_ui_shown(true)
 	if ui != null:
 		ui.on_menu(hand, pressed)
+
+
+## X: title bars, side stacks and glows shown or hidden, and the menu with them. Hidden, the surfaces are locked in
+## place (no bar to take) and still work: clicks, scrolling, typing and voice. The floating keyboard is not affected.
+func set_ui_shown(on: bool) -> void:
+	pointing.set_ui_shown(on)
+	if not on and ui != null and ui.is_open():
+		ui.hide_panel()
+	update_controller_labels()
 
 
 # --- Controllers -------------------------------------------------------------------------------------------------
@@ -1293,9 +1319,7 @@ func _on_trigger(hand: XRController3D, pressed: bool) -> void:
 	# Grip held + trigger in 180 / 360: the zoom lens (scripts/play/zoom_lens.gd, ideas #38).
 	if features != null and features.zoom_lens.on_trigger(hand, pressed):
 		return
-	if pressed:
-		player.toggle()
-		(hand as XRHand).pulse()
+	# On nothing, the trigger does nothing: it clicks what the laser is on, and A is play or pause.
 
 
 func _on_grip(hand: XRController3D, pressed: bool) -> void:
@@ -1436,9 +1460,9 @@ func _on_language_changed(_code: String) -> void:
 func update_controller_labels() -> void:
 	_update_foveation()
 	var on_window := window_pointer != null and window_pointer.is_active()
-	var terminal := local_agents != null and (local_agents.waiting() and local_agents.pane_shown()
-			or local_agents.looking() or local_agents.on_big_screen())
-	var enter := local_agents != null and local_agents.enter_ready()
+	# A terminal no longer changes what the buttons do, so it no longer changes their legends.
+	var terminal := false
+	var enter := false
 	_grab_labelled = features != null and features.physics.available()
 	# The stick pointer's mode: pointer (looking at the screen) or away (scripts/window_pointer.gd).
 	var window_texts: Dictionary = window_pointer.window_labels() if on_window else {}
@@ -1448,8 +1472,6 @@ func update_controller_labels() -> void:
 		var applying: bool = ui != null and ui.is_applying() and hand == ui.pointer_hand
 		var texts := controller_labels(hand.profile if use_xr else PREVIEW_PROFILE, side, menu_shown, on_window,
 				terminal, _grab_labelled, holding, window_texts, applying, enter)
-		if ui != null and ui.talk_hand() == hand and texts.has("bumper"):
-			texts["bumper"] = tr("TALK")
 		hand.visual.set_texts(texts)
 		hand.visual.set_print_state("menu" if menu_shown else ("window" if on_window else "normal"))
 		hand.visual.set_input_bindings(_profile_bindings(hand.profile if use_xr else PREVIEW_PROFILE, side))

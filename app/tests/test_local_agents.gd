@@ -634,82 +634,16 @@ func _gaze_checks(hand: Node) -> void:
 		agents.toggle_pane()
 	await _seconds(0.3)
 	var pane: Node3D = agents.get_node("AgentPane")
-	var half: Vector2 = (pane.get_node("AgentQuad").mesh as QuadMesh).size * 0.5
-	var margin := tan(deg_to_rad(agents.GAZE_MARGIN_DEG))
 	_look_at_pane(pane, 0, 0)
 	_check("a look at the middle meets the pane", pane.looked_at(fake_gaze.origin, fake_gaze.dir, 3.0))
-	_look_at_pane(pane, half.x + margin * 0.9, 0)
-	_check("just past the edge, within the margin", pane.looked_at(fake_gaze.origin, fake_gaze.dir, 3.0))
-	_look_at_pane(pane, half.x + margin * 1.2, 0)
-	_check("past the margin, no", not pane.looked_at(fake_gaze.origin, fake_gaze.dir, 3.0))
-	_check("from behind, no", not pane.looked_at(pane.global_transform * Vector3(0, 0, -1), pane.global_basis.z, 3.0))
-	_check("away from it, no", not pane.looked_at(pane.global_transform * Vector3(0, 0, 1), pane.global_basis.z, 3.0))
-
-	_look_at_pane(pane, 0, 0)
-	await _seconds(agents.GAZE_ON * 0.3)
-	_check("a passing look takes nothing", not agents.looking() and not agents.has_input(hand))
-	await _seconds(agents.GAZE_ON + 0.1)
-	_check("a held look gives the hand to the terminal", agents.looking() and agents.has_input(hand))
+	await _seconds(1.0)
 	fake.keys.clear()
-	agents.on_stick(hand, Vector2(1, 0), 0.016)
-	_check("the stick right is the arrow", fake.keys == ["Right"])
-	agents.on_stick(hand, Vector2.ZERO, 0.016)
-	agents.on_stick(hand, Vector2(-1, 0), 0.016)
-	agents.on_stick(hand, Vector2.ZERO, 0.016)
-	agents.on_stick(hand, Vector2(0.2, -1), 0.016)
-	agents.on_stick(hand, Vector2.ZERO, 0.016)
-	_check("left, and the stronger axis wins (%s)" % [fake.keys], fake.keys == ["Right", "Left", "Down"])
-	fake.keys.clear()
+	# Gaze never changes what a control does (docs/dev/surfaces-design.md).
+	_check("a held look gives the terminal nothing", not agents.looking() and not agents.has_input(hand)
+			and not agents.on_stick(hand, Vector2(1, 0), 0.016) and not agents.on_trigger(hand, true)
+			and fake.keys.is_empty())
 	agents.on_trigger(hand, false)
-	_check("the trigger is Enter", agents.on_trigger(hand, true) and fake.keys == ["Enter"])
-	agents.on_trigger(hand, false)
-
-	agents.on_stick(hand, Vector2(0, 1), 0.016)
-	fake_gaze.gone = true
-	await _seconds(agents.GAZE_OFF + 0.15)
-	_check("a held stick keeps it past the look", agents.looking())
-	agents.on_stick(hand, Vector2.ZERO, 0.016)
-	await _seconds(agents.GAZE_OFF * 0.4)
-	_check("a blink keeps it", agents.looking())
-	await _seconds(agents.GAZE_OFF + 0.1)
-	_check("a look away gives it back", not agents.looking() and not agents.has_input(hand))
-
-	fake_gaze.gone = false
-	fake_gaze.fitted = false
-	await _seconds(agents.GAZE_ON + 0.1)
-	_check("no calibration: the raw gaze looks too (a new install)", agents.looking() and agents.has_input(hand))
-	_check("with the wider margin (%.1f, calibrated %.1f)" % [agents.GAZE_MARGIN_RAW_DEG, agents.GAZE_MARGIN_DEG],
-			agents.gaze_margin() == agents.GAZE_MARGIN_RAW_DEG and agents.GAZE_MARGIN_RAW_DEG > agents.GAZE_MARGIN_DEG)
-	# 4 degrees past the edge, seen from a metre: within the raw margin, past the calibrated one.
-	var four := tan(deg_to_rad(4.0))
-	_look_at_pane(pane, half.x + four, 0)
-	_check("4 degrees off the edge meets it uncalibrated", pane.looked_at(fake_gaze.origin, fake_gaze.dir,
-			agents.gaze_margin()))
-	fake_gaze.fitted = true
-	_check("but not calibrated", not pane.looked_at(fake_gaze.origin, fake_gaze.dir, agents.gaze_margin()))
-	fake_gaze.fitted = false
-	_look_at_pane(pane, half.x + tan(deg_to_rad(6.0)), 0)
-	await _seconds(agents.GAZE_OFF + 0.15)
-	_check("6 degrees off, uncalibrated: not looking", not agents.looking())
-	_look_at_pane(pane, 0, 0)
-	main.set_menu_shown(true)
-	await _seconds(agents.GAZE_ON + 0.1)
-	_check("the menu open: the look takes nothing from it", not agents.looking() and not agents.has_input(hand))
-	main.set_menu_shown(false)
-	fake_gaze.fitted = true
-	await _seconds(agents.GAZE_ON + 0.1)
-	_check("looking, calibrated", agents.looking())
-	fake_gaze.calibrating = true
-	await _seconds(agents.GAZE_OFF + 0.15)
-	_check("nor while calibrating", not agents.looking())
-	fake_gaze.calibrating = false
-	await _seconds(agents.GAZE_ON + 0.1)
-	_check("looking again", agents.looking())
 	agents.gaze_override = null
-	await _keyboard_checks()
-	agents.hide_pane()
-	await _frames(2)
-	_check("a hidden pane drops it at once", not agents.looking())
 
 
 func _key_event(code: Key, unicode: int, pressed := true, ctrl := false) -> InputEventKey:
@@ -721,32 +655,25 @@ func _key_event(code: Key, unicode: int, pressed := true, ctrl := false) -> Inpu
 	return e
 
 
-## A window on the big screen as well: the look decides.
+## A window on the big screen as well: the selection decides who has a paired keyboard, not the look.
 func _keyboard_window_checks() -> void:
-	var pane: Node3D = agents.get_node("AgentPane")
 	agents.window_override = true
 	fake.typed = ""
-	fake_gaze.gone = true
-	agents.gaze_override = fake_gaze
-	await _seconds(agents.GAZE_OFF + 0.1)
-	_check("a window, and no look at the pane: the keyboard is the window's",
-			not agents.looking() and not agents.on_key(_key_event(KEY_H, 104)) and fake.typed == "")
+	main.pointing.select(null)
+	_check("a window, and the terminal not selected: the keyboard is the window's",
+			not agents.on_key(_key_event(KEY_H, 104)) and fake.typed == "")
 	agents.on_key(_key_event(KEY_H, 104, false))
-	fake_gaze.gone = false
-	_look_at_pane(pane, 0, 0)
-	await _seconds(agents.GAZE_ON + 0.1)
-	_check("a look at the pane takes it", agents.looking() and agents.on_key(_key_event(KEY_H, 104)) and fake.typed == "h")
+	main.pointing.select(agents.get_node("AgentPane"))
+	_check("the terminal selected takes it", agents.is_selected() and agents.on_key(_key_event(KEY_H, 104))
+			and fake.typed == "h")
 	_check("the repeat follows the press", agents.on_key(_make_echo(KEY_H, 104)) and fake.typed == "hh")
-	fake_gaze.gone = true
-	await _seconds(agents.GAZE_OFF + 0.1)
-	_check("the release follows the press past the look", agents.on_key(_key_event(KEY_H, 104, false)))
+	main.pointing.select(null)
+	_check("the release follows the press past the selection", agents.on_key(_key_event(KEY_H, 104, false)))
 	_check("then the next key is the window's", not agents.on_key(_key_event(KEY_I, 105)))
 	agents.window_override = false
-	agents.gaze_override = null
 	await _frames(2)
-	_check("no window: the keyboard is the pane's with no look", agents.on_key(_key_event(KEY_J, 106)))
+	_check("no window: the keyboard is the pane's with nothing selected", agents.on_key(_key_event(KEY_J, 106)))
 	agents.on_key(_key_event(KEY_J, 106, false))
-	fake_gaze.gone = false
 
 
 func _make_echo(code: Key, unicode: int) -> InputEventKey:
@@ -796,24 +723,48 @@ func _input_checks() -> void:
 	agents.on_trigger(hand, false)
 	_check("no prompt, no squeeze: the trigger stays the film's", agents.on_trigger(hand, true) == false)
 	_check("and the stick", agents.on_stick(hand, Vector2(0, 1), 0.016) == false and fake.keys.is_empty())
+	# The squeeze, a waiting prompt and a look give the terminal nothing now: only a laser on its picture does.
 	hand.set("grip_down", true)
-	_check("squeeze held: the trigger is Enter", agents.on_trigger(hand, true) and fake.keys == ["Enter"])
-	_check("and its release doesn't reach the film", agents.on_trigger(hand, false))
-	fake.keys.clear()
-	agents.on_stick(hand, Vector2(0, 1), 0.016)
-	_check("squeeze + stick scrolls back (%s)" % [fake.keys], fake.keys == ["Shift", "PageUp"])
-	agents.on_stick(hand, Vector2.ZERO, 0.016)
+	_check("squeeze held: still nothing", not agents.on_trigger(hand, true) and fake.keys.is_empty()
+			and not agents.on_stick(hand, Vector2(0, 1), 0.016))
+	agents.on_trigger(hand, false)
 	hand.set("grip_down", false)
 	var w := FileAccess.open(AgentTerminal.player_dir("claude").path_join("waiting"), FileAccess.WRITE)
 	w.close()
 	await _seconds(0.7)
 	fake.keys.clear()
-	agents.on_stick(hand, Vector2(0, -1), 0.016)
-	_check("a prompt waits: the stick is arrows", fake.keys == ["Down"])
+	_check("a prompt waits: the stick and B are still not the terminal's", agents.waiting()
+			and not agents.on_stick(hand, Vector2(0, -1), 0.016) and not agents.on_button(hand, "prev_file")
+			and not agents.on_button(hand, "next_file") and fake.keys.is_empty())
+	# A laser on the picture: the stick scrolls the terminal's history, the trigger selects.
+	agents._aims[hand] = {"distance": 1.0}
+	main.pointing.select(null)
+	fake.keys.clear()
+	_check("a laser on it: the trigger selects it, and types nothing", agents.on_trigger(hand, true)
+			and agents.is_selected() and fake.keys.is_empty())
+	_check("and its release doesn't reach the film", agents.on_trigger(hand, false))
+	agents.on_stick(hand, Vector2(0, 1), 0.016)
+	_check("a laser on it: the stick up scrolls back (%s)" % [fake.keys], fake.keys == ["Shift", "PageUp"])
 	agents.on_stick(hand, Vector2.ZERO, 0.016)
 	fake.keys.clear()
-	_check("B is Escape", agents.on_button(hand, "prev_file") and fake.keys == ["Escape"])
-	_check("and it clears the wait", not agents.waiting())
+	agents.on_stick(hand, Vector2(1, 0), 0.016)
+	_check("the stick sideways types nothing", fake.keys.is_empty())
+	agents.on_stick(hand, Vector2.ZERO, 0.016)
+	# The side stack's keys.
+	for key: Array in [["enter", "Enter"], ["escape", "Escape"], ["up", "Up"], ["down", "Down"]]:
+		fake.keys.clear()
+		agents._aims[hand] = {"distance": 1.0, "part": "button", "id": key[0]}
+		agents.on_trigger(hand, true)
+		_check("the stack's %s is that key (%s)" % [key[0], fake.keys], fake.keys == [key[1]])
+		agents.on_trigger(hand, false)
+	_check("Enter or Esc answers a waiting prompt", not agents.waiting())
+	agents._aims[hand] = {"distance": 1.0, "part": "close"}
+	agents.on_trigger(hand, true)
+	agents.on_trigger(hand, false)
+	_check("Close hides the window; the agent goes on", not agents.pane_shown() and agents.is_running("claude"))
+	agents._aims.erase(hand)
+	agents.toggle_pane()
+	await _frames(2)
 	w = FileAccess.open(AgentTerminal.player_dir("claude").path_join("waiting"), FileAccess.WRITE)
 	w.close()
 	await _seconds(0.7)
@@ -827,23 +778,21 @@ func _input_checks() -> void:
 	await _seconds(0.7)
 	await _pane_fade_checks()
 	await _y_checks(hand)
-	# Talk: shows the pane; a tap while it shows hides it.
-	agents.on_talk(true)
-	_check("talk shows the pane", agents.pane_shown())
-	agents.on_talk(false)
-	_check("a press that showed it leaves it", agents.pane_shown())
+	# Talking no longer shows or hides the window: B's tap is the keyboard, Y and Close show and hide.
+	var shown: bool = agents.pane_shown()
 	agents.on_talk(true)
 	agents.on_talk(false)
-	_check("a quick tap while it shows hides it", not agents.pane_shown())
+	_check("talking leaves the window as it was", agents.pane_shown() == shown)
+	if not agents.pane_shown():
+		agents.toggle_pane()
 	agents.on_talk(true)
-	agents._talk_down -= LocalAgents.TAP_MSEC + 100
 	agents.on_talk(false)
-	_check("a long press (speech) leaves it showing", agents.pane_shown())
+	_check("a quick tap of talk no longer hides it", agents.pane_shown())
 	await _x_checks(hand)
 
 
-## X (the action map's "enter", the right controller): Enter whenever the terminal shows, whichever hand points, the
-## menu open or not; its legend ENTER then, none otherwise.
+## X (the action map's "enter", the right controller) is the UI, shown or hidden (main.gd): never Enter, whatever
+## shows. The legends say what the buttons do and do not change with the terminal.
 func _x_checks(hand: Node) -> void:
 	var right: Node = main.right_hand
 	var texts := func() -> Dictionary: return right.visual.get("_texts")
@@ -851,40 +800,37 @@ func _x_checks(hand: Node) -> void:
 		agents.toggle_pane()
 	await _frames(2)
 	fake.keys.clear()
-	_check("the pane shows: X is Enter", agents.enter_ready() and agents.on_enter_button(right) and fake.keys == ["Enter"])
-	_check("no prompt, no look, no squeeze needed", not agents.has_input(hand))
-	_check("its legend says ENTER (%s)" % texts.call().get("x", ""), texts.call().get("x", "") == "ENTER")
-	main.ui.set_pointer_hand(main.left_hand)
-	fake.keys.clear()
-	_check("the left hand pointing: X is still Enter", agents.on_enter_button(right) and fake.keys == ["Enter"])
-	main.ui.set_pointer_hand(main.right_hand)
-	main.set_menu_shown(true)
-	fake.keys.clear()
-	_check("the menu open: X is still Enter, the legend too", agents.on_enter_button(right) and fake.keys == ["Enter"]
-			and texts.call().get("x", "") == "ENTER")
-	main.set_menu_shown(false)
-	FileAccess.open(AgentTerminal.player_dir("claude").path_join("waiting"), FileAccess.WRITE).close()
-	await _seconds(0.7)
-	agents.on_enter_button(right)
-	_check("X answers a waiting prompt", not agents.waiting())
-	agents.hide_pane()
-	await _frames(2)
-	fake.keys.clear()
-	_check("the pane hidden: X does nothing", not agents.enter_ready() and not agents.on_enter_button(right)
+	_check("the pane shows: X is not Enter", not agents.enter_ready() and not agents.on_enter_button(right)
 			and fake.keys.is_empty())
-	_check("and its legend goes (%s)" % [texts.call()], not texts.call().has("x"))
-	_check("the spoken enter stays", agents.spoken_key("Enter.") == "enter")
-	agents.toggle_pane()
+	main.update_controller_labels()
+	var legends: Dictionary = texts.call()
+	_check("the legends are the fixed ones (%s)" % [legends], legends.get("x", "") == "UI"
+			and legends.get("a", "") == "PLAY / PAUSE" and legends.get("b", "") == "KEYS / TALK"
+			and legends.get("trigger", "") == "CLICK")
+	var pane: Node3D = agents.get_node("AgentPane")
+	main.set_ui_shown(false)
 	await _frames(2)
-	# The first start's introduction (ui/intro.gd) not gone through: the terminal takes no controller keys.
+	_check("X hides the UI: the window stays, its frame goes and cannot be hit", agents.pane_shown()
+			and not pane.frame.shown and pane.frame.hit(Vector2(0, float(pane._height) / 2.0 + pane.frame.bar_height() / 2.0)).is_empty())
+	_check("the menu is hidden with it", not main.ui.is_open())
+	main.on_menu(right, true)
+	main.on_menu(right, false)
+	await _frames(2)
+	_check("Menu with the UI hidden shows the UI, with the menu", main.pointing.ui_shown and main.ui.is_open()
+			and pane.frame.shown)
+	main.ui.hide_panel()
+	main.set_ui_shown(false)
+	main.set_ui_shown(true)
+	await _frames(2)
+	_check("X again shows the frames", pane.frame.shown)
+	main.update_controller_labels()
+	_check("the legends are the same with the pane hidden", (texts.call() as Dictionary).get("x", "") == "UI")
+	# The first start's introduction (ui/intro.gd) not gone through: the terminal takes no keyboard.
 	main.ui.show_intro()
 	await _frames(2)
-	hand.set("grip_down", true)
 	fake.keys.clear()
-	_check("the introduction pending: no X, no squeeze keys, no keyboard", main.ui.intro_pending()
-			and not agents.on_enter_button(right) and not agents.has_input(hand) and not agents.on_trigger(hand, true)
+	_check("the introduction pending: no keyboard for the terminal", main.ui.intro_pending()
 			and not agents.on_key(_key_event(KEY_H, 104)) and fake.keys.is_empty())
-	hand.set("grip_down", false)
 	main.ui.hide_panel()
 	agents.on_agent_button(hand)
 	_check("Y opens the menu at the introduction", main.ui.is_open() and main.ui.ui.intro_showing())
@@ -892,8 +838,6 @@ func _x_checks(hand: Node) -> void:
 	main.ui.ui.intro.finished.emit()
 	main.ui.hide_panel()
 	await _frames(2)
-	fake.keys.clear()
-	_check("gone through: X is Enter again", agents.on_enter_button(right) and fake.keys == ["Enter"])
 
 
 func _context_checks() -> void:

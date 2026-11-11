@@ -47,9 +47,6 @@ msgstr "关闭"
 msgid "PC window"
 msgstr "电脑窗口"
 
-msgid "TALK"
-msgstr "说话"
-
 msgid "PUSH: %s"
 msgstr "按下：%s"
 
@@ -73,12 +70,6 @@ msgstr "关闭"
 
 msgid "INFO"
 msgstr "信息"
-
-msgid "NEXT"
-msgstr "下一个"
-
-msgid "PREV"
-msgstr "上一个"
 
 msgid "LABELS"
 msgstr "标签"
@@ -3839,3 +3830,16 @@ msgstr "回车"
 
 msgid "Esc"
 msgstr "Esc"
+
+#. The controllers' fixed legends (scripts/main.gd CONTROL_LABELS): B, tap for the keyboard, hold to talk; X, the UI.
+msgid "KEYS / TALK"
+msgstr "键盘 / 语音"
+
+msgid "UI"
+msgstr "界面"
+
+msgid "Up"
+msgstr "上"
+
+msgid "Down"
+msgstr "下"

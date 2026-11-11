@@ -15,6 +15,8 @@ extends XRController3D
 signal trigger_changed(hand: XRController3D, pressed: bool)
 signal grip_changed(hand: XRController3D, pressed: bool)
 signal menu_pressed(hand: XRController3D)
+## The "prev_file" button (headset profile: B) let go: a tap of it is the keyboard, a hold is talking (main.gd).
+signal prev_released(hand: XRController3D)
 ## The menu button let go (a hold of it recentres the panel, ui/ui_layer.gd).
 signal menu_released(hand: XRController3D)
 ## The stick click (headset profile: the right one) pressed or let go: main.gd lets the picture keeper have it on an
@@ -83,6 +85,8 @@ func _ready() -> void:
 			print("XR %s: %s released" % [tracker, action])
 		if action == "labels":
 			labels_held.emit(self, false)
+		elif action == "prev_file":
+			prev_released.emit(self)
 		elif action == "menu":
 			menu_released.emit(self)
 		elif action == "stick_click":

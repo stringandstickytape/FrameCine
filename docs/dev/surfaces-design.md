@@ -102,7 +102,14 @@ is done. The others are offered and said to be untried.
   either. The mouse drags a PC window by its bar and sizes it with the wheel meanwhile. PC windows no longer take
   the keyboard by being looked at. The bar is 7.2 % of the picture's height (the user, in the headset: 12 % was too tall); the glow reaches 34 % of it. Both are
   for the user to judge in the headset.
-- Until step 3 the UI is always shown, X is still Enter for a terminal, and the terminal still takes the stick,
-  trigger, A and B while it is looked at.
+- **Step 3, done** (not tried on the headset): X shows and hides the UI (frames, and the menu with them; Menu with
+  the UI hidden shows both). A is play or pause. B: a tap is the floating keyboard, a hold is talking (the voice
+  still goes where it went before: step 6 makes it dictation to the selected surface). The trigger on nothing does
+  nothing. The bumper is no longer push-to-talk. A terminal takes nothing by being looked at, by a waiting prompt or
+  by the squeeze: a laser on its picture scrolls its history with the stick, and Enter, Esc, Up and Down are in its
+  side stack. The printed legends are fixed: CLICK, PLAY / PAUSE, KEYS / TALK, UI.
+- Owed from step 3: the brief glow when the selection changes while the UI is hidden; B still puts a held object
+  back and cancels seat picking; next and previous have no button and no place on a bar yet; `docs/USAGE.md`'s
+  control tables still describe the old rules.
 - Until step 4 the menu's own extras (the card, the tablet, placing an object, picking a seat, marking a window)
   still take the pointer hand whole, as before.

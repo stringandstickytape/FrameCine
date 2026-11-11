@@ -537,10 +537,10 @@ func _test_labels() -> void:
 			squeeze = k
 	_check("the squeeze says GRAB with objects in the room (%s)" % grab.get(squeeze, ""), squeeze != ""
 			and not str(normal.get(squeeze, "")).contains("GRAB"))
-	_check("holding: let go to throw, the stick near-far / turn, no play / pause (%s)" % [hold.values()],
+	# A is play or pause whatever is held (docs/dev/surfaces-design.md); the trigger does nothing while holding.
+	_check("holding: let go to throw, the stick near-far / turn, the trigger nothing (%s)" % [hold],
 			str(hold.get(squeeze, "")).contains("THROW") and hold.values().any(func(t: String) -> bool:
-			return t.contains("NEAR-FAR")) and not hold.values().any(func(t: String) -> bool:
-			return t.contains("PLAY")))
+			return t.contains("NEAR-FAR")) and str(hold.get("trigger", "")) == "")
 	_check("the menu shown: no GRAB", not main.controller_labels(p, "right", true, false, false, true, false)
 			.values().any(func(t: String) -> bool: return t.contains("GRAB")))
 
