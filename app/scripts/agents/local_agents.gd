@@ -526,7 +526,10 @@ func _frame_trigger(hand: Node, pressed: bool) -> bool:
 		"bar":
 			# The window's turn against the controller's, so turning the hand turns it, as if held on the end of the ray.
 			var rel: Basis = (hand.global_basis as Basis).orthonormalized().inverse() * _pane.global_basis.orthonormalized()
-			_holds[hand] = {"distance": float(aim["distance"]), "rel": rel}
+			# Where on the window it was taken: that point stays under the laser, not the window's middle.
+			var at: Vector3 = _pane.global_transform.affine_inverse() \
+					* (hand.get_ray_origin() + hand.get_ray_direction() * float(aim["distance"]))
+			_holds[hand] = {"distance": float(aim["distance"]), "rel": rel, "at": at}
 		"close":
 			_show_pane(false)
 		"button":
@@ -546,9 +549,10 @@ func _hold(hand: Node) -> void:
 		_holds.erase(hand)
 		return
 	var hold: Dictionary = _holds[hand]
-	_pane.global_position = hand.get_ray_origin() + hand.get_ray_direction() * float(hold["distance"])
 	var turned: Basis = (hand.global_basis as Basis).orthonormalized() * (hold["rel"] as Basis)
 	_pane.face_along(turned.z)
+	_pane.global_position = hand.get_ray_origin() + hand.get_ray_direction() * float(hold["distance"]) \
+			- _pane.global_basis * (hold.get("at", Vector3.ZERO) as Vector3)
 	_pane.placed = true
 	hand.set_laser(true, float(hold["distance"]), true)
 

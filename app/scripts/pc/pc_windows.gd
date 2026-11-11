@@ -615,8 +615,8 @@ func _update_cursor() -> void:
 		# Dragging a pane by its bar: it follows the cursor at the distance it was taken at, facing the head.
 		var held: PcPane = _mouse_hold["pane"]
 		if panes.has(held):
-			held.global_position = r[0] + r[1] * float(_mouse_hold["distance"])
-			held.face(r[0])
+			held.global_position = r[0] + r[1] * float(_mouse_hold["distance"]) \
+					- held.global_basis * (_mouse_hold.get("at", Vector3.ZERO) as Vector3)
 		else:
 			_mouse_hold = {}
 	if pane != old_pane:
@@ -683,7 +683,9 @@ func _mouse_button(b: InputEventMouseButton) -> bool:
 	if cursor_target.has("bar"):
 		if b.pressed and name == "left":
 			set_focus(pane)
-			_mouse_hold = {"pane": pane, "distance": float(cursor_target["distance"])}
+			var ray := cursor_ray()
+			_mouse_hold = {"pane": pane, "distance": float(cursor_target["distance"]),
+					"at": pane.global_transform.affine_inverse() * (ray[0] + ray[1] * float(cursor_target["distance"]))}
 		return true
 	if b.pressed and cursor_target.has("pixel"):
 		set_focus(pane)
@@ -827,7 +829,11 @@ func on_trigger(hand: Node, pressed: bool) -> bool:
 	elif aim.has("bar"):
 		# The pane's turn against the controller's, so turning the hand turns the pane, as if held on the end of the ray.
 		var rel: Basis = (hand.global_basis as Basis).orthonormalized().inverse() * pane.global_basis.orthonormalized()
-		_holds[hand] = {"pane": pane, "distance": float(aim["distance"]), "rel": rel}
+		# Where on the pane it was taken (the user, 2026-11-11: the point of the bar under the laser stays under it;
+		# the pane's middle must not jump to the laser).
+		var at: Vector3 = pane.global_transform.affine_inverse() \
+				* (hand.get_ray_origin() + hand.get_ray_direction() * float(aim["distance"]))
+		_holds[hand] = {"pane": pane, "distance": float(aim["distance"]), "rel": rel, "at": at}
 		set_focus(pane)
 	elif aim.has("pixel"):
 		set_focus(pane)
@@ -864,9 +870,10 @@ func _hold(hand: Node, _delta: float) -> void:
 		return
 	var o: Vector3 = hand.get_ray_origin()
 	var d: Vector3 = hand.get_ray_direction()
-	pane.global_position = o + d * float(hold["distance"])
 	var turned: Basis = (hand.global_basis as Basis).orthonormalized() * (hold["rel"] as Basis)
 	pane.face_along(turned.z)
+	# The point it was taken by stays on the ray.
+	pane.global_position = o + d * float(hold["distance"]) - pane.global_basis * (hold.get("at", Vector3.ZERO) as Vector3)
 	hand.set_laser(true, float(hold["distance"]), true)
 
 

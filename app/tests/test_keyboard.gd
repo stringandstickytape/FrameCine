@@ -303,8 +303,10 @@ func _pane() -> void:
 	kb.test_xr = true
 	var before := kb.global_position
 	kb.step(0.0)
-	_check("held pane follows the ray at the captured distance", not kb.global_position.is_equal_approx(before)
-			and kb.global_position.is_equal_approx(hand.get_ray_origin() + hand.get_ray_direction() * float(kb._holds[hand].distance)))
+	# The point it was taken by is on the ray at the captured distance: its middle does not jump to the laser.
+	_check("held pane follows the ray by the point it was taken at", not kb.global_position.is_equal_approx(before)
+			and kb.to_global(kb._holds[hand].at).is_equal_approx(
+			hand.get_ray_origin() + hand.get_ray_direction() * float(kb._holds[hand].distance)))
 	kb.test_xr = false
 	pose = kb.global_transform
 	kb.on_grip(hand, false)

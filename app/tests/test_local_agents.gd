@@ -1017,6 +1017,21 @@ func _window_checks() -> void:
 	_check("window: the trigger up lets go", agents.on_trigger(hand, false))
 	_check("window: let go; its width is kept", not agents.holding(hand)
 			and absf(float(main.settings.get_value("agent_window", "width", 0.0)) - snappedf(pane.width, 0.01)) < 0.001)
+	# Taken by a point of its bar off the middle: that point stays under the laser, the window does not jump.
+	var off: Vector3 = pane.global_position + pane.global_basis.y * (float(pane._height) / 2.0 + pane.frame.bar_height() / 2.0) \
+			- pane.global_basis.x * pane.width * 0.3
+	hand.look_at(off, Vector3.UP)
+	var bar_aim: Dictionary = pane.hit(hand.get_ray_origin(), hand.get_ray_direction())
+	agents._aims[hand] = bar_aim
+	var stood: Vector3 = pane.global_position
+	agents.on_trigger(hand, true)
+	agents._hold(hand)
+	_check("window: taken by its bar off the middle, it does not jump (%.4f m)" % pane.global_position.distance_to(stood),
+			str(bar_aim.get("part", "")) == "bar" and pane.global_position.distance_to(stood) < 0.001)
+	hand.global_position += Vector3(0.0, 0.1, 0.0)
+	agents._hold(hand)
+	_check("window: and then it follows the hand", absf(pane.global_position.y - stood.y - 0.1) < 0.02)
+	agents.on_trigger(hand, false)
 	pane.set_width(100.0)
 	_check("window: the width has limits", pane.width == LocalAgents.AgentPane.MAX_WIDTH_M)
 	agents._aims.erase(hand)

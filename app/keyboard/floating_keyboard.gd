@@ -196,8 +196,10 @@ func step(delta: float) -> void:
 			continue
 		if _holds.has(hand):
 			var hold: Dictionary = _holds[hand]
-			global_position = hand.get_ray_origin() + hand.get_ray_direction() * float(hold.distance)
 			global_basis = hand.global_basis.orthonormalized() * (hold.rel as Basis)
+			# The point it was taken by stays on the ray: its middle must not jump to the laser.
+			global_position = hand.get_ray_origin() + hand.get_ray_direction() * float(hold.distance) \
+					- global_basis * (hold.get("at", Vector3.ZERO) as Vector3)
 			hand.set_laser(true, float(hold.distance), true)
 			continue
 		# The nearest thing the laser is on has the hand: the keyboard's hit only when that is the keyboard.
@@ -268,7 +270,8 @@ func on_grip(hand: Node, down: bool) -> bool:
 	if not _holds.is_empty():
 		return true
 	_release_hand(hand)
-	_holds[hand] = {"distance": h.distance, "rel": hand.global_basis.orthonormalized().inverse() * global_basis}
+	_holds[hand] = {"distance": h.distance, "rel": hand.global_basis.orthonormalized().inverse() * global_basis,
+			"at": global_transform.affine_inverse() * (hand.get_ray_origin() + hand.get_ray_direction() * float(h.distance))}
 	return true
 
 
