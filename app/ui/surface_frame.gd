@@ -27,7 +27,7 @@ const Pane := preload("res://ui/pane.gd")
 const GLOW := preload("res://shaders/surface_glow.gdshader")
 
 ## The bar's height as a share of the picture's height.
-const BAR_SHARE := 0.12
+const BAR_SHARE := 0.072
 ## Close's width, and the stack's, in bar heights.
 const CLOSE_WIDTHS := 3.0
 const STACK_WIDTHS := 5.5

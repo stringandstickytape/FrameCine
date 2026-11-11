@@ -100,7 +100,7 @@ is done. The others are offered and said to be untried.
 - **Step 2, done for PC windows and an agent's terminal** (not tried on the headset): `app/ui/surface_frame.gd` and
   `app/shaders/surface_glow.gdshader`. The trigger on a title bar selects and drags; the squeeze no longer moves
   either. The mouse drags a PC window by its bar and sizes it with the wheel meanwhile. PC windows no longer take
-  the keyboard by being looked at. The bar is 12 % of the picture's height; the glow reaches 34 % of it. Both are
+  the keyboard by being looked at. The bar is 7.2 % of the picture's height (the user, in the headset: 12 % was too tall); the glow reaches 34 % of it. Both are
   for the user to judge in the headset.
 - Until step 3 the UI is always shown, X is still Enter for a terminal, and the terminal still takes the stick,
   trigger, A and B while it is looked at.
