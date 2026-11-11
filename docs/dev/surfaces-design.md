@@ -37,7 +37,7 @@ terminal. The floating keyboard is a tool for the selected surface, not a surfac
 | A | Play or pause |
 | B, tap | The floating keyboard, open or closed |
 | B, hold | Talk: speech becomes text in the selected surface. Recording starts at button down and is thrown away if it was a tap, so the first word is not cut |
-| X | The UI, shown or hidden |
+| X | The windows' chrome (title bars, side stacks, glows), shown or hidden. The menu pane is not hidden by it |
 | Y | The AI |
 | Menu, press | The menu pane, shown or hidden |
 | Menu, hold | The menu pane comes back in front of the viewer |
@@ -102,13 +102,13 @@ is done. The others are offered and said to be untried.
   either. The mouse drags a PC window by its bar and sizes it with the wheel meanwhile. PC windows no longer take
   the keyboard by being looked at. The bar is 7.2 % of the picture's height (the user, in the headset: 12 % was too tall); the glow reaches 34 % of it. Both are
   for the user to judge in the headset.
-- **Step 3, done** (not tried on the headset): X shows and hides the UI (frames, and the menu with them; Menu with
-  the UI hidden shows both). A is play or pause. B: a tap is the floating keyboard, a hold is talking (the voice
+- **Step 3, done** (not tried on the headset): X shows and hides the windows' chrome (frames only: the menu
+  pane stays, the user in the headset; Menu does not bring the chrome back). A is play or pause. B: a tap is the floating keyboard, a hold is talking (the voice
   still goes where it went before: step 6 makes it dictation to the selected surface). The trigger on nothing does
   nothing. The bumper is no longer push-to-talk. A terminal takes nothing by being looked at, by a waiting prompt or
   by the squeeze: a laser on its picture scrolls its history with the stick, and Enter, Esc, Up and Down are in its
   side stack. The printed legends are fixed: CLICK, PLAY / PAUSE, HOLD FOR VOICE (above B), UI. The A, B and X caps have pictures in
-  place of their letters, as Y has its sparkle: play and pause, a keyboard, an eye.
+  place of their letters, as Y has its sparkle: play and pause, a keyboard, a window with its title bar (the user: X is a window chrome button).
 - Owed from step 3: the brief glow when the selection changes while the UI is hidden; B still puts a held object
   back and cancels seat picking; next and previous have no button and no place on a bar yet; `docs/USAGE.md`'s
   control tables still describe the old rules.

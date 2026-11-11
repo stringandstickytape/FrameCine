@@ -1172,7 +1172,7 @@ const MARK_ERASE_MM := 3.9
 const MARK_CAP := Color(0.067, 0.071, 0.071)
 const MARK_Y_UVS := Rect2(0.6993, 0.6355, 0.1855, 0.26)
 ## The pictures on the right controller's caps, for what the buttons always do (docs/dev/surfaces-design.md): Y the sparkle
-## (AI), A play and pause, B a keyboard (its tap; its hold is in print above it), X an eye (the UI shown or hidden). "kind":
+## (AI), A play and pause, B a keyboard (its tap; its hold is in print above it), X a window with its bar (the windows' bars shown or hidden). "kind":
 ## the picture in controller_model.gdshader; "centre": the moulded letter's centre in the atlas; "right": the way the
 ## letter's right lies there, measured from the model (each letter lies its own way); "uvs": the cap mesh's whole UV
 ## range, which tells that this is the model we know.

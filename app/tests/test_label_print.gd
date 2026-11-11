@@ -438,7 +438,7 @@ func _test_agent_mark(scene: Node3D, side: String) -> void:
 		_check("the plastic is black", body.get_shader_parameter("lift") == ControllerVisual.BLACK_LIFT)
 		var kind := func(part: String) -> int:
 			return int((model.find_child(part, true, false) as MeshInstance3D).get_active_material(0).get_shader_parameter("mark_kind"))
-		_check("A, B and X have their pictures: play and pause, the keyboard, the eye", marked.call("button_a")
+		_check("A, B and X have their pictures: play and pause, the keyboard, the window", marked.call("button_a")
 				and marked.call("button_b") and marked.call("button_x") and kind.call("button_y") == 0
 				and kind.call("button_a") == 1 and kind.call("button_b") == 2 and kind.call("button_x") == 3)
 		for part: String in ["button_menu", "button_system", "body"]:

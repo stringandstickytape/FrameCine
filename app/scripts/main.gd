@@ -456,7 +456,7 @@ func _ready() -> void:
 		# The bumper is no longer push-to-talk (B is): it is the "labels" button only (the snapshot chord with A).
 		hand.labels_held.connect(func(h: XRController3D, held: bool) -> void: set_labels_held(h, held))
 		hand.agent_pressed.connect(func(h: XRController3D) -> void: local_agents.on_agent_button(h))
-		# X (headset profile, right controller): the UI, shown or hidden.
+		# X (headset profile, right controller): the windows' chrome, shown or hidden.
 		hand.enter_pressed.connect(func(h: XRController3D) -> void:
 			set_ui_shown(not pointing.ui_shown)
 			(h as XRHand).pulse())
@@ -1281,19 +1281,15 @@ func toggle_menu() -> void:
 ## The menu button of a controller (or null: the M / F3 key) pressed or released: the UI layer decides (a press opens,
 ## a short press closes, a hold recentres). Without the layer, a press does nothing.
 func on_menu(hand: XRHand, pressed: bool) -> void:
-	# Menu with the UI hidden shows the UI, with the menu (docs/dev/surfaces-design.md).
-	if pressed and not pointing.ui_shown:
-		set_ui_shown(true)
 	if ui != null:
 		ui.on_menu(hand, pressed)
 
 
-## X: title bars, side stacks and glows shown or hidden, and the menu with them. Hidden, the surfaces are locked in
-## place (no bar to take) and still work: clicks, scrolling, typing and voice. The floating keyboard is not affected.
+## X: the windows' chrome (title bars, side stacks and glows) shown or hidden. Hidden, the surfaces are locked in
+## place (no bar to take) and still work: clicks, scrolling, typing and voice. The menu stays as it is (only its own
+## bar goes: the Menu button opens and closes it), and so does the floating keyboard.
 func set_ui_shown(on: bool) -> void:
 	pointing.set_ui_shown(on)
-	if not on and ui != null and ui.is_open():
-		ui.hide_panel()
 	update_controller_labels()
 
 

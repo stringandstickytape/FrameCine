@@ -37,7 +37,7 @@ const float INK_TO = 0.13;
 // The right controller's A, B, X and Y caps (controller_visual.gd, MARKS): the moulded letter in the atlas is painted out,
 // here and not over it, so nothing can show through, and a picture of what the button does takes its place. It moves with
 // the cap. mark_kind: 0 Y's sparkle, the only colour on the controller (unlit as the print is, one gradient from the big
-// one's foot to the small one's tip); 1 play and pause; 2 a keyboard; 3 an eye (the UI shown or hidden): these three in
+// one's foot to the small one's tip); 1 play and pause; 2 a keyboard; 3 a window with its title bar (the windows' bars shown or hidden): these three in
 // the print's white. mark_right: the way the picture's right lies in the atlas (each cap's letter lies its own way).
 uniform bool use_mark = false;
 uniform int mark_kind = 0;
@@ -90,10 +90,11 @@ float keyboard(vec2 p) {
 	return max(ring, max(keys, box(p, vec2(0.0, -0.5), vec2(1.15, 0.22))));
 }
 
-// An almond's outline (two arcs) and a pupil.
-float eye(vec2 p) {
-	float d = 2.685 - max(length(p - vec2(0.0, -1.385)), length(p - vec2(0.0, 1.385)));
-	return max(0.19 - abs(d - 0.19), 0.68 - length(p));
+// A window: a rounded outline with its title bar filled.
+float window(vec2 p) {
+	vec2 q = abs(p) - vec2(2.3, 1.75) + vec2(0.4);
+	float d = length(max(q, vec2(0.0))) + min(max(q.x, q.y), 0.0) - 0.4;
+	return max(0.19 - abs(d + 0.19), min(-d, p.y - 0.7));
 }
 
 void fragment() {
@@ -113,7 +114,7 @@ void fragment() {
 		} else if (mark_kind == 2) {
 			ink = keyboard(p);
 		} else if (mark_kind == 3) {
-			ink = eye(p);
+			ink = window(p);
 		} else {
 			ink = max(sparkle(p - vec2(-0.21, -0.34), 1.75), sparkle(p - vec2(1.24, 1.37), 0.72));
 		}
