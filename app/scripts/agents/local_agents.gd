@@ -385,6 +385,10 @@ func _show_pane(on: bool) -> void:
 	if on and on_big_screen():
 		return
 	_pane.set_shown(on)
+	# Asking for the terminal selects it: what is typed and said next is for the agent. Hidden, it gives that up.
+	if on and AgentTerminal.AGENTS.has(active):
+		_pane.frame.set_title(str(AgentTerminal.AGENTS[active]["name"]))
+	_select(on)
 	if on:
 		_capture()
 	elif not _pane.visible:
@@ -456,9 +460,11 @@ func _update_hands() -> void:
 	var hands: Array = main.get("hands") if main.get("hands") != null else []
 	if not (main.use_xr or test_xr):
 		return
+	var hover := ""
 	for hand: Node in hands:
 		if _holds.has(hand):
 			_hold(hand)
+			hover = "bar"
 			continue
 		var aim := {}
 		# The nearest thing the laser is on has the hand: the window's hit only when that is the window.
@@ -469,6 +475,7 @@ func _update_hands() -> void:
 			_aims.erase(hand)
 		else:
 			_aims[hand] = aim
+			hover = str(aim.get("id", aim.get("part", "")))
 		var want := not aim.is_empty()
 		if want:
 			hand.set_laser(true, float(aim["distance"]), true)
@@ -477,21 +484,60 @@ func _update_hands() -> void:
 			if ui == null or not ui.has_method("laser_in_use") or not ui.laser_in_use(hand):
 				hand.set_laser(false)
 		_lit[hand] = want
+	# The frame: what a laser is on is lighter; the glow says pointed at, or selected (typing and voice come here).
+	_pane.frame.hover = hover
+	_pane.frame.set_state(not _aims.is_empty() or not _holds.is_empty(), is_selected())
 
 
-## The squeeze with the laser on the window takes hold of it; letting go puts it there. True when used.
-func on_grip(hand: Node, pressed: bool) -> bool:
+## The window is the app's selected surface (scripts/pointing/pointing.gd).
+func is_selected() -> bool:
+	return main.get("pointing") is Pointing and main.pointing.selected == _pane
+
+
+func _select(on: bool) -> void:
+	if not (main.get("pointing") is Pointing):
+		return
+	if on:
+		main.pointing.select(_pane)
+	elif main.pointing.selected == _pane:
+		main.pointing.select(null)
+
+
+## The squeeze does nothing to the window now: its title bar moves it (_frame_trigger()).
+func on_grip(_hand: Node, _pressed: bool) -> bool:
+	return false
+
+
+## The trigger on the window's frame, or its release after taking hold by the bar. True when used. On the title bar:
+## selects the window and takes hold of it until the trigger comes up. Close hides it (the agent goes on). Enter and
+## Esc in the stack are those keys. On the picture: selects it, and the press goes on to the terminal as before.
+func _frame_trigger(hand: Node, pressed: bool) -> bool:
 	if not pressed:
 		if _holds.has(hand):
 			_holds.erase(hand)
 			_save_width()
 			return true
 		return false
-	if not _aims.has(hand):
+	var aim: Dictionary = _aims.get(hand, {})
+	if aim.is_empty():
 		return false
-	# The window's turn against the controller's, so turning the hand turns it, as if held on the end of the ray.
-	var rel: Basis = (hand.global_basis as Basis).orthonormalized().inverse() * _pane.global_basis.orthonormalized()
-	_holds[hand] = {"distance": float(_aims[hand]["distance"]), "rel": rel}
+	_select(true)
+	match str(aim.get("part", "")):
+		"bar":
+			# The window's turn against the controller's, so turning the hand turns it, as if held on the end of the ray.
+			var rel: Basis = (hand.global_basis as Basis).orthonormalized().inverse() * _pane.global_basis.orthonormalized()
+			_holds[hand] = {"distance": float(aim["distance"]), "rel": rel}
+		"close":
+			_show_pane(false)
+		"button":
+			var t := _target()
+			if t != null:
+				_key(t, KEY_ENTER if str(aim.get("id", "")) == "enter" else KEY_ESCAPE)
+				_answered()
+		_:
+			return false
+	if hand.has_method("pulse"):
+		hand.pulse()
 	return true
 
 
@@ -961,6 +1007,8 @@ func on_enter_button(hand: Node) -> bool:
 
 
 func on_trigger(hand: Node, pressed: bool) -> bool:
+	if _frame_trigger(hand, pressed):
+		return true
 	if not pressed:
 		var taken := _trigger_taken
 		_trigger_taken = false

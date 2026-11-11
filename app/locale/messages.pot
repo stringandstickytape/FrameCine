@@ -31,136 +31,136 @@ msgstr ""
 msgid "the browser"
 msgstr ""
 
-#: keyboard/keyboard_surface.gd:26 scripts/pc/pc_windows.gd:267
+#: keyboard/keyboard_surface.gd:27 scripts/pc/pc_windows.gd:272 ui/surface_frame.gd:210
 msgid "Close"
 msgstr ""
 
-#: scripts/main.gd:807
+#: scripts/main.gd:816
 msgid "PC window"
 msgstr ""
 
-#: scripts/main.gd:1440
+#: scripts/main.gd:1452
 msgid "TALK"
 msgstr ""
 
-#: scripts/main.gd:1491
+#: scripts/main.gd:1503
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
 
-#: scripts/main.gd:154
+#: scripts/main.gd:156
 msgid "PLAY / PAUSE"
 msgstr ""
 
-#: scripts/main.gd:154 scripts/main.gd:177 scripts/main.gd:186
+#: scripts/main.gd:156 scripts/main.gd:179 scripts/main.gd:188
 msgid "CLICK"
 msgstr ""
 
-#: scripts/main.gd:156
+#: scripts/main.gd:158
 msgid "SEEK / DIST"
 msgstr ""
 
-#: scripts/main.gd:156
+#: scripts/main.gd:158
 msgid "SCROLL"
 msgstr ""
 
-#: scripts/main.gd:157 scripts/main.gd:159
+#: scripts/main.gd:159 scripts/main.gd:161
 msgid "MENU"
 msgstr ""
 
-#: scripts/main.gd:157 scripts/main.gd:159
+#: scripts/main.gd:159 scripts/main.gd:161
 msgid "CLOSE"
 msgstr ""
 
-#: scripts/main.gd:160
+#: scripts/main.gd:162
 msgid "INFO"
 msgstr ""
 
-#: scripts/main.gd:161
+#: scripts/main.gd:163
 msgid "NEXT"
 msgstr ""
 
-#: scripts/main.gd:162
+#: scripts/main.gd:164
 msgid "PREV"
 msgstr ""
 
-#: scripts/main.gd:163
+#: scripts/main.gd:165
 msgid "LABELS"
 msgstr ""
 
-#: scripts/main.gd:165
+#: scripts/main.gd:167
 msgid "CHAPTER -"
 msgstr ""
 
-#: scripts/main.gd:166
+#: scripts/main.gd:168
 msgid "CHAPTER +"
 msgstr ""
 
-#: scripts/main.gd:167
+#: scripts/main.gd:169
 msgid "REPLAY"
 msgstr ""
 
-#: scripts/main.gd:172 scripts/main.gd:216
+#: scripts/main.gd:174 scripts/main.gd:218
 msgid "ENTER"
 msgstr ""
 
-#: scripts/main.gd:178
+#: scripts/main.gd:180
 msgid "R-CLICK"
 msgstr ""
 
-#: scripts/main.gd:179 scripts/main.gd:206
+#: scripts/main.gd:181 scripts/main.gd:208
 msgid "SCROLL / KEYS"
 msgstr ""
 
-#: scripts/main.gd:180 scripts/main.gd:189 scripts/main.gd:207 scripts/main.gd:219
+#: scripts/main.gd:182 scripts/main.gd:191 scripts/main.gd:209 scripts/main.gd:221
 msgid "SPACE"
 msgstr ""
 
-#: scripts/main.gd:181 scripts/main.gd:190 scripts/main.gd:208
+#: scripts/main.gd:183 scripts/main.gd:192 scripts/main.gd:210
 msgid "BACK"
 msgstr ""
 
-#: scripts/main.gd:187 scripts/main.gd:217
+#: scripts/main.gd:189 scripts/main.gd:219
 msgid "HOLD: SCROLL"
 msgstr ""
 
-#: scripts/main.gd:188
+#: scripts/main.gd:190
 msgid "POINTER"
 msgstr ""
 
-#: scripts/main.gd:195
+#: scripts/main.gd:197
 msgid "KEEP PICTURE"
 msgstr ""
 
-#: scripts/main.gd:198
+#: scripts/main.gd:200
 msgid "APPLY"
 msgstr ""
 
-#: scripts/main.gd:199
+#: scripts/main.gd:201
 msgid "SIZE / TURN"
 msgstr ""
 
-#: scripts/main.gd:200 scripts/main.gd:229
+#: scripts/main.gd:202 scripts/main.gd:231
 msgid "CANCEL"
 msgstr ""
 
-#: scripts/main.gd:218
+#: scripts/main.gd:220
 msgid "ARROWS"
 msgstr ""
 
-#: scripts/main.gd:220
+#: scripts/main.gd:222
 msgid "ESC"
 msgstr ""
 
-#: scripts/main.gd:224
+#: scripts/main.gd:226
 msgid "GRAB"
 msgstr ""
 
-#: scripts/main.gd:227
+#: scripts/main.gd:229
 msgid "LET GO: THROW"
 msgstr ""
 
-#: scripts/main.gd:228
+#: scripts/main.gd:230
 msgid "NEAR-FAR / TURN"
 msgstr ""
 
@@ -555,11 +555,11 @@ msgstr[1] ""
 msgid "Can't make the certificate: %s."
 msgstr ""
 
-#: scripts/pc/pc_windows.gd:267
+#: scripts/pc/pc_windows.gd:272
 msgid "Back to a pane"
 msgstr ""
 
-#: scripts/pc/pc_windows.gd:267
+#: scripts/pc/pc_windows.gd:272
 msgid "Show on the big screen"
 msgstr ""
 
@@ -1223,7 +1223,15 @@ msgstr ""
 msgid "Carbon fibre"
 msgstr ""
 
-#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/ui_layer.gd:445
+#: ui/agent_pane.gd:105
+msgid "Enter"
+msgstr ""
+
+#: ui/agent_pane.gd:105
+msgid "Esc"
+msgstr ""
+
+#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/ui_layer.gd:449
 msgid "Assistant"
 msgstr ""
 
@@ -2346,12 +2354,12 @@ msgstr ""
 msgid "%s deleted"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:682 ui/ui_layer.gd:234
-#: ui/ui_layer.gd:415 ui/ui_layer.gd:1022 ui/ui_layer.gd:1026 ui/ui_layer.gd:1060
+#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:682 ui/ui_layer.gd:238
+#: ui/ui_layer.gd:419 ui/ui_layer.gd:1046 ui/ui_layer.gd:1050 ui/ui_layer.gd:1084
 msgid "Undo"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:990
+#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:1014
 msgid "The headset's cameras can't show here."
 msgstr ""
 
@@ -2650,7 +2658,7 @@ msgstr ""
 msgid "battery %d %%"
 msgstr ""
 
-#: ui/pane_ui.gd:657 ui/pane_ui.gd:696 ui/ui_layer.gd:481
+#: ui/pane_ui.gd:657 ui/pane_ui.gd:696 ui/ui_layer.gd:485
 msgid "Listening"
 msgstr ""
 
@@ -4170,7 +4178,7 @@ msgstr ""
 msgid "Allow for an hour"
 msgstr ""
 
-#: ui/system_tab.gd:381 ui/ui_layer.gd:820
+#: ui/system_tab.gd:381 ui/ui_layer.gd:844
 msgid "Revoke"
 msgstr ""
 
@@ -4285,130 +4293,130 @@ msgstr ""
 msgid "LIVE"
 msgstr ""
 
-#: ui/ui_layer.gd:199
+#: ui/ui_layer.gd:203
 #, c-format
 msgid "Resumed at %s"
 msgstr ""
 
-#: ui/ui_layer.gd:199
+#: ui/ui_layer.gd:203
 msgid "Start over"
 msgstr ""
 
-#: ui/ui_layer.gd:234
+#: ui/ui_layer.gd:238
 #, c-format
 msgid "Remote: %s"
 msgstr ""
 
-#: ui/ui_layer.gd:415 ui/ui_layer.gd:420
+#: ui/ui_layer.gd:419 ui/ui_layer.gd:424
 #, c-format
 msgid "Assistant: %s"
 msgstr ""
 
-#: ui/ui_layer.gd:458
+#: ui/ui_layer.gd:462
 #, c-format
 msgid "Left controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:460
+#: ui/ui_layer.gd:464
 #, c-format
 msgid "Right controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:461
+#: ui/ui_layer.gd:465
 #, c-format
 msgid "Controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:468
+#: ui/ui_layer.gd:472
 #, c-format
 msgid "Left controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:470
+#: ui/ui_layer.gd:474
 #, c-format
 msgid "Right controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:471
+#: ui/ui_layer.gd:475
 #, c-format
 msgid "Controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:820
+#: ui/ui_layer.gd:844
 msgid "Remote changes allowed for an hour"
 msgstr ""
 
-#: ui/ui_layer.gd:833
+#: ui/ui_layer.gd:857
 msgid "Connecting..."
 msgstr ""
 
-#: ui/ui_layer.gd:843
+#: ui/ui_layer.gd:867
 msgid "Starting the browser..."
 msgstr ""
 
-#: ui/ui_layer.gd:857
+#: ui/ui_layer.gd:881
 msgid "Point at a seat and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:867
+#: ui/ui_layer.gd:891
 msgid "Seat unchanged"
 msgstr ""
 
-#: ui/ui_layer.gd:936
+#: ui/ui_layer.gd:960
 msgid "That can't be applied here"
 msgstr ""
 
-#: ui/ui_layer.gd:940
+#: ui/ui_layer.gd:964
 msgid "Point at a part and pull the trigger. Stick: size and turn the pattern. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:941
+#: ui/ui_layer.gd:965
 msgid "Point at a part and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:953
+#: ui/ui_layer.gd:977
 msgid "That object can't be placed here"
 msgstr ""
 
-#: ui/ui_layer.gd:957
+#: ui/ui_layer.gd:981
 msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:991
+#: ui/ui_layer.gd:1015
 msgid "That's as many areas as there can be: delete one first."
 msgstr ""
 
-#: ui/ui_layer.gd:1008 ui/ui_layer.gd:1019
+#: ui/ui_layer.gd:1032 ui/ui_layer.gd:1043
 msgid "Nothing marked"
 msgstr ""
 
-#: ui/ui_layer.gd:1022
+#: ui/ui_layer.gd:1046
 #, c-format
 msgid "%s added: the cameras show there"
 msgstr ""
 
-#: ui/ui_layer.gd:1026
+#: ui/ui_layer.gd:1050
 #, c-format
 msgid "%s changed"
 msgstr ""
 
-#: ui/ui_layer.gd:1044
+#: ui/ui_layer.gd:1068
 msgid "Nothing changed"
 msgstr ""
 
-#: ui/ui_layer.gd:1044
+#: ui/ui_layer.gd:1068
 msgid "Nothing placed"
 msgstr ""
 
-#: ui/ui_layer.gd:1063
+#: ui/ui_layer.gd:1087
 msgid "Not placed"
 msgstr ""
 
-#: ui/ui_layer.gd:1077
+#: ui/ui_layer.gd:1101
 msgid "No seat there"
 msgstr ""
 
-#: ui/ui_layer.gd:1079
+#: ui/ui_layer.gd:1103
 msgid "Seat"
 msgstr ""
 

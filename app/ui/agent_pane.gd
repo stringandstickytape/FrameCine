@@ -8,16 +8,21 @@ extends Node3D
 ## texture, decoded here. Its shape is its window's; on a render layer the snapshots for assistants don't see
 ## (VideoScreen.PRIVATE_LAYER), so its contents stay in the headset.
 ##
-## Three small signs in the shader: a red dot in the corner while recording, an amber edge while the agent waits on a
-## prompt, a blue edge while the viewer's look (or a laser) gives the hand to it (the stick and the trigger go to it
-## either way). With both, the blue runs inside the amber.
+## It wears a surface's frame (ui/surface_frame.gd, docs/dev/surfaces-design.md): a title bar with the agent's name and
+## Close (which hides the window; the agent goes on), Enter and Esc in the stack beside it, and a glow outside it while
+## it is pointed at or selected. The trigger on the bar moves it.
+##
+## Two small signs in the shader: a red dot in the corner while recording, an amber edge while the agent waits on a
+## prompt. The blue edge inside the picture for "looked at" is gone: the highlight is the glow, outside.
 ##
 ## It comes and goes with an ease of its opacity and a small growth out of its bottom edge. One amount runs both ways,
 ## so a press in the middle turns it back from where it is.
 ##
 ##   app, set_texture(tex, size), set_shown(on), set_recording(on), set_waiting(on), set_looked_at(on), is_shown()
 ##   set_width(m), width, place_in_front(), face(head_pos), face_along(front)
-##   looked_at(origin, dir, margin_deg) -> bool; hit(origin, dir) -> {distance} or {}; faded: gone from sight
+##   looked_at(origin, dir, margin_deg) -> bool; faded: gone from sight
+##   hit(origin, dir) -> {distance} on the picture, {distance, part, id} on the frame (surface_frame.gd's hit()), or {}
+##   frame: the SurfaceFrame
 
 signal faded
 
@@ -37,6 +42,7 @@ const FADE_SECONDS := 0.2
 ## Its size at the far end of the fade.
 const FADE_SCALE := 0.92
 const Pane := preload("res://ui/pane.gd")
+const SurfaceFrame := preload("res://ui/surface_frame.gd")
 
 const SHADER := """
 shader_type spatial;
@@ -76,6 +82,7 @@ var _aspect := 9.0 / 16.0
 var _height := WIDTH_M * 9.0 / 16.0
 ## It has been put somewhere in this run (the first show places it in front).
 var placed := false
+var frame: SurfaceFrame
 
 
 func _ready() -> void:
@@ -92,7 +99,11 @@ func _ready() -> void:
 	_mesh.set_layer_mask_value(VideoScreen.PRIVATE_LAYER, true)
 	_mesh.set_layer_mask_value(1, false)
 	add_child(_mesh)
-	_apply_fade()
+	frame = SurfaceFrame.new()
+	frame.name = "Frame"
+	add_child(frame)
+	frame.set_buttons([{"id": "enter", "text": tr("Enter")}, {"id": "escape", "text": tr("Esc")}])
+	_layout()
 	visible = false
 
 
@@ -112,6 +123,8 @@ func set_width(w: float) -> void:
 func _layout() -> void:
 	_height = width * _aspect
 	(_mesh.mesh as QuadMesh).size = Vector2(width, _height)
+	if frame != null:
+		frame.set_content_size(Vector2(width, _height))
 	_apply_fade()
 
 
@@ -135,8 +148,9 @@ func set_waiting(on: bool) -> void:
 	_mat.set_shader_parameter("waiting", 1.0 if on else 0.0)
 
 
-func set_looked_at(on: bool) -> void:
-	_mat.set_shader_parameter("looked_at", 1.0 if on else 0.0)
+## Kept for its callers: nothing is drawn inside the picture for it now (the glow outside is the highlight).
+func set_looked_at(_on: bool) -> void:
+	_mat.set_shader_parameter("looked_at", 0.0)
 
 
 ## A ray from in front of the pane meets it, or passes within margin_deg of its edge as seen from the ray's origin.
@@ -152,16 +166,25 @@ func looked_at(origin: Vector3, dir: Vector3, margin_deg: float) -> bool:
 	return absf(hit.x) <= half.x + margin and absf(hit.y - _mesh.position.y) <= half.y + margin
 
 
-## Where a ray (a laser) meets the window: {distance} along the ray, or {} when it misses or comes from behind.
+## Where a ray (a laser) meets the window: {distance} along the ray on its picture, the same with the frame's "part"
+## (and "id") on its title bar, Close or a stack button, or {} when it misses or comes from behind.
 func hit(origin: Vector3, dir: Vector3) -> Dictionary:
-	if not visible or _target <= 0.0 or not looked_at(origin, dir, 0.0):
+	if not visible or _target <= 0.0:
 		return {}
-	var n := global_basis.z.normalized()
-	var denom := n.dot(dir)
-	if absf(denom) < 1e-5:
+	var to_pane := global_transform.affine_inverse()
+	var o := to_pane * origin
+	var d := to_pane.basis * dir
+	if o.z <= 0.0 or d.z >= -1e-6:
 		return {}
-	var t := n.dot(global_position - origin) / denom
-	return {"distance": t} if t > 0.0 else {}
+	var p := o - d * (o.z / d.z)
+	var out := {"distance": origin.distance_to(global_transform * p)}
+	if absf(p.x) <= width / 2.0 and absf(p.y) <= _height / 2.0:
+		return out
+	var part: Dictionary = frame.hit(Vector2(p.x, p.y))
+	if part.is_empty():
+		return {}
+	out.merge(part)
+	return out
 
 
 func _apply_fade() -> void:

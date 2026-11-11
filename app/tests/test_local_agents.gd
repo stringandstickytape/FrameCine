@@ -982,7 +982,27 @@ func _window_checks() -> void:
 	_check("window: a laser pointing away misses it", pane.hit(away.get_ray_origin(), away.get_ray_direction()).is_empty())
 	away.free()
 	agents._aims[hand] = aim
-	_check("window: the squeeze takes it", agents.on_grip(hand, true) and agents.holding(hand) and agents.owns_laser(hand))
+	_check("window: the squeeze leaves it alone now", not agents.on_grip(hand, true) and not agents.holding(hand))
+	# Its frame (docs/dev/surfaces-design.md): the title bar over the picture, Close at its end, Enter and Esc beside.
+	var bar: float = pane.frame.bar_height()
+	var top: Vector3 = pane.global_position + pane.global_basis.y * (float(pane._height) / 2.0 + bar / 2.0)
+	var from: Vector3 = top + pane.global_basis.z
+	var on_bar: Dictionary = pane.hit(from, -pane.global_basis.z)
+	_check("window: the title bar is over the picture (%s)" % [on_bar], str(on_bar.get("part", "")) == "bar")
+	var close: Dictionary = pane.hit(from + pane.global_basis.x * (pane.width / 2.0 - bar), -pane.global_basis.z)
+	_check("window: Close at the bar's right end", str(close.get("part", "")) == "close")
+	var enter: Dictionary = pane.hit(from + pane.global_basis.x * (pane.width / 2.0 + bar), -pane.global_basis.z)
+	var esc: Dictionary = pane.hit(from + pane.global_basis.x * (pane.width / 2.0 + bar) - pane.global_basis.y * bar,
+			-pane.global_basis.z)
+	_check("window: Enter and Esc in the stack beside it (%s, %s)" % [enter.get("id"), esc.get("id")],
+			str(enter.get("id", "")) == "enter" and str(esc.get("id", "")) == "escape")
+	main.pointing.select(null)
+	_check("window: the trigger on the picture selects it and is not kept by the frame",
+			not agents._frame_trigger(hand, true) and agents.is_selected())
+	main.pointing.select(null)
+	agents._aims[hand] = {"distance": d, "part": "bar"}
+	_check("window: the trigger on the title bar takes it and selects it", agents.on_trigger(hand, true)
+			and agents.holding(hand) and agents.owns_laser(hand) and agents.is_selected() and agents.point_holds(hand))
 	hand.rotate_y(deg_to_rad(15.0))
 	agents._hold(hand)
 	_check("window: it rides the ray", pane.global_position.distance_to(hand.get_ray_origin()
@@ -994,8 +1014,8 @@ func _window_checks() -> void:
 	agents.on_stick(hand, Vector2(0.0, 1.0), 0.5)
 	_check("window: stick up while holding, further", float(agents._holds[hand]["distance"]) > d)
 	_check("window: while held, the stick isn't the terminal's", not agents.has_input(hand))
-	agents.on_grip(hand, false)
-	_check("window: letting go; its width is kept", not agents.holding(hand)
+	_check("window: the trigger up lets go", agents.on_trigger(hand, false))
+	_check("window: let go; its width is kept", not agents.holding(hand)
 			and absf(float(main.settings.get_value("agent_window", "width", 0.0)) - snappedf(pane.width, 0.01)) < 0.001)
 	pane.set_width(100.0)
 	_check("window: the width has limits", pane.width == LocalAgents.AgentPane.MAX_WIDTH_M)
@@ -1003,6 +1023,7 @@ func _window_checks() -> void:
 	hand.free()
 	pane.set_width(LocalAgents.AgentPane.WIDTH_M)
 	agents.hide_pane()
+	_check("window: hidden, it is not the selection", not agents.is_selected())
 
 
 func _detached_checks() -> void:

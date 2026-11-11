@@ -419,7 +419,8 @@ func _test_panes() -> void:
 	await _test_hold(pane)
 
 
-## Holding a pane (the user, 2026-11-08): it rides the ray and turns with the hand, kept level.
+## Holding a pane (the user, 2026-11-08): it rides the ray and turns with the hand, kept level. It is taken by the
+## trigger on its title bar (the user, 2026-11-11), and the squeeze leaves it alone.
 func _test_hold(pane: Node3D) -> void:
 	var hand := FakeHand.new()
 	root.add_child(hand)
@@ -428,7 +429,11 @@ func _test_hold(pane: Node3D) -> void:
 	var d := hand.global_position.distance_to(pane.global_position)
 	var before: Basis = pane.global_basis
 	pc._aims[hand] = {"pane": pane, "distance": d}
-	_check("hold: the squeeze takes the pane", pc.on_grip(hand, true) and pc.holding(hand))
+	_check("hold: the squeeze on the picture does nothing now", not pc.on_grip(hand, true) and not pc.holding(hand))
+	pc._aims[hand] = {"pane": pane, "distance": d, "bar": true}
+	_check("hold: the trigger on the title bar takes the pane and selects it", pc.on_trigger(hand, true)
+			and pc.holding(hand) and pc.focused == pane and main.pointing.selected == pane
+			and pc.point_holds(hand))
 	pc._hold(hand, 0.016)
 	_check("hold: no jump on taking it (%.3f)" % pane.global_basis.z.angle_to(before.z),
 			pane.global_basis.z.angle_to(before.z) < 0.01)
@@ -444,31 +449,45 @@ func _test_hold(pane: Node3D) -> void:
 	_check("hold: on the ray", pane.global_position.distance_to(hand.get_ray_origin() + hand.get_ray_direction() * d)
 			< 0.001)
 	hand.rotate_y(deg_to_rad(-20.0))
-	pc.on_grip(hand, false)
-	_check("hold: letting go", not pc.holding(hand))
+	_check("hold: the trigger up lets go", pc.on_trigger(hand, false) and not pc.holding(hand))
 	pc._aims.erase(hand)
 	hand.free()
 
 
-## The bar under a pane scales with it (the user, 2026-11-08): a small pane gets small buttons, which still hit.
+## A pane's frame (docs/dev/surfaces-design.md): the title bar over it is a share of its height, Close is at the bar's
+## right end, and Show on the big screen is in the stack joined to its right edge.
 func _test_bar() -> void:
 	var p := PcPane.new()
 	root.add_child(p)
 	await process_frame
 	p.set_width(1.6)
-	var big: Vector2 = ((p.get_node("Bar/Close") as MeshInstance3D).mesh as QuadMesh).size
+	var h: float = p.height()
+	var bar: float = p.frame.bar_height()
+	_check("frame: the bar is a share of the picture's height (%.3f of %.3f)" % [bar, h],
+			is_equal_approx(bar, h * p.frame.BAR_SHARE))
 	p.set_width(0.4)
-	var small: Vector2 = ((p.get_node("Bar/Close") as MeshInstance3D).mesh as QuadMesh).size
-	_check("bar: a quarter the pane, a quarter the buttons (%s, %s)" % [big, small],
-			big.is_equal_approx(Vector2(PcPane.BUTTON_WIDTH, PcPane.BAR_HEIGHT)) and small.is_equal_approx(big * 0.25))
-	_check("bar: the buttons narrower than the pane", small.x * 2.0 + 0.01 < p.width)
-	var at: Vector3 = (p.get_node("Bar/Screen") as Node3D).global_position
-	var hit: Dictionary = p.hit(at + Vector3(0, 0, 1), Vector3(0, 0, -1))
-	_check("bar: the small Show button hits (%s)" % hit, str(hit.get("button", "")) == "screen")
-	hit = p.hit(at + Vector3(0, small.y, 1), Vector3(0, 0, -1))
-	_check("bar: above the small button misses it (%s)" % hit, not hit.has("button"))
-	p.set_width(30.0)
-	_check("bar: no bigger than BAR_SCALE_MAX", is_equal_approx(p.bar_scale(), PcPane.BAR_SCALE_MAX))
+	_check("frame: a quarter the pane, a quarter the bar", is_equal_approx(p.frame.bar_height(), bar * 0.25))
+	h = p.height()
+	bar = p.frame.bar_height()
+	var from := Vector3(0, 0, 1)
+	var hit: Dictionary = p.hit(from + Vector3(0, h / 2.0 + bar / 2.0, 0), Vector3(0, 0, -1))
+	_check("frame: the title bar is over the picture (%s)" % hit, hit.get("bar", false) == true)
+	hit = p.hit(from + Vector3(p.width / 2.0 - bar, h / 2.0 + bar / 2.0, 0), Vector3(0, 0, -1))
+	_check("frame: Close at the bar's right end (%s)" % hit, str(hit.get("button", "")) == "close")
+	hit = p.hit(from + Vector3(p.width / 2.0 + bar, h / 2.0 + bar / 2.0, 0), Vector3(0, 0, -1))
+	_check("frame: Show on the big screen in the stack beside it (%s)" % hit, str(hit.get("button", "")) == "screen")
+	hit = p.hit(from + Vector3(p.width / 2.0 + bar, h / 2.0 - bar, 0), Vector3(0, 0, -1))
+	_check("frame: under the stack's one button is nothing (%s)" % hit, hit.is_empty())
+	hit = p.hit(from + Vector3(0, h / 2.0 + bar * 1.5, 0), Vector3(0, 0, -1))
+	_check("frame: over the bar is nothing", hit.is_empty())
+	hit = p.hit(from, Vector3(0, 0, -1))
+	_check("frame: the picture is the picture", hit.has("pixel"))
+	var rects: Array = p.frame.outline()
+	_check("frame: the stack touches the picture's edge", is_equal_approx((rects[1] as Rect2).position.x,
+			(rects[0] as Rect2).end.x) and is_equal_approx((rects[1] as Rect2).end.y, (rects[0] as Rect2).end.y))
+	p.frame.set_shown(false)
+	hit = p.hit(from + Vector3(0, h / 2.0 + bar / 2.0, 0), Vector3(0, 0, -1))
+	_check("frame: hidden with the UI, nothing of it can be hit", hit.is_empty() and not p.frame.visible)
 	p.free()
 
 
@@ -582,14 +601,17 @@ func _test_focus() -> void:
 		return
 	pc.set_focus(a)
 	await _frames(2)
+	# Looking at another pane does nothing (the user, 2026-11-11: gaze never changes where typing goes).
 	pc.use_gaze_override = true
 	var o: Vector3 = main.camera.global_position
 	pc.gaze_override = [o, (b.global_position - o).normalized()]
-	await _seconds(0.25)
-	_check("gaze: a glance doesn't take the focus", pc.focused == a)
-	await _seconds(0.45)
-	_check("gaze: half a second does", pc.focused == b)
-	_check("gaze: the outline follows", b.focused and not a.focused)
+	await _seconds(0.7)
+	_check("focus: looking at another pane leaves the selection", pc.focused == a and main.pointing.selected == a)
+	pc.use_gaze_override = false
+	pc.gaze_override = []
+	pc.set_focus(b)
+	_check("focus: selecting is the app's one selection", pc.focused == b and main.pointing.selected == b
+			and b.focused and not a.focused)
 	await _frames(3)
 	var q := _got("quality")
 	var qa := q.filter(func(m: Dictionary) -> bool: return int(m["stream"]) == a.stream)
@@ -597,10 +619,9 @@ func _test_focus() -> void:
 	_check("quality: the pane looked away from asks for a few frames (%s)" % [qa.back() if not qa.is_empty() else {}],
 			not qa.is_empty() and int(qa.back()["fps"]) <= 5)
 	_check("quality: the pane in focus for the full rate", qb.is_empty() or int(qb.back()["fps"]) >= 30)
-	pc.gaze_override = []
-	await _seconds(0.6)
-	_check("gaze: looking at nothing keeps the focus", pc.focused == b)
-	pc.use_gaze_override = false
+	main.pointing.select(null)
+	_check("focus: something else selected, no PC window has the keys", pc.focused == null and not b.focused)
+	pc.set_focus(b)
 
 
 func _test_big_screen() -> void:

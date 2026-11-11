@@ -9,7 +9,8 @@ const Pointing := preload("res://scripts/pointing/pointing.gd")
 ##              the laser at the distance it was taken), the stick while holding: left / right smaller or bigger, up / down further or nearer.
 ##              Its bar: Close, Show on the big screen (the window becomes the big screen's source, a film's place
 ##              and the room's presentation: pc_window_source.gd) and back.
-##   focus      the pane looked at for DWELL seconds (eye gaze, else the head) is highlighted and takes the keyboard
+##   focus      the selected pane (its title bar or its picture was clicked: scripts/pointing/pointing.gd) is
+##              highlighted and takes the keyboard
 ##              and the voice. It and the big screen ask the PC for the full rate (full_fps(): the headset's refresh rate; FULL_KBPS), the others
 ##              for a few frames a second. The PC window comes to the front (`focus`) only before its first click or
 ##              key after it gained the focus.
@@ -42,7 +43,6 @@ const PushToTalk := preload("res://scripts/dev/push_to_talk.gd")
 const Transcriber := preload("res://scripts/voice/transcriber.gd")
 
 const SECTION := "pc_windows"
-const DWELL := 0.5
 ## The full rate when the headset's own refresh rate can't be read (a desktop run).
 const FULL_FPS := 60
 const FULL_KBPS := 20000
@@ -93,8 +93,6 @@ var cursor_pitch := 0.0
 var cursor_target := {}
 ## The pane on the big screen, or null.
 var screen_pane: PcPane
-var _dwell_pane: PcPane
-var _dwell_since := 0.0
 ## pane -> its window was told `focus` since it gained the focus.
 var _focus_sent := {}
 ## Protocol button names held down -> the pane they went to.
@@ -103,6 +101,8 @@ var _buttons_down := {}
 var _holds := {}
 ## hand -> the pane its laser points at ({pane, pixel?, button?, distance}).
 var _aims := {}
+## The pane the mouse drags by its bar: {pane, distance}, or {}.
+var _mouse_hold := {}
 var _lit := {}
 var _trigger_on := {}
 var _last_move := {}
@@ -117,6 +117,7 @@ var texts_sent := 0
 func _ready() -> void:
 	if main != null and main.get("pointing") is Pointing:
 		main.pointing.add(self)
+		main.pointing.selection_changed.connect(_on_selection)
 	PcWindowSource.find_video = _find_video
 	PcWindowSource.released = _on_screen_released
 	cursor = PcCursor.new()
@@ -249,7 +250,7 @@ func open_window(client_id: String, window_id: String) -> PcPane:
 	pane.name = "Pane%d" % (panes.size() + 1)
 	pane.client_id = client_id
 	pane.window_id = window_id
-	pane.title = str(w.get("title", ""))
+	pane.set_title(str(w.get("title", "")))
 	if int(w.get("w", 0)) > 0 and int(w.get("h", 0)) > 0:
 		var scale := minf(1.0, minf(float(MAX_SIZE.x) / float(w["w"]), float(MAX_SIZE.y) / float(w["h"])))
 		pane.pixels = Vector2i(roundi(float(w["w"]) * scale), roundi(float(w["h"]) * scale))
@@ -305,8 +306,10 @@ func close_pane(pane: PcPane) -> void:
 	_focus_sent.erase(pane)
 	if focused == pane:
 		focused = null
-	if _dwell_pane == pane:
-		_dwell_pane = null
+	if main != null and main.get("pointing") is Pointing and main.pointing.selected == pane:
+		main.pointing.select(null)
+	if _mouse_hold.get("pane") == pane:
+		_mouse_hold = {}
 	for h: Object in _holds.keys():
 		if _holds[h]["pane"] == pane:
 			_holds.erase(h)
@@ -325,6 +328,12 @@ func close_all() -> void:
 		close_pane(pane)
 
 
+## Something else was selected (an agent's terminal, nothing): no PC window has the keys.
+func _on_selection(surface: Object) -> void:
+	if focused != null and surface != focused:
+		set_focus(null)
+
+
 func set_focus(pane: PcPane) -> void:
 	if pane == focused:
 		return
@@ -334,6 +343,9 @@ func set_focus(pane: PcPane) -> void:
 	if pane != null:
 		pane.set_focused(true)
 		_focus_sent[pane] = false
+		# The one selection of the app (scripts/pointing/pointing.gd): typing and voice go to this window now.
+		if main != null and main.get("pointing") is Pointing:
+			main.pointing.select(pane)
 	_update_quality()
 	changed.emit()
 
@@ -475,9 +487,14 @@ func step(delta: float) -> void:
 	if sound != null:
 		var s := _session(_sound_client())
 		sound.source = s.reader(0) if s != null else null
-	_update_gaze()
 	_update_hands(delta)
 	_update_cursor()
+	for pane: PcPane in panes:
+		pane.pointed = cursor_target.get("pane") == pane
+		for h: Object in _aims:
+			pane.pointed = pane.pointed or _aims[h]["pane"] == pane
+		for h: Object in _holds:
+			pane.pointed = pane.pointed or _holds[h]["pane"] == pane
 
 
 func _sound_client() -> String:
@@ -521,22 +538,6 @@ func screen_hit(origin: Vector3, dir: Vector3) -> Dictionary:
 		return {}
 	return {"screen": true, "pane": screen_pane, "pixel": uv * Vector2(screen_pane.pixels),
 			"distance": h["distance"]}
-
-
-func _update_gaze() -> void:
-	var g := gaze_ray()
-	var looked: PcPane = null
-	if not g.is_empty():
-		var h := pane_hit(g[0], g[1])
-		if h.is_empty():
-			h = screen_hit(g[0], g[1])
-		looked = h.get("pane")
-	var now := Time.get_ticks_msec() / 1000.0
-	if looked != _dwell_pane:
-		_dwell_pane = looked
-		_dwell_since = now
-	elif looked != null and looked != focused and now - _dwell_since >= DWELL:
-		set_focus(looked)
 
 
 # --- Mouse and keyboard --------------------------------------------------------------------------------------------
@@ -610,6 +611,14 @@ func _update_cursor() -> void:
 	var old_pane: PcPane = cursor_target.get("pane")
 	cursor_target = h
 	var pane: PcPane = h.get("pane")
+	if not _mouse_hold.is_empty():
+		# Dragging a pane by its bar: it follows the cursor at the distance it was taken at, facing the head.
+		var held: PcPane = _mouse_hold["pane"]
+		if panes.has(held):
+			held.global_position = r[0] + r[1] * float(_mouse_hold["distance"])
+			held.face(r[0])
+		else:
+			_mouse_hold = {}
 	if pane != old_pane:
 		var s := _session(pane.client_id) if pane != null else null
 		cursor.set_shape(str(s.cursors.get(pane.window_id, "arrow")) if s != null else "arrow")
@@ -634,6 +643,16 @@ func _mouse_button(b: InputEventMouseButton) -> bool:
 	var pane: PcPane = cursor_target.get("pane")
 	if cursor_target.has("menu"):
 		return main.ui.on_mouse(b, cursor_ray()) if main.ui != null else false
+	if not _mouse_hold.is_empty():
+		# While a pane is dragged by its bar: the wheel makes it bigger or smaller; the left button up lets it go.
+		var held: PcPane = _mouse_hold["pane"]
+		if b.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
+			if b.pressed and panes.has(held):
+				held.set_width(held.width * (1.08 if b.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.08))
+		elif b.button_index == MOUSE_BUTTON_LEFT and not b.pressed:
+			_mouse_hold = {}
+			changed.emit()
+		return true
 	if b.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN, MOUSE_BUTTON_WHEEL_LEFT,
 			MOUSE_BUTTON_WHEEL_RIGHT]:
 		if pane == null or not b.pressed or not cursor_target.has("pixel"):
@@ -660,6 +679,11 @@ func _mouse_button(b: InputEventMouseButton) -> bool:
 	if cursor_target.has("button"):
 		if b.pressed and name == "left":
 			press_pane_button(pane, str(cursor_target["button"]))
+		return true
+	if cursor_target.has("bar"):
+		if b.pressed and name == "left":
+			set_focus(pane)
+			_mouse_hold = {"pane": pane, "distance": float(cursor_target["distance"])}
 		return true
 	if b.pressed and cursor_target.has("pixel"):
 		set_focus(pane)
@@ -757,7 +781,7 @@ func _update_hands(delta: float) -> void:
 		else:
 			_aims[hand] = aim
 			var pane: PcPane = aim["pane"]
-			pane.hover_button = str(aim.get("button", ""))
+			pane.hover_button = str(aim.get("button", "bar" if aim.has("bar") else ""))
 			if aim.has("pixel"):
 				_send_move(pane, aim["pixel"], "hand%d" % hand.get_instance_id())
 		var want := not aim.is_empty()
@@ -771,13 +795,20 @@ func _update_hands(delta: float) -> void:
 	for pane: PcPane in panes:
 		var hovered := false
 		for h: Object in _aims:
-			hovered = hovered or (_aims[h]["pane"] == pane and _aims[h].has("button"))
+			hovered = hovered or (_aims[h]["pane"] == pane and (_aims[h].has("button") or _aims[h].has("bar")))
+		hovered = hovered or (cursor_target.get("pane") == pane and (cursor_target.has("button") or cursor_target.has("bar")))
 		if not hovered:
 			pane.hover_button = ""
 
 
-## The trigger on a pane: the left button at the laser's pixel, or the bar's button. True when used.
+## The trigger on a pane: the left button at the laser's pixel, or a button of its frame. On its title bar: selects
+## it and takes hold of it until the trigger comes up (docs/dev/surfaces-design.md: the bar moves a surface, not the
+## squeeze). True when used.
 func on_trigger(hand: Node, pressed: bool) -> bool:
+	if not pressed and _holds.has(hand):
+		_holds.erase(hand)
+		changed.emit()
+		return true
 	if not pressed and _trigger_on.has(hand):
 		var pane: PcPane = _trigger_on[hand]
 		_trigger_on.erase(hand)
@@ -793,6 +824,11 @@ func on_trigger(hand: Node, pressed: bool) -> bool:
 	var pane: PcPane = aim["pane"]
 	if aim.has("button"):
 		press_pane_button(pane, str(aim["button"]))
+	elif aim.has("bar"):
+		# The pane's turn against the controller's, so turning the hand turns the pane, as if held on the end of the ray.
+		var rel: Basis = (hand.global_basis as Basis).orthonormalized().inverse() * pane.global_basis.orthonormalized()
+		_holds[hand] = {"pane": pane, "distance": float(aim["distance"]), "rel": rel}
+		set_focus(pane)
 	elif aim.has("pixel"):
 		set_focus(pane)
 		_trigger_on[hand] = pane
@@ -802,24 +838,9 @@ func on_trigger(hand: Node, pressed: bool) -> bool:
 	return true
 
 
-## The squeeze on a pane takes hold of it; letting go puts it there. True when used.
-func on_grip(hand: Node, pressed: bool) -> bool:
-	if not pressed:
-		if _holds.has(hand):
-			_holds.erase(hand)
-			changed.emit()
-			return true
-		return false
-	var aim: Dictionary = _aims.get(hand, {})
-	if aim.is_empty():
-		return false
-	var pane: PcPane = aim["pane"]
-	# The pane's turn against the controller's, so turning the hand turns the pane (the user, 2026-11-08: grab to
-	# move changes its angle too), as if held on the end of the ray.
-	var rel: Basis = (hand.global_basis as Basis).orthonormalized().inverse() * pane.global_basis.orthonormalized()
-	_holds[hand] = {"pane": pane, "distance": float(aim["distance"]), "rel": rel}
-	set_focus(pane)
-	return true
+## The squeeze does nothing to a pane now: its title bar moves it (on_trigger()).
+func on_grip(_hand: Node, _pressed: bool) -> bool:
+	return false
 
 
 ## The stick while holding a pane, as for the big screen (the user, 2026-11-08): right bigger, left smaller; up

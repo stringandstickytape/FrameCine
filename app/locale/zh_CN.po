@@ -3832,3 +3832,10 @@ msgstr "阵雨"
 #~ msgid "Version %s is ready. It goes in at the next start."
 #~ msgstr "版本 %s 已就绪，下次启动时生效。"
 
+
+#. A surface's frame (ui/surface_frame.gd): the keys beside an agent's terminal.
+msgid "Enter"
+msgstr "回车"
+
+msgid "Esc"
+msgstr "Esc"

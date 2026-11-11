@@ -96,5 +96,13 @@ is done. The others are offered and said to be untried.
 
 ## State
 
-Step 1 is in progress. Until step 4 the menu's own extras (the card, the tablet, placing an object, picking a
-seat, marking a window) still take the pointer hand whole, as before.
+- **Step 1, done** (not tried on the headset): `app/scripts/pointing/pointing.gd`.
+- **Step 2, done for PC windows and an agent's terminal** (not tried on the headset): `app/ui/surface_frame.gd` and
+  `app/shaders/surface_glow.gdshader`. The trigger on a title bar selects and drags; the squeeze no longer moves
+  either. The mouse drags a PC window by its bar and sizes it with the wheel meanwhile. PC windows no longer take
+  the keyboard by being looked at. The bar is 12 % of the picture's height; the glow reaches 34 % of it. Both are
+  for the user to judge in the headset.
+- Until step 3 the UI is always shown, X is still Enter for a terminal, and the terminal still takes the stick,
+  trigger, A and B while it is looked at.
+- Until step 4 the menu's own extras (the card, the tablet, placing an object, picking a seat, marking a window)
+  still take the pointer hand whole, as before.

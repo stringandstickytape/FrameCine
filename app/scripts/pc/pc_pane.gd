@@ -1,28 +1,20 @@
 extends Node3D
 
 ## One PC window in the headset (docs/pc-windows.md, "Panes"): the window's picture on a quad facing +Z, on the
-## private render layer only (VideoScreen.PRIVATE_LAYER: the room snapshots for assistants never see it), with a bar
-## under it holding Close and Show on the big screen. pc_windows.gd makes, moves and feeds it; this node draws it and
-## answers where a ray meets it.
+## private render layer only (VideoScreen.PRIVATE_LAYER: the room snapshots for assistants never see it), in a
+## surface's frame (ui/surface_frame.gd, docs/dev/surfaces-design.md): a title bar over it with the window's name and
+## Close, Show on the big screen in the stack beside it, and a glow outside it while it is pointed at or selected.
+## pc_windows.gd makes, moves and feeds it; this node draws it and answers where a ray meets it.
 ## Size: about one PC pixel to one headset pixel (PIXELS_PER_DEGREE) at the distance it was put, until resized.
-## While it has the focus (the one looked at) a thin outline in the accent colour runs round it.
 
 const PcVideo := preload("res://scripts/pc/pc_video.gd")
 const VideoScreen := preload("res://scripts/video_screen.gd")
 const PaneStyle := preload("res://ui/pane_style.gd")
 const SHADER := preload("res://shaders/pc_pane.gdshader")
+const SurfaceFrame := preload("res://ui/surface_frame.gd")
 
 ## The Frame's panels: 2160 pixels across about 108 degrees.
 const PIXELS_PER_DEGREE := 20.0
-## The bar's sizes for a pane BAR_FOR_WIDTH across; it scales with the pane (the user, 2026-11-08: a small pane
-## close by had a huge bar), within BAR_SCALE_MIN..BAR_SCALE_MAX.
-const BAR_HEIGHT := 0.07
-const BAR_GAP := 0.012
-const BUTTON_WIDTH := 0.36
-const LABEL_PIXEL := 0.0006
-const BAR_FOR_WIDTH := 1.6
-const BAR_SCALE_MIN := 0.22
-const BAR_SCALE_MAX := 1.5
 const MIN_WIDTH := 0.2
 const MAX_WIDTH := 8.0
 
@@ -39,15 +31,16 @@ var width := 1.0
 var pixels := Vector2i(1280, 720)
 ## The window is the big screen's source now: the pane hides.
 var on_screen := false
+## The selected surface: typing and voice go to it (pc_windows.gd's set_focus()).
 var focused := false
-## "close" or "screen" while a ray is over that button, else "".
+## A laser or the mouse is on it.
+var pointed := false
+## "close", "screen" or "bar" while a pointer is over that part of the frame, else "".
 var hover_button := ""
 var material: ShaderMaterial
+var frame: SurfaceFrame
 var _quad: MeshInstance3D
-var _bar: Node3D
-var _buttons := {}
-var _labels := {}
-var _focus_level := 0.0
+var _screen_text := "Show on the big screen"
 
 
 func _ready() -> void:
@@ -63,29 +56,11 @@ func _ready() -> void:
 	_quad.material_override = material
 	_quad.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_quad)
-	_bar = Node3D.new()
-	_bar.name = "Bar"
-	add_child(_bar)
-	for b: Array in [["close", "Close"], ["screen", "Show on the big screen"]]:
-		var m := MeshInstance3D.new()
-		m.name = str(b[0]).capitalize()
-		m.mesh = QuadMesh.new()
-		var mat := StandardMaterial3D.new()
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		mat.albedo_color = Color(0.12, 0.13, 0.15)
-		m.material_override = mat
-		m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		_bar.add_child(m)
-		var l := Label3D.new()
-		l.text = b[1]
-		l.pixel_size = LABEL_PIXEL
-		l.font_size = 44
-		l.position.z = 0.001
-		l.modulate = Color(0.92, 0.93, 0.95)
-		l.outline_size = 0
-		m.add_child(l)
-		_buttons[b[0]] = m
-		_labels[b[0]] = l
+	frame = SurfaceFrame.new()
+	frame.name = "Frame"
+	add_child(frame)
+	frame.set_title(title)
+	frame.set_buttons([{"id": "screen", "text": _screen_text}])
 	_layout()
 
 
@@ -138,23 +113,17 @@ func _layout() -> void:
 	var h := height()
 	(_quad.mesh as QuadMesh).size = Vector2(width, h)
 	material.set_shader_parameter("size_m", Vector2(width, h))
-	material.set_shader_parameter("outline_m", clampf(width * 0.003, 0.002, 0.01))
-	var k := bar_scale()
-	_bar.position = Vector3(0, -h / 2.0 - (BAR_GAP + BAR_HEIGHT / 2.0) * k, 0)
-	for b: String in _buttons:
-		var m := _buttons[b] as MeshInstance3D
-		(m.mesh as QuadMesh).size = Vector2(BUTTON_WIDTH, BAR_HEIGHT) * k
-		m.position.x = (BUTTON_WIDTH / 2.0 + 0.01) * k * (-1.0 if b == "close" else 1.0)
-		(_labels[b] as Label3D).pixel_size = LABEL_PIXEL * k
+	frame.set_content_size(Vector2(width, h))
 	_quad.visible = not on_screen
 
 
-## How big the bar is against its sizes at BAR_FOR_WIDTH.
-func bar_scale() -> float:
-	return clampf(width / BAR_FOR_WIDTH, BAR_SCALE_MIN, BAR_SCALE_MAX)
+func set_title(text: String) -> void:
+	title = text
+	if frame != null:
+		frame.set_title(text)
 
 
-## On the big screen the picture is there instead: only the bar stays (Close, Back to a pane).
+## On the big screen the picture is there instead: only the frame stays (Close, Back to a pane).
 func set_on_screen(on: bool) -> void:
 	on_screen = on
 	if _quad != null:
@@ -165,23 +134,21 @@ func set_focused(on: bool) -> void:
 	focused = on
 
 
-func _process(delta: float) -> void:
-	_focus_level = move_toward(_focus_level, 1.0 if focused else 0.0, delta * 8.0)
-	material.set_shader_parameter("outline", _focus_level)
-	for b: String in _buttons:
-		var mat: StandardMaterial3D = (_buttons[b] as MeshInstance3D).material_override
-		mat.albedo_color = Color(0.22, 0.32, 0.5) if hover_button == b else Color(0.12, 0.13, 0.15)
+func _process(_delta: float) -> void:
+	# The highlight is the frame's glow, outside the picture (the user, 2026-11-11), not an outline inside it.
+	frame.set_state(pointed, focused)
+	frame.hover = hover_button
 
 
-func set_labels(close_text: String, screen_text: String) -> void:
-	if _labels.is_empty():
-		return
-	(_labels["close"] as Label3D).text = close_text
-	(_labels["screen"] as Label3D).text = screen_text
+## The stack's button: "Show on the big screen" or "Back to a pane", in the menus' language.
+func set_labels(_close_text: String, screen_text: String) -> void:
+	_screen_text = screen_text
+	if frame != null:
+		frame.set_buttons([{"id": "screen", "text": screen_text}])
 
 
 ## Where a ray meets the pane: {"pixel": Vector2 (picture pixels, 0..w, 0..h), "distance"}, {"button": "close" |
-## "screen", "distance"}, or {} when it misses (or the pane is hidden).
+## "screen", "distance"}, {"bar": true, "distance"} on the title bar, or {} when it misses (or the pane is hidden).
 func hit(origin: Vector3, direction: Vector3) -> Dictionary:
 	if not visible or not is_inside_tree():
 		return {}
@@ -199,12 +166,14 @@ func hit(origin: Vector3, direction: Vector3) -> Dictionary:
 	if not on_screen and absf(p.x) <= width / 2.0 and absf(p.y) <= h / 2.0:
 		var uv := Vector2(p.x / width + 0.5, 0.5 - p.y / h)
 		return {"pixel": uv * Vector2(pixels), "distance": dist}
-	var by := p.y - _bar.position.y
-	var k := bar_scale()
-	if absf(by) <= BAR_HEIGHT * k / 2.0:
-		for b: String in _buttons:
-			if absf(p.x - (_buttons[b] as Node3D).position.x) <= BUTTON_WIDTH * k / 2.0:
-				return {"button": b, "distance": dist}
+	var part: Dictionary = frame.hit(Vector2(p.x, p.y))
+	match str(part.get("part", "")):
+		"close":
+			return {"button": "close", "distance": dist}
+		"button":
+			return {"button": str(part["id"]), "distance": dist}
+		"bar":
+			return {"bar": true, "distance": dist}
 	return {}
 
 
