@@ -805,7 +805,7 @@ func _x_checks(hand: Node) -> void:
 	main.update_controller_labels()
 	var legends: Dictionary = texts.call()
 	_check("the legends are the fixed ones (%s)" % [legends], legends.get("x", "") == "UI"
-			and legends.get("a", "") == "PLAY / PAUSE" and legends.get("b", "") == "KEYS / TALK"
+			and legends.get("a", "") == "PLAY / PAUSE" and legends.get("b", "") == "HOLD FOR\nVOICE"
 			and legends.get("trigger", "") == "CLICK")
 	var pane: Node3D = agents.get_node("AgentPane")
 	main.set_ui_shown(false)

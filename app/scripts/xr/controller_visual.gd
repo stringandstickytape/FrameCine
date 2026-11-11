@@ -494,30 +494,38 @@ func _make_unlit(model: Node3D) -> void:
 	print("XR %s render model: %d mesh instances, %d materials made unlit" % [side, count, converted.size()])
 
 
-## Once per model: the Y cap's own copy of its material, with the sparkle. The other parts keep theirs.
+## Once per model: the A, B, X and Y caps' own copies of their material, each with its picture (MARKS). The other parts
+## keep theirs.
 func _mark_agent_button() -> void:
-	var y: MeshInstance3D = _model_nodes.get("y")
-	if side != "right" or y == null or y.mesh == null:
+	if side != "right":
 		return
-	var mat := y.get_active_material(0) as ShaderMaterial
-	if mat == null or mat.get_shader_parameter("use_mark") == true:
-		return
-	var range := Rect2(mesh_uvs(y)[0], Vector2.ZERO)
-	for uv in mesh_uvs(y):
-		range = range.expand(uv)
-	if not range.grow(0.002).encloses(MARK_Y_UVS) or not MARK_Y_UVS.grow(0.002).encloses(range):
-		print("XR right render model: the Y cap's atlas is not the one we know (%s): it keeps its letter" % range)
-		return
-	var marked := mat.duplicate() as ShaderMaterial
-	marked.set_shader_parameter("use_mark", true)
-	marked.set_shader_parameter("mark_centre", MARK_CENTRE_UV)
-	marked.set_shader_parameter("mark_mm_per_uv", MARK_MM_PER_UV)
-	marked.set_shader_parameter("mark_erase_mm", MARK_ERASE_MM)
-	marked.set_shader_parameter("mark_cap", MARK_CAP)
-	if y.material_override != null:
-		y.material_override = marked
-	else:
-		y.set_surface_override_material(0, marked)
+	for input: String in MARKS:
+		var cap: MeshInstance3D = _model_nodes.get(input) as MeshInstance3D
+		if cap == null or cap.mesh == null:
+			continue
+		var mat := cap.get_active_material(0) as ShaderMaterial
+		if mat == null or mat.get_shader_parameter("use_mark") == true:
+			continue
+		var known: Rect2 = MARKS[input]["uvs"]
+		var range := Rect2(mesh_uvs(cap)[0], Vector2.ZERO)
+		for uv in mesh_uvs(cap):
+			range = range.expand(uv)
+		if not range.grow(0.002).encloses(known) or not known.grow(0.002).encloses(range):
+			print("XR right render model: the %s cap's atlas is not the one we know (%s): it keeps its letter"
+					% [input.to_upper(), range])
+			continue
+		var marked := mat.duplicate() as ShaderMaterial
+		marked.set_shader_parameter("use_mark", true)
+		marked.set_shader_parameter("mark_kind", int(MARKS[input]["kind"]))
+		marked.set_shader_parameter("mark_centre", MARKS[input]["centre"])
+		marked.set_shader_parameter("mark_right", MARKS[input]["right"])
+		marked.set_shader_parameter("mark_mm_per_uv", MARK_MM_PER_UV)
+		marked.set_shader_parameter("mark_erase_mm", MARK_ERASE_MM)
+		marked.set_shader_parameter("mark_cap", MARK_CAP)
+		if cap.material_override != null:
+			cap.material_override = marked
+		else:
+			cap.set_surface_override_material(0, marked)
 
 
 static func mesh_uvs(mi: MeshInstance3D) -> PackedVector2Array:
@@ -1163,6 +1171,20 @@ const MARK_MM_PER_UV := 108.2
 const MARK_ERASE_MM := 3.9
 const MARK_CAP := Color(0.067, 0.071, 0.071)
 const MARK_Y_UVS := Rect2(0.6993, 0.6355, 0.1855, 0.26)
+## The pictures on the right controller's caps, for what the buttons always do (docs/dev/surfaces-design.md): Y the sparkle
+## (AI), A play and pause, B a keyboard (its tap; its hold is in print above it), X an eye (the UI shown or hidden). "kind":
+## the picture in controller_model.gdshader; "centre": the moulded letter's centre in the atlas; "right": the way the
+## letter's right lies there, measured from the model (each letter lies its own way); "uvs": the cap mesh's whole UV
+## range, which tells that this is the model we know.
+const MARKS := {
+	"y": {"kind": 0, "centre": MARK_CENTRE_UV, "right": Vector2(0.0, 1.0), "uvs": MARK_Y_UVS},
+	"a": {"kind": 1, "centre": Vector2(1729.0, 1746.0) / 2048.0, "right": Vector2(0.0, -1.0),
+			"uvs": Rect2(0.6794, 0.028, 0.2056, 0.8675)},
+	"b": {"kind": 2, "centre": Vector2(1749.5, 1944.5) / 2048.0, "right": Vector2(1.0, 0.0),
+			"uvs": Rect2(0.7465, 0.0093, 0.1506, 0.9832)},
+	"x": {"kind": 3, "centre": Vector2(1830.5, 1394.5) / 2048.0, "right": Vector2(1.0, 0.0),
+			"uvs": Rect2(0.0174, 0.3409, 0.9193, 0.3828)},
+}
 ## Part name -> input name (as in the profile bindings).
 const PART_INPUTS := {"button_a": "a", "button_b": "b", "button_x": "x", "button_y": "y", "button_menu": "menu",
 		"button_view": "view", "button_system": "system", "dpad": "dpad"}

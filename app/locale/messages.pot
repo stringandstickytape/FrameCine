@@ -35,16 +35,16 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: scripts/main.gd:830
+#: scripts/main.gd:831
 msgid "PC window"
 msgstr ""
 
-#: scripts/main.gd:1525
+#: scripts/main.gd:1526
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
 
-#: scripts/main.gd:156 scripts/main.gd:181 scripts/main.gd:190
+#: scripts/main.gd:156 scripts/main.gd:182 scripts/main.gd:191
 msgid "CLICK"
 msgstr ""
 
@@ -72,91 +72,93 @@ msgstr ""
 msgid "PLAY / PAUSE"
 msgstr ""
 
-#: scripts/main.gd:166
-msgid "KEYS / TALK"
+#: scripts/main.gd:167
+msgid ""
+"HOLD FOR\n"
+"VOICE"
 msgstr ""
 
-#: scripts/main.gd:167
+#: scripts/main.gd:168
 msgid "LABELS"
 msgstr ""
 
-#: scripts/main.gd:169
+#: scripts/main.gd:170
 msgid "CHAPTER -"
 msgstr ""
 
-#: scripts/main.gd:170
+#: scripts/main.gd:171
 msgid "CHAPTER +"
 msgstr ""
 
-#: scripts/main.gd:171
+#: scripts/main.gd:172
 msgid "REPLAY"
 msgstr ""
 
-#: scripts/main.gd:173
+#: scripts/main.gd:174
 msgid "UI"
 msgstr ""
 
-#: scripts/main.gd:176 scripts/main.gd:220
+#: scripts/main.gd:177 scripts/main.gd:221
 msgid "ENTER"
 msgstr ""
 
-#: scripts/main.gd:182
+#: scripts/main.gd:183
 msgid "R-CLICK"
 msgstr ""
 
-#: scripts/main.gd:183 scripts/main.gd:210
+#: scripts/main.gd:184 scripts/main.gd:211
 msgid "SCROLL / KEYS"
 msgstr ""
 
-#: scripts/main.gd:184 scripts/main.gd:193 scripts/main.gd:211 scripts/main.gd:223
+#: scripts/main.gd:185 scripts/main.gd:194 scripts/main.gd:212 scripts/main.gd:224
 msgid "SPACE"
 msgstr ""
 
-#: scripts/main.gd:185 scripts/main.gd:194 scripts/main.gd:212
+#: scripts/main.gd:186 scripts/main.gd:195 scripts/main.gd:213
 msgid "BACK"
 msgstr ""
 
-#: scripts/main.gd:191 scripts/main.gd:221
+#: scripts/main.gd:192 scripts/main.gd:222
 msgid "HOLD: SCROLL"
 msgstr ""
 
-#: scripts/main.gd:192
+#: scripts/main.gd:193
 msgid "POINTER"
 msgstr ""
 
-#: scripts/main.gd:199
+#: scripts/main.gd:200
 msgid "KEEP PICTURE"
 msgstr ""
 
-#: scripts/main.gd:202
+#: scripts/main.gd:203
 msgid "APPLY"
 msgstr ""
 
-#: scripts/main.gd:203
+#: scripts/main.gd:204
 msgid "SIZE / TURN"
 msgstr ""
 
-#: scripts/main.gd:204 scripts/main.gd:233
+#: scripts/main.gd:205 scripts/main.gd:234
 msgid "CANCEL"
 msgstr ""
 
-#: scripts/main.gd:222
+#: scripts/main.gd:223
 msgid "ARROWS"
 msgstr ""
 
-#: scripts/main.gd:224
+#: scripts/main.gd:225
 msgid "ESC"
 msgstr ""
 
-#: scripts/main.gd:228
+#: scripts/main.gd:229
 msgid "GRAB"
 msgstr ""
 
-#: scripts/main.gd:231
+#: scripts/main.gd:232
 msgid "LET GO: THROW"
 msgstr ""
 
-#: scripts/main.gd:232
+#: scripts/main.gd:233
 msgid "NEAR-FAR / TURN"
 msgstr ""
 

@@ -163,7 +163,8 @@ const CONTROL_LABELS := {
 	# A and B on the headset's controllers: fixed meanings (docs/dev/surfaces-design.md). B: tap for the keyboard,
 	# hold to talk.
 	"next_file": ["PLAY / PAUSE", "PLAY / PAUSE"],
-	"prev_file": ["KEYS / TALK", "KEYS / TALK"],
+	# B's cap has the keyboard's picture (its tap); the print above it says what holding it does.
+	"prev_file": ["HOLD FOR\nVOICE", "HOLD FOR\nVOICE"],
 	"labels": ["LABELS", "LABELS"],
 	# Only bound by the opt-in d-pad map, xr/openxr_action_map_dpad.tres (docs/features.md, #15).
 	"chapter_prev": ["CHAPTER -", "CHAPTER -"],

@@ -34,10 +34,14 @@ uniform bool use_ink = false;
 uniform vec3 ink_colour : source_color = vec3(1.0);
 const float INK_FROM = 0.012;
 const float INK_TO = 0.13;
-// The right controller's Y cap (controller_visual.gd, MARK_*): the moulded letter in the atlas is painted out, here and not
-// over it, so nothing can show through, and a sparkle takes its place. It moves with the cap, and is the only colour on
-// the controller: unlit as the print is, one gradient from the big one's foot to the small one's tip.
+// The right controller's A, B, X and Y caps (controller_visual.gd, MARKS): the moulded letter in the atlas is painted out,
+// here and not over it, so nothing can show through, and a picture of what the button does takes its place. It moves with
+// the cap. mark_kind: 0 Y's sparkle, the only colour on the controller (unlit as the print is, one gradient from the big
+// one's foot to the small one's tip); 1 play and pause; 2 a keyboard; 3 an eye (the UI shown or hidden): these three in
+// the print's white. mark_right: the way the picture's right lies in the atlas (each cap's letter lies its own way).
 uniform bool use_mark = false;
+uniform int mark_kind = 0;
+uniform vec2 mark_right = vec2(0.0, 1.0);
 // 0: the bare cap (tools/label_proof.gd).
 uniform float mark_ink = 1.0;
 uniform vec2 mark_centre = vec2(0.0);
@@ -65,6 +69,33 @@ float sparkle(vec2 p, float r) {
 	return min(length(a - vec2(k)) - length(vec2(k - r, k)), r - max(a.x, a.y));
 }
 
+// The pictures, in millimetres, x to the right and y up; more than zero inside, as sparkle().
+float box(vec2 p, vec2 centre, vec2 half_size) {
+	vec2 a = half_size - abs(p - centre);
+	return min(a.x, a.y);
+}
+
+// A triangle to the right, then two bars.
+float play_pause(vec2 p) {
+	float play = min(p.x + 2.3, (-1.5 * (p.x + 0.1) - 2.2 * abs(p.y)) / 2.663);
+	return max(play, max(box(p, vec2(0.95, 0.0), vec2(0.3, 1.5)), box(p, vec2(2.0, 0.0), vec2(0.3, 1.5))));
+}
+
+// A rounded outline, a row of four keys and the long key under them.
+float keyboard(vec2 p) {
+	vec2 q = abs(p) - vec2(2.4, 1.55) + vec2(0.45);
+	float d = length(max(q, vec2(0.0))) + min(max(q.x, q.y), 0.0) - 0.45;
+	float ring = 0.19 - abs(d + 0.19);
+	float keys = min(0.27 - abs(abs(abs(p.x) - 0.9) - 0.45), 0.27 - abs(p.y - 0.42));
+	return max(ring, max(keys, box(p, vec2(0.0, -0.5), vec2(1.15, 0.22))));
+}
+
+// An almond's outline (two arcs) and a pupil.
+float eye(vec2 p) {
+	float d = 2.685 - max(length(p - vec2(0.0, -1.385)), length(p - vec2(0.0, 1.385)));
+	return max(0.19 - abs(d - 0.19), 0.68 - length(p));
+}
+
 void fragment() {
 	vec4 c = albedo;
 	if (use_texture) {
@@ -73,15 +104,24 @@ void fragment() {
 	float mark = 0.0;
 	vec3 mark_rgb = vec3(0.0);
 	if (use_mark) {
-		// The letter lies in the atlas with its top towards -U and its right towards +V.
+		// Y's letter lies in the atlas with its top towards -U and its right towards +V: mark_right (0, 1).
 		vec2 d = (UV - mark_centre) * mark_mm_per_uv;
-		vec2 p = vec2(d.y, -d.x);
-		float ink = max(sparkle(p - vec2(-0.21, -0.34), 1.75), sparkle(p - vec2(1.24, 1.37), 0.72));
+		vec2 p = vec2(dot(d, mark_right), dot(d, vec2(-mark_right.y, mark_right.x)));
+		float ink;
+		if (mark_kind == 1) {
+			ink = play_pause(p);
+		} else if (mark_kind == 2) {
+			ink = keyboard(p);
+		} else if (mark_kind == 3) {
+			ink = eye(p);
+		} else {
+			ink = max(sparkle(p - vec2(-0.21, -0.34), 1.75), sparkle(p - vec2(1.24, 1.37), 0.72));
+		}
 		float painted = step(length(d), mark_erase_mm);
 		c.rgb = mix(c.rgb, mark_cap, painted);
 		mark = clamp(ink / max(fwidth(ink), 0.001) + 0.5, 0.0, 1.0) * mark_ink * painted;
 		float t = clamp(dot(p - vec2(-1.96, -2.09), vec2(0.684, 0.729)) / 5.73, 0.0, 1.0);
-		mark_rgb = mix(mix(MARK_FROM, MARK_VIA, t), mix(MARK_VIA, MARK_TO, t), t);
+		mark_rgb = mark_kind == 0 ? mix(mix(MARK_FROM, MARK_VIA, t), mix(MARK_VIA, MARK_TO, t), t) : ink_colour;
 	}
 	if (use_vertex_color) {
 		c *= COLOR;

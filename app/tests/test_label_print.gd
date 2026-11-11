@@ -436,7 +436,12 @@ func _test_agent_mark(scene: Node3D, side: String) -> void:
 			_check("%s: no art to whiten" % part, not ink.call(part))
 		var body := (model.find_child("body", true, false) as MeshInstance3D).get_active_material(0) as ShaderMaterial
 		_check("the plastic is black", body.get_shader_parameter("lift") == ControllerVisual.BLACK_LIFT)
-		for part: String in ["button_a", "button_b", "button_x", "button_menu", "button_system", "body"]:
+		var kind := func(part: String) -> int:
+			return int((model.find_child(part, true, false) as MeshInstance3D).get_active_material(0).get_shader_parameter("mark_kind"))
+		_check("A, B and X have their pictures: play and pause, the keyboard, the eye", marked.call("button_a")
+				and marked.call("button_b") and marked.call("button_x") and kind.call("button_y") == 0
+				and kind.call("button_a") == 1 and kind.call("button_b") == 2 and kind.call("button_x") == 3)
+		for part: String in ["button_menu", "button_system", "body"]:
 			_check("%s does not" % part, not marked.call(part))
 		var y := model.find_child("button_y", true, false) as MeshInstance3D
 		var mat := y.get_active_material(0)

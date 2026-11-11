@@ -3832,8 +3832,8 @@ msgid "Esc"
 msgstr "Esc"
 
 #. The controllers' fixed legends (scripts/main.gd CONTROL_LABELS): B, tap for the keyboard, hold to talk; X, the UI.
-msgid "KEYS / TALK"
-msgstr "键盘 / 语音"
+msgid "HOLD FOR\nVOICE"
+msgstr "按住：\n语音"
 
 msgid "UI"
 msgstr "界面"

@@ -17,8 +17,10 @@ func _init() -> void:
 	var left: Dictionary = app.controller_labels(HEADSET_PROFILE, "left", false)
 	print("Headset profile right, menu hidden: %s" % right)
 	print("Headset profile left, menu hidden: %s" % left)
-	_check("right trigger", right.get("trigger") == "PLAY / PAUSE")
-	_check("right A / B", right.get("a") == "NEXT" and right.get("b") == "PREV")
+	# The fixed meanings (docs/dev/surfaces-design.md): the trigger clicks, A plays and pauses, B's hold is the voice
+	# (its tap, the keyboard, is the picture on its cap), X is the UI.
+	_check("right trigger", right.get("trigger") == "CLICK")
+	_check("right A / B", right.get("a") == "PLAY / PAUSE" and right.get("b") == "HOLD FOR\nVOICE")
 	_check("right menu", right.get("menu") == "MENU")
 	_check("right stick: seek + press for menu", str(right.get("thumbstick", "")).begins_with("SEEK / DIST")
 			and str(right.get("thumbstick", "")).ends_with("PUSH: MENU"))
@@ -51,8 +53,8 @@ func _init() -> void:
 			if profile.get_binding(i).action.resource_name == "enter":
 				x.append(profile.get_binding(i).binding_path)
 		_check("%s: X on the right is Enter" % path.get_file(), x == ["/user/hand/right/input/x/click"])
-	# X: no legend until an agent's terminal shows, then ENTER, the menu open or not; the left has no X.
-	_check("X: no legend normally", not right.has("x"))
+	# X is the UI, shown or hidden; the left has no X.
+	_check("X: the UI", right.get("x") == "UI")
 	var enter: Dictionary = app.controller_labels(HEADSET_PROFILE, "right", false, false, false, false, false, {}, false, true)
 	var enter_menu: Dictionary = app.controller_labels(HEADSET_PROFILE, "right", true, false, false, false, false, {}, false, true)
 	_check("X: ENTER while the terminal shows, the menu open too", enter.get("x") == "ENTER" and enter_menu.get("x") == "ENTER")
@@ -77,12 +79,12 @@ func _init() -> void:
 	_check("menu shown: menu closes", right_menu.get("menu") == "CLOSE")
 	_check("menu shown: stick scrolls", str(right_menu.get("thumbstick", "")).begins_with("SCROLL"))
 	var touch_left: Dictionary = app.controller_labels("/interaction_profiles/oculus/touch_controller", "left", false)
-	_check("third-party profile left X / Y / menu", touch_left.get("x") == "NEXT" and touch_left.get("y") == "PREV"
+	_check("third-party profile left X / Y / menu", touch_left.get("x") == "PLAY / PAUSE" and touch_left.get("y") == "HOLD FOR\nVOICE"
 			and touch_left.get("menu") == "MENU")
 	var generic_left: Dictionary = app.controller_labels("/interaction_profiles/khr/generic_controller", "left", false)
 	_check("generic left primary -> x = menu", generic_left.get("x") == "MENU")
 	var simple: Dictionary = app.controller_labels("/interaction_profiles/khr/simple_controller", "right", false)
-	_check("simple select -> trigger", simple.get("trigger") == "PLAY / PAUSE")
+	_check("simple select -> trigger", simple.get("trigger") == "CLICK")
 	_check("no profile: no labels", app.controller_labels("", "right", false).is_empty())
 	app.free()
 
