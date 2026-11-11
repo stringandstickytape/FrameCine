@@ -1,5 +1,7 @@
 extends Node
 
+const Pointing := preload("res://scripts/pointing/pointing.gd")
+
 ## The playback features hub (docs/features.md). main.gd creates it as "Features" before the menu's setup, so the
 ## menu (or the pane) reaches every feature as main.features.<name>. Each feature is a small node or helper with
 ## properties, signals and its own settings section; this node only creates them, hands them `main`, and offers a
@@ -295,6 +297,8 @@ func _ready() -> void:
 	real_windows = _add(RealWindows.new(), "RealWindows")
 	physics = _add(ObjectPhysics.new(), "ObjectPhysics")
 	grab = _add(ObjectGrab.new(), "ObjectGrab")
+	if main.get("pointing") is Pointing:
+		main.pointing.add(grab)
 	room_settings = _add(RoomSettings.new(), "RoomSettings")
 	env_audio = _add(EnvAudio.new(), "EnvAudio")
 	time_travel = _add(TimeTravel.new(), "TimeTravel")

@@ -1,5 +1,7 @@
 extends Node
 
+const Pointing := preload("res://scripts/pointing/pointing.gd")
+
 ## Picking objects up with the controllers (docs/physics.md, "Controls"; object physics:
 ## scripts/play/object_physics.gd). Either controller, and one is enough:
 ##   point at an object      the laser shows to it (it fades after LASER_LINGER seconds of a still controller, so a
@@ -73,18 +75,35 @@ func owns_laser(hand: Node) -> bool:
 	return aimed(hand) != ""
 
 
-## The laser is free for the grab: nothing else (Place, seat picking, marking a window, the menu, a captured window)
-## has it on this hand.
+## The laser is free for the grab: the nearest thing it is on is an object or nothing (scripts/pointing/pointing.gd),
+## not the menu, a window or the keyboard, and nothing else (Place, seat picking, marking a window, the browser) has
+## the hand.
 func _free(hand: Node) -> bool:
 	var ph: Node = _physics()
 	if ph == null or not ph.available():
 		return false
+	if main.get("pointing") is Pointing:
+		# Nothing else: an object the controller is inside is picked up with no ray on it.
+		var has: Object = main.pointing.owner_of(hand)
+		return (has == self or has == null) and not main.pointing.claimed(hand)
 	if main.window_pointer != null and main.window_pointer_owns(hand as XRHand):
 		return false
 	var ui: Node = main.ui
 	if ui != null and ui.has_method("laser_in_use") and ui.laser_in_use(hand):
 		return false
 	return true
+
+
+## For scripts/pointing/pointing.gd: the object this hand's ray meets, and whether the hand holds one.
+func point_hit(hand: Object, origin: Vector3, direction: Vector3) -> Dictionary:
+	var ph: Node = _physics()
+	if ph == null or not ph.available():
+		return {}
+	return ph.aim(origin, direction, REACH)
+
+
+func point_holds(hand: Object) -> bool:
+	return _holds.has(hand)
 
 
 # --- Input ------------------------------------------------------------------------------------------------------

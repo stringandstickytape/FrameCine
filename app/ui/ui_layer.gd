@@ -1,5 +1,7 @@
 extends Node3D
 
+const Pointing := preload("res://scripts/pointing/pointing.gd")
+
 ## The UI layer: the menu, on the tablet (ui/tablet.gd; the user, 2026-11-06: the front panel, the first UI, is
 ## gone). It talks to the app (scripts/main.gd)
 ## only through the app's public functions, signals and its features hub, and the app works without it (delete the
@@ -146,6 +148,8 @@ var tablet: Tablet
 ## Called by the app once its nodes are ready.
 func setup(p_app: Node3D) -> void:
 	app = p_app
+	if app.get("pointing") is Pointing:
+		app.pointing.add(self)
 	PaneStyle.use(str(app.settings.get_value("pane", "theme", PaneStyle.DEFAULT_PATH)))
 	panel = Pane.new()
 	panel.name = "Pane"
@@ -638,26 +642,17 @@ func _take_over_pointer() -> void:
 func _update_pointer() -> void:
 	if not app.use_xr or pointer_hand == null:
 		return
-	if keyboard != null and keyboard.owns_laser(pointer_hand):
-		_pointed = false
-		_card_pointed = false
-		_hit = {}
-		_tablet_hit = {}
-		panel.pointer_exit()
-		return
-	var hit := {}
-	if pointer_hand.get_is_active() and _open:
-		hit = panel.ray_hit(pointer_hand.get_ray_origin(), pointer_hand.get_ray_direction())
+	# The nearest thing the laser is on has the hand (scripts/pointing/pointing.gd): the panel's, the card's or the
+	# tablet's hit only when that is one of them, not the keyboard, a window or an object in front.
+	var mine := Pointing.hit_for(app, self, pointer_hand)
+	var what := str(mine.get("what", ""))
+	var hit: Dictionary = mine if what == "panel" else {}
 	_pointed = not hit.is_empty()
 	_hit = hit
-	var card_hit := {}
-	if not _pointed and pointer_hand.get_is_active():
-		card_hit = card.ray_hit(pointer_hand.get_ray_origin(), pointer_hand.get_ray_direction())
+	var card_hit: Dictionary = mine if what == "card" else {}
 	_card_pointed = not card_hit.is_empty()
 	_card_hit = card_hit
-	_tablet_hit = {}
-	if not _pointed and not _card_pointed and pointer_hand.get_is_active():
-		_tablet_hit = tablet.ray_hit(pointer_hand.get_ray_origin(), pointer_hand.get_ray_direction())
+	_tablet_hit = mine if what == "tablet" else {}
 	# A grab with the trigger held (the bar, a list): it follows the laser on the tablet's plane, on or off it.
 	if _scrub_by == "trigger" and _scrub_hand == pointer_hand and tablet.is_grabbing():
 		var at: Variant = tablet.plane_point(pointer_hand.get_ray_origin(), pointer_hand.get_ray_direction())
@@ -704,6 +699,35 @@ func _update_pointer() -> void:
 	elif not panel.is_pressed():
 		panel.pointer_exit()
 	_check_hover(pointer_hand)
+
+
+## For scripts/pointing/pointing.gd. The menu has one pointer hand: its ray on the panel, else the card, else the
+## tablet (in that order, as before; they do not overlap in practice). "what" says which.
+func point_hit(hand: Object, origin: Vector3, direction: Vector3) -> Dictionary:
+	if hand != pointer_hand or not app.use_xr or not pointer_hand.get_is_active():
+		return {}
+	var h: Dictionary = panel.ray_hit(origin, direction) if _open else {}
+	var what := "panel"
+	if h.is_empty():
+		h = card.ray_hit(origin, direction)
+		what = "card"
+	if h.is_empty():
+		h = tablet.ray_hit(origin, direction)
+		what = "tablet"
+	if h.is_empty():
+		return {}
+	h["what"] = what
+	if not h.has("distance"):
+		h["distance"] = 3.0
+	return h
+
+
+## The menu's own jobs that take the hands whole, as before step 4: placing an object, picking a seat, marking a
+## window; and the pointer hand while it presses on the panel or drags on the tablet.
+func point_holds(hand: Object) -> bool:
+	if _seat_pick or is_placing_object() or is_marking_window():
+		return true
+	return hand == pointer_hand and (panel.is_pressed() or _scrub_hand == hand)
 
 
 func _grab_owns(hand: XRHand) -> bool:

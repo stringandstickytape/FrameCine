@@ -4,6 +4,8 @@
 ## status or dev events. Closing, losing tracking or losing the XR session releases every key.
 extends Node3D
 
+const Pointing := preload("res://scripts/pointing/pointing.gd")
+
 const Layout := preload("res://keyboard/key_layout.gd")
 const Router := preload("res://keyboard/keyboard_router.gd")
 const State := preload("res://keyboard/key_state.gd")
@@ -92,6 +94,8 @@ func setup(p_app: Node) -> void:
 	_light_mesh.position.z = 0.001
 	add_child(_light_mesh)
 	set_width(width)
+	if app.get("pointing") is Pointing:
+		app.pointing.add(self)
 	Commands.register("keyboard", func(a: Dictionary, _ctx: Commands.Call) -> Variant:
 		set_shown(bool(a.get("show", true)))
 		return {"shown": visible, "width": width}, {
@@ -157,6 +161,16 @@ func hit(origin: Vector3, direction: Vector3) -> Dictionary:
 	return {"point": point, "key": key_at(point), "distance": origin.distance_to(global_transform * p)}
 
 
+## For scripts/pointing/pointing.gd: what this hand's ray meets here, and whether the keyboard has the hand anyway
+## (it is held by it, or it has a key down with it).
+func point_hit(_hand: Object, origin: Vector3, direction: Vector3) -> Dictionary:
+	return hit(origin, direction)
+
+
+func point_holds(hand: Object) -> bool:
+	return visible and (_holds.has(hand) or state.held.has(hand))
+
+
 func key_at(point: Vector2) -> int:
 	for i in state.keys.size():
 		if (state.keys[i].rect as Rect2).has_point(point):
@@ -186,8 +200,9 @@ func step(delta: float) -> void:
 			global_basis = hand.global_basis.orthonormalized() * (hold.rel as Basis)
 			hand.set_laser(true, float(hold.distance), true)
 			continue
-		var h := hit(hand.get_ray_origin(), hand.get_ray_direction())
-		if h.is_empty():
+		# The nearest thing the laser is on has the hand: the keyboard's hit only when that is the keyboard.
+		var h := Pointing.hit_for(app, self, hand)
+		if h.is_empty() or h.has("held"):
 			aims.erase(hand)
 		else:
 			aims[hand] = h

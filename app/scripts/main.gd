@@ -1,5 +1,7 @@
 extends Node3D
 
+const Pointing := preload("res://scripts/pointing/pointing.gd")
+
 ## FrameCine: the app core. The view (XR, or a flat camera when there is no runtime), the PlaybackController,
 ## the VideoScreen, environments, the info overlay, settings, the playlist, command-line arguments and the direct
 ## controller / keyboard bindings. The menu is the panel (docs/ui-design.md), a separate, optional layer
@@ -330,6 +332,8 @@ var _grab_labelled := false
 ## "profile|side" -> [[input, action, press], ...] from the action map.
 static var _binding_cache := {}
 ## Input for a captured window (browser) on the screen.
+## What each hand's laser is on, and the selection (scripts/pointing/pointing.gd).
+var pointing: Pointing
 var window_pointer: WindowPointer
 ## Voice into the browser's selected field (scripts/video/browser_dictation.gd): the talk button asks the page first.
 var browser_dictation: BrowserDictation
@@ -361,10 +365,15 @@ func _ready() -> void:
 		WindowVideoSource.browser_command.assign(str(_args["browser-command"]).split(" ", false))
 	if _args.has("browser-match"):
 		WindowVideoSource.browser_match = str(_args["browser-match"]).to_lower()
+	pointing = Pointing.new()
+	pointing.name = "Pointing"
+	add_child(pointing)
 	window_pointer = WindowPointer.new()
 	window_pointer.name = "WindowPointer"
 	window_pointer.main = self
 	add_child(window_pointer)
+	# Not a surface yet (docs/dev/surfaces-design.md, step 5): the browser's laser takes the right hand whole.
+	pointing.add_claimant(window_pointer_owns)
 	browser_dictation = BrowserDictation.new()
 	browser_dictation.name = "BrowserDictation"
 	browser_dictation.main = self
@@ -1264,6 +1273,8 @@ func on_menu(hand: XRHand, pressed: bool) -> void:
 # --- Controllers -------------------------------------------------------------------------------------------------
 
 func _on_trigger(hand: XRController3D, pressed: bool) -> void:
+	# A press is answered for where the hand is now, not where it was when this frame's first question was asked.
+	pointing.refresh()
 	# A keyboard stroke keeps its release even when the hand leaves the keys.
 	if ui != null and ui.keyboard != null and ui.keyboard.on_trigger(hand, pressed):
 		return
@@ -1288,6 +1299,7 @@ func _on_trigger(hand: XRController3D, pressed: bool) -> void:
 
 
 func _on_grip(hand: XRController3D, pressed: bool) -> void:
+	pointing.refresh()
 	var h := hand as XRHand
 	if ui != null and ui.keyboard != null and ui.keyboard.on_grip(h, pressed):
 		_grip_down.erase(h)

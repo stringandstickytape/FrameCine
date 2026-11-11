@@ -1,5 +1,7 @@
 extends Node
 
+const Pointing := preload("res://scripts/pointing/pointing.gd")
+
 ## Agents running on the headset itself (docs/assistant.md, "Agents on the headset"; the table and the files are in
 ## agent_terminal.gd). The terminal IS the conversation: it shows in a window that floats where it is put
 ## (ui/agent_pane.gd; "the pane" below) while the film carries on, and push-to-talk types straight into it. One agent is
@@ -133,6 +135,8 @@ var test_xr := false
 
 
 func _ready() -> void:
+	if main != null and main.get("pointing") is Pointing:
+		main.pointing.add(self)
 	_pane = AgentPane.new()
 	_pane.name = "AgentPane"
 	_pane.app = main
@@ -436,20 +440,16 @@ func _process(delta: float) -> void:
 
 # --- The window: lasers, holding, sizing (as a PC window's pane) ---------------------------------------------------
 
-## The laser is free for the window on this hand (the menu, the keyboard, a held object or a PC pane don't have it).
-func _hand_free(hand: Node) -> bool:
-	var ui: Node = main.get("ui")
-	if ui != null and ui.has_method("laser_in_use") and ui.laser_in_use(hand):
-		return false
-	var keyboard: Node = ui.get("keyboard") if ui != null else null
-	if keyboard != null and keyboard.owns_laser(hand):
-		return false
-	var f: Node = main.get("features")
-	for name: String in ["grab", "pc_windows"]:
-		var other: Node = f.get(name) if f != null else null
-		if other != null and other.owns_laser(hand):
-			return false
-	return true
+## For scripts/pointing/pointing.gd: where this hand's ray meets the window, and whether the window has the hand
+## anyway (it is held by it).
+func point_hit(hand: Object, origin: Vector3, direction: Vector3) -> Dictionary:
+	if not pane_shown() or not (bool(hand.call("get_is_active")) or test_xr):
+		return {}
+	return _pane.hit(origin, direction)
+
+
+func point_holds(hand: Object) -> bool:
+	return _holds.has(hand)
 
 
 func _update_hands() -> void:
@@ -461,8 +461,10 @@ func _update_hands() -> void:
 			_hold(hand)
 			continue
 		var aim := {}
-		if pane_shown() and (hand.get_is_active() or test_xr) and _hand_free(hand):
-			aim = _pane.hit(hand.get_ray_origin(), hand.get_ray_direction())
+		# The nearest thing the laser is on has the hand: the window's hit only when that is the window.
+		aim = Pointing.hit_for(main, self, hand)
+		if aim.has("held"):
+			aim = {}
 		if aim.is_empty():
 			_aims.erase(hand)
 		else:

@@ -1,5 +1,7 @@
 extends Node3D
 
+const Pointing := preload("res://scripts/pointing/pointing.gd")
+
 ## PC windows in the headset (docs/pc-windows.md, decision D31): the feature (main.features.pc_windows). It runs the
 ## service while System, PC windows is on (pc_service.gd), and owns what the viewer sees and uses:
 ##   panes      a window opened from the Files tab (or `pc_open`) becomes a pane in front of the viewer (pc_pane.gd),
@@ -113,6 +115,8 @@ var texts_sent := 0
 
 
 func _ready() -> void:
+	if main != null and main.get("pointing") is Pointing:
+		main.pointing.add(self)
 	PcWindowSource.find_video = _find_video
 	PcWindowSource.released = _on_screen_released
 	cursor = PcCursor.new()
@@ -725,15 +729,16 @@ func press_pane_button(pane: PcPane, button: String) -> void:
 
 # --- Controllers ---------------------------------------------------------------------------------------------------
 
-## The laser is free for the panes on this hand (nothing else has it).
-func _hand_free(hand: Node) -> bool:
-	var ui: Node = main.ui
-	if ui != null and ui.has_method("laser_in_use") and ui.laser_in_use(hand):
-		return false
-	var grab: Node = main.features.get("grab") if main.get("features") != null else null
-	if grab != null and (grab.owns_laser(hand) or grab.holding(hand) != ""):
-		return false
-	return true
+## For scripts/pointing/pointing.gd: the nearest pane this hand's ray meets, and whether a pane has the hand anyway
+## (it is held by it, or its left button is down with it).
+func point_hit(hand: Object, origin: Vector3, direction: Vector3) -> Dictionary:
+	if panes.is_empty() or not (bool(hand.call("get_is_active")) or test_xr):
+		return {}
+	return pane_hit(origin, direction)
+
+
+func point_holds(hand: Object) -> bool:
+	return _holds.has(hand) or _trigger_on.has(hand)
 
 
 func _update_hands(delta: float) -> void:
@@ -743,11 +748,10 @@ func _update_hands(delta: float) -> void:
 		if _holds.has(hand):
 			_hold(hand, delta)
 			continue
-		var aim := {}
-		if (hand.get_is_active() or test_xr) and _hand_free(hand) and not panes.is_empty():
-			var o: Vector3 = hand.get_ray_origin()
-			var d: Vector3 = hand.get_ray_direction()
-			aim = pane_hit(o, d)
+		# The nearest thing the laser is on has the hand: a pane's hit only when that is a pane.
+		var aim := Pointing.hit_for(main, self, hand)
+		if aim.has("held"):
+			aim = {}
 		if aim.is_empty():
 			_aims.erase(hand)
 		else:
