@@ -6,7 +6,9 @@ extends VBoxContainer
 ## pane in focus (`text`), for when there is no keyboard paired.
 ## The titles and the pictures are the PC's (content, never translated, never logged). Built again when the feature
 ## says something changed, once a frame at most and only while it shows (else when it next shows): a title changing
-## every second rebuilt it every second, hidden or not, and the headset lurched (the user, 2026-11-08).
+## every second rebuilt it every second, hidden or not, and the headset lurched (the user, 2026-11-08). While it shows,
+## the same windows in the same order are not built again: their titles, pictures and pressed state are set in place
+## (the user, 2026-11-11: a terminal whose title moves every second, with this place open, lurched once a second).
 
 const W := preload("res://ui/pane_widgets.gd")
 const OnscreenKeyboard := preload("res://ui/onscreen_keyboard.gd")
@@ -19,6 +21,8 @@ var _keyboard: OnscreenKeyboard
 ## Window tiles made (the tests press them): [{button, pc, id}].
 var tiles: Array[Dictionary] = []
 var _dirty := false
+## What the tiles were built from (_shape()): the PCs and their windows' ids, in order.
+var _built := []
 var _queued := false
 
 
@@ -49,7 +53,46 @@ func _changed() -> void:
 
 func _rebuild_now() -> void:
 	_queued = false
-	_rebuild()
+	if _shape() == _built and not _built.is_empty():
+		_refresh()
+	else:
+		_rebuild()
+
+
+## The PCs and their windows, as far as the layout goes: a change here builds the place again.
+func _shape() -> Array:
+	var out := []
+	if feature == null or feature.service == null:
+		return out
+	for s: RefCounted in feature.sessions():
+		var ids := []
+		for w: Dictionary in s.windows:
+			ids.append([str(w["id"]), str(w["kind"])])
+		out.append([str(s.client_id), str(s.pc_name), ids])
+	return out
+
+
+## The same windows as built: only what a tile says.
+func _refresh() -> void:
+	_dirty = false
+	var at := {}
+	for s: RefCounted in feature.sessions():
+		for w: Dictionary in s.windows:
+			at["%s|%s" % [s.client_id, w["id"]]] = w
+	for t: Dictionary in tiles:
+		var w: Dictionary = at.get("%s|%s" % [t["pc"], t["id"]], {})
+		if w.is_empty() or not is_instance_valid(t["button"]):
+			continue
+		var text := _title(w)
+		if (t["label"] as Label).text != text:
+			(t["label"] as Label).text = text
+		if (t["picture"] as TextureRect).texture != w.get("thumb"):
+			(t["picture"] as TextureRect).texture = w.get("thumb")
+		(t["button"] as Button).set_pressed_no_signal(feature.pane_for(t["pc"], t["id"]) != null)
+
+
+func _title(w: Dictionary) -> String:
+	return str(w["title"]) if str(w["title"]) != "" else (tr("Monitor") if w["kind"] == "monitor" else str(w["app"]))
 
 
 func _rebuild() -> void:
@@ -60,6 +103,7 @@ func _rebuild() -> void:
 	tiles.clear()
 	_line = null
 	_keyboard = null
+	_built = _shape()
 	if feature == null or feature.service == null:
 		add_child(W.help("PC windows is off. Turn it on in System, PC windows, and add your PC there."))
 		return
@@ -103,8 +147,7 @@ func _tile(s: RefCounted, w: Dictionary) -> Button:
 	pic.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	pic.texture = w.get("thumb")
 	box.add_child(pic)
-	var title := str(w["title"]) if str(w["title"]) != "" else (tr("Monitor") if w["kind"] == "monitor" else str(w["app"]))
-	var l := W.ellipsis(W.label(title))
+	var l := W.ellipsis(W.label(_title(w)))
 	W.content(l)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(l)
@@ -113,7 +156,7 @@ func _tile(s: RefCounted, w: Dictionary) -> Button:
 	b.pressed.connect(func() -> void:
 		feature.open_window(client, id)
 		b.set_pressed_no_signal(true))
-	tiles.append({"button": b, "pc": client, "id": id})
+	tiles.append({"button": b, "pc": client, "id": id, "label": l, "picture": pic})
 	return b
 
 

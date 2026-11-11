@@ -325,6 +325,15 @@ func _test_ui() -> void:
 	_check("Files: a tile opens its pane", m != null)
 	if m != null:
 		pc.close_pane(m)
+	# A title that moves (a terminal's, every second): the tiles stay, only the text changes.
+	var first: Button = place.tiles[0]["button"]
+	var moved: Dictionary = pc.sessions()[0].windows.filter(func(w: Dictionary) -> bool: return w["id"] == place.tiles[0]["id"]).front()
+	moved["title"] = "moved on"
+	pc.changed.emit()
+	await _frames(2)
+	_check("Files: a changed title is set in place, the tiles are not built again", place.tiles.size() == 5
+			and place.tiles[0]["button"] == first and is_instance_valid(first)
+			and (place.tiles[0]["label"] as Label).text == "moved on")
 	place.queue_free()
 	await _frames(2)
 
