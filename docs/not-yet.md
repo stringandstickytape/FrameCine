@@ -18,7 +18,6 @@ yet are in [ideas.md](ideas.md). An entry leaves this list when it is built and 
 |---|---|
 | The terminal at its full size | On the Frame the agents' terminal is 74 x 21 cells again (it was 112 x 32 for an hour, and stuttered). With the engine now copying only what changed, 112 x 32 may be fine: to try, then to choose. |
 | A PC window with no terminal open | The compositor crashes of 2026-11-10 had an agent's terminal showing every time. A PC window alone has not been watched for long since. |
-| The engine change in the public fork | "x11window: the copy path reads and uploads only the damaged box" is on the build machine only. |
 | Speech to text on the graphics chip | `--whisper-backend=vulkan` exists and has not been proven on the headset. It decides whether a bigger speech model is usable. |
 | The agent window's place | It is kept for one run only; its width is kept for good. |
 | Updates: "Later" | Nobody has yet answered Later to an update on the headset and seen that it waits. |
