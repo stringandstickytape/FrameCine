@@ -1237,7 +1237,7 @@ msgstr ""
 msgid "Down"
 msgstr ""
 
-#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/ui_layer.gd:449
+#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/ui_layer.gd:465
 msgid "Assistant"
 msgstr ""
 
@@ -2360,12 +2360,12 @@ msgstr ""
 msgid "%s deleted"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:682 ui/ui_layer.gd:238
-#: ui/ui_layer.gd:419 ui/ui_layer.gd:1056 ui/ui_layer.gd:1060 ui/ui_layer.gd:1094
+#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:682 ui/ui_layer.gd:254
+#: ui/ui_layer.gd:435 ui/ui_layer.gd:1173 ui/ui_layer.gd:1177 ui/ui_layer.gd:1211
 msgid "Undo"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:1024
+#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:1141
 msgid "The headset's cameras can't show here."
 msgstr ""
 
@@ -2664,7 +2664,7 @@ msgstr ""
 msgid "battery %d %%"
 msgstr ""
 
-#: ui/pane_ui.gd:657 ui/pane_ui.gd:696 ui/ui_layer.gd:485
+#: ui/pane_ui.gd:657 ui/pane_ui.gd:696 ui/ui_layer.gd:503
 msgid "Listening"
 msgstr ""
 
@@ -4184,7 +4184,7 @@ msgstr ""
 msgid "Allow for an hour"
 msgstr ""
 
-#: ui/system_tab.gd:381 ui/ui_layer.gd:854
+#: ui/system_tab.gd:381 ui/ui_layer.gd:971
 msgid "Revoke"
 msgstr ""
 
@@ -4299,130 +4299,134 @@ msgstr ""
 msgid "LIVE"
 msgstr ""
 
-#: ui/ui_layer.gd:203
+#: ui/ui_layer.gd:181 ui/ui_layer.gd:473
+msgid "Menu"
+msgstr ""
+
+#: ui/ui_layer.gd:219
 #, c-format
 msgid "Resumed at %s"
 msgstr ""
 
-#: ui/ui_layer.gd:203
+#: ui/ui_layer.gd:219
 msgid "Start over"
 msgstr ""
 
-#: ui/ui_layer.gd:238
+#: ui/ui_layer.gd:254
 #, c-format
 msgid "Remote: %s"
 msgstr ""
 
-#: ui/ui_layer.gd:419 ui/ui_layer.gd:424
+#: ui/ui_layer.gd:435 ui/ui_layer.gd:440
 #, c-format
 msgid "Assistant: %s"
 msgstr ""
 
-#: ui/ui_layer.gd:462
+#: ui/ui_layer.gd:480
 #, c-format
 msgid "Left controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:464
+#: ui/ui_layer.gd:482
 #, c-format
 msgid "Right controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:465
+#: ui/ui_layer.gd:483
 #, c-format
 msgid "Controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:472
+#: ui/ui_layer.gd:490
 #, c-format
 msgid "Left controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:474
+#: ui/ui_layer.gd:492
 #, c-format
 msgid "Right controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:475
+#: ui/ui_layer.gd:493
 #, c-format
 msgid "Controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:854
+#: ui/ui_layer.gd:971
 msgid "Remote changes allowed for an hour"
 msgstr ""
 
-#: ui/ui_layer.gd:867
+#: ui/ui_layer.gd:984
 msgid "Connecting..."
 msgstr ""
 
-#: ui/ui_layer.gd:877
+#: ui/ui_layer.gd:994
 msgid "Starting the browser..."
 msgstr ""
 
-#: ui/ui_layer.gd:891
+#: ui/ui_layer.gd:1008
 msgid "Point at a seat and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:901
+#: ui/ui_layer.gd:1018
 msgid "Seat unchanged"
 msgstr ""
 
-#: ui/ui_layer.gd:970
+#: ui/ui_layer.gd:1087
 msgid "That can't be applied here"
 msgstr ""
 
-#: ui/ui_layer.gd:974
+#: ui/ui_layer.gd:1091
 msgid "Point at a part and pull the trigger. Stick: size and turn the pattern. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:975
+#: ui/ui_layer.gd:1092
 msgid "Point at a part and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:987
+#: ui/ui_layer.gd:1104
 msgid "That object can't be placed here"
 msgstr ""
 
-#: ui/ui_layer.gd:991
+#: ui/ui_layer.gd:1108
 msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:1025
+#: ui/ui_layer.gd:1142
 msgid "That's as many areas as there can be: delete one first."
 msgstr ""
 
-#: ui/ui_layer.gd:1042 ui/ui_layer.gd:1053
+#: ui/ui_layer.gd:1159 ui/ui_layer.gd:1170
 msgid "Nothing marked"
 msgstr ""
 
-#: ui/ui_layer.gd:1056
+#: ui/ui_layer.gd:1173
 #, c-format
 msgid "%s added: the cameras show there"
 msgstr ""
 
-#: ui/ui_layer.gd:1060
+#: ui/ui_layer.gd:1177
 #, c-format
 msgid "%s changed"
 msgstr ""
 
-#: ui/ui_layer.gd:1078
+#: ui/ui_layer.gd:1195
 msgid "Nothing changed"
 msgstr ""
 
-#: ui/ui_layer.gd:1078
+#: ui/ui_layer.gd:1195
 msgid "Nothing placed"
 msgstr ""
 
-#: ui/ui_layer.gd:1097
+#: ui/ui_layer.gd:1214
 msgid "Not placed"
 msgstr ""
 
-#: ui/ui_layer.gd:1111
+#: ui/ui_layer.gd:1228
 msgid "No seat there"
 msgstr ""
 
-#: ui/ui_layer.gd:1113
+#: ui/ui_layer.gd:1230
 msgid "Seat"
 msgstr ""
 

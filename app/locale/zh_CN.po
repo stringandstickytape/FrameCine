@@ -3843,3 +3843,7 @@ msgstr "上"
 
 msgid "Down"
 msgstr "下"
+
+#. The menu surface's title bar (ui/ui_layer.gd).
+msgid "Menu"
+msgstr "菜单"

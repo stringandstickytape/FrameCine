@@ -112,5 +112,11 @@ is done. The others are offered and said to be untried.
 - Owed from step 3: the brief glow when the selection changes while the UI is hidden; B still puts a held object
   back and cancels seat picking; next and previous have no button and no place on a bar yet; `docs/USAGE.md`'s
   control tables still describe the old rules.
-- Until step 4 the menu's own extras (the card, the tablet, placing an object, picking a seat, marking a window)
-  still take the pointer hand whole, as before.
+- **Step 4, done** (not tried on the headset): the menu wears a surface's frame (`menu_frame` in `app/ui/ui_layer.gd`,
+  on the tablet): a title bar as wide as the tablet, with Close. The trigger on the bar selects the menu and moves it
+  (the grabbed point stays under the laser; it turns with the hand and never rolls); a click inside selects it; it
+  glows while selected. Once moved it opens where it was left; Menu held puts it back in front of the head. Its
+  place is not kept across runs.
+- Owed from step 4: the menu's own extras (the card, placing an object, picking a seat, marking a window) still take
+  the pointer hand whole; the menu still has one pointer hand; the glow's blue is a constant in
+  `app/ui/surface_frame.gd`, which `test_pane` flags (it wants a theme token).

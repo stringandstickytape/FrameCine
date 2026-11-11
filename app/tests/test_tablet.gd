@@ -65,6 +65,8 @@ func _run() -> void:
 	layer.on_menu(null, false)
 	_check("menu again: hidden with the panel", not tablet.is_shown() and not layer.is_open())
 
+	await _surface_checks(layer, tablet, head, turned)
+
 	# Two panes: a short now playing one on top, the main one below, a gap between, filling the tablet.
 	var r: Dictionary = Tablet.pane_rects()
 	var np: Rect2 = r["now_playing"]
@@ -469,6 +471,74 @@ func _run() -> void:
 	_check("faded out: hidden", not tablet.visible and float(top_mat.get_shader_parameter("opacity")) < 0.01)
 	print("test_tablet: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	quit(_failures)
+
+
+func _surface_checks(layer: Node, tablet: Tablet, head: Transform3D, turned: Transform3D) -> void:
+	# The menu is a surface like the others (docs/dev/surfaces-design.md, step 4): a frame with a title bar and Close,
+	# moved by the bar, left where it is put, and put back in front of the head by a held Menu press.
+	var frame: Node3D = layer.menu_frame
+	_check("the menu's frame is hidden with it", not frame.shown)
+	main.camera.global_transform = head
+	layer.on_menu(null, true)
+	layer.on_menu(null, false)
+	await _frames(2)
+	_check("open: its frame shows, as wide as the tablet", frame.shown and frame.content_size == Tablet.SIZE
+			and frame.title == "Menu")
+	var bar_y: float = frame.content_size.y / 2.0 + frame.bar_height() / 2.0
+	var bar_at: Vector3 = frame.global_transform * Vector3(-0.1, bar_y, 0.0)
+	var eye := head.origin
+	var frame_ray: Dictionary = layer.point_hit(layer.pointer_hand, eye, (bar_at - eye).normalized())
+	if main.use_xr:
+		_check("a ray at the bar finds the frame's bar", frame_ray.get("what") == "frame" and frame_ray.get("part") == "bar")
+	var close_at: Vector3 = frame.global_transform * Vector3(frame.content_size.x / 2.0 - frame.bar_height(), bar_y, 0.0)
+	_check("the frame's parts: the bar, Close at its right end",
+			frame.hit(Vector2(-0.1, bar_y)).get("part") == "bar" and frame.hit(Vector2(frame.content_size.x / 2.0 - frame.bar_height(), bar_y)).get("part") == "close")
+	# Taken by the bar: it follows the hand, the grabbed point stays under the ray, and it does not roll.
+	var holder: Node3D = load("res://scripts/xr/xr_hand.gd").new()
+	main.add_child(holder)
+	holder.global_position = eye
+	holder.look_at(bar_at, Vector3.UP)
+	layer.pointer_hand = holder
+	layer._frame_hit = {"what": "frame", "part": "bar", "point": bar_at, "distance": eye.distance_to(bar_at)}
+	var stood: Vector3 = tablet.global_position
+	_check("the trigger on the bar takes the menu", layer._frame_trigger(holder, true) and layer.point_holds(holder))
+	layer._update_frame()
+	_check("taken off its middle, it does not jump (%.4f m)" % tablet.global_position.distance_to(stood),
+			tablet.global_position.distance_to(stood) < 0.002)
+	_check("the menu is the selected surface, and glows", main.pointing.selected == tablet)
+	holder.global_position += Vector3(0.2, 0.1, 0.0)
+	layer._update_frame()
+	_check("it follows the hand", tablet.global_position.distance_to(stood + Vector3(0.2, 0.1, 0.0)) < 0.03)
+	_check("it does not roll", absf(tablet.global_basis.x.y) < 0.001)
+	_check("the menu's panel goes with it", layer.panel.global_transform.is_equal_approx(tablet.panel_transform()))
+	_check("the release lets go", layer._frame_trigger(holder, false) and not layer.point_holds(holder))
+	var put: Transform3D = tablet.global_transform
+	layer.on_menu(null, true)
+	layer.on_menu(null, false)
+	await _frames(1)
+	main.camera.global_transform = turned
+	layer.on_menu(null, true)
+	layer.on_menu(null, false)
+	await _frames(2)
+	_check("closed and opened: it is where it was put, not in front of the head", layer.is_open()
+			and tablet.global_transform.is_equal_approx(put))
+	# Menu held: back in front of the head.
+	layer.on_menu(null, true)
+	layer._process(float(layer.layout_value("recentre_hold")) + 0.1)
+	layer.on_menu(null, false)
+	await _frames(1)
+	_check("Menu held: back in front of the head, and open", layer.is_open()
+			and tablet.global_transform.is_equal_approx(Tablet.pose(turned)))
+	# Close on the bar closes it; X hides the frame with the menu.
+	layer._frame_hit = {"what": "frame", "part": "close", "distance": 0.5}
+	layer._frame_trigger(holder, true)
+	layer._frame_trigger(holder, false)
+	_check("Close closes the menu and deselects it", not layer.is_open() and not frame.shown and main.pointing.selected == null)
+	layer._frame_hit = {}
+	layer.pointer_hand = null
+	holder.queue_free()
+	main.camera.global_transform = head
+	await _frames(1)
 
 
 func _frames(n: int) -> void:

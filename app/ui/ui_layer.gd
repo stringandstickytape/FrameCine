@@ -51,6 +51,7 @@ const Assistant := preload("res://scripts/assistant/assistant.gd")
 const I18n := preload("res://scripts/i18n.gd")
 const Intro := preload("res://ui/intro.gd")
 const FloatingKeyboard := preload("res://keyboard/floating_keyboard.gd")
+const SurfaceFrame := preload("res://ui/surface_frame.gd")
 var keyboard: FloatingKeyboard
 ## The header lists the controller batteries at or below this.
 const CONTROLLER_BATTERY_HEADER := 20
@@ -90,6 +91,14 @@ var docked: bool:
 ## The menu button's press and hold (the hold from the settings, apply_layout()).
 var menu := PanePose.MenuPress.new()
 var _open := false
+## The menu is a surface like the others (docs/dev/surfaces-design.md, step 4): its frame (title bar, Close, the glow
+## while it is the selected one), on the tablet; the pointer's hit on that frame; the hand that has it by the bar
+## ({} or {hand, distance, rel, at}); and whether the user has put it somewhere. Placed, it opens where it was left;
+## a held Menu press puts it back in front of the head.
+var menu_frame: SurfaceFrame
+var _frame_hit := {}
+var _menu_hold := {}
+var _placed := false
 ## The left_handed value the pointer was last set from (a change picks the pointer again).
 var _left_handed_applied: Variant = null
 var _pointed := false
@@ -164,6 +173,13 @@ func setup(p_app: Node3D) -> void:
 	tablet.name = "Tablet"
 	tablet.app = app
 	add_child(tablet)
+	menu_frame = SurfaceFrame.new()
+	menu_frame.name = "Frame"
+	tablet.add_child(menu_frame)
+	menu_frame.set_content_size(Tablet.SIZE)
+	menu_frame.position = Vector3(0.0, Tablet.TOP_EDGE - Tablet.SIZE.y * 0.5, 0.0)
+	menu_frame.set_title(tr("Menu"))
+	menu_frame.set_shown(false)
 	apply_layout()
 	tablet.layout_changed.connect(apply_tablet)
 	apply_tablet()
@@ -453,6 +469,8 @@ func _update_header_extra() -> void:
 ## The language changed (scripts/i18n.gd): the header's extra items in it.
 func _on_language_changed(_code: String) -> void:
 	_update_header_extra()
+	if menu_frame != null:
+		menu_frame.set_title(tr("Menu"))
 
 
 ## "Left controller battery 14 %" (a notice), whole sentences per side (docs/i18n.md).
@@ -510,18 +528,26 @@ func apply_tablet() -> void:
 	ui.set_tablet_theme(menu_theme)
 	PaneStyle.set_active(menu_theme)
 	ui.set_text_scale(tablet.panel_text_scale() * float(app.features.access.get_value("ui_scale")))
-	if _open:
+	if _open and not _placed:
 		recentre()
+	elif _open:
+		panel.global_transform = tablet.panel_transform()
 
 
-## Opens the panel in front of the head (the menu button; at launch; at the end of a file). Already open: brings it
-## back in front (a recentre). hand: the new pointer (null: keep the current one).
+## Opens the panel (the menu button; at launch; at the end of a file): in front of the head, or where the user left it
+## once they have moved it by its bar (_placed). Already open and not placed: brings it back in front (a recentre).
+## hand: the new pointer (null: keep the current one).
 func show_panel(hand: XRHand = null) -> void:
 	set_pointer_hand(hand)
 	var was_open := _open
 	_open = true
+	var kept := tablet.global_transform
 	tablet.show_at(_head())
-	recentre(was_open)
+	if _placed:
+		tablet.global_transform = kept
+		panel.global_transform = tablet.panel_transform()
+	else:
+		recentre(was_open)
 	if app.get("_frames") != null and int(app.get("_frames")) < 10:
 		_replace_left = LAUNCH_REPLACE_SECONDS
 	panel.fade_to(1.0)
@@ -539,6 +565,11 @@ func hide_panel() -> void:
 	if not _open:
 		return
 	_open = false
+	_menu_hold = {}
+	_frame_hit = {}
+	menu_frame.set_shown(false)
+	if _pointing() != null and _pointing().selected == tablet:
+		_pointing().select(null)
 	panel.fade_to(0.0)
 	tablet.hide_tablet()
 	var focus := panel.focus_owner()
@@ -601,14 +632,18 @@ func _process(delta: float) -> void:
 	if keyboard != null:
 		keyboard.step(delta)
 	if menu.step(delta) == "recentre":
+		# The held press: back in front of the head, wherever it was put.
+		_placed = false
+		_menu_hold = {}
 		show_panel(menu.hand as XRHand)
 		if menu.hand != null:
 			(menu.hand as XRHand).pulse()
 	if _replace_left > 0.0:
 		_replace_left -= delta
-		if _open:
+		if _open and not _placed:
 			recentre(false)
 	_take_over_pointer()
+	_update_frame()
 	_update_pointer()
 	_update_poke()
 	_update_grip_hold(delta)
@@ -653,6 +688,8 @@ func _update_pointer() -> void:
 	_card_pointed = not card_hit.is_empty()
 	_card_hit = card_hit
 	_tablet_hit = mine if what == "tablet" else {}
+	_frame_hit = mine if what == "frame" else {}
+	menu_frame.hover = str(_frame_hit.get("part", "")) if _menu_hold.is_empty() else "bar"
 	# A grab with the trigger held (the bar, a list): it follows the laser on the tablet's plane, on or off it.
 	if _scrub_by == "trigger" and _scrub_hand == pointer_hand and tablet.is_grabbing():
 		var at: Variant = tablet.plane_point(pointer_hand.get_ray_origin(), pointer_hand.get_ray_direction())
@@ -664,7 +701,13 @@ func _update_pointer() -> void:
 	if not _tablet_hit.is_empty():
 		card_hit = _tablet_hit
 		_card_pointed = false
-	var laser_on := _pointed or _card_pointed or not _tablet_hit.is_empty()
+	if not _frame_hit.is_empty():
+		card_hit = _frame_hit
+		_card_pointed = false
+	if not _menu_hold.is_empty() and _menu_hold["hand"] == pointer_hand:
+		card_hit = {"distance": float(_menu_hold["distance"])}
+	var laser_on: bool = _pointed or _card_pointed or not _tablet_hit.is_empty() or not _frame_hit.is_empty() \
+			or (not _menu_hold.is_empty() and _menu_hold["hand"] == pointer_hand)
 	if not (_seat_pick and not laser_on) and seat_ring_shown():
 		_seat_ring.visible = false
 	if not is_marking_window() and hand_hint != null and hand_hint.visible:
@@ -689,7 +732,7 @@ func _update_pointer() -> void:
 		_show_seat_ring(_seat_aim)
 	elif _grab_owns(pointer_hand) and not laser_on:
 		pass  # aimed at an object, or holding one on the laser: the grab draws it (scripts/play/object_grab.gd)
-	elif not app.window_pointer_owns(pointer_hand) or _card_pointed or not _tablet_hit.is_empty():
+	elif not app.window_pointer_owns(pointer_hand) or _card_pointed or not _tablet_hit.is_empty() or not _frame_hit.is_empty():
 		pointer_hand.set_laser(laser_on, float((hit if _pointed else card_hit).get("distance", 3.0)), laser_on,
 				PaneStyle.color(&"laser"), PaneStyle.color(&"laser_dot"))
 	if other_hand != null and not app.window_pointer_owns(other_hand) and not _grab_owns(other_hand):
@@ -706,6 +749,17 @@ func _update_pointer() -> void:
 func point_hit(hand: Object, origin: Vector3, direction: Vector3) -> Dictionary:
 	if hand != pointer_hand or not app.use_xr or not pointer_hand.get_is_active():
 		return {}
+	# The menu's frame first: its bar lies over the tablet's top edge.
+	if _open and menu_frame.shown:
+		var at: Variant = tablet.plane_point(origin, direction)
+		if at != null:
+			var local: Vector3 = menu_frame.global_transform.affine_inverse() * (at as Vector3)
+			var part: Dictionary = menu_frame.hit(Vector2(local.x, local.y))
+			if not part.is_empty():
+				part["what"] = "frame"
+				part["point"] = at
+				part["distance"] = (at as Vector3).distance_to(origin)
+				return part
 	var h: Dictionary = panel.ray_hit(origin, direction) if _open else {}
 	var what := "panel"
 	if h.is_empty():
@@ -727,7 +781,70 @@ func point_hit(hand: Object, origin: Vector3, direction: Vector3) -> Dictionary:
 func point_holds(hand: Object) -> bool:
 	if _seat_pick or is_placing_object() or is_marking_window():
 		return true
-	return hand == pointer_hand and (panel.is_pressed() or _scrub_hand == hand)
+	return hand == pointer_hand and (panel.is_pressed() or _scrub_hand == hand
+			or (not _menu_hold.is_empty() and _menu_hold["hand"] == hand))
+
+
+## The app's pointing layer (scripts/pointing/pointing.gd), or null (a test's stand-in app).
+func _pointing() -> Pointing:
+	return app.get("pointing") as Pointing if app != null else null
+
+
+## The menu's frame, each frame: shown with the menu while the UI is shown, glowing while the menu is the selected
+## surface; and the menu following the hand that has it by its bar. The point of the bar that was taken stays under
+## the laser; the menu turns with the hand but never rolls.
+func _update_frame() -> void:
+	var p := _pointing()
+	var shown := _open and (p == null or p.ui_shown)
+	if menu_frame.shown != shown:
+		menu_frame.set_shown(shown)
+	menu_frame.set_state(false, p != null and p.selected == tablet)
+	if _menu_hold.is_empty():
+		return
+	var hand: XRHand = _menu_hold["hand"]
+	if not _open or not is_instance_valid(hand) or (app.use_xr and not hand.get_is_active()):
+		_menu_hold = {}
+		return
+	var turned: Basis = hand.global_basis.orthonormalized() * (_menu_hold["rel"] as Basis)
+	var face := turned.z.normalized()
+	var right := Vector3.UP.cross(face)
+	right = right.normalized() if right.length() > 0.05 else turned.x.normalized()
+	tablet.global_basis = Basis(right, face.cross(right).normalized(), face)
+	tablet.global_position = hand.get_ray_origin() + hand.get_ray_direction() * float(_menu_hold["distance"]) \
+			- tablet.global_basis * (_menu_hold["at"] as Vector3)
+	panel.global_transform = tablet.panel_transform()
+	_placed = true
+
+
+## The trigger on the menu's frame. The bar: selects the menu and takes hold of it until the trigger comes up. Close
+## closes it.
+func _frame_trigger(hand: XRHand, pressed: bool) -> bool:
+	if not pressed:
+		if not _menu_hold.is_empty() and _menu_hold["hand"] == hand:
+			_menu_hold = {}
+			return true
+		return false
+	if _frame_hit.is_empty():
+		return false
+	match str(_frame_hit.get("part", "")):
+		"bar":
+			_select_menu()
+			var distance := float(_frame_hit["distance"])
+			_menu_hold = {"hand": hand, "distance": distance,
+					"rel": hand.global_basis.orthonormalized().inverse() * tablet.global_basis.orthonormalized(),
+					"at": tablet.global_transform.affine_inverse() * (hand.get_ray_origin() + hand.get_ray_direction() * distance)}
+		"close":
+			hide_panel()
+		_:
+			return false
+	hand.pulse()
+	return true
+
+
+## The menu becomes the selected surface (a click on its bar or inside it).
+func _select_menu() -> void:
+	if _pointing() != null:
+		_pointing().select(tablet)
 
 
 ## This hand's laser is on something that is not the menu's (a window, the terminal, an object): its trigger and stick
@@ -760,7 +877,7 @@ func laser_in_use(hand: XRHand) -> bool:
 	if _seat_pick or is_placing_object() or is_marking_window():
 		return true
 	return hand == pointer_hand and (_pointed or _card_pointed or not _tablet_hit.is_empty() or panel.is_pressed()
-			or _scrub_hand == hand)
+			or _scrub_hand == hand or not _frame_hit.is_empty() or not _menu_hold.is_empty())
 
 
 ## One haptic tick when the pointer moves onto a new target (features.haptics, #32).
@@ -1194,6 +1311,8 @@ func on_trigger(hand: XRHand, pressed: bool) -> bool:
 					rw.next_face()
 					hand.pulse()
 		return true
+	if _frame_trigger(hand, pressed):
+		return true
 	if is_placing_object() and not _pointed and not _card_pointed:
 		if pressed:
 			_commit_object()
@@ -1227,6 +1346,7 @@ func on_trigger(hand: XRHand, pressed: bool) -> bool:
 	if _pointed:
 		panel.pointer_button(_hit["pixel"], pressed)
 		if pressed:
+			_select_menu()
 			hand.pulse()
 		return true
 	if panel.is_pressed() and not pressed:
