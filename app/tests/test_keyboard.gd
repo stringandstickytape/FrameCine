@@ -293,7 +293,24 @@ func _pane() -> void:
 	var hand: Node3D = main.right_hand
 	var other: Node3D = main.left_hand
 	kb.aims[hand] = ray
-	_check("grip takes the keyboard", kb.on_grip(hand, true) and kb.owns_laser(hand))
+	_check("the squeeze does nothing to it", not kb.on_grip(hand, true) and kb._holds.is_empty())
+	kb.on_grip(hand, false)
+	# Its frame: a title bar over the keys, with Close at its right end.
+	var size: Vector2 = kb.frame.content_size
+	var bar_at: Vector3 = pose * Vector3(-size.x * 0.3, size.y / 2.0 + kb.frame.bar_height() / 2.0, 0.0)
+	var bar := kb.hit(bar_at + pose.basis.z, -pose.basis.z)
+	var close_at: Vector3 = pose * Vector3(size.x / 2.0 - kb.frame.bar_height(), size.y / 2.0 + kb.frame.bar_height() / 2.0, 0.0)
+	var close := kb.hit(close_at + pose.basis.z, -pose.basis.z)
+	_check("it has a title bar with Close (%s, %s)" % [bar, close], kb.frame.shown and kb.frame.title != ""
+			and str(bar.get("part", "")) == "bar" and str(close.get("part", "")) == "close")
+	kb.frame.set_shown(false)
+	_check("the chrome hidden: no bar to take", kb.hit(bar_at + pose.basis.z, -pose.basis.z).is_empty())
+	kb.frame.set_shown(true)
+	hand.global_position = bar_at + pose.basis.z
+	hand.look_at(bar_at, Vector3.UP)
+	kb.aims[hand] = kb.hit(hand.get_ray_origin(), hand.get_ray_direction())
+	_check("the trigger on the bar takes the keyboard", kb.on_trigger(hand, true) and kb._holds.has(hand)
+			and kb.owns_laser(hand))
 	kb.on_stick(hand, Vector2.RIGHT, 100)
 	_check("resize clamps at 1.6 m", is_equal_approx(kb.width, Keyboard.MAX_WIDTH))
 	kb.on_stick(hand, Vector2.LEFT, 100)
@@ -304,12 +321,12 @@ func _pane() -> void:
 	var before := kb.global_position
 	kb.step(0.0)
 	# The point it was taken by is on the ray at the captured distance: its middle does not jump to the laser.
-	_check("held pane follows the ray by the point it was taken at", not kb.global_position.is_equal_approx(before)
-			and kb.to_global(kb._holds[hand].at).is_equal_approx(
+	_check("held by the bar: the point taken stays on the ray", true and kb.to_global(kb._holds[hand].at).is_equal_approx(
 			hand.get_ray_origin() + hand.get_ray_direction() * float(kb._holds[hand].distance)))
 	kb.test_xr = false
 	pose = kb.global_transform
-	kb.on_grip(hand, false)
+	_check("the trigger up lets it go", kb.on_trigger(hand, false) and kb._holds.is_empty())
+	kb.aims[hand] = kb.hit(pose.origin + pose.basis.z, -pose.basis.z)
 	_check("pose and size saved in settings", main.settings.has_value("keyboard", "transform")
 			and is_equal_approx(float(main.settings.get_value("keyboard", "width", 0)), kb.width))
 	kb.set_width(0.85)
@@ -355,9 +372,9 @@ func _pane() -> void:
 	kb.on_trigger(hand, false)
 	_check("laser tap keeps held Shift's case", _typed(recorder.events) == "A" and not kb.state.modifier_on(KEY_SHIFT)
 			and not recorder.events[-1].pressed)
-	kb.aims[hand] = {"key": -1, "point": kb.CLOSE.get_center(), "distance": 1.0}
+	kb.aims[hand] = {"key": -1, "part": "close", "distance": 1.0}
 	kb.on_trigger(hand, true)
-	_check("Close box in the bar closes the keyboard", not kb.visible)
+	_check("Close on its title bar closes the keyboard", not kb.visible)
 	kb.on_trigger(hand, false)
 	kb.set_shown(true)
 	_check("no key lies under the bar", kb.state.keys.all(func(k: Dictionary) -> bool: return (k.rect as Rect2).position.y >= 1.0))

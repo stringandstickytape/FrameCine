@@ -804,7 +804,7 @@ func _x_checks(hand: Node) -> void:
 			and fake.keys.is_empty())
 	main.update_controller_labels()
 	var legends: Dictionary = texts.call()
-	_check("the legends are the fixed ones (%s)" % [legends], legends.get("x", "") == "UI"
+	_check("the legends are the fixed ones (%s)" % [legends], not legends.has("x")
 			and legends.get("a", "") == "PLAY / PAUSE" and legends.get("b", "") == "HOLD FOR\nVOICE"
 			and legends.get("trigger", "") == "CLICK")
 	var pane: Node3D = agents.get_node("AgentPane")
@@ -824,7 +824,7 @@ func _x_checks(hand: Node) -> void:
 	await _frames(2)
 	_check("X again shows the frames", pane.frame.shown)
 	main.update_controller_labels()
-	_check("the legends are the same with the pane hidden", (texts.call() as Dictionary).get("x", "") == "UI")
+	_check("the legends are the same with the pane hidden", not (texts.call() as Dictionary).has("x"))
 	# The first start's introduction (ui/intro.gd) not gone through: the terminal takes no keyboard.
 	main.ui.show_intro()
 	await _frames(2)

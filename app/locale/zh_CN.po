@@ -59,14 +59,8 @@ msgstr "点击"
 msgid "SEEK / DIST"
 msgstr "跳转 / 距离"
 
-msgid "SCROLL"
-msgstr "滚动"
-
 msgid "MENU"
 msgstr "菜单"
-
-msgid "CLOSE"
-msgstr "关闭"
 
 msgid "INFO"
 msgstr "信息"
@@ -3834,9 +3828,6 @@ msgstr "Esc"
 #. The controllers' fixed legends (scripts/main.gd CONTROL_LABELS): B, tap for the keyboard, hold to talk; X, the UI.
 msgid "HOLD FOR\nVOICE"
 msgstr "按住：\n语音"
-
-msgid "UI"
-msgstr "界面"
 
 msgid "Up"
 msgstr "上"

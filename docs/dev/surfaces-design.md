@@ -107,7 +107,8 @@ is done. The others are offered and said to be untried.
   still goes where it went before: step 6 makes it dictation to the selected surface). The trigger on nothing does
   nothing. The bumper is no longer push-to-talk. A terminal takes nothing by being looked at, by a waiting prompt or
   by the squeeze: a laser on its picture scrolls its history with the stick, and Enter, Esc, Up and Down are in its
-  side stack. The printed legends are fixed: CLICK, PLAY / PAUSE, HOLD FOR VOICE (above B), UI. The A, B and X caps have pictures in
+  side stack. The printed legends are fixed: CLICK, PLAY / PAUSE, HOLD FOR VOICE (above B), MENU. X has no print (the user: no UI,
+  SCROLL, CLOSE or PUSH: CLOSE legends). The A, B and X caps have pictures in
   place of their letters, as Y has its sparkle: play and pause, a keyboard, a window with its title bar (the user: X is a window chrome button).
 - Owed from step 3: the brief glow when the selection changes while the UI is hidden; B still puts a held object
   back and cancels seat picking; next and previous have no button and no place on a bar yet; `docs/USAGE.md`'s

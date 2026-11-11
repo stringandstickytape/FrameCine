@@ -121,7 +121,7 @@ func _switching() -> void:
 			return b.button_pressed and b.get_meta("language") == "zh_CN"))
 	var legends: Dictionary = main.controller_labels(main.PREVIEW_PROFILE, "right", false)
 	_check("the controller legends in Chinese (%s)" % legends.get("trigger"), legends.get("trigger") == "点击"
-			and legends.values().has("播放 / 暂停") and legends.values().has("按住：\n语音") and legends.values().has("界面"))
+			and legends.values().has("播放 / 暂停") and legends.values().has("按住：\n语音") and not legends.has("x"))
 	_check("a pushed stick says so in Chinese", str(legends.get("thumbstick", "")).contains("按下：菜单"))
 	_check("the header's times in Chinese", main.features.end_text(true) == "" or main.features.end_text(true).contains("结束"))
 	I18n.choose(main.settings, "en")

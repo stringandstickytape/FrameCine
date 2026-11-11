@@ -54,7 +54,7 @@ func _init() -> void:
 				x.append(profile.get_binding(i).binding_path)
 		_check("%s: X on the right is Enter" % path.get_file(), x == ["/user/hand/right/input/x/click"])
 	# X is the UI, shown or hidden; the left has no X.
-	_check("X: the UI", right.get("x") == "UI")
+	_check("X: no print, its cap has the picture", not right.has("x"))
 	var enter: Dictionary = app.controller_labels(HEADSET_PROFILE, "right", false, false, false, false, false, {}, false, true)
 	var enter_menu: Dictionary = app.controller_labels(HEADSET_PROFILE, "right", true, false, false, false, false, {}, false, true)
 	_check("X: ENTER while the terminal shows, the menu open too", enter.get("x") == "ENTER" and enter_menu.get("x") == "ENTER")
@@ -62,7 +62,7 @@ func _init() -> void:
 	_check("left: no X", not app.controller_labels(HEADSET_PROFILE, "left", false, false, false, false, false, {}, false, true).has("x"))
 	_check("X's legend has its place in the layout", ControllerVisual.layout_entry("right", "x").get("line_height", 0.0) > 0.003)
 	var left_menu: Dictionary = app.controller_labels(HEADSET_PROFILE, "left", true)
-	_check("menu shown: the left view button closes", left_menu.get("view") == "CLOSE")
+	_check("menu shown: the left view button is still MENU", left_menu.get("view") == "MENU")
 	# Every profile with a menu action has one on each hand, so one controller is enough.
 	for profile: String in [HEADSET_PROFILE, "/interaction_profiles/khr/generic_controller",
 			"/interaction_profiles/valve/index_controller", "/interaction_profiles/oculus/touch_controller",
@@ -76,8 +76,9 @@ func _init() -> void:
 			_check("%s %s: a menu input" % [profile.get_file(), side], has_menu)
 	var right_menu: Dictionary = app.controller_labels(HEADSET_PROFILE, "right", true)
 	_check("menu shown: trigger clicks", right_menu.get("trigger") == "CLICK")
-	_check("menu shown: menu closes", right_menu.get("menu") == "CLOSE")
-	_check("menu shown: stick scrolls", str(right_menu.get("thumbstick", "")).begins_with("SCROLL"))
+	_check("menu shown: the menu button is still MENU", right_menu.get("menu") == "MENU")
+	_check("menu shown: no SCROLL, no PUSH: CLOSE (%s)" % [right_menu.get("thumbstick", "")],
+			not str(right_menu.get("thumbstick", "")).contains("SCROLL") and not str(right_menu.get("thumbstick", "")).contains("CLOSE"))
 	var touch_left: Dictionary = app.controller_labels("/interaction_profiles/oculus/touch_controller", "left", false)
 	_check("third-party profile left X / Y / menu", touch_left.get("x") == "PLAY / PAUSE" and touch_left.get("y") == "HOLD FOR\nVOICE"
 			and touch_left.get("menu") == "MENU")

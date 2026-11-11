@@ -1,4 +1,6 @@
-## A world-locked keyboard, made by ui_layer.gd, with the same grip and stick rules as a PC pane. Both hands can
+## A world-locked keyboard, made by ui_layer.gd: a pane like the others (docs/dev/surfaces-design.md), with a title
+## bar and Close (ui/surface_frame.gd) while the windows' chrome is shown. The trigger on the bar takes it and moves
+## it; the squeeze does nothing. It is not a surface to select: it types into the selected one. Both hands can
 ## aim and poke independently. A key goes down when the trigger or the tip does, and up when it leaves. The ordinary
 ## picture contains only the panel and the legends; typed content stays in the target and is never included in
 ## status or dev events. Closing, losing tracking or losing the XR session releases every key.
@@ -10,6 +12,7 @@ const Layout := preload("res://keyboard/key_layout.gd")
 const Router := preload("res://keyboard/keyboard_router.gd")
 const State := preload("res://keyboard/key_state.gd")
 const Surface := preload("res://keyboard/keyboard_surface.gd")
+const SurfaceFrame := preload("res://ui/surface_frame.gd")
 const Style := preload("res://ui/pane_style.gd")
 const VideoScreen := preload("res://scripts/video_screen.gd")
 const Commands := preload("res://scripts/dev/dev_commands.gd")
@@ -17,13 +20,12 @@ const MIN_WIDTH := 0.35
 const MAX_WIDTH := 1.6
 const POKE_DOWN := -0.006
 const POKE_UP := 0.012
-## The Close box in the bar, in key units.
-const CLOSE := Rect2(20.5, 0.17, 2.3, 0.66)
 var app: Node
 var router := Router.new()
 var state := State.new()
 var width := 0.85
 var aims := {}
+var frame: SurfaceFrame
 var _viewport: SubViewport
 var _surface: Control
 var _mesh: MeshInstance3D
@@ -93,6 +95,10 @@ func setup(p_app: Node) -> void:
 	_light_mesh.set_layer_mask_value(VideoScreen.PRIVATE_LAYER, true)
 	_light_mesh.position.z = 0.001
 	add_child(_light_mesh)
+	frame = SurfaceFrame.new()
+	frame.name = "Frame"
+	add_child(frame)
+	frame.set_title(tr("Keyboard"))
 	set_width(width)
 	if app.get("pointing") is Pointing:
 		app.pointing.add(self)
@@ -111,6 +117,8 @@ func set_shown(on: bool) -> void:
 	elif not _placed:
 		recentre()
 	visible = on
+	if on and frame != null:
+		frame.set_title(tr("Keyboard"))
 	if _viewport != null:
 		_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 		_light_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
@@ -135,6 +143,8 @@ func set_width(value: float) -> void:
 	if _mesh != null:
 		(_mesh.mesh as QuadMesh).size = Vector2(width, width * Layout.SIZE.y / Layout.SIZE.x)
 		(_light_mesh.mesh as QuadMesh).size = (_mesh.mesh as QuadMesh).size
+	if frame != null:
+		frame.set_content_size(Vector2(width, width * Layout.SIZE.y / Layout.SIZE.x))
 
 
 func _save() -> void:
@@ -143,7 +153,8 @@ func _save() -> void:
 		app.settings.set_value("keyboard", "width", width)
 
 
-## Face +Z, like pc_pane.gd. A hit on an empty gap or the bar still owns the laser and can be grabbed.
+## Face +Z, like pc_pane.gd. A hit on its frame's bar or Close has "part"; one on the keys has "point" and "key" (a gap
+## between keys still owns the laser).
 func hit(origin: Vector3, direction: Vector3) -> Dictionary:
 	if not visible:
 		return {}
@@ -154,6 +165,11 @@ func hit(origin: Vector3, direction: Vector3) -> Dictionary:
 		return {}
 	var t := -o.z / d.z
 	var p := o + d * t
+	var part: Dictionary = frame.hit(Vector2(p.x, p.y)) if frame != null else {}
+	if not part.is_empty():
+		part["key"] = -1
+		part["distance"] = origin.distance_to(global_transform * p)
+		return part
 	var point := Vector2(p.x / width * Layout.SIZE.x + Layout.SIZE.x / 2.0,
 			Layout.SIZE.y / 2.0 - p.y / width * Layout.SIZE.x)
 	if not Rect2(Vector2.ZERO, Layout.SIZE).has_point(point):
@@ -190,6 +206,10 @@ func step(delta: float) -> void:
 		cancel()
 		return
 	state.step(delta)
+	var chrome: bool = not (app.get("pointing") is Pointing) or app.pointing.ui_shown
+	if frame.shown != chrome:
+		frame.set_shown(chrome)
+	var on_part := ""
 	for hand: Node in app.hands:
 		if not (app.use_xr or test_xr) or not (hand.get_is_active() or test_xr):
 			_release_hand(hand)
@@ -208,6 +228,8 @@ func step(delta: float) -> void:
 			aims.erase(hand)
 		else:
 			aims[hand] = h
+			if h.has("part"):
+				on_part = str(h["part"])
 		_poke(hand, controller_tip(hand))
 		var on := owns_laser(hand)
 		if on:
@@ -215,6 +237,7 @@ func step(delta: float) -> void:
 		elif bool(_lit.get(hand, false)):
 			hand.set_laser(false)
 		_lit[hand] = on
+	frame.hover = "bar" if not _holds.is_empty() else on_part
 	_redraw()
 
 
@@ -241,7 +264,13 @@ func _redraw() -> void:
 	_light_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
+## The trigger: a key goes down; on the frame's bar it takes the keyboard until the trigger comes up (the point taken
+## stays under the laser); Close closes it.
 func on_trigger(hand: Node, down: bool) -> bool:
+	if not down and _holds.has(hand):
+		_holds.erase(hand)
+		_save()
+		return true
 	if not down and state.held.has(hand):
 		state.release(hand)
 		return true
@@ -249,30 +278,26 @@ func on_trigger(hand: Node, down: bool) -> bool:
 	if h.is_empty() or not visible:
 		return false
 	if down and not _holds.has(hand):
-		if CLOSE.has_point(h.point):
-			set_shown(false)
-		elif int(h.key) >= 0:
-			state.press(hand, int(h.key))
+		match str(h.get("part", "")):
+			"close":
+				set_shown(false)
+			"bar":
+				if _holds.is_empty():
+					var distance := float(h.distance)
+					_release_hand(hand)
+					_holds[hand] = {"distance": distance,
+							"rel": hand.global_basis.orthonormalized().inverse() * global_basis,
+							"at": global_transform.affine_inverse() * (hand.get_ray_origin() + hand.get_ray_direction() * distance)}
+			_:
+				if int(h.key) >= 0:
+					state.press(hand, int(h.key))
 		_pulse(hand, false)
 	return true
 
 
-func on_grip(hand: Node, down: bool) -> bool:
-	if not down:
-		if _holds.has(hand):
-			_holds.erase(hand)
-			_save()
-			return true
-		return false
-	var h: Dictionary = aims.get(hand, {})
-	if h.is_empty() or not visible:
-		return false
-	if not _holds.is_empty():
-		return true
-	_release_hand(hand)
-	_holds[hand] = {"distance": h.distance, "rel": hand.global_basis.orthonormalized().inverse() * global_basis,
-			"at": global_transform.affine_inverse() * (hand.get_ray_origin() + hand.get_ray_direction() * float(h.distance))}
-	return true
+## The squeeze does nothing to the keyboard now: its title bar moves it (on_trigger()).
+func on_grip(_hand: Node, _down: bool) -> bool:
+	return false
 
 
 func on_stick(hand: Node, stick: Vector2, delta: float) -> bool:
@@ -303,16 +328,11 @@ func _poke(hand: Node, world_tip: Vector3) -> void:
 			or _pokes.values().has(index) or state.held.has(hand):
 		return
 	_pokes[hand] = index
-	if index == -2:
-		set_shown(false)
-	else:
-		state.press("poke%d" % hand.get_instance_id(), index)
+	state.press("poke%d" % hand.get_instance_id(), index)
 	_pulse(hand, true)
 
 
 func _touch_at(point: Vector2) -> int:
-	if CLOSE.has_point(point):
-		return -2
 	return key_at(point)
 
 

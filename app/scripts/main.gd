@@ -155,10 +155,12 @@ const OVERLAY_SCALE_PER_METRE := 0.9
 const CONTROL_LABELS := {
 	"trigger": ["CLICK", "CLICK"],
 	"squeeze": ["", ""],
-	"thumbstick": ["SEEK / DIST", "SCROLL"],
-	"menu": ["MENU", "CLOSE"],
+	# The user, in the headset, 2026-11-11: no SCROLL, CLOSE or PUSH: CLOSE with the menu open, and no UI on X (its
+	# cap has the picture). The menu's legends are the same open or closed.
+	"thumbstick": ["SEEK / DIST", ""],
+	"menu": ["MENU", "MENU"],
 	# The right stick click on the headset's own controllers: the menu, except on an image in the browser (below).
-	"stick_click": ["MENU", "CLOSE"],
+	"stick_click": ["MENU", "MENU"],
 	"overlay": ["INFO", "INFO"],
 	# A and B on the headset's controllers: fixed meanings (docs/dev/surfaces-design.md). B: tap for the keyboard,
 	# hold to talk.
@@ -170,8 +172,8 @@ const CONTROL_LABELS := {
 	"chapter_prev": ["CHAPTER -", "CHAPTER -"],
 	"chapter_next": ["CHAPTER +", "CHAPTER +"],
 	"replay": ["REPLAY", "REPLAY"],
-	# X: the UI, shown or hidden.
-	"enter": ["UI", "UI"],
+	# X: the windows' chrome, shown or hidden. No print: its cap has the picture.
+	"enter": ["", ""],
 }
 ## X's legend while an agent's terminal shows (scripts/agents/local_agents.gd enter_ready()), menu open or not.
 const ENTER_LABEL := "ENTER"

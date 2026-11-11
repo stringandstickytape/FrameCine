@@ -2,7 +2,7 @@
 
 Open **System → Keyboard** in the menu. It is a full 104-key ANSI US keyboard in its own window, below and in
 front of you, tilted towards your head. Its legends stay in US English whatever language the menu uses. The small
-keyboard inside a menu form is still available too. Close on the keyboard's top bar hides the floating one.
+keyboard inside a menu form is still available too. Close on the keyboard's title bar (shown with the windows' chrome, X) hides the floating one, as a tap of B does.
 
 The bar says where typing will go: a focused text field in the menu first, then a focused PC window, then a showing
 terminal, then the browser on the big screen. With no target it says **Nothing to type into**. Looking down at the

@@ -24,7 +24,6 @@ func _draw() -> void:
 		draw_style_box(_ground(theme), Rect2(Vector2.ZERO, Layout.SIZE * UNIT))
 		draw_string(font, Vector2(25, 50 + font.get_ascent(font_size) / 2.0 - 4), keyboard.router.target_name(),
 				HORIZONTAL_ALIGNMENT_LEFT, 1900, font_size, Style.color(&"muted"))
-		_box(keyboard.CLOSE, tr("Close"), &"normal", font, font_size)
 	for i in keyboard.state.keys.size():
 		var k: Dictionary = keyboard.state.keys[i]
 		var code := int(k.code)
