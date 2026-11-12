@@ -122,8 +122,8 @@ is done. The others are offered and said to be untried.
   trigger on the bar moves it; the squeeze does nothing to it; the Close box in its own picture is gone.
 - **Step 5, done** (not tried on the headset): `app/scripts/screen_surface.gd`. The flat film screen wears a frame
   with the chrome: a title bar with what is playing, no Close, and a side stack (Previous and Next for a film; Back
-  for a browser or an Android app). The trigger on its bar selects it and moves it, in the room's terms, the point
-  taken staying under the laser. A film's picture answers no ray, so no laser is drawn over a film. A captured
+  for a browser or an Android app). The trigger on its bar selects it and does not move it: the big screen is the exception to
+  the rule that a bar moves its surface (the user, in the headset). A film's picture answers no ray, so no laser is drawn over a film. A captured
   window on the screen takes the laser as its pointer, with either hand (the right first): the trigger is the left
   button there, the stick scrolls, a squeeze tap is the right button. The gaze-chosen stick cursor, the
   "Laser on the browser" setting and the window's own legends are gone. Dictation into a page is for the selected
@@ -134,7 +134,7 @@ is done. The others are offered and said to be untried.
 - Owed from step 5: KEEP PICTURE is no longer printed on the stick while the laser is on an image (the legends are
   fixed); `WINDOW_LABELS` and the other per-mode legend tables in `main.gd` are unused and to be removed with the
   `docs/USAGE.md` rewrite; a paired keyboard still goes to a window on the big screen whenever the menu is hidden,
-  selected or not; the screen's place is saved per room as before, the bar only adds a way to move it.
+  selected or not.
 - Owed from step 4: the menu's own extras (the card, placing an object, picking a seat, marking a window) still take
   the pointer hand whole; the menu still has one pointer hand; the glow's blue is a constant in
   `app/ui/surface_frame.gd`, which `test_pane` flags (it wants a theme token).

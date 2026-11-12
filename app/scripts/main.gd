@@ -1324,7 +1324,7 @@ func _on_trigger(hand: XRController3D, pressed: bool) -> void:
 		return
 	if local_agents.on_trigger(hand, pressed):
 		return
-	# On the film screen or its frame: selects it, takes it by the bar, clicks a window on it (screen_surface.gd).
+	# On the film screen or its frame: selects it, clicks a window on it (screen_surface.gd).
 	if screen_surface.on_trigger(hand, pressed):
 		return
 	# Grip held + trigger in 180 / 360: the zoom lens (scripts/play/zoom_lens.gd, ideas #38).
@@ -1370,17 +1370,6 @@ func _on_grip(hand: XRController3D, pressed: bool) -> void:
 		_grip_down.erase(h)
 
 
-## The screen taken by its title bar (scripts/screen_surface.gd): it follows the hand's ray until end_screen_drag(),
-## with the point of the bar that was taken (at this distance along the ray) staying under the laser.
-func start_screen_drag(hand: XRHand, distance: float) -> void:
-	_start_grab(func() -> Array: return [hand.get_ray_origin(), hand.get_ray_direction()], hand, distance)
-
-
-func end_screen_drag() -> void:
-	if not _grab.is_empty():
-		_end_grab()
-
-
 ## The hand's ray as a turn about the vertical, in the XR origin's own space (so that turning the origin does not feed
 ## back into it); null when it points too steeply up or down to have one.
 func _hand_yaw(hand: XRHand) -> Variant:
@@ -1412,20 +1401,10 @@ func turn_view(by: float) -> void:
 			* Transform3D(Basis.IDENTITY, -c) * xr_origin.global_transform
 
 
-## at: the distance along the ray of the point taken (the bar); 0: the screen's middle goes to the ray.
-func _start_grab(ray: Callable, hand: XRHand, at := 0.0) -> void:
+func _start_grab(ray: Callable, hand: XRHand) -> void:
 	var r: Array = ray.call()
 	_grab = {"ray": ray, "hand": hand, "distance": maxf((r[0] as Vector3).distance_to(screen.global_position), 0.5),
-			"yaw": _ray_yaw(r[1]), "start_dir": r[1], "start_msec": Time.get_ticks_msec(),
-			"d_yaw": 0.0, "d_distance": 0.0, "d_height": 0.0}
-	if at > 0.0:
-		# What the screen's place is, less what the taken point's would be: kept while it is held.
-		var p: Vector3 = (r[0] as Vector3) + (r[1] as Vector3) * at - room_shift
-		_grab["distance"] = at
-		_grab["start_msec"] = 0
-		_grab["d_yaw"] = wrapf(screen_yaw - atan2(p.x, -p.z), -PI, PI)
-		_grab["d_distance"] = screen_distance - Vector2(p.x, p.z).length()
-		_grab["d_height"] = screen_height_offset - (p.y - eye_height)
+			"yaw": _ray_yaw(r[1]), "start_dir": r[1], "start_msec": Time.get_ticks_msec()}
 
 
 func _end_grab() -> void:
@@ -1460,9 +1439,9 @@ func _update_grab(delta: float) -> void:
 		elif absf(stick.y) > 0.25:
 			_grab["distance"] = clampf(float(_grab["distance"]) * (1.0 + stick.y * delta * 1.5), 0.5, 30.0)
 	var p := origin + dir * float(_grab["distance"]) - room_shift
-	screen_yaw = atan2(p.x, -p.z) + float(_grab.get("d_yaw", 0.0))
-	screen_distance = clampf(Vector2(p.x, p.z).length() + float(_grab.get("d_distance", 0.0)), 0.5, 30.0)
-	screen_height_offset = clampf(p.y - eye_height + float(_grab.get("d_height", 0.0)), -3.0, 6.0)
+	screen_yaw = atan2(p.x, -p.z)
+	screen_distance = clampf(Vector2(p.x, p.z).length(), 0.5, 30.0)
+	screen_height_offset = clampf(p.y - eye_height, -3.0, 6.0)
 	_place_screen()
 	screen_changed.emit(screen_width, screen_distance, screen_height_offset)
 

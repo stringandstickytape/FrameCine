@@ -5,9 +5,8 @@ extends Node
 ## while the windows' chrome is shown: a title bar with what is playing, and a side stack with Previous and Next (a
 ## browser or an Android app on the screen: Back). There is no Close: the screen is always there.
 ##
-##   The trigger on the bar selects the screen and takes it: it follows the hand, in the room's terms (main.gd's
-##   screen placement: the stick meanwhile makes it bigger or smaller, further or nearer), and the point taken stays
-##   under the laser.
+##   The trigger on the bar selects the screen, and that is all: the big screen is the one surface its bar does not
+##   move (the user, in the headset, 2026-11-12: the exception to the rule). The Room and Picture controls place it.
 ##   A captured window on the screen (the browser, an Android app, a terminal): the trigger on the picture selects
 ##   the screen and is the left button at the laser's pixel (scripts/window_pointer.gd). The laser is the pointer, and
 ##   where the viewer looks changes nothing.
@@ -29,7 +28,6 @@ var aims := {}
 ## Tests: hands count without an XR session.
 var test_xr := false
 var _lit := {}
-var _drag: Object = null
 var _stack := ""
 
 
@@ -49,9 +47,9 @@ func window() -> WindowVideoSource:
 	return src if src != null and src.has_frame() else null
 
 
-## This hand's laser is the screen's: it is on it, or it has it by the bar.
+## This hand's laser is the screen's: it is on it.
 func has_hand(hand: Object) -> bool:
-	return aims.has(hand) or _drag == hand
+	return aims.has(hand)
 
 
 func point_hit(_hand: Object, origin: Vector3, direction: Vector3) -> Dictionary:
@@ -79,7 +77,7 @@ func point_hit(_hand: Object, origin: Vector3, direction: Vector3) -> Dictionary
 
 
 func point_holds(hand: Object) -> bool:
-	return _drag == hand or bool(main.window_pointer.holds(hand))
+	return bool(main.window_pointer.holds(hand))
 
 
 func _process(_delta: float) -> void:
@@ -104,8 +102,6 @@ func step() -> void:
 	if frame.shown != chrome:
 		frame.set_shown(chrome)
 	frame.set_state(false, main.pointing.selected == main.screen)
-	if _drag != null and (not on or not is_instance_valid(_drag)):
-		_end_drag()
 	var hover := ""
 	for hand: Node in main.hands:
 		var tracked: bool = (main.use_xr and hand.get_is_active()) or test_xr
@@ -122,7 +118,7 @@ func step() -> void:
 		elif bool(_lit.get(hand, false)):
 			hand.set_laser(false)
 		_lit[hand] = lit
-	frame.hover = "bar" if _drag != null else hover
+	frame.hover = hover
 
 
 ## The side stack for what is on the screen: a window has Back, a film has Previous and Next.
@@ -144,9 +140,6 @@ func _set_stack() -> void:
 ## The trigger on the screen or its frame. True when used.
 func on_trigger(hand: Node, pressed: bool) -> bool:
 	if not pressed:
-		if _drag == hand:
-			_end_drag()
-			return true
 		return bool(main.window_pointer.on_trigger(hand, false))
 	var aim: Dictionary = aims.get(hand, {})
 	if aim.is_empty():
@@ -155,9 +148,6 @@ func on_trigger(hand: Node, pressed: bool) -> bool:
 		match str(aim["part"]):
 			"bar":
 				main.pointing.select(main.screen)
-				if _drag == null:
-					_drag = hand
-					main.start_screen_drag(hand, float(aim["distance"]))
 			"button":
 				_press(str(aim.get("id", "")))
 			_:
@@ -169,11 +159,6 @@ func on_trigger(hand: Node, pressed: bool) -> bool:
 	if hand.has_method("pulse"):
 		hand.pulse()
 	return true
-
-
-func _end_drag() -> void:
-	_drag = null
-	main.end_screen_drag()
 
 
 ## A button of the side stack.

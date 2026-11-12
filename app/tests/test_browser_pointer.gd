@@ -2,8 +2,7 @@ extends SceneTree
 
 ## The film screen as a surface and the laser on a captured window (scripts/screen_surface.gd,
 ## scripts/window_pointer.gd; docs/dev/surfaces-design.md, step 5), against the real main scene with a stand-in for
-## the window capture: the screen's frame with the chrome (X), its bar selecting and moving the screen without a
-## jump, the side stack (Back for a window; Previous and Next for a film), a film's picture answering no ray, the
+## the window capture: the screen's frame with the chrome (X), its bar selecting the screen and not moving it, the side stack (Back for a window; Previous and Next for a film), a film's picture answering no ray, the
 ## laser as the window's pointer (the cursor at its pixel, the trigger the left button, a drag, the squeeze tap the
 ## right button, the stick scrolling), the gaze changing nothing, the legends staying as they are, and browser_pointer.
 ##
@@ -181,22 +180,19 @@ func _frame_checks() -> void:
 	surface.on_trigger(hand, false)
 	_check("Back sent the key and no click (%s)" % [win.calls], win.of("key").any(func(c: Array) -> bool: return c[1] == KEY_BACK)
 			and win.of("button").is_empty())
-	# The bar selects the screen and takes it: the point taken stays under the laser, the screen does not jump.
+	# The bar selects the screen and does not move it: the big screen is the exception to the rule.
 	main.pointing.select(null)
 	_aim(null, _bar(-0.3))
-	var before: Vector3 = main.screen.global_position
+	var before: Transform3D = main.screen.global_transform
 	win.calls.clear()
 	_check("the trigger on the bar selects the screen and sends the window nothing", surface.on_trigger(hand, true)
 			and main.pointing.selected == main.screen and win.of("button").is_empty())
-	main._update_grab(DT)
-	_check("taken by a point of its bar off the middle, it does not jump (%.4f m)" % main.screen.global_position.distance_to(before),
-			main.screen.global_position.distance_to(before) < 0.01)
-	_check("held, the hand is the screen's whatever it points at", surface.point_holds(hand))
 	hand.global_position += Vector3(0.0, 0.2, 0.0)
-	main._update_grab(DT)
-	_check("and then it follows the hand (%.3f m up)" % (main.screen.global_position.y - before.y),
-			main.screen.global_position.y - before.y > 0.1)
-	_check("the trigger up lets it go", surface.on_trigger(hand, false) and not surface.point_holds(hand))
+	if not main._grab.is_empty():
+		main._update_grab(DT)
+	_check("the bar does not take the screen: it stays where it is", main._grab.is_empty()
+			and not surface.point_holds(hand) and main.screen.global_transform.is_equal_approx(before))
+	surface.on_trigger(hand, false)
 	# X hides the chrome: no bar to take, and the window still clicks.
 	main.set_ui_shown(false)
 	_aim(null, _bar(-0.3))
