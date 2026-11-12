@@ -193,7 +193,7 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 | `[benchmark]` | `auto` (true), `result`, `tries`, `last_error` | `docs/benchmark.md` |
 | `[intro]` | `done` (false) | The introduction at the first start (eye calibration, the controls, the agent's terminal) has been gone through. Not shown on a run with `--file`, `--dir`, `--tour`, `--no-ui`, a test or read-only settings. System, Test and setup: Show the introduction again. |
 | `[hwvideo]` | `hw_vp9` (true) | VP9 in hardware, one video at a time (a second VP9 video, such as picture in picture, decodes in software); false: VP9 always in software. Read at start. The removed setup's `iris_bundle` and `iris_setup_prompt` are ignored if still there. 10-bit needs no setting (`docs/features.md`, "Hardware 10-bit video"). |
-| `[voice]` | `whisper_dir` (""; empty: `whisper/` next to the engine or the app), `whisper_model` ("small.en": q8_0, else q5_1, else f16; or a stem such as "small.en-q5_1", or a `.bin` path), `whisper_threads` (4), `whisper_backend` ("cpu"; or "vulkan"), `live_partials` (false: the text shows when you let go; true: live text while you hold the button, which costs CPU the film needs) | On-device speech to text: whisper.cpp's server on 127.0.0.1, started when the assistant needs it. Its output: `whisper-server.log` in this folder. `build/whisper/README.md` |
+| `[voice]` | `whisper_dir` (""; empty: `whisper/` next to the engine or the app), `language` (""; the voice language, a Whisper code such as "fr"; empty follows the menus' language; System, Voice language), `whisper_model` (unset: "small.en" for English, "small", multilingual, for another language; "small.en" means q8_0, else q5_1, else f16; or a stem such as "small.en-q5_1", or a `.bin` path), `whisper_threads` (4), `whisper_backend` ("cpu"; or "vulkan"), `live_partials` (false: the text shows when you let go; true: live text while you hold the button, which costs CPU the film needs) | On-device speech to text: whisper.cpp's server on 127.0.0.1, started when the assistant needs it. Its output: `whisper-server.log` in this folder. `build/whisper/README.md` |
 | `[files]`, `[stereo_depth_files]`, `[zoom_files]`, `[horizon_files]`, `[subtitle_delay_files]` | one key per file (a hash of the path) | What you chose for each file: mode, depth, zoom, horizon, subtitle delay |
 
 Other files in the same folder: `resume.cfg` (one section per file: path, title, position, duration, updated,
@@ -243,8 +243,9 @@ the pointer controller and types what you say into it. X is Enter whenever the t
 and B stay the film's unless a prompt waits (the pane's edge turns amber), you look at the pane (its edge turns blue;
 within 3 degrees of its edge with eye calibration, 5 without) or you hold squeeze: then they are arrows, Enter, Space
 and Escape, and squeeze and stick scroll back. A terminal on the big screen
-takes the trigger as Enter, the stick as arrows, and B as Escape. Say "one" to "four", "up", "down", "enter" or "escape"
-for that key at any time, and "yes" or "no" while a prompt waits. Other words are not typed while a prompt waits. A
+takes the trigger as Enter, the stick as arrows, and B as Escape. Voice is dictation: what you say is typed, then
+Enter; no spoken word is a key (the side stack beside the window has Enter, Esc, Up and Down). Nothing is typed while a
+prompt waits. A
 keyboard paired to the headset types into the terminal while the pane shows. With a window on the big screen as well,
 such as the browser, it types into the terminal while you look at the pane and into the window otherwise.
 

@@ -1,8 +1,8 @@
 extends Node
 
 ## Voice into the selected field of the browser on the big screen (docs/window-source.md, "Voice into a field").
-## While the browser is on the big screen with the menu hidden, the talk button (the pointer hand's bumper,
-## ui_layer.gd talk_hand()) first asks the page over DevTools what has focus (page_field.gd, one round trip on a
+## While the big screen is the selected surface with the browser on it, the talk button (B held, ui_layer.gd
+## on_bumper()) first asks the page over DevTools what has focus (page_field.gd, one round trip on a
 ## lasting socket, devtools_session.gd):
 ##   a text field (an input of a text type, a textarea, contenteditable)  -> the recording is transcribed on the
 ##       headset (scripts/voice/transcriber.gd) and the final text goes in with DevTools Input.insertText, which
@@ -94,12 +94,11 @@ func browser_source() -> WindowVideoSource:
 
 ## The talk button asks the page first only while the screen is the selected surface (docs/dev/surfaces-design.md:
 ## voice goes to the selected surface, and where the viewer looks changes nothing): the browser is on the big screen,
-## the menu hidden, and its page has a DevTools socket. With anything else selected the button is the assistant's or
+## and its page has a DevTools socket. The menu showing changes nothing: it is a surface of its own. With anything else selected the button is the assistant's or
 ## the agent's as always, so Claude or Codex can be talked to without their window open (the user, 2026-11-06).
 func wants_talk() -> bool:
 	var src := browser_source()
-	return src != null and main.window_pointer.is_active() and src.page_ws() != "" \
-			and main.pointing.selected == main.screen
+	return src != null and src.page_ws() != "" and main.pointing.selected == main.screen
 
 
 func busy() -> bool:
@@ -126,8 +125,8 @@ func _process(delta: float) -> void:
 		# Speech to text loads once the browser can take voice, so the first press doesn't wait for the model.
 		_whisper_asked = true
 		WhisperBackend.ensure(get_tree())
-	if busy() and not main.window_pointer.is_active():
-		# The menu opened, or the window went.
+	if busy() and not main.window_pointer.on_screen():
+		# The window went.
 		cancel("")
 	# The bumper's legend says TALK while the page can take voice (main.gd, ui_layer.gd talk_hand()).
 	var wants := wants_talk()

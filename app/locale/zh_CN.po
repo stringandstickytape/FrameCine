@@ -3832,3 +3832,22 @@ msgstr "下"
 #. The menu surface's title bar (ui/ui_layer.gd).
 msgid "Menu"
 msgstr "菜单"
+
+#. An agent's prompt is waiting and its window is hidden (scripts/agents/local_agents.gd).
+msgid "%s is asking: press Y to see it"
+msgstr "%s 正在提问：按 Y 查看"
+
+#. Voice while an agent's prompt waits (scripts/agents/local_agents.gd).
+msgid "%s is asking: answer with the buttons beside its window"
+msgstr "%s 正在提问：请用窗口旁的按钮回答"
+
+#. System tab: the language that voice hears (ui/system_tab.gd).
+msgid "Voice language"
+msgstr "语音语言"
+
+#. The voice language follows the menus' language.
+msgid "Same as the menus"
+msgstr "与菜单相同"
+
+msgid "Holding B types what you say into the selected window. English is tried; the others are not yet. A language other than English uses a second speech model, a one-time download of about 265 MB."
+msgstr "按住 B 说话，所说内容会输入到选中的窗口。英语已经过测试，其他语言尚未测试。英语以外的语言使用第二个语音模型，需要一次性下载约 265 MB。"

@@ -45,6 +45,7 @@ func _run() -> void:
 	_make_model()
 	_test_units()
 	_test_lookup()
+	_test_language()
 	if await _start_server():
 		await _test_downloads()
 		await _test_offline()
@@ -177,6 +178,48 @@ func _test_lookup() -> void:
 			"the store is user://whisper-models")
 	plain.free()
 	b.free()
+
+
+## The voice language (docs/dev/surfaces-design.md "Voice"): English keeps the English-only model, another language
+## takes the multilingual one, and each request names the language.
+func _test_language() -> void:
+	var was := TranslationServer.get_locale()
+	TranslationServer.set_locale("en")
+	_check(Backend.language_for("") == "en" and Backend.language_for("fr") == "fr" and Backend.language_for("xx") == "en",
+			"the setting: a code it knows, else the menus' language, else English")
+	TranslationServer.set_locale("zh_CN")
+	_check(Backend.language_for("") == "zh" and Backend.language_for("de") == "de",
+			"\"\" follows the menus (zh_CN is zh); a setting wins")
+	TranslationServer.set_locale(was)
+	_check(Backend.model_for("en") == "small.en" and Backend.model_for("fr") == "small", "English-only for English only")
+	_check(ModelDownload.MULTI_SIZE == 264464607 and ModelDownload.MULTI_SHA256.length() == 64
+			and ModelDownload.url(ModelDownload.MULTI_FILE).ends_with("/models-1/ggml-small-q8_0.bin"),
+			"the multilingual model: pinned, from the same release")
+	var b: Node = Backend.new()
+	b.autostart = false
+	b.configure({"language": "fr"}, {})
+	_check(b.model == "small" and b.model_file == ModelDownload.MULTI_FILE and b.model_size == ModelDownload.MULTI_SIZE
+			and b.heard_language() == "fr", "French: the multilingual model, and requests say fr (%s)" % b.model)
+	b.set_language("en")
+	_check(b.model == "small.en" and b.model_file == ModelDownload.MODEL_FILE and b.model_size == ModelDownload.MODEL_SIZE
+			and b.heard_language() == "en", "back to English: the English-only model (%s)" % b.model)
+	b.set_language("es")
+	_check(b.model == "small" and b.heard_language() == "es", "Spanish: the multilingual model again")
+	b.configure({"language": "fr", "whisper_model": "base.en"}, {})
+	_check(b.model == "base.en" and b.heard_language() == "en", "a model set by hand stays; an .en model hears English")
+	b.set_language("de")
+	_check(b.model == "base.en", "and a change of language does not change it")
+	b.configure({}, {"whisper-language": "it"})
+	_check(b.model == "small" and b.language == "it", "the flag --whisper-language")
+	b.free()
+	var en := Backend.request_body(PackedByteArray([0, 0]), true, "en")
+	var fr := Backend.request_body(PackedByteArray([0, 0]), true, "fr")
+	var en_text := (en[1] as PackedByteArray).get_string_from_ascii()
+	var fr_text := (fr[1] as PackedByteArray).get_string_from_ascii()
+	_check(en_text.contains("name=\"language\"\r\n\r\nen\r\n") and en_text.contains("name=\"prompt\""),
+			"an English request: language en and the vocabulary prompt")
+	_check(fr_text.contains("name=\"language\"\r\n\r\nfr\r\n") and not fr_text.contains("name=\"prompt\""),
+			"a French one: language fr and no English prompt")
 
 
 func _start_server() -> bool:

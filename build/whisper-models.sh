@@ -16,6 +16,8 @@
 #   base.en-q8_0      81781811   the default in the package ([voice] whisper_model "base.en")
 #   small.en-q5_1    190098681
 #   small.en-q8_0    264477561   what the PC used (small.en); if the headset's benchmark says it is fast enough
+#   small-q8_0       264464607   multilingual: the player's model for a voice language other than English (not in
+#                                the default set; bash build/whisper-models.sh small-q8_0)
 #   tiny.en           77704715   f16 (--all)
 #   base.en          147964211   f16 (--all)
 #   small.en         487614201   f16 (--all)
@@ -33,6 +35,7 @@ declare -A SHA=(
   [base.en-q8_0]=a4d4a0768075e13cfd7e19df3ae2dbc4a68d37d36a7dad45e8410c9a34f8c87e
   [small.en-q5_1]=bfdff4894dcb76bbf647d56263ea2a96645423f1669176f4844a1bf8e478ad30
   [small.en-q8_0]=67a179f608ea6114bd3fdb9060e762b588a3fb3bd00c4387971be4d177958067
+  [small-q8_0]=49c8fb02b65e6049d5fa6c04f81f53b867b5ec9540406812c643f177317f779f
   [tiny.en]=921e4cf8686fdd993dcd081a5da5b6c365bfde1162e72b08d75ac75289920b1f
   [base.en]=a03779c86df3323075f5e796cb2ce5029f00ec8869eee3fdfb897afe36c6d002
   [small.en]=c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d

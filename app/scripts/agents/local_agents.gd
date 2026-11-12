@@ -9,35 +9,19 @@ const Pointing := preload("res://scripts/pointing/pointing.gd")
 ## only while the window shows. The terminals outlive the player and film changes: nothing here closes one, and each is
 ## found again by its window class.
 ##
-## The window is moved and sized as a PC window's pane is (scripts/pc/pc_windows.gd; the user, 2026-11-10): squeeze and
-## hold with a laser on it, and it follows the laser at that distance, turning with the hand; the stick while holding
-## makes it bigger or smaller (right, left) and further or nearer (up, down). Its width is kept ([agent_window] width);
-## where it is, for the run. A laser on it gives it the hand as the look does.
+## The window is a surface (docs/dev/surfaces-design.md): its title bar moves it, its side stack has Enter, Esc, Up and
+## Down, a laser on its picture scrolls its history with the stick. Its width is kept ([agent_window] width); where it
+## is, for the run. Y on the right controller shows or hides it, and with no agent running starts the last one used.
 ##
-## Talk (the bumper on the pointer hand) shows the pane; a quick tap while it shows hides it (the agent keeps working).
-## Y on the right controller, while that is the pointer hand, shows or hides it too, and with no agent running starts the
-## last one used.
-## X on the right controller is Enter whenever the terminal shows (on the pane or the big screen), whichever hand points,
-## the menu open or not; its printed legend says ENTER then, and nothing otherwise (X has no other job on the headset's
-## own profile). on_enter_button(), enter_ready().
-## While it shows, the stick and the trigger stay the film's, except:
-##   an agent's prompt is waiting (its hook said so, .player/waiting; the pane's edge turns amber, the hand buzzes, and a
-##   note says so if the pane is hidden): stick up / down are arrows, trigger Enter, A Space, B Escape
-##   the viewer looks at the pane (the gaze within GAZE_MARGIN_DEG of its edge when calibrated, GAZE_MARGIN_RAW_DEG when
-##   not; the edge turns blue): the same keys, and stick left / right are arrows too. No hook is needed, so this answers a
-##   list no hook told of. Never with the menu open (the menu keeps its stick and trigger), never while a calibration runs
-##   squeeze held: trigger Enter, stick up / down scroll back (Shift + Page Up / Down)
-## Until the first start's introduction is gone through (ui/intro.gd), the controllers give the terminal nothing: Y opens
-## the menu at the introduction instead.
-## A keyboard paired to the headset types into the terminal while the pane shows. With a window on the big screen as
-## well (a browser), the look decides: on the pane the terminal has it, anywhere else the window does.
-## Spoken alone, "one" to "four", "up", "down", "enter" and "escape" are always that key (a list no hook told of, such as
-## the folder trust question, takes only these); "yes" and "no" are the agent's keys while a prompt waits and ordinary
-## words otherwise (a "yes" typed at an agent asking a plain question is an answer).
+## Voice (B held) is dictation: what was said is typed, then Enter. It comes here while the window is the selected
+## surface, or the agent is on the big screen and that is selected; with nothing selected that takes text, it comes
+## here too while an agent is active, as before (ui/ui_layer.gd on_bumper()). No spoken word is a key any more ("one",
+## "escape", "yes", "no" are typed as words): the side stack has the keys.
 ## Words must not answer a prompt by accident: Enter takes a list's highlighted row, usually yes, and Codex's rows answer
-## to single letters. So while a prompt waits, words that are not a key are not typed, and a note says what to say. A
-## prompt no hook told of is met with Escape, which turns it down, ahead of a lone "no" and of any words before the
-## session's first hook has run (until then the app can't tell; Codex before /hooks trusts them, or a plain start).
+## to single letters. So while a prompt waits (its hook said so, .player/waiting) nothing is typed, and a note says to
+## answer with the buttons beside the window. A prompt no hook told of is met with Escape, which turns it down, ahead
+## of any words before the session's first hook has run (until then the app can't tell; Codex before /hooks trusts
+## them, or a plain start).
 ##
 ## Nothing here reads the terminal: words and keys go in, the picture goes to the pane, and nothing leaves the headset.
 ##
@@ -90,8 +74,6 @@ const INSTALL_CARD := "agent_install"
 const STICK_DEAD := 0.2
 const RESIZE_RATE := 0.8
 const SECTION_WINDOW := "agent_window"
-const WORDS := {"one": "1", "two": "2", "three": "3", "four": "4", "escape": "escape", "1": "1", "2": "2", "3": "3",
-		"4": "4", "up": "up", "down": "down", "enter": "enter"}
 
 ## scripts/main.gd
 var main: Node3D
@@ -677,7 +659,7 @@ func _set_waiting(on: bool) -> void:
 		if hand != null:
 			hand.pulse()
 		if not pane_shown() and not on_big_screen():
-			_note("%s is asking: press talk to see it" % AgentTerminal.AGENTS[active]["name"])
+			_note(tr("%s is asking: press Y to see it") % AgentTerminal.AGENTS[active]["name"])
 	if main.has_method("update_controller_labels"):
 		main.update_controller_labels()
 	changed.emit()
@@ -802,23 +784,7 @@ func _on_transcribed(id: int, text: String, final: bool) -> void:
 		deliver(text)
 
 
-## The keys a spoken word alone stands for (a character, or "escape"), or "".
-func spoken_key(text: String) -> String:
-	var word := _spoken_word(text)
-	if WORDS.has(word):
-		return WORDS[word]
-	if _waiting and active != "":
-		var keys: Dictionary = AgentTerminal.AGENTS[active]["keys"]
-		if keys.has(word):
-			return keys[word]
-	return ""
-
-
-func _spoken_word(text: String) -> String:
-	return text.strip_edges().to_lower().rstrip(".!?,:;").lstrip("\"'")
-
-
-## What was said goes in: a key if that is what a lone word means, else the words and Enter, unless a prompt waits.
+## What was said goes in: the words and Enter, unless a prompt waits.
 func deliver(text: String) -> void:
 	var t := text.strip_edges()
 	if t == "" or active == "":
@@ -828,17 +794,12 @@ func deliver(text: String) -> void:
 		return
 	# The hook may have written this since the last look.
 	_set_waiting(FileAccess.file_exists(_state("waiting")))
-	var key := spoken_key(t)
-	if key != "":
-		_tap(target, key)
-		_answered()
-		return
 	var a: Dictionary = AgentTerminal.AGENTS[active]
 	if _waiting:
-		_note("%s is asking: say yes, no or a number, or use the stick and trigger" % a["name"])
+		_note(tr("%s is asking: answer with the buttons beside its window") % a["name"])
 		return
 	var hook_ran := FileAccess.file_exists(_state("hook_seen"))
-	if not hook_ran or _spoken_word(t) == "no":
+	if not hook_ran:
 		_tap(target, "escape")
 		await get_tree().create_timer(ENTER_DELAY).timeout
 	_write_context()

@@ -28,6 +28,7 @@ const UpdateRow := preload("res://ui/update_row.gd")
 const ControllerLook := preload("res://scripts/xr/controller_look.gd")
 const ObjectSection := preload("res://ui/object_section.gd")
 const I18n := preload("res://scripts/i18n.gd")
+const WhisperBackend := preload("res://scripts/voice/whisper_backend.gd")
 
 ## Open a place of the Files tab (test patterns, network hosts).
 signal open_place(path: String)
@@ -111,6 +112,8 @@ var _stats_next_msec := 0
 ## The Language row's buttons, one per code offered (I18n.languages(): the pseudo-locale only in dev mode).
 var _language_row: HFlowContainer
 var _language_codes: Array = []
+## The Voice language row: "Same as the menus", then one button per WhisperBackend.LANGUAGES code.
+var _voice_row: HFlowContainer
 
 
 func _init() -> void:
@@ -164,6 +167,26 @@ func bind(p_app: Node) -> void:
 	box.add_child(_language_row)
 	box.add_child(W.help("The menus and the controller labels. Names of films and files stay as they are."))
 	box.add_child(W.help("The translations other than English were made automatically, by AI."))
+
+	# The voice language ([voice] language, scripts/voice/whisper_backend.gd): what B held hears and types into the
+	# selected window. The names are in their own languages, so not translated; "" follows the menus.
+	box.add_child(W.section("Voice language"))
+	_voice_row = W.flow()
+	var voice_group := ButtonGroup.new()
+	var same := W.button("Same as the menus", func() -> void: _set_voice_language(""))
+	same.toggle_mode = true
+	same.button_group = voice_group
+	_voice_row.add_child(same)
+	for l: Array in WhisperBackend.LANGUAGES:
+		var code := str(l[0])
+		var b := W.button(str(l[1]), func() -> void: _set_voice_language(code))
+		W.content(b)
+		b.toggle_mode = true
+		b.button_group = voice_group
+		_voice_row.add_child(b)
+	box.add_child(_voice_row)
+	box.add_child(W.help("Holding B types what you say into the selected window. English is tried; the others are "
+			+ "not yet. A language other than English uses a second speech model, a one-time download of about 265 MB."))
 
 	box.add_child(W.section("Accessibility"))
 	_ui_scale = W.slider_row("Larger panel", 1.0, 2.0, 0.05, func(v: float) -> String: return "%.2fx" % v,
@@ -450,6 +473,24 @@ func sync() -> void:
 	_sync_remote()
 	_sync_dev()
 	_sync_language()
+	_sync_voice_language()
+
+
+## [voice] language ("" follows the menus), saved and told to the speech to text when it runs.
+func _set_voice_language(code: String) -> void:
+	app.settings.set_value("voice", "language", code if code != "" else null)
+	var backend: Node = get_tree().root.get_node_or_null(WhisperBackend.NODE_NAME) if is_inside_tree() else null
+	if backend != null:
+		backend.set_language(code)
+	_sync_voice_language()
+
+
+func _sync_voice_language() -> void:
+	var code := str(app.settings.get_value("voice", "language", ""))
+	var codes: Array = [""]
+	for l: Array in WhisperBackend.LANGUAGES:
+		codes.append(str(l[0]))
+	W.set_choice(_voice_row, maxi(codes.find(code), 0))
 
 
 ## The Language row: made again when the languages offered change (dev mode comes up after the tab), the one on

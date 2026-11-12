@@ -134,6 +134,11 @@ var _card_hit := {}
 var _ptt: Node
 var _ptt_check := 0.0
 var _talking := false
+## Where this press of the talk button goes (voice_route()), from the press to its release.
+var _talk_route := ""
+## The agent's recorder, when the press went to an agent's window that is not the voice target (voice_target()).
+var _talk_ptt: Node = null
+var _talk_ptt_on := false
 ## The header's extra items: low controller batteries (from the last levels: side -> percent), and "Assistant" while
 ## the assistant link is connected.
 var _battery_levels := {}
@@ -349,20 +354,71 @@ func talk_hand() -> XRHand:
 	return pointer_hand if pc != null and pc.wants_talk() else null
 
 
-## The bumper (the app's "labels" action): on the talk hand, hold to record and release to send. True when used.
-## With the browser on the big screen it asks the page first (scripts/video/browser_dictation.gd): a selected text
-## field takes the voice, anything else leaves the button as it was (_talk_as_before()).
-func on_bumper(hand: XRHand, held: bool) -> bool:
+## Where the talk button (B held, main.gd) sends the voice (docs/dev/surfaces-design.md "Voice"): into the selected
+## surface when it takes text, else where it went before (the assistant, the dev link or the active agent).
+##   "page"    the screen is selected with the browser on it (DevTools): browser_dictation.gd asks the page for a
+##             text field, and with none the press goes on as before
+##   "pc"      a PC window is selected (pc_windows.gd)
+##   "agent"   an agent's window is selected, or the agent is on the big screen and that is selected
+##   "before"  anything else: the film, the menu, nothing
+func voice_route() -> String:
 	var dictation: Node = app.get("browser_dictation") if app != null else null
-	if hand == pointer_hand and dictation != null and dictation.on_talk(held, _talk_as_before.bind(hand)):
-		return true
+	if dictation != null and dictation.wants_talk():
+		return "page"
 	var pc: Node = app.features.get("pc_windows") if app != null and app.get("features") != null else null
-	if hand == pointer_hand and pc != null and pc.on_talk(held):
-		return true
+	if pc != null and pc.wants_talk():
+		return "pc"
+	var agents: Node = app.local_agents if app != null else null
+	var p := _pointing()
+	if agents != null and agents.push_to_talk() != null and p != null and p.selected != null \
+			and (agents.is_selected() or (p.selected == app.get("screen") and agents.on_big_screen())):
+		return "agent"
+	return "before"
+
+
+## The talk button on the pointer hand: held, then let go. True when used.
+func on_bumper(hand: XRHand, held: bool) -> bool:
+	if hand != pointer_hand:
+		return false
+	if held:
+		_talk_route = voice_route()
+	var route := _talk_route
+	if not held:
+		_talk_route = ""
+	match route:
+		"page":
+			var dictation: Node = app.get("browser_dictation")
+			if dictation != null and dictation.on_talk(held, _talk_as_before.bind(hand)):
+				return true
+		"pc":
+			var pc: Node = app.features.get("pc_windows")
+			if pc != null and pc.on_talk(held):
+				return true
+		"agent":
+			return _talk_to_agent(held)
 	return _talk_as_before(held, hand)
 
 
-## The bumper as it was before the browser's fields: the assistant, the dev link or an agent.
+## The selected agent's window takes the voice even when the viewer chose the dev link or the assistant for it.
+func _talk_to_agent(held: bool) -> bool:
+	var ptt: Node = app.local_agents.push_to_talk()
+	if held:
+		if ptt == null:
+			return false
+		_talk_ptt = ptt
+		if not ptt.recording_changed.is_connected(_on_listening):
+			ptt.recording_changed.connect(_on_listening)
+		app.local_agents.on_talk(true)
+		_talk_ptt_on = bool(ptt.begin())
+		return true
+	if _talk_ptt_on and _talk_ptt != null and is_instance_valid(_talk_ptt):
+		_talk_ptt.end()
+	_talk_ptt_on = false
+	_talk_ptt = null
+	return true
+
+
+## The talk button where nothing selected takes text: the assistant, the dev link or an agent (voice_target()).
 func _talk_as_before(held: bool, hand: XRHand) -> bool:
 	if _ptt == null or not is_instance_valid(_ptt) or hand != pointer_hand:
 		return false
@@ -496,7 +552,8 @@ func _battery_header(side: String, pct: int) -> String:
 func _on_listening(on: bool) -> void:
 	ui.set_listening(on)
 	# Typing into an agent: its pane shows the red dot and the words arrive in the terminal.
-	if app.local_agents != null and _ptt == app.local_agents.push_to_talk():
+	if app.local_agents != null and app.local_agents.push_to_talk() != null \
+			and app.local_agents.push_to_talk() in [_ptt, _talk_ptt]:
 		return
 	if not _open:
 		if on:

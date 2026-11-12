@@ -8,6 +8,7 @@ extends SceneTree
 ## there, covers every Chinese text, and keeps the line height); Chinese wraps.
 ## Run: godot --headless --xr-mode off --path app --script res://tests/test_i18n.gd
 
+const WhisperBackend := preload("res://scripts/voice/whisper_backend.gd")
 const I18n := preload("res://scripts/i18n.gd")
 const W := preload("res://ui/pane_widgets.gd")
 const PaneStyle := preload("res://ui/pane_style.gd")
@@ -687,9 +688,9 @@ func _plain_under(n: Node, skip: Array, out: Array[String]) -> void:
 		var s := _shown(c)
 		if not RegEx.create_from_string("[A-Za-z]{2,}").search(s) or s.begins_with("["):
 			continue
-		# Content left as it is on purpose: the player's name, the languages' own names, an assistant service's own
-		# status line. (The lab's card names are keys since stage 2.)
-		if s.begins_with("FrameCine") or s == "English":
+		# Content left as it is on purpose: the player's name, the languages' own names (the menus' and the voice's),
+		# an assistant service's own status line. (The lab's card names are keys since stage 2.)
+		if s.begins_with("FrameCine") or WhisperBackend.LANGUAGES.any(func(l: Array) -> bool: return l[1] == s):
 			continue
 		var line := "%s '%s'" % [c.name, s]
 		if not out.has(line):

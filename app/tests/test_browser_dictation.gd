@@ -507,16 +507,16 @@ func _cancel_checks() -> void:
 	page.event("Page.frameNavigated", {"frame": {"id": "F2", "parentId": "F1"}})
 	await _frames(4)
 	_check("a sub-frame's navigation is no page change", dict.session.navigations == 1)
-	# The menu opening while held: a cancel, and the outline goes.
+	# The menu opening while held changes nothing: it is a surface of its own, and the screen stays selected.
 	await _press()
 	_check("dictating again", dict.state == dict.State.DICTATING and page.marked[""])
 	main.set_menu_shown(true)
-	await _until(func() -> bool: return not page.marked[""], 2.0)
-	_check("the menu opens: cancelled, the outline removed", dict.state == dict.State.IDLE and not page.marked[""]
-			and not rec.recording and backend.count(true) == finals)
+	await _frames(6)
+	_check("the menu opens: still dictating into the page", dict.state == dict.State.DICTATING and page.marked[""]
+			and rec.recording and backend.count(true) == finals)
+	_check("and the talk button is still the page's", dict.wants_talk())
 	main.set_menu_shown(false)
 	await _release()
-	_check("no talk button for the page while the menu shows", true)
 	# A navigation after release, before the text came: nothing goes in.
 	await _press()
 	await _release()

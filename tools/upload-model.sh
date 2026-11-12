@@ -5,9 +5,11 @@
 # player's updater reads releases/latest. So it is made a pre-release (GitHub's releases/latest never returns one)
 # and also --latest=false, and the script checks releases/latest afterwards.
 #
-#   bash tools/upload-model.sh [--publish] [--model FILE]
+#   bash tools/upload-model.sh [--publish] [--multilingual] [--model FILE]
 #
 # Without --publish it is a dry run: it checks the file and prints what it would do; nothing goes to GitHub.
+# --multilingual the multilingual model (MULTI_FILE, for a voice language other than English) instead of the
+#                English-only one; it goes in the same release, and SHA256SUMS is replaced with one that lists both
 # --model FILE   the model file (default: build/out/whisper-models/<name> of this checkout, else of the main checkout;
 #                build/whisper-models.sh downloads it)
 # GH=...         the GitHub CLI to use (default: gh, else gh.exe; from WSL, gh.exe gets Windows paths)
@@ -21,10 +23,12 @@ REPO=$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)
 SRC=$REPO/app/scripts/voice/model_download.gd
 
 PUBLISH=0
+MULTI=0
 MODEL=""
 while [ $# -gt 0 ]; do
   case $1 in
     --publish) PUBLISH=1 ;;
+    --multilingual) MULTI=1 ;;
     --model) MODEL=$2; shift ;;
     --model=*) MODEL=${1#--model=} ;;
     -h|--help) sed -n '2,18p' "$0"; exit 0 ;;
@@ -41,6 +45,13 @@ TAG=$(const MODEL_RELEASE)
 NAME=$(const MODEL_FILE)
 SIZE=$(const MODEL_SIZE)
 SHA=$(const MODEL_SHA256)
+EN_NAME=$NAME
+EN_SHA=$SHA
+if [ "$MULTI" = 1 ]; then
+  NAME=$(const MULTI_FILE)
+  SIZE=$(const MULTI_SIZE)
+  SHA=$(const MULTI_SHA256)
+fi
 SLUG=${RELEASES#https://github.com/}
 SLUG=${SLUG%/releases/download}
 for v in RELEASES TAG NAME SIZE SHA SLUG; do
@@ -79,13 +90,18 @@ got_sha=$(sha256sum "$MODEL" | cut -d' ' -f1)
 STAGE=$(mktemp -d)
 trap 'rm -rf "$STAGE"' EXIT
 cp "$LICENSE" "$STAGE/LICENSE-models.txt"
-( cd "$STAGE" && echo "$SHA  $NAME" > SHA256SUMS && sha256sum LICENSE-models.txt >> SHA256SUMS )
+if [ "$MULTI" = 1 ]; then
+  ( cd "$STAGE" && printf '%s  %s\n%s  %s\n' "$EN_SHA" "$EN_NAME" "$SHA" "$NAME" > SHA256SUMS \
+    && sha256sum LICENSE-models.txt >> SHA256SUMS )
+else
+  ( cd "$STAGE" && echo "$SHA  $NAME" > SHA256SUMS && sha256sum LICENSE-models.txt >> SHA256SUMS )
+fi
 cat > "$STAGE/notes.md" <<EOF
 The speech model for on-device voice. The player downloads it once, the first time voice is used, into its data
 folder (\`user://whisper-models/\`), and checks its SHA-256. You do not need to download anything here.
 
 - \`$NAME\`: $SIZE bytes, SHA-256 \`$SHA\`
-- OpenAI's Whisper small.en weights (MIT), converted to ggml by the whisper.cpp project
+- OpenAI's Whisper $([ "$MULTI" = 1 ] && echo small || echo small.en) weights (MIT), converted to ggml by the whisper.cpp project
   (Hugging Face ggerganov/whisper.cpp, the revision in \`build/whisper-models.sh\`). The MIT notice:
   \`LICENSE-models.txt\`.
 
@@ -125,8 +141,8 @@ if "$GH" release view "$TAG" --repo "$SLUG" >/dev/null 2>&1; then
   if grep -qx "$NAME" <<<"$have"; then
     echo "$TAG already has $NAME; nothing to do (the release does not change)."
   else
-    echo "$TAG exists without $NAME: uploading the assets"
-    "$GH" release upload "$TAG" --repo "$SLUG" "$(p "$MODEL")" "$(p "$STAGE/SHA256SUMS")" \
+    echo "$TAG exists without $NAME: uploading it, and SHA256SUMS and the notice again"
+    "$GH" release upload "$TAG" --repo "$SLUG" --clobber "$(p "$MODEL")" "$(p "$STAGE/SHA256SUMS")" \
       "$(p "$STAGE/LICENSE-models.txt")"
   fi
 else

@@ -628,8 +628,14 @@ func _test_focus() -> void:
 	_check("quality: the pane looked away from asks for a few frames (%s)" % [qa.back() if not qa.is_empty() else {}],
 			not qa.is_empty() and int(qa.back()["fps"]) <= 5)
 	_check("quality: the pane in focus for the full rate", qb.is_empty() or int(qb.back()["fps"]) >= 30)
+	# Voice (B held) goes to the selected window, the menu showing or not (ui_layer.gd voice_route()).
+	main.set_menu_shown(true)
+	_check("voice: the selected window takes it with the menu showing (%s)" % main.ui.voice_route(), pc.wants_talk()
+			and main.ui.voice_route() == "pc")
+	main.set_menu_shown(false)
 	main.pointing.select(null)
 	_check("focus: something else selected, no PC window has the keys", pc.focused == null and not b.focused)
+	_check("voice: and not the voice", not pc.wants_talk() and main.ui.voice_route() != "pc")
 	pc.set_focus(b)
 
 

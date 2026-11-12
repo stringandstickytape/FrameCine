@@ -30,6 +30,11 @@ const MODEL_FILE := "ggml-small.en-q8_0.bin"
 ## build/whisper-models.sh pins the same file (Hugging Face ggerganov/whisper.cpp, small.en-q8_0).
 const MODEL_SIZE := 264477561
 const MODEL_SHA256 := "67a179f608ea6114bd3fdb9060e762b588a3fb3bd00c4387971be4d177958067"
+## The multilingual model, for a voice language other than English (whisper_backend.gd LANGUAGES): the same revision
+## of the same repository (small-q8_0), in the same release (tools/upload-model.sh --multilingual).
+const MULTI_FILE := "ggml-small-q8_0.bin"
+const MULTI_SIZE := 264464607
+const MULTI_SHA256 := "49c8fb02b65e6049d5fa6c04f81f53b867b5ec9540406812c643f177317f779f"
 const MAX_REDIRECTS := 5
 ## Room kept free on the disk beyond the model.
 const KEEP_FREE := 200 * 1024 * 1024
@@ -43,12 +48,12 @@ var _mutex := Mutex.new()
 var _job := {}
 
 
-## The model's address: --model-url=URL, else the release asset.
-static func url() -> String:
+## A model's address: --model-url=URL, else the release asset.
+static func url(file := MODEL_FILE) -> String:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--model-url="):
 			return arg.trim_prefix("--model-url=")
-	return "%s/%s/%s" % [RELEASES, MODEL_RELEASE, MODEL_FILE]
+	return "%s/%s/%s" % [RELEASES, MODEL_RELEASE, file]
 
 
 ## Starts the download of `from` into dir/name (false while one runs).

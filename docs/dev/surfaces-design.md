@@ -135,6 +135,17 @@ is done. The others are offered and said to be untried.
   fixed); `WINDOW_LABELS` and the other per-mode legend tables in `main.gd` are unused and to be removed with the
   `docs/USAGE.md` rewrite; a paired keyboard still goes to a window on the big screen whenever the menu is hidden,
   selected or not.
+- **Step 6, done** (not tried on the headset): B held goes into the selected surface when it takes text
+  (`voice_route()` in `app/ui/ui_layer.gd`): a text field of the browser on the big screen, a PC window, an agent's
+  window (or the agent on the big screen), whichever link the viewer chose for the voice. With anything else selected
+  (the film, the menu, nothing), or the browser with no text field, it goes where it went before: the assistant, the
+  dev link or the active agent. That keeps talking to an assistant without its window; it is a choice for the user to
+  confirm. The menu showing no longer stops voice into a window. No spoken word is a key any more. The language:
+  System, Voice language ([voice] language; "Same as the menus" by default); English keeps `small.en`, any other
+  takes the multilingual `small` (`ggml-small-q8_0.bin`, 264 MB, downloaded once from the models release when first
+  needed; the server starts again with it), and each request names the language. The English vocabulary prompt is
+  for English only. Offered: English, French, German, Spanish, Italian, Portuguese, Dutch, Polish, Russian, Chinese;
+  English tried, French to be tried by the user.
 - Owed from step 4: the menu's own extras (the card, placing an object, picking a seat, marking a window) still take
   the pointer hand whole; the menu still has one pointer hand; the glow's blue is a constant in
   `app/ui/surface_frame.gd`, which `test_pane` flags (it wants a theme token).

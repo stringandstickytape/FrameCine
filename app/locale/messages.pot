@@ -6,7 +6,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: keyboard/floating_keyboard.gd:101 keyboard/floating_keyboard.gd:121 ui/pc_place.gd:170 ui/system_tab.gd:348
+#: keyboard/floating_keyboard.gd:101 keyboard/floating_keyboard.gd:121 ui/pc_place.gd:170 ui/system_tab.gd:371
 msgid "Keyboard"
 msgstr ""
 
@@ -39,7 +39,7 @@ msgstr ""
 msgid "PC window"
 msgstr ""
 
-#: scripts/main.gd:1594
+#: scripts/main.gd:1573
 #, c-format
 msgid "PUSH: %s"
 msgstr ""
@@ -150,15 +150,15 @@ msgstr ""
 msgid "NEAR-FAR / TURN"
 msgstr ""
 
-#: scripts/screen_surface.gd:137 ui/intro.gd:75 ui/intro.gd:87 ui/intro.gd:95
+#: scripts/screen_surface.gd:133 ui/intro.gd:75 ui/intro.gd:87 ui/intro.gd:95
 msgid "Back"
 msgstr ""
 
-#: scripts/screen_surface.gd:139 ui/pane_ui.gd:55
+#: scripts/screen_surface.gd:135 ui/pane_ui.gd:55
 msgid "Previous"
 msgstr ""
 
-#: scripts/screen_surface.gd:139 ui/intro.gd:75 ui/intro.gd:87 ui/pane_ui.gd:55
+#: scripts/screen_surface.gd:135 ui/intro.gd:75 ui/intro.gd:87 ui/pane_ui.gd:55
 msgid "Next"
 msgstr ""
 
@@ -202,6 +202,16 @@ msgstr ""
 #: scripts/video_mode.gd:23
 #, c-format
 msgid "%s, top / bottom"
+msgstr ""
+
+#: scripts/agents/local_agents.gd:662
+#, c-format
+msgid "%s is asking: press Y to see it"
+msgstr ""
+
+#: scripts/agents/local_agents.gd:799
+#, c-format
+msgid "%s is asking: answer with the buttons beside its window"
 msgstr ""
 
 #: scripts/android/android_apps.gd:137
@@ -998,39 +1008,39 @@ msgstr ""
 msgid "Later"
 msgstr ""
 
-#: scripts/video/browser_dictation.gd:181 scripts/video/browser_dictation.gd:360
+#: scripts/video/browser_dictation.gd:180 scripts/video/browser_dictation.gd:359
 msgid "That is a password field. Voice never types into one."
 msgstr ""
 
-#: scripts/video/browser_dictation.gd:194
+#: scripts/video/browser_dictation.gd:193
 msgid "No microphone, so nothing was typed."
 msgstr ""
 
-#: scripts/video/browser_dictation.gd:211
+#: scripts/video/browser_dictation.gd:210
 msgid "Select a text field on the page first, then hold the talk button."
 msgstr ""
 
-#: scripts/video/browser_dictation.gd:245
+#: scripts/video/browser_dictation.gd:244
 msgid "The page changed, so nothing was typed."
 msgstr ""
 
-#: scripts/video/browser_dictation.gd:251
+#: scripts/video/browser_dictation.gd:250
 msgid "The browser window closed, so nothing was typed."
 msgstr ""
 
-#: scripts/video/browser_dictation.gd:312
+#: scripts/video/browser_dictation.gd:311
 msgid "Speech to text isn't working on the headset, so nothing was typed."
 msgstr ""
 
-#: scripts/video/browser_dictation.gd:343
+#: scripts/video/browser_dictation.gd:342
 msgid "Didn't catch that. Try again."
 msgstr ""
 
-#: scripts/video/browser_dictation.gd:357 scripts/video/browser_dictation.gd:368
+#: scripts/video/browser_dictation.gd:356 scripts/video/browser_dictation.gd:367
 msgid "The page didn't answer, so nothing was typed."
 msgstr ""
 
-#: scripts/video/browser_dictation.gd:363
+#: scripts/video/browser_dictation.gd:362
 msgid "The text field lost focus, so nothing was typed."
 msgstr ""
 
@@ -1126,30 +1136,30 @@ msgstr ""
 msgid "Dual fisheye 360° (front and back lens)"
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:64
+#: scripts/voice/whisper_backend.gd:80
 #, c-format
 msgid "Voice needs a one-time download of about %d MB. Downloaded: %d %%. The rest of the player works as usual."
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:65
+#: scripts/voice/whisper_backend.gd:81
 #, c-format
 msgid "Speech model download: %d %%"
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:66
+#: scripts/voice/whisper_backend.gd:82
 #, c-format
 msgid "Voice needs the network once, for a download of about %d MB. The rest of the player works as usual."
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:67
+#: scripts/voice/whisper_backend.gd:83
 msgid "The speech model did not download. Voice tries again when you use it next."
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:68
+#: scripts/voice/whisper_backend.gd:84
 msgid "Voice is starting."
 msgstr ""
 
-#: scripts/voice/whisper_backend.gd:69
+#: scripts/voice/whisper_backend.gd:85
 msgid "Voice is ready."
 msgstr ""
 
@@ -1241,7 +1251,7 @@ msgstr ""
 msgid "Down"
 msgstr ""
 
-#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/ui_layer.gd:465
+#: ui/assistant_row.gd:57 ui/assistant_row.gd:155 ui/ui_layer.gd:521
 msgid "Assistant"
 msgstr ""
 
@@ -1522,7 +1532,7 @@ msgid_plural "%d items"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/files_tab.gd:556 ui/files_tab.gd:403 ui/pc_windows_row.gd:32 ui/system_tab.gd:344
+#: ui/files_tab.gd:556 ui/files_tab.gd:403 ui/pc_windows_row.gd:32 ui/system_tab.gd:367
 msgid "PC windows"
 msgstr ""
 
@@ -1773,7 +1783,7 @@ msgstr ""
 msgid "Repeat: all"
 msgstr ""
 
-#: ui/files_tab.gd:395 ui/system_tab.gd:185
+#: ui/files_tab.gd:395 ui/system_tab.gd:208
 msgid "Test patterns"
 msgstr ""
 
@@ -2356,12 +2366,12 @@ msgstr ""
 msgid "%s deleted"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:672 ui/ui_layer.gd:254
-#: ui/ui_layer.gd:435 ui/ui_layer.gd:1173 ui/ui_layer.gd:1177 ui/ui_layer.gd:1211
+#: ui/mixed_reality_tab.gd:119 ui/object_section.gd:757 ui/system_tab.gd:713 ui/ui_layer.gd:259
+#: ui/ui_layer.gd:491 ui/ui_layer.gd:1230 ui/ui_layer.gd:1234 ui/ui_layer.gd:1268
 msgid "Undo"
 msgstr ""
 
-#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:1141
+#: ui/mixed_reality_tab.gd:78 ui/ui_layer.gd:1198
 msgid "The headset's cameras can't show here."
 msgstr ""
 
@@ -2660,7 +2670,7 @@ msgstr ""
 msgid "battery %d %%"
 msgstr ""
 
-#: ui/pane_ui.gd:657 ui/pane_ui.gd:696 ui/ui_layer.gd:503
+#: ui/pane_ui.gd:657 ui/pane_ui.gd:696 ui/ui_layer.gd:560
 msgid "Listening"
 msgstr ""
 
@@ -2862,11 +2872,11 @@ msgstr ""
 msgid "3D"
 msgstr ""
 
-#: ui/picture_tab.gd:213 ui/system_tab.gd:173
+#: ui/picture_tab.gd:213 ui/system_tab.gd:196
 msgid "Left eye"
 msgstr ""
 
-#: ui/picture_tab.gd:213 ui/system_tab.gd:173
+#: ui/picture_tab.gd:213 ui/system_tab.gd:196
 msgid "Right eye"
 msgstr ""
 
@@ -3174,7 +3184,7 @@ msgstr ""
 msgid "Polynomial"
 msgstr ""
 
-#: ui/picture_tab.gd:31 ui/room_tab.gd:23 ui/sound_tab.gd:129 ui/system_tab.gd:44
+#: ui/picture_tab.gd:31 ui/room_tab.gd:23 ui/sound_tab.gd:129 ui/system_tab.gd:45
 #: environments/flagship.env.json environments/ice_cinema.env.json
 msgid "Off"
 msgstr ""
@@ -3569,7 +3579,7 @@ msgstr ""
 msgid "Live delay"
 msgstr ""
 
-#: ui/sound_tab.gd:90 ui/system_tab.gd:560
+#: ui/sound_tab.gd:90 ui/system_tab.gd:601
 msgid "Speed"
 msgstr ""
 
@@ -3975,303 +3985,315 @@ msgstr ""
 msgid "words in English, such as brick or oak floor"
 msgstr ""
 
-#: ui/system_tab.gd:130
+#: ui/system_tab.gd:133
 msgid "Views"
 msgstr ""
 
-#: ui/system_tab.gd:131
+#: ui/system_tab.gd:134
 msgid "Info overlay"
 msgstr ""
 
-#: ui/system_tab.gd:132
+#: ui/system_tab.gd:135
 msgid "Stats"
 msgstr ""
 
-#: ui/system_tab.gd:144
+#: ui/system_tab.gd:147
 msgid "Panel"
 msgstr ""
 
-#: ui/system_tab.gd:148
+#: ui/system_tab.gd:151
 msgid "Hold menu to recentre"
 msgstr ""
 
-#: ui/system_tab.gd:149
+#: ui/system_tab.gd:152
 #, c-format
 msgid "%.2f s"
 msgstr ""
 
-#: ui/system_tab.gd:152
+#: ui/system_tab.gd:155
 msgid "Left-handed"
 msgstr ""
 
-#: ui/system_tab.gd:153
+#: ui/system_tab.gd:156
 msgid "Reset layout"
 msgstr ""
 
-#: ui/system_tab.gd:161
+#: ui/system_tab.gd:164
 msgid "Language"
 msgstr ""
 
-#: ui/system_tab.gd:165
+#: ui/system_tab.gd:168
 msgid "The menus and the controller labels. Names of films and files stay as they are."
 msgstr ""
 
-#: ui/system_tab.gd:166
+#: ui/system_tab.gd:169
 msgid "The translations other than English were made automatically, by AI."
 msgstr ""
 
-#: ui/system_tab.gd:168
+#: ui/system_tab.gd:173
+msgid "Voice language"
+msgstr ""
+
+#: ui/system_tab.gd:176
+msgid "Same as the menus"
+msgstr ""
+
+#: ui/system_tab.gd:188
+msgid "Holding B types what you say into the selected window. English is tried; the others are not yet. A language other than English uses a second speech model, a one-time download of about 265 MB."
+msgstr ""
+
+#: ui/system_tab.gd:191
 msgid "Accessibility"
 msgstr ""
 
-#: ui/system_tab.gd:169
+#: ui/system_tab.gd:192
 msgid "Larger panel"
 msgstr ""
 
-#: ui/system_tab.gd:172
+#: ui/system_tab.gd:195
 msgid "One eye for 3D"
 msgstr ""
 
-#: ui/system_tab.gd:175
+#: ui/system_tab.gd:198
 msgid "Subtitles always on"
 msgstr ""
 
-#: ui/system_tab.gd:179
+#: ui/system_tab.gd:202
 msgid "Test and setup"
 msgstr ""
 
-#: ui/system_tab.gd:181
+#: ui/system_tab.gd:204
 msgid "Show the introduction again"
 msgstr ""
 
-#: ui/system_tab.gd:186
+#: ui/system_tab.gd:209
 msgid "Network hosts"
 msgstr ""
 
-#: ui/system_tab.gd:193
+#: ui/system_tab.gd:216
 msgid "Calibration cards"
 msgstr ""
 
-#: ui/system_tab.gd:203
+#: ui/system_tab.gd:226
 msgid "Measure bandwidth"
 msgstr ""
 
-#: ui/system_tab.gd:208
+#: ui/system_tab.gd:231
 msgid "Run benchmark"
 msgstr ""
 
-#: ui/system_tab.gd:219
+#: ui/system_tab.gd:242
 msgid "Stop tour"
 msgstr ""
 
-#: ui/system_tab.gd:227
+#: ui/system_tab.gd:250
 msgid "Hardware video"
 msgstr ""
 
-#: ui/system_tab.gd:233
+#: ui/system_tab.gd:256
 msgid "Rendering"
 msgstr ""
 
-#: ui/system_tab.gd:235
+#: ui/system_tab.gd:258
 msgid "Foveation"
 msgstr ""
 
-#: ui/system_tab.gd:238
+#: ui/system_tab.gd:261
 msgid "Sharp while the panel shows"
 msgstr ""
 
-#: ui/system_tab.gd:243
+#: ui/system_tab.gd:266
 msgid "Film drawn by the headset"
 msgstr ""
 
-#: ui/system_tab.gd:246
+#: ui/system_tab.gd:269
 msgid "Curved screen too"
 msgstr ""
 
-#: ui/system_tab.gd:256
+#: ui/system_tab.gd:279
 msgid "Controllers"
 msgstr ""
 
-#: ui/system_tab.gd:259
+#: ui/system_tab.gd:282
 msgid "Haptic ticks"
 msgstr ""
 
-#: ui/system_tab.gd:261
+#: ui/system_tab.gd:284
 msgid "Tick strength"
 msgstr ""
 
-#: ui/system_tab.gd:266
+#: ui/system_tab.gd:289
 msgid "Jog wheel"
 msgstr ""
 
-#: ui/system_tab.gd:270
+#: ui/system_tab.gd:293
 msgid "One turn"
 msgstr ""
 
-#: ui/system_tab.gd:275
+#: ui/system_tab.gd:298
 msgid "Seek bar pictures"
 msgstr ""
 
-#: ui/system_tab.gd:279
+#: ui/system_tab.gd:302
 msgid "Zoom lens"
 msgstr ""
 
-#: ui/system_tab.gd:284
+#: ui/system_tab.gd:307
 msgid "Magnification"
 msgstr ""
 
-#: ui/system_tab.gd:290 ui/system_tab.gd:293
+#: ui/system_tab.gd:313 ui/system_tab.gd:316
 msgid "Phone remote"
 msgstr ""
 
-#: ui/system_tab.gd:301
+#: ui/system_tab.gd:324
 msgid "Unpair phones"
 msgstr ""
 
-#: ui/system_tab.gd:318
+#: ui/system_tab.gd:341
 msgid "Share files"
 msgstr ""
 
-#: ui/system_tab.gd:319
+#: ui/system_tab.gd:342
 msgid "Share this headset's files"
 msgstr ""
 
-#: ui/system_tab.gd:328
+#: ui/system_tab.gd:351
 msgid "Phones and computers on this network can download and upload files. Scan the code: it holds the pairing code, which is shown nowhere else."
 msgstr ""
 
-#: ui/system_tab.gd:339
+#: ui/system_tab.gd:362
 msgid "Development AI assistant"
 msgstr ""
 
-#: ui/system_tab.gd:351
+#: ui/system_tab.gd:374
 msgid "Type with either laser or controller tip. Hold the grip to move it, and the stick to resize it."
 msgstr ""
 
-#: ui/system_tab.gd:353
+#: ui/system_tab.gd:376
 msgid "Updates"
 msgstr ""
 
-#: ui/system_tab.gd:360
+#: ui/system_tab.gd:383
 msgid "Dev tools"
 msgstr ""
 
-#: ui/system_tab.gd:364
+#: ui/system_tab.gd:387
 msgid "Reload theme"
 msgstr ""
 
-#: ui/system_tab.gd:365
+#: ui/system_tab.gd:388
 msgid "Remote changes"
 msgstr ""
 
-#: ui/system_tab.gd:370
+#: ui/system_tab.gd:393
 msgid "Allow for an hour"
 msgstr ""
 
-#: ui/system_tab.gd:374 ui/ui_layer.gd:971
+#: ui/system_tab.gd:397 ui/ui_layer.gd:1028
 msgid "Revoke"
 msgstr ""
 
-#: ui/system_tab.gd:382
+#: ui/system_tab.gd:405
 msgid "About"
 msgstr ""
 
-#: ui/system_tab.gd:387
+#: ui/system_tab.gd:410
 #, c-format
 msgid "Engine %s, %s"
 msgstr ""
 
-#: ui/system_tab.gd:530
+#: ui/system_tab.gd:571
 msgid "Look"
 msgstr ""
 
-#: ui/system_tab.gd:647
+#: ui/system_tab.gd:688
 msgid "hot-reload on"
 msgstr ""
 
-#: ui/system_tab.gd:647
+#: ui/system_tab.gd:688
 msgid "hot-reload off"
 msgstr ""
 
-#: ui/system_tab.gd:649
+#: ui/system_tab.gd:690
 #, c-format
 msgid "%s; remote changes allowed for %d more min"
 msgstr ""
 
-#: ui/system_tab.gd:682
+#: ui/system_tab.gd:723
 #, c-format
 msgid "Measuring %s ..."
 msgstr ""
 
-#: ui/system_tab.gd:686
+#: ui/system_tab.gd:727
 #, c-format
 msgid "Can't measure: %s"
 msgstr ""
 
-#: ui/system_tab.gd:688
+#: ui/system_tab.gd:729
 #, c-format
 msgid "%.0f Mbit/s average, %.0f peak, opened in %d ms, %.0f MB read"
 msgstr ""
 
-#: ui/system_tab.gd:699
+#: ui/system_tab.gd:740
 msgid "This engine build can't run the benchmark."
 msgstr ""
 
-#: ui/system_tab.gd:721
+#: ui/system_tab.gd:762
 #, c-format
 msgid "Tour %s (kiosk): round %d, step %d of %d"
 msgstr ""
 
-#: ui/system_tab.gd:722
+#: ui/system_tab.gd:763
 #, c-format
 msgid "Tour %s: round %d, step %d of %d"
 msgstr ""
 
-#: ui/system_tab.gd:202
+#: ui/system_tab.gd:225
 msgid "a file on a share, e.g. smb://host/share/film.mkv"
 msgstr ""
 
-#: ui/system_tab.gd:249
+#: ui/system_tab.gd:272
 msgid "A curved screen as the headset's cylinder layer; off: drawn in the room, where things in front of it cover it"
 msgstr ""
 
-#: ui/system_tab.gd:282
+#: ui/system_tab.gd:305
 msgid "In 180 and 360: hold the grip and pull the trigger for a magnifier"
 msgstr ""
 
-#: ui/system_tab.gd:42
+#: ui/system_tab.gd:43
 msgid "Ask"
 msgstr ""
 
-#: ui/system_tab.gd:42
+#: ui/system_tab.gd:43
 msgid "Allow"
 msgstr ""
 
-#: ui/system_tab.gd:42
+#: ui/system_tab.gd:43
 msgid "Deny"
 msgstr ""
 
-#: ui/system_tab.gd:44
+#: ui/system_tab.gd:45
 msgid "Low"
 msgstr ""
 
-#: ui/system_tab.gd:44
+#: ui/system_tab.gd:45
 msgid "Medium"
 msgstr ""
 
-#: ui/system_tab.gd:44
+#: ui/system_tab.gd:45
 msgid "High"
 msgstr ""
 
-#: ui/system_tab.gd:45
+#: ui/system_tab.gd:46
 msgid "Saves GPU time at the edges of your view. High can look blocky."
 msgstr ""
 
-#: ui/system_tab.gd:46
+#: ui/system_tab.gd:47
 msgid "Foveation isn't available: this build starts without it."
 msgstr ""
 
-#: ui/system_tab.gd:49
+#: ui/system_tab.gd:50
 msgid "Both controllers. The labels change ink, or get a dark outline, to stay readable."
 msgstr ""
 
@@ -4279,134 +4301,134 @@ msgstr ""
 msgid "LIVE"
 msgstr ""
 
-#: ui/ui_layer.gd:181 ui/ui_layer.gd:473
+#: ui/ui_layer.gd:186 ui/ui_layer.gd:529
 msgid "Menu"
 msgstr ""
 
-#: ui/ui_layer.gd:219
+#: ui/ui_layer.gd:224
 #, c-format
 msgid "Resumed at %s"
 msgstr ""
 
-#: ui/ui_layer.gd:219
+#: ui/ui_layer.gd:224
 msgid "Start over"
 msgstr ""
 
-#: ui/ui_layer.gd:254
+#: ui/ui_layer.gd:259
 #, c-format
 msgid "Remote: %s"
 msgstr ""
 
-#: ui/ui_layer.gd:435 ui/ui_layer.gd:440
+#: ui/ui_layer.gd:491 ui/ui_layer.gd:496
 #, c-format
 msgid "Assistant: %s"
 msgstr ""
 
-#: ui/ui_layer.gd:480
+#: ui/ui_layer.gd:536
 #, c-format
 msgid "Left controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:482
+#: ui/ui_layer.gd:538
 #, c-format
 msgid "Right controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:483
+#: ui/ui_layer.gd:539
 #, c-format
 msgid "Controller battery %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:490
+#: ui/ui_layer.gd:546
 #, c-format
 msgid "Left controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:492
+#: ui/ui_layer.gd:548
 #, c-format
 msgid "Right controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:493
+#: ui/ui_layer.gd:549
 #, c-format
 msgid "Controller %d %%"
 msgstr ""
 
-#: ui/ui_layer.gd:971
+#: ui/ui_layer.gd:1028
 msgid "Remote changes allowed for an hour"
 msgstr ""
 
-#: ui/ui_layer.gd:984
+#: ui/ui_layer.gd:1041
 msgid "Connecting..."
 msgstr ""
 
-#: ui/ui_layer.gd:994
+#: ui/ui_layer.gd:1051
 msgid "Starting the browser..."
 msgstr ""
 
-#: ui/ui_layer.gd:1008
+#: ui/ui_layer.gd:1065
 msgid "Point at a seat and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:1018
+#: ui/ui_layer.gd:1075
 msgid "Seat unchanged"
 msgstr ""
 
-#: ui/ui_layer.gd:1087
+#: ui/ui_layer.gd:1144
 msgid "That can't be applied here"
 msgstr ""
 
-#: ui/ui_layer.gd:1091
+#: ui/ui_layer.gd:1148
 msgid "Point at a part and pull the trigger. Stick: size and turn the pattern. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:1092
+#: ui/ui_layer.gd:1149
 msgid "Point at a part and pull the trigger. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:1104
+#: ui/ui_layer.gd:1161
 msgid "That object can't be placed here"
 msgstr ""
 
-#: ui/ui_layer.gd:1108
+#: ui/ui_layer.gd:1165
 msgid "Point at a wall or the floor and pull the trigger. Stick: turn and size. B cancels."
 msgstr ""
 
-#: ui/ui_layer.gd:1142
+#: ui/ui_layer.gd:1199
 msgid "That's as many areas as there can be: delete one first."
 msgstr ""
 
-#: ui/ui_layer.gd:1159 ui/ui_layer.gd:1170
+#: ui/ui_layer.gd:1216 ui/ui_layer.gd:1227
 msgid "Nothing marked"
 msgstr ""
 
-#: ui/ui_layer.gd:1173
+#: ui/ui_layer.gd:1230
 #, c-format
 msgid "%s added: the cameras show there"
 msgstr ""
 
-#: ui/ui_layer.gd:1177
+#: ui/ui_layer.gd:1234
 #, c-format
 msgid "%s changed"
 msgstr ""
 
-#: ui/ui_layer.gd:1195
+#: ui/ui_layer.gd:1252
 msgid "Nothing changed"
 msgstr ""
 
-#: ui/ui_layer.gd:1195
+#: ui/ui_layer.gd:1252
 msgid "Nothing placed"
 msgstr ""
 
-#: ui/ui_layer.gd:1214
+#: ui/ui_layer.gd:1271
 msgid "Not placed"
 msgstr ""
 
-#: ui/ui_layer.gd:1228
+#: ui/ui_layer.gd:1285
 msgid "No seat there"
 msgstr ""
 
-#: ui/ui_layer.gd:1230
+#: ui/ui_layer.gd:1287
 msgid "Seat"
 msgstr ""
 

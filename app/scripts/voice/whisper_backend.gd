@@ -13,8 +13,12 @@ extends Node
 ## Settings ([voice] in user://settings.cfg) and flags (after `--`; a flag wins for that run):
 ##   whisper_dir      --whisper-dir=DIR       the folder with whisper-server and models/ (default: whisper/ next to the
 ##                                            engine, one folder up from it (a release's bin/), or next to the app)
-##   whisper_model    --whisper-model=NAME    "small.en" (default): models/ggml-small.en-q8_0.bin, else -q5_1, else the
-##                                            f16 file; or a full stem such as "small.en-q5_1"; or a .bin path
+##   language         --whisper-language=L    the voice language, a LANGUAGES code; "" (default) follows the menus'
+##                                            language (scripts/i18n.gd), English when that is not in LANGUAGES
+##   whisper_model    --whisper-model=NAME    unset (default): "small.en" for English, "small" (multilingual) for any
+##                                            other language. "small.en": models/ggml-small.en-q8_0.bin, else -q5_1,
+##                                            else the f16 file; or a full stem such as "small.en-q5_1"; or a .bin path.
+##                                            An English-only model (.en) always hears English.
 ##   whisper_threads  --whisper-threads=N     4 (default; the server runs at nice 10)
 ##   whisper_backend  --whisper-backend=B     "cpu" (default) or "vulkan" (the GPU build in whisper/vulkan/)
 ## The server's own output goes to user://whisper-server.log.
@@ -25,11 +29,14 @@ extends Node
 ## model_download.gd, about 264 MB) when the first start's introduction opens (ui/intro.gd: model_status(),
 ## fetch_model(), quiet), else the first time voice is used, then starts the server. The viewer sees a notice
 ## when it starts, at each quarter, and when voice is ready; with no network, one notice says so, and the next use of
-## voice tries again, not sooner than RETRY_SECONDS later. Nothing else waits for it. Only the default model is
-## downloaded: another whisper_model that is missing stays off with the line as before.
+## voice tries again, not sooner than RETRY_SECONDS later. Nothing else waits for it. Only the two default models
+## are downloaded (English-only, and the multilingual one when the voice language is another, about the same size):
+## another whisper_model that is missing stays off with the line as before. A change of language (set_language(),
+## the System tab) that needs the other model starts the server again with it, or downloads it at the next use.
 ## Flag: --model-url=URL takes the model from URL (tests, a mirror).
 
 const Transcriber := preload("res://scripts/voice/transcriber.gd")
+const I18n := preload("res://scripts/i18n.gd")
 const WorkerTask := preload("res://scripts/dev/worker_task.gd")
 const ModelDownload := preload("res://scripts/voice/model_download.gd")
 
@@ -37,6 +44,14 @@ const SELF_PATH := "res://scripts/voice/whisper_backend.gd"
 const NODE_NAME := "WhisperBackend"
 const SECTION := "voice"
 const DEFAULT_MODEL := "small.en"
+## The model for a voice language other than English.
+const MULTI_MODEL := "small"
+## The voice languages offered: Whisper's code and the name in its own language (the System tab; not translated).
+## English is tried by a person; French is to be tried; the others are offered untried (docs/dev/surfaces-design.md).
+## Names the menu's fonts can draw: Fira for the Latin and Cyrillic ones, the Chinese subset for 中文.
+const LANGUAGES := [["en", "English"], ["fr", "Français"], ["de", "Deutsch"], ["es", "Español"], ["it", "Italiano"],
+		["pt", "Português"], ["nl", "Nederlands"], ["pl", "Polski"], ["ru", "Русский"], ["zh", "中文"]]
+const TRIED: Array[String] = ["en"]
 const DEFAULT_THREADS := 4
 const HOST := "127.0.0.1"
 ## Model variants tried for a bare name such as "base.en", best first.
@@ -53,6 +68,7 @@ const MIN_SAMPLES := 16800
 const USER_MODELS := "user://whisper-models"
 ## The setting values that mean the model the player downloads (ModelDownload.MODEL_FILE).
 const DOWNLOADABLE: Array[String] = ["small.en", "small.en-q8_0", "ggml-small.en-q8_0.bin"]
+const DOWNLOADABLE_MULTI: Array[String] = ["small", "small-q8_0", "ggml-small-q8_0.bin"]
 ## After a failed download, voice tries again at its next use, but not sooner than this (no retry storm).
 const RETRY_SECONDS := 60.0
 ## A notice for a press comes when voice has not been asked for this long: push-to-talk asks every second while the
@@ -75,6 +91,11 @@ const VOCABULARY := ("Talking to Claude about the VR video player on the Steam F
 ## Configuration: set before the node enters the tree (ensure() fills them from the settings and flags).
 var whisper_dir := ""
 var model := DEFAULT_MODEL
+## The model was set by [voice] whisper_model or the flag: the language does not change it.
+var model_chosen := false
+## [voice] language as set ("" follows the menus), and the Whisper code it means now.
+var language_setting := ""
+var language := "en"
 var threads := DEFAULT_THREADS
 var backend_kind := "cpu"
 ## Start the server when the node enters the tree (tests set false and call start() themselves).
@@ -83,6 +104,9 @@ var autostart := true
 ## the timeouts (connect, then no bytes).
 var model_store := USER_MODELS
 var model_url := ""
+## The file the download writes, its size and SHA-256: the English-only model's or the multilingual one's
+## (_set_download(), from the model).
+var model_file := ModelDownload.MODEL_FILE
 var model_size := ModelDownload.MODEL_SIZE
 var model_sha256 := ModelDownload.MODEL_SHA256
 var connect_timeout := 15.0
@@ -146,18 +170,76 @@ static func ensure(tree: SceneTree) -> Node:
 ## Settings first, then the flags over them.
 func configure(settings: Dictionary, args: Dictionary) -> void:
 	whisper_dir = _expand(str(args.get("whisper-dir", settings.get("whisper_dir", ""))))
-	model = str(args.get("whisper-model", settings.get("whisper_model", DEFAULT_MODEL)))
+	var chosen := str(args.get("whisper-model", settings.get("whisper_model", "")))
+	model_chosen = chosen != ""
+	language_setting = str(args.get("whisper-language", settings.get("language", "")))
+	language = language_for(language_setting)
+	model = chosen if model_chosen else model_for(language)
 	threads = maxi(1, int(str(args.get("whisper-threads", settings.get("whisper_threads", DEFAULT_THREADS)))))
 	backend_kind = str(args.get("whisper-backend", settings.get("whisper_backend", "cpu"))).to_lower()
 	model_url = str(args.get("model-url", ""))
-	if model == "":
-		model = DEFAULT_MODEL
+	_set_download()
+
+
+## The Whisper code for a [voice] language setting: the setting when it is one of LANGUAGES; "" follows the menus'
+## language (zh_CN is zh); anything else is English.
+static func language_for(setting: String) -> String:
+	var codes := LANGUAGES.map(func(l: Array) -> String: return str(l[0]))
+	if setting in codes:
+		return setting
+	var menus := TranslationServer.get_locale().get_slice("_", 0).to_lower()
+	return menus if setting == "" and menus in codes else "en"
+
+
+## The default model for a voice language: English-only for English, else the multilingual one.
+static func model_for(code: String) -> String:
+	return DEFAULT_MODEL if code == "en" else MULTI_MODEL
+
+
+## The language each request names: an English-only model hears English whatever the setting.
+func heard_language() -> String:
+	var stem := model_path.get_file() if model_path != "" else model
+	return "en" if stem.contains(".en") else language
+
+
+## The voice language changed (the System tab; "" follows the menus): requests name it from now on, and when it
+## needs the other default model the server starts again with that one (a missing one downloads at the next use of
+## voice, with the notices as at first).
+func set_language(setting: String) -> void:
+	language_setting = setting
+	language = language_for(setting)
+	if model_chosen or model_for(language) == model:
+		return
+	model = model_for(language)
+	_set_download()
+	print("Voice: language %s; the model is now %s" % [language, model])
+	stop()
+	download_state = ""
+	restarts = 0
+	if is_inside_tree():
+		start()
+
+
+func _set_download() -> void:
+	var multi := model in DOWNLOADABLE_MULTI
+	model_file = ModelDownload.MULTI_FILE if multi else ModelDownload.MODEL_FILE
+	model_size = ModelDownload.MULTI_SIZE if multi else ModelDownload.MODEL_SIZE
+	model_sha256 = ModelDownload.MULTI_SHA256 if multi else ModelDownload.MODEL_SHA256
 
 
 func _ready() -> void:
 	set_process(false)
+	# Following the menus' language: a change there is a change of voice language.
+	var holder: Object = I18n.holder()
+	if holder != null and not holder.is_connected("changed", _on_menus_language):
+		holder.connect("changed", _on_menus_language)
 	if autostart:
 		start()
+
+
+func _on_menus_language(_code: String) -> void:
+	if language_setting == "":
+		set_language("")
 
 
 func ready() -> bool:
@@ -165,7 +247,7 @@ func ready() -> bool:
 
 
 func describe() -> String:
-	var s := "whisper.cpp %s, %s, %d threads" % [model_name(), backend_kind, threads]
+	var s := "whisper.cpp %s, %s, %d threads, language %s" % [model_name(), backend_kind, threads, heard_language()]
 	match download_state:
 		"needed":
 			s += " (no model yet: it downloads, %d MB, the first time voice is used)" % (model_size / 1000000)
@@ -219,7 +301,7 @@ func _start() -> bool:
 	# transcribing at normal priority).
 	var args := PackedStringArray(["-c", 'l=$1; shift; exec nice -n 10 "$@" >>"$l" 2>&1', "whisper-server", log_path,
 			server_path,
-			"-m", model_path, "-t", str(threads), "-l", "en", "--host", HOST, "--port", str(port),
+			"-m", model_path, "-t", str(threads), "-l", heard_language(), "--host", HOST, "--port", str(port),
 			"--request-path", route])
 	var t0 := Time.get_ticks_msec()
 	pid = OS.create_process("/bin/sh", args)
@@ -271,7 +353,7 @@ func transcribe(id: int, pcm: PackedByteArray, final: bool) -> bool:
 
 
 func _run(id: int, pcm: PackedByteArray, final: bool) -> void:
-	var body_parts := request_body(pcm, final)
+	var body_parts := request_body(pcm, final, heard_language())
 	var my_port := port
 	var my_route := route
 	var t0 := Time.get_ticks_msec()
@@ -297,11 +379,13 @@ func _run(id: int, pcm: PackedByteArray, final: bool) -> void:
 	Transcriber.emit_done(id, text, final)
 
 
-## [content type, body] of the multipart form for one clip.
-static func request_body(pcm: PackedByteArray, final: bool) -> Array:
+## [content type, body] of the multipart form for one clip. The vocabulary prompt is English, so only for English (in
+## another language it pulls the words towards English).
+static func request_body(pcm: PackedByteArray, final: bool, lang := "en") -> Array:
 	var boundary := "----vrvp%d%d" % [Time.get_ticks_usec(), randi()]
-	var fields := {"response_format": "json", "language": "en", "no_timestamps": "true", "temperature": "0.0",
-			"prompt": VOCABULARY}
+	var fields := {"response_format": "json", "language": lang, "no_timestamps": "true", "temperature": "0.0"}
+	if lang == "en":
+		fields["prompt"] = VOCABULARY
 	if final:
 		fields["beam_size"] = str(FINAL_BEAM)
 	else:
@@ -443,7 +527,7 @@ func _resolve() -> bool:
 	if model_path == "":
 		model_path = store_model()
 	if model_path == "":
-		_need_download = model in DOWNLOADABLE
+		_need_download = model in DOWNLOADABLE or model in DOWNLOADABLE_MULTI
 		last_error = "no model %s in %s/models or %s (%s)" % [model, server_dir, model_store,
 				"it downloads the first time voice is used" if _need_download
 				else "build/whisper-models.sh downloads them"]
@@ -456,7 +540,7 @@ func _resolve() -> bool:
 func store_model() -> String:
 	var dir := ProjectSettings.globalize_path(model_store)
 	var p := find_model(model, dir)
-	if p != "" and p.get_file() == ModelDownload.MODEL_FILE and model_size > 0 and FileAccess.get_size(p) != model_size:
+	if p != "" and p.get_file() == model_file and model_size > 0 and FileAccess.get_size(p) != model_size:
 		print("Voice: %s has %d bytes, not %d; deleted" % [p, FileAccess.get_size(p), model_size])
 		DirAccess.remove_absolute(p)
 		return ""
@@ -516,7 +600,7 @@ func _wait_for_model() -> void:
 	download_state = "needed"
 	Transcriber.waiting = self
 	print("Voice: no speech model yet (%s, %d MB); it downloads the first time voice is used" % [
-			ModelDownload.MODEL_FILE, model_size / 1000000])
+			model_file, model_size / 1000000])
 
 
 func _begin_download() -> void:
@@ -524,17 +608,17 @@ func _begin_download() -> void:
 		_download = ModelDownload.new()
 	_download.connect_timeout = connect_timeout
 	_download.stall_timeout = stall_timeout
-	var from := model_url if model_url != "" else ModelDownload.url()
+	var from := model_url if model_url != "" else ModelDownload.url(model_file)
 	var dir := ProjectSettings.globalize_path(model_store)
-	if not _download.start(from, dir, ModelDownload.MODEL_FILE, model_size, model_sha256):
+	if not _download.start(from, dir, model_file, model_size, model_sha256):
 		return
 	download_state = "running"
 	download_error = ""
 	download_offline = false
 	_quarter = 0
 	_download_t0 = Time.get_ticks_msec()
-	var kept := FileAccess.get_size(dir.path_join(ModelDownload.MODEL_FILE + ".part")) \
-			if FileAccess.file_exists(dir.path_join(ModelDownload.MODEL_FILE + ".part")) else 0
+	var kept := FileAccess.get_size(dir.path_join(model_file + ".part")) \
+			if FileAccess.file_exists(dir.path_join(model_file + ".part")) else 0
 	print("Voice: downloading the speech model (%d MB%s) from %s" % [model_size / 1000000,
 			", %d MB already here" % (kept / 1000000) if kept > 0 else "", from])
 	set_process(true)
@@ -569,7 +653,7 @@ func _poll_download() -> void:
 	download_offline = bool(p["offline"])
 	_failed_at = Time.get_ticks_msec()
 	var line := "Voice: speech model download failed after %.0f s: %s" % [secs, download_error]
-	var part := ProjectSettings.globalize_path(model_store).path_join(ModelDownload.MODEL_FILE + ".part")
+	var part := ProjectSettings.globalize_path(model_store).path_join(model_file + ".part")
 	var kept := FileAccess.get_size(part) if FileAccess.file_exists(part) else 0
 	print(line + " (%d of %d bytes kept; the next use of voice tries again)" % [kept, model_size])
 	_queue(why(true), 0.0)
@@ -770,7 +854,7 @@ static func _read_settings(tree: SceneTree) -> Dictionary:
 	var settings: Variant = main.get("settings") if main != null else null
 	var cfg := ConfigFile.new()
 	var use_cfg := settings == null and cfg.load("user://settings.cfg") == OK
-	for key: String in ["whisper_dir", "whisper_model", "whisper_threads", "whisper_backend"]:
+	for key: String in ["whisper_dir", "whisper_model", "whisper_threads", "whisper_backend", "language"]:
 		if settings != null and settings.has_value(SECTION, key):
 			out[key] = settings.get_value(SECTION, key, null)
 		elif use_cfg and cfg.has_section_key(SECTION, key):

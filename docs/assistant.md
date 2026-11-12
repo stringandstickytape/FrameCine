@@ -1040,17 +1040,18 @@ goes back a step. For 0.6 s after a step shows, its buttons are off and A does n
 does not go through it. It is not shown on a run with `--file`, `--dir`, `--tour`, `--no-ui`, a test or read-only
 settings. System, Test and setup, **Show the introduction again** shows it at any time.
 
-Said alone, "one" to "four" and "escape" are always that key. "Yes" and "no" are the prompt's keys while one waits, and
-ordinary words otherwise, because a "yes" to a question the agent asks in plain text has to reach it as text.
+Voice is dictation (docs/dev/surfaces-design.md, "Voice"): what you say is typed, then Enter. No spoken word is a key:
+"one", "escape", "yes" and "no" are typed as words. The keys are on the side stack beside the agent's window (Enter,
+Esc, Up, Down) and on the keyboard.
 
 Words must not answer a prompt by accident: Enter takes a list's highlighted row, usually yes, and Codex's rows answer
 to single letters. So:
 
-- While a prompt waits, words that are not a key are **not typed**. A note says what to say. Answer the prompt first.
-- A prompt no hook told of is turned down, not accepted: Escape goes ahead of a lone "no", and ahead of any words before
+- While a prompt waits, words are **not typed**. A note says to answer with the buttons beside the window.
+- A prompt no hook told of is turned down, not accepted: Escape goes ahead of any words before
   the session's first hook has run. Until then the app can't tell if a prompt is up. This is the case for Codex until
   `/hooks` trusts its hooks, and for the first message of a plain start. In those cases Escape also interrupts an agent
-  that is working. At a prompt you can see, use "one" or squeeze and trigger.
+  that is working. At a prompt you can see, use the side stack.
 - The first run in a folder counts as a prompt from the start. The agent's question about trusting the folder comes
   before any hook can run: your hooks don't run until you accept it.
 

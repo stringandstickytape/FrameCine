@@ -890,9 +890,9 @@ func owns_laser(hand: Node) -> bool:
 
 # --- Voice ---------------------------------------------------------------------------------------------------------
 
-## The talk button types into the focused pane while one has the focus and the menu is hidden.
+## The talk button types into the focused pane: it is the selected surface (set_focus()), menu or no menu.
 func wants_talk() -> bool:
-	return focused != null and connected() and not bool(main.get("menu_shown"))
+	return focused != null and connected()
 
 
 func on_talk(held: bool) -> bool:

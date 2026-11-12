@@ -50,7 +50,6 @@ const AGENTS := {
 		"mcp_file": ".mcp.json", "mcp_enable": "enabledMcpjsonServers",
 		"install": "curl -fsSL https://claude.ai/install.sh | bash",
 		"sign_in": "",
-		"keys": {"yes": "1", "no": "escape"},
 		# The context reaches it by the hook alone.
 		"inline_context": false,
 	},
@@ -69,7 +68,6 @@ const AGENTS := {
 				+ "| tar -xz -C \"$t\" && mkdir -p \"$HOME/.local/bin\" && mv \"$t\"/codex-* " \
 				+ "\"$HOME/.local/bin/codex\" && chmod +x \"$HOME/.local/bin/codex\"; rm -rf \"$t\"",
 		"sign_in": "\"$BIN\" login status >/dev/null 2>&1 || \"$BIN\" login --device-auth",
-		"keys": {"yes": "y", "no": "n"},
 		# Codex runs a hook only once the viewer has trusted it with /hooks: until the hook has run, a short bracketed
 		# context line goes ahead of the spoken words.
 		"inline_context": true,

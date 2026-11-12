@@ -393,8 +393,9 @@ The default model (`ggml-small.en-q8_0.bin`) is 264 MB (264477561 bytes, SHA-256
 - **When it downloads:** as soon as the introduction at the first start opens (`app/ui/intro.gd`): every step shows
   how far it is, Start waits for it, and a failure offers Retry or Start without voice. Otherwise (Start without voice,
   or a model deleted later) the first time voice is used (push-to-talk in the assistant, the browser, an agent pane
-  or a PC window) with the server there and no model. Only the default model downloads; another `[voice] whisper_model` that is missing stays off,
-  with the log line as before.
+  or a PC window) with the server there and no model. Only the two default models download: the English-only one, and
+  the multilingual one (`ggml-small-q8_0.bin`, 264 MB, the same release) when the voice language (System, Voice
+  language) is another; another `[voice] whisper_model` that is missing stays off, with the log line as before.
 - **No confirmation.** Pressing the talk button is the request, as the app does its own setup elsewhere (no step for
   the user). Before any byte comes, the notice says what it is and how big: "Voice needs a one-time download of
   about 264 MB. Downloaded: 0 %. The rest of the player works as usual." It comes 1.2 s after the button is let

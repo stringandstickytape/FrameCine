@@ -428,6 +428,14 @@ func _start_checks() -> void:
 
 
 func _voice_checks() -> void:
+	# Where B held sends the voice (ui_layer.gd voice_route()): the agent's window selected, the agent's, whichever
+	# link the viewer chose for the voice; nothing selected, where it went before.
+	_check("an agent's recorder", agents.push_to_talk() != null)
+	main.pointing.select(agents.get_node("AgentPane"))
+	_check("the agent's window selected: the voice is the agent's (%s)" % main.ui.voice_route(),
+			main.ui.voice_route() == "agent")
+	main.pointing.select(null)
+	_check("nothing selected: where it went before (%s)" % main.ui.voice_route(), main.ui.voice_route() == "before")
 	var hook_seen := AgentTerminal.player_dir("claude").path_join("hook_seen")
 	FileAccess.open(hook_seen, FileAccess.WRITE).close()
 	fake.typed = ""
@@ -440,12 +448,13 @@ func _voice_checks() -> void:
 	fake.keys.clear()
 	agents.deliver("Two.")
 	await _seconds(0.3)
-	_check("\"two\" alone is the key (%s, %s)" % [fake.typed, fake.keys], fake.typed == "2" and fake.keys.is_empty())
+	_check("a spoken number is words, not a key (%s, %s)" % [fake.typed, fake.keys], fake.typed == "Two."
+			and fake.keys == ["Enter"])
 	fake.keys.clear()
 	fake.typed = ""
 	agents.deliver("Escape")
-	await _seconds(0.05)
-	_check("\"escape\" too", fake.keys == ["Escape"] and fake.typed == "")
+	await _seconds(0.3)
+	_check("\"escape\" too", fake.keys == ["Enter"] and fake.typed == "Escape")
 	DirAccess.remove_absolute(hook_seen)
 	fake.keys.clear()
 	fake.typed = ""
@@ -463,8 +472,8 @@ func _voice_checks() -> void:
 	fake.typed = ""
 	agents.deliver("No.")
 	await _seconds(0.3)
-	_check("a lone \"no\" with no prompt known: Escape, then the word (%s, %s)" % [fake.typed, fake.keys],
-			fake.typed == "No." and fake.keys == ["Escape", "Enter"])
+	_check("a lone \"no\" is a word too (%s, %s)" % [fake.typed, fake.keys], fake.typed == "No."
+			and fake.keys == ["Enter"])
 	var w := FileAccess.open(AgentTerminal.player_dir("claude").path_join("waiting"), FileAccess.WRITE)
 	w.close()
 	await _seconds(0.7)
@@ -482,17 +491,12 @@ func _voice_checks() -> void:
 	fake.typed = ""
 	fake.keys.clear()
 	agents.deliver("Yes.")
-	await _seconds(0.05)
-	_check("\"yes\" at a prompt is its first choice, and the mark goes (%s)" % fake.typed, fake.typed == "1"
-			and not agents.waiting() and not FileAccess.file_exists(AgentTerminal.player_dir("claude").path_join("waiting")))
-	w = FileAccess.open(AgentTerminal.player_dir("claude").path_join("waiting"), FileAccess.WRITE)
-	w.close()
+	await _seconds(0.3)
+	_check("\"yes\" at a prompt is not typed either: the side stack answers it (%s)" % fake.typed, fake.typed == ""
+			and fake.keys.is_empty() and agents.waiting())
+	DirAccess.remove_absolute(AgentTerminal.player_dir("claude").path_join("waiting"))
 	await _seconds(0.7)
-	fake.keys.clear()
-	agents.deliver("no")
-	await _seconds(0.05)
-	_check("\"no\" at a prompt is Escape for Claude Code", fake.keys == ["Escape"])
-	# Codex: its keys, and the context line ahead of the words until its hook has run.
+	# Codex: the context line ahead of the words until its hook has run.
 	agents.open_agent("codex")
 	await _frames(2)
 	main.current_path = "stub://flat_sbs"
@@ -511,13 +515,6 @@ func _voice_checks() -> void:
 	await _seconds(0.3)
 	_check("after that, the words alone", fake.typed == "what is this film")
 	main.current_path = ""
-	var y := FileAccess.open(AgentTerminal.player_dir("codex").path_join("waiting"), FileAccess.WRITE)
-	y.close()
-	await _seconds(0.7)
-	fake.typed = ""
-	agents.deliver("yes")
-	await _seconds(0.05)
-	_check("Codex's yes is y (%s)" % fake.typed, fake.typed == "y")
 	agents.open_agent("claude")
 	await _frames(2)
 	_check("no shell: a word is only ever typed as words", not fake.keys.has("Ctrl"))
