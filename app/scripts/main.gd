@@ -93,6 +93,7 @@ const SavedPlaces := preload("res://scripts/net/saved_places.gd")
 const WindowVideoSource := preload("res://scripts/video/window_video_source.gd")
 const LibraryIndex := preload("res://scripts/library/library_index.gd")
 const WindowPointer := preload("res://scripts/window_pointer.gd")
+const ScreenSurface := preload("res://scripts/screen_surface.gd")
 const BrowserDictation := preload("res://scripts/video/browser_dictation.gd")
 const PictureKeeper := preload("res://scripts/pictures/picture_keeper.gd")
 const LocalAgents := preload("res://scripts/agents/local_agents.gd")
@@ -311,6 +312,9 @@ var controller_look_options := {}
 var _grab := {}
 ## hand -> msec of its squeeze press, for the quick squeeze (a right click on a captured window).
 var _grip_down := {}
+## The room held by the right squeeze and turned about the viewer (_update_turn()): {} or {hand, yaw: the hand's ray in
+## the XR origin's own space, null while it points too steeply to have one}.
+var _turn := {}
 var _seek_hold := {}
 var _look := Vector2.ZERO
 var _mouse_look := false
@@ -343,6 +347,8 @@ var pointing: Pointing
 var _talk_down := {}
 const TALK_TAP_MSEC := 300
 var window_pointer: WindowPointer
+## The film screen as a surface: its frame, and what each laser is on there (scripts/screen_surface.gd).
+var screen_surface: ScreenSurface
 ## Voice into the browser's selected field (scripts/video/browser_dictation.gd): the talk button asks the page first.
 var browser_dictation: BrowserDictation
 ## Keeping pictures from the browser on the big screen (scripts/pictures/picture_keeper.gd): the right stick click on
@@ -380,8 +386,10 @@ func _ready() -> void:
 	window_pointer.name = "WindowPointer"
 	window_pointer.main = self
 	add_child(window_pointer)
-	# Not a surface yet (docs/dev/surfaces-design.md, step 5): the browser's laser takes the right hand whole.
-	pointing.add_claimant(window_pointer_owns)
+	screen_surface = ScreenSurface.new()
+	screen_surface.name = "ScreenSurface"
+	screen_surface.main = self
+	add_child(screen_surface)
 	browser_dictation = BrowserDictation.new()
 	browser_dictation.name = "BrowserDictation"
 	browser_dictation.main = self
@@ -1115,6 +1123,9 @@ func _place_overlay() -> void:
 
 
 func recenter() -> void:
+	# A room turned by the squeeze (turn_view()) is straight again.
+	_turn = {}
+	xr_origin.transform = Transform3D.IDENTITY
 	if use_xr:
 		XRServer.center_on_hmd(XRServer.RESET_BUT_KEEP_TILT, true)
 		# The camera moves on the next frames; then take the eye height and put the screen in front again.
@@ -1313,7 +1324,8 @@ func _on_trigger(hand: XRController3D, pressed: bool) -> void:
 		return
 	if local_agents.on_trigger(hand, pressed):
 		return
-	if window_pointer.on_trigger(hand as XRHand, pressed):
+	# On the film screen or its frame: selects it, takes it by the bar, clicks a window on it (screen_surface.gd).
+	if screen_surface.on_trigger(hand, pressed):
 		return
 	# Grip held + trigger in 180 / 360: the zoom lens (scripts/play/zoom_lens.gd, ideas #38).
 	if features != null and features.zoom_lens.on_trigger(hand, pressed):
@@ -1342,6 +1354,11 @@ func _on_grip(hand: XRController3D, pressed: bool) -> void:
 	if local_agents.on_grip(h, pressed):
 		_grip_down.erase(h)
 		return
+	# The right squeeze on no object: the room is held and turns with the hand (the user, 2026-11-12: so as not to
+	# keep turning in the chair). In 180 / 360 with the zoom lens on, the squeeze is the lens's.
+	if h == right_hand:
+		var lens: bool = features != null and bool(features.zoom_lens.enabled) and mode.is_spherical()
+		_turn = {"hand": h, "yaw": _hand_yaw(h)} if pressed and not lens else {}
 	# Squeeze no longer moves the screen or turns it to the gaze (the user, in the headset, 2026-10-31: the Room and
 	# Picture controls and Reset room do that in terms of the room). A quick squeeze is still a right click on a
 	# captured window; a held squeeze is the zoom lens's modifier in 180 / 360 (zoom_lens.gd reads it itself).
@@ -1353,10 +1370,62 @@ func _on_grip(hand: XRController3D, pressed: bool) -> void:
 		_grip_down.erase(h)
 
 
-func _start_grab(ray: Callable, hand: XRHand) -> void:
+## The screen taken by its title bar (scripts/screen_surface.gd): it follows the hand's ray until end_screen_drag(),
+## with the point of the bar that was taken (at this distance along the ray) staying under the laser.
+func start_screen_drag(hand: XRHand, distance: float) -> void:
+	_start_grab(func() -> Array: return [hand.get_ray_origin(), hand.get_ray_direction()], hand, distance)
+
+
+func end_screen_drag() -> void:
+	if not _grab.is_empty():
+		_end_grab()
+
+
+## The hand's ray as a turn about the vertical, in the XR origin's own space (so that turning the origin does not feed
+## back into it); null when it points too steeply up or down to have one.
+func _hand_yaw(hand: XRHand) -> Variant:
+	var d: Vector3 = xr_origin.global_basis.inverse() * hand.get_ray_direction()
+	if Vector2(d.x, d.z).length() < 0.3:
+		return null
+	return atan2(d.x, -d.z)
+
+
+## The room held by the squeeze: what the laser was on stays under it as the hand swings, so the room (the screen,
+## every pane, the objects) turns about the viewer. It is the XR origin that turns, about the head's place.
+func _update_turn() -> void:
+	var hand: XRHand = _turn["hand"]
+	if not hand.grip_down or (use_xr and not hand.get_is_active()):
+		_turn = {}
+		return
+	var yaw: Variant = _hand_yaw(hand)
+	if yaw != null and _turn["yaw"] != null:
+		turn_view(wrapf(float(yaw) - float(_turn["yaw"]), -PI, PI))
+	_turn["yaw"] = yaw
+
+
+## Turns the viewer in the room by this angle (radians; positive: the room goes round to the right), about the head.
+func turn_view(by: float) -> void:
+	if is_zero_approx(by):
+		return
+	var c: Vector3 = camera.global_position
+	xr_origin.global_transform = Transform3D(Basis.IDENTITY, c) * Transform3D(Basis(Vector3.UP, by), Vector3.ZERO) \
+			* Transform3D(Basis.IDENTITY, -c) * xr_origin.global_transform
+
+
+## at: the distance along the ray of the point taken (the bar); 0: the screen's middle goes to the ray.
+func _start_grab(ray: Callable, hand: XRHand, at := 0.0) -> void:
 	var r: Array = ray.call()
 	_grab = {"ray": ray, "hand": hand, "distance": maxf((r[0] as Vector3).distance_to(screen.global_position), 0.5),
-			"yaw": _ray_yaw(r[1]), "start_dir": r[1], "start_msec": Time.get_ticks_msec()}
+			"yaw": _ray_yaw(r[1]), "start_dir": r[1], "start_msec": Time.get_ticks_msec(),
+			"d_yaw": 0.0, "d_distance": 0.0, "d_height": 0.0}
+	if at > 0.0:
+		# What the screen's place is, less what the taken point's would be: kept while it is held.
+		var p: Vector3 = (r[0] as Vector3) + (r[1] as Vector3) * at - room_shift
+		_grab["distance"] = at
+		_grab["start_msec"] = 0
+		_grab["d_yaw"] = wrapf(screen_yaw - atan2(p.x, -p.z), -PI, PI)
+		_grab["d_distance"] = screen_distance - Vector2(p.x, p.z).length()
+		_grab["d_height"] = screen_height_offset - (p.y - eye_height)
 
 
 func _end_grab() -> void:
@@ -1391,9 +1460,9 @@ func _update_grab(delta: float) -> void:
 		elif absf(stick.y) > 0.25:
 			_grab["distance"] = clampf(float(_grab["distance"]) * (1.0 + stick.y * delta * 1.5), 0.5, 30.0)
 	var p := origin + dir * float(_grab["distance"]) - room_shift
-	screen_yaw = atan2(p.x, -p.z)
-	screen_distance = clampf(Vector2(p.x, p.z).length(), 0.5, 30.0)
-	screen_height_offset = clampf(p.y - eye_height, -3.0, 6.0)
+	screen_yaw = atan2(p.x, -p.z) + float(_grab.get("d_yaw", 0.0))
+	screen_distance = clampf(Vector2(p.x, p.z).length() + float(_grab.get("d_distance", 0.0)), 0.5, 30.0)
+	screen_height_offset = clampf(p.y - eye_height + float(_grab.get("d_height", 0.0)), -3.0, 6.0)
 	_place_screen()
 	screen_changed.emit(screen_width, screen_distance, screen_height_offset)
 
@@ -1458,8 +1527,9 @@ func _on_language_changed(_code: String) -> void:
 ## (menu shown or not). Called when a profile changes and when the menu shows / hides, never per frame.
 func update_controller_labels() -> void:
 	_update_foveation()
-	var on_window := window_pointer != null and window_pointer.is_active()
-	# A terminal no longer changes what the buttons do, so it no longer changes their legends.
+	# A window on the big screen no longer changes what the buttons do (the laser is its pointer), nor a terminal: so
+	# neither changes the legends.
+	var on_window := false
 	var terminal := false
 	var enter := false
 	_grab_labelled = features != null and features.physics.available()
@@ -1682,6 +1752,8 @@ func _process(delta: float) -> void:
 		_update_sticks(delta)
 	if not _grab.is_empty():
 		_update_grab(delta)
+	if not _turn.is_empty():
+		_update_turn()
 
 	if overlay.visible:
 		_overlay_timer += delta

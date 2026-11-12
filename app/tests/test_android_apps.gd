@@ -781,9 +781,10 @@ func _back_checks() -> void:
 	var right: Node = main.right_hand
 	fake.tops.assign([b, a])
 	var keys := _count("keyevent 4")
-	_check("B on the window is taken", main.window_pointer.on_button(right, "prev_file"))
+	_check("B is not the window's any more", not main.window_pointer.has_method("on_button"))
+	main.screen_surface._press("back")
 	await _until(func() -> bool: return _count("keyevent 4") == keys + 1)
-	_check("B on the window is Android Back", _count("keyevent 4") == keys + 1)
+	_check("Back on the screen's side stack is Android Back", _count("keyevent 4") == keys + 1)
 	await _until(func() -> bool: return not apps._back_busy)
 	await _stopped_by(func() -> void: apps.stop_app())
 	var after := await apps.back()

@@ -1,30 +1,19 @@
 extends Node
 
-## Input for a captured window (scripts/video/window_video_source.gd) while it is on the flat screen and the menu is
-## hidden. main.gd asks it first (after the menu) and skips its own binding when it returns true.
-## Right controller (docs/window-source.md, "Controller mapping"), in two modes:
-##   Pointer mode, while the viewer looks at the screen (eye gaze, else the head's direction; stick_cursor.gd has the
-##   hysteresis and the latch; the gaze only chooses the mode, the cursor never follows it): a cursor drawn into the picture (video_common.gdshaderinc,
-##   cursor_px / cursor_alpha: the film layer can't hide it), moved by the stick; the trigger is the left button at
-##   the cursor (held with the trigger: drags work); a squeeze tap is the right button there; squeeze held + stick:
-##   the stick's normal job below.
-##   Normal job, while they look away (the cursor is not drawn: that is the cue): stick up / down scrolls, left / right
-##   sends the arrow keys (web players seek with them); the trigger and the squeeze do nothing.
-##   Both: A is Space (play / pause in web players); B browser Back (an Android app's Back, below); menu, view, bumper
-##   unchanged (the bumper: voice into the selected field, browser_dictation.gd, or the assistant). The right stick
-##   click (the headset's own controllers) in pointer mode keeps the picture under the cursor
-##   (scripts/pictures/picture_keeper.gd); looking away it is the menu.
-## The laser: off on a window by default. It was drawn in front of the screen, so the film layer had to hide while it
-## pointed there (film_layer.gd), and it competed with the cursor for the trigger. [browser] laser brings it back as an
-## alternative: where it meets the window the cursor follows it, and the trigger clicks there.
-## An agent's terminal on the big screen (terminal://): no cursor; trigger Enter, stick up / down arrows, B Escape,
-## and with the squeeze held stick up / down scroll back (Shift + Page Up / Down, xterm's own scrollback).
-## An Android app on the big screen (scripts/android/android_apps.gd): as any window, but B is its own Back.
-## Left controller: trigger and X / Y do nothing on a window; the stick works as for video.
+## Input for a captured window (scripts/video/window_video_source.gd) while it is on the flat screen. The screen is a
+## surface (scripts/screen_surface.gd; docs/dev/surfaces-design.md, step 5): a laser on it is the pointer, with either
+## hand, and where the viewer looks changes nothing.
+##   The trigger is the left button at the laser's pixel (held: drags work). A cursor is drawn into the picture there
+##   (video_common.gdshaderinc, cursor_px / cursor_alpha: the film layer can't hide it).
+##   The stick with the laser on the window: up / down scrolls, left / right sends the arrow keys (web players seek
+##   with them). On an agent's terminal: up / down scrolls back (Shift + Page Up / Down, xterm's own scrollback).
+##   A squeeze tap with the laser on the window is the right button there.
+##   The right stick click keeps the picture under the laser (scripts/pictures/picture_keeper.gd).
+##   Back is a button of the screen's side stack. A, B, X, Y and Menu are what they always are.
+## With no laser on the window the controllers do what they do for a film.
 ## Desktop: the mouse over the screen is the window's mouse; the keyboard types into the window, except F1 (overlay),
 ## F3 (menu) and F12 (screenshot). A keyboard paired to the headset arrives the same way.
-## Settings: [browser] laser (default false).
-## Command: browser_pointer (read); setting browser_laser (the dev link's set).
+## Command: browser_pointer (read).
 
 const XRHand := preload("res://scripts/xr/xr_hand.gd")
 const WindowVideoSource := preload("res://scripts/video/window_video_source.gd")
@@ -46,12 +35,13 @@ const MOUSE_TO_X := {MOUSE_BUTTON_LEFT: 1, MOUSE_BUTTON_MIDDLE: 2, MOUSE_BUTTON_
 
 ## scripts/main.gd
 var main: Node3D
-## Window pixel a click goes to now (the cursor in pointer mode, the laser's hit with [browser] laser), or NO_HIT.
+## Window pixel a click goes to now (where a laser meets the window), or NO_HIT.
 var pointer := NO_HIT
-## The stick pointer's state.
+## The cursor drawn in the picture: on ("mode") while a laser is on the window, at its pixel ("pos").
 var cursor := StickCursor.new()
-## [browser] laser: the laser on the window as an alternative pointer.
-var laser := false
+## The hand whose laser is the pointer now, and the one that has the left button down.
+var pointer_hand: Object = null
+var _left_hand: Object = null
 ## Tests: run as in the headset without an XR session, and look where gaze_override says ([origin, dir], or [] for
 ## no gaze at all) instead of the eyes or the head.
 var test_xr := false
@@ -64,17 +54,11 @@ var _left_down := false
 var _mouse_down := {}
 var _arrow_hold := -1.0
 var _was_active := false
-var _stick := Vector2.ZERO
-var _stick_frame := -1
-## The stick was used with the squeeze held, so letting go of the squeeze is no right click.
-var _grip_scrolled := false
 var _drawn_alpha := -1.0
 var _drawn_px := Vector2(-2, -2)
 
 
 func _ready() -> void:
-	if main != null and main.get("settings") != null:
-		laser = bool(main.settings.get_value(SECTION, "laser", false))
 	register_commands()
 
 
@@ -90,44 +74,42 @@ func is_active() -> bool:
 			and (main.mode as VideoMode).projection == VideoMode.Proj.FLAT
 
 
-## The window takes the stick pointer: any window but an agent's terminal.
+## A captured window is on the flat screen, the menu open or not: a laser can point at it (the menu is one more pane).
+func on_screen() -> bool:
+	var src := get_source()
+	return src != null and src.has_frame() and (main.mode as VideoMode).projection == VideoMode.Proj.FLAT
+
+
+## The window takes a pointer and shows a cursor: any window but an agent's terminal.
 func has_cursor() -> bool:
 	var src := get_source()
-	return is_active() and not src.is_terminal()
+	return on_screen() and not src.is_terminal()
 
 
-## The UI layer leaves this hand's laser alone: it is the window's pointer ([browser] laser only).
-func owns_laser(hand: XRHand) -> bool:
-	return laser and main.use_xr and hand == main.right_hand and has_cursor()
+## The UI layer leaves this hand's laser alone: it is on the screen (scripts/screen_surface.gd draws it).
+func owns_laser(hand: Object) -> bool:
+	var surface: Node = main.get("screen_surface")
+	return surface != null and bool(surface.has_hand(hand))
 
 
-## [browser] laser.
-func set_laser(on: bool) -> void:
-	laser = on
-	main.settings.set_value(SECTION, "laser", true if on else null)
-	if not on and main.use_xr:
-		main.right_hand.set_laser(false)
-	main.update_controller_labels()
-
-
-## The right controller's legends on the window for the mode now (main.gd's controller_labels()): {} for a terminal.
+## The legends never change on a window now (docs/dev/surfaces-design.md).
 func window_labels() -> Dictionary:
-	var src := get_source()
-	if src == null or src.is_terminal():
-		return {}
-	if cursor.mode:
-		# The stick click keeps the picture under the cursor: said only while there is one (picture_keeper.gd).
-		var keeper: Node = main.get("picture_keeper")
-		if keeper != null and bool(keeper.get("over_image")):
-			var t: Dictionary = main.WINDOW_POINTER_LABELS.duplicate()
-			t["stick_click"] = main.KEEP_PICTURE_LABEL
-			return t
-		return main.WINDOW_POINTER_LABELS
-	return main.WINDOW_LABELS if laser else main.WINDOW_AWAY_LABELS
+	return {}
 
 
-## The stick clicked in pointer mode: the cursor back where it was before the click's nudge, and held there a moment
-## (stick_cursor.gd freeze()). Returns that window pixel, or NO_HIT outside pointer mode.
+## This hand has the window's left button down.
+func holds(hand: Object) -> bool:
+	return _left_down and _left_hand == hand
+
+
+## What this hand's laser is on, on the screen ({} when it is not on it).
+func _aim(hand: Object) -> Dictionary:
+	var surface: Node = main.get("screen_surface")
+	return surface.aims.get(hand, {}) if surface != null else {}
+
+
+## The stick clicked with the laser on the window: the cursor back where it was before the click's nudge, and held
+## there a moment (stick_cursor.gd freeze()). Returns that window pixel, or NO_HIT with no laser on the window.
 func freeze_cursor(seconds: float) -> Vector2:
 	if not cursor.mode or not has_cursor():
 		return NO_HIT
@@ -200,45 +182,46 @@ func _process(delta: float) -> void:
 
 ## One frame of the window's pointer (tests call it with test_xr).
 func step(delta: float) -> void:
-	var active := is_active()
+	var active := on_screen()
 	if active != _was_active:
 		_was_active = active
 		if not active:
 			_release_all()
 			cursor.reset()
-		main.update_controller_labels()
 	if not active or not (main.use_xr or test_xr) or not has_cursor():
 		pointer = NO_HIT
+		pointer_hand = null
 		if cursor.mode or cursor.alpha > 0.0:
 			cursor.reset()
-			main.update_controller_labels()
 		_draw_cursor()
 		return
 	var src := get_source()
 	var size := Vector2(src.get_size())
 	if size.x >= 1.0 and size.y >= 1.0:
 		cursor.size = size
-	var hand: XRHand = main.right_hand
-	var laser_px: Variant = null
-	if laser and main.use_xr and hand.get_is_active() and not (main.ui != null and main.ui.laser_in_use(hand)):
-		var hit := ray_to_window(hand.get_ray_origin(), hand.get_ray_direction())
-		hand.set_laser(true, float(hit.get("distance", 3.0)), not hit.is_empty())
-		if not hit.is_empty():
-			laser_px = hit["pixel"]
-	var uv: Variant = null
-	var g := gaze_ray()
-	if not g.is_empty():
-		var h := ray_to_uv(g[0], g[1])
-		if not h.is_empty():
-			uv = h["uv"]
-	var stick := _stick if _stick_frame == Engine.get_process_frames() else Vector2.ZERO
-	cursor.step(delta, uv, stick, hand.grip_down, _left_down, laser_px)
-	pointer = cursor.pos if cursor.mode else NO_HIT
-	if cursor.mode and pointer.distance_to(_last_sent) >= 0.5:
+	# The hand with the button down keeps the pointer; else the right hand's laser on the window, else the left's.
+	var at: Variant = null
+	pointer_hand = null
+	var order: Array = [_left_hand] if _left_down else []
+	order.append(main.right_hand)
+	order.append_array(main.hands)
+	for hand: Object in order:
+		var aim := _aim(hand)
+		if aim.has("pixel"):
+			at = aim["pixel"]
+			pointer_hand = hand
+			break
+	if at == null:
+		pointer = NO_HIT
+		if cursor.mode or cursor.alpha > 0.0:
+			cursor.reset()
+		_draw_cursor()
+		return
+	cursor.step(delta, null, Vector2.ZERO, false, _left_down, at)
+	pointer = cursor.pos
+	if pointer.distance_to(_last_sent) >= 0.5:
 		_last_sent = pointer
 		src.send_pointer(pointer)
-	if cursor.mode_changed:
-		main.update_controller_labels()
 	_draw_cursor()
 
 
@@ -261,6 +244,7 @@ func _release_all() -> void:
 	if _left_down and src != null:
 		src.send_button(1, false)
 	_left_down = false
+	_left_hand = null
 	if src != null:
 		for b: int in _mouse_down:
 			src.send_button(b, false)
@@ -271,66 +255,64 @@ func _release_all() -> void:
 
 # --- Controllers -------------------------------------------------------------------------------------------------
 
-func on_trigger(hand: XRHand, pressed: bool) -> bool:
-	if not is_active():
-		return false
-	if hand != main.right_hand:
-		return true
+## The left button goes down at this pixel with this hand's trigger (scripts/screen_surface.gd, which knows what the
+## laser is on).
+func click(hand: Object, pixel: Vector2) -> void:
 	var src := get_source()
-	if src.is_terminal():
-		if pressed:
-			src.tap_key(KEY_ENTER)
-			hand.pulse()
-		return true
-	if pressed:
-		if pointer != NO_HIT:
-			src.send_pointer(pointer)
-			src.send_button(1, true)
-			_left_down = true
-			hand.pulse()
-	elif _left_down:
+	if src == null:
+		return
+	pointer = pixel
+	_last_sent = pixel
+	src.send_pointer(pixel)
+	src.send_button(1, true)
+	_left_down = true
+	_left_hand = hand
+
+
+## The trigger comes up: the left button with it, wherever the laser is by then. True when it was down with this hand.
+func on_trigger(hand: Object, pressed: bool) -> bool:
+	if pressed or not holds(hand):
+		return false
+	var src := get_source()
+	if src != null:
 		if pointer != NO_HIT:
 			src.send_pointer(pointer)
 		src.send_button(1, false)
-		_left_down = false
+	_left_down = false
+	_left_hand = null
 	return true
 
 
-## A squeeze tap (main.gd measured it): right click at the cursor. False when there is none (looking away). A squeeze
-## that scrolled with the stick is no tap.
+## A squeeze tap (main.gd measured it) with the laser on the window: the right button there. False otherwise.
 func on_grip_tap(hand: XRHand) -> bool:
-	if not is_active() or hand != main.right_hand:
-		return false
-	if _grip_scrolled:
-		_grip_scrolled = false
-		return true
-	if pointer == NO_HIT:
+	var aim := _aim(hand)
+	if not aim.has("pixel") or not has_cursor():
 		return false
 	var src := get_source()
-	src.send_pointer(pointer)
+	src.send_pointer(aim["pixel"])
 	src.send_button(3, true)
 	src.send_button(3, false)
 	hand.pulse()
 	return true
 
 
+## The stick with this hand's laser on the window: it scrolls. False with no laser on it (the film's stick then).
 func on_stick(hand: XRHand, stick: Vector2, delta: float) -> bool:
-	if not is_active() or hand != main.right_hand:
+	if not on_screen() or not _aim(hand).has("pixel"):
 		return false
 	var src := get_source()
 	if src.is_terminal():
-		_terminal_stick(hand, stick, delta)
+		# Up is back through the terminal's history, as on its own pane.
+		if absf(stick.y) < ARROW_THRESHOLD:
+			_arrow_hold = -1.0
+			return true
+		if _arrow_hold < 0.0 or _arrow_hold >= ARROW_REPEAT:
+			_arrow_hold = 0.0
+			src.send_godot_key(KEY_SHIFT, true)
+			src.tap_key(KEY_PAGEUP if stick.y > 0.0 else KEY_PAGEDOWN)
+			src.send_godot_key(KEY_SHIFT, false)
+		_arrow_hold += delta
 		return true
-	_stick = stick
-	_stick_frame = Engine.get_process_frames()
-	if not hand.grip_down:
-		_grip_scrolled = false
-	if cursor.mode and not hand.grip_down:
-		# Pointer mode: step() moves the cursor with this frame's stick.
-		_arrow_hold = -1.0
-		return true
-	if hand.grip_down and stick.length() > SCROLL_DEAD_ZONE:
-		_grip_scrolled = true
 	if absf(stick.y) > SCROLL_DEAD_ZONE:
 		src.send_scroll(0.0, -stick.y * SCROLL_RATE * delta)
 	if absf(stick.x) > ARROW_THRESHOLD:
@@ -340,39 +322,6 @@ func on_stick(hand: XRHand, stick: Vector2, delta: float) -> bool:
 		_arrow_hold += delta
 	else:
 		_arrow_hold = -1.0
-	return true
-
-
-func _terminal_stick(hand: XRHand, stick: Vector2, delta: float) -> void:
-	var src := get_source()
-	if absf(stick.y) < ARROW_THRESHOLD:
-		_arrow_hold = -1.0
-		return
-	if _arrow_hold < 0.0 or _arrow_hold >= ARROW_REPEAT:
-		_arrow_hold = 0.0
-		if hand.grip_down:
-			src.send_godot_key(KEY_SHIFT, true)
-			src.tap_key(KEY_PAGEUP if stick.y > 0.0 else KEY_PAGEDOWN)
-			src.send_godot_key(KEY_SHIFT, false)
-		else:
-			src.tap_key(KEY_UP if stick.y > 0.0 else KEY_DOWN)
-	_arrow_hold += delta
-
-
-## next_file (A / X) and prev_file (B / Y). Right hand: Space and Back. Left hand: nothing.
-func on_button(hand: XRHand, action: String) -> bool:
-	if not is_active():
-		return false
-	if hand == main.right_hand:
-		match action:
-			"next_file":
-				get_source().tap_key(KEY_SPACE)
-			"prev_file":
-				if main.android_apps.on_big_screen():
-					main.android_apps.back()
-					hand.pulse()
-				else:
-					get_source().tap_key(KEY_ESCAPE if get_source().is_terminal() else KEY_BACK)
 	return true
 
 
@@ -456,19 +405,14 @@ func status() -> Dictionary:
 	return {"active": is_active(), "cursor_window": has_cursor(), "pointer_mode": cursor.mode,
 			"cursor_shown": cursor.shown(), "cursor": {"x": roundi(cursor.pos.x), "y": roundi(cursor.pos.y)}
 					if cursor.pos.x >= 0.0 else null,
-			"window": {"width": size.x, "height": size.y}, "gaze": gaze_source if has_cursor() else "",
-			"laser": laser}
+			"window": {"width": size.x, "height": size.y}}
 
 
 func register_commands() -> void:
 	DevCommands.register("browser_pointer", func(_args: Dictionary, _ctx: DevCommands.Call) -> Variant:
 		return status(), {"assistant": "read",
-		"description": "The stick pointer on the window on the big screen (the browser): active (a window has the "
-				+ "controllers, menu hidden), pointer_mode (the viewer looks at the screen, so the right stick moves "
-				+ "the cursor and the trigger clicks; else the stick scrolls), cursor_shown, cursor {x, y} in window "
-				+ "pixels (null before it first showed; it never follows the gaze, only the stick moves it), window "
-				+ "{width, height}, gaze (eyes, head or none: what chooses the mode), laser.",
-		"returns": "{active, cursor_window, pointer_mode, cursor_shown, cursor, window, gaze, laser}"})
-	DevCommands.register_setting("browser_laser", func() -> bool: return laser,
-			func(v: Variant) -> void: set_laser(bool(v)), {"type": "bool",
-			"description": "The laser on a window as well as the stick pointer ([browser] laser)."})
+			"description": "The pointer on the window on the big screen (the browser): active (a window is on the flat "
+					+ "screen, menu hidden), pointer_mode (a controller's laser is on the window: the trigger clicks "
+					+ "there and the stick scrolls), cursor_shown, cursor {x, y} in window pixels (null before a laser "
+					+ "was first on it), window {width, height}.",
+			"returns": "{active, cursor_window, pointer_mode, cursor_shown, cursor, window}"})

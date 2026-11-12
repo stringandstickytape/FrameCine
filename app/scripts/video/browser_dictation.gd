@@ -92,13 +92,14 @@ func browser_source() -> WindowVideoSource:
 	return null
 
 
-## The talk button asks the page first only while the viewer looks at the browser: it is on the big screen, the menu
-## hidden, its page has a DevTools socket, and the gaze has the stick pointer on (window_pointer.gd, stick_cursor.gd:
-## the ring showing is the cue). Looking anywhere else, the button is the assistant's or the agent's as always, so
-## Claude or Codex can be talked to without their window open (the user, 2026-11-06).
+## The talk button asks the page first only while the screen is the selected surface (docs/dev/surfaces-design.md:
+## voice goes to the selected surface, and where the viewer looks changes nothing): the browser is on the big screen,
+## the menu hidden, and its page has a DevTools socket. With anything else selected the button is the assistant's or
+## the agent's as always, so Claude or Codex can be talked to without their window open (the user, 2026-11-06).
 func wants_talk() -> bool:
 	var src := browser_source()
-	return src != null and main.window_pointer.is_active() and src.page_ws() != "" 			and bool(main.window_pointer.cursor.mode)
+	return src != null and main.window_pointer.is_active() and src.page_ws() != "" \
+			and main.pointing.selected == main.screen
 
 
 func busy() -> bool:

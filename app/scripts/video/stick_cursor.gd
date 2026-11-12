@@ -138,7 +138,8 @@ func _pin(delta: float, at: Vector2) -> void:
 	mode = true
 	_off_time = 0.0
 	_on_time = 0.0
-	var to := at.clamp(Vector2.ZERO, size - Vector2.ONE)
+	# Held a moment after a stick click (freeze()): the click's wobble of the hand does not move it.
+	var to := at.clamp(Vector2.ZERO, size - Vector2.ONE) if not frozen() else pos
 	if to != pos:
 		pos = to
 		moved = true

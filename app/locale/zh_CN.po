@@ -3001,9 +3001,6 @@ msgstr "放大镜"
 msgid "Magnification"
 msgstr "放大倍数"
 
-msgid "Laser on the browser"
-msgstr "在浏览器上使用激光"
-
 msgid "Phone remote"
 msgstr "手机遥控"
 
@@ -3088,9 +3085,6 @@ msgstr "曲面屏幕作为头显的圆柱图层；关：在房间中绘制，前
 
 msgid "In 180 and 360: hold the grip and pull the trigger for a magnifier"
 msgstr "在 180° 和 360° 中：按住握把并扣动扳机即可使用放大镜"
-
-msgid "The laser points and clicks on the page too, as well as the stick"
-msgstr "除摇杆外，激光也能在网页上指向和点击"
 
 msgid "Ask"
 msgstr "询问"

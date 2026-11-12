@@ -351,7 +351,8 @@ func _open_browser() -> void:
 	wp = main.window_pointer
 	wp.set_process(false)
 	wp.test_xr = true
-	wp.use_gaze_override = true
+	main.screen_surface.set_process(false)
+	main.screen_surface.test_xr = true
 	await _frames(2)
 	await _until(func() -> bool: return main.browser_dictation.session.is_open(), 3.0)
 	_check("the page's DevTools session is open", main.browser_dictation.session.is_open())
@@ -365,15 +366,39 @@ static func _window_picture() -> Image:
 	return img
 
 
-func _look_at_screen() -> void:
+## The right hand's laser on this pixel of the window (1920 x 1080); null: off the screen.
+func _aim_at(px: Variant) -> void:
+	_aim_px = px
+	_apply_aim()
+
+
+## The app puts the hands back each frame without a session: the aim is set again before every step.
+func _apply_aim() -> void:
+	var px: Variant = _aim_px
+	var hand: Node3D = main.right_hand
 	var screen: Node3D = main.screen
-	var eye: Vector3 = main.camera.global_position
-	wp.gaze_override = [eye, (screen.global_position - eye).normalized()]
+	var quad: Vector2 = screen.get_flat_size()
+	hand.global_position = main.camera.global_position + Vector3(0.2, -0.3, 0.0)
+	var local := Vector3(quad.x * 3.0, 0.0, 0.0)
+	if px != null:
+		local = Vector3(((px as Vector2).x / 1920.0 - 0.5) * quad.x, (0.5 - (px as Vector2).y / 1080.0) * quad.y, 0.0)
+	hand.look_at(screen.global_transform * local, Vector3.UP)
+	# The other hand points away from the screen.
+	(main.left_hand as Node3D).look_at((main.left_hand as Node3D).global_position + screen.global_basis.z, Vector3.UP)
 
 
-func _step(n: int, stick := Vector2.ZERO) -> void:
+var _aim_px: Variant = null
+
+
+func _look_at_screen() -> void:
+	_aim_at(Vector2(960, 540))
+
+
+func _step(n: int, _stick := Vector2.ZERO) -> void:
 	for i in n:
-		wp.on_stick(main.right_hand, stick, DT)
+		_apply_aim()
+		main.pointing.refresh()
+		main.screen_surface.step()
 		wp.step(DT)
 		await process_frame
 
@@ -388,15 +413,16 @@ func _test_stick_click() -> void:
 			func(t: String) -> bool: return t.contains("KEEP PICTURE")))
 	page.under = {"image": true, "src": IMG_URL, "alt": "Test Mountain Lake", "title": "Test pictures page",
 			"page": PAGE_URL, "rect": {"x": 600, "y": 300, "w": 300, "h": 200}}
-	await _step(30, Vector2(0.5, 0))
-	await _step(30)
+	_aim_at(Vector2(700, 400))
+	await _step(60)
 	_check("over an image: the page was asked where the cursor is, in window pixels", keeper.over_image
 			and not page.asked.is_empty() and page.asked[-1][0] == "over")
-	_check("the legend says KEEP PICTURE (%s)" % [_right_labels()], _right_labels().values().any(
+	_check("the legends do not change over an image (%s)" % [_right_labels()], not _right_labels().values().any(
 			func(t: String) -> bool: return t.contains("KEEP PICTURE")))
-	# The click's nudge: the stick pushed a few frames just before, then the click.
+	# The click's nudge: the hand wobbles a few frames just before, then the click.
 	var before: Vector2 = wp.cursor.pos
-	await _step(6, Vector2(1, 0))
+	_aim_at(Vector2(760, 400))
+	await _step(6)
 	_check("the nudge moved the cursor (%s -> %s)" % [before, wp.cursor.pos], wp.cursor.pos.x > before.x)
 	fake.routes[IMG_URL] = {"code": 200, "body": _image(640, 427, 5).save_jpg_to_buffer(0.9)}
 	var n := PictureLibrary.list().size()
@@ -445,9 +471,9 @@ func _test_stick_click() -> void:
 	_check("nothing under the cursor: said, nothing kept", keeper.last.get("ok") == false
 			and _toast().contains("No picture under the pointer"))
 	# Looking away: the stick click is the menu again.
-	wp.gaze_override = []
+	_aim_at(null)
 	await _step(60)
-	_check("looking away: no pointer mode, the stick click not taken", not wp.cursor.mode
+	_check("the laser off the window: no pointer, the stick click not taken", not wp.cursor.mode
 			and not keeper.on_stick_click(main.right_hand, true))
 
 

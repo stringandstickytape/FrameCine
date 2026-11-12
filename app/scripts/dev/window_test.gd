@@ -109,22 +109,16 @@ func _run() -> void:
 	# The controllers' mapping (no XR here: called as main.gd does).
 	var right: Node = main.right_hand
 	var left: Node = main.left_hand
-	main.window_pointer.pointer = Vector2(size) / 2.0
 	inputs = int(src.get_stats().get("input_events", 0))
-	_check("right trigger is taken by the window", main.window_pointer.on_trigger(right, true))
-	main.window_pointer.on_trigger(right, false)
-	_check("squeeze tap is a right click", main.window_pointer.on_grip_tap(right))
-	_check("right stick scrolls", main.window_pointer.on_stick(right, Vector2(0.0, -1.0), 0.1))
-	_check("A is Space", main.window_pointer.on_button(right, "next_file"))
-	_check("B is Back", main.window_pointer.on_button(right, "prev_file"))
+	main.window_pointer.click(right, Vector2(size) / 2.0)
+	_check("the trigger's release is the window's", main.window_pointer.on_trigger(right, false))
 	after = int(src.get_stats().get("input_events", 0))
-	_check("controller input reached the window (%d events)" % (after - inputs), after - inputs >= 8)
-	_check("left trigger does nothing on a window", main.window_pointer.on_trigger(left, true)
-			and main.player.is_playing())
-	_check("left stick still moves the screen", not main.window_pointer.on_stick(left, Vector2(0.0, 1.0), 0.1))
-	var labels: Dictionary = main.controller_labels(main.PREVIEW_PROFILE, "right", false, true)
-	_check("right labels for the window (%s)" % labels.get("trigger"), labels.get("trigger") == "CLICK"
-			and labels.get("a") == "SPACE" and labels.get("b") == "BACK")
+	_check("a click reached the window (%d events)" % (after - inputs), after - inputs >= 2)
+	_check("the left trigger with nothing held is not taken", not main.window_pointer.on_trigger(left, false))
+	_check("a stick with no laser on the window is the film's", not main.window_pointer.on_stick(left, Vector2(0.0, 1.0), 0.1))
+	var labels: Dictionary = main.controller_labels(main.PREVIEW_PROFILE, "right", false)
+	_check("the legends are the fixed ones on a window (%s)" % labels.get("trigger"), labels.get("trigger") == "CLICK"
+			and labels.get("a") == "PLAY / PAUSE")
 	labels = main.controller_labels(main.PREVIEW_PROFILE, "left", false, true)
 	_check("left labels drop the trigger (%s)" % labels, not labels.has("trigger") and labels.get("squeeze") == "MOVE SCREEN")
 

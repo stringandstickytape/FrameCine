@@ -41,7 +41,7 @@ terminal. The floating keyboard is a tool for the selected surface, not a surfac
 | Y | The AI |
 | Menu, press | The menu pane, shown or hidden |
 | Menu, hold | The menu pane comes back in front of the viewer |
-| Grip | Pick up an object, in either state |
+| Grip | On an object: pick it up, in either state. On nothing (right controller): hold the room and turn it about the viewer |
 
 Next and previous are not worth buttons (the user: this is for films, not music). They are on the film's bar.
 X as Enter, and the stick, A and B turning into arrows, Space and Escape for a terminal, go: the terminal's side
@@ -60,8 +60,8 @@ stack has those as buttons, and the keyboard has the keys. The spoken command wo
 | The floating keyboard | Not affected | Not affected |
 | Objects | Can be picked up | Can be picked up |
 
-No automatic switching: the viewer presses X. Hiding the UI hides the menu pane with the rest; Menu while it is
-hidden shows the UI with the menu.
+No automatic switching: the viewer presses X. The menu pane is not hidden by it (only its own bar goes), and Menu
+does not bring the chrome back.
 
 ## What a surface looks like
 
@@ -118,6 +118,23 @@ is done. The others are offered and said to be untried.
   (the grabbed point stays under the laser; it turns with the hand and never rolls); a click inside selects it; it
   glows while selected. Once moved it opens where it was left; Menu held puts it back in front of the head. Its
   place is not kept across runs.
+- **The keyboard is a pane too** (the user, in the headset): a title bar with Close while the chrome shows; the
+  trigger on the bar moves it; the squeeze does nothing to it; the Close box in its own picture is gone.
+- **Step 5, done** (not tried on the headset): `app/scripts/screen_surface.gd`. The flat film screen wears a frame
+  with the chrome: a title bar with what is playing, no Close, and a side stack (Previous and Next for a film; Back
+  for a browser or an Android app). The trigger on its bar selects it and moves it, in the room's terms, the point
+  taken staying under the laser. A film's picture answers no ray, so no laser is drawn over a film. A captured
+  window on the screen takes the laser as its pointer, with either hand (the right first): the trigger is the left
+  button there, the stick scrolls, a squeeze tap is the right button. The gaze-chosen stick cursor, the
+  "Laser on the browser" setting and the window's own legends are gone. Dictation into a page is for the selected
+  screen, not for where the viewer looks. A 180 or 360 picture is not a surface.
+- **The room turns** (the user, 2026-11-12): the right squeeze on no object holds the room and turns it about the
+  viewer with the hand's swing (`turn_view()` in `app/scripts/main.gd`: the XR origin turns about the head).
+  Recentre puts it straight. Not kept across runs. In 180 / 360 with the zoom lens on, the squeeze is the lens's.
+- Owed from step 5: KEEP PICTURE is no longer printed on the stick while the laser is on an image (the legends are
+  fixed); `WINDOW_LABELS` and the other per-mode legend tables in `main.gd` are unused and to be removed with the
+  `docs/USAGE.md` rewrite; a paired keyboard still goes to a window on the big screen whenever the menu is hidden,
+  selected or not; the screen's place is saved per room as before, the bar only adds a way to move it.
 - Owed from step 4: the menu's own extras (the card, placing an object, picking a seat, marking a window) still take
   the pointer hand whole; the menu still has one pointer hand; the glow's blue is a constant in
   `app/ui/surface_frame.gd`, which `test_pane` flags (it wants a theme token).
