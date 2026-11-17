@@ -1,0 +1,17 @@
+{
+	"name": "Aurora",
+	"description": "Slow curtains of colour behind the words: the low notes lift them, the high notes make them shimmer.",
+	"area": "backdrop",
+	"order": 50,
+	"params": {
+		"speed": {"type": "float", "min": 0.0, "max": 2.0, "default": 0.5, "label": "Speed"},
+		"brightness": {"type": "float", "min": 0.1, "max": 1.0, "default": 0.6, "label": "Brightness"},
+		"colour_a": {"type": "colour", "default": "#2fd6a0", "label": "First colour"},
+		"colour_b": {"type": "colour", "default": "#6a5cff", "label": "Second colour"},
+		"use_cover": {"type": "bool", "default": true, "label": "Colours from the cover"}
+	},
+	"presets": {
+		"Dusk": {"colour_a": "#ff7a59", "colour_b": "#7a3cff", "use_cover": false},
+		"Calm": {"speed": 0.2, "brightness": 0.4}
+	}
+}

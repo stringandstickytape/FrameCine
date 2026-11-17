@@ -1,0 +1,12 @@
+{
+	"name": "Mirror",
+	"description": "Bars both ways from a line through the middle.",
+	"area": "strip",
+	"order": 20,
+	"params": {
+		"bars": {"type": "int", "min": 8, "max": 128, "default": 32, "label": "Bars"},
+		"gap": {"type": "float", "min": 0.0, "max": 0.8, "default": 0.3, "label": "Gap"},
+		"colour_low": {"type": "colour", "default": "#73b3ff", "label": "Low colour"},
+		"colour_high": {"type": "colour", "default": "#ffbf66", "label": "High colour"}
+	}
+}

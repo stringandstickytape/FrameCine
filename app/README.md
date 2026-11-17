@@ -724,6 +724,7 @@ godot --headless --xr-mode off --path app --script res://tests/test_label_print.
 godot --headless --xr-mode off --path app --script res://tests/test_network_open.gd      # unreachable host: listing, worker-thread open
 godot --headless --xr-mode off --path app --script res://tests/test_render_model_dump.gd # --dump-render-models on a stand-in model
 godot --headless --xr-mode off --path app --script res://tests/test_features.gd          # every playback feature in the real scene, test patterns
+godot --xr-mode off --path app --script res://tests/test_visualisers.gd                  # visualisers: manifests, analysis, parameters; the flash limit with a renderer
 godot --headless --xr-mode off --path app --script res://tests/test_media_features.gd    # features on real files through MediaSource (WSL media)
 godot --headless --xr-mode off --path app --script res://tests/test_end_time.gd          # also test_battery_forecast.gd, test_container_mode.gd
 godot --headless --xr-mode off --path app --script res://tests/test_pane.gd             # front pose, head follow, menu hold, chips, theme rules

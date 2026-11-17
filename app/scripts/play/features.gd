@@ -54,6 +54,7 @@ const Pointing := preload("res://scripts/pointing/pointing.gd")
 ##   spatial_tune scripts/play/spatial_tune.gd: "Tune spatial sound", the HRTF fitted to the ears by A / B picks (#21)
 ##   bias       scripts/env/bias_light.gd: the screen's light on the room takes the picture's colour (#29)
 ##   night      scripts/play/night_mode.gd: night mode (levelled loudness) and dialogue boost (#26)
+##   audio_analysis scripts/play/audio_analysis.gd: one analysis of the film's sound for the reactions and visualisers
 ##   react      scripts/env/film_react.gd: bass pulses in the controllers, room flashes on loud moments (#81)
 ##   projector  scripts/env/projector.gd: a projector's beam with dust motes, film grain, gate weave (#92)
 ##   time_of_day scripts/env/time_of_day.gd: the outdoor rooms' sky from the clock and a latitude (#84)
@@ -127,6 +128,8 @@ const SpatialTune := preload("res://scripts/play/spatial_tune.gd")
 const BiasLight := preload("res://scripts/env/bias_light.gd")
 const NightMode := preload("res://scripts/play/night_mode.gd")
 const FilmReact := preload("res://scripts/env/film_react.gd")
+const AudioAnalysis := preload("res://scripts/play/audio_analysis.gd")
+const VisualiserRegistry := preload("res://scripts/visualisers/visualiser_registry.gd")
 const Projector := preload("res://scripts/env/projector.gd")
 const TimeOfDay := preload("res://scripts/env/time_of_day.gd")
 const ZoomLens := preload("res://scripts/play/zoom_lens.gd")
@@ -196,6 +199,7 @@ var speakers: SpatialAudio
 var spatial_tune: SpatialTune
 var bias: BiasLight
 var night: NightMode
+var audio_analysis: AudioAnalysis
 var react: FilmReact
 var projector: Projector
 var time_of_day: TimeOfDay
@@ -232,8 +236,9 @@ var update: Updater
 
 func _ready() -> void:
 	EndTime.use_24h = bool(main.settings.get_value("display", "clock_24h", true))
-	var vis := str(main.settings.get_value("music", "visualiser", "bars"))
-	MusicSource.style = vis if vis in MusicSource.STYLES else "bars"
+	var vis := str(main.settings.get_value("music", "visualiser", MusicSource.DEFAULT_STYLE))
+	MusicSource.style = vis if vis in MusicSource.styles() else MusicSource.DEFAULT_STYLE
+	_load_visualiser_params()
 	battery = _add(BatteryForecast.new(), "Battery")
 	depth = _add(StereoDepth.new(), "StereoDepth")
 	resume = _add(Resume.new(), "Resume")
@@ -278,6 +283,7 @@ func _ready() -> void:
 	spatial_tune = _add(SpatialTune.new(), "SpatialTune")
 	bias = _add(BiasLight.new(), "BiasLight")
 	night = _add(NightMode.new(), "NightMode")
+	audio_analysis = _add(AudioAnalysis.new(), "AudioAnalysis")
 	react = _add(FilmReact.new(), "FilmReact")
 	projector = _add(Projector.new(), "Projector")
 	time_of_day = _add(TimeOfDay.new(), "TimeOfDay")
@@ -334,17 +340,94 @@ func end_text(localised := false) -> String:
 	return EndTime.format_end(remaining(), speed.speed if speed != null else 1.0, -1.0, null, localised)
 
 
-## The music card's visualiser (#64): one of MusicSource.STYLES ("bars", "mirror", "line", "radial", "off"; names for
-## the pane in MusicSource.STYLE_NAMES). [music] visualiser, default "bars". Applies at once to the card showing.
+## The music card's visualiser (#64, docs/visualisers.md): an id of VisualiserRegistry or "off" (MusicSource.styles();
+## names for people in MusicSource.style_names()). [music] visualiser, default "bars". Applies at once to the card
+## showing.
 func visualiser() -> String:
 	return MusicSource.style
 
 
 func set_visualiser(s: String) -> void:
-	if not s in MusicSource.STYLES:
+	if not s in MusicSource.styles():
 		return
 	MusicSource.style = s
-	main.settings.set_value("music", "visualiser", null if s == "bars" else s)
+	main.settings.set_value("music", "visualiser", null if s == MusicSource.DEFAULT_STYLE else s)
+
+
+## Every visualiser, for a menu or an assistant:
+## [{id, name, description, area, builtin, params: [spec], presets: [name]}].
+## A spec is {name, type, label, default, min, max (numbers only), value (now)}.
+func visualisers() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for id in VisualiserRegistry.ids():
+		var e := VisualiserRegistry.entry(id)
+		var vals := VisualiserRegistry.values(id)
+		var params: Array[Dictionary] = []
+		for pname: String in e["params"]:
+			var spec: Dictionary = e["params"][pname].duplicate()
+			spec["value"] = vals[pname]
+			params.append(spec)
+		out.append({"id": id, "name": e["name"], "description": e["description"], "area": e["area"],
+				"builtin": e["builtin"], "params": params, "presets": (e["presets"] as Dictionary).keys()})
+	return out
+
+
+## Sets a parameter of a visualiser (the one showing by default), clamped to its range; false when there is no such
+## parameter or the value cannot be its type. Kept in [visualiser.<id>] <name>; the default value is not stored.
+func set_visualiser_param(pname: String, value: Variant, id := "") -> bool:
+	if id == "":
+		id = MusicSource.style
+	var spec: Dictionary = VisualiserRegistry.entry(id).get("params", {}).get(pname, {})
+	if spec.is_empty():
+		return false
+	var v: Variant = VisualiserRegistry.coerce(spec, value)
+	if v == null:
+		return false
+	var o: Dictionary = VisualiserRegistry.overrides.get(id, {})
+	if v == spec["default"]:
+		o.erase(pname)
+	else:
+		o[pname] = v
+	VisualiserRegistry.overrides[id] = o
+	main.settings.set_value("visualiser." + id, pname, null if v == spec["default"] else v)
+	return true
+
+
+## Every parameter of a visualiser back to its default.
+func reset_visualiser_params(id := "") -> void:
+	if id == "":
+		id = MusicSource.style
+	for pname: String in VisualiserRegistry.entry(id).get("params", {}):
+		main.settings.set_value("visualiser." + id, pname, null)
+	VisualiserRegistry.overrides.erase(id)
+
+
+## A visualiser's preset: its defaults with the preset's values over them. False when there is no such preset.
+func apply_visualiser_preset(preset: String, id := "") -> bool:
+	if id == "":
+		id = MusicSource.style
+	var presets: Dictionary = VisualiserRegistry.entry(id).get("presets", {})
+	if not presets.has(preset):
+		return false
+	reset_visualiser_params(id)
+	for pname: String in presets[preset]:
+		set_visualiser_param(pname, presets[preset][pname], id)
+	return true
+
+
+## The parameters kept in the settings ([visualiser.<id>]), checked against the manifests as they are now.
+func _load_visualiser_params() -> void:
+	VisualiserRegistry.overrides.clear()
+	for id in VisualiserRegistry.ids():
+		var params: Dictionary = VisualiserRegistry.entry(id)["params"]
+		for pname in main.settings.get_keys("visualiser." + id):
+			if params.has(pname):
+				var v: Variant = VisualiserRegistry.coerce(params[pname],
+						main.settings.get_value("visualiser." + id, pname, null))
+				if v != null:
+					var o: Dictionary = VisualiserRegistry.overrides.get(id, {})
+					o[pname] = v
+					VisualiserRegistry.overrides[id] = o
 
 
 ## One line of feature state for the overlay ("chapter 3/12 Title  |  sleep in 23 min ..."), or "".

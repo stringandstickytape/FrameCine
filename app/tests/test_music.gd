@@ -2,8 +2,9 @@ extends SceneTree
 
 ## Tests for music files (scripts/play/music_source.gd, ideas #64) in the real main scene, on the fork's MediaSource
 ## and the music clips of spikes/03-player/demux-test/make-feature-files.sh: the tags and cover, the card on the
-## screen, the audio as the clock, seeking, the visualiser, the end, and a file without a cover. Needs the fork and a
-## renderer (the audio clock starts with the first frame); otherwise only the file-type checks run.
+## screen, the audio as the clock, seeking, the visualisers on the card, the end, and a file without a cover. Needs the
+## fork and a renderer (the audio clock starts with the first frame); otherwise only the file-type checks run. The
+## visualisers in detail: test_visualisers.gd.
 ## Run: godot --xr-mode off --path app --script res://tests/test_music.gd
 
 const Factory := preload("res://scripts/video/video_source_factory.gd")
@@ -53,23 +54,31 @@ func _playback() -> void:
 	var p: float = main.player.get_position()
 	_check("the audio is the clock (%.2f s, audio %.2f s)" % [p, main.player.audio.get_playback_position()],
 			p > 1.0 and absf(p - main.player.audio.get_playback_position()) < 0.15)
-	var lv: PackedFloat32Array = src.levels()
-	var top := 0.0
-	for v in lv:
-		top = maxf(top, v)
-	_check("the visualiser hears it (%d bars, top %.2f)" % [lv.size(), top], lv.size() == 32 and top > 0.2)
+	# The clip is quiet for about its first second: wait for its sound rather than look at one moment.
+	var top_level := func() -> float:
+		var most := 0.0
+		for v: float in src.levels():
+			most = maxf(most, v)
+		return most
+	await _until(func() -> bool: return top_level.call() > 0.2, 3.0)
+	var top: float = top_level.call()
+	_check("the visualiser hears it (%d bars, top %.2f)" % [src.levels().size(), top], src.levels().size() == 32
+			and top > 0.2)
 	await RenderingServer.frame_post_draw
 	var card: Image = src.get_rgb_texture().get_image()
 	var c := card.get_pixel(int(card.get_width() * 0.2), int(card.get_height() * 0.4))
 	_check("the card shows the cover on the left (%s)" % c, c.v > 0.15 and not c.is_equal_approx(Color(0.06, 0.06, 0.08)))
-	# The visualiser's styles: each draws something of its own in the visualiser's area; "off" draws nothing there.
+	# The visualisers (res://visualisers, docs/visualisers.md): each draws something of its own in its area; "off"
+	# draws nothing there.
 	var f: Node = main.features
-	_check("visualiser: bars by default, five styles", f.visualiser() == "bars" and src.STYLES.size() == 5)
+	var styles: Array[String] = src.styles()
+	_check("visualiser: bars by default; bars, mirror, line, radial, aurora and off (%s)" % [styles],
+			f.visualiser() == "bars" and styles == ["bars", "mirror", "line", "radial", "aurora", "off"])
 	var painted := {}
 	var looks := {}
-	for s: String in src.STYLES:
+	for s: String in styles:
 		f.set_visualiser(s)
-		await _frames(2)
+		await _frames(4)
 		await RenderingServer.frame_post_draw
 		var img: Image = src.get_rgb_texture().get_image()
 		var n := 0
@@ -84,11 +93,12 @@ func _playback() -> void:
 		painted[s] = n
 		looks[s] = sig.hash()
 	print("  coloured samples per style: %s" % painted)
-	_check("visualiser: off draws nothing; the others draw", painted["off"] == 0 and painted["bars"] > 0
-			and painted["mirror"] > 0 and painted["line"] > 0 and painted["radial"] > 0)
-	_check("visualiser: each style looks different", looks.values().filter(func(v: int) -> bool: return true).size() == 5
-			and looks["bars"] != looks["mirror"] and looks["bars"] != looks["line"] and looks["bars"] != looks["radial"]
-			and looks["mirror"] != looks["radial"] and looks["line"] != looks["radial"])
+	var drawn := styles.filter(func(st: String) -> bool: return st != "off" and painted[st] > 0)
+	_check("visualiser: off draws nothing; the others draw", painted["off"] == 0 and drawn.size() == styles.size() - 1)
+	var distinct := {}
+	for st: String in drawn:
+		distinct[looks[st]] = true
+	_check("visualiser: each style looks different", distinct.size() == drawn.size())
 	f.set_visualiser("nonsense")
 	_check("visualiser: an unknown style is ignored", f.visualiser() == "off")
 	f.set_visualiser("bars")

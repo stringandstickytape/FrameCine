@@ -1743,8 +1743,9 @@ The film's sound drives two subtle effects. Off by default.
   photosensitivity ceiling as every assistant room effect, `RoomSchema.MAX_SWING`; it was up to 2.5 times) and
   fades back over 0.35 s, at most one every 1.2 s. Only rooms that opt in flash (an environment's
   `reacts_to_film`): the drive-in, under its open sky.
-- **How:** `scripts/env/film_react.gd` adds an `AudioEffectSpectrumAnalyzer` to the Master bus while it is on, and
-  removes it when off. It hears what the viewer hears, from the stereo player or the cinema speakers (#21). With the
+- **How:** `scripts/env/film_react.gd` holds the shared analysis (`scripts/play/audio_analysis.gd`, an
+  `AudioEffectSpectrumAnalyzer` on the Film bus, `docs/visualisers.md`) while it is on, and lets go when off. It hears
+  what the viewer hears, from the stereo player or the cinema speakers (#21). With the
   PC audio sink (#9) the headset is silent and nothing reacts. The flash is a factor on the shared room light,
   which now accepts factors up to 4 (above 1 brightens).
 - **API:** `main.features.react`: `enabled`, `set_enabled(on)`, `strength`, `set_strength(v)`, `room_opts_in()`,
@@ -1877,21 +1878,25 @@ MP3, FLAC, Ogg, Opus, WAV, AAC and M4A, AC-3, DTS and other audio files play on 
 video (fork 5997ea5369: the audio is the clock). The flat screen shows a card instead of a picture.
 
 - **The card** (1280 x 720, flat and mono): the file's cover (`get_album_art()`) on the left, with title, artist and
-  album from its tags. Without a title tag, the file name is used. Below them is a visualiser: 32 bars over 40 Hz
-  to 12 kHz from an `AudioEffectSpectrumAnalyzer` on the Master bus while the file is open. The bars rise at once
-  and fall slowly. Without a cover, the bars take the card's middle. A time line runs along the bottom.
+  album from its tags. Without a title tag, the file name is used. With them is a visualiser (`docs/visualisers.md`):
+  a shader plug-in from `app/visualisers/` or `user://visualisers/`, fed the shared analysis of the sound while the
+  file is open. It draws in a strip under the words, a taller area, or behind the whole card, as its manifest says.
+  Without a cover, the strip takes the card's middle. A time line runs along the bottom.
 - **Lying down:** the card is the flat screen, so lying down (#12) and the other screen comforts work as for films.
 - **How:** `scripts/play/music_source.gd`, a video source of kind "music". The factory (dev-plumbing's) opens music
   extensions with it and lists them as media files. Network files open on the player's worker thread, as videos
   do, and hand over their MediaSource (`open_with_media()`). It has the night mode, dialogue boost and speed
   forwards. Up next (#34) does not count down between tracks; the next one starts at once.
-- **Visualiser styles:** "bars" (the default), "mirror" (bars both ways from a middle line), "line" (one line through
-  the bands with a faint fill), "radial" (spokes round a circle, low bands at the top, clockwise) and "off". The
-  choice applies at once to the card showing and is kept in `[music] visualiser`.
+- **Visualisers:** "bars" (the default), "mirror" (bars both ways from a middle line), "line" (one line through
+  the bands with a faint fill), "radial" (spokes round a circle, low bands at the top, clockwise), "aurora"
+  (curtains of colour behind the words), the viewer's own, and "off". Each has parameters and may have presets. The
+  choice applies at once to the card showing and is kept in `[music] visualiser`. Every visualiser is held to a
+  flash limit and a GPU budget by the app (`docs/visualisers.md`).
 - **API:** `MusicSource`: `is_music_path(p)`, `available()` (static), `title`, `artist`, `album`, `cover`,
-  `levels()`, `STYLES`, `STYLE_NAMES` (names for the pane), static `style`. `main.features.visualiser()`,
-  `main.features.set_visualiser(style)`. Factory: `is_music_file(path)`.
-- **Settings:** `[music] visualiser` (default "bars").
+  `levels()`, `styles()`, `style_names()`, static `style`, `visualiser()`. `main.features.visualiser()`,
+  `set_visualiser(id)`, `visualisers()`, `set_visualiser_param(name, value)`, `apply_visualiser_preset(name)`,
+  `reset_visualiser_params()`. Factory: `is_music_file(path)`.
+- **Settings:** `[music] visualiser` (default "bars"); `[visualiser.<id>] <param>`.
 - **Tested:** `tests/test_music.gd`, 12 checks, with WSLg and the fork, on the music clips of
   `make-feature-files.sh`.
   - Music extensions are media files.
@@ -1900,8 +1905,9 @@ video (fork 5997ea5369: the audio is the clock). The flat screen shows a card in
   - The audio is the clock, the visualiser hears it, seeking to 10 s works, and up next does not count down. The
     end is reported.
   - A WAV without a cover uses its name.
-  - Visualiser styles (4 more checks): bars by default, five styles; read back from the card, "off" draws nothing in
-    the visualiser's area and the other four draw there, each looking different; an unknown style is ignored.
+  - Visualisers (4 more checks): bars by default, six styles; read back from the card, "off" draws nothing in the
+    visualiser's area and the other five draw there, each looking different; an unknown style is ignored. The
+    visualisers in detail: `tests/test_visualisers.gd` (`docs/visualisers.md`).
   - `test_features`, `test_media_features`, `test_images`, `test_pane` and `test_delight` still pass.
 - **Untested:** the headset, MP3 and Ogg (the tool build of FFmpeg cannot make test files), music over SMB and
   HTTP, and the Files tab's rows for music (app-shell's).

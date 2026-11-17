@@ -1,0 +1,12 @@
+{
+	"name": "Radial",
+	"description": "Spokes round a circle, the low notes at the top, going clockwise.",
+	"area": "tall",
+	"order": 40,
+	"params": {
+		"spokes": {"type": "int", "min": 8, "max": 128, "default": 32, "label": "Spokes"},
+		"radius": {"type": "float", "min": 0.1, "max": 0.4, "default": 0.24, "label": "Circle"},
+		"colour_low": {"type": "colour", "default": "#73b3ff", "label": "Low colour"},
+		"colour_high": {"type": "colour", "default": "#ffbf66", "label": "High colour"}
+	}
+}

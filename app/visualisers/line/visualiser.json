@@ -1,0 +1,13 @@
+{
+	"name": "Line",
+	"description": "One line through the bands, with a faint fill under it.",
+	"area": "strip",
+	"order": 30,
+	"params": {
+		"points": {"type": "int", "min": 8, "max": 128, "default": 32, "label": "Points"},
+		"thickness": {"type": "float", "min": 1.0, "max": 12.0, "default": 4.0, "label": "Thickness"},
+		"fill": {"type": "float", "min": 0.0, "max": 0.6, "default": 0.18, "label": "Fill"},
+		"colour_low": {"type": "colour", "default": "#73b3ff", "label": "Low colour"},
+		"colour_high": {"type": "colour", "default": "#ffbf66", "label": "High colour"}
+	}
+}

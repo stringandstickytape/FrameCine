@@ -5,9 +5,10 @@ extends Node
 ##               shaker: stronger bass, stronger pulse, at most PULSE_HZ a second
 ##   transients  a sudden loud jump (a thunderclap, an explosion) flashes the room light briefly, in rooms that opt in
 ##               (an environment's `reacts_to_film`; the drive-in under its open sky)
-## Off by default ([react] enabled); `strength` scales both. The sound is read from an AudioEffectSpectrumAnalyzer
-## added to the Film bus (scripts/env/env_audio.gd; Master when there is none) while it is on or a room's film
-## signals ask for it (request_analysis; removed when neither), so it hears the film, whatever plays it: the stereo
+## Off by default ([react] enabled); `strength` scales both. The sound is read from the shared analysis
+## (scripts/play/audio_analysis.gd: an AudioEffectSpectrumAnalyzer on the Film bus, scripts/env/env_audio.gd; Master
+## when there is none), held while it is on or a room's film signals ask for it (request_analysis; let go when
+## neither), so it hears the film, whatever plays it: the stereo
 ## player or the cinema speakers (#21), and never the room's own sounds. With the PC audio sink (#9) the headset is
 ## silent and nothing reacts. The controllers' haptics setting (#32) must be on for the pulses.
 ##
@@ -19,6 +20,7 @@ extends Node
 ##   signal pulsed(amplitude), signal flashed(amount)
 
 const RoomSchema := preload("res://scripts/assistant/room_schema.gd")
+const AudioAnalysis := preload("res://scripts/play/audio_analysis.gd")
 
 signal pulsed(amplitude: float)
 signal flashed(amount: float)
@@ -52,10 +54,14 @@ var flashes := 0
 var _avg_db := -60.0
 var _since_pulse := 1.0
 var _since_flash := 10.0
-var _analyzer: AudioEffectSpectrumAnalyzerInstance
-var _effect_index := -1
-var _bus := ""
 var _requests := {}
+## Holding the shared analysis.
+var _on := false
+## The shared analysis's analyser while this holds it (tests read it).
+var _analyzer: AudioEffectSpectrumAnalyzerInstance:
+	get:
+		var a := _analysis()
+		return a.analyzer() if _on and a != null else null
 var _levels: Array = [-120.0, -120.0]
 
 
@@ -98,6 +104,10 @@ static func bus_name() -> String:
 	return BUS if AudioServer.get_bus_index(BUS) >= 0 else FALLBACK_BUS
 
 
+func _analysis() -> Node:
+	return AudioAnalysis.shared
+
+
 func set_strength(v: float) -> void:
 	strength = clampf(v, 0.0, 1.0)
 	main.settings.set_value("react", "strength", null if is_equal_approx(strength, 0.5) else strength)
@@ -108,30 +118,13 @@ func room_opts_in() -> bool:
 
 
 func _attach(on: bool) -> void:
-	if on and _effect_index < 0:
-		_bus = bus_name()
-		var bus := AudioServer.get_bus_index(_bus)
-		var fx := AudioEffectSpectrumAnalyzer.new()
-		fx.buffer_length = 0.1
-		fx.fft_size = AudioEffectSpectrumAnalyzer.FFT_SIZE_1024
-		AudioServer.add_bus_effect(bus, fx)
-		_effect_index = AudioServer.get_bus_effect_count(bus) - 1
-		_analyzer = AudioServer.get_bus_effect_instance(bus, _effect_index) as AudioEffectSpectrumAnalyzerInstance
-	elif not on and _effect_index >= 0:
-		_detach()
+	var a := _analysis()
+	if on == _on or a == null:
+		return
+	_on = on
+	a.request(self, on)
+	if not on:
 		_unflash()
-
-
-## Takes the analyser off its bus (found by its instance: another feature's effect may have moved it).
-func _detach() -> void:
-	var bus := AudioServer.get_bus_index(_bus)
-	if bus >= 0:
-		for i in AudioServer.get_bus_effect_count(bus):
-			if AudioServer.get_bus_effect_instance(bus, i) == _analyzer:
-				AudioServer.remove_bus_effect(bus, i)
-				break
-	_effect_index = -1
-	_analyzer = null
 
 
 func _unflash() -> void:
@@ -141,10 +134,12 @@ func _unflash() -> void:
 
 
 func _process(delta: float) -> void:
-	if _analyzer == null or not main.player.is_playing():
+	var a := _analysis()
+	if not _on or a == null or not a.active() or not main.player.is_playing():
 		return
-	var bass := _db(_analyzer.get_magnitude_for_frequency_range(BASS.x, BASS.y))
-	var broad := _db(_analyzer.get_magnitude_for_frequency_range(BROAD.x, BROAD.y))
+	# The analysis reads before this (it is earlier among the features) and has these two bands (BASS and BROAD).
+	var bass: float = a.bass_db
+	var broad: float = a.broad_db
 	_levels = [bass, broad]
 	if enabled:
 		feed(bass, broad, delta)
@@ -185,5 +180,6 @@ func feed(bass_db: float, broad_db: float, delta: float) -> void:
 
 
 func _exit_tree() -> void:
-	if _effect_index >= 0:
-		_detach()
+	if _on and _analysis() != null:
+		_analysis().request(self, false)
+	_on = false

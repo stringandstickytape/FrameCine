@@ -1,0 +1,341 @@
+extends SceneTree
+
+## Tests for the visualisers (docs/visualisers.md): the registry and its manifest checks
+## (scripts/visualisers/visualiser_registry.gd), the shared analysis's maths and requests
+## (scripts/play/audio_analysis.gd), the parameters through main.features, and with a renderer the host
+## (scripts/visualisers/visualiser_host.gd): every visualiser of the app compiles and draws, the flash limit holds a
+## strobing visualiser down and leaves a calm one alone, and its floor survives the two-byte round trip.
+## Test visualisers are written to user://test_visualisers_<pid> and deleted after.
+## Run: godot --headless --xr-mode off --path app --script res://tests/test_visualisers.gd
+## (the host's checks: without --headless, with xvfb and lavapipe; see docs/BUILD.md)
+
+const Registry := preload("res://scripts/visualisers/visualiser_registry.gd")
+const AudioAnalysis := preload("res://scripts/play/audio_analysis.gd")
+const VisualiserHost := preload("res://scripts/visualisers/visualiser_host.gd")
+const BUILTIN: Array[String] = ["bars", "mirror", "line", "radial", "aurora"]
+
+var _failures := 0
+var _checks := 0
+var _tmp := "user://test_visualisers_%d" % OS.get_process_id()
+
+
+func _init() -> void:
+	_run.call_deferred()
+
+
+func _run() -> void:
+	_registry()
+	_bad_manifests()
+	_coerce()
+	await _analysis()
+	await _features()
+	if DisplayServer.get_name() == "headless":
+		print("SKIP the host's checks (needs a renderer)")
+	else:
+		await _host()
+	_rmdir(_tmp)
+	Registry.dirs = Registry.DIRS.duplicate()
+	Registry.rescan()
+	print("test_visualisers: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
+	quit(_failures)
+
+
+func _registry() -> void:
+	Registry.dirs = ["res://visualisers"]
+	Registry.rescan()
+	_check("the app's visualisers, in order (%s)" % [Registry.ids()], Registry.ids() == BUILTIN)
+	_check("none of them has an error (%s)" % [Registry.errors()], Registry.errors().is_empty())
+	var bars := Registry.entry("bars")
+	_check("bars: a strip, four parameters, two presets", bars["area"] == "strip" and bars["params"].size() == 4
+			and bars["presets"].size() == 2 and bool(bars["builtin"]))
+	_check("bars: an int and a colour parameter read", bars["params"]["bars"]["default"] == 32
+			and bars["params"]["colour_low"]["default"] is Color)
+	_check("radial is tall, aurora a backdrop", Registry.entry("radial")["area"] == "tall"
+			and Registry.entry("aurora")["area"] == "backdrop")
+	for id in BUILTIN:
+		var sh := Registry.load_shader(id)
+		var uniforms := {}
+		if sh != null:
+			for u: Dictionary in sh.get_shader_uniform_list(true):
+				uniforms[u["name"]] = true
+		var missing: Array = Registry.entry(id)["params"].keys().filter(func(k: String) -> bool:
+			return not uniforms.has(k))
+		_check("%s: every parameter is a uniform, and it has the inputs (missing %s)" % [id, missing],
+				sh != null and missing.is_empty() and uniforms.has("spectrum") and uniforms.has("vis_time"))
+
+
+## Broken folders in a user folder: each is left out with a reason; the good one is in.
+func _bad_manifests() -> void:
+	DirAccess.make_dir_recursive_absolute(_tmp)
+	var shader := "shader_type canvas_item;\nvoid fragment() { COLOR = vec4(1.0); }\n"
+	_put("good_one", '{"name": "Good", "order": 5, "params": {"k": {"type": "float", "min": 0, "max": 1, '
+			+ '"default": 2}}}', shader)
+	_put("bad_json", '{"name": "Bad",\n "area": }', shader)
+	_put("no_shader", '{"name": "No shader"}', "")
+	_put("bad_area", '{"area": "ceiling"}', shader)
+	_put("bad_type", '{"params": {"x": {"type": "vector", "default": 1}}}', shader)
+	_put("bad_range", '{"params": {"x": {"type": "int", "min": 5, "max": 1, "default": 2}}}', shader)
+	_put("bad_colour", '{"params": {"c": {"type": "colour", "default": "teal-ish"}}}', shader)
+	_put("bad_preset", '{"params": {}, "presets": {"P": {"nope": 1}}}', shader)
+	_put("Capital", '{}', shader)
+	_put("bars", '{"name": "My bars"}', shader)
+	Registry.dirs = ["res://visualisers", _tmp]
+	Registry.rescan()
+	var err := Registry.errors()
+	print("  errors: %s" % [err])
+	_check("a good user visualiser is in, first by its order", Registry.ids()[0] == "good_one"
+			and not bool(Registry.entry("good_one")["builtin"]))
+	_check("a default outside the range is clamped (2 -> 1)",
+			Registry.entry("good_one")["params"]["k"]["default"] == 1.0)
+	_check("bad JSON: left out, with the line", not Registry.has("bad_json")
+			and str(err.get("bad_json")).contains("line "))
+	for id in ["no_shader", "bad_area", "bad_type", "bad_range", "bad_colour", "bad_preset", "Capital"]:
+		_check("%s: left out with a reason" % id, not Registry.has(id) and str(err.get(id, "")) != "")
+	_check("a user folder may not take the app's id (bars stays the app's)", bool(Registry.entry("bars")["builtin"])
+			and str(err.get("bars", "")).contains("new name"))
+	var sh := Registry.load_shader("good_one")
+	_check("a user's shader loads from its text", sh != null and sh.code.contains("COLOR = vec4(1.0)"))
+
+
+func _put(id: String, manifest: String, shader: String) -> void:
+	var dir := _tmp.path_join(id)
+	DirAccess.make_dir_recursive_absolute(dir)
+	var f := FileAccess.open(dir.path_join(Registry.MANIFEST), FileAccess.WRITE)
+	f.store_string(manifest)
+	f.close()
+	if shader != "":
+		f = FileAccess.open(dir.path_join(Registry.SHADER), FileAccess.WRITE)
+		f.store_string(shader)
+		f.close()
+
+
+func _coerce() -> void:
+	var fl := {"type": "float", "min": 0.0, "max": 2.0}
+	var it := {"type": "int", "min": 8.0, "max": 128.0}
+	_check("float: clamped", Registry.coerce(fl, 5) == 2.0 and Registry.coerce(fl, -1.0) == 0.0)
+	_check("int: rounded and clamped", Registry.coerce(it, 31.6) == 32 and Registry.coerce(it, 1000) == 128)
+	_check("colour: from #hex or a Color", Registry.coerce({"type": "colour"}, "#ff0000") == Color.RED
+			and Registry.coerce({"type": "colour"}, Color.BLUE) == Color.BLUE)
+	_check("wrong types: null", Registry.coerce(fl, "x") == null and Registry.coerce({"type": "bool"}, 1) == null
+			and Registry.coerce({"type": "colour"}, "no") == null)
+
+
+func _analysis() -> void:
+	var a := AudioAnalysis.new()
+	root.add_child(a)
+	_check("in the tree: the shared one", AudioAnalysis.shared == a)
+	# The maths, fed directly.
+	a.feed(AudioAnalysis.snapshot(-6.0, -60.0, PackedFloat32Array()), 0.016)
+	_check("-6 dBFS everywhere: every band full", is_equal_approx(a.fast[0], 1.0)
+			and is_equal_approx(a.smooth[127], 1.0) and is_equal_approx(a.level, 1.0))
+	a.feed(AudioAnalysis.snapshot(-60.0, -60.0, PackedFloat32Array()), 0.1)
+	_check("silence: fast drops at once, smooth falls (%.2f)" % a.smooth[0], a.fast[0] == 0.0
+			and is_equal_approx(a.smooth[0], 0.4) and is_equal_approx(a.bass, 0.4))
+	var bins := PackedFloat32Array()
+	bins.resize(AudioAnalysis.BINS)
+	bins.fill(-60.0)
+	bins[10] = -33.0
+	a.feed(AudioAnalysis.snapshot(-60.0, -60.0, bins), 1.0)
+	_check("one band: only that bin (%.2f)" % a.fast[10], is_equal_approx(a.fast[10], 0.5) and a.fast[11] == 0.0)
+	# Beats.
+	for i in 120:
+		a.feed(AudioAnalysis.snapshot(-60.0, -50.0, PackedFloat32Array()), 1.0 / 60.0)
+	var before: int = a.beats
+	a.feed(AudioAnalysis.snapshot(-60.0, -20.0, PackedFloat32Array()), 1.0 / 60.0)
+	_check("a jump in the bass: a beat", a.beats == before + 1 and a.beat == 1.0)
+	a.feed(AudioAnalysis.snapshot(-60.0, -50.0, PackedFloat32Array()), 1.0 / 60.0)
+	a.feed(AudioAnalysis.snapshot(-60.0, -10.0, PackedFloat32Array()), 1.0 / 60.0)
+	_check("another within 0.25 s: not a beat", a.beats == before + 1)
+	for i in 30:
+		a.feed(AudioAnalysis.snapshot(-60.0, -50.0, PackedFloat32Array()), 1.0 / 60.0)
+	_check("beat falls to 0 within 0.3 s (%.2f)" % a.beat, a.beat == 0.0)
+	a.feed(AudioAnalysis.snapshot(-60.0, -45.0, PackedFloat32Array()), 1.0 / 60.0)
+	_check("too quiet for a beat (under -40 dBFS)", a.beats == before + 1)
+	# The textures carry the bands.
+	a.feed(AudioAnalysis.snapshot(-33.0, -60.0, PackedFloat32Array()), 0.016)
+	var img := a.spectrum_texture().get_image()
+	_check("spectrum texture: %d x %d, r = the level now (%.2f)" % [img.get_width(), img.get_height(),
+			img.get_pixel(5, 0).r], img.get_width() == 128 and img.get_height() == 1
+			and absf(img.get_pixel(5, 0).r - 0.5) < 0.01)
+	_check("waveform texture: 512 x 1", a.wave_texture().get_width() == 512)
+	# Requests: the analyser on the bus while anyone holds it; the capture beside it for the waveform.
+	var bus := AudioServer.get_bus_index(AudioAnalysis.bus_name())
+	var n0 := AudioServer.get_bus_effect_count(bus)
+	var one := RefCounted.new()
+	var two := Node.new()
+	a.request(one, true)
+	_check("held: the analyser on the bus", a.active() and AudioServer.get_bus_effect_count(bus) == n0 + 1)
+	a.request(two, true, true)
+	_check("the waveform asked for: the capture too", AudioServer.get_bus_effect_count(bus) == n0 + 2)
+	a.request(one, false)
+	_check("one lets go: both stay for the other", a.active() and AudioServer.get_bus_effect_count(bus) == n0 + 2)
+	two.free()
+	a.request(one, false)
+	_check("the other freed: all off the bus", not a.active() and AudioServer.get_bus_effect_count(bus) == n0)
+	a.delay_override = -1.0
+	_check("the delay: never negative, at most 0.5 s (%.3f)" % a.delay(), a.delay() >= 0.0 and a.delay() <= 0.5)
+	a.queue_free()
+	await process_frame
+	_check("out of the tree: no shared one", AudioAnalysis.shared == null)
+
+
+## The parameters through the real main scene's features.
+func _features() -> void:
+	Registry.dirs = ["res://visualisers"]
+	Registry.rescan()
+	var main: Node3D = (load("res://scenes/main.tscn") as PackedScene).instantiate() as Node3D
+	main.settings.read_only = true
+	root.add_child(main)
+	await process_frame
+	await process_frame
+	var f: Node = main.features
+	var list: Array[Dictionary] = f.visualisers()
+	_check("features: every visualiser listed with its parameters", list.size() == BUILTIN.size()
+			and list[0]["id"] == "bars" and list[0]["params"].size() == 4 and list[0]["presets"].has("Embers"))
+	_check("set a parameter: clamped and kept", f.set_visualiser_param("bars", 500)
+			and Registry.values("bars")["bars"] == 128 and main.settings.get_value("visualiser.bars", "bars", 0) == 128)
+	_check("an unknown parameter or a wrong type: refused", not f.set_visualiser_param("nope", 1)
+			and not f.set_visualiser_param("gap", "wide"))
+	_check("a preset: its values over the defaults", f.apply_visualiser_preset("Embers")
+			and Registry.values("bars")["bars"] == 32
+			and Registry.values("bars")["colour_low"] == Color.html("#ff5a1f"))
+	_check("an unknown preset: refused", not f.apply_visualiser_preset("Nope"))
+	f.reset_visualiser_params()
+	_check("reset: the defaults, nothing kept", Registry.values("bars")["colour_low"] == Color.html("#73b3ff")
+			and not main.settings.has_value("visualiser.bars", "colour_low"))
+	f.set_visualiser("aurora")
+	_check("choose a visualiser by id", f.visualiser() == "aurora"
+			and main.settings.get_value("music", "visualiser", "") == "aurora")
+	f.set_visualiser("nope")
+	_check("an unknown id: ignored", f.visualiser() == "aurora")
+	f.set_visualiser("bars")
+	# The main scene stays (its analysis is the shared one for the host's checks).
+
+
+## The host on a card of its own, with a flashing test visualiser and the app's.
+func _host() -> void:
+	_put("strobe", '{"name": "Strobe", "area": "backdrop", "params": {"white": {"type": "float", "min": 0, "max": 1, ' \
+			+ '"default": 0}}}', "shader_type canvas_item;\nuniform float white = 0.0;\n" \
+			+ "void fragment() { COLOR = vec4(vec3(white), 1.0); }\n")
+	_put("grey", '{"name": "Grey", "area": "backdrop"}',
+			"shader_type canvas_item;\nvoid fragment() { COLOR = vec4(vec3(0.5), 1.0); }\n")
+	Registry.dirs = ["res://visualisers", _tmp]
+	Registry.rescan()
+	# The main scene's analysis, idle (nothing holds it), so the levels fed here stay.
+	var a: Node = AudioAnalysis.shared
+	a.feed(AudioAnalysis.snapshot(-20.0, -60.0, PackedFloat32Array()), 0.016)
+	var card := SubViewport.new()
+	card.size = Vector2i(320, 180)
+	card.disable_3d = true
+	card.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	root.add_child(card)
+	var out := TextureRect.new()
+	out.size = Vector2(card.size)
+	card.add_child(out)
+	var host := VisualiserHost.new()
+	host.budget_ms = 0.0
+	card.add_child(host)
+	host.setup(card, out)
+	host.set_area(Vector2(card.size))
+	# Each of the app's draws something (strong levels: -20 dBFS in every band).
+	for id in BUILTIN:
+		_check("%s: starts" % id, host.use(id))
+		await _frames(4)
+		await RenderingServer.frame_post_draw
+		var img := host.picture().get_image()
+		var lit := 0
+		for y in range(0, img.get_height(), 4):
+			for x in range(0, img.get_width(), 4):
+				if img.get_pixel(x, y).a > 0.5:
+					lit += 1
+		_check("%s: draws (%d samples)" % [id, lit], lit > 10)
+	# A calm picture: untouched, and the floor's two bytes give back its luminance.
+	host.use("grey")
+	await _frames(30)
+	await RenderingServer.frame_post_draw
+	var st := host.limit_texture().get_image().get_pixel(0, 0)
+	var floor_now := st.r + st.g / 255.0
+	_check("steady grey: gain 1 (%.3f), the floor its luminance (%.4f, want 0.214)" % [st.a, floor_now],
+			st.a > 0.99 and absf(floor_now - 0.214) < 0.004)
+	# A strobe: white and black on alternate frames for a second.
+	host.use("strobe")
+	await _frames(6)
+	var lums: Array[float] = []
+	for i in 60:
+		Registry.overrides["strobe"] = {"white": float(i % 2)}
+		await RenderingServer.frame_post_draw
+		lums.append(_mean_lum(card.get_texture().get_image()))
+	var swing := 0.0
+	for i in range(1, lums.size()):
+		swing = maxf(swing, absf(lums[i] - lums[i - 1]))
+	print("  strobe: shown luminance %s" % [lums.slice(0, 12).map(func(v: float) -> String: return "%.3f" % v)])
+	_check("a strobe: the shown picture swings at most %.2f a frame (%.3f)" % [VisualiserHost.MARGIN + 0.02, swing],
+			swing <= VisualiserHost.MARGIN + 0.02)
+	# Black, then white for good: it rises at most RISE a second over the margin.
+	Registry.overrides["strobe"] = {"white": 0.0}
+	await _frames(10)
+	Registry.overrides["strobe"] = {"white": 1.0}
+	var t0 := Time.get_ticks_msec()
+	await _frames(30)
+	await RenderingServer.frame_post_draw
+	var secs := (Time.get_ticks_msec() - t0) / 1000.0
+	var lum := _mean_lum(card.get_texture().get_image())
+	var most := VisualiserHost.MARGIN + VisualiserHost.RISE * secs + 0.02
+	_check("black to white: %.3f after %.2f s (at most %.3f)" % [lum, secs, most], lum <= most and lum > 0.05)
+	# Starting a bright visualiser is one change: shown at once.
+	host.use("grey")
+	await _frames(3)
+	await RenderingServer.frame_post_draw
+	lum = _mean_lum(card.get_texture().get_image())
+	_check("a new visualiser starts at its own brightness (%.3f)" % lum, absf(lum - 0.214) < 0.01)
+	# Off: nothing drawn or fed; on again: starts afresh.
+	host.set_active(false)
+	var counted := host.frames
+	await _frames(3)
+	_check("off: its viewports stop and it is not fed", host._vp.render_target_update_mode
+			== SubViewport.UPDATE_DISABLED and host._measure_vp.render_target_update_mode == SubViewport.UPDATE_DISABLED
+			and host.frames == counted)
+	host.set_active(true)
+	await _frames(2)
+	_check("on again: drawn, counting from the start (%d)" % host.frames, host._vp.render_target_update_mode
+			== SubViewport.UPDATE_ALWAYS and host.frames == 2)
+	Registry.overrides.erase("strobe")
+	card.queue_free()
+	await process_frame
+
+
+## Mean relative luminance of an image (linear light).
+static func _mean_lum(img: Image) -> float:
+	var sum := 0.0
+	var n := 0
+	for y in range(0, img.get_height(), 3):
+		for x in range(0, img.get_width(), 3):
+			var c := img.get_pixel(x, y).srgb_to_linear()
+			sum += 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+			n += 1
+	return sum / n
+
+
+func _rmdir(path: String) -> void:
+	var d := DirAccess.open(path)
+	if d == null:
+		return
+	for sub in d.get_directories():
+		_rmdir(path.path_join(sub))
+	for file in d.get_files():
+		d.remove(file)
+	DirAccess.remove_absolute(path)
+
+
+func _frames(n: int) -> void:
+	for i in n:
+		await process_frame
+
+
+func _check(what: String, ok: bool) -> void:
+	_checks += 1
+	if not ok:
+		_failures += 1
+		print("FAIL ", what)
+	else:
+		print("PASS ", what)
