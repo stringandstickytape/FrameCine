@@ -19,7 +19,8 @@ const TestSignals := preload("res://scripts/visualisers/test_signals.gd")
 const DevCommands := preload("res://scripts/dev/dev_commands.gd")
 const MusicSource := preload("res://scripts/play/music_source.gd")
 const W := preload("res://ui/pane_widgets.gd")
-const BUILTIN: Array[String] = ["bars", "mirror", "line", "radial", "aurora"]
+const BUILTIN: Array[String] = ["bars", "mirror", "line", "radial", "aurora", "halftone", "tiles", "runner", "sakura",
+		"ink"]
 
 var _failures := 0
 var _checks := 0
@@ -300,6 +301,7 @@ func _host() -> void:
 	await RenderingServer.frame_post_draw
 	lum = _mean_lum(card.get_texture().get_image())
 	_check("a new visualiser starts at its own brightness (%.3f)" % lum, absf(lum - 0.214) < 0.01)
+	await _feedback(host)
 	await _patterns(host, card)
 	await _probe(host)
 	# Off: nothing drawn or fed; on again: starts afresh.
@@ -557,6 +559,44 @@ func _patterns(host: Node, card: SubViewport) -> void:
 			_check("half the card swapping: that half dimmed (%.4f), the other half untouched (%.3f, want 0.214)"
 					% [shown, right], shown < 0.04 and absf(right - 0.214) < 0.02)
 	Registry.overrides.erase("checker")
+
+
+## The clocks and "feedback": a visualiser that adds a step to its own last frame each frame grows; one without it
+## keeps no copy; paused, the clocks and the picture stand still.
+func _feedback(host: Node) -> void:
+	_put("accum", '{"name": "Accumulate", "area": "backdrop", "feedback": true}',
+			"shader_type canvas_item;\n#include \"res://visualisers/visualiser.gdshaderinc\"\n"
+			+ "void fragment() {\n\tfloat v = fresh > 0.5 ? 0.0 : texture(previous, UV).r + (vis_dt > 0.0 ? 3.0 / 255.0 : 0.0);\n"
+			+ "\tCOLOR = vec4(vec3(v), 1.0);\n}\n")
+	_put("bad_feedback", '{"feedback": "yes"}', "shader_type canvas_item;\nvoid fragment() { COLOR = vec4(1.0); }\n")
+	Registry.rescan()
+	_check("feedback in the manifest: read; not true or false: left out", bool(Registry.entry("accum")["feedback"])
+			and not bool(Registry.entry("grey")["feedback"]) and not Registry.has("bad_feedback"))
+	_check("without feedback no copy is drawn", host.id == "grey" and not host.feedback())
+	host.use("accum")
+	await _frames(4)
+	await RenderingServer.frame_post_draw
+	var v0: float = host.picture().get_image().get_pixel(10, 10).r
+	await _frames(20)
+	await RenderingServer.frame_post_draw
+	var v1: float = host.picture().get_image().get_pixel(10, 10).r
+	_check("feedback: previous is its own last frame (%.3f -> %.3f over 20 frames)" % [v0, v1], host.feedback()
+			and v1 - v0 > 15.0 * 3.0 / 255.0 and v1 - v0 < 25.0 * 3.0 / 255.0)
+	_check("drive runs faster than its rest with sound (%.2f in %.2f s)" % [host.drive, host.vis_time],
+			host.drive > host.vis_time * VisualiserHost.DRIVE_REST * 1.2)
+	host.playing = false
+	var d0: float = host.drive
+	await _frames(10)
+	await RenderingServer.frame_post_draw
+	var v2: float = host.picture().get_image().get_pixel(10, 10).r
+	await _frames(10)
+	await RenderingServer.frame_post_draw
+	var v3: float = host.picture().get_image().get_pixel(10, 10).r
+	_check("paused: drive stands, and so does a feedback picture (%.3f, %.3f)" % [v2, v3], host.drive == d0
+			and is_equal_approx(v2, v3))
+	host.playing = true
+	host.use("grey")
+	await _frames(2)
 
 
 ## The first frames' timing: within budget at full size, over it scaled down, far over it refused.

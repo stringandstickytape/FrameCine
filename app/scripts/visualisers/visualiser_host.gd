@@ -17,8 +17,12 @@ extends Node
 ##                     runs, more than budget_ms (averaged) for a second steps the scale down. It does not come back up
 ##                     until the visualiser is chosen again.
 ## The viewports nest so the engine draws them in order each frame (children first, renderer_viewport.cpp
-## _sort_active_viewports): visualiser, sample points, cells, limit, then the copies of the points and the limit (read
-## next frame), then the card that holds them all. Nothing is read back to the CPU.
+## _sort_active_viewports): visualiser, its copy (for one with "feedback", read next frame as `previous`), sample
+## points, cells, limit, then the copies of the points and the limit (read next frame), then the card that holds them
+## all. Nothing is read back to the CPU.
+##   the clocks        vis_time (seconds of playing), vis_dt (this frame's seconds; 0 while paused) and drive: a clock
+##                     that runs with the music, DRIVE_REST a second in silence up to DRIVE_REST + DRIVE_BASS +
+##                     DRIVE_LEVEL with everything full (for motion that speeds up with the sound and never jumps).
 ##
 ##   setup(card: SubViewport, output: TextureRect)   output shows the visualiser on the card (the host sets its texture
 ##                                                   and material; the card places and sizes it)
@@ -27,8 +31,10 @@ extends Node
 ##   set_area(size)         the area's size in card pixels
 ##   set_active(on)         off: nothing is drawn or fed (the card shows no visualiser); on again starts afresh
 ##   probing() -> bool      the first frames' timing is still running
-##   id, entry, scale, gpu_ms, budget_ms (0: no budget and no probe), cover, playing, frames, last_refusal
-##   stats() -> Dictionary  id, area, viewport size, scale, gpu_ms, frames, probe
+##   id, entry, scale, gpu_ms, budget_ms (0: no budget and no probe), cover, playing, frames, vis_time, drive,
+##   last_refusal
+##   feedback() -> bool     the visualiser's last frame is being kept for it (`previous`)
+##   stats() -> Dictionary  id, area, viewport size, scale, gpu_ms, frames, probe, feedback
 ##   signal refused(id, why)
 
 signal refused(refused_id: String, why: String)
@@ -70,6 +76,12 @@ const REFUSE_MS := 4.0
 const SMALL := Vector2i(2, 2)
 ## Frames after a start in which the limit starts from the picture itself (a start is one change, not a flicker).
 const RESET_FRAMES := 3
+## drive's rate: DRIVE_REST + DRIVE_BASS * bass + DRIVE_LEVEL * level seconds a second.
+const DRIVE_REST := 0.4
+const DRIVE_BASS := 0.8
+const DRIVE_LEVEL := 0.4
+## Frames after a start in which `fresh` is 1: `previous` still holds the picture from before.
+const FRESH_FRAMES := 2
 
 var id := ""
 var entry := {}
@@ -80,6 +92,7 @@ var cover: Texture2D
 var playing := true
 var frames := 0
 var vis_time := 0.0
+var drive := 0.0
 ## {id, why, estimate_ms} of the last visualiser refused by the probe, or {}.
 var last_refusal := {}
 ## Tests: the probe's measured milliseconds instead of the GPU's (-1: the GPU's).
@@ -89,6 +102,9 @@ var _area := Vector2(640, 160)
 var _card_px := 1280.0 * 720.0
 var _vp: SubViewport
 var _rect: ColorRect
+## The visualiser's last frame, for one with "feedback" (drawn after it, read by it next frame).
+var _vis_copy: SubViewport
+var _vis_copy_rect: ColorRect
 var _mat: ShaderMaterial
 var _small: Array[SubViewport] = []
 var _taps_vp: SubViewport
@@ -109,7 +125,8 @@ var _before := {}
 func setup(card: SubViewport, output: TextureRect) -> void:
 	_output = output
 	_card_px = float(card.size.x * card.size.y)
-	# Nested so the innermost draws first: limit copy > points copy > limit > cells > points > visualiser.
+	# Nested so the innermost draws first: limit copy > points copy > limit > cells > points > visualiser's copy >
+	# visualiser.
 	var limit_copy := _small_vp("VisualiserLimitCopy", SMALL)
 	card.add_child(limit_copy)
 	var taps_copy := _small_vp("VisualiserPointsCopy", TAPS)
@@ -120,16 +137,21 @@ func setup(card: SubViewport, output: TextureRect) -> void:
 	_limit_vp.add_child(_cells_vp)
 	_taps_vp = _small_vp("VisualiserPoints", TAPS)
 	_cells_vp.add_child(_taps_vp)
+	_vis_copy = _small_vp("VisualiserCopy", SMALL)
+	_vis_copy.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	_taps_vp.add_child(_vis_copy)
 	_vp = SubViewport.new()
 	_vp.name = "Visualiser"
 	_vp.disable_3d = true
 	_vp.transparent_bg = true
 	_vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
-	_taps_vp.add_child(_vp)
+	_vis_copy.add_child(_vp)
 	_rect = ColorRect.new()
 	_rect.color = Color.WHITE
 	_rect.visible = false
 	_vp.add_child(_rect)
+	_vis_copy_rect = _fill(_material(COPY_SHADER, {"source": _vp.get_texture()}), SMALL)
+	_vis_copy.add_child(_vis_copy_rect)
 	_small = [_taps_vp, _cells_vp, _limit_vp, taps_copy, limit_copy]
 	_taps_mat = _material(TAPS_SHADER, {"picture": _vp.get_texture(), "previous": taps_copy.get_texture(),
 			"taps": Vector2(TAPS), "tau": TAU, "behind": BEHIND})
@@ -192,6 +214,7 @@ func use(new_id: String) -> bool:
 	if a != null:
 		_mat.set_shader_parameter("spectrum", a.spectrum_texture())
 		_mat.set_shader_parameter("waveform", a.wave_texture())
+	_mat.set_shader_parameter("previous", _vis_copy.get_texture())
 	_start(0)
 	if budget_ms > 0.0:
 		_probe_left = PROBE_FRAMES
@@ -208,8 +231,23 @@ func _start(step: int) -> void:
 	_over_s = 0.0
 	frames = 0
 	vis_time = 0.0
+	drive = 0.0
 	_probe_left = 0
+	_sync_copy()
 	_resize()
+
+
+## The copy of the visualiser's picture draws only for one that reads it ("feedback" in its manifest).
+func _sync_copy() -> void:
+	if _vis_copy == null:
+		return
+	var on := is_processing() and _mat != null and bool(entry.get("feedback", false)) \
+			and _vp.render_target_update_mode == SubViewport.UPDATE_ALWAYS
+	_vis_copy.render_target_update_mode = SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
+
+
+func feedback() -> bool:
+	return _vis_copy != null and _vis_copy.render_target_update_mode == SubViewport.UPDATE_ALWAYS
 
 
 func probing() -> bool:
@@ -225,6 +263,7 @@ func set_active(on: bool) -> void:
 			vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
 	if on:
 		frames = 0
+	_sync_copy()
 
 
 func set_area(size: Vector2) -> void:
@@ -249,6 +288,8 @@ func _resize() -> void:
 		px = Vector2i(maxi(2, roundi(_area.x * scale)), maxi(2, roundi(_area.y * scale)))
 	_vp.size = px
 	_rect.size = Vector2(px)
+	_vis_copy.size = px
+	_vis_copy_rect.size = Vector2(px)
 	if _limit_mat != null:
 		_limit_mat.set_shader_parameter("area_share", clampf(_area.x * _area.y / _card_px, 0.0, 1.0))
 
@@ -257,14 +298,20 @@ func _process(delta: float) -> void:
 	if _mat == null:
 		return
 	frames += 1
-	if playing:
-		vis_time += delta
+	var dt := delta if playing else 0.0
+	vis_time += dt
 	var a := AudioAnalysis.shared
 	if a != null:
 		for k: String in ["bass", "mid", "treble", "level", "beat"]:
 			_mat.set_shader_parameter(k, float(a.get(k)))
 		_mat.set_shader_parameter("beats", float(a.beats))
+		drive += dt * (DRIVE_REST + DRIVE_BASS * float(a.bass) + DRIVE_LEVEL * float(a.level))
+	else:
+		drive += dt * DRIVE_REST
 	_mat.set_shader_parameter("vis_time", vis_time)
+	_mat.set_shader_parameter("vis_dt", dt)
+	_mat.set_shader_parameter("drive", drive)
+	_mat.set_shader_parameter("fresh", 1.0 if frames <= FRESH_FRAMES else 0.0)
 	_mat.set_shader_parameter("size", _area)
 	_mat.set_shader_parameter("cover", cover if cover != null else _grey)
 	_mat.set_shader_parameter("has_cover", 1.0 if cover != null else 0.0)
@@ -342,7 +389,8 @@ func _budget(delta: float) -> void:
 
 func stats() -> Dictionary:
 	return {"id": id, "area": [roundi(_area.x), roundi(_area.y)], "viewport": [_vp.size.x, _vp.size.y] if _vp else [],
-			"scale": snappedf(scale, 0.01), "gpu_ms": snappedf(gpu_ms, 0.01), "frames": frames, "probe": probing()}
+			"scale": snappedf(scale, 0.01), "gpu_ms": snappedf(gpu_ms, 0.01), "frames": frames, "probe": probing(),
+			"feedback": feedback()}
 
 
 ## The flash limit's state now (reads four pixels back: status and tests only, never every frame).

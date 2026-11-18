@@ -1,0 +1,19 @@
+{
+	"name": "Runner",
+	"description": "A little pixel game that plays itself: a runner jumps the crates and spikes, collects coins and hops on every beat, faster when the music is loud, past a city of towers that are the sound.",
+	"area": "tall",
+	"order": 80,
+	"params": {
+		"speed": {"type": "float", "min": 10.0, "max": 80.0, "default": 36.0, "label": "Speed"},
+		"pixel": {"type": "int", "min": 2, "max": 8, "default": 4, "label": "Pixel size"},
+		"score": {"type": "bool", "default": true, "label": "Score"},
+		"sky_top": {"type": "colour", "default": "#1b1640", "label": "Sky"},
+		"sky_low": {"type": "colour", "default": "#c8577a", "label": "Horizon"},
+		"shirt": {"type": "colour", "default": "#3fa7d6", "label": "Runner"}
+	},
+	"presets": {
+		"Day": {"sky_top": "#3d7bd9", "sky_low": "#bfe3f2"},
+		"Night": {"sky_top": "#05060f", "sky_low": "#23295a"},
+		"Chunky": {"pixel": 7}
+	}
+}

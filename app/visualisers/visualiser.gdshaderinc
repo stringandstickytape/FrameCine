@@ -19,6 +19,17 @@ uniform float beat = 0.0;
 uniform float beats = 0.0;
 // Seconds of playing: stops while paused. Use it rather than TIME.
 uniform float vis_time = 0.0;
+// This frame's seconds (0 while paused): for a visualiser with "feedback", so it changes at the same speed at any
+// frame rate and stands still while paused.
+uniform float vis_dt = 0.0;
+// A clock that runs with the music: 0.4 s a second in silence, up to 1.6 with loud bass. Use it for motion that
+// speeds up with the sound and never jumps (a scroll, a spin, a drift). Stops while paused.
+uniform float drive = 0.0;
+// With "feedback": true in visualiser.json: this visualiser's own last frame (same size, before the flash limit).
+// 8 bits a channel: a fade must take off at least 1/255 a frame or it never reaches black. fresh is 1 for the first
+// frames after a start, while previous still holds the picture from before.
+uniform sampler2D previous : filter_linear, repeat_disable;
+uniform float fresh = 1.0;
 // The area in pixels (for round shapes and lines of a fixed width).
 uniform vec2 size = vec2(1280.0, 720.0);
 // The track's cover (a plain grey square without one; has_cover is then 0).

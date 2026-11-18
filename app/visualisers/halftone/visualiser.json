@@ -1,0 +1,19 @@
+{
+	"name": "Halftone",
+	"description": "The cover as a cheap colour print: big dots of four inks that swell with their part of the sound, and slip out of line on a beat.",
+	"area": "backdrop",
+	"order": 60,
+	"params": {
+		"dot_size": {"type": "float", "min": 8.0, "max": 32.0, "default": 15.0, "label": "Dot size"},
+		"swell": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.4, "label": "Swell"},
+		"slip": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Slip on a beat"},
+		"speed": {"type": "float", "min": 0.0, "max": 2.0, "default": 0.5, "label": "Speed"},
+		"paper": {"type": "colour", "default": "#e6dcc4", "label": "Paper"},
+		"use_cover": {"type": "bool", "default": true, "label": "Print the cover"}
+	},
+	"presets": {
+		"Comic": {"dot_size": 22.0, "use_cover": false},
+		"Fine": {"dot_size": 9.0, "swell": 0.3},
+		"Newsprint": {"paper": "#c9c3b4", "slip": 0.8}
+	}
+}

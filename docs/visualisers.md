@@ -54,6 +54,10 @@ A folder whose name is its id (lower case letters, digits and `_`), holding:
     its range is clamped.
   - `presets`: named sets of parameter values, over the defaults.
   - `order`: the place in the list (lower first; then by name).
+  - `feedback`: `true` gives the shader its own last frame as `previous` (default `false`). Without it a visualiser
+    has no memory: every frame is worked out afresh from the sound and the clocks. With it, it can keep things that
+    build up and move on (ink, trails, growth). The host keeps a copy of the picture (before the flash limit) in a
+    viewport drawn after the visualiser's, so it costs one copy a frame, and only for a visualiser that asks.
 - `visualiser.gdshader`, a `canvas_item` shader. UV runs 0..1 over the area, (0, 0) at the top left. The area is
   see-through: alpha 0 shows the card behind.
 
@@ -72,6 +76,9 @@ that is not an id. A user folder with the id of one of the app's is left out too
 | `bass`, `mid`, `treble`, `level` | 0..1, smoothed like `g`: 20-250 Hz, 250 Hz-2 kHz, 2-12 kHz, all |
 | `beat`, `beats` | 1 on a beat (a jump in the low end), falling to 0 over 0.3 s; the count of beats |
 | `vis_time` | seconds of playing; stops while paused (use it, not `TIME`) |
+| `vis_dt` | this frame's seconds; 0 while paused (for `feedback`: change at the same speed at any frame rate, stand still while paused) |
+| `drive` | a clock that runs with the music: 0.4 s a second in silence, up to 1.6 with full bass and level (`0.4 + 0.8 bass + 0.4 level`). For motion that speeds up with the sound and never jumps back (a scroll, a spin, a drift); stops while paused |
+| `previous`, `fresh` | with `feedback` only: the visualiser's own last frame (same size, 8 bits a channel), and 1 for the first two frames after a start, while `previous` still holds the picture from before |
 | `size` | the area in pixels |
 | `cover`, `has_cover` | the track's cover (a grey square without one; `has_cover` is then 0) |
 
@@ -90,8 +97,15 @@ its 0.5 s average, louder than -40 dBFS, at least 0.25 s after the last. It is a
 | `line` | strip | the old line with its faint fill; thickness and fill |
 | `radial` | tall | the old spokes round a circle; spoke count and circle size |
 | `aurora` | backdrop | new: curtains of colour behind the words, lifted by the bass, shimmering with the treble; colours from the cover or chosen (presets Dusk, Calm) |
+| `halftone` | backdrop | the cover as a cheap colour print: four plates of dots (cyan, magenta, yellow, black, each at its own angle) whose sizes are the picture's inks, swollen by the sound at their place across the card; the magenta plate slips out of line on a beat and settles. Without a cover, a starburst panel (presets Comic, Fine, Newsprint) |
+| `tiles` | backdrop | a wall of flat-colour tiles in the manner of modernist posters, each with one bold shape; each tile turns a quarter every few beats at its own phase, so only a few turn on any beat, with a small overshoot over the beat's fall; on the music's clock now and then too; shapes breathe with their band (presets Pastel, Night, Calm) |
+| `runner` | tall | a pixel game that plays itself: the runner jumps crates and spikes on parabolas worked out from where it is, hops on every beat between them, collects coins (a sparkle rises), the world scrolling on `drive`; behind it a striped sun and a city whose towers are the spectrum; the score counts the beats (presets Day, Night, Chunky) |
+| `sakura` | backdrop | a night sky with the moon, hills, and a branch of blossom; petals drift past in four layers, blown along on `drive`, swayed by the middle notes; the blossom glints with the high notes, the moon glows with the level (presets Dusk, Snow, Storm) |
+| `ink` | backdrop | the first with `feedback`: ink in slowly turning water. Its last frame moves along a flow (the curl of a drifting noise, a whirl, a push outwards on a beat) and fades; six pourers circle, each pouring as loud as its sixth of the spectrum; a beat blooms a drop. Dithered half a step so slow motion survives 8 bits; paused, copied exactly. Colours from the cover or chosen (presets Milk, Lagoon, Still) |
 
-The four old styles were drawn in GDScript; they are now shaders that look the same.
+The four old styles were drawn in GDScript; they are now shaders that look the same. None of the ten keeps any
+state on the CPU: everything is worked out from the sound, the clocks and their parameters (and for `ink`, its own
+last frame), so a seek, a pause or a restart never leaves them in a strange state.
 
 ## The analysis
 
@@ -134,9 +148,12 @@ read back to the CPU:
 - **Measured** (`test_visualisers.gd`, lavapipe): a black and white checkerboard swapping every third frame changes
   0.333 of luminance a frame in the picture and 0.015 on the card; the old whole-picture rule alone did nothing to it
   (its gain stays 1). With only the left half swapping, the left half shows 0.031 and the right half keeps its
-  brightness (0.214). The app's own visualisers on the drums test signal reach at most 0.0101 (mirror), 0.0076
-  (bars), 0.0043 (aurora), 0.0034 (line) and 0.0004 (radial): never dimmed. Busier music may bring mirror and bars
-  near the limit; then their busiest cells dim a little.
+  brightness (0.214). The app's own visualisers on the drums test signal reach at most 0.0132 (mirror), 0.0129
+  (tiles), 0.0116 (bars, halftone), 0.0111 (sakura), 0.0022 (line), 0.0014 (runner), 0.0008 (aurora), 0.0006
+  (radial) and about 0 (ink): never dimmed. Busier music may bring mirror, bars, tiles and halftone near the limit;
+  then their busiest cells dim a little. Halftone and tiles were tuned to get there: at first halftone's starburst
+  had hard ray edges (a dot on an edge swapped colour at once; 0.023 to 0.032) and tiles overshot further on each
+  turn (0.020).
 - **A new visualiser starts at its own brightness.** Both rules start from the picture for the first 3 frames: a
   start is one change, not a flicker.
 - **How:** viewports nested so the engine draws them in order each frame (it draws a viewport's child viewports
@@ -265,16 +282,17 @@ of its own. Real motion is 10 frames a second and more, so nothing else is caugh
   `coerce(spec, value)`, `load_shader(id)`.
 - `main.features.set_visualiser_checked(id)` ("" or why not). `main.features.visualisers_service`: `poll()`,
   `status()`, `capture()`, `open_test(signal)`, `last_change`, `user_dir`.
-- The host: `use(id)`, `stats()` (id, area, viewport size, scale, GPU ms, frames).
+- The host: `use(id)`, `stats()` (id, area, viewport size, scale, GPU ms, frames, feedback), `feedback()`,
+  `vis_time`, `drive`.
 - Settings: `[music] visualiser` (default "bars"); `[visualiser.<id>] <param>` for each parameter set away from its
   default.
 
 ## Tested
 
-`tests/test_visualisers.gd`, 87 checks, with WSLg and lavapipe (headless: the 54 without the host and the
+`tests/test_visualisers.gd`, 119 checks, with xvfb and lavapipe (headless: the 59 without the host and the
 watcher).
 
-- The registry: the five in order, no errors, the areas, the parameters read with their types, and every parameter
+- The registry: the ten in order, no errors, the areas, the parameters read with their types, and every parameter
   a uniform of its shader.
 - Ten broken user folders, each left out with its reason; a good one in, its out-of-range default clamped; a user
   folder may not take an app id; a user's shader loads from its text.
@@ -283,14 +301,17 @@ watcher).
   textures, the effects on and off the bus with two holders (one freed), the delay's range.
 - `main.features`: the list, a parameter clamped and kept in the settings, unknown ones refused, a preset, reset,
   choosing by id.
-- The host: each of the five starts and draws; a steady grey picture is untouched and the floor's two bytes give
+- The host: each of the ten starts and draws; a steady grey picture is untouched and the floor's two bytes give
   back its luminance (0.2159 for 0.214); a black and white strobe changing every frame swings at most 0.078 on the
   card; black to white stays under the rise limit after 1.4 s; a new visualiser shows at its own brightness at once.
   Off, its viewports stop and it is not fed; on again, it starts afresh.
+- `feedback`: read from the manifest, and a manifest whose `feedback` is not true or false left out; without it no
+  copy is drawn; a test visualiser that adds 3/255 to its own last frame grows by that each frame; `drive` runs
+  faster than its rest with sound; paused, `drive` stands and so does a feedback picture.
 - Flicker over an area: a swapping checkerboard dimmed (0.333 of change a frame in the picture, 0.015 shown, the
   whole-picture gain untouched); half the card swapping dims that half only. The first frames' timing (test timings
   given to it): cheap at full size, about 3 ms at 75 %, about 62 ms refused with the one before back and the reason.
-  The app's five on the drums test signal on the real card, never dimmed (figures under "The flash limit").
+  The app's ten on the drums test signal on the real card, never dimmed (figures under "The flash limit").
 - Making them: a test signal's WAV (header, length, sound or none); the nine commands open to the assistant at their
   levels; the README in the user folder with this machine's paths; the watcher sees a new folder; a compile error
   comes back with its line (5, after the include on line 2) and words; the last good shader kept; a broken manifest
@@ -303,9 +324,10 @@ watcher).
   should; choosing Aurora builds its controls (a switch among them); Off has none; a change made elsewhere shows on
   the slider; a film hides the section.
 
-`tests/test_music.gd` (24 checks: an `.mp4` holding only sound plays as music; a 1 frame a second video shows as the
-card with its picture dimmed behind it, its title and the visualiser, and the switch turns it into a video and back) now checks all six styles on the card: "off" draws nothing in the area, the others
-draw, each differently. Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
+`tests/test_music.gd` (25 checks: an `.mp4` holding only sound plays as music; a 1 frame a second video shows as the
+card with its picture dimmed behind it, its title and the visualiser, and the switch turns it into a video and back)
+checks all eleven styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
+`feedback` is given 90 frames to build its picture up). Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
 second; the old fixed 1.5 s wait sat on that edge). `test_env_signals` still passes. `test_react` passes as before:
 its flash-size check fails on main too (it expects more than the room schema's swing ceiling allows; not this work).
 
@@ -315,7 +337,12 @@ its flash-size check fails on main too (it expects more than the room schema's s
   right frame, but the audio clock comes back seconds ahead. An engine matter (MediaSource audio with 1 frame a
   second of video), seen in tests; not fixed here.
 - **The acceptance test:** a fresh Claude Code session on the headset, told only to make a visualiser.
-- **More of the app's own.**
+- **The five new ones on the headset** (halftone, tiles, runner, sakura, ink): drawn and measured only under
+  lavapipe so far. There, on the drums, a frame took 3.3 ms (tiles), 2.6 (runner), 4.5 (halftone), 7.2 (sakura) and
+  9 to 11 (ink), against 3.8 for aurora (10 with a cover), which took 0.58 ms on the headset. If the ratio holds,
+  all are under the 2 ms budget there, ink and sakura nearest it; the probe scales any that are not.
+- **More of the app's own.** Ideas not yet made: a Game of Life seeded by beats (with `feedback`, stepping slowly: a
+  fast one would be dimmed as flicker), trails, reaction-diffusion, a starfield, a kaleidoscope of the cover.
 - **Surround.**
 - **On the headset:** the five ran there on 2026-11-18 on a synthetic beat track: all draw and react, 0.06 to
   0.12 ms of GPU each (aurora 0.58 ms), the flash limit idle on all of them, aurora's words readable. Not yet: real

@@ -1,0 +1,18 @@
+{
+	"name": "Sakura",
+	"description": "A blossoming branch against the moon at night, petals drifting past: the music's clock blows them along, the middle notes sway them, the high notes make the blossom glint.",
+	"area": "backdrop",
+	"order": 90,
+	"params": {
+		"petals": {"type": "float", "min": 0.1, "max": 1.0, "default": 0.55, "label": "Petals"},
+		"wind": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "label": "Wind"},
+		"glow": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Moonlight"},
+		"petal": {"type": "colour", "default": "#f6b3c6", "label": "Petal colour"},
+		"sky": {"type": "colour", "default": "#0d1233", "label": "Sky"}
+	},
+	"presets": {
+		"Dusk": {"sky": "#3a2347", "glow": 0.8},
+		"Snow": {"petal": "#f2f4fa", "sky": "#141a2b", "wind": 0.6},
+		"Storm": {"petals": 1.0, "wind": 2.0}
+	}
+}

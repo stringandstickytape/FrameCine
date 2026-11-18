@@ -1,0 +1,22 @@
+{
+	"name": "Ink",
+	"description": "Ink dropped into slowly turning water: each part of the sound pours its own colour, the low notes stir it, and a beat blooms a new drop. It keeps its own last frame, so the ink drifts and fades over seconds.",
+	"area": "backdrop",
+	"order": 100,
+	"feedback": true,
+	"params": {
+		"swirl": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Swirl"},
+		"fade": {"type": "float", "min": 0.05, "max": 1.0, "default": 0.25, "label": "Fade"},
+		"pour": {"type": "float", "min": 0.1, "max": 1.0, "default": 0.5, "label": "Pour"},
+		"use_cover": {"type": "bool", "default": true, "label": "Colours from the cover"},
+		"ink_a": {"type": "colour", "default": "#2fb5d6", "label": "First ink"},
+		"ink_b": {"type": "colour", "default": "#d6386f", "label": "Second ink"},
+		"ink_c": {"type": "colour", "default": "#f0b43a", "label": "Third ink"},
+		"water": {"type": "colour", "default": "#06070d", "label": "Water"}
+	},
+	"presets": {
+		"Milk": {"water": "#d9d4c8", "ink_a": "#1b2a4a", "ink_b": "#7a2140", "ink_c": "#2f5a3a", "use_cover": false},
+		"Lagoon": {"ink_a": "#17c4a5", "ink_b": "#2a6cf0", "ink_c": "#b8f07a", "use_cover": false},
+		"Still": {"swirl": 0.15, "fade": 0.1}
+	}
+}

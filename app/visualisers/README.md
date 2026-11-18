@@ -5,7 +5,8 @@ title, artist, a time line, and a **visualiser**, a picture of the sound. A visu
 here. The player watches this folder and shows your change within a second. Nothing to build, nothing to restart.
 
 - Your visualisers go in: `<<USER>>` (this folder; one sub-folder each)
-- The player's own, to read and copy: `<<APP>>` (`bars`, `mirror`, `line`, `radial`, `aurora`)
+- The player's own, to read and copy: `<<APP>>` (`bars`, `mirror`, `line`, `radial`, `aurora`, `halftone`, `tiles`,
+  `runner`, `sakura`, `ink`)
 
 This file is rewritten by the player when it changes. Keep your notes elsewhere.
 
@@ -49,6 +50,8 @@ names: lower case letters, digits and `_`. The folder name is the id.
   (`min`, `max`, `default`), `bool` (`default`), `colour` (`default` `"#rrggbb"`; declare it
   `uniform vec4 tint : source_color;`). `visualiser_param` sets one.
 - `presets`: named values over the defaults. `order`: place in the list (lower first).
+- `feedback`: `true` gives your shader its own last frame as `previous` (default `false`), for things that build up
+  and move on: ink, trails, growth. Without it every frame is drawn afresh from the sound and the clocks.
 
 ## visualiser.gdshader
 
@@ -78,6 +81,9 @@ grey), so a `strip` visualiser draws only its shapes. The include gives you, set
 | `beat` | 1 on a beat (a jump in the bass), falling to 0 over 0.3 s |
 | `beats` | how many beats so far (for taking turns: `mod(beats, 2.0)`) |
 | `vis_time` | seconds of playing; stops while paused. Use it rather than `TIME` |
+| `drive` | a clock that runs with the music: 0.4 s a second in silence, up to 1.6 with loud bass. Scroll, spin or drift on it: motion speeds up with the sound and never jumps back (`sin(bass)` would) |
+| `vis_dt` | this frame's seconds, 0 while paused |
+| `previous`, `fresh` | with `"feedback": true` only: your last frame (sample it at `UV`), and 1 for the first frames after a start (draw a clean background then) |
 | `size` | the area in pixels |
 | `cover`, `has_cover` | the track's cover texture; `has_cover` is 0 without one (`cover` is then plain grey) |
 
@@ -86,7 +92,13 @@ And functions: `band(x)` (smoothed level at x, 0 low .. 1 high), `band_now(x)`, 
 
 Godot shader notes: no `#version`, no `main()`, no `gl_FragCoord` (use `UV` and `size`, or `FRAGCOORD`); functions
 must be defined before use; `float` literals need a point (`1.0`); `mod`, `fract`, `mix`, `smoothstep`, `atan(y, x)`
-work as in GLSL. Read `visualiser.gdshaderinc` in `<<APP>>` for the exact declarations.
+work as in GLSL. `PI` and `TAU` are built in (defining your own is an error), and so is `dot()` (do not name a
+uniform `dot`). Read `visualiser.gdshaderinc` in `<<APP>>` for the exact declarations.
+
+With `feedback`: `previous` has 8 bits a channel, so a slow fade or a slow drift rounds away to nothing. Add a little
+noise (half a step, `(hash - 0.5) / 255.0`) to what you write and it survives on average; `ink` does. Multiply changes
+by `vis_dt` so they run at the same speed at 60 and 90 frames a second and stop while paused; when `vis_dt` is 0,
+write `previous` back unchanged.
 
 ## Rules the player keeps for you
 
@@ -97,7 +109,7 @@ work as in GLSL. Read `visualiser.gdshaderinc` in `<<APP>>` for the exact declar
     gentle swells.
   - Flicker over an area: every part of the picture is compared with its own recent average. Patterns that swap or
     flicker (checkerboards, stripes, strobing regions) are dimmed where they flicker, more the larger the area.
-    Moving shapes and bars are fine; the player's own five are never dimmed on the test drums.
+    Moving shapes and bars are fine; the player's own ten are never dimmed on the test drums.
   Design for that: move shapes, change colour, pulse sizes; avoid swapping or strobing patterns. `visualiser_status`
   shows `flash_limit`: `dimming`, and `flicker` against `flicker_max`.
 - **The GPU budget.** A new or changed visualiser first draws a few frames small, timed: if it would take more than
@@ -121,4 +133,6 @@ work as in GLSL. Read `visualiser.gdshaderinc` in `<<APP>>` for the exact declar
 
 Oscilloscope from `waveform`; circles that grow with `bass`; a starfield that speeds up with `level`; colour from the
 cover (`texture(cover, uv)`); a grid of cells each lit by its own band; a slow kaleidoscope turned by `vis_time` and
-pushed by `beat`. Look at `aurora` in `<<APP>>` for a full-card one.
+pushed by `beat`. Look at `aurora` in `<<APP>>` for a full-card one, `halftone` for the cover reworked, `tiles` for
+taking turns on beats (each tile its own number of beats), `runner` for a scene worked out from `drive` alone (a game
+that plays itself, no memory needed), `sakura` for many falling things at one per cell, and `ink` for `feedback`.

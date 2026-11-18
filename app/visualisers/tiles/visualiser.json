@@ -1,0 +1,21 @@
+{
+	"name": "Tiles",
+	"description": "A wall of flat-colour tiles, each with a bold shape. On a beat a few of them turn a quarter, with a snap; the shapes breathe with their part of the sound.",
+	"area": "backdrop",
+	"order": 70,
+	"params": {
+		"rows": {"type": "int", "min": 3, "max": 10, "default": 5, "label": "Rows"},
+		"busy": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.4, "label": "Tiles turning"},
+		"breathe": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Breathing"},
+		"colour_a": {"type": "colour", "default": "#c8402f", "label": "First colour"},
+		"colour_b": {"type": "colour", "default": "#e9ad2e", "label": "Second colour"},
+		"colour_c": {"type": "colour", "default": "#245a9e", "label": "Third colour"},
+		"paper": {"type": "colour", "default": "#e4dac4", "label": "Paper"},
+		"ink": {"type": "colour", "default": "#1c1b1f", "label": "Dark"}
+	},
+	"presets": {
+		"Pastel": {"colour_a": "#e8a0a0", "colour_b": "#f2d58c", "colour_c": "#8fb8d9", "ink": "#4a4458"},
+		"Night": {"colour_a": "#7b3fbf", "colour_b": "#2fb59a", "colour_c": "#e0577d", "paper": "#2a2833", "ink": "#0f0e13"},
+		"Calm": {"busy": 0.2, "breathe": 0.2, "rows": 4}
+	}
+}

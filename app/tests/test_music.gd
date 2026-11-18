@@ -9,6 +9,7 @@ extends SceneTree
 
 const Factory := preload("res://scripts/video/video_source_factory.gd")
 const MusicSource := preload("res://scripts/play/music_source.gd")
+const Registry := preload("res://scripts/visualisers/visualiser_registry.gd")
 var DIR := OS.get_environment("HOME") + "/media-tests/features/music/"
 
 var _failures := 0
@@ -72,13 +73,15 @@ func _playback() -> void:
 	# draws nothing there.
 	var f: Node = main.features
 	var styles: Array[String] = src.styles()
-	_check("visualiser: bars by default; bars, mirror, line, radial, aurora and off (%s)" % [styles],
-			f.visualiser() == "bars" and styles == ["bars", "mirror", "line", "radial", "aurora", "off"])
+	_check("visualiser: bars by default; the app's ten and off (%s)" % [styles],
+			f.visualiser() == "bars" and styles == ["bars", "mirror", "line", "radial", "aurora", "halftone", "tiles",
+			"runner", "sakura", "ink", "off"])
 	var painted := {}
 	var looks := {}
 	for s: String in styles:
 		f.set_visualiser(s)
-		await _frames(4)
+		# One that keeps its own last frame ("feedback") builds its picture up over a second or two.
+		await _frames(90 if bool(Registry.entry(s).get("feedback", false)) else 4)
 		await RenderingServer.frame_post_draw
 		var img: Image = src.get_rgb_texture().get_image()
 		var n := 0

@@ -12,8 +12,8 @@ extends RefCounted
 ## (get_shader_uniform_list()) with a Logger catching what it reports.
 ##
 ##   ids() -> Array[String]            the usable ones, in order (the manifest's "order", then the name)
-##   entry(id) -> Dictionary           {id, name, description, area, order, params, presets, shader_path, dir, builtin,
-##                                     stale (a newer manifest is broken; this is the last good one)}
+##   entry(id) -> Dictionary           {id, name, description, area, order, feedback, params, presets, shader_path,
+##                                     dir, builtin, stale (a newer manifest is broken; this is the last good one)}
 ##   errors() -> Dictionary            id -> why its folder (or its newest manifest) is not usable
 ##   rescan()                          read the folders again (after a change in user://visualisers)
 ##   check(id) -> Dictionary           compiles the shader as it is on disk now: {ok, errors: [{line, message}],
@@ -31,7 +31,8 @@ extends RefCounted
 ##               "colour_low": {"type": "colour", "default": "#73b3ff", "label": "Low colour"}},
 ##    "presets": {"Warm": {"colour_low": "#ff9a40"}}}
 ## Each parameter is a uniform of the same name in the shader: float and int (min, max, default), bool (default) and
-## colour ("#rrggbb", a vec4 uniform). "label" names it for people; the name is used without one.
+## colour ("#rrggbb", a vec4 uniform). "label" names it for people; the name is used without one. "feedback": true
+## gives the shader its own last frame as `previous` (default false).
 
 const DIRS: Array[String] = ["res://visualisers", "user://visualisers"]
 const MANIFEST := "visualiser.json"
@@ -145,6 +146,8 @@ static func _read(folder: String, id: String, builtin: bool) -> Dictionary:
 	var area := str(m.get("area", "strip"))
 	if not area in AREAS:
 		return {"error": "%s: area must be one of %s, not %s" % [path, ", ".join(AREAS), area]}
+	if not m.get("feedback", false) is bool:
+		return {"error": "%s: feedback must be true or false" % path}
 	var params := {}
 	var raw_params: Variant = m.get("params", {})
 	if not raw_params is Dictionary:
@@ -170,7 +173,8 @@ static func _read(folder: String, id: String, builtin: bool) -> Dictionary:
 				vals[pname] = v
 			presets[pre] = vals
 	return {"id": id, "name": str(m.get("name", id)), "description": str(m.get("description", "")), "area": area,
-			"order": int(m.get("order", 100)), "params": params, "presets": presets,
+			"order": int(m.get("order", 100)), "feedback": bool(m.get("feedback", false)), "params": params,
+			"presets": presets,
 			"shader_path": folder.path_join(SHADER), "dir": folder, "builtin": builtin}
 
 
