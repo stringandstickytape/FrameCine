@@ -241,6 +241,18 @@ the factory asks the file whether it has a video stream (`MusicSource.has_no_pic
 never pays for that: the question is asked only after the video path failed. Network files ask the MediaSource
 already open.
 
+## Still pictures
+
+A video at 5 frames a second or fewer (`HWVideoSource.STILL_FPS`; radio programmes put out as video with one picture,
+at 1 or 2 frames a second) plays as a video (its audio tracks, subtitles, chapters and gapless next item as usual),
+but the screen shows the music card: the video's picture fitted to the card and dimmed to 45 %
+(`shaders/still_picture.gdshader`: the decoder's planes, the file's matrix and range; no HDR, no picture controls),
+the title from the tags or the file name, the time line, and the visualiser. Picture, Visualisations shows for it,
+with the switch **Show videos with a still picture as music** (`[music] still_card`, default on); turning it off
+opens the file again as a plain video, and the switch stays in the section to turn it back on.
+`HWVideoSource.is_still_video()`, `shows_card()`, `visualiser()`; the card is a `MusicSource.open_card()` with no file
+of its own. Real motion is 10 frames a second and more, so nothing else is caught.
+
 ## API and settings
 
 - `main.features`: `visualiser()`, `set_visualiser(id)` (an id or "off"), `visualisers()` (each with its parameter
@@ -291,15 +303,17 @@ watcher).
   should; choosing Aurora builds its controls (a switch among them); Off has none; a change made elsewhere shows on
   the slider; a film hides the section.
 
-`tests/test_music.gd` (17 checks: an `.mp4` holding only sound plays as music) now checks all six styles on the card: "off" draws nothing in the area, the others
+`tests/test_music.gd` (24 checks: an `.mp4` holding only sound plays as music; a 1 frame a second video shows as the
+card with its picture dimmed behind it, its title and the visualiser, and the switch turns it into a video and back) now checks all six styles on the card: "off" draws nothing in the area, the others
 draw, each differently. Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
 second; the old fixed 1.5 s wait sat on that edge). `test_env_signals` still passes. `test_react` passes as before:
 its flash-size check fails on main too (it expects more than the room schema's swing ceiling allows; not this work).
 
 ## Not yet
 
-- **Videos that are a still picture** (a picture held for a whole programme, at 1 or 2 frames a second): next. Shown
-  as the music card with the video's own picture as the cover, the visualiser beside it.
+- **Seeking in a still picture** lands at the next keyframe (up to 10 s on): after the seek the decoder shows the
+  right frame, but the audio clock comes back seconds ahead. An engine matter (MediaSource audio with 1 frame a
+  second of video), seen in tests; not fixed here.
 - **The acceptance test:** a fresh Claude Code session on the headset, told only to make a visualiser.
 - **More of the app's own.**
 - **Surround.**

@@ -1,6 +1,7 @@
 extends Node
 
 const Pointing := preload("res://scripts/pointing/pointing.gd")
+const StillVideo := preload("res://scripts/video/hw_video_source.gd")
 
 ## The playback features hub (docs/features.md). main.gd creates it as "Features" before the menu's setup, so the
 ## menu (or the pane) reaches every feature as main.features.<name>. Each feature is a small node or helper with
@@ -246,6 +247,7 @@ func _ready() -> void:
 	var vis := str(main.settings.get_value("music", "visualiser", MusicSource.DEFAULT_STYLE))
 	MusicSource.style = vis if vis in MusicSource.styles() else MusicSource.DEFAULT_STYLE
 	_load_visualiser_params()
+	StillVideo.still_card = bool(main.settings.get_value("music", "still_card", true))
 	battery = _add(BatteryForecast.new(), "Battery")
 	depth = _add(StereoDepth.new(), "StereoDepth")
 	resume = _add(Resume.new(), "Resume")
@@ -353,6 +355,26 @@ func end_text(localised := false) -> String:
 ## showing.
 func visualiser() -> String:
 	return MusicSource.style
+
+
+## Videos that are a still picture shown as the music card (HWVideoSource.still_card; [music] still_card, default on).
+func still_card() -> bool:
+	return StillVideo.still_card
+
+
+## Turns the card for still pictures on or off; a still picture playing now opens again where it was, the other way.
+func set_still_card(on: bool) -> void:
+	StillVideo.still_card = on
+	main.settings.set_value("music", "still_card", null if on else false)
+	var src: Object = main.player.source
+	if src != null and src.has_method("is_still_video") and src.is_still_video() and src.shows_card() != on \
+			and main.current_path != "":
+		var at: float = main.player.get_position()
+		main.file_opened.connect(func(_p: String) -> void:
+			if main.player.can_seek():
+				main.player.seek(at), CONNECT_ONE_SHOT)
+		main.open_path(main.current_path, false)
+	visualisers_changed.emit()
 
 
 func set_visualiser(s: String) -> void:

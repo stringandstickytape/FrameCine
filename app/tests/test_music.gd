@@ -129,8 +129,60 @@ func _playback() -> void:
 	main.open_path("stub://flat_mono")
 	await _frames(3)
 	DirAccess.remove_absolute(sound_only)
+	await _still_picture()
 	main.open_path("stub://flat_mono")
 	await _frames(3)
+
+
+## A video at 1 frame a second (made by ffmpeg: testsrc2 and a tone, title "Still Test"): the card with its picture
+## dimmed behind it and the visualiser; the switch in Picture, Visualisations shows it as a video and back.
+func _still_picture() -> void:
+	var still := DIR.get_base_dir().get_base_dir().path_join("still/still_1fps.mkv")
+	if not FileAccess.file_exists(still):
+		print("SKIP still pictures (no %s)" % still)
+		return
+	var f: Node = main.features
+	f.set_visualiser("bars")
+	main.open_path(still)
+	await _until(_card_on, 6.0)
+	var src: Object = main.player.source
+	var m: ShaderMaterial = main.screen.material
+	_check("a 1 frame a second video shows as the card (%s)" % src.get_video_info().get("fps"), src.get_kind() == "hw"
+			and src.shows_card() and m.get_shader_parameter("rgb_source") == true
+			and m.get_shader_parameter("rgb_tex") == src.get_rgb_texture() and not main.mode.is_stereo())
+	await create_timer(1.5).timeout
+	await RenderingServer.frame_post_draw
+	var card: Image = src.get_rgb_texture().get_image()
+	# testsrc2's colours, dimmed, at the card's left middle (the words are at the left top, the visualiser lower).
+	var c := card.get_pixel(int(card.get_width() * 0.5), int(card.get_height() * 0.08))
+	_check("its picture is behind the card, dimmed (%s)" % c, c.v > 0.05 and c.v < 0.6
+			and not c.is_equal_approx(MusicSource.BACKGROUND))
+	_check("the card's title is the file's (%s)" % src._card.title, src._card.title == "Still Test")
+	_check("the visualiser runs on it", src.visualiser() != null and src.visualiser().id == "bars")
+	var pic: Node = main.ui.ui.picture
+	pic.sync()
+	_check("Picture shows Visualisations with the switch on", pic._vis_box.visible and pic._still.visible
+			and pic._still.button_pressed and pic._vis_body.visible)
+	var at: float = main.player.get_position()
+	f.set_still_card(false)
+	await _until(func() -> bool: return main.player.source != src and main.player.source.has_frame(), 6.0)
+	await _frames(5)
+	src = main.player.source
+	pic.sync()
+	# Where it was: asked for, not checked. A seek in a 1 frame a second file comes out at the next keyframe (the audio
+	# clock runs ahead of the frame shown; an engine matter, docs/visualisers.md "Still pictures").
+	_check("switched off: the same file as a video (%.1f, was %.1f); only the switch shows" % [
+			main.player.get_position(), at], not src.shows_card() and m.get_shader_parameter("rgb_source") == false
+			and pic._vis_box.visible and not pic._vis_body.visible)
+	f.set_still_card(true)
+	await _until(func() -> bool: return main.player.source != src and main.player.source.shows_card(), 6.0)
+	_check("switched on again: the card", main.player.source.shows_card())
+	main.settings.set_value("music", "still_card", null)
+
+
+func _card_on() -> bool:
+	var s: Object = main.player.source
+	return s != null and s.has_method("shows_card") and s.shows_card()
 
 
 func _until(cond: Callable, seconds: float) -> void:

@@ -52,6 +52,7 @@ var _vis_body: VBoxContainer
 ## when it changes, else only its values set.
 var _vis_built := ""
 var _vis_rows := {}
+var _still: Button
 var _mode: VideoMode = VideoMode.new()
 var _layout_buttons: Array[ModeDiagram] = []
 var _projection_buttons: Array[ModeDiagram] = []
@@ -132,6 +133,8 @@ func bind(p_app: Node) -> void:
 	f.projector.changed.connect(_sync_picture)
 	f.pip.changed.connect(func(_s: String, _p: String) -> void: _sync_pip())
 	f.visualisers_changed.connect(_sync_visualisers)
+	# A still picture's card is made when the decoder has its first frame, after the file opened.
+	app.mode_changed.connect(func(_m: VideoMode, _t: String) -> void: _sync_visualisers())
 	app.file_opened.connect(func(_p: String) -> void:
 		_sync_folder.call_deferred()
 		_sync_hdr.call_deferred()
@@ -162,11 +165,16 @@ func _sync_visualisers() -> void:
 	if _vis_box == null:
 		return
 	var src: Object = app.player.source if app.get("player") != null else null
-	var music: bool = src != null and src.has_method("get_kind") and src.get_kind() == "music"
-	_vis_box.visible = music
-	if not music:
-		return
+	# The card is on the screen (music, a still picture), or a still picture shows as a video (its switch).
+	var card: bool = src != null and src.has_method("shows_card") and src.shows_card()
+	var still: bool = src != null and src.has_method("is_still_video") and src.is_still_video()
 	var f: Node = app.features
+	_vis_box.visible = card or still
+	_still.visible = still
+	W.set_on(_still, f.still_card())
+	_vis_body.visible = card
+	if not card:
+		return
 	var list: Array[Dictionary] = f.visualisers()
 	var showing: String = f.visualiser()
 	var broken: Dictionary = VisualiserRegistry.errors()
@@ -298,6 +306,9 @@ func _build() -> void:
 			&"MutedLabel"))
 	_vis_body = W.vbox()
 	_vis_box.add_child(_vis_body)
+	_still = W.toggle("Show videos with a still picture as music", func(on: bool) -> void:
+		app.features.set_still_card(on))
+	_vis_box.add_child(W.hbox([_still]))
 	box.add_child(W.section("Mode"))
 	# Two rows: the layouts, then the projections (eight diagrams in one row are wider than the panel); each wraps
 	# where it is narrower still (a card on the tablet).

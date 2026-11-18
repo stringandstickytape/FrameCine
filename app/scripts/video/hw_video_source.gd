@@ -12,6 +12,13 @@ const RAW_H264: Array[String] = ["h264", "264", "avc", "jsv"]
 const RAW_HEVC: Array[String] = ["h265", "265", "hevc"]
 const DEFAULT_FPS := 23.976
 const NetworkHosts := preload("res://scripts/net/network_hosts.gd")
+const MusicSource := preload("res://scripts/play/music_source.gd")
+const HdrToneMap := preload("res://scripts/play/hdr_tone_map.gd")
+const STILL_SHADER := preload("res://shaders/still_picture.gdshader")
+## A video at this many frames a second or fewer is a still picture (a programme of sound with one picture, at 1 or 2
+## frames a second): it shows as the music card, its picture dimmed behind the words, with the visualiser
+## (docs/visualisers.md "Still pictures"). Real motion is 10 frames a second and more.
+const STILL_FPS := 5.0
 
 ## HWVideoTexture (untyped: the class only exists in our engine build).
 var _tex: Variant = null
@@ -46,6 +53,10 @@ static var live_latency := -1.0
 ## a file opens. The engine keeps hardware VP9 to one session at a time (two crash the decoder firmware), so a second
 ## VP9 texture (next item, picture in picture, thumbnails) decodes in software. Engine builds without it ignore it.
 static var hw_vp9 := true
+## Still pictures as the music card ([music] still_card, default on; features.set_still_card()).
+static var still_card := true
+var _card: MusicSource
+var _host: Node
 
 
 static func is_available() -> bool:
@@ -240,8 +251,15 @@ func _on_format_changed() -> void:
 	format_changed.emit()
 
 
+func attach(host: Node) -> void:
+	_host = host
+
+
 func close() -> void:
 	cancel_next()
+	if _card != null:
+		_card.close()
+		_card = null
 	if _tex != null:
 		_tex.close()
 	if _media != null and _media.has_method("close"):
@@ -300,6 +318,57 @@ func get_duration() -> float:
 func update(delta: float, master_clock: float) -> void:
 	if _tex != null:
 		_tex.update(delta, master_clock)
+	if _card != null:
+		_card.set_playing(is_playing())
+		_card.update(delta, get_position())
+
+
+## A video whose picture stands still (STILL_FPS or fewer frames a second, not live): it shows as the music card when
+## still_card is on.
+func is_still_video() -> bool:
+	return _tex != null and _media != null and not is_live() and float(_info.get("fps", 0.0)) > 0.0 \
+			and float(_info.get("fps", 0.0)) <= STILL_FPS
+
+
+## True while the screen shows the music card for this still picture.
+func shows_card() -> bool:
+	return _card != null
+
+
+## The visualiser on the card (null while the video shows as a video).
+func visualiser() -> Object:
+	return _card.visualiser() if _card != null else null
+
+
+## The card, made the first time the screen asks for the picture (a chained next item makes its own when it takes
+## over), its picture the decoder's planes through shaders/still_picture.gdshader.
+func _ensure_card() -> void:
+	if _card != null or not still_card or not is_still_video() or _host == null:
+		return
+	var m := ShaderMaterial.new()
+	m.shader = STILL_SHADER
+	m.set_shader_parameter("y_tex", _tex.get_plane_texture(0))
+	m.set_shader_parameter("uv_tex", _tex.get_plane_texture(1))
+	m.set_shader_parameter("p010", is_p010())
+	var r: Rect2 = _tex.get_visible_uv_rect()
+	m.set_shader_parameter("visible_rect", Vector4(r.position.x, r.position.y, r.size.x, r.size.y))
+	var colour: Dictionary = HdrToneMap.describe(_info)
+	m.set_shader_parameter("yuv_matrix", int(colour.get("matrix", 0)))
+	m.set_shader_parameter("full_range", bool(colour.get("full_range", false)))
+	var tags: Dictionary = _media.get_tags() if _media.has_method("get_tags") else {}
+	var t := str(tags.get("title", "")).strip_edges()
+	if t == "":
+		t = path.get_file().get_basename().replace("_", " ")
+	var who := str(tags.get("show", tags.get("artist", tags.get("album_artist", "")))).strip_edges()
+	var w := float(_info.get("width", 0))
+	var h := float(_info.get("height", 0))
+	var sar := float(_info.get("sample_aspect_ratio", 1.0))
+	var aspect := w * (sar if sar > 0.0 else 1.0) / h if h > 0.0 else 16.0 / 9.0
+	_card = MusicSource.new()
+	_card.attach(_host)
+	_card.open_card(path, t, who, _duration, m, aspect)
+	print("HWVideoSource: %s is a still picture (%.1f frames a second): shown as the music card" % [path,
+			float(_info.get("fps", 0.0))])
 
 
 func has_frame() -> bool:
@@ -327,10 +396,26 @@ func is_p010() -> bool:
 
 
 func get_visible_uv_rect() -> Rect2:
+	if _card != null:
+		return Rect2(0, 0, 1, 1)
 	return _tex.get_visible_uv_rect() if _tex != null else Rect2(0, 0, 1, 1)
 
 
+func get_rgb_texture() -> Texture2D:
+	_ensure_card()
+	return _card.get_rgb_texture() if _card != null else null
+
+
 func get_video_info() -> Dictionary:
+	if _card != null:
+		# The screen is the card: its size, so the screen keeps the card's shape.
+		var d := _info.duplicate()
+		d["picture_width"] = d.get("width", 0)
+		d["picture_height"] = d.get("height", 0)
+		d["width"] = MusicSource.CARD_SIZE.x
+		d["height"] = MusicSource.CARD_SIZE.y
+		d["still_card"] = true
+		return d
 	return _info
 
 

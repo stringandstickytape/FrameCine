@@ -47,6 +47,9 @@ var _vis: VisualiserHost
 var _vis_rect: TextureRect
 var _text: Control
 var _holding := false
+## A video that is a still picture (open_card()): the material that draws its picture behind the card, and its aspect.
+var _picture: Material
+var _picture_aspect := 16.0 / 9.0
 
 
 ## Every style: the visualisers' ids in order, then "off".
@@ -118,6 +121,26 @@ func open_with_media(p: String, result: Dictionary) -> Error:
 	return _use(result["media"])
 
 
+## The card alone, for a video whose picture stands still (HWVideoSource, docs/visualisers.md "Still pictures"): the
+## video's words, and its picture drawn dimmed behind them by `picture` (shaders/still_picture.gdshader). The video
+## keeps its own playback; its owner calls update() with the position and sets the play state.
+func open_card(p_path: String, p_title: String, p_artist: String, duration: float, picture: Material,
+		aspect: float) -> void:
+	path = p_path
+	title = p_title
+	artist = p_artist
+	_duration = duration
+	_picture = picture
+	_picture_aspect = aspect if aspect > 0.0 else 16.0 / 9.0
+	_build_card()
+	_hold(true)
+
+
+## The play state of a card that open_card() made (its video plays and pauses).
+func set_playing(on: bool) -> void:
+	_playing = on
+
+
 func _use(media: Object) -> Error:
 	_media = media
 	_duration = float(media.call("get_duration"))
@@ -147,6 +170,18 @@ func _build_card() -> void:
 	_card = MusicCard.new()
 	_card.size = Vector2(CARD_SIZE)
 	_vp.add_child(_card)
+	if _picture != null:
+		# The still picture, fitted to the card (bars at the sides or above and below), dimmed by its shader.
+		var pic := ColorRect.new()
+		pic.name = "StillPicture"
+		pic.material = _picture
+		var s := Vector2(CARD_SIZE)
+		var fit := Vector2(s.x, s.x / _picture_aspect) if _picture_aspect >= s.x / s.y \
+				else Vector2(s.y * _picture_aspect, s.y)
+		pic.position = (s - fit) * 0.5
+		pic.size = fit
+		pic.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_card.add_child(pic)
 	_vis_rect = TextureRect.new()
 	_vis_rect.name = "VisualiserArea"
 	_vp.add_child(_vis_rect)
@@ -309,6 +344,16 @@ func is_ended() -> bool:
 
 func get_rgb_texture() -> Texture2D:
 	return _vp.get_texture() if _vp != null else null
+
+
+## The card's picture: a video that is a still picture (open_card()) shows it dimmed behind the words.
+func is_still_card() -> bool:
+	return _picture != null
+
+
+## True: what is on the screen is the card (the Picture tab's Visualisations; HWVideoSource for a still picture).
+func shows_card() -> bool:
+	return true
 
 
 func get_video_info() -> Dictionary:

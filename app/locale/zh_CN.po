@@ -2103,6 +2103,9 @@ msgstr "可视化效果"
 msgid "Shown on the screen while something without a picture plays, such as music."
 msgstr "播放没有画面的内容（例如音乐）时显示在屏幕上。"
 
+msgid "Show videos with a still picture as music"
+msgstr "将画面静止的视频作为音乐显示"
+
 msgid "Mode"
 msgstr "模式"
 
