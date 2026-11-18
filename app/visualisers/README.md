@@ -90,14 +90,21 @@ work as in GLSL. Read `visualiser.gdshaderinc` in `<<APP>>` for the exact declar
 
 ## Rules the player keeps for you
 
-- **The flash limit.** No visualiser may flash: it would be dangerous for people with photosensitive epilepsy, and
-  the screen is large in a headset. The player measures your picture's average brightness each frame and dims the
-  whole picture when it jumps more than about 8 % above where it has been lately. It may rise only slowly (about 20 %
-  a second). So whole-screen flashes on beats come out as gentle swells. Design for that: move shapes, change colour,
-  pulse sizes; keep the average brightness steady. `visualiser_status` shows `flash_limit.dimming`.
-- **The GPU budget.** Over 2 ms a frame (for a second), your visualiser is drawn at a lower resolution and
-  stretched. `visualiser_status` shows `gpu_ms` and `scale`. Long loops per pixel (many octaves of noise,
-  ray-marching) cost the most.
+- **The flash limit.** No visualiser may flash: it can be dangerous for people with photosensitive epilepsy, and the
+  screen is large in a headset. Two rules, applied to your picture on the GPU:
+  - Whole-picture brightness: when the average jumps more than about 8 % above where it has been lately, the whole
+    picture is dimmed; it may rise only slowly (about 20 % a second). Whole-screen flashes on beats come out as
+    gentle swells.
+  - Flicker over an area: every part of the picture is compared with its own recent average. Patterns that swap or
+    flicker (checkerboards, stripes, strobing regions) are dimmed where they flicker, more the larger the area.
+    Moving shapes and bars are fine; the player's own five are never dimmed on the test drums.
+  Design for that: move shapes, change colour, pulse sizes; avoid swapping or strobing patterns. `visualiser_status`
+  shows `flash_limit`: `dimming`, and `flicker` against `flicker_max`.
+- **The GPU budget.** A new or changed visualiser first draws a few frames small, timed: if it would take more than
+  2 ms a frame it starts at a lower resolution, and if far more (over 4 ms even at 35 %) it is refused and the one
+  before stays (`visualiser_use` says so, with the estimate). While it runs, over 2 ms for a second steps it down.
+  `visualiser_status` shows `gpu_ms` and `scale`. Long loops per pixel (many octaves of noise, ray-marching) cost the
+  most. Never write a loop that might not end: it would stall the headset's GPU.
 - **Comfort.** It is a screen in a room, so motion is fine; no strobing, no text that pretends to be the player.
 
 ## When something is wrong

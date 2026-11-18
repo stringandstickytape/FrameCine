@@ -145,6 +145,7 @@ func _build_card() -> void:
 	_vis.cover = _cover_tex
 	_vp.add_child(_vis)
 	_vis.setup(_vp, _vis_rect)
+	_vis.refused.connect(_on_refused)
 	if _host != null:
 		_host.add_child(_vp)
 
@@ -246,6 +247,11 @@ func update(delta: float, master_clock: float) -> void:
 	if not _drawn:
 		_drawn = true
 		format_changed.emit()
+
+
+## A visualiser refused as too heavy: the card keeps the one before (the host has put it back), or the default.
+func _on_refused(_id: String, _why: String) -> void:
+	style = _vis.id if _vis.id != "" else DEFAULT_STYLE
 
 
 ## Starts the chosen visualiser when it changed, and places its area.

@@ -299,12 +299,14 @@ func _host() -> void:
 	await RenderingServer.frame_post_draw
 	lum = _mean_lum(card.get_texture().get_image())
 	_check("a new visualiser starts at its own brightness (%.3f)" % lum, absf(lum - 0.214) < 0.01)
+	await _patterns(host, card)
+	await _probe(host)
 	# Off: nothing drawn or fed; on again: starts afresh.
 	host.set_active(false)
 	var counted := host.frames
 	await _frames(3)
 	_check("off: its viewports stop and it is not fed", host._vp.render_target_update_mode
-			== SubViewport.UPDATE_DISABLED and host._measure_vp.render_target_update_mode == SubViewport.UPDATE_DISABLED
+			== SubViewport.UPDATE_DISABLED and host._limit_vp.render_target_update_mode == SubViewport.UPDATE_DISABLED
 			and host.frames == counted)
 	host.set_active(true)
 	await _frames(2)
@@ -388,6 +390,16 @@ func _tinkering() -> void:
 	var why: String = f.set_visualiser_checked("never")
 	_check("choosing one that never compiled: refused with the error (%s)" % why, why.contains("line 2")
 			and f.visualiser() != "never")
+	# An include can only bring in a shader include file: not the project, not the settings.
+	var peek := _tmp.path_join("peek")
+	DirAccess.make_dir_recursive_absolute(peek)
+	_write(peek.path_join(Registry.MANIFEST), '{"name": "Peek"}')
+	_write(peek.path_join(Registry.SHADER), "shader_type canvas_item;\n#include \"res://project.godot\"\n"
+			+ "void fragment() { COLOR = vec4(1.0); }\n")
+	svc.poll()
+	var peeked: Dictionary = Registry.check("peek")
+	print("  include of a non-shader file: %s" % [peeked["errors"]])
+	_check("an include of a file that is not a shader include is refused", not peeked["ok"])
 	var r: Dictionary = await DevCommands.execute("visualiser_check", {"id": "never"})
 	_check("visualiser_check through the registry gives the errors", r["ok"] and not r["result"]["ok"])
 	if not MusicSource.available():
@@ -399,6 +411,9 @@ func _tinkering() -> void:
 	await _frames(30)
 	_check("visualiser_test plays the drums as music", r["ok"] and _main.player.source != null
 			and _main.player.source.get_kind() == "music")
+	# lavapipe draws on the CPU: its timings would scale the visualisers down here.
+	var mh: Node = svc._host()
+	mh.budget_ms = 0.0
 	r = await DevCommands.execute("visualiser_use", {"id": "live"})
 	await _frames(10)
 	var st: Dictionary = svc.status()
@@ -416,6 +431,24 @@ func _tinkering() -> void:
 	var card := Image.load_from_file(str(r["result"]["card"])) if r["ok"] else null
 	_check("visualiser_capture saves the card (%s)" % [r.get("result", r.get("error"))], card != null
 			and card.get_width() == 1280 and r["result"]["alone"] != null)
+	# The app's own on the drums: how much they flicker, against the limit. None may be dimmed.
+	_main.player.seek(0.0)
+	var figures := {}
+	var clean := true
+	for vid in BUILTIN:
+		f.set_visualiser(vid)
+		await _frames(20)
+		var most := 0.0
+		var dimmed := 0
+		for i in 12:
+			await _frames(8)
+			var lim: Dictionary = mh.limit_state()
+			most = maxf(most, lim["flicker"])
+			dimmed += 1 if lim["dimming"] else 0
+		figures[vid] = "flicker %.4f at most, dimmed %d/12" % [most, dimmed]
+		clean = clean and dimmed == 0
+	print("  on the drums: %s" % [figures])
+	_check("the app's own visualisers on the drums are never dimmed (limit %.3f)" % VisualiserHost.FLICKER_MAX, clean)
 	f.set_visualiser("bars")
 	svc.user_dir = svc.USER_DIR
 
@@ -424,6 +457,102 @@ func _write(path: String, text: String) -> void:
 	var fa := FileAccess.open(path, FileAccess.WRITE)
 	fa.store_string(text)
 	fa.close()
+
+
+## Patterns that swap with a steady average: the area rule dims them; half the card swapping dims only that half.
+func _patterns(host: Node, card: SubViewport) -> void:
+	var swap := "shader_type canvas_item;\nuniform float white = 0.0;\nuniform bool half_only = false;\n" \
+			+ "void fragment() {\n\tfloat c = mod(floor(UV.x * 32.0) + floor(UV.y * 18.0) + white, 2.0);\n" \
+			+ "\tif (half_only && UV.x > 0.5) { c = 0.5; }\n\tCOLOR = vec4(vec3(c), 1.0);\n}\n"
+	_put("checker", '{"name": "Checker", "area": "backdrop", "params": {"white": {"type": "float", "min": 0, ' \
+			+ '"max": 1, "default": 0}, "half_only": {"type": "bool", "default": false}}}', swap)
+	Registry.rescan()
+	for half in [false, true]:
+		Registry.overrides["checker"] = {"white": 0.0, "half_only": half}
+		host.use("checker")
+		await _frames(6)
+		var prev := card.get_texture().get_image()
+		var raw_prev: Image = host.picture().get_image()
+		var shown := 0.0
+		var raw := 0.0
+		var right := 0.0
+		var n := 0
+		for i in 60:
+			# A swap every third frame: 10 to 20 a second at lavapipe's rates.
+			Registry.overrides["checker"] = {"white": float((i / 3) % 2), "half_only": half}
+			await RenderingServer.frame_post_draw
+			var img := card.get_texture().get_image()
+			var raw_img: Image = host.picture().get_image()
+			if i >= 30:
+				shown += _mean_change(prev, img, 0.0, 0.5 if half else 1.0)
+				raw += _mean_change(raw_prev, raw_img, 0.0, 0.5 if half else 1.0)
+				if half:
+					right += _mean_lum_part(img, 0.6, 1.0)
+				n += 1
+			prev = img
+			raw_prev = raw_img
+		shown /= n
+		raw /= n
+		var lim: Dictionary = host.limit_state()
+		print("  checker%s: picture changes %.3f a frame, shown %.4f; %s" % [" (left half)" if half else "", raw,
+				shown, lim])
+		if not half:
+			_check("a swapping checkerboard (steady average) is dimmed: %.4f a frame shown against %.3f" % [shown, raw],
+					raw > 0.2 and shown < 0.02 and lim["gain"] > 0.99)
+		else:
+			right /= n
+			_check("half the card swapping: that half dimmed (%.4f), the other half untouched (%.3f, want 0.214)"
+					% [shown, right], shown < 0.04 and absf(right - 0.214) < 0.02)
+	Registry.overrides.erase("checker")
+
+
+## The first frames' timing: within budget at full size, over it scaled down, far over it refused.
+func _probe(host: Node) -> void:
+	host.budget_ms = VisualiserHost.BUDGET_MS
+	var refusals: Array = []
+	host.refused.connect(func(rid: String, why: String) -> void: refusals.append([rid, why]))
+	var trial := func(vid: String, ms: float) -> void:
+		host.probe_ms_override = ms
+		host.use(vid)
+		for i in VisualiserHost.PROBE_FRAMES + 2:
+			await process_frame
+	# The test card is 320 x 180; the probe draws 256 x 144, so the full size costs 1.5625 times the probe's.
+	await trial.call("grey", 0.05)
+	_check("cheap: full size (scale %.2f)" % host.scale, host.id == "grey" and host.scale == 1.0 and not host.probing())
+	await trial.call("bars", 2.0)
+	_check("about 3.1 ms at full size: 75 %% (scale %.2f)" % host.scale, host.id == "bars" and host.scale == 0.75)
+	await trial.call("strobe", 40.0)
+	print("  refused: %s" % [host.last_refusal])
+	_check("about 62 ms: refused, the one before back, and why", host.id == "bars" and host.scale == 0.75
+			and refusals.size() == 1 and refusals[0][0] == "strobe" and str(host.last_refusal["why"]).contains("ms"))
+	host.probe_ms_override = -1.0
+	host.budget_ms = 0.0
+
+
+## The mean change of relative luminance per pixel between two pictures, over a band of x (0..1).
+static func _mean_change(a: Image, b: Image, x0: float, x1: float) -> float:
+	var sum := 0.0
+	var n := 0
+	for y in range(0, a.get_height(), 4):
+		for x in range(int(a.get_width() * x0), int(a.get_width() * x1), 4):
+			sum += absf(_lum(a.get_pixel(x, y)) - _lum(b.get_pixel(x, y)))
+			n += 1
+	return sum / maxi(n, 1)
+
+
+static func _mean_lum_part(img: Image, x0: float, x1: float) -> float:
+	var sum := 0.0
+	var n := 0
+	for y in range(0, img.get_height(), 4):
+		for x in range(int(img.get_width() * x0), int(img.get_width() * x1), 4):
+			sum += _lum(img.get_pixel(x, y))
+			n += 1
+	return sum / maxi(n, 1)
+
+
+static func _lum(c: Color) -> float:
+	var l := c.srgb_to_linear()
+	return 0.2126 * l.r + 0.7152 * l.g + 0.0722 * l.b
 
 
 ## Mean relative luminance of an image (linear light).

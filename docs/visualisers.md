@@ -111,34 +111,70 @@ The four old styles were drawn in GDScript; they are now shaders that look the s
 
 ## The flash limit
 
-A visualiser may not flash. The rule follows photosensitivity guidance: a flash is a pair of opposite changes in
-brightness of about 10 % or more, and more than 3 a second is the danger. On a screen in a headset the picture is
-large in the view, so the limit applies to the whole area.
+A visualiser may not flash. The rules follow photosensitivity guidance: a flash is a pair of opposite changes in
+brightness of about 10 % or more, more than 3 a second is the danger, and so are patterns (stripes, checks) that swap
+or move. Area matters: the guidance starts at about a quarter of the central field of view. On a screen in a headset
+the card is large in the view, so area is measured against the card. Two rules, both on the GPU every frame, nothing
+read back to the CPU:
 
-- **What is measured:** the average relative luminance of the visualiser's picture (linear light; see-through parts
-  count as the card), from 32 x 32 samples, every frame, on the GPU.
-- **The rule:** a floor follows the average down at once and up at most `RISE` (0.2) a second. The picture may stand
-  at most `MARGIN` (0.08) over the floor. When it would stand higher, the card scales the whole picture down to the
-  limit (a gain in linear light).
-- **What that gives:** a flicker of the average at f Hz swings at most `MARGIN + RISE / (2 f)`: 0.11 at 3 Hz, less
-  above. A picture that brightens slowly is not touched. One that jumps from dark to bright is let up to its
-  brightness over a few seconds. Bars and lines on a dark card never come near it: their average moves far less.
-- **A new visualiser starts at its own brightness.** The floor starts from the picture for the first 3 frames: a
+- **The whole picture's brightness.** A floor follows the picture's average relative luminance (linear light;
+  see-through parts count as the card) down at once and up at most `RISE` (0.2) a second. The picture may stand at
+  most `MARGIN` (0.08) over it; when it would stand higher, the whole picture is scaled down to the limit. A flicker
+  of the average at f Hz swings at most `MARGIN + RISE / (2 f)`: 0.11 at 3 Hz, less above. A jump from dark to bright
+  is let up to its brightness over a few seconds. This catches whole-screen flashes.
+- **Flicker over an area.** 128 x 72 sample points each keep their own slow average (over 0.25 s); a point's distance
+  from it is its flicker. A pattern that swaps moves every point though the picture's average stays put, and so does
+  flicker in one part of the picture. The points are pooled in 16 x 9 cells, and the cells over the card, weighted by
+  the visualiser's share of the card. Over `FLICKER_MAX` (0.02), a cap is found (bisection) such that capping every
+  cell's flicker at it brings the total down to the limit; the card dims each cell over the cap by cap / its flicker
+  (read smoothly between cells). Only the flickering cells dim, and only as much as needed. The cap drops at once and
+  doubles every 0.25 s back towards none. For scale: black and white swapping over the whole card is 0.5; 10 % of
+  contrast swapping over a quarter of it (where the guidance starts) is 0.0125; so 0.02 lets a quarter of the card
+  swap at about 16 % of contrast, or a smaller area more.
+- **Measured** (`test_visualisers.gd`, lavapipe): a black and white checkerboard swapping every third frame changes
+  0.333 of luminance a frame in the picture and 0.015 on the card; the old whole-picture rule alone did nothing to it
+  (its gain stays 1). With only the left half swapping, the left half shows 0.031 and the right half keeps its
+  brightness (0.214). The app's own visualisers on the drums test signal reach at most 0.0101 (mirror), 0.0076
+  (bars), 0.0043 (aurora), 0.0034 (line) and 0.0004 (radial): never dimmed. Busier music may bring mirror and bars
+  near the limit; then their busiest cells dim a little.
+- **A new visualiser starts at its own brightness.** Both rules start from the picture for the first 3 frames: a
   start is one change, not a flicker.
-- **How:** three viewports nested so the engine draws them in order each frame (it draws a viewport's child
-  viewports before it): the visualiser, then `visualiser_limit.gdshader` (measures and keeps the floor, in two
-  bytes), then `visualiser_copy.gdshader` (keeps this frame's floor for the next), then the card, where
-  `visualiser_apply.gdshader` applies the gain. The engine makes no viewport smaller than 2 x 2, so the small two
-  are 2 x 2 with every pixel the same. Nothing is read back to the CPU.
-- **Not covered:** saturated red flashes (the guidance treats them separately) and patterns (stripes, checks).
-  Small areas flickering are averaged with the rest.
+- **How:** viewports nested so the engine draws them in order each frame (it draws a viewport's child viewports
+  before it): the visualiser; `visualiser_taps.gdshader` (128 x 72: each point's luminance, average and flicker);
+  `visualiser_cells.gdshader` (16 x 9); `visualiser_limit.gdshader` (2 x 2, the engine's smallest: the floor and gain,
+  the cap, the total); copies of the points and of the limit (`visualiser_copy.gdshader`, read next frame); then the
+  card, where `visualiser_apply.gdshader` applies the gain and the caps. The averages and the floor are kept in two
+  bytes each.
+- **Not covered:** saturated red flashes (the guidance treats them separately); a still, high-contrast pattern (no
+  change, so no flicker; the guidance also warns about some still patterns); flicker in a patch smaller than a sample
+  point's (10 x 10 pixels at full size), which the four samples per point only partly see.
 
 ## The GPU budget
 
-The visualiser's own viewport is timed on the GPU (`RenderingServer.viewport_get_measured_render_time_gpu`). When it
-takes more than 2 ms (averaged) for a second, it draws at the next lower scale (100, 75, 50, 35 %), stretched to its
-area, and the log says so once. It does not come back up until the visualiser is chosen again. The headset draws a
-frame in 11 ms at 90 Hz, both eyes, so 2 ms is generous for a screen.
+- **The first frames.** A visualiser that starts (chosen, or its files changed) first draws 6 frames at about
+  256 x 144, timed on the GPU (`RenderingServer.viewport_get_measured_render_time_gpu`; the first two frames have no
+  timing yet). From the slowest, the cost at full size is estimated (per pixel). It then starts at the largest scale
+  (100, 75, 50, 35 %) within 2 ms. When even 35 % would take more than 4 ms, it is refused: the visualiser before it
+  stays (or the default), `visualiser_use` fails with the estimate and why, and `visualiser_status` shows
+  `last_refusal`. The visualiser is shown at the small size for those frames (about 0.1 s).
+- **While it runs.** More than 2 ms (averaged) for a second steps it down a scale; the log says so. It does not come
+  back up until the visualiser starts again.
+- The headset draws a frame in 11 ms at 90 Hz, both eyes, so 2 ms is generous for a screen.
+- **Not covered:** a shader that never ends (an endless loop) or takes seconds even at 256 x 144 still stalls the GPU
+  on its first frame, which can end the app. The probe catches the heavy, not the endless.
+
+## What a visualiser can and cannot do
+
+A visualiser is a shader. It cannot read or write files, use the network, run programs, or see the film, other
+windows or the room: it gets only the textures the host gives it (spectrum, waveform, cover) and its own parameters.
+`#include` loads shader include files only. Its commands are checked (ids against the folders, values against the
+manifest) and follow the assistant's switches. What it can still do: stall or crash the GPU (above), crash the
+shader compiler with a malformed shader, show anything at all on the card (including text that looks like the
+player's), and get past the flash limit in the ways listed under "Not covered".
+
+That is the boundary for a visualiser, from whoever wrote it. It is not a boundary around an agent on the headset:
+Claude Code or Codex there has a shell as the user and can change any file the user can, the app's own included.
+What guards that is the agent's permission prompts and the viewer.
 
 ## Tinkering on the headset
 
@@ -198,7 +234,7 @@ visualiser that ...". Code: `scripts/visualisers/visualiser_service.gd` (`main.f
 
 ## Tested
 
-`tests/test_visualisers.gd`, 81 checks, with WSLg and lavapipe (headless: the 54 without the host and the
+`tests/test_visualisers.gd`, 87 checks, with WSLg and lavapipe (headless: the 54 without the host and the
 watcher).
 
 - The registry: the five in order, no errors, the areas, the parameters read with their types, and every parameter
@@ -214,6 +250,10 @@ watcher).
   back its luminance (0.2159 for 0.214); a black and white strobe changing every frame swings at most 0.078 on the
   card; black to white stays under the rise limit after 1.4 s; a new visualiser shows at its own brightness at once.
   Off, its viewports stop and it is not fed; on again, it starts afresh.
+- Flicker over an area: a swapping checkerboard dimmed (0.333 of change a frame in the picture, 0.015 shown, the
+  whole-picture gain untouched); half the card swapping dims that half only. The first frames' timing (test timings
+  given to it): cheap at full size, about 3 ms at 75 %, about 62 ms refused with the one before back and the reason.
+  The app's five on the drums test signal on the real card, never dimmed (figures under "The flash limit").
 - Making them: a test signal's WAV (header, length, sound or none); the nine commands open to the assistant at their
   levels; the README in the user folder with this machine's paths; the watcher sees a new folder; a compile error
   comes back with its line (5, after the include on line 2) and words; the last good shader kept; a broken manifest

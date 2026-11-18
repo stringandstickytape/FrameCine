@@ -158,11 +158,15 @@ func status() -> Dictionary:
 			"folder": ProjectSettings.globalize_path(user_dir)}
 	if host != null and host.is_processing() and str(host.id) != "":
 		var st: Dictionary = host.stats()
-		var px: Color = host.limit_texture().get_image().get_pixel(0, 0)
-		st["flash_limit"] = {"gain": snappedf(px.a, 0.01), "average": snappedf(px.b * px.b, 0.001),
-				"floor": snappedf(px.r + px.g / 255.0, 0.001), "dimming": px.a < 0.99}
+		var lim: Dictionary = host.limit_state()
+		for k: String in lim:
+			if lim[k] is float:
+				lim[k] = snappedf(lim[k], 0.001)
+		st["flash_limit"] = lim
 		out["running"] = st
 		out["check"] = Registry.check(str(host.id))
+	if host != null and not host.last_refusal.is_empty():
+		out["last_refusal"] = host.last_refusal
 	if not last_change.is_empty():
 		out["last_change"] = last_change
 	return out
@@ -200,8 +204,9 @@ func _register() -> void:
 		"returns": "{showing, visualisers, broken, folder, readme, app_folder}"})
 	DevCommands.register("visualiser_status", func(_args: Dictionary, _ctx: DevCommands.Call) -> Variant:
 		return status(), {
-		"description": "The visualiser on the music card now: its GPU time and scale, whether the flash limit is "
-				+ "dimming it, and its shader check (compile errors with line numbers).",
+		"description": "The visualiser on the music card now: its GPU time and scale, the flash limit (dimming: "
+				+ "whether it is dimming the picture; flicker against flicker_max: how much of the card flickers), "
+				+ "its shader check (compile errors with line numbers), and the last visualiser refused as too heavy.",
 		"level": "read", "assistant": "read", "title": "Visualiser status",
 		"returns": "{showing, music_card, running: {gpu_ms, scale, flash_limit, ...}, check, last_change}"})
 	DevCommands.register("visualiser_check", func(args: Dictionary, ctx: DevCommands.Call) -> Variant:
@@ -225,11 +230,22 @@ func _register() -> void:
 		var why: String = f.set_visualiser_checked(id)
 		if why != "":
 			return ctx.fail(why)
+		# On the card, its first frames are timed: wait for the verdict (a refusal puts the one before back).
+		var host: Node = _host()
+		if host != null and id != "off":
+			var waited := 0
+			while waited < 90 and (host.id != id or host.probing()) and host.last_refusal.get("id", "") != id:
+				await get_tree().process_frame
+				waited += 1
+			if host.last_refusal.get("id", "") == id and host.id != id:
+				f.set_visualiser(old)
+				return ctx.fail("%s: %s" % [id, host.last_refusal["why"]])
 		ctx.summary = "Visualiser: %s" % id
 		ctx.undo = func() -> void: f.set_visualiser(old)
 		return {"showing": f.visualiser()}, {
 		"description": "Chooses the music visualiser (an id from visualisers, or \"off\"); kept as the viewer's "
-				+ "choice. Refused, with the compile errors, when its shader has never compiled.",
+				+ "choice. Refused, with the compile errors, when its shader has never compiled, and when its first "
+				+ "frames show it is far too heavy for the headset's GPU (the one before stays).",
 		"params": [{"name": "id", "type": "string", "required": true, "description": "a visualiser's id, or off"}],
 		"level": "control", "assistant": "settings", "title": "Choose a visualiser", "returns": "{showing}"})
 	DevCommands.register("visualiser_param", func(args: Dictionary, ctx: DevCommands.Call) -> Variant:
