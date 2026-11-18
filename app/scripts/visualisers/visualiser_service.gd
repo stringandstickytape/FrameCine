@@ -104,6 +104,9 @@ func poll() -> Array[String]:
 		r += " %s %s" % [id, "ok" if res["ok"] else "has errors (%s)" % _first_error(res)]
 	print("Visualisers: changed:%s" % r)
 	_restart_showing(ids)
+	var f: Node = get_parent()
+	if f != null and f.has_signal("visualisers_changed"):
+		f.visualisers_changed.emit()
 	return ids
 
 

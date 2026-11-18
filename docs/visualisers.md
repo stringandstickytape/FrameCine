@@ -216,6 +216,31 @@ visualiser that ...". Code: `scripts/visualisers/visualiser_service.gd` (`main.f
 | `visualiser_param`, `visualiser_preset`, `visualiser_reset` | settings | its parameters |
 | `visualiser_test` | control | play a test signal |
 
+## In the menu
+
+Picture, **Visualisations**: the first section of the Picture tab, shown only while what plays has no picture (the
+music card is on the screen), so it is not in the tab's list during a film. In it:
+
+- one button per visualiser (the app's and the user's, by their manifests' names) and Off;
+- the chosen one's description and its parameters, built from its manifest: a slider for a number (whole steps for
+  `int`), a switch for `bool`, and for `colour` its current colour and twelve swatches (a colour picker is hard to
+  use in a headset; Defaults gives the manifest's own colour back);
+- its presets as buttons, and Defaults;
+- the user's visualisers that do not load, and why (the first three).
+
+Built again when the list, the chosen one or its parameters' shape change (an agent saving a new manifest included:
+`main.features.visualisers_changed`); otherwise only the values are set, so a slider being dragged is not rebuilt
+under the finger. Names, labels, descriptions and preset names are the manifests' (content, not translated).
+`ui/picture_tab.gd`.
+
+## Sound with no picture
+
+The music card shows for music files (by extension), and now also for a video's container that holds only sound (an
+audio-only `.mp4`, `.mkv` or `.webm`, as a download of a music video's sound often is): when the video path fails,
+the factory asks the file whether it has a video stream (`MusicSource.has_no_picture()`) and opens it as music. A film
+never pays for that: the question is asked only after the video path failed. Network files ask the MediaSource
+already open.
+
 ## API and settings
 
 - `main.features`: `visualiser()`, `set_visualiser(id)` (an id or "off"), `visualisers()` (each with its parameter
@@ -261,16 +286,20 @@ watcher).
   `visualiser_check` through the registry; `visualiser_test` plays the drums as music; `visualiser_use` shows a
   user's one and `visualiser_status` has its flash limit; an edit to the one showing starts it again;
   `visualiser_capture` saves the card.
+- The menu: Visualisations shows with the music card, first in Picture; a choice for each visualiser and Off; bars'
+  four parameters as controls; its slider, a colour swatch, a preset's button and Defaults each set what they
+  should; choosing Aurora builds its controls (a switch among them); Off has none; a change made elsewhere shows on
+  the slider; a film hides the section.
 
-`tests/test_music.gd` (16 checks) now checks all six styles on the card: "off" draws nothing in the area, the others
+`tests/test_music.gd` (17 checks: an `.mp4` holding only sound plays as music) now checks all six styles on the card: "off" draws nothing in the area, the others
 draw, each differently. Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
 second; the old fixed 1.5 s wait sat on that edge). `test_env_signals` still passes. `test_react` passes as before:
 its flash-size check fails on main too (it expects more than the room schema's swing ceiling allows; not this work).
 
 ## Not yet
 
-- **The menu.** The visualiser and its parameters are set through `main.features` (the dev link, an assistant). No
-  panel row exists yet; the manifest has what one needs (labels, types, ranges, presets).
+- **Videos that are a still picture** (a picture held for a whole programme, at 1 or 2 frames a second): next. Shown
+  as the music card with the video's own picture as the cover, the visualiser beside it.
 - **The acceptance test:** a fresh Claude Code session on the headset, told only to make a visualiser.
 - **More of the app's own.**
 - **Surround.**

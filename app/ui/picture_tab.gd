@@ -7,6 +7,9 @@ extends ScrollContainer
 ## lens (profile, field of view, seam nudge; scripts/play/dual_fisheye.gd), size in degrees and its
 ## presets (#55), head follow and lying down (#33, #12), deinterlace (#95), sharpen (#90), HDR tone mapping (#85),
 ## auto crop of letterbox bars (#42), the projector's grain and gate weave (#92), and a stereo screenshot (#66).
+## Visualisations (docs/visualisers.md) come first, shown only while what plays has no picture (music, a video file
+## that is only sound): the visualiser to show, its parameters (built from its manifest: sliders, switches, colours),
+## its presets and Defaults, and the user's visualisers that do not load and why.
 ## Talks to the app (scripts/main.gd) and its features hub (docs/features.md) directly.
 ##
 ## Languages (docs/i18n.md): the words of the constants below are keys; the built lines (the Auto line, the folder
@@ -17,6 +20,8 @@ const VideoMode := preload("res://scripts/video_mode.gd")
 const ModeDiagram := preload("res://ui/mode_diagram.gd")
 const W := preload("res://ui/pane_widgets.gd")
 const HelpTexts := preload("res://ui/help_texts.gd")
+const PaneStyle := preload("res://ui/pane_style.gd")
+const VisualiserRegistry := preload("res://scripts/visualisers/visualiser_registry.gd")
 
 const LAYOUT_KINDS := ["mono", "sbs", "tb"]
 const LAYOUT_WORDS := ["Mono", "SBS", "TB"] # i18n
@@ -28,6 +33,9 @@ const PICTURE_NAMES := {"brightness": "Brightness", "contrast": "Contrast", "sat
 		"deband": "Smooth banding"}
 # i18n: end
 const LENS_WORDS := ["Equidistant", "Equisolid", "Stereographic", "Polynomial"] # i18n
+## The colours a visualiser's colour parameter offers (its default comes back with Defaults).
+const VIS_COLOURS := ["#ffffff", "#ff5a1f", "#ffbf66", "#ffe14d", "#7dff6a", "#2fd6a0", "#40c0ff", "#73b3ff",
+		"#3366ff", "#6a5cff", "#c04dff", "#ff4da6"]
 const DEINTERLACE_WORDS := ["Off", "Bob", "Edge", "Auto"] # i18n
 ## The footer's mode line by how the mode was chosen (main.gd mode_source): one phrase each, the mode as %s.
 # i18n: begin
@@ -38,6 +46,12 @@ const HOW_CHOSEN := {"user": "%s (your choice)", "arg": "%s (from the command li
 
 var app: Node
 var box: VBoxContainer
+var _vis_box: VBoxContainer
+var _vis_body: VBoxContainer
+## What the Visualisations section was built for (the visualisers, their parameters, the one chosen): built again
+## when it changes, else only its values set.
+var _vis_built := ""
+var _vis_rows := {}
 var _mode: VideoMode = VideoMode.new()
 var _layout_buttons: Array[ModeDiagram] = []
 var _projection_buttons: Array[ModeDiagram] = []
@@ -117,9 +131,11 @@ func bind(p_app: Node) -> void:
 	f.auto_crop.changed.connect(_sync_crop)
 	f.projector.changed.connect(_sync_picture)
 	f.pip.changed.connect(func(_s: String, _p: String) -> void: _sync_pip())
+	f.visualisers_changed.connect(_sync_visualisers)
 	app.file_opened.connect(func(_p: String) -> void:
 		_sync_folder.call_deferred()
-		_sync_hdr.call_deferred())
+		_sync_hdr.call_deferred()
+		_sync_visualisers.call_deferred())
 	set_mode(app.mode, "")
 	sync()
 
@@ -138,9 +154,150 @@ func sync() -> void:
 	_sync_hdr()
 	_sync_crop()
 	_sync_pip()
+	_sync_visualisers()
+
+
+## Visualisations: shown while the music card is the picture; built again when the list or the choice changed.
+func _sync_visualisers() -> void:
+	if _vis_box == null:
+		return
+	var src: Object = app.player.source if app.get("player") != null else null
+	var music: bool = src != null and src.has_method("get_kind") and src.get_kind() == "music"
+	_vis_box.visible = music
+	if not music:
+		return
+	var f: Node = app.features
+	var list: Array[Dictionary] = f.visualisers()
+	var showing: String = f.visualiser()
+	var broken: Dictionary = VisualiserRegistry.errors()
+	var built := showing + "|" + str(broken.keys())
+	for v: Dictionary in list:
+		built += "|%s:%s:%s" % [v["id"], ",".join(v["params"].map(func(p: Dictionary) -> String:
+				return "%s/%s" % [p["name"], p["type"]])), ",".join(v["presets"])]
+	if built != _vis_built:
+		_vis_built = built
+		_build_visualisers(list, showing, broken)
+	_set_visualiser_values(list, showing)
+
+
+func _build_visualisers(list: Array[Dictionary], showing: String, broken: Dictionary) -> void:
+	for c in _vis_body.get_children():
+		_vis_body.remove_child(c)
+		c.queue_free()
+	_vis_rows.clear()
+	var f: Node = app.features
+	var ids: Array = list.map(func(v: Dictionary) -> String: return v["id"])
+	ids.append("off")
+	var names: Array = list.map(func(v: Dictionary) -> String: return v["name"])
+	names.append("Off")
+	var row := W.choices(names, func(i: int) -> void: f.set_visualiser(ids[i]))
+	# The visualisers' names are their manifests' (content); Off is a word.
+	for i in list.size():
+		W.content(row.get_child(i))
+	_vis_rows["_choice"] = row
+	_vis_body.add_child(row)
+	var current: Dictionary = {}
+	for v: Dictionary in list:
+		if v["id"] == showing:
+			current = v
+	if current.is_empty():
+		return
+	if str(current["description"]) != "":
+		var about := W.label(str(current["description"]), &"MutedLabel")
+		about.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		W.content(about)
+		_vis_body.add_child(about)
+	for p: Dictionary in current["params"]:
+		_vis_body.add_child(_param_row(p))
+	var buttons: Array = []
+	for preset: String in current["presets"]:
+		var b := W.button(preset, func() -> void: f.apply_visualiser_preset(preset))
+		W.content(b)
+		buttons.append(b)
+	buttons.append(W.button("Defaults", func() -> void: f.reset_visualiser_params()))
+	_vis_body.add_child(W.flow(buttons))
+	if not broken.is_empty():
+		var lines: Array = []
+		for id: String in broken:
+			lines.append("%s: %s" % [id, broken[id]])
+		var text := "\n".join(lines.slice(0, 3))
+		var note := W.live_label(func() -> String: return tr("Not loaded: %s") % text, &"MutedLabel")
+		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_vis_body.add_child(note)
+
+
+## One parameter's control: a slider (numbers), a switch (true or false) or a row of colours, named by its label.
+func _param_row(p: Dictionary) -> Control:
+	var f: Node = app.features
+	var pname: String = p["name"]
+	var row: Control
+	match str(p["type"]):
+		"float", "int":
+			var whole: bool = p["type"] == "int"
+			var lo: float = p["min"]
+			var hi: float = p["max"]
+			var step: float = 1.0 if whole else maxf((hi - lo) / 100.0, 0.001)
+			row = W.slider_row(str(p["label"]), lo, hi, step, func(v: float) -> String:
+					return "%d" % roundi(v) if whole else ("%.2f" % v if hi - lo <= 10.0 else "%.1f" % v),
+					func(v: float) -> void: f.set_visualiser_param(pname, v))
+			W.content(row.get_child(0).get_child(0))
+		"bool":
+			row = W.toggle(str(p["label"]), func(on: bool) -> void: f.set_visualiser_param(pname, on))
+			W.content(row)
+		_:
+			var name_label := W.label(str(p["label"]))
+			W.content(name_label)
+			var now := ColorRect.new()
+			now.custom_minimum_size = Vector2(PaneStyle.constant(&"button_height") * 0.6,
+					PaneStyle.constant(&"button_height") * 0.6)
+			now.set_meta("now", true)
+			var swatches: Array = [name_label, now]
+			for hex: String in VIS_COLOURS:
+				var b := W.button("", func() -> void: f.set_visualiser_param(pname, hex))
+				b.custom_minimum_size = Vector2(PaneStyle.constant(&"button_height"),
+						PaneStyle.constant(&"button_height"))
+				b.tooltip_text = hex
+				var dot := ColorRect.new()
+				dot.color = Color.html(hex)
+				dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				dot.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 6)
+				b.add_child(dot)
+				swatches.append(b)
+			row = W.flow(swatches)
+			row.set_meta("swatch", now)
+	_vis_rows[pname] = row
+	return row
+
+
+## The controls set to the values now, without running their callbacks.
+func _set_visualiser_values(list: Array[Dictionary], showing: String) -> void:
+	var ids: Array = list.map(func(v: Dictionary) -> String: return v["id"])
+	var at := ids.find(showing)
+	W.set_choice(_vis_rows["_choice"], at if at >= 0 else ids.size())
+	for v: Dictionary in list:
+		if v["id"] != showing:
+			continue
+		for p: Dictionary in v["params"]:
+			var row: Control = _vis_rows.get(p["name"])
+			if row == null:
+				continue
+			match str(p["type"]):
+				"float", "int":
+					W.set_slider(row, float(p["value"]))
+				"bool":
+					W.set_on(row as Button, bool(p["value"]))
+				_:
+					(row.get_meta("swatch") as ColorRect).color = p["value"]
 
 
 func _build() -> void:
+	_vis_box = W.vbox()
+	box.add_child(_vis_box)
+	_vis_box.add_child(W.section("Visualisations"))
+	_vis_box.add_child(W.label("Shown on the screen while something without a picture plays, such as music.",
+			&"MutedLabel"))
+	_vis_body = W.vbox()
+	_vis_box.add_child(_vis_body)
 	box.add_child(W.section("Mode"))
 	# Two rows: the layouts, then the projections (eight diagrams in one row are wider than the panel); each wraps
 	# where it is narrower still (a card on the tablet).

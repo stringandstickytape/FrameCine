@@ -114,6 +114,12 @@ static func create(path: String, host: Node) -> VideoSource:
 		reason = hw.last_error
 	else:
 		reason = "no hardware video in this engine build"
+	# Only sound (an audio-only .mp4, .mkv or .webm): the music card and its visualiser, not the stand-in.
+	if MusicSource.available() and MusicSource.has_no_picture(path):
+		var sound := MusicSource.new()
+		sound.attach(host)
+		if sound.open(path) == OK:
+			return sound
 	return _placeholder(path, host, reason)
 
 
@@ -125,6 +131,14 @@ static func create_from_media(path: String, host: Node, result: Dictionary) -> V
 		if music.open_with_media(path, result) == OK:
 			return music
 		return _placeholder(path, host, music.last_error)
+	# Only sound: the music card (its MediaSource is open already and says it has no video stream).
+	var media: Object = result.get("media")
+	if MusicSource.available() and int(result.get("err", FAILED)) == OK and media != null \
+			and (media.call("get_video_info") as Dictionary).is_empty():
+		var sound := MusicSource.new()
+		sound.attach(host)
+		if sound.open_with_media(path, result) == OK:
+			return sound
 	var hw := HWVideoSource.new()
 	hw.attach(host)
 	if hw.open_with_media(path, result) == OK:

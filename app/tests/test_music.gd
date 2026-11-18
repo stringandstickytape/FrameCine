@@ -118,6 +118,17 @@ func _playback() -> void:
 	src = main.player.source
 	_check("a file without a cover: music, the name as the title (%s)" % src.title, src.get_kind() == "music"
 			and src.cover == null and src.title != "")
+	# A video's container with only sound in it: the music card, not the test-pattern stand-in.
+	var sound_only := OS.get_user_data_dir().path_join("test_sound_only.mp4")
+	DirAccess.copy_absolute(DIR + "aac_cover.m4a", sound_only)
+	main.open_path(sound_only)
+	await _until(func() -> bool: return main.player.audio.playing, 5.0)
+	src = main.player.source
+	_check("an .mp4 with only sound plays as music (%s, %s)" % [src.get_kind(), src.title], src.get_kind() == "music"
+			and src.title == "Test Song")
+	main.open_path("stub://flat_mono")
+	await _frames(3)
+	DirAccess.remove_absolute(sound_only)
 	main.open_path("stub://flat_mono")
 	await _frames(3)
 

@@ -177,11 +177,11 @@ msgstr ""
 msgid "%s, eyes swapped"
 msgstr ""
 
-#: scripts/video_mode.gd:20 ui/picture_tab.gd:24
+#: scripts/video_mode.gd:20 ui/picture_tab.gd:29
 msgid "Flat"
 msgstr ""
 
-#: scripts/video_mode.gd:20 ui/picture_tab.gd:24
+#: scripts/video_mode.gd:20 ui/picture_tab.gd:29
 msgid "Fisheye"
 msgstr ""
 
@@ -593,7 +593,7 @@ msgstr ""
 msgid "Already in your pictures: %s"
 msgstr ""
 
-#: scripts/pictures/picture_library.gd:85 ui/object_section.gd:499 ui/pane_ui.gd:56 ui/picture_tab.gd:288
+#: scripts/pictures/picture_library.gd:85 ui/object_section.gd:499 ui/pane_ui.gd:56 ui/picture_tab.gd:445
 msgid "Picture"
 msgstr ""
 
@@ -1716,11 +1716,11 @@ msgstr ""
 msgid "DUAL 360"
 msgstr ""
 
-#: ui/files_tab.gd:999 ui/picture_tab.gd:22
+#: ui/files_tab.gd:999 ui/picture_tab.gd:27
 msgid "SBS"
 msgstr ""
 
-#: ui/files_tab.gd:1001 ui/picture_tab.gd:22
+#: ui/files_tab.gd:1001 ui/picture_tab.gd:27
 msgid "TB"
 msgstr ""
 
@@ -2651,7 +2651,7 @@ msgstr ""
 msgid "Steady detail"
 msgstr ""
 
-#: ui/pane_ui.gd:244 ui/picture_tab.gd:28
+#: ui/pane_ui.gd:244 ui/picture_tab.gd:33
 msgid "Smooth banding"
 msgstr ""
 
@@ -2820,414 +2820,431 @@ msgstr ""
 msgid "words to search for, such as autumn forest"
 msgstr ""
 
-#: ui/picture_tab.gd:144
+#: ui/picture_tab.gd:217
+msgid "Defaults"
+msgstr ""
+
+#: ui/picture_tab.gd:224
+#, c-format
+msgid "Not loaded: %s"
+msgstr ""
+
+#: ui/picture_tab.gd:296
+msgid "Visualisations"
+msgstr ""
+
+#: ui/picture_tab.gd:297
+msgid "Shown on the screen while something without a picture plays, such as music."
+msgstr ""
+
+#: ui/picture_tab.gd:301
 msgid "Mode"
 msgstr ""
 
-#: ui/picture_tab.gd:169 ui/picture_tab.gd:31 ui/sound_tab.gd:133
+#: ui/picture_tab.gd:326 ui/picture_tab.gd:39 ui/sound_tab.gd:133
 msgid "Auto"
 msgstr ""
 
-#: ui/picture_tab.gd:170
+#: ui/picture_tab.gd:327
 msgid "Half"
 msgstr ""
 
-#: ui/picture_tab.gd:171
+#: ui/picture_tab.gd:328
 msgid "Swap eyes"
 msgstr ""
 
-#: ui/picture_tab.gd:175
+#: ui/picture_tab.gd:332
 msgid "Clear folder rule"
 msgstr ""
 
-#: ui/picture_tab.gd:179
+#: ui/picture_tab.gd:336
 msgid "Use for this folder"
 msgstr ""
 
-#: ui/picture_tab.gd:184
+#: ui/picture_tab.gd:341
 msgid "Fisheye field"
 msgstr ""
 
-#: ui/picture_tab.gd:192
+#: ui/picture_tab.gd:349
 msgid "Lens"
 msgstr ""
 
-#: ui/picture_tab.gd:200
+#: ui/picture_tab.gd:357
 msgid "Camera"
 msgstr ""
 
-#: ui/picture_tab.gd:202
+#: ui/picture_tab.gd:359
 msgid "Lens field"
 msgstr ""
 
-#: ui/picture_tab.gd:204
+#: ui/picture_tab.gd:361
 msgid "Seam"
 msgstr ""
 
-#: ui/picture_tab.gd:208
+#: ui/picture_tab.gd:365
 msgid "Reset lens"
 msgstr ""
 
-#: ui/picture_tab.gd:212 ui/picture_tab.gd:213
+#: ui/picture_tab.gd:369 ui/picture_tab.gd:370
 msgid "3D"
 msgstr ""
 
-#: ui/picture_tab.gd:213 ui/system_tab.gd:196
+#: ui/picture_tab.gd:370 ui/system_tab.gd:196
 msgid "Left eye"
 msgstr ""
 
-#: ui/picture_tab.gd:213 ui/system_tab.gd:196
+#: ui/picture_tab.gd:370 ui/system_tab.gd:196
 msgid "Right eye"
 msgstr ""
 
-#: ui/picture_tab.gd:214
+#: ui/picture_tab.gd:371
 msgid "Show"
 msgstr ""
 
-#: ui/picture_tab.gd:216 environments/bathysphere.env.json
+#: ui/picture_tab.gd:373 environments/bathysphere.env.json
 msgid "Depth"
 msgstr ""
 
-#: ui/picture_tab.gd:220
+#: ui/picture_tab.gd:377
 msgid "This file only"
 msgstr ""
 
-#: ui/picture_tab.gd:226
+#: ui/picture_tab.gd:383
 msgid "Soft edges"
 msgstr ""
 
-#: ui/picture_tab.gd:229 ui/seat_plan.gd:128
+#: ui/picture_tab.gd:386 ui/seat_plan.gd:128
 msgid "Screen"
 msgstr ""
 
-#: ui/picture_tab.gd:233 ui/subtitles_tab.gd:68
+#: ui/picture_tab.gd:390 ui/subtitles_tab.gd:68
 msgid "Size"
 msgstr ""
 
-#: ui/picture_tab.gd:234
+#: ui/picture_tab.gd:391
 msgid "Distance"
 msgstr ""
 
-#: ui/picture_tab.gd:235
+#: ui/picture_tab.gd:392
 msgid "Height"
 msgstr ""
 
-#: ui/picture_tab.gd:235
+#: ui/picture_tab.gd:392
 #, c-format
 msgid "%+.2f m"
 msgstr ""
 
-#: ui/picture_tab.gd:240
+#: ui/picture_tab.gd:397
 msgid "Curvature"
 msgstr ""
 
-#: ui/picture_tab.gd:241
+#: ui/picture_tab.gd:398
 msgid "flat"
 msgstr ""
 
-#: ui/picture_tab.gd:244
+#: ui/picture_tab.gd:401
 msgid "Zoom"
 msgstr ""
 
-#: ui/picture_tab.gd:248
+#: ui/picture_tab.gd:405
 msgid "Size in degrees"
 msgstr ""
 
-#: ui/picture_tab.gd:262
+#: ui/picture_tab.gd:419
 msgid "Follow my head"
 msgstr ""
 
-#: ui/picture_tab.gd:263
+#: ui/picture_tab.gd:420
 msgid "Lying down"
 msgstr ""
 
-#: ui/picture_tab.gd:267
+#: ui/picture_tab.gd:424
 msgid "Reset zoom"
 msgstr ""
 
-#: ui/picture_tab.gd:270
+#: ui/picture_tab.gd:427
 msgid "Auto crop bars"
 msgstr ""
 
-#: ui/picture_tab.gd:271
+#: ui/picture_tab.gd:428
 msgid "Grow the screen to keep its height"
 msgstr ""
 
-#: ui/picture_tab.gd:277
+#: ui/picture_tab.gd:434
 msgid "Horizon"
 msgstr ""
 
-#: ui/picture_tab.gd:282
+#: ui/picture_tab.gd:439
 msgid "Pitch"
 msgstr ""
 
-#: ui/picture_tab.gd:283
+#: ui/picture_tab.gd:440
 msgid "Roll"
 msgstr ""
 
-#: ui/picture_tab.gd:286
+#: ui/picture_tab.gd:443
 msgid "Level"
 msgstr ""
 
-#: ui/picture_tab.gd:298
+#: ui/picture_tab.gd:455
 msgid "Deinterlace"
 msgstr ""
 
-#: ui/picture_tab.gd:301
+#: ui/picture_tab.gd:458
 msgid "Film grain"
 msgstr ""
 
-#: ui/picture_tab.gd:303
+#: ui/picture_tab.gd:460
 msgid "Gate weave"
 msgstr ""
 
-#: ui/picture_tab.gd:307
+#: ui/picture_tab.gd:464
 msgid "Reset picture"
 msgstr ""
 
-#: ui/picture_tab.gd:312
+#: ui/picture_tab.gd:469
 msgid "HDR"
 msgstr ""
 
-#: ui/picture_tab.gd:318
+#: ui/picture_tab.gd:475
 msgid "Tone map"
 msgstr ""
 
-#: ui/picture_tab.gd:319
+#: ui/picture_tab.gd:476
 msgid "Reset HDR"
 msgstr ""
 
-#: ui/picture_tab.gd:321
+#: ui/picture_tab.gd:478
 msgid "Exposure"
 msgstr ""
 
-#: ui/picture_tab.gd:322
+#: ui/picture_tab.gd:479
 #, c-format
 msgid "%+.1f stops"
 msgstr ""
 
-#: ui/picture_tab.gd:323
+#: ui/picture_tab.gd:480
 msgid "Knee"
 msgstr ""
 
-#: ui/picture_tab.gd:325
+#: ui/picture_tab.gd:482
 msgid "HDR brightness"
 msgstr ""
 
-#: ui/picture_tab.gd:326
+#: ui/picture_tab.gd:483
 #, c-format
 msgid "%d nits"
 msgstr ""
 
-#: ui/picture_tab.gd:333 ui/picture_tab.gd:335
+#: ui/picture_tab.gd:490 ui/picture_tab.gd:492
 msgid "Slideshow"
 msgstr ""
 
-#: ui/picture_tab.gd:337
+#: ui/picture_tab.gd:494
 msgid "Each picture"
 msgstr ""
 
-#: ui/picture_tab.gd:337 ui/room_tab.gd:274 ui/room_tab.gd:286
+#: ui/picture_tab.gd:494 ui/room_tab.gd:274 ui/room_tab.gd:286
 #, c-format
 msgid "%d s"
 msgstr ""
 
-#: ui/picture_tab.gd:340
+#: ui/picture_tab.gd:497
 msgid "Crossfade"
 msgstr ""
 
-#: ui/picture_tab.gd:341
+#: ui/picture_tab.gd:498
 msgid "cut"
 msgstr ""
 
-#: ui/picture_tab.gd:341
+#: ui/picture_tab.gd:498
 #, c-format
 msgid "%s s"
 msgstr ""
 
-#: ui/picture_tab.gd:346
+#: ui/picture_tab.gd:503
 msgid "Frame"
 msgstr ""
 
-#: ui/picture_tab.gd:348
+#: ui/picture_tab.gd:505
 msgid "Frame back"
 msgstr ""
 
-#: ui/picture_tab.gd:349
+#: ui/picture_tab.gd:506
 msgid "Frame forward"
 msgstr ""
 
-#: ui/picture_tab.gd:350
+#: ui/picture_tab.gd:507
 msgid "Mark A / B"
 msgstr ""
 
-#: ui/picture_tab.gd:351
+#: ui/picture_tab.gd:508
 msgid "Clear loop"
 msgstr ""
 
-#: ui/picture_tab.gd:352
+#: ui/picture_tab.gd:509
 msgid "Screenshot"
 msgstr ""
 
-#: ui/picture_tab.gd:356
+#: ui/picture_tab.gd:513
 msgid "Corner film"
 msgstr ""
 
-#: ui/picture_tab.gd:361
+#: ui/picture_tab.gd:518
 msgid "Swap"
 msgstr ""
 
-#: ui/picture_tab.gd:362
+#: ui/picture_tab.gd:519
 msgid "Close corner"
 msgstr ""
 
-#: ui/picture_tab.gd:363
+#: ui/picture_tab.gd:520
 msgid "Corner size"
 msgstr ""
 
-#: ui/picture_tab.gd:366
+#: ui/picture_tab.gd:523
 msgid "Top right"
 msgstr ""
 
-#: ui/picture_tab.gd:366
+#: ui/picture_tab.gd:523
 msgid "Top left"
 msgstr ""
 
-#: ui/picture_tab.gd:366
+#: ui/picture_tab.gd:523
 msgid "Bottom right"
 msgstr ""
 
-#: ui/picture_tab.gd:366
+#: ui/picture_tab.gd:523
 msgid "Bottom left"
 msgstr ""
 
-#: ui/picture_tab.gd:376
+#: ui/picture_tab.gd:533
 #, c-format
 msgid "%.1f m"
 msgstr ""
 
-#: ui/picture_tab.gd:432
+#: ui/picture_tab.gd:589
 #, c-format
 msgid "Auto: %s (%s)"
 msgstr ""
 
-#: ui/picture_tab.gd:432
+#: ui/picture_tab.gd:589
 #, c-format
 msgid "Auto: %s"
 msgstr ""
 
-#: ui/picture_tab.gd:482
+#: ui/picture_tab.gd:639
 #, c-format
 msgid "Folder rule: %s for %s"
 msgstr ""
 
-#: ui/picture_tab.gd:515
+#: ui/picture_tab.gd:672
 #, c-format
 msgid "%s  (opening...)"
 msgstr ""
 
-#: ui/picture_tab.gd:537
+#: ui/picture_tab.gd:694
 #, c-format
 msgid "Screenshot saved: %s"
 msgstr ""
 
-#: ui/picture_tab.gd:537
+#: ui/picture_tab.gd:694
 #, c-format
 msgid "No screenshot: %s"
 msgstr ""
 
-#: ui/picture_tab.gd:22
+#: ui/picture_tab.gd:27
 msgid "Mono"
 msgstr ""
 
-#: ui/picture_tab.gd:24
+#: ui/picture_tab.gd:29
 msgid "Dual 360"
 msgstr ""
 
-#: ui/picture_tab.gd:26
+#: ui/picture_tab.gd:31
 msgid "Brightness"
 msgstr ""
 
-#: ui/picture_tab.gd:26
+#: ui/picture_tab.gd:31
 msgid "Contrast"
 msgstr ""
 
-#: ui/picture_tab.gd:26
+#: ui/picture_tab.gd:31
 msgid "Saturation"
 msgstr ""
 
-#: ui/picture_tab.gd:27
+#: ui/picture_tab.gd:32
 msgid "Gamma"
 msgstr ""
 
-#: ui/picture_tab.gd:27
+#: ui/picture_tab.gd:32
 msgid "Dark-scene lift"
 msgstr ""
 
-#: ui/picture_tab.gd:27
+#: ui/picture_tab.gd:32
 msgid "Sharpen"
 msgstr ""
 
-#: ui/picture_tab.gd:30
+#: ui/picture_tab.gd:35
 msgid "Equidistant"
 msgstr ""
 
-#: ui/picture_tab.gd:30
+#: ui/picture_tab.gd:35
 msgid "Equisolid"
 msgstr ""
 
-#: ui/picture_tab.gd:30
+#: ui/picture_tab.gd:35
 msgid "Stereographic"
 msgstr ""
 
-#: ui/picture_tab.gd:30
+#: ui/picture_tab.gd:35
 msgid "Polynomial"
 msgstr ""
 
-#: ui/picture_tab.gd:31 ui/room_tab.gd:23 ui/sound_tab.gd:129 ui/system_tab.gd:45
+#: ui/picture_tab.gd:39 ui/room_tab.gd:23 ui/sound_tab.gd:129 ui/system_tab.gd:45
 #: environments/flagship.env.json environments/ice_cinema.env.json
 msgid "Off"
 msgstr ""
 
-#: ui/picture_tab.gd:31
+#: ui/picture_tab.gd:39
 msgid "Bob"
 msgstr ""
 
-#: ui/picture_tab.gd:31
+#: ui/picture_tab.gd:39
 msgid "Edge"
 msgstr ""
 
-#: ui/picture_tab.gd:34
+#: ui/picture_tab.gd:42
 #, c-format
 msgid "%s (your choice)"
 msgstr ""
 
-#: ui/picture_tab.gd:34
+#: ui/picture_tab.gd:42
 #, c-format
 msgid "%s (from the command line)"
 msgstr ""
 
-#: ui/picture_tab.gd:34
+#: ui/picture_tab.gd:42
 #, c-format
 msgid "%s (test pattern)"
 msgstr ""
 
-#: ui/picture_tab.gd:35
+#: ui/picture_tab.gd:43
 #, c-format
 msgid "%s (window)"
 msgstr ""
 
-#: ui/picture_tab.gd:35
+#: ui/picture_tab.gd:43
 #, c-format
 msgid "%s (remembered for this file)"
 msgstr ""
 
-#: ui/picture_tab.gd:35
+#: ui/picture_tab.gd:43
 #, c-format
 msgid "%s (from the file's sidecar)"
 msgstr ""
 
-#: ui/picture_tab.gd:36
+#: ui/picture_tab.gd:44
 #, c-format
 msgid "%s (the folder's rule)"
 msgstr ""

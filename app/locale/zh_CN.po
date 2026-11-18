@@ -22,6 +22,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+msgid "Keyboard"
+msgstr "键盘"
+
 msgid "the text field"
 msgstr "文本框"
 
@@ -40,18 +43,12 @@ msgstr "终端"
 msgid "the browser"
 msgstr "浏览器"
 
-msgid "Close"
-msgstr "关闭"
-
 #. PC windows (scripts/pc/, ui/pc_windows_row.gd, ui/pc_place.gd).
 msgid "PC window"
 msgstr "电脑窗口"
 
 msgid "PUSH: %s"
 msgstr "按下：%s"
-
-msgid "PLAY / PAUSE"
-msgstr "播放 / 暂停"
 
 msgid "CLICK"
 msgstr "点击"
@@ -64,6 +61,17 @@ msgstr "菜单"
 
 msgid "INFO"
 msgstr "信息"
+
+msgid "PLAY / PAUSE"
+msgstr "播放 / 暂停"
+
+#. The controllers' fixed legends (scripts/main.gd CONTROL_LABELS): B, tap for the keyboard, hold to talk; X, the UI.
+msgid ""
+"HOLD FOR\n"
+"VOICE"
+msgstr ""
+"按住：\n"
+"语音"
 
 msgid "LABELS"
 msgstr "标签"
@@ -125,6 +133,15 @@ msgstr "松开：扔出"
 msgid "NEAR-FAR / TURN"
 msgstr "远近 / 转动"
 
+msgid "Back"
+msgstr "返回"
+
+msgid "Previous"
+msgstr "上一个"
+
+msgid "Next"
+msgstr "下一个"
+
 # --- stage 2, set B ---
 msgid "Fisheye %d°"
 msgstr "鱼眼 %d°"
@@ -152,6 +169,14 @@ msgstr "%s，左右并排"
 
 msgid "%s, top / bottom"
 msgstr "%s，上下排列"
+
+#. An agent's prompt is waiting and its window is hidden (scripts/agents/local_agents.gd).
+msgid "%s is asking: press Y to see it"
+msgstr "%s 正在提问：按 Y 查看"
+
+#. Voice while an agent's prompt waits (scripts/agents/local_agents.gd).
+msgid "%s is asking: answer with the buttons beside its window"
+msgstr "%s 正在提问：请用窗口旁的按钮回答"
 
 msgid "%s is on the big screen"
 msgstr "%s 正在大屏幕上"
@@ -404,6 +429,9 @@ msgstr[0] "已连接 %d 台电脑。"
 
 msgid "Can't make the certificate: %s."
 msgstr "无法生成证书：%s。"
+
+msgid "Close"
+msgstr "关闭"
 
 msgid "Back to a pane"
 msgstr "回到窗格"
@@ -704,11 +732,17 @@ msgstr "ARI 听者 NH2"
 msgid "CIPIC subject 003"
 msgstr "CIPIC 受试者 003"
 
+msgid "Version %s is downloaded. It installs when you say yes in the menu."
+msgstr "版本 %s 已下载。在菜单中确认后才会安装。"
+
 msgid "This copy does not run from an install: no updates."
 msgstr "此副本不是从安装目录运行的：不会更新。"
 
 msgid "Version %s"
 msgstr "版本 %s"
+
+msgid "Looking for a new version..."
+msgstr "正在查找新版本..."
 
 msgid "Downloading version %s: %d %%"
 msgstr "正在下载版本 %s：%d %%"
@@ -716,23 +750,14 @@ msgstr "正在下载版本 %s：%d %%"
 msgid "Preparing version %s..."
 msgstr "正在准备版本 %s……"
 
-msgid "Version %s is downloaded. It installs when you say yes in the menu."
-msgstr "版本 %s 已下载。在菜单中确认后才会安装。"
-
-msgid "Downloading version %s"
-msgstr "正在下载版本 %s"
-
-msgid "Check now"
-msgstr "立即检查"
-
-msgid "Looking for a new version..."
-msgstr "正在查找新版本..."
+msgid "Could not check for updates. Try again later."
+msgstr "无法检查更新，请稍后再试。"
 
 msgid "Version %s is the newest."
 msgstr "版本 %s 已是最新。"
 
-msgid "Could not check for updates. Try again later."
-msgstr "无法检查更新，请稍后再试。"
+msgid "Downloading version %s"
+msgstr "正在下载版本 %s"
 
 msgid "Updated to version %s"
 msgstr "已更新到版本 %s"
@@ -920,6 +945,19 @@ msgstr "虹彩"
 
 msgid "Carbon fibre"
 msgstr "碳纤维"
+
+#. A surface's frame (ui/surface_frame.gd): the keys beside an agent's terminal.
+msgid "Enter"
+msgstr "回车"
+
+msgid "Esc"
+msgstr "Esc"
+
+msgid "Up"
+msgstr "上"
+
+msgid "Down"
+msgstr "下"
 
 msgid "Assistant"
 msgstr "助手"
@@ -1593,12 +1631,6 @@ msgstr "A 和 B：下一个和上一个视频。"
 msgid "Hold the left bumper and speak instead of typing. It types into a text field in the browser, a PC window or the agent's terminal, or talks to a connected assistant. Its label says TALK when it can."
 msgstr "按住左侧肩键说话，代替打字。它会输入到浏览器的文本框、电脑窗口或代理的终端，或者与已连接的助手对话。可以说话时，它的标签显示“说话”。"
 
-msgid "Next"
-msgstr "下一个"
-
-msgid "Back"
-msgstr "返回"
-
 msgid "In the agent's terminal"
 msgstr "在代理的终端里"
 
@@ -1960,9 +1992,6 @@ msgstr "画面缩小处过滤细微细节，使其不闪烁。"
 msgid "Hides the steps in dark gradients (8-bit video)."
 msgstr "隐藏暗部渐变中的色阶（8 位视频）。"
 
-msgid "Previous"
-msgstr "上一个"
-
 msgid "−10 s"
 msgstr "−10 秒"
 
@@ -2002,14 +2031,14 @@ msgstr "暂停"
 msgid "General"
 msgstr "常规"
 
+msgid "Monitor"
+msgstr "显示器"
+
 msgid "PC windows is off. Turn it on in System, PC windows, and add your PC there."
 msgstr "电脑窗口已关闭。请在“系统”的“电脑窗口”中打开，并在那里添加你的电脑。"
 
 msgid "No windows yet."
 msgstr "还没有窗口。"
-
-msgid "Monitor"
-msgstr "显示器"
 
 msgid "Type into the window in focus"
 msgstr "输入到当前焦点窗口"
@@ -2019,9 +2048,6 @@ msgstr "要输入的文字"
 
 msgid "Send"
 msgstr "发送"
-
-msgid "Keyboard"
-msgstr "键盘"
 
 msgid "Your PC's windows as panes here, used with a mouse and keyboard paired with the headset. Run the PC windows app on the PC."
 msgstr "把电脑的窗口作为窗格显示在这里，用与头显配对的鼠标和键盘操作。请在电脑上运行电脑窗口程序。"
@@ -2064,6 +2090,18 @@ msgstr "从你的图片中删除 %s？"
 
 msgid "words to search for, such as autumn forest"
 msgstr "要搜索的词，例如 autumn forest"
+
+msgid "Defaults"
+msgstr "默认值"
+
+msgid "Not loaded: %s"
+msgstr "未加载：%s"
+
+msgid "Visualisations"
+msgstr "可视化效果"
+
+msgid "Shown on the screen while something without a picture plays, such as music."
+msgstr "播放没有画面的内容（例如音乐）时显示在屏幕上。"
 
 msgid "Mode"
 msgstr "模式"
@@ -2926,6 +2964,17 @@ msgstr "用于菜单和手柄标签。影片和文件的名称保持不变。"
 msgid "The translations other than English were made automatically, by AI."
 msgstr "英语以外的翻译均由 AI 自动生成。"
 
+#. System tab: the language that voice hears (ui/system_tab.gd).
+msgid "Voice language"
+msgstr "语音语言"
+
+#. The voice language follows the menus' language.
+msgid "Same as the menus"
+msgstr "与菜单相同"
+
+msgid "Holding B types what you say into the selected window. English is tried; the others are not yet. A language other than English uses a second speech model, a one-time download of about 265 MB."
+msgstr "按住 B 说话，所说内容会输入到选中的窗口。英语已经过测试，其他语言尚未测试。英语以外的语言使用第二个语音模型，需要一次性下载约 265 MB。"
+
 msgid "Accessibility"
 msgstr "辅助功能"
 
@@ -3116,6 +3165,10 @@ msgstr "两个手柄都适用。标签会改变颜色或加上深色描边，以
 msgid "LIVE"
 msgstr "直播"
 
+#. The menu surface's title bar (ui/ui_layer.gd).
+msgid "Menu"
+msgstr "菜单"
+
 msgid "Resumed at %s"
 msgstr "从 %s 继续播放"
 
@@ -3205,6 +3258,9 @@ msgstr "座位"
 
 msgid "Check for updates"
 msgstr "检查更新"
+
+msgid "Check now"
+msgstr "立即检查"
 
 msgid "Restart now"
 msgstr "立即重启"
@@ -3811,43 +3867,3 @@ msgstr "阵雨"
 #~ msgid "Version %s is ready. It goes in at the next start."
 #~ msgstr "版本 %s 已就绪，下次启动时生效。"
 
-
-#. A surface's frame (ui/surface_frame.gd): the keys beside an agent's terminal.
-msgid "Enter"
-msgstr "回车"
-
-msgid "Esc"
-msgstr "Esc"
-
-#. The controllers' fixed legends (scripts/main.gd CONTROL_LABELS): B, tap for the keyboard, hold to talk; X, the UI.
-msgid "HOLD FOR\nVOICE"
-msgstr "按住：\n语音"
-
-msgid "Up"
-msgstr "上"
-
-msgid "Down"
-msgstr "下"
-
-#. The menu surface's title bar (ui/ui_layer.gd).
-msgid "Menu"
-msgstr "菜单"
-
-#. An agent's prompt is waiting and its window is hidden (scripts/agents/local_agents.gd).
-msgid "%s is asking: press Y to see it"
-msgstr "%s 正在提问：按 Y 查看"
-
-#. Voice while an agent's prompt waits (scripts/agents/local_agents.gd).
-msgid "%s is asking: answer with the buttons beside its window"
-msgstr "%s 正在提问：请用窗口旁的按钮回答"
-
-#. System tab: the language that voice hears (ui/system_tab.gd).
-msgid "Voice language"
-msgstr "语音语言"
-
-#. The voice language follows the menus' language.
-msgid "Same as the menus"
-msgstr "与菜单相同"
-
-msgid "Holding B types what you say into the selected window. English is tried; the others are not yet. A language other than English uses a second speech model, a one-time download of about 265 MB."
-msgstr "按住 B 说话，所说内容会输入到选中的窗口。英语已经过测试，其他语言尚未测试。英语以外的语言使用第二个语音模型，需要一次性下载约 265 MB。"

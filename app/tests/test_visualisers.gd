@@ -18,6 +18,7 @@ const VisualiserHost := preload("res://scripts/visualisers/visualiser_host.gd")
 const TestSignals := preload("res://scripts/visualisers/test_signals.gd")
 const DevCommands := preload("res://scripts/dev/dev_commands.gd")
 const MusicSource := preload("res://scripts/play/music_source.gd")
+const W := preload("res://ui/pane_widgets.gd")
 const BUILTIN: Array[String] = ["bars", "mirror", "line", "radial", "aurora"]
 
 var _failures := 0
@@ -449,7 +450,12 @@ func _tinkering() -> void:
 		clean = clean and dimmed == 0
 	print("  on the drums: %s" % [figures])
 	_check("the app's own visualisers on the drums are never dimmed (limit %.3f)" % VisualiserHost.FLICKER_MAX, clean)
+	await _picture_tab()
 	f.set_visualiser("bars")
+	_main.open_path("stub://flat_mono")
+	await _frames(3)
+	_main.ui.ui.picture.sync()
+	_check("a film: no Visualisations in Picture", not _main.ui.ui.picture._vis_box.visible)
 	svc.user_dir = svc.USER_DIR
 
 
@@ -457,6 +463,53 @@ func _write(path: String, text: String) -> void:
 	var fa := FileAccess.open(path, FileAccess.WRITE)
 	fa.store_string(text)
 	fa.close()
+
+
+## The Picture tab's Visualisations: shown with the music card, its controls built from the manifest and working.
+func _picture_tab() -> void:
+	var f: Node = _main.features
+	var pic: Node = _main.ui.ui.picture
+	f.set_visualiser("bars")
+	f.reset_visualiser_params("bars")
+	pic.sync()
+	var rows: Dictionary = pic._vis_rows
+	_check("Visualisations shows with the music card, first in Picture", pic._vis_box.visible
+			and pic.box.get_child(0) == pic._vis_box)
+	var choice: Container = rows["_choice"]
+	_check("a choice for each visualiser and Off (%d)" % choice.get_child_count(),
+			choice.get_child_count() == Registry.ids().size() + 1)
+	_check("bars' four parameters as controls", rows.has("bars") and rows.has("gap") and rows.has("colour_low")
+			and rows.has("colour_high"))
+	W.slider_of(rows["bars"]).value = 64.0
+	_check("the Bars slider sets the parameter (%s)" % Registry.values("bars")["bars"], Registry.values("bars")["bars"]
+			== 64)
+	var swatch: Button = (rows["colour_low"] as Container).get_child(2)
+	swatch.pressed.emit()
+	_check("a colour swatch sets the colour", Registry.values("bars")["colour_low"] == Color.html(pic.VIS_COLOURS[0]))
+	var embers: Button = _button_in(pic._vis_body, "Embers")
+	embers.pressed.emit()
+	_check("a preset's button applies it", Registry.values("bars")["colour_low"] == Color.html("#ff5a1f")
+			and Registry.values("bars")["bars"] == 32)
+	_button_in(pic._vis_body, "Defaults").pressed.emit()
+	_check("Defaults", Registry.values("bars")["colour_low"] == Color.html("#73b3ff"))
+	(choice.get_child(Registry.ids().find("aurora")) as Button).pressed.emit()
+	_check("choosing Aurora: its controls (a switch among them)", f.visualiser() == "aurora"
+			and pic._vis_rows.has("use_cover") and pic._vis_rows["use_cover"] is Button
+			and not pic._vis_rows.has("gap"))
+	(pic._vis_rows["_choice"] as Container).get_child(Registry.ids().size()).pressed.emit()
+	_check("Off: no controls", f.visualiser() == "off" and pic._vis_rows.size() == 1)
+	f.set_visualiser_param("speed", 1.5, "aurora")
+	f.set_visualiser("aurora")
+	_check("a change from elsewhere shows on the slider", is_equal_approx(W.slider_of(pic._vis_rows["speed"]).value,
+			1.5))
+	f.reset_visualiser_params("aurora")
+
+
+static func _button_in(n: Node, text: String) -> Button:
+	for c in n.find_children("*", "Button", true, false):
+		if (c as Button).text == text:
+			return c
+	return null
 
 
 ## Patterns that swap with a steady average: the area rule dims them; half the card swapping dims only that half.

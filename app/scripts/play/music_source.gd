@@ -72,6 +72,21 @@ static func available() -> bool:
 	return ClassDB.class_exists("MediaSource") and ClassDB.class_has_method("MediaSource", "get_album_art")
 
 
+## A file that opens and has no video stream: sound only, in a video's container (an audio-only .mp4, .mkv or .webm).
+## The factory asks after the video path failed, so a film never pays for the extra open.
+static func has_no_picture(p: String) -> bool:
+	if not available():
+		return false
+	var media: Object = ClassDB.instantiate("MediaSource")
+	NetworkHosts.apply_credentials(media, p)
+	if media.call("open", p) != OK:
+		return false
+	var none: bool = (media.call("get_video_info") as Dictionary).is_empty()
+	if media.has_method("close"):
+		media.call("close")
+	return none
+
+
 func get_kind() -> String:
 	return "music"
 

@@ -146,6 +146,9 @@ const PictureInPicture := preload("res://scripts/play/picture_in_picture.gd")
 const SeekThumbnails := preload("res://scripts/play/seek_thumbnails.gd")
 const Crossfade := preload("res://scripts/play/crossfade.gd")
 const MusicSource := preload("res://scripts/play/music_source.gd")
+
+## A visualiser was chosen, a parameter set, or the visualiser folders changed (the Picture tab's Visualisations).
+signal visualisers_changed
 const HwVideo := preload("res://scripts/play/hw_video.gd")
 const FilmLayer := preload("res://scripts/play/film_layer.gd")
 const ObjectPhysics := preload("res://scripts/play/object_physics.gd")
@@ -357,6 +360,7 @@ func set_visualiser(s: String) -> void:
 		return
 	MusicSource.style = s
 	main.settings.set_value("music", "visualiser", null if s == MusicSource.DEFAULT_STYLE else s)
+	visualisers_changed.emit()
 
 
 ## set_visualiser() for a visualiser that must be usable now: "" when chosen, else why not (unknown, or a shader that
@@ -409,6 +413,7 @@ func set_visualiser_param(pname: String, value: Variant, id := "") -> bool:
 		o[pname] = v
 	VisualiserRegistry.overrides[id] = o
 	main.settings.set_value("visualiser." + id, pname, null if v == spec["default"] else v)
+	visualisers_changed.emit()
 	return true
 
 
@@ -419,6 +424,7 @@ func reset_visualiser_params(id := "") -> void:
 	for pname: String in VisualiserRegistry.entry(id).get("params", {}):
 		main.settings.set_value("visualiser." + id, pname, null)
 	VisualiserRegistry.overrides.erase(id)
+	visualisers_changed.emit()
 
 
 ## A visualiser's preset: its defaults with the preset's values over them. False when there is no such preset.
