@@ -6,11 +6,21 @@ extends RefCounted
 ## one of the app's is skipped (its error says so): copy it under a new name instead. "off" is no folder: no visualiser.
 ## Static; preload to use.
 ##
+## The last good version stays (docs/visualisers.md, "Tinkering"): a user's manifest that breaks keeps the entry read
+## before it (marked "stale", with the error in errors()), and a user's shader that does not compile keeps the shader
+## that last did. The engine compiles a shader on first use, on the main thread; check() makes it compile at once
+## (get_shader_uniform_list()) with a Logger catching what it reports.
+##
 ##   ids() -> Array[String]            the usable ones, in order (the manifest's "order", then the name)
-##   entry(id) -> Dictionary           {id, name, description, area, order, params, presets, shader_path, dir, builtin}
-##   errors() -> Dictionary            id -> why its folder is not usable
+##   entry(id) -> Dictionary           {id, name, description, area, order, params, presets, shader_path, dir, builtin,
+##                                     stale (a newer manifest is broken; this is the last good one)}
+##   errors() -> Dictionary            id -> why its folder (or its newest manifest) is not usable
 ##   rescan()                          read the folders again (after a change in user://visualisers)
-##   load_shader(id) -> Shader         the app's through the resource cache; the user's from their text, fresh
+##   check(id) -> Dictionary           compiles the shader as it is on disk now: {ok, errors: [{line, message}],
+##                                     missing: params with no uniform of their name, uniforms}; cached until the
+##                                     file changes. A broken manifest: ok false with its error.
+##   load_shader(id) -> Shader         the app's through the resource cache; a user's: the last that compiled (null
+##                                     if none has)
 ##   values(id) -> Dictionary          every parameter's value now: the default, or overrides[id][name]
 ##   coerce(spec, value) -> Variant    a value made the parameter's type and clamped to its range (null: unusable)
 ##   overrides                         id -> {name: value} (main.features keeps these in the settings)
@@ -39,6 +49,9 @@ static var _entries := {}
 static var _order: Array[String] = []
 static var _errors := {}
 static var _scanned := false
+## id -> the last user shader that compiled; id -> {stamp, result} of the last check.
+static var _good := {}
+static var _checks := {}
 
 
 static func ids() -> Array[String]:
@@ -70,6 +83,7 @@ static func _scan() -> void:
 	if _scanned:
 		return
 	_scanned = true
+	var before := _entries.duplicate()
 	_entries.clear()
 	_errors.clear()
 	var found: Array[Dictionary] = []
@@ -91,7 +105,14 @@ static func _scan() -> void:
 			var e := _read(folder, id, builtin)
 			if e.has("error"):
 				_errors[id] = e["error"]
-				continue
+				# A user's manifest broken while being worked on: the one read before stays.
+				var was: Dictionary = before.get(id, {})
+				if builtin or was.is_empty() or was["dir"] != folder:
+					continue
+				e = was.duplicate()
+				e["stale"] = true
+			else:
+				e["stale"] = false
 			_entries[id] = e
 			found.append(e)
 	found.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -218,9 +239,71 @@ static func load_shader(id: String) -> Shader:
 	var e := entry(id)
 	if e.is_empty():
 		return null
-	var path: String = e["shader_path"]
 	if bool(e["builtin"]):
-		return load(path) as Shader
-	var s := Shader.new()
-	s.code = FileAccess.get_file_as_string(path)
-	return s
+		return load(e["shader_path"]) as Shader
+	check(id)
+	return _good.get(id)
+
+
+static func check(id: String) -> Dictionary:
+	var e := entry(id)
+	if e.is_empty():
+		return {"ok": false, "errors": [{"line": 0, "message": str(errors().get(id, "no visualiser called %s" % id))}],
+				"missing": [], "uniforms": []}
+	var path: String = e["shader_path"]
+	var stamp := "%d:%d" % [FileAccess.get_modified_time(path), FileAccess.get_size(path)]
+	var cached: Dictionary = _checks.get(id, {})
+	if cached.get("stamp", "") == stamp and not bool(e["stale"]):
+		return cached["result"]
+	var shader: Shader
+	var catch := ShaderErrors.new()
+	if bool(e["builtin"]):
+		shader = load(path) as Shader
+	else:
+		shader = Shader.new()
+		OS.add_logger(catch)
+		shader.code = FileAccess.get_file_as_string(path)
+	var uniforms: Array[String] = []
+	for u: Dictionary in shader.get_shader_uniform_list(true):
+		uniforms.append(str(u["name"]))
+	OS.remove_logger(catch)
+	var errs := catch.take()
+	if errs.is_empty() and uniforms.is_empty() and not shader.code.contains("void fragment"):
+		errs.append({"line": 0, "message": "no fragment() function"})
+	var missing: Array[String] = []
+	for pname: String in e["params"]:
+		if not pname in uniforms:
+			missing.append(pname)
+	var result := {"ok": errs.is_empty(), "errors": errs, "missing": missing, "uniforms": uniforms}
+	if bool(e["stale"]):
+		result["ok"] = false
+		result["errors"] = [{"line": 0, "message": str(errors().get(id, ""))}] + errs
+	if errs.is_empty() and not bool(e["builtin"]):
+		_good[id] = shader
+	_checks[id] = {"stamp": stamp, "result": result}
+	return result
+
+
+## Catches what the shader compiler reports while a check runs (it compiles on the main thread, inside the call).
+class ShaderErrors extends Logger:
+	const SHADER_ERROR := 3
+	var _found: Array[Dictionary] = []
+	var _mutex := Mutex.new()
+
+	func _log_error(_function: String, _file: String, line: int, code: String, rationale: String,
+			_editor_notify: bool, error_type: int, _script_backtraces: Array[ScriptBacktrace]) -> void:
+		if error_type != SHADER_ERROR:
+			return
+		_mutex.lock()
+		_found.append({"line": line, "message": rationale if rationale != "" else code})
+		_mutex.unlock()
+
+	func _log_message(_message: String, _error: bool) -> void:
+		pass
+
+	func take() -> Array[Dictionary]:
+		_mutex.lock()
+		var out := _found.duplicate()
+		_found.clear()
+		_mutex.unlock()
+		return out

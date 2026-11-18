@@ -178,6 +178,9 @@ static func area_rect(kind: String, with_cover: bool) -> Rect2:
 	if kind == "backdrop":
 		return Rect2(Vector2.ZERO, s)
 	if not with_cover:
+		# Without a cover the words end about 0.3 down: a strip under them, or all the height to the time line.
+		if kind == "tall":
+			return Rect2(s.x * 0.08, s.y * 0.33, s.x * 0.84, s.y * 0.52)
 		return Rect2(s.x * 0.08, s.y * 0.28, s.x * 0.84, s.y * 0.42)
 	var text_x := s.x * 0.06 + s.y * 0.62 + s.x * 0.05
 	if kind == "tall":
@@ -250,8 +253,9 @@ func _show_visualiser() -> void:
 	if _vis == null:
 		return
 	if style != OFF and style != _vis.id and not _vis.use(style):
-		push_warning("Music: no visualiser %s" % style)
-		style = OFF
+		# Unknown, or a user's shader that has never compiled: the one before stays (or none).
+		push_warning("Music: visualiser %s is not usable; keeping %s" % [style, _vis.id if _vis.id != "" else OFF])
+		style = _vis.id if _vis.id != "" else OFF
 	var on := style != OFF
 	_vis_rect.visible = on
 	_vis.set_active(on)

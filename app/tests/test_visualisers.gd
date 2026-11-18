@@ -4,7 +4,10 @@ extends SceneTree
 ## (scripts/visualisers/visualiser_registry.gd), the shared analysis's maths and requests
 ## (scripts/play/audio_analysis.gd), the parameters through main.features, and with a renderer the host
 ## (scripts/visualisers/visualiser_host.gd): every visualiser of the app compiles and draws, the flash limit holds a
-## strobing visualiser down and leaves a calm one alone, and its floor survives the two-byte round trip.
+## strobing visualiser down and leaves a calm one alone, and its floor survives the two-byte round trip. Making them
+## on the headset (scripts/visualisers/visualiser_service.gd): the README, the test signals' files, the commands and
+## their assistant levels, and with a renderer the watcher, compile errors with their lines, the last good version
+## kept, a broken manifest kept as before, refusing a shader that never compiled, a test signal played and captured.
 ## Test visualisers are written to user://test_visualisers_<pid> and deleted after.
 ## Run: godot --headless --xr-mode off --path app --script res://tests/test_visualisers.gd
 ## (the host's checks: without --headless, with xvfb and lavapipe; see docs/BUILD.md)
@@ -12,11 +15,15 @@ extends SceneTree
 const Registry := preload("res://scripts/visualisers/visualiser_registry.gd")
 const AudioAnalysis := preload("res://scripts/play/audio_analysis.gd")
 const VisualiserHost := preload("res://scripts/visualisers/visualiser_host.gd")
+const TestSignals := preload("res://scripts/visualisers/test_signals.gd")
+const DevCommands := preload("res://scripts/dev/dev_commands.gd")
+const MusicSource := preload("res://scripts/play/music_source.gd")
 const BUILTIN: Array[String] = ["bars", "mirror", "line", "radial", "aurora"]
 
 var _failures := 0
 var _checks := 0
 var _tmp := "user://test_visualisers_%d" % OS.get_process_id()
+var _main: Node3D
 
 
 func _init() -> void:
@@ -29,10 +36,13 @@ func _run() -> void:
 	_coerce()
 	await _analysis()
 	await _features()
+	_signals()
+	_commands()
 	if DisplayServer.get_name() == "headless":
-		print("SKIP the host's checks (needs a renderer)")
+		print("SKIP the host's and the watcher's checks (need a renderer)")
 	else:
 		await _host()
+		await _tinkering()
 	_rmdir(_tmp)
 	Registry.dirs = Registry.DIRS.duplicate()
 	Registry.rescan()
@@ -183,7 +193,8 @@ func _analysis() -> void:
 func _features() -> void:
 	Registry.dirs = ["res://visualisers"]
 	Registry.rescan()
-	var main: Node3D = (load("res://scenes/main.tscn") as PackedScene).instantiate() as Node3D
+	_main = (load("res://scenes/main.tscn") as PackedScene).instantiate() as Node3D
+	var main := _main
 	main.settings.read_only = true
 	root.add_child(main)
 	await process_frame
@@ -302,6 +313,117 @@ func _host() -> void:
 	Registry.overrides.erase("strobe")
 	card.queue_free()
 	await process_frame
+
+
+func _signals() -> void:
+	var drums := TestSignals.make("drums", 0.5)
+	_check("a test signal is a 16-bit mono WAV of the right length (%d bytes)" % drums.size(), drums.size()
+			== 44 + 16000 * 2 and drums.slice(0, 4).get_string_from_ascii() == "RIFF"
+			and drums.decode_u32(24) == TestSignals.RATE and drums.decode_u16(22) == 1)
+	var peak := func(d: PackedByteArray) -> int:
+		var most := 0
+		for i in range(44, d.size(), 2):
+			most = maxi(most, absi(d.decode_s16(i)))
+		return most
+	_check("drums and sweep have sound, silence has none", peak.call(drums) > 8000
+			and peak.call(TestSignals.make("sweep", 0.5)) > 8000 and peak.call(TestSignals.make("silence", 0.5)) == 0)
+
+
+func _commands() -> void:
+	var levels := {}
+	for c in ["visualisers", "visualiser_status", "visualiser_check", "visualiser_use", "visualiser_param",
+			"visualiser_preset", "visualiser_reset", "visualiser_test", "visualiser_capture"]:
+		levels[c] = DevCommands.assistant_level(c)
+	print("  assistant levels: %s" % [levels])
+	_check("the commands are open to the assistant (and so to the agents' tools)", levels["visualisers"] == "read"
+			and levels["visualiser_check"] == "read" and levels["visualiser_capture"] == "read"
+			and levels["visualiser_use"] == "settings" and levels["visualiser_param"] == "settings"
+			and levels["visualiser_test"] == "control")
+	var readme := FileAccess.get_file_as_string("user://visualisers/README.md")
+	_check("the README is in the user folder with this machine's paths", readme.contains("visualiser_test")
+			and not readme.contains("<<") and readme.contains(ProjectSettings.globalize_path("res://visualisers")))
+
+
+## The tinkering loop on the main scene's own card: the watcher, compile errors, the last good version, a test signal.
+func _tinkering() -> void:
+	var svc: Node = _main.features.visualisers_service
+	var f: Node = _main.features
+	var dir := _tmp.path_join("live")
+	DirAccess.make_dir_recursive_absolute(dir)
+	svc.user_dir = _tmp
+	Registry.dirs = ["res://visualisers", _tmp]
+	svc.poll()
+	var manifest := '{"name": "Live", "params": {"k": {"type": "float", "min": 0, "max": 1, "default": 0.5}}}'
+	var good := "shader_type canvas_item;\n#include \"res://visualisers/visualiser.gdshaderinc\"\n" \
+			+ "uniform float k = 0.5;\nvoid fragment() {\n\tCOLOR = vec4(vec3(k), band(UV.x));\n}\n"
+	_write(dir.path_join(Registry.MANIFEST), manifest)
+	_write(dir.path_join(Registry.SHADER), good)
+	var changed: Array[String] = svc.poll()
+	_check("the watcher sees a new visualiser (%s)" % [changed], changed.has("live") and Registry.has("live")
+			and Registry.check("live")["ok"])
+	var first: Shader = Registry.load_shader("live")
+	# Line 5 now has the mistake (the include is line 2).
+	_write(dir.path_join(Registry.SHADER), good.replace("band(UV.x));", "band(UV.x)) + nope;"))
+	changed = svc.poll()
+	var res: Dictionary = Registry.check("live")
+	print("  broken: %s" % [res["errors"]])
+	_check("a change seen; the compile error with its line in the file (5) and its words", changed.has("live")
+			and not res["ok"] and int(res["errors"][0]["line"]) == 5
+			and str(res["errors"][0]["message"]).contains("nope"))
+	_check("the last shader that compiled is kept", Registry.load_shader("live") == first)
+	_write(dir.path_join(Registry.MANIFEST), '{"name": "Live", "params": {')
+	svc.poll()
+	_check("a broken manifest: the last good one stays, marked, with the error", Registry.has("live")
+			and bool(Registry.entry("live")["stale"]) and Registry.errors().has("live")
+			and not Registry.check("live")["ok"])
+	_write(dir.path_join(Registry.MANIFEST), manifest)
+	_write(dir.path_join(Registry.SHADER), good)
+	svc.poll()
+	_check("fixed: usable again", Registry.check("live")["ok"] and not bool(Registry.entry("live")["stale"]))
+	var never := _tmp.path_join("never")
+	DirAccess.make_dir_recursive_absolute(never)
+	_write(never.path_join(Registry.MANIFEST), '{"name": "Never"}')
+	_write(never.path_join(Registry.SHADER), "shader_type canvas_item;\nvoid fragment() { COLOR = oops; }\n")
+	svc.poll()
+	var why: String = f.set_visualiser_checked("never")
+	_check("choosing one that never compiled: refused with the error (%s)" % why, why.contains("line 2")
+			and f.visualiser() != "never")
+	var r: Dictionary = await DevCommands.execute("visualiser_check", {"id": "never"})
+	_check("visualiser_check through the registry gives the errors", r["ok"] and not r["result"]["ok"])
+	if not MusicSource.available():
+		print("SKIP the test signal on the card (needs the fork's MediaSource)")
+		return
+	var t0 := Time.get_ticks_msec()
+	r = await DevCommands.execute("visualiser_test", {"signal": "drums"})
+	print("  test signal: %s in %d ms" % [r.get("result", r.get("error")), Time.get_ticks_msec() - t0])
+	await _frames(30)
+	_check("visualiser_test plays the drums as music", r["ok"] and _main.player.source != null
+			and _main.player.source.get_kind() == "music")
+	r = await DevCommands.execute("visualiser_use", {"id": "live"})
+	await _frames(10)
+	var st: Dictionary = svc.status()
+	_check("visualiser_use shows a user's visualiser; status has its flash limit (%s)" % [st.get("running", {})],
+			r["ok"] and st["showing"] == "live" and st.has("running")
+			and (st["running"] as Dictionary).has("flash_limit"))
+	# A change to the one showing starts it again with the new files.
+	var frames_before: int = svc._host().frames
+	_write(dir.path_join(Registry.SHADER), good.replace("vec3(k)", "vec3(k, 0.2, 1.0 - k)"))
+	svc.poll()
+	await _frames(2)
+	_check("an edit to the one showing starts it again (%d -> %d frames)" % [frames_before, svc._host().frames],
+			svc._host().frames < frames_before)
+	r = await DevCommands.execute("visualiser_capture", {})
+	var card := Image.load_from_file(str(r["result"]["card"])) if r["ok"] else null
+	_check("visualiser_capture saves the card (%s)" % [r.get("result", r.get("error"))], card != null
+			and card.get_width() == 1280 and r["result"]["alone"] != null)
+	f.set_visualiser("bars")
+	svc.user_dir = svc.USER_DIR
+
+
+func _write(path: String, text: String) -> void:
+	var fa := FileAccess.open(path, FileAccess.WRITE)
+	fa.store_string(text)
+	fa.close()
 
 
 ## Mean relative luminance of an image (linear light).

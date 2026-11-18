@@ -212,6 +212,8 @@ static func instructions_text(id: String) -> String:
 			+ "`control_allowed`).\n" \
 			+ "- In ~/.local/bin: yt-dlp, with deno as its JavaScript runtime, and get_iplayer. ffmpeg and ffprobe are in " \
 			+ "/usr/bin.\n" \
+			+ "- Music visualisers (the picture of the sound on the screen while music plays) are shader plug-ins you " \
+			+ "can write: read %s/README.md first.\n" % ProjectSettings.globalize_path("user://visualisers") \
 			+ "- Formats: VP9 8-bit or H.264 up to 2160p, which the headset decodes well; not AV1, not VP9 10-bit or HDR. " \
 			+ "Merge to mkv: `yt-dlp -f \"bv*[vcodec^=vp09][dynamic_range=SDR][height<=2160]+ba/" \
 			+ "bv*[vcodec^=avc1][height<=2160]+ba\" --merge-output-format mkv -P \"$HOME/Videos/From assistant\" " \

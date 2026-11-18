@@ -55,6 +55,8 @@ const Pointing := preload("res://scripts/pointing/pointing.gd")
 ##   bias       scripts/env/bias_light.gd: the screen's light on the room takes the picture's colour (#29)
 ##   night      scripts/play/night_mode.gd: night mode (levelled loudness) and dialogue boost (#26)
 ##   audio_analysis scripts/play/audio_analysis.gd: one analysis of the film's sound for the reactions and visualisers
+##   visualisers_service scripts/visualisers/visualiser_service.gd: making visualisers on the headset (the user folder
+##              watched, the README, test signals, the visualiser_* commands)
 ##   react      scripts/env/film_react.gd: bass pulses in the controllers, room flashes on loud moments (#81)
 ##   projector  scripts/env/projector.gd: a projector's beam with dust motes, film grain, gate weave (#92)
 ##   time_of_day scripts/env/time_of_day.gd: the outdoor rooms' sky from the clock and a latitude (#84)
@@ -130,6 +132,7 @@ const NightMode := preload("res://scripts/play/night_mode.gd")
 const FilmReact := preload("res://scripts/env/film_react.gd")
 const AudioAnalysis := preload("res://scripts/play/audio_analysis.gd")
 const VisualiserRegistry := preload("res://scripts/visualisers/visualiser_registry.gd")
+const VisualiserService := preload("res://scripts/visualisers/visualiser_service.gd")
 const Projector := preload("res://scripts/env/projector.gd")
 const TimeOfDay := preload("res://scripts/env/time_of_day.gd")
 const ZoomLens := preload("res://scripts/play/zoom_lens.gd")
@@ -200,6 +203,7 @@ var spatial_tune: SpatialTune
 var bias: BiasLight
 var night: NightMode
 var audio_analysis: AudioAnalysis
+var visualisers_service: VisualiserService
 var react: FilmReact
 var projector: Projector
 var time_of_day: TimeOfDay
@@ -284,6 +288,7 @@ func _ready() -> void:
 	bias = _add(BiasLight.new(), "BiasLight")
 	night = _add(NightMode.new(), "NightMode")
 	audio_analysis = _add(AudioAnalysis.new(), "AudioAnalysis")
+	visualisers_service = _add(VisualiserService.new(), "VisualiserService")
 	react = _add(FilmReact.new(), "FilmReact")
 	projector = _add(Projector.new(), "Projector")
 	time_of_day = _add(TimeOfDay.new(), "TimeOfDay")
@@ -352,6 +357,20 @@ func set_visualiser(s: String) -> void:
 		return
 	MusicSource.style = s
 	main.settings.set_value("music", "visualiser", null if s == MusicSource.DEFAULT_STYLE else s)
+
+
+## set_visualiser() for a visualiser that must be usable now: "" when chosen, else why not (unknown, or a shader that
+## has never compiled, with its first errors).
+func set_visualiser_checked(s: String) -> String:
+	if s != MusicSource.OFF:
+		if not VisualiserRegistry.has(s):
+			return "no visualiser %s (%s)" % [s, VisualiserRegistry.errors().get(s, "no folder with that name")]
+		if VisualiserRegistry.load_shader(s) == null:
+			var errs: Array = VisualiserRegistry.check(s)["errors"]
+			return "%s's shader has not compiled yet: %s" % [s, "; ".join(errs.slice(0, 3).map(
+					func(e: Dictionary) -> String: return "line %d: %s" % [int(e["line"]), e["message"]]))]
+	set_visualiser(s)
+	return ""
 
 
 ## Every visualiser, for a menu or an assistant:

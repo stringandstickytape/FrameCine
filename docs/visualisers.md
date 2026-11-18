@@ -7,8 +7,9 @@ them without rebuilding anything.
 
 Code: `app/scripts/play/audio_analysis.gd` (the shared analysis), `app/scripts/visualisers/visualiser_registry.gd`
 (the folders and manifests), `app/scripts/visualisers/visualiser_host.gd` (runs one, with the flash limit and the GPU
-budget), `app/scripts/play/music_source.gd` (the card), `app/shaders/visualiser_*.gdshader` (the flash limit).
-Tests: `app/tests/test_visualisers.gd`, `app/tests/test_music.gd`.
+budget), `app/scripts/visualisers/visualiser_service.gd` (making them on the headset),
+`app/scripts/visualisers/test_signals.gd`, `app/visualisers/README.md` (the guide an agent reads),
+`app/scripts/play/music_source.gd` (the card), `app/shaders/visualiser_*.gdshader` (the flash limit). Tests: `app/tests/test_visualisers.gd`, `app/tests/test_music.gd`.
 
 ## Design
 
@@ -47,7 +48,7 @@ A folder whose name is its id (lower case letters, digits and `_`), holding:
 
   - `area`: where on the card it draws. `strip` (the default): a wide strip under the words. `tall`: a taller area
     there (for round shapes). `backdrop`: the whole card, behind the words, which then get dark panels behind them.
-    Without a cover, `strip` and `tall` take the card's middle.
+    Without a cover, `strip` takes the card's middle and `tall` all the height between the words and the time line.
   - `params`: each is a uniform of the same name in the shader. Types: `float` and `int` (`min`, `max`, `default`),
     `bool` (`default`), `colour` (`default` as `"#rrggbb"`; a `vec4` uniform with `source_color`). A default outside
     its range is clamped.
@@ -139,6 +140,46 @@ takes more than 2 ms (averaged) for a second, it draws at the next lower scale (
 area, and the log says so once. It does not come back up until the visualiser is chosen again. The headset draws a
 frame in 11 ms at 90 Hz, both eyes, so 2 ms is generous for a screen.
 
+## Tinkering on the headset
+
+The aim: Claude Code (or Codex) in the headset's terminal, or a person over ssh, writes a visualiser and sees it on
+the screen at once, with nothing built or restarted. The acceptance test is a fresh session told only "make me a
+visualiser that ...". Code: `scripts/visualisers/visualiser_service.gd` (`main.features.visualisers_service`).
+
+- **The folder.** `user://visualisers/` (on the headset `~/.local/share/godot/app_userdata/FrameCine/visualisers/`)
+  is made at start, with `README.md`: `app/visualisers/README.md` with this headset's paths filled in, rewritten when
+  the app's text changes. It is the whole guide for an agent: the quick loop, the manifest, the shader's inputs, the
+  rules the app keeps, what to do when something is wrong. The agents' `CLAUDE.md` and `AGENTS.md` block has one line
+  pointing at it.
+- **The watcher.** Every second the user folders' manifests and shaders are looked at (times and sizes; a few stats).
+  A change reads the folders again, checks each changed visualiser and, when the one on the card changed and
+  compiles, starts it again with its new files. Always on, not only in dev mode. One log line per change.
+- **Compile errors, with lines.** The engine compiles a shader on its first use, on the main thread. The check
+  (`VisualiserRegistry.check(id)`) sets the code, asks for its uniforms (which compiles it at once), and catches what
+  the compiler reports with a `Logger` (`OS.add_logger`; shader errors are error type 3, with the line and the words).
+  The lines are those of `visualiser.gdshader`: the include does not shift them. It also lists parameters with no
+  uniform of their name. Cached until the file changes.
+- **The last good version stays.** A user's shader that does not compile keeps the one that last did, on the card and
+  for `load_shader()`; drawing a broken shader would only log errors every frame. A user's manifest that breaks keeps
+  the entry read before (`stale`, with the error in `errors()`). A visualiser whose shader has never compiled cannot
+  be chosen (`set_visualiser_checked()` says why), and the card keeps what it showed.
+- **Test signals** (`scripts/visualisers/test_signals.gd`), so there is something to react to: `drums` (120 a minute,
+  a kick, hats, a bass line, a pad; no drums from 20 to 30 s), `sweep` (30 Hz to 15 kHz and back), `tones` (an
+  octave higher every 2 s) and `silence`. 40 s WAVs at 32 kHz, made once on a worker thread (1.7 s on the PC) in
+  `user://visualisers/.test-signals-1/`, opened as music.
+- **The commands**, in the one command registry, so on the dev link, the phone remote, the assistant API and the
+  agents' MCP tools at once:
+
+| Command | Assistant level | What |
+|---|---|---|
+| `visualisers` | read | every visualiser with its parameters and presets, the one showing, broken folders and why, the folders and the README |
+| `visualiser_status` | read | the one on the card: GPU ms, scale, the flash limit (gain, average, floor, dimming), its check, the last change seen |
+| `visualiser_check` | read | read the folders again and compile one now: ok, errors with lines, parameters with no uniform |
+| `visualiser_capture` | read | the card (1280 x 720) and the visualiser alone (before the flash limit) as PNGs on the headset, for an agent to look at |
+| `visualiser_use` | settings | choose one (refused with its errors if it never compiled) |
+| `visualiser_param`, `visualiser_preset`, `visualiser_reset` | settings | its parameters |
+| `visualiser_test` | control | play a test signal |
+
 ## API and settings
 
 - `main.features`: `visualiser()`, `set_visualiser(id)` (an id or "off"), `visualisers()` (each with its parameter
@@ -147,15 +188,18 @@ frame in 11 ms at 90 Hz, both eyes, so 2 ms is generous for a screen.
   `reset_visualiser_params(id := showing)`.
 - `MusicSource`: `styles()` (the ids, then "off"), `style_names()`, static `style`, `visualiser()` (the host),
   `area_rect(area, with_cover)`, `levels()` (32 bands, for the overlay and tests).
-- `VisualiserRegistry`: `ids()`, `entry(id)`, `errors()`, `rescan()`, `values(id)`, `coerce(spec, value)`,
-  `load_shader(id)`.
+- `VisualiserRegistry`: `ids()`, `entry(id)`, `errors()`, `rescan()`, `check(id)`, `values(id)`,
+  `coerce(spec, value)`, `load_shader(id)`.
+- `main.features.set_visualiser_checked(id)` ("" or why not). `main.features.visualisers_service`: `poll()`,
+  `status()`, `capture()`, `open_test(signal)`, `last_change`, `user_dir`.
 - The host: `use(id)`, `stats()` (id, area, viewport size, scale, GPU ms, frames).
 - Settings: `[music] visualiser` (default "bars"); `[visualiser.<id>] <param>` for each parameter set away from its
   default.
 
 ## Tested
 
-`tests/test_visualisers.gd`, 66 checks, with WSLg and lavapipe (headless: the 50 without the host).
+`tests/test_visualisers.gd`, 81 checks, with WSLg and lavapipe (headless: the 54 without the host and the
+watcher).
 
 - The registry: the five in order, no errors, the areas, the parameters read with their types, and every parameter
   a uniform of its shader.
@@ -170,6 +214,13 @@ frame in 11 ms at 90 Hz, both eyes, so 2 ms is generous for a screen.
   back its luminance (0.2159 for 0.214); a black and white strobe changing every frame swings at most 0.078 on the
   card; black to white stays under the rise limit after 1.4 s; a new visualiser shows at its own brightness at once.
   Off, its viewports stop and it is not fed; on again, it starts afresh.
+- Making them: a test signal's WAV (header, length, sound or none); the nine commands open to the assistant at their
+  levels; the README in the user folder with this machine's paths; the watcher sees a new folder; a compile error
+  comes back with its line (5, after the include on line 2) and words; the last good shader kept; a broken manifest
+  keeps the last good entry, marked; fixed, usable again; one that never compiled is refused with its error;
+  `visualiser_check` through the registry; `visualiser_test` plays the drums as music; `visualiser_use` shows a
+  user's one and `visualiser_status` has its flash limit; an edit to the one showing starts it again;
+  `visualiser_capture` saves the card.
 
 `tests/test_music.gd` (16 checks) now checks all six styles on the card: "off" draws nothing in the area, the others
 draw, each differently. Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
@@ -180,12 +231,10 @@ its flash-size check fails on main too (it expects more than the room schema's s
 
 - **The menu.** The visualiser and its parameters are set through `main.features` (the dev link, an assistant). No
   panel row exists yet; the manifest has what one needs (labels, types, ranges, presets).
-- **Tinkering on the headset** (next): `user://visualisers` watched outside dev mode, shader compile errors given back
-  (through the engine's `Logger`, `OS.add_logger()`, which this engine has; not yet tried on shader errors) with the last good version kept running, a test signal (sweep, drums,
-  silence) so a visualiser can be tuned with no music, dev-link commands to list, choose and set, a capture of the
-  visualiser alone, and a README in the folder written for an agent that knows nothing else.
+- **The acceptance test:** a fresh Claude Code session on the headset, told only to make a visualiser.
 - **More of the app's own.**
 - **Surround.**
-- **On the headset:** nothing here has run on the Frame yet: the GPU cost of each visualiser and the limit's passes,
-  how the flash limit looks on real music, whether `aurora` keeps the words readable, and the analysis's CPU cost
-  (128 band reads a frame).
+- **On the headset:** the five ran there on 2026-11-18 on a synthetic beat track: all draw and react, 0.06 to
+  0.12 ms of GPU each (aurora 0.58 ms), the flash limit idle on all of them, aurora's words readable. Not yet: real
+  music in the headset's view, the analysis's CPU cost (128 band reads a frame). Radial was small on a card without
+  a cover (it got the strip, 302 px high); `tall` now takes the height down to the time line there (374 px).
