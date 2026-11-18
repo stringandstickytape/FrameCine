@@ -270,8 +270,9 @@ static func check(id: String) -> Dictionary:
 	var errs := catch.take()
 	if errs.is_empty() and uniforms.is_empty() and not shader.code.contains("void fragment"):
 		errs.append({"line": 0, "message": "no fragment() function"})
+	# Only a shader that compiled has a list of uniforms to compare with.
 	var missing: Array[String] = []
-	for pname: String in e["params"]:
+	for pname: String in e["params"] if errs.is_empty() else {}:
 		if not pname in uniforms:
 			missing.append(pname)
 	var result := {"ok": errs.is_empty(), "errors": errs, "missing": missing, "uniforms": uniforms}
