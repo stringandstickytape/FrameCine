@@ -159,6 +159,13 @@ func _still_picture() -> void:
 			and not c.is_equal_approx(MusicSource.BACKGROUND))
 	_check("the card's title is the file's (%s)" % src._card.title, src._card.title == "Still Test")
 	_check("the visualiser runs on it", src.visualiser() != null and src.visualiser().id == "bars")
+	# The film layer (scripts/play/film_layer.gd) redraws when frame_key() changes: the card must count as new each frame.
+	_check("the film layer redraws the card every frame (frame_key %s)" % src.frame_key(), is_nan(src.frame_key()))
+	var layer: Node = f.get("film_layer")
+	if layer != null and layer.get("updates") != null:
+		var before: int = layer.updates
+		await _frames(30)
+		print("  film layer: %d updates in 30 frames (%s)" % [layer.updates - before, layer.get("kind")])
 	var pic: Node = main.ui.ui.picture
 	pic.sync()
 	_check("Picture shows Visualisations with the switch on", pic._vis_box.visible and pic._still.visible

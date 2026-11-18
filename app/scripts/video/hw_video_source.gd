@@ -377,6 +377,8 @@ func has_frame() -> bool:
 
 ## The media time of the frame on show: it moves with every new frame, and with a seek while paused.
 func frame_key() -> float:
+	if _card != null:
+		return NAN  # The card moves every frame (its visualiser, its time line), not with the video's frames.
 	return _tex.get_frame_time() if _tex != null else NAN
 
 
