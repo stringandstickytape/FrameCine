@@ -1,0 +1,20 @@
+{
+	"name": "Record deck",
+	"description": "A turntable from above: the record turns with the cover on its label and the lamp's wedges in its grooves, a row of strobe dots stands still under the lamp, the arm tracks slowly in, and a magnifier shows the groove under the needle with its walls wiggling to the sound itself.",
+	"area": "backdrop",
+	"order": 180,
+	"params": {
+		"zoom": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Record size"},
+		"sheen": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Sheen"},
+		"show_loupe": {"type": "bool", "default": true, "label": "Magnifier"},
+		"wood": {"type": "colour", "default": "#5c3821", "label": "Plinth"},
+		"record": {"type": "colour", "default": "#080809", "label": "Vinyl"},
+		"label": {"type": "colour", "default": "#d93326", "label": "Label (no cover)"},
+		"metal": {"type": "colour", "default": "#c7c9cc", "label": "Metal"}
+	},
+	"presets": {
+		"Red vinyl": {"record": "#8c0d0d", "sheen": 0.8},
+		"Silver": {"wood": "#a6a8ab", "metal": "#e0e2e6", "label": "#1f4fa6"},
+		"Black": {"wood": "#17171a", "metal": "#8f8a80", "label": "#e6c34d"}
+	}
+}

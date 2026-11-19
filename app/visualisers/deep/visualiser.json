@@ -1,0 +1,20 @@
+{
+	"name": "Deep sea",
+	"description": "Jellyfish drifting through dark water by their own light: each pulls in its bell with its own part of the spectrum, the lights round its margin glow with bands of their own, tentacles trail and sway, marine snow sinks past and plankton glints with the high notes.",
+	"area": "backdrop",
+	"order": 160,
+	"params": {
+		"pulse": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Pulse"},
+		"speed": {"type": "float", "min": 0.1, "max": 2.0, "default": 0.5, "label": "Speed"},
+		"snow": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Marine snow"},
+		"reach": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Tentacles"},
+		"glow_a": {"type": "colour", "default": "#4de6ff", "label": "Glow"},
+		"glow_b": {"type": "colour", "default": "#ff59cc", "label": "Second glow"},
+		"water": {"type": "colour", "default": "#05172b", "label": "Water"}
+	},
+	"presets": {
+		"Ember": {"glow_a": "#ff8a3d", "glow_b": "#ffd24d", "water": "#140805"},
+		"Abyss": {"glow_a": "#7a5cff", "glow_b": "#3dffb0", "water": "#04030f", "snow": 0.8},
+		"Lagoon": {"glow_a": "#b3fff0", "glow_b": "#80b3ff", "water": "#0d3b4d", "reach": 1.0}
+	}
+}

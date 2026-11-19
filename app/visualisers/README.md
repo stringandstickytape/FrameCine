@@ -6,7 +6,8 @@ here. The player watches this folder and shows your change within a second. Noth
 
 - Your visualisers go in: `<<USER>>` (this folder; one sub-folder each)
 - The player's own, to read and copy: `<<APP>>` (`bars`, `mirror`, `line`, `radial`, `aurora`, `halftone`, `tiles`,
-  `runner`, `sakura`, `ink`, `planet`, `rose`, `clockwork`, `chrome`, `circuit`)
+  `runner`, `sakura`, `ink`, `planet`, `rose`, `clockwork`, `chrome`, `circuit`, `deep`, `cymatics`, `vinyl`,
+  `fireworks`, `rain`)
 
 This file is rewritten by the player when it changes. Keep your notes elsewhere.
 
@@ -109,7 +110,7 @@ write `previous` back unchanged.
     gentle swells.
   - Flicker over an area: every part of the picture is compared with its own recent average. Patterns that swap or
     flicker (checkerboards, stripes, strobing regions) are dimmed where they flicker, more the larger the area.
-    Moving shapes and bars are fine; the player's own fifteen are never dimmed on the test drums.
+    Moving shapes and bars are fine; the player's own twenty are never dimmed on the test drums.
   Design for that: move shapes, change colour, pulse sizes; avoid swapping or strobing patterns. `visualiser_status`
   shows `flash_limit`: `dimming`, and `flicker` against `flicker_max`.
 - **The GPU budget.** A new or changed visualiser first draws a few frames small, timed: if it would take more than
@@ -141,4 +142,9 @@ that plays itself, no memory needed), `sakura` for many falling things at one pe
 For 3D: `planet` and `chrome` ray trace spheres and planes exactly (no marching): shadows, reflections, a ring plane.
 `rose` builds shapes in polar sectors (one shape, repeated round a wheel) and glass pieces from Voronoi cells;
 `clockwork` meshes gears (each wheel's turn worked out from the one before) and steps on beats; `circuit` lays out
-tracks in lanes with light running along them, and prints labels with a 3 x 5 pixel font.
+tracks in lanes with light running along them, and prints labels with a 3 x 5 pixel font. `deep` draws translucent
+shapes that glow (jellyfish) and lines that sway along their length; `cymatics` keeps lines an even width with a
+field's value over its slope, and draws single grains of sand one per cell; `vinyl` uses the cover as a turning
+label and draws `waveform` as the walls of a groove; `fireworks` draws many particles by working out only the
+nearest one on each ring; `rain` draws its background once per pixel, sharp or soft depending on what is in front
+(a drop is a lens).

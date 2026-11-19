@@ -1,0 +1,20 @@
+{
+	"name": "Rain",
+	"description": "A city at night through a wet, misted window: out-of-focus windows, street lamps and passing cars glow as discs, each brightening with its part of the spectrum (low notes on the left), a neon sign follows the middle; beads sit on the glass and drops run down in wandering trails, each one a little lens with the city sharp and upside down inside.",
+	"area": "backdrop",
+	"order": 200,
+	"params": {
+		"rain": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Rain"},
+		"mist": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Mist"},
+		"speed": {"type": "float", "min": 0.1, "max": 2.0, "default": 0.5, "label": "Speed"},
+		"city_a": {"type": "colour", "default": "#ffa140", "label": "Warm lights"},
+		"city_b": {"type": "colour", "default": "#4da6ff", "label": "Cool lights"},
+		"neon": {"type": "colour", "default": "#ff3d8c", "label": "Neon"},
+		"sky": {"type": "colour", "default": "#0d1221", "label": "Sky"}
+	},
+	"presets": {
+		"Neon": {"city_a": "#ff3dd2", "city_b": "#3dffe0", "neon": "#ffe14d"},
+		"Sodium": {"city_a": "#ff9a2e", "city_b": "#ffc266", "neon": "#ff5a2e", "sky": "#140d08"},
+		"Downpour": {"rain": 1.0, "mist": 0.8, "speed": 1.2}
+	}
+}

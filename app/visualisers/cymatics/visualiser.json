@@ -1,0 +1,20 @@
+{
+	"name": "Cymatics",
+	"description": "Chladni plates: sand on a shaken square plate and a round one gathers on the lines that stand still, and slides into a new figure as each plate steps to its next mode; the bass ripples the lamp's reflection in the shape of the mode, the round plate goes with the high notes, and a signal generator shows the tone.",
+	"area": "backdrop",
+	"order": 170,
+	"params": {
+		"speed": {"type": "float", "min": 0.1, "max": 2.0, "default": 0.5, "label": "Speed"},
+		"shake": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Shake"},
+		"grain_size": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Grain size"},
+		"plate": {"type": "colour", "default": "#1c1d21", "label": "Plate"},
+		"sand_colour": {"type": "colour", "default": "#e8dbbf", "label": "Sand"},
+		"cloth": {"type": "colour", "default": "#170d0f", "label": "Cloth"},
+		"display": {"type": "colour", "default": "#ffa633", "label": "Display"}
+	},
+	"presets": {
+		"Brass": {"plate": "#8c6a33", "sand_colour": "#f5f2eb", "cloth": "#0d1a14"},
+		"Steel": {"plate": "#9ca3ab", "sand_colour": "#2b2722", "cloth": "#141a24", "display": "#59ff8c"},
+		"Blue": {"plate": "#13284d", "sand_colour": "#e6f0ff", "cloth": "#0a0a0d", "display": "#66d9ff"}
+	}
+}

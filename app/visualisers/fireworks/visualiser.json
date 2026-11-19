@@ -1,0 +1,21 @@
+{
+	"name": "Fireworks",
+	"description": "A display over a harbour at night: shells rise from the water and burst into peonies, crackling chrysanthemums, gold willows and rings, each swelling and brightening with its own part of the spectrum, lighting the smoke over the town and stretching down the rippled water; loud music fills the sky.",
+	"area": "backdrop",
+	"order": 190,
+	"params": {
+		"launches": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Launches"},
+		"burst_size": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Burst size"},
+		"smoke": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Smoke"},
+		"colour_a": {"type": "colour", "default": "#ff3d59", "label": "First colour"},
+		"colour_b": {"type": "colour", "default": "#3dc7ff", "label": "Second colour"},
+		"colour_c": {"type": "colour", "default": "#b3ff4d", "label": "Third colour"},
+		"gold": {"type": "colour", "default": "#ffc457", "label": "Willow"},
+		"night": {"type": "colour", "default": "#0a1230", "label": "Night"}
+	},
+	"presets": {
+		"Gold": {"colour_a": "#ffd98a", "colour_b": "#ffb347", "colour_c": "#fff2d9"},
+		"Winter": {"colour_a": "#e6f2ff", "colour_b": "#80b3ff", "colour_c": "#c7a6ff", "gold": "#d9e6ff", "night": "#0d1426"},
+		"Festival": {"launches": 1.0, "burst_size": 0.8, "colour_c": "#ff59e6"}
+	}
+}

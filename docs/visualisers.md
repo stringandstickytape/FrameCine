@@ -107,8 +107,13 @@ its 0.5 s average, louder than -40 dBFS, at least 0.25 s after the last. It is a
 | `clockwork` | backdrop | a watch movement from the back: barrel, centre, third and fourth wheels each turning the next one's pinion with the teeth properly meshed (each wheel's turn worked out from the one before), ending in the escape wheel; the pallet lever rocks on every beat and the train steps half a tooth, turning on `drive` between beats. The balance swings wider when it is loud, its hairspring breathing. Bridges with striped finish and polished bevels; ruby jewels glowing each with a part of the spectrum; blued screws (presets Gilt, Black, Rose gold) |
 | `chrome` | backdrop | ray traced in the manner of the early ray tracers: a mirror sphere on a chequered floor (filtered over each pixel's footprint, so far tiles turn grey instead of shimmering), seven coloured metal spheres circling it, each bouncing with its band; up to three bounces, soft shadows, the floor darkened under the spheres. A ring of pillars on the horizon is the spectrum again, seen in every reflection; the camera circles on `drive` (presets Sunset, Night, Gold) |
 | `circuit` | backdrop | a circuit board seen close: copper tracks in lanes under a glossy mask, a bus at a time jogging across at 45 degrees, vias where tracks end; chips with legs on the lanes and printed labels, a big lidded processor, small resistors and capacitors. Bursts of light run along the tracks, each lane a part of the spectrum (low notes at the bottom); a column of LEDs is a level meter (presets Black, Blue, Purple) |
+| `deep` | backdrop | jellyfish drifting through dark water by their own light, carried across by the current on `drive`, the near ones faster. Each bell is a thin glassy shell (brighter where you look through more of it), with canals running down it like meridians, four horseshoe gonads and a ring of lights round the margin; tentacles trail and sway, frilled mouth arms hang below. Each jellyfish pulls in its bell with its own band (a fast stroke on a hit, a slow relaxing after); each margin light glows with a band of its own; marine snow sinks past in three depths; plankton glints with the high notes (presets Ember, Abyss, Lagoon) |
+| `cymatics` | backdrop | Chladni plates: a square plate and a round one, bolted at the middle, under a lamp on dark cloth. Sand lies in ridges of single lit grains on the lines that stand still (worked out from each mode's field and its slope, so the lines keep their width); each plate steps to its next mode on `drive`, the lines sliding and blurring into the new figure, sharper when it is loud. The bass shakes the square plate (the lamp's reflection ripples in the shape of the mode, sand hangs as a haze where it moves most); the round plate goes with the high notes; a signal generator shows each mode's tone on seven-segment digits (presets Brass, Steel, Blue) |
+| `vinyl` | backdrop | a record deck from above: the record turns at 33 1/3 with the cover on its label (a printed label without one), the lamp's two bright wedges in its grooves broken by the gaps between tracks; one row of strobe dots stands still under the lamp; the arm tracks inwards over twenty minutes; a magnifier shows the groove under the needle, its walls wiggling with the waveform itself, louder sound cutting wider (presets Red vinyl, Silver, Black) |
+| `fireworks` | backdrop | a display over a harbour at night: shells rise from the water and burst into peonies, chrysanthemums (crackling with the high notes at the end), gold willows and tilted rings, each a sphere of stars drawn as three rings (only the star nearest in angle on each ring is evaluated); each shell swells and brightens with its band; the bursts light the smoke over the town and stretch down the rippled water. Shells go up on `drive`, so loud music fills the sky (presets Gold, Winter, Festival) |
+| `rain` | backdrop | a city at night through a wet, misted window: out-of-focus windows, street lamps and cars passing both ways glow as discs, each window brighter with the band at its place across (low notes on the left), a neon sign following the middle; beads sit on the glass and grow and dry, drops run down in wandering paths on `drive`, wiping clear trails and leaving beads. Each drop is a lens: inside it the city is sharp and upside down (the city is drawn once per pixel, sharp or blurred by what is in front of it) (presets Neon, Sodium, Downpour) |
 
-The four old styles were drawn in GDScript; they are now shaders that look the same. None of the fifteen keeps any
+The four old styles were drawn in GDScript; they are now shaders that look the same. None of the twenty keeps any
 state on the CPU: everything is worked out from the sound, the clocks and their parameters (and for `ink`, its own
 last frame), so a seek, a pause or a restart never leaves them in a strange state.
 
@@ -153,10 +158,14 @@ read back to the CPU:
 - **Measured** (`test_visualisers.gd`, lavapipe): a black and white checkerboard swapping every third frame changes
   0.333 of luminance a frame in the picture and 0.015 on the card; the old whole-picture rule alone did nothing to it
   (its gain stays 1). With only the left half swapping, the left half shows 0.031 and the right half keeps its
-  brightness (0.214). The app's own visualisers on the drums test signal reach at most 0.0165 (halftone), 0.0112
-  (sakura), 0.0107 (tiles), 0.0098 (mirror), 0.0084 (bars), 0.0049 (clockwork), 0.0031 (chrome), 0.0024 (line),
-  0.0023 (aurora), 0.0015 (circuit), 0.0013 (runner), 0.0004 (radial), 0.0002 (planet) and about 0 (ink, rose):
-  never dimmed. The figures vary from run to run (halftone measured 0.0116 in another). Over longer runs, chrome
+  brightness (0.214). The app's own visualisers on the drums test signal reach at most 0.0168 (halftone), 0.0111
+  (sakura), 0.0095 (bars), 0.0086 (mirror), 0.0050 (clockwork), 0.0030 (chrome), 0.0028 (deep), 0.0027 (line),
+  0.0021 (fireworks), 0.0015 (circuit), 0.0014 (runner), 0.0010 (radial), 0.0008 (rain), 0.0006 (aurora), 0.0005
+  (vinyl), 0.0002 (planet) and about 0 (ink, rose, cymatics). The figures vary from run to run (halftone measured
+  0.0116 in another). Tiles varies most: 0.0107, 0.0158, 0.0176 and once 0.0202 in four runs, when one of its twelve
+  samples was dimmed a little and the test failed; the runs before and after passed. Its bold shapes turn a quarter
+  in the 0.3 s of a beat's fall, about the length of the limit's average, so how many turn together on a sample
+  decides it. Over longer runs, chrome
   reached 0.015 to 0.017 and circuit 0.016 (on the cover clip, before its bursts were dimmed a little): chrome's
   chequered floor sliding as the camera turns, and its horizon pillars reflected in the floor, were most of it; a
   less shiny floor, a slower camera and softer pillars brought it there. Busier music may bring mirror, bars, tiles,
@@ -298,10 +307,10 @@ of its own. Real motion is 10 frames a second and more, so nothing else is caugh
 
 ## Tested
 
-`tests/test_visualisers.gd`, 134 checks, with xvfb and lavapipe (headless: the 64 without the host and the
+`tests/test_visualisers.gd`, 149 checks, with xvfb and lavapipe (headless: the 69 without the host and the
 watcher).
 
-- The registry: the fifteen in order, no errors, the areas, the parameters read with their types, and every parameter
+- The registry: the twenty in order, no errors, the areas, the parameters read with their types, and every parameter
   a uniform of its shader.
 - Ten broken user folders, each left out with its reason; a good one in, its out-of-range default clamped; a user
   folder may not take an app id; a user's shader loads from its text.
@@ -310,7 +319,7 @@ watcher).
   textures, the effects on and off the bus with two holders (one freed), the delay's range.
 - `main.features`: the list, a parameter clamped and kept in the settings, unknown ones refused, a preset, reset,
   choosing by id.
-- The host: each of the fifteen starts and draws; a steady grey picture is untouched and the floor's two bytes give
+- The host: each of the twenty starts and draws; a steady grey picture is untouched and the floor's two bytes give
   back its luminance (0.2159 for 0.214); a black and white strobe changing every frame swings at most 0.078 on the
   card; black to white stays under the rise limit after 1.4 s; a new visualiser shows at its own brightness at once.
   Off, its viewports stop and it is not fed; on again, it starts afresh.
@@ -320,7 +329,7 @@ watcher).
 - Flicker over an area: a swapping checkerboard dimmed (0.333 of change a frame in the picture, 0.015 shown, the
   whole-picture gain untouched); half the card swapping dims that half only. The first frames' timing (test timings
   given to it): cheap at full size, about 3 ms at 75 %, about 62 ms refused with the one before back and the reason.
-  The app's fifteen on the drums test signal on the real card, never dimmed (figures under "The flash limit").
+  The app's twenty on the drums test signal on the real card, never dimmed (figures under "The flash limit").
 - Making them: a test signal's WAV (header, length, sound or none); the nine commands open to the assistant at their
   levels; the README in the user folder with this machine's paths; the watcher sees a new folder; a compile error
   comes back with its line (5, after the include on line 2) and words; the last good shader kept; a broken manifest
@@ -335,7 +344,7 @@ watcher).
 
 `tests/test_music.gd` (25 checks: an `.mp4` holding only sound plays as music; a 1 frame a second video shows as the
 card with its picture dimmed behind it, its title and the visualiser, and the switch turns it into a video and back)
-checks all sixteen styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
+checks all twenty-one styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
 `feedback` is given 90 frames to build its picture up). Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
 second; the old fixed 1.5 s wait sat on that edge). `test_env_signals` still passes. `test_react` passes as before:
 its flash-size check fails on main too (it expects more than the room schema's swing ceiling allows; not this work).
@@ -346,14 +355,18 @@ its flash-size check fails on main too (it expects more than the room schema's s
   right frame, but the audio clock comes back seconds ahead. An engine matter (MediaSource audio with 1 frame a
   second of video), seen in tests; not fixed here.
 - **The acceptance test:** a fresh Claude Code session on the headset, told only to make a visualiser.
-- **GPU time on the headset of the later ten.** Halftone, tiles, runner, sakura and ink were put on the headset on
-  2026-11-18 and looked right there; their GPU time there has not been read yet. Planet, rose, clockwork, chrome and
-  circuit have run only under lavapipe so far. There, on the drums, a frame took 3.3 ms (tiles), 2.6 (runner), 4.5
-  (halftone), 7.2 (sakura), 9 to 11 (ink), 7.5 (planet), 7 (rose), 6 (clockwork), 9 (chrome) and 8.5 (circuit),
+- **GPU time on the headset of the later fifteen.** Halftone, tiles, runner, sakura and ink were put on the headset on
+  2026-11-18 and looked right there; their GPU time there has not been read yet. Planet, rose, clockwork, chrome,
+  circuit, deep, cymatics, vinyl, fireworks and rain have run only under lavapipe so far. There, on the drums, a frame
+  took 3.3 ms (tiles), 2.6 (runner), 4.5 (halftone), 7.2 (sakura), 9 to 11 (ink), 7.5 (planet), 7 (rose), 6
+  (clockwork), 9 (chrome), 8.5 (circuit), 9.7 (deep), 3.8 (cymatics), 4.9 (vinyl), 8.5 (fireworks) and 4.4 (rain),
   against 3.8 for aurora (10 with a cover), which took 0.58 ms on the headset. If the ratio holds, all are under the
   2 ms budget there; the probe scales any that are not. Clockwork first took 20 ms: every pixel drew all twelve
   balance screws and evaluated the bridges four times; it now draws only the nearest screw and takes the bridges'
-  slope from screen derivatives. Rose took 18 ms while its rays marched 14 steps through the window.
+  slope from screen derivatives. Rose took 18 ms while its rays marched 14 steps through the window. Fireworks took
+  13 ms while it went over its shells twice (once for their light, once for their stars) and hashed each shell three
+  times; one pass and one hash brought it to 8.5. Deep's tentacles turn each one's place on from the last instead of
+  calling sin and cos for each.
 - **More of the app's own.** Ideas not yet made: a Game of Life seeded by beats (with `feedback`, stepping slowly: a
   fast one would be dimmed as flicker), trails, reaction-diffusion, a starfield, a kaleidoscope of the cover.
 - **Surround.**
