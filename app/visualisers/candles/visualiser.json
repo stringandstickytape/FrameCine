@@ -1,0 +1,20 @@
+{
+	"name": "Candles",
+	"description": "Pillar candles burning on a polished table in a dark room: each flame grows and brightens with its own part of the spectrum and wavers on its own, all lean in the draught of the bass; the wax glows through round its pool, drips run down, smoke curls up, and the flames light the wall and lie in the table.",
+	"area": "backdrop",
+	"order": 230,
+	"params": {
+		"flame": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Flame size"},
+		"draught": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Draught"},
+		"glow": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Glow"},
+		"wax": {"type": "colour", "default": "#ede0c7", "label": "Wax"},
+		"fire": {"type": "colour", "default": "#ff9e38", "label": "Flame"},
+		"wall": {"type": "colour", "default": "#6b5242", "label": "Wall"},
+		"table": {"type": "colour", "default": "#331c12", "label": "Table"}
+	},
+	"presets": {
+		"Red wax": {"wax": "#b31f1f", "wall": "#4d3a33"},
+		"Church": {"wax": "#f5f0e6", "wall": "#8c8579", "table": "#2b2620", "glow": 0.8},
+		"Blue": {"wax": "#3355a6", "fire": "#ffb366", "wall": "#26304d", "table": "#141826"}
+	}
+}

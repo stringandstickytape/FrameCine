@@ -1,0 +1,21 @@
+{
+	"name": "Contour map",
+	"description": "A printed topographic map: nine summits rise with their parts of the spectrum so the contour lines crowd and spread with the music, the tide comes in and goes out on the music's clock, and a dashed route runs from summit to summit across shaded, tinted land with water-lines along the coast.",
+	"area": "backdrop",
+	"order": 210,
+	"params": {
+		"relief": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Relief"},
+		"tide": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Tide"},
+		"lines": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Contour lines"},
+		"sea": {"type": "colour", "default": "#8cbdd6", "label": "Sea"},
+		"lowland": {"type": "colour", "default": "#a8c98a", "label": "Lowland"},
+		"upland": {"type": "colour", "default": "#d1ad75", "label": "Upland"},
+		"ink": {"type": "colour", "default": "#734a29", "label": "Contours"},
+		"paper": {"type": "colour", "default": "#f5edd9", "label": "Paper"}
+	},
+	"presets": {
+		"Old chart": {"sea": "#c9c2a1", "lowland": "#e3d6b0", "upland": "#c7a878", "ink": "#5c3d24", "paper": "#ede0bf"},
+		"Night": {"sea": "#1a2b45", "lowland": "#26404a", "upland": "#4d5e66", "ink": "#b3e0ff", "paper": "#c7d6e6"},
+		"Ice": {"sea": "#3d6e99", "lowland": "#e6eef2", "upland": "#b8cad6", "ink": "#4d6680", "paper": "#f7fbff"}
+	}
+}

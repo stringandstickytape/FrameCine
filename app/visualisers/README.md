@@ -7,7 +7,7 @@ here. The player watches this folder and shows your change within a second. Noth
 - Your visualisers go in: `<<USER>>` (this folder; one sub-folder each)
 - The player's own, to read and copy: `<<APP>>` (`bars`, `mirror`, `line`, `radial`, `aurora`, `halftone`, `tiles`,
   `runner`, `sakura`, `ink`, `planet`, `rose`, `clockwork`, `chrome`, `circuit`, `deep`, `cymatics`, `vinyl`,
-  `fireworks`, `rain`)
+  `fireworks`, `rain`, `topo`, `koi`, `candles`, `paper`, `bubbles`)
 
 This file is rewritten by the player when it changes. Keep your notes elsewhere.
 
@@ -94,7 +94,9 @@ And functions: `band(x)` (smoothed level at x, 0 low .. 1 high), `band_now(x)`, 
 Godot shader notes: no `#version`, no `main()`, no `gl_FragCoord` (use `UV` and `size`, or `FRAGCOORD`); functions
 must be defined before use; `float` literals need a point (`1.0`); `mod`, `fract`, `mix`, `smoothstep`, `atan(y, x)`
 work as in GLSL. `PI`, `TAU` and `E` are built in (defining your own, even a local variable `E`, is an error), and so
-is `dot()` (do not name a uniform `dot`). Read `visualiser.gdshaderinc` in `<<APP>>` for the exact declarations.
+is `dot()` (do not name a uniform `dot`). The include's names (`cover`, `size`, `level`, `beat`, `mid` and the rest
+in the table) are taken too, for your functions as well as your variables; keep clear of GLSL's own function names
+(`round`, `step`) as well. Read `visualiser.gdshaderinc` in `<<APP>>` for the exact declarations.
 
 With `feedback`: `previous` has 8 bits a channel, so a slow fade or a slow drift rounds away to nothing. Add a little
 noise (half a step, `(hash - 0.5) / 255.0`) to what you write and it survives on average; `ink` does. Multiply changes
@@ -110,7 +112,7 @@ write `previous` back unchanged.
     gentle swells.
   - Flicker over an area: every part of the picture is compared with its own recent average. Patterns that swap or
     flicker (checkerboards, stripes, strobing regions) are dimmed where they flicker, more the larger the area.
-    Moving shapes and bars are fine; the player's own twenty are never dimmed on the test drums.
+    Moving shapes and bars are fine; the player's own twenty-five are never dimmed on the test drums.
   Design for that: move shapes, change colour, pulse sizes; avoid swapping or strobing patterns. `visualiser_status`
   shows `flash_limit`: `dimming`, and `flicker` against `flicker_max`.
 - **The GPU budget.** A new or changed visualiser first draws a few frames small, timed: if it would take more than
@@ -147,4 +149,7 @@ shapes that glow (jellyfish) and lines that sway along their length; `cymatics` 
 field's value over its slope, and draws single grains of sand one per cell; `vinyl` uses the cover as a turning
 label and draws `waveform` as the walls of a groove; `fireworks` draws many particles by working out only the
 nearest one on each ring; `rain` draws its background once per pixel, sharp or soft depending on what is in front
-(a drop is a lens).
+(a drop is a lens). `topo` draws contour lines of an even width from `fwidth` of a height; `koi` bends each fish
+along the curve of its path; `candles` works out what several loops share once, into an array; `paper` stacks
+layers that each throw a shadow on the ones behind (test the same shape at a point moved towards the light), and
+skips layers that cannot show; `bubbles` colours thin films by their thickness.

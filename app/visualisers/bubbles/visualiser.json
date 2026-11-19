@@ -1,0 +1,20 @@
+{
+	"name": "Bubbles",
+	"description": "Soap bubbles drifting on the breeze across a sunny garden: rainbow bands swirl over each film as it flows and drains, each large bubble wobbles with its own part of the spectrum and its colours brighten with it, the sky shows in each as a bright window, and small bubbles glint with the high notes.",
+	"area": "backdrop",
+	"order": 250,
+	"params": {
+		"amount": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Bubbles"},
+		"wobble": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Wobble"},
+		"speed": {"type": "float", "min": 0.1, "max": 2.0, "default": 0.5, "label": "Breeze"},
+		"sky": {"type": "colour", "default": "#9ed1f2", "label": "Sky"},
+		"garden": {"type": "colour", "default": "#5c9e4a", "label": "Garden"},
+		"blossom": {"type": "colour", "default": "#fab3cc", "label": "Blossom"},
+		"sunlight": {"type": "colour", "default": "#fff7e0", "label": "Sunlight"}
+	},
+	"presets": {
+		"Evening": {"sky": "#f2a873", "garden": "#3d5233", "blossom": "#ffd18c", "sunlight": "#ffd9a6"},
+		"Dark": {"sky": "#141a26", "garden": "#141f1a", "blossom": "#33263d", "sunlight": "#e6f2ff", "amount": 1.0},
+		"Meadow": {"sky": "#c7e6ff", "garden": "#8cbf4d", "blossom": "#fff27a"}
+	}
+}

@@ -1,0 +1,20 @@
+{
+	"name": "Paper diorama",
+	"description": "A landscape cut from six layers of coloured paper set in a box, each throwing a soft shadow on the ones behind: each layer's hills rise and fall with its part of the spectrum (low notes at the front), reeds sway with the bass, a paper sun glows with the level, clouds and birds go by on the music's clock.",
+	"area": "backdrop",
+	"order": 240,
+	"params": {
+		"hills": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Hills"},
+		"sway": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Sway"},
+		"shadows": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Shadows"},
+		"near": {"type": "colour", "default": "#291f4d", "label": "Front layer"},
+		"far": {"type": "colour", "default": "#f29e8c", "label": "Back layer"},
+		"sky": {"type": "colour", "default": "#ffd9a8", "label": "Sky"},
+		"sun": {"type": "colour", "default": "#fff5d1", "label": "Sun"}
+	},
+	"presets": {
+		"Forest": {"near": "#123320", "far": "#a6d9a0", "sky": "#e6f5d9", "sun": "#fff7cc"},
+		"Winter": {"near": "#2b3d59", "far": "#dfe8f2", "sky": "#f2f6fa", "sun": "#ffffff"},
+		"Night": {"near": "#0a0d1a", "far": "#3d4a73", "sky": "#1f2645", "sun": "#f2eccf"}
+	}
+}

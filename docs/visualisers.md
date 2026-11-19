@@ -112,8 +112,13 @@ its 0.5 s average, louder than -40 dBFS, at least 0.25 s after the last. It is a
 | `vinyl` | backdrop | a record deck from above: the record turns at 33 1/3 with the cover on its label (a printed label without one), the lamp's two bright wedges in its grooves broken by the gaps between tracks; one row of strobe dots stands still under the lamp; the arm tracks inwards over twenty minutes; a magnifier shows the groove under the needle, its walls wiggling with the waveform itself, louder sound cutting wider (presets Red vinyl, Silver, Black) |
 | `fireworks` | backdrop | a display over a harbour at night: shells rise from the water and burst into peonies, chrysanthemums (crackling with the high notes at the end), gold willows and tilted rings, each a sphere of stars drawn as three rings (only the star nearest in angle on each ring is evaluated); each shell swells and brightens with its band; the bursts light the smoke over the town and stretch down the rippled water. Shells go up on `drive`, so loud music fills the sky (presets Gold, Winter, Festival) |
 | `rain` | backdrop | a city at night through a wet, misted window: out-of-focus windows, street lamps and cars passing both ways glow as discs, each window brighter with the band at its place across (low notes on the left), a neon sign following the middle; beads sit on the glass and grow and dry, drops run down in wandering paths on `drive`, wiping clear trails and leaving beads. Each drop is a lens: inside it the city is sharp and upside down (the city is drawn once per pixel, sharp or blurred by what is in front of it) (presets Neon, Sodium, Downpour) |
+| `topo` | backdrop | a printed topographic map, folded and opened out: land tinted in steps by height and shaded from the north-west, brown contour lines kept one width with the height's screen slope (every fifth heavier, faded where they would crowd), sea with water-lines along the coast. Nine summits each rise with their band, so the contours crowd and spread; the tide comes and goes and the land drifts slowly on `drive`. A dashed route from summit to summit, a graticule, a scale border and a compass rose (presets Old chart, Night, Ice) |
+| `koi` | backdrop | a garden pond from above: koi of five kinds swim loops over pebbles, each body bent along the curve it swims (worked out from the path's curvature) with its tail beating as hard as its band; shadows on the stones; caustics brighter with the middle notes; drops land on `drive` and their rings bend the view below and catch the sun; lily pads, their flowers opening with the high notes (presets Clear, Evening, Autumn) |
+| `candles` | backdrop | pillar candles on a polished table in a dark room: each flame a teardrop (blue root, dark heart, yellow-white, orange edge) that wavers on its own, leans in the draught of the bass and grows with its band; wax glowing through round a pool of melted wax, drips, smoke, the wall lit by the flames, reflections in the table (presets Red wax, Church, Blue) |
+| `paper` | backdrop | a paper-cut diorama: six layers of hills, darkest at the front, each throwing a soft shadow on those behind and rising with its band (the front the low notes); pines, a cottage with a window lit by the middle notes, reeds swaying with the bass, a paper sun glowing with the level, clouds and birds on `drive`, the box swaying a little (presets Forest, Winter, Night) |
+| `bubbles` | backdrop | soap bubbles drifting across a garden out of focus: each film's colour is interference from its thickness (thinner at the top, swirling), reflecting most at the edge, with the sky's light as two windows and the garden bent through it; each large bubble's outline rings in two and three lobes with its band; small ones glint with the high notes (presets Evening, Dark, Meadow) |
 
-The four old styles were drawn in GDScript; they are now shaders that look the same. None of the twenty keeps any
+The four old styles were drawn in GDScript; they are now shaders that look the same. None of the twenty-five keeps any
 state on the CPU: everything is worked out from the sound, the clocks and their parameters (and for `ink`, its own
 last frame), so a seek, a pause or a restart never leaves them in a strange state.
 
@@ -158,11 +163,13 @@ read back to the CPU:
 - **Measured** (`test_visualisers.gd`, lavapipe): a black and white checkerboard swapping every third frame changes
   0.333 of luminance a frame in the picture and 0.015 on the card; the old whole-picture rule alone did nothing to it
   (its gain stays 1). With only the left half swapping, the left half shows 0.031 and the right half keeps its
-  brightness (0.214). The app's own visualisers on the drums test signal reach at most 0.0168 (halftone), 0.0111
-  (sakura), 0.0095 (bars), 0.0086 (mirror), 0.0050 (clockwork), 0.0030 (chrome), 0.0028 (deep), 0.0027 (line),
-  0.0021 (fireworks), 0.0015 (circuit), 0.0014 (runner), 0.0010 (radial), 0.0008 (rain), 0.0006 (aurora), 0.0005
-  (vinyl), 0.0002 (planet) and about 0 (ink, rose, cymatics). The figures vary from run to run (halftone measured
-  0.0116 in another). Tiles varies most: 0.0107, 0.0158, 0.0176 and once 0.0202 in four runs, when one of its twelve
+  brightness (0.214). The app's own visualisers on the drums test signal reach at most 0.0168 (halftone), 0.0114
+  (sakura), 0.0112 (mirror), 0.0110 (bars), 0.0050 (clockwork), 0.0044 (topo), 0.0043 (koi), 0.0035 (aurora),
+  0.0032 (chrome), 0.0029 (deep, line), 0.0025 (fireworks, bubbles), 0.0016 (circuit), 0.0012 (runner), 0.0008
+  (rain), 0.0005 (vinyl), 0.0004 (radial, paper), 0.0002 (planet) and about 0 (ink, rose, cymatics, candles). Over
+  longer runs topo reached 0.0187 (once dimmed a little) while its tide followed the bass and the land drifted 2.5
+  times faster; with the tide on the clock and a slower drift it measures 0.011 to 0.012. The figures vary from run to run (halftone measured
+  0.0116 in another). Tiles varies most: 0.0107, 0.0158, 0.0176 and once 0.0202 in four runs (and 0.0003 and 0.0004 in two later ones), when one of its twelve
   samples was dimmed a little and the test failed; the runs before and after passed. Its bold shapes turn a quarter
   in the 0.3 s of a beat's fall, about the length of the limit's average, so how many turn together on a sample
   decides it. Over longer runs, chrome
@@ -307,10 +314,10 @@ of its own. Real motion is 10 frames a second and more, so nothing else is caugh
 
 ## Tested
 
-`tests/test_visualisers.gd`, 149 checks, with xvfb and lavapipe (headless: the 69 without the host and the
+`tests/test_visualisers.gd`, 164 checks, with xvfb and lavapipe (headless: the 74 without the host and the
 watcher).
 
-- The registry: the twenty in order, no errors, the areas, the parameters read with their types, and every parameter
+- The registry: the twenty-five in order, no errors, the areas, the parameters read with their types, and every parameter
   a uniform of its shader.
 - Ten broken user folders, each left out with its reason; a good one in, its out-of-range default clamped; a user
   folder may not take an app id; a user's shader loads from its text.
@@ -319,7 +326,7 @@ watcher).
   textures, the effects on and off the bus with two holders (one freed), the delay's range.
 - `main.features`: the list, a parameter clamped and kept in the settings, unknown ones refused, a preset, reset,
   choosing by id.
-- The host: each of the twenty starts and draws; a steady grey picture is untouched and the floor's two bytes give
+- The host: each of the twenty-five starts and draws; a steady grey picture is untouched and the floor's two bytes give
   back its luminance (0.2159 for 0.214); a black and white strobe changing every frame swings at most 0.078 on the
   card; black to white stays under the rise limit after 1.4 s; a new visualiser shows at its own brightness at once.
   Off, its viewports stop and it is not fed; on again, it starts afresh.
@@ -329,7 +336,7 @@ watcher).
 - Flicker over an area: a swapping checkerboard dimmed (0.333 of change a frame in the picture, 0.015 shown, the
   whole-picture gain untouched); half the card swapping dims that half only. The first frames' timing (test timings
   given to it): cheap at full size, about 3 ms at 75 %, about 62 ms refused with the one before back and the reason.
-  The app's twenty on the drums test signal on the real card, never dimmed (figures under "The flash limit").
+  The app's twenty-five on the drums test signal on the real card, never dimmed (figures under "The flash limit").
 - Making them: a test signal's WAV (header, length, sound or none); the nine commands open to the assistant at their
   levels; the README in the user folder with this machine's paths; the watcher sees a new folder; a compile error
   comes back with its line (5, after the include on line 2) and words; the last good shader kept; a broken manifest
@@ -344,7 +351,7 @@ watcher).
 
 `tests/test_music.gd` (25 checks: an `.mp4` holding only sound plays as music; a 1 frame a second video shows as the
 card with its picture dimmed behind it, its title and the visualiser, and the switch turns it into a video and back)
-checks all twenty-one styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
+checks all twenty-six styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
 `feedback` is given 90 frames to build its picture up). Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
 second; the old fixed 1.5 s wait sat on that edge). `test_env_signals` still passes. `test_react` passes as before:
 its flash-size check fails on main too (it expects more than the room schema's swing ceiling allows; not this work).
@@ -355,9 +362,10 @@ its flash-size check fails on main too (it expects more than the room schema's s
   right frame, but the audio clock comes back seconds ahead. An engine matter (MediaSource audio with 1 frame a
   second of video), seen in tests; not fixed here.
 - **The acceptance test:** a fresh Claude Code session on the headset, told only to make a visualiser.
-- **GPU time on the headset of the later fifteen.** Halftone, tiles, runner, sakura and ink were put on the headset on
+- **GPU time on the headset of the later twenty.** Halftone, tiles, runner, sakura and ink were put on the headset on
   2026-11-18 and looked right there; their GPU time there has not been read yet. Planet, rose, clockwork, chrome,
-  circuit, deep, cymatics, vinyl, fireworks and rain have run only under lavapipe so far. There, on the drums, a frame
+  circuit, deep, cymatics, vinyl, fireworks, rain, topo, koi, candles, paper and bubbles have run only under lavapipe
+  so far. There, on the drums, a frame
   took 3.3 ms (tiles), 2.6 (runner), 4.5 (halftone), 7.2 (sakura), 9 to 11 (ink), 7.5 (planet), 7 (rose), 6
   (clockwork), 9 (chrome), 8.5 (circuit), 9.7 (deep), 3.8 (cymatics), 4.9 (vinyl), 8.5 (fireworks) and 4.4 (rain),
   against 3.8 for aurora (10 with a cover), which took 0.58 ms on the headset. If the ratio holds, all are under the
@@ -366,7 +374,12 @@ its flash-size check fails on main too (it expects more than the room schema's s
   slope from screen derivatives. Rose took 18 ms while its rays marched 14 steps through the window. Fireworks took
   13 ms while it went over its shells twice (once for their light, once for their stars) and hashed each shell three
   times; one pass and one hash brought it to 8.5. Deep's tentacles turn each one's place on from the last instead of
-  calling sin and cos for each.
+  calling sin and cos for each. Lavapipe's figures drift from session to session: in a later one aurora took 4.2
+  to 5 ms and chrome 17.6, and there topo took 7 to 8.8, koi 10.4 to 12, candles 8 to 9.3, paper 8.7 to 9.9 and
+  bubbles 7.4 to 9.1, so between 1.7 and 2.8 times aurora's time then. Koi skips a fish when the pixel is far from its head (one point on its path) and
+  leaves the fins out of its shadows (17 ms to 11); candles works each flame out once into an array (13 to 7.5);
+  paper skips the layers hidden behind a nearer one and those wholly below the pixel (14.5 to 12, 7.7 with a
+  cover).
 - **More of the app's own.** Ideas not yet made: a Game of Life seeded by beats (with `feedback`, stepping slowly: a
   fast one would be dimmed as flicker), trails, reaction-diffusion, a starfield, a kaleidoscope of the cover.
 - **Surround.**

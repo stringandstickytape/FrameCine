@@ -1,0 +1,21 @@
+{
+	"name": "Koi pond",
+	"description": "A garden pond from above: koi of five kinds swim slow loops over pebbles, their tails beating as hard as their parts of the spectrum; caustics shimmer with the middle notes, drops land on the music's clock and send rings out over the surface, and lily flowers open with the high notes.",
+	"area": "backdrop",
+	"order": 220,
+	"params": {
+		"swim": {"type": "float", "min": 0.1, "max": 2.0, "default": 0.5, "label": "Swimming"},
+		"ripples": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Ripples"},
+		"lilies": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Lily pads"},
+		"water": {"type": "colour", "default": "#1f4d47", "label": "Water"},
+		"stones": {"type": "colour", "default": "#736b5c", "label": "Pebbles"},
+		"koi_red": {"type": "colour", "default": "#e64d1a", "label": "Koi red"},
+		"flower": {"type": "colour", "default": "#fa99bf", "label": "Flowers"},
+		"leaf": {"type": "colour", "default": "#408033", "label": "Pads"}
+	},
+	"presets": {
+		"Clear": {"water": "#2e6b73", "stones": "#a39985"},
+		"Evening": {"water": "#14243d", "stones": "#4d4a52", "flower": "#fff2e6", "leaf": "#2e4d2e"},
+		"Autumn": {"water": "#3d3d1f", "leaf": "#8c6b26", "flower": "#ffd98c"}
+	}
+}
