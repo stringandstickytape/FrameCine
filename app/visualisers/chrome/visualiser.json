@@ -1,0 +1,22 @@
+{
+	"name": "Chrome",
+	"description": "A ray-traced scene: a mirror sphere on a chequered floor with seven coloured metal spheres circling it, each bouncing with its own part of the spectrum, and a ring of glowing pillars on the horizon, the spectrum again, seen in every reflection.",
+	"area": "backdrop",
+	"order": 140,
+	"params": {
+		"bounce": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Bounce"},
+		"speed": {"type": "float", "min": 0.0, "max": 2.0, "default": 0.5, "label": "Camera speed"},
+		"pillars": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.7, "label": "Horizon pillars"},
+		"tint_a": {"type": "colour", "default": "#f25a4d", "label": "First sphere colour"},
+		"tint_b": {"type": "colour", "default": "#4d8cf2", "label": "Last sphere colour"},
+		"floor_a": {"type": "colour", "default": "#d1ccc2", "label": "Light tiles"},
+		"floor_b": {"type": "colour", "default": "#33363d", "label": "Dark tiles"},
+		"sky_top": {"type": "colour", "default": "#2e5299", "label": "Sky"},
+		"sky_low": {"type": "colour", "default": "#bfad9e", "label": "Horizon"}
+	},
+	"presets": {
+		"Sunset": {"sky_top": "#3d2a6b", "sky_low": "#f2925a", "tint_a": "#f2c94d", "tint_b": "#e0457a"},
+		"Night": {"sky_top": "#05070f", "sky_low": "#1a2240", "floor_a": "#5a5f70", "floor_b": "#0d0f14", "pillars": 1.0},
+		"Gold": {"tint_a": "#e6b84d", "tint_b": "#c98a3a", "floor_a": "#e8e2d5", "floor_b": "#7a1f2b"}
+	}
+}

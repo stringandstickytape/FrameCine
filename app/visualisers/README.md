@@ -6,7 +6,7 @@ here. The player watches this folder and shows your change within a second. Noth
 
 - Your visualisers go in: `<<USER>>` (this folder; one sub-folder each)
 - The player's own, to read and copy: `<<APP>>` (`bars`, `mirror`, `line`, `radial`, `aurora`, `halftone`, `tiles`,
-  `runner`, `sakura`, `ink`)
+  `runner`, `sakura`, `ink`, `planet`, `rose`, `clockwork`, `chrome`, `circuit`)
 
 This file is rewritten by the player when it changes. Keep your notes elsewhere.
 
@@ -92,8 +92,8 @@ And functions: `band(x)` (smoothed level at x, 0 low .. 1 high), `band_now(x)`, 
 
 Godot shader notes: no `#version`, no `main()`, no `gl_FragCoord` (use `UV` and `size`, or `FRAGCOORD`); functions
 must be defined before use; `float` literals need a point (`1.0`); `mod`, `fract`, `mix`, `smoothstep`, `atan(y, x)`
-work as in GLSL. `PI` and `TAU` are built in (defining your own is an error), and so is `dot()` (do not name a
-uniform `dot`). Read `visualiser.gdshaderinc` in `<<APP>>` for the exact declarations.
+work as in GLSL. `PI`, `TAU` and `E` are built in (defining your own, even a local variable `E`, is an error), and so
+is `dot()` (do not name a uniform `dot`). Read `visualiser.gdshaderinc` in `<<APP>>` for the exact declarations.
 
 With `feedback`: `previous` has 8 bits a channel, so a slow fade or a slow drift rounds away to nothing. Add a little
 noise (half a step, `(hash - 0.5) / 255.0`) to what you write and it survives on average; `ink` does. Multiply changes
@@ -109,14 +109,16 @@ write `previous` back unchanged.
     gentle swells.
   - Flicker over an area: every part of the picture is compared with its own recent average. Patterns that swap or
     flicker (checkerboards, stripes, strobing regions) are dimmed where they flicker, more the larger the area.
-    Moving shapes and bars are fine; the player's own ten are never dimmed on the test drums.
+    Moving shapes and bars are fine; the player's own fifteen are never dimmed on the test drums.
   Design for that: move shapes, change colour, pulse sizes; avoid swapping or strobing patterns. `visualiser_status`
   shows `flash_limit`: `dimming`, and `flicker` against `flicker_max`.
 - **The GPU budget.** A new or changed visualiser first draws a few frames small, timed: if it would take more than
   2 ms a frame it starts at a lower resolution, and if far more (over 4 ms even at 35 %) it is refused and the one
   before stays (`visualiser_use` says so, with the estimate). While it runs, over 2 ms for a second steps it down.
   `visualiser_status` shows `gpu_ms` and `scale`. Long loops per pixel (many octaves of noise, ray-marching) cost the
-  most. Never write a loop that might not end: it would stall the headset's GPU.
+  most. Never write a loop that might not end: it would stall the headset's GPU. Draw a small part only near it (test
+  the distance first and skip the rest), and draw the nearest of a ring of things rather than all of them: `clockwork`
+  went from 20 ms to 6 under lavapipe that way.
 - **Comfort.** It is a screen in a room, so motion is fine; no strobing, no text that pretends to be the player.
 
 ## When something is wrong
@@ -136,3 +138,7 @@ cover (`texture(cover, uv)`); a grid of cells each lit by its own band; a slow k
 pushed by `beat`. Look at `aurora` in `<<APP>>` for a full-card one, `halftone` for the cover reworked, `tiles` for
 taking turns on beats (each tile its own number of beats), `runner` for a scene worked out from `drive` alone (a game
 that plays itself, no memory needed), `sakura` for many falling things at one per cell, and `ink` for `feedback`.
+For 3D: `planet` and `chrome` ray trace spheres and planes exactly (no marching): shadows, reflections, a ring plane.
+`rose` builds shapes in polar sectors (one shape, repeated round a wheel) and glass pieces from Voronoi cells;
+`clockwork` meshes gears (each wheel's turn worked out from the one before) and steps on beats; `circuit` lays out
+tracks in lanes with light running along them, and prints labels with a 3 x 5 pixel font.

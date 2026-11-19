@@ -1,0 +1,21 @@
+{
+	"name": "Clockwork",
+	"description": "A watch movement from the back: a gear train turning with the music, the escape wheel ticking on every beat, the balance swinging wider when it is loud, ruby jewels glowing each with its own part of the spectrum.",
+	"area": "backdrop",
+	"order": 130,
+	"params": {
+		"speed": {"type": "float", "min": 0.0, "max": 2.0, "default": 0.5, "label": "Speed"},
+		"swing": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Balance swing"},
+		"shine": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Shine"},
+		"gold": {"type": "colour", "default": "#d9a340", "label": "Wheels"},
+		"plate": {"type": "colour", "default": "#8c8f96", "label": "Plate and bridges"},
+		"steel": {"type": "colour", "default": "#c4c9d1", "label": "Steel"},
+		"jewel": {"type": "colour", "default": "#c41730", "label": "Jewels"},
+		"blued": {"type": "colour", "default": "#2747a8", "label": "Screws"}
+	},
+	"presets": {
+		"Gilt": {"plate": "#b8913f", "gold": "#e6c46e"},
+		"Black": {"plate": "#2e2e33", "gold": "#c9a24d", "steel": "#9aa0aa"},
+		"Rose gold": {"gold": "#d99a80", "plate": "#a6a2a0", "jewel": "#2a6fd1"}
+	}
+}

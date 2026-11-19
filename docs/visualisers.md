@@ -102,8 +102,13 @@ its 0.5 s average, louder than -40 dBFS, at least 0.25 s after the last. It is a
 | `runner` | tall | a pixel game that plays itself: the runner jumps crates and spikes on parabolas worked out from where it is, hops on every beat between them, collects coins (a sparkle rises), the world scrolling on `drive`; behind it a striped sun and a city whose towers are the spectrum; the score counts the beats (presets Day, Night, Chunky) |
 | `sakura` | backdrop | a night sky with the moon, hills, and a branch of blossom; petals drift past in four layers, blown along on `drive`, swayed by the middle notes; the blossom glints with the high notes, the moon glows with the level (presets Dusk, Snow, Storm) |
 | `ink` | backdrop | the first with `feedback`: ink in slowly turning water. Its last frame moves along a flow (the curl of a drifting noise, a whirl, a push outwards on a beat) and fades; six pourers circle, each pouring as loud as its sixth of the spectrum; a beat blooms a drop. Dithered half a step so slow motion survives 8 bits; paused, copied exactly. Colours from the cover or chosen (presets Milk, Lagoon, Still) |
+| `planet` | backdrop | a ringed gas giant, ray traced: the sphere, the ring plane and three moons, with the planet's shadow on the rings and the rings' and moons' shadows on the clouds, a thin lit atmosphere at the edge. The cloud bands flow in zonal winds (two copies taking turns so the flow never shears into streaks) and churn with the sound, low notes at the equator, high at the poles; the rings are a spectrum from the inner edge out; a storm turns in the south; lightning on the night side on a beat, aurora with the high notes (presets Ice giant, Tempest, Ochre) |
+| `rose` | backdrop | a gothic rose window from inside, the sun behind: stone tracery round a six-lobed oculus, twelve lancets, twelve eyes and twenty-four quatrefoils, glazed in pieces (Voronoi cells) between lead lines. Each lancet and roundel is a part of the spectrum going round the wheel; the oculus glows with the bass. The sun moves behind, sweeping the light over the glass; coloured rays spread into the room (each worked out from its angle: the openings on its line, no marching), with dust glinting with the high notes (presets Grisaille, Twilight, Plain light) |
+| `clockwork` | backdrop | a watch movement from the back: barrel, centre, third and fourth wheels each turning the next one's pinion with the teeth properly meshed (each wheel's turn worked out from the one before), ending in the escape wheel; the pallet lever rocks on every beat and the train steps half a tooth, turning on `drive` between beats. The balance swings wider when it is loud, its hairspring breathing. Bridges with striped finish and polished bevels; ruby jewels glowing each with a part of the spectrum; blued screws (presets Gilt, Black, Rose gold) |
+| `chrome` | backdrop | ray traced in the manner of the early ray tracers: a mirror sphere on a chequered floor (filtered over each pixel's footprint, so far tiles turn grey instead of shimmering), seven coloured metal spheres circling it, each bouncing with its band; up to three bounces, soft shadows, the floor darkened under the spheres. A ring of pillars on the horizon is the spectrum again, seen in every reflection; the camera circles on `drive` (presets Sunset, Night, Gold) |
+| `circuit` | backdrop | a circuit board seen close: copper tracks in lanes under a glossy mask, a bus at a time jogging across at 45 degrees, vias where tracks end; chips with legs on the lanes and printed labels, a big lidded processor, small resistors and capacitors. Bursts of light run along the tracks, each lane a part of the spectrum (low notes at the bottom); a column of LEDs is a level meter (presets Black, Blue, Purple) |
 
-The four old styles were drawn in GDScript; they are now shaders that look the same. None of the ten keeps any
+The four old styles were drawn in GDScript; they are now shaders that look the same. None of the fifteen keeps any
 state on the CPU: everything is worked out from the sound, the clocks and their parameters (and for `ink`, its own
 last frame), so a seek, a pause or a restart never leaves them in a strange state.
 
@@ -148,10 +153,14 @@ read back to the CPU:
 - **Measured** (`test_visualisers.gd`, lavapipe): a black and white checkerboard swapping every third frame changes
   0.333 of luminance a frame in the picture and 0.015 on the card; the old whole-picture rule alone did nothing to it
   (its gain stays 1). With only the left half swapping, the left half shows 0.031 and the right half keeps its
-  brightness (0.214). The app's own visualisers on the drums test signal reach at most 0.0132 (mirror), 0.0129
-  (tiles), 0.0116 (bars, halftone), 0.0111 (sakura), 0.0022 (line), 0.0014 (runner), 0.0008 (aurora), 0.0006
-  (radial) and about 0 (ink): never dimmed. Busier music may bring mirror, bars, tiles and halftone near the limit;
-  then their busiest cells dim a little. Halftone and tiles were tuned to get there: at first halftone's starburst
+  brightness (0.214). The app's own visualisers on the drums test signal reach at most 0.0165 (halftone), 0.0112
+  (sakura), 0.0107 (tiles), 0.0098 (mirror), 0.0084 (bars), 0.0049 (clockwork), 0.0031 (chrome), 0.0024 (line),
+  0.0023 (aurora), 0.0015 (circuit), 0.0013 (runner), 0.0004 (radial), 0.0002 (planet) and about 0 (ink, rose):
+  never dimmed. The figures vary from run to run (halftone measured 0.0116 in another). Over longer runs, chrome
+  reached 0.015 to 0.017 and circuit 0.016 (on the cover clip, before its bursts were dimmed a little): chrome's
+  chequered floor sliding as the camera turns, and its horizon pillars reflected in the floor, were most of it; a
+  less shiny floor, a slower camera and softer pillars brought it there. Busier music may bring mirror, bars, tiles,
+  halftone and chrome near the limit; then their busiest cells dim a little. Halftone and tiles were tuned to get there: at first halftone's starburst
   had hard ray edges (a dot on an edge swapped colour at once; 0.023 to 0.032) and tiles overshot further on each
   turn (0.020).
 - **A new visualiser starts at its own brightness.** Both rules start from the picture for the first 3 frames: a
@@ -289,10 +298,10 @@ of its own. Real motion is 10 frames a second and more, so nothing else is caugh
 
 ## Tested
 
-`tests/test_visualisers.gd`, 119 checks, with xvfb and lavapipe (headless: the 59 without the host and the
+`tests/test_visualisers.gd`, 134 checks, with xvfb and lavapipe (headless: the 64 without the host and the
 watcher).
 
-- The registry: the ten in order, no errors, the areas, the parameters read with their types, and every parameter
+- The registry: the fifteen in order, no errors, the areas, the parameters read with their types, and every parameter
   a uniform of its shader.
 - Ten broken user folders, each left out with its reason; a good one in, its out-of-range default clamped; a user
   folder may not take an app id; a user's shader loads from its text.
@@ -301,7 +310,7 @@ watcher).
   textures, the effects on and off the bus with two holders (one freed), the delay's range.
 - `main.features`: the list, a parameter clamped and kept in the settings, unknown ones refused, a preset, reset,
   choosing by id.
-- The host: each of the ten starts and draws; a steady grey picture is untouched and the floor's two bytes give
+- The host: each of the fifteen starts and draws; a steady grey picture is untouched and the floor's two bytes give
   back its luminance (0.2159 for 0.214); a black and white strobe changing every frame swings at most 0.078 on the
   card; black to white stays under the rise limit after 1.4 s; a new visualiser shows at its own brightness at once.
   Off, its viewports stop and it is not fed; on again, it starts afresh.
@@ -311,7 +320,7 @@ watcher).
 - Flicker over an area: a swapping checkerboard dimmed (0.333 of change a frame in the picture, 0.015 shown, the
   whole-picture gain untouched); half the card swapping dims that half only. The first frames' timing (test timings
   given to it): cheap at full size, about 3 ms at 75 %, about 62 ms refused with the one before back and the reason.
-  The app's ten on the drums test signal on the real card, never dimmed (figures under "The flash limit").
+  The app's fifteen on the drums test signal on the real card, never dimmed (figures under "The flash limit").
 - Making them: a test signal's WAV (header, length, sound or none); the nine commands open to the assistant at their
   levels; the README in the user folder with this machine's paths; the watcher sees a new folder; a compile error
   comes back with its line (5, after the include on line 2) and words; the last good shader kept; a broken manifest
@@ -326,7 +335,7 @@ watcher).
 
 `tests/test_music.gd` (25 checks: an `.mp4` holding only sound plays as music; a 1 frame a second video shows as the
 card with its picture dimmed behind it, its title and the visualiser, and the switch turns it into a video and back)
-checks all eleven styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
+checks all sixteen styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
 `feedback` is given 90 frames to build its picture up). Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
 second; the old fixed 1.5 s wait sat on that edge). `test_env_signals` still passes. `test_react` passes as before:
 its flash-size check fails on main too (it expects more than the room schema's swing ceiling allows; not this work).
@@ -337,10 +346,14 @@ its flash-size check fails on main too (it expects more than the room schema's s
   right frame, but the audio clock comes back seconds ahead. An engine matter (MediaSource audio with 1 frame a
   second of video), seen in tests; not fixed here.
 - **The acceptance test:** a fresh Claude Code session on the headset, told only to make a visualiser.
-- **The five new ones on the headset** (halftone, tiles, runner, sakura, ink): drawn and measured only under
-  lavapipe so far. There, on the drums, a frame took 3.3 ms (tiles), 2.6 (runner), 4.5 (halftone), 7.2 (sakura) and
-  9 to 11 (ink), against 3.8 for aurora (10 with a cover), which took 0.58 ms on the headset. If the ratio holds,
-  all are under the 2 ms budget there, ink and sakura nearest it; the probe scales any that are not.
+- **GPU time on the headset of the later ten.** Halftone, tiles, runner, sakura and ink were put on the headset on
+  2026-11-18 and looked right there; their GPU time there has not been read yet. Planet, rose, clockwork, chrome and
+  circuit have run only under lavapipe so far. There, on the drums, a frame took 3.3 ms (tiles), 2.6 (runner), 4.5
+  (halftone), 7.2 (sakura), 9 to 11 (ink), 7.5 (planet), 7 (rose), 6 (clockwork), 9 (chrome) and 8.5 (circuit),
+  against 3.8 for aurora (10 with a cover), which took 0.58 ms on the headset. If the ratio holds, all are under the
+  2 ms budget there; the probe scales any that are not. Clockwork first took 20 ms: every pixel drew all twelve
+  balance screws and evaluated the bridges four times; it now draws only the nearest screw and takes the bridges'
+  slope from screen derivatives. Rose took 18 ms while its rays marched 14 steps through the window.
 - **More of the app's own.** Ideas not yet made: a Game of Life seeded by beats (with `feedback`, stepping slowly: a
   fast one would be dimmed as flicker), trails, reaction-diffusion, a starfield, a kaleidoscope of the cover.
 - **Surround.**

@@ -20,7 +20,7 @@ const DevCommands := preload("res://scripts/dev/dev_commands.gd")
 const MusicSource := preload("res://scripts/play/music_source.gd")
 const W := preload("res://ui/pane_widgets.gd")
 const BUILTIN: Array[String] = ["bars", "mirror", "line", "radial", "aurora", "halftone", "tiles", "runner", "sakura",
-		"ink"]
+		"ink", "planet", "rose", "clockwork", "chrome", "circuit"]
 
 var _failures := 0
 var _checks := 0

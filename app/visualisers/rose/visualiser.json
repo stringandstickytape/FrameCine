@@ -1,0 +1,22 @@
+{
+	"name": "Rose window",
+	"description": "A gothic rose window with the sun behind it: twelve lancets and twenty-four roundels of coloured glass, each a part of the spectrum glowing as it plays, the middle with the bass; the light sweeps across the glass and falls into the room in coloured shafts.",
+	"area": "backdrop",
+	"order": 120,
+	"params": {
+		"glow": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.7, "label": "Glow"},
+		"beams": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Light shafts"},
+		"pieces": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Small pieces"},
+		"sun_speed": {"type": "float", "min": 0.0, "max": 2.0, "default": 0.5, "label": "Sun speed"},
+		"glass_a": {"type": "colour", "default": "#1a3dcc", "label": "First glass"},
+		"glass_b": {"type": "colour", "default": "#c71221", "label": "Second glass"},
+		"glass_c": {"type": "colour", "default": "#f5b32e", "label": "Gold glass"},
+		"glass_d": {"type": "colour", "default": "#1f9452", "label": "Green glass"},
+		"stone": {"type": "colour", "default": "#807363", "label": "Stone"}
+	},
+	"presets": {
+		"Grisaille": {"glass_a": "#c9cfc4", "glass_b": "#a8b0a6", "glass_c": "#e8dcae", "glass_d": "#8fa39a"},
+		"Twilight": {"glass_a": "#3b1f8f", "glass_b": "#8f1f6e", "glass_c": "#3fa8c9", "glass_d": "#5a2fb0", "beams": 0.8},
+		"Plain light": {"beams": 0.0, "pieces": 0.2}
+	}
+}
