@@ -127,12 +127,17 @@ its 0.5 s average, louder than -40 dBFS, at least 0.25 s after the last. It is a
 | `balloons` | backdrop | hot-air balloons over a valley at dawn: eight, each climbing with its band while its burner lights the cloth from inside; each envelope a teardrop marched inside its bounding sphere, patterned by gores and bands. The land is a marched height field: plots and hedges, woods, a river mirroring the sky, mist in the hollows with the bass, the balloons' shadows; `night` turns them into lanterns (presets Night glow, Autumn, Alpine) |
 | `crystals` | backdrop | (Crystal cave) a walk through a cave of six-sided crystals in four kinds, each a quarter of the spectrum, glowing from inside; each crystal keeps inside its cell of a grid, so a point looks at one cell (two grids half a cell apart on the floor, one on the roof, and only those that reach the point's height). Their light on the rock is worked out at the hit point; the glow in the air is gathered per kind along the ray (presets Amethyst, Citrine, Ice) |
 | `stage` | backdrop | (Stage lights) an empty stage, every surface and beam exact: eight moving heads on a truss and six on the deck, each a band, beams in the haze (nearest approach, stopped where the beam lands) and pools on the boards; a laser fan with the high notes; an LED wall of dots showing the spectrum, mirrored in the deck; speaker cones pumping with the bass (presets Amber, Ultraviolet, White) |
+| `stadium` | backdrop | (Floodlit) a football match under floodlights from high in the stand, all exact (planes, capsules, a sphere): a striped pitch marked out in full, goals with nets; three stands of seats, each a dot in home or away colours, the crowd the spectrum going round the ground (each block stands with its band, a wave runs round on `drive`, cameras flash with the high notes); LED boards showing the spectrum; two elevens holding a 4-4-2 and drifting towards a ball passed in arcs, each with four shadows; floodlight towers (presets Blue and white, Green and gold, Black and orange) |
+| `city` | backdrop | (Night flight) a flight down an avenue between towers: the ray walks a grid of blocks (one tower each), so every tower is found exactly; each tower lights more windows the more of its band there is, in three makes of facade, with neon corners, roof crowns, beacons and screens of spectrum bars; wet streets with two streams of traffic on `drive`; searchlights, a skyline, the moon (presets Sodium, Cyan, Mono) |
+| `clouds` | backdrop | (Above the clouds) a flight over a sea of cloud at dusk, a marched height field (the hit refined between the last two steps): soft mounds, one to a cell, each glowing from inside with its band and a little taller with it; each point looks towards the low sun for a higher top in the way; silver edges, stars, high cloud, an airliner's trail (presets Moonlit, Rose dawn, Thunder) |
+| `organ` | backdrop | (Pipe organ) an organ front in a stone hall, flat: thirty-three pipes of spotted metal in three towers and two flats, the longest the lowest; a pipe's mouth glows and its standing wave shows when its band sounds; pierced gilt pipe shades, a gilt sun with the bass; a console whose keys go down with their notes and whose stops draw; candles; a shaft of light with drifting dust (presets White and gold, Dark oak, Blue) |
+| `kaleidoscope` | backdrop | a real kaleidoscope: each pixel folded back across three mirrors into one triangle (counting reflections, each a little dimmer), where a turning cell holds the cover and sixteen pieces of glass (five shapes), each a band, tumbling on `drive` and colouring what is behind them; seed beads with the high notes (presets Jewels, Amber, Fine) |
 
 Each manifest has a `category`, a heading the menu groups it under. The app's own say which model wrote them: the
-first thirty `Opus 5.5`, the five from `lighthouse` on `Fable 5.2` (written when the budget went to 3 ms, so most are
+first thirty `Opus 5.5`, the ten from `lighthouse` on `Fable 5.2` (written when the budget went to 3 ms, so most are
 ray-marched).
 
-The four old styles were drawn in GDScript; they are now shaders that look the same. None of the thirty-five keeps any
+The four old styles were drawn in GDScript; they are now shaders that look the same. None of the forty keeps any
 state on the CPU: everything is worked out from the sound, the clocks and their parameters (and for `ink`, its own
 last frame), so a seek, a pause or a restart never leaves them in a strange state.
 
@@ -336,10 +341,10 @@ of its own. Real motion is 10 frames a second and more, so nothing else is caugh
 
 ## Tested
 
-`tests/test_visualisers.gd`, 194 checks, with xvfb and lavapipe (headless: the 84 without the host and the
+`tests/test_visualisers.gd`, 209 checks, with xvfb and lavapipe (headless: the 89 without the host and the
 watcher).
 
-- The registry: the thirty-five in order, no errors, the areas, the parameters read with their types, and every parameter
+- The registry: the forty in order, no errors, the areas, the parameters read with their types, and every parameter
   a uniform of its shader.
 - Ten broken user folders, each left out with its reason; a good one in, its out-of-range default clamped; a user
   folder may not take an app id; a user's shader loads from its text.
@@ -348,7 +353,7 @@ watcher).
   textures, the effects on and off the bus with two holders (one freed), the delay's range.
 - `main.features`: the list, a parameter clamped and kept in the settings, unknown ones refused, a preset, reset,
   choosing by id.
-- The host: each of the thirty-five starts and draws; a steady grey picture is untouched and the floor's two bytes give
+- The host: each of the forty starts and draws; a steady grey picture is untouched and the floor's two bytes give
   back its luminance (0.2159 for 0.214); a black and white strobe changing every frame swings at most 0.078 on the
   card; black to white stays under the rise limit after 1.4 s; a new visualiser shows at its own brightness at once.
   Off, its viewports stop and it is not fed; on again, it starts afresh.
@@ -358,7 +363,7 @@ watcher).
 - Flicker over an area: a swapping checkerboard dimmed (0.333 of change a frame in the picture, 0.015 shown, the
   whole-picture gain untouched); half the card swapping dims that half only. The first frames' timing (test timings
   given to it): cheap at full size, about 3 ms at 75 %, about 62 ms refused with the one before back and the reason.
-  The app's thirty-five on the drums test signal on the real card, never dimmed (figures under "The flash limit").
+  The app's forty on the drums test signal on the real card, never dimmed (figures under "The flash limit").
 - Making them: a test signal's WAV (header, length, sound or none); the nine commands open to the assistant at their
   levels; the README in the user folder with this machine's paths; the watcher sees a new folder; a compile error
   comes back with its line (5, after the include on line 2) and words; the last good shader kept; a broken manifest
@@ -373,7 +378,7 @@ watcher).
 
 `tests/test_music.gd` (25 checks: an `.mp4` holding only sound plays as music; a 1 frame a second video shows as the
 card with its picture dimmed behind it, its title and the visualiser, and the switch turns it into a video and back)
-checks all thirty-six styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
+checks all forty-one styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
 `feedback` is given 90 frames to build its picture up). Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
 second; the old fixed 1.5 s wait sat on that edge). `test_env_signals` still passes. `test_react` passes as before:
 its flash-size check fails on main too (it expects more than the room schema's swing ceiling allows; not this work).
@@ -406,7 +411,11 @@ its flash-size check fails on main too (it expects more than the room schema's s
   The Fable 5.2 five aim at 3 ms (about 5 times aurora): with aurora at 4.0 to 4.6 ms, lighthouse took 19.9,
   fractal 19.8 to 21.5, balloons 19.7, stage 17.2 and crystals 32.9 (7 times: it may start at 75 % on the headset).
   Crystals first took 122 ms (five crystals, each with its own trigonometry, at every step) and fractal 44 (72
-  steps of seven folds).
+  steps of seven folds). The next five, same aim (aurora 3.8 to 4.7): stadium 12.9, city 9, organ 6, kaleidoscope 16 to
+  23 and clouds 25 to 27 (about 6 times). Stadium first reached 0.024 on the flash limit: its camera panned with the
+  ball, sliding thousands of crowd dots past every point; the pan is now slow. Organ's dust was a fresh random
+  pattern each frame (0.016); it now drifts. Clouds as steep towers showed the march's steps on their sides: a height
+  field wants soft shapes.
 - **More of the app's own.** Ideas not yet made: a Game of Life seeded by beats (with `feedback`, stepping slowly: a
   fast one would be dimmed as flicker), trails, reaction-diffusion, a starfield, a kaleidoscope of the cover.
 - **Surround.**

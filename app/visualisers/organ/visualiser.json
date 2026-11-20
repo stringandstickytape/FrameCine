@@ -1,0 +1,21 @@
+{
+	"name": "Pipe organ",
+	"description": "The front of a church organ in a dim stone hall: thirty-three pipes in towers and flats, each a part of the spectrum, the longest the lowest. When its part sounds a pipe's mouth glows and the standing wave shows up its length. The keys of two keyboards go down with their notes, stop knobs draw as their parts sound, a gilt sun over the middle tower spreads its rays with the bass, and dust glints in a shaft of light with the high notes.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 390,
+	"params": {
+		"voice": {"type": "float", "min": 0.2, "max": 1.0, "default": 0.7, "label": "Voice"},
+		"candle": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Candles"},
+		"metal": {"type": "colour", "default": "#b8b8ad", "label": "Pipes"},
+		"wood": {"type": "colour", "default": "#4d2b14", "label": "Case"},
+		"gilt": {"type": "colour", "default": "#f2b847", "label": "Gilt"},
+		"tone": {"type": "colour", "default": "#ff9933", "label": "Sound"},
+		"stone": {"type": "colour", "default": "#333033", "label": "Stone"}
+	},
+	"presets": {
+		"White and gold": {"wood": "#d9d2c4", "metal": "#d9d6cc", "stone": "#4d4a47", "tone": "#ffcc66"},
+		"Dark oak": {"wood": "#261a12", "gilt": "#b38c4d", "tone": "#ff6633", "stone": "#1f1f24"},
+		"Blue": {"wood": "#1f3352", "gilt": "#e6e6f2", "metal": "#c2ccd9", "tone": "#66ccff", "stone": "#262b38"}
+	}
+}

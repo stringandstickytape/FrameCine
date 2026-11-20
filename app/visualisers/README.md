@@ -8,7 +8,8 @@ here. The player watches this folder and shows your change within a second. Noth
 - The player's own, to read and copy: `<<APP>>` (`bars`, `mirror`, `line`, `radial`, `aurora`, `halftone`, `tiles`,
   `runner`, `sakura`, `ink`, `planet`, `rose`, `clockwork`, `chrome`, `circuit`, `deep`, `cymatics`, `vinyl`,
   `fireworks`, `rain`, `topo`, `koi`, `candles`, `paper`, `bubbles`, `carousel`, `microscope`, `volcano`, `web`,
-  `starlings`, `lighthouse`, `fractal`, `balloons`, `crystals`, `stage`)
+  `starlings`, `lighthouse`, `fractal`, `balloons`, `crystals`, `stage`,
+  `stadium`, `city`, `clouds`, `organ`, `kaleidoscope`)
 
 This file is rewritten by the player when it changes. Keep your notes elsewhere.
 
@@ -115,7 +116,7 @@ write `previous` back unchanged.
     gentle swells.
   - Flicker over an area: every part of the picture is compared with its own recent average. Patterns that swap or
     flicker (checkerboards, stripes, strobing regions) are dimmed where they flicker, more the larger the area.
-    Moving shapes and bars are fine; the player's own thirty-five are never dimmed on the test drums.
+    Moving shapes and bars are fine; the player's own forty are never dimmed on the test drums.
   Design for that: move shapes, change colour, pulse sizes; avoid swapping or strobing patterns. `visualiser_status`
   shows `flash_limit`: `dimming`, and `flicker` against `flicker_max`.
 - **The GPU budget.** A new or changed visualiser first draws a few frames small, timed: if it would take more than
@@ -164,4 +165,8 @@ chord of the spiral is parallel, so the nearest chord is one division; `starling
 one bird per cell from layers turning at different speeds. For ray marching within the budget: `lighthouse` (a
 height field of waves; beams of light worked out exactly, not marched), `fractal` (a folded fractal with an orbit
 trap), `balloons` (a short march inside each bounding sphere), `crystals` (one object per grid cell, glow gathered
-along the ray) and `stage` (planes, boxes and beams, all exact).
+along the ray) and `stage` (planes, boxes and beams, all exact). `city` walks a grid cell by cell along the ray (exact boxes
+however far); `clouds` refines a height field's hit between the last two steps; `stadium` draws crowds of dots
+and players as capsules; `kaleidoscope` folds the picture across mirrors and uses the cover; `organ` is flat but
+built field by field with one function. Two lessons from them: a camera that pans over fine, high-contrast detail
+counts as flicker, and so does anything random that changes every frame.

@@ -1,0 +1,21 @@
+{
+	"name": "Night flight",
+	"description": "A flight down an avenue between the towers of a city at night, rising over the roofs and sinking between them: each tower is a part of the spectrum and lights more of its windows the more of its part there is; neon up the corners and crowns of light on the roofs glow with it, big screens show the spectrum as bars, traffic streams along the wet streets on the music's clock and searchlights turn in the distance.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 370,
+	"params": {
+		"speed": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.4, "label": "Speed"},
+		"lit": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Windows lit"},
+		"fog": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Haze"},
+		"window_a": {"type": "colour", "default": "#ffc773", "label": "Windows"},
+		"window_b": {"type": "colour", "default": "#99d9ff", "label": "Second windows"},
+		"neon": {"type": "colour", "default": "#ff3399", "label": "Neon"},
+		"glow": {"type": "colour", "default": "#38244d", "label": "City glow"}
+	},
+	"presets": {
+		"Sodium": {"window_a": "#ffb34d", "window_b": "#ffe0a6", "neon": "#ff6619", "glow": "#4d2e14"},
+		"Cyan": {"window_a": "#66fff0", "window_b": "#ccf2ff", "neon": "#33ff99", "glow": "#0d2e40"},
+		"Mono": {"window_a": "#f2f2f2", "window_b": "#bfbfbf", "neon": "#ffffff", "glow": "#1f1f24", "fog": 0.8}
+	}
+}

@@ -1,0 +1,20 @@
+{
+	"name": "Kaleidoscope",
+	"description": "The view down a real kaleidoscope: three mirrors and a turning cell of loose coloured glass over the track's cover. Sixteen pieces of glass tumble on the music's clock, each a part of the spectrum, swelling and brightening with its part and colouring what lies behind it; seed beads glint with the high notes; every reflection is a little dimmer, as in real mirrors.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 400,
+	"params": {
+		"turn": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.5, "label": "Turning"},
+		"scale": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Mirror size"},
+		"picture": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Cover"},
+		"glass_a": {"type": "colour", "default": "#ff3359", "label": "Glass"},
+		"glass_b": {"type": "colour", "default": "#268cff", "label": "Second glass"},
+		"glass_c": {"type": "colour", "default": "#ffcc26", "label": "Third glass"}
+	},
+	"presets": {
+		"Jewels": {"glass_a": "#b31a8c", "glass_b": "#1ab38c", "glass_c": "#f2f2ff", "picture": 0.2},
+		"Amber": {"glass_a": "#ff661a", "glass_b": "#ffb833", "glass_c": "#8c2e0d", "scale": 0.8},
+		"Fine": {"scale": 0.1, "picture": 0.8}
+	}
+}

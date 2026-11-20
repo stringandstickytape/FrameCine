@@ -1,0 +1,21 @@
+{
+	"name": "Above the clouds",
+	"description": "A flight over a sea of cloud at dusk, ray-marched: towers of cumulus stand out of it, each a part of the spectrum, climbing with its part and glowing softly from inside as storms do. The low sun lights one side of every billow gold and leaves the other in blue shade, with silver edges against the light; above, the first stars, a wisp of high cloud and an airliner drawing its trail.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 380,
+	"params": {
+		"towers": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Towers"},
+		"speed": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.5, "label": "Speed"},
+		"storm": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Glow"},
+		"zenith": {"type": "colour", "default": "#141f4d", "label": "Sky"},
+		"sunset": {"type": "colour", "default": "#ff8c4d", "label": "Sun"},
+		"shade": {"type": "colour", "default": "#4d5480", "label": "Shade"},
+		"inner": {"type": "colour", "default": "#bfd9ff", "label": "Inner light"}
+	},
+	"presets": {
+		"Moonlit": {"zenith": "#050814", "sunset": "#8ca6d9", "shade": "#1f2638", "inner": "#fff0cc"},
+		"Rose dawn": {"zenith": "#33407a", "sunset": "#ff8fa3", "shade": "#665c85", "inner": "#fff5e6"},
+		"Thunder": {"zenith": "#0d0d1a", "sunset": "#b3703d", "shade": "#262633", "inner": "#99b3ff", "storm": 1.0, "towers": 0.9}
+	}
+}
