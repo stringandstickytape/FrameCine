@@ -1,0 +1,21 @@
+{
+	"name": "Event horizon",
+	"description": "A black hole and its disc of glowing gas, with the light bent as it truly is: the far side of the disc shows lifted over the hole and tucked under it, a thin ring of light hugs the shadow and the stars behind are smeared round it. The disc is the spectrum from the inside (low notes) to the rim (high), each ring glowing with its part; the gas turns faster the nearer the hole, the side coming towards you is the brighter, and two jets leave the poles with the bass.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 410,
+	"params": {
+		"tilt": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.4, "label": "View from above"},
+		"spin": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.5, "label": "Turning"},
+		"jets": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Jets"},
+		"hot": {"type": "colour", "default": "#ffedcc", "label": "Inner disc"},
+		"cool": {"type": "colour", "default": "#ff5914", "label": "Outer disc"},
+		"jet": {"type": "colour", "default": "#6699ff", "label": "Jets"},
+		"space": {"type": "colour", "default": "#0d0a1a", "label": "Sky"}
+	},
+	"presets": {
+		"Blue giant": {"hot": "#e6f2ff", "cool": "#2673ff", "jet": "#ff66cc", "space": "#0a0d1a"},
+		"Ember": {"hot": "#ffcc80", "cool": "#b31a0d", "jet": "#ffb366", "space": "#140a0a", "jets": 0.3},
+		"Edge on": {"tilt": 0.0, "spin": 0.8}
+	}
+}

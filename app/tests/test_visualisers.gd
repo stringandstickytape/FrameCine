@@ -22,7 +22,8 @@ const W := preload("res://ui/pane_widgets.gd")
 const BUILTIN: Array[String] = ["bars", "mirror", "line", "radial", "aurora", "halftone", "tiles", "runner", "sakura",
 		"ink", "planet", "rose", "clockwork", "chrome", "circuit", "deep", "cymatics", "vinyl", "fireworks", "rain", "topo",
 		"koi", "candles", "paper", "bubbles", "carousel", "microscope", "volcano", "web", "starlings",
-		"lighthouse", "fractal", "balloons", "crystals", "stage", "stadium", "city", "clouds", "organ", "kaleidoscope"]
+		"lighthouse", "fractal", "balloons", "crystals", "stage", "stadium", "city", "clouds", "organ", "kaleidoscope",
+		"blackhole", "musicbox", "pinball", "fountains", "snowglobe"]
 
 var _failures := 0
 var _checks := 0

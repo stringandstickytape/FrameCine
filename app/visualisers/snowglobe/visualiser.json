@@ -1,0 +1,21 @@
+{
+	"name": "Snow globe",
+	"description": "A snow globe on a table in a dark room, a string of coloured lamps out of focus behind. The glass bends the light as a real globe does, and inside is a winter village: the windows of one house glow with the bass, the other's with the middle of the sound, the church's with the top, their light lying on the snow, and the star on the spire shines with the high notes. The snow in the water falls and sways on the music's clock, and each lamp behind is a part of the spectrum.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 450,
+	"params": {
+		"snow": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Snow"},
+		"swirl": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Swirl"},
+		"window": {"type": "colour", "default": "#ffb859", "label": "Windows"},
+		"walls": {"type": "colour", "default": "#993326", "label": "Walls"},
+		"pine": {"type": "colour", "default": "#1a4d2e", "label": "Firs"},
+		"stand": {"type": "colour", "default": "#4d2412", "label": "Stand"},
+		"room": {"type": "colour", "default": "#1a0f0d", "label": "Room"}
+	},
+	"presets": {
+		"Blue hour": {"window": "#ffd98c", "walls": "#33598c", "stand": "#1f1f26", "room": "#0d1426"},
+		"Gingerbread": {"window": "#ff994d", "walls": "#8c5226", "pine": "#26593a", "stand": "#732e1a"},
+		"Blizzard": {"snow": 1.0, "swirl": 1.0}
+	}
+}

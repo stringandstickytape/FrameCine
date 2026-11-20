@@ -132,12 +132,17 @@ its 0.5 s average, louder than -40 dBFS, at least 0.25 s after the last. It is a
 | `clouds` | backdrop | (Above the clouds) a flight over a sea of cloud at dusk, a marched height field (the hit refined between the last two steps): soft mounds, one to a cell, each glowing from inside with its band and a little taller with it; each point looks towards the low sun for a higher top in the way; silver edges, stars, high cloud, an airliner's trail (presets Moonlit, Rose dawn, Thunder) |
 | `organ` | backdrop | (Pipe organ) an organ front in a stone hall, flat: thirty-three pipes of spotted metal in three towers and two flats, the longest the lowest; a pipe's mouth glows and its standing wave shows when its band sounds; pierced gilt pipe shades, a gilt sun with the bass; a console whose keys go down with their notes and whose stops draw; candles; a shaft of light with drifting dust (presets White and gold, Dark oak, Blue) |
 | `kaleidoscope` | backdrop | a real kaleidoscope: each pixel folded back across three mirrors into one triangle (counting reflections, each a little dimmer), where a turning cell holds the cover and sixteen pieces of glass (five shapes), each a band, tumbling on `drive` and colouring what is behind them; seed beads with the high notes (presets Jewels, Amber, Fine) |
+| `blackhole` | backdrop | (Event horizon) a black hole and its disc, the light truly bent: each ray is a photon stepped through the hole's gravity, so the far side of the disc shows over and under the shadow, a ring of light hugs it and the stars are smeared round it; the disc is the spectrum from inside (low) to rim (high), turning faster inwards, brighter on the side coming towards the eye; two jets with the bass (presets Blue giant, Ember, Edge on) |
+| `musicbox` | backdrop | (Music box) the works of a music box in its open case, all exact: a pinned brass cylinder turning on `drive`, a steel comb of twenty-four teeth (each a band, glowing towards its tip as it sounds, as do the pins about to pluck it), an engine-turned bedplate, a lined case, and a mirror in the lid in which the whole scene is traced a second time (presets Walnut and green, Ebony and silver, Cherry) |
+| `pinball` | backdrop | a pinball table from the player's end, in a row of machines: a chrome ball (an exact sphere reflecting the table) runs on `drive`, flippers take turns on the beat, three pop bumpers light with bass, middle and top and when the ball is near, inserts, lanes and targets are the spectrum; in the back box the cover in a sunburst, spectrum bulbs and a seven-segment score counting beats (presets Green baize, Midnight, Wood rail) |
+| `fountains` | backdrop | a musical fountain at night: sixteen jets in a ring, each as tall as its band, a great jet with the bass, eight arcs with the middle, coloured lamps moving round; jets found by closest approach, arcs in their own planes; the pool reflects the ray and finds the jets again; a stone rim, trees, lanterns, stars, mist (presets White, Emerald, Gold) |
+| `snowglobe` | backdrop | (Snow globe) a glass globe on a wooden stand, lamps out of focus behind: the ray is bent into the sphere, a village inside is ray-marched (houses, a church, firs, a snowman), and a ray that meets nothing is bent out again; windows glow with bass, middle and top, the spire's star with the high notes, seven sheets of snow fall and sway on `drive` (presets Blue hour, Gingerbread, Blizzard) |
 
 Each manifest has a `category`, a heading the menu groups it under. The app's own say which model wrote them: the
-first thirty `Opus 5.5`, the ten from `lighthouse` on `Fable 5.2` (written when the budget went to 3 ms, so most are
+first thirty `Opus 5.5`, the fifteen from `lighthouse` on `Fable 5.2` (written when the budget went to 3 ms, so most are
 ray-marched).
 
-The four old styles were drawn in GDScript; they are now shaders that look the same. None of the forty keeps any
+The four old styles were drawn in GDScript; they are now shaders that look the same. None of the forty-five keeps any
 state on the CPU: everything is worked out from the sound, the clocks and their parameters (and for `ink`, its own
 last frame), so a seek, a pause or a restart never leaves them in a strange state.
 
@@ -341,10 +346,10 @@ of its own. Real motion is 10 frames a second and more, so nothing else is caugh
 
 ## Tested
 
-`tests/test_visualisers.gd`, 209 checks, with xvfb and lavapipe (headless: the 89 without the host and the
+`tests/test_visualisers.gd`, 224 checks, with xvfb and lavapipe (headless: the 94 without the host and the
 watcher).
 
-- The registry: the forty in order, no errors, the areas, the parameters read with their types, and every parameter
+- The registry: the forty-five in order, no errors, the areas, the parameters read with their types, and every parameter
   a uniform of its shader.
 - Ten broken user folders, each left out with its reason; a good one in, its out-of-range default clamped; a user
   folder may not take an app id; a user's shader loads from its text.
@@ -353,7 +358,7 @@ watcher).
   textures, the effects on and off the bus with two holders (one freed), the delay's range.
 - `main.features`: the list, a parameter clamped and kept in the settings, unknown ones refused, a preset, reset,
   choosing by id.
-- The host: each of the forty starts and draws; a steady grey picture is untouched and the floor's two bytes give
+- The host: each of the forty-five starts and draws; a steady grey picture is untouched and the floor's two bytes give
   back its luminance (0.2159 for 0.214); a black and white strobe changing every frame swings at most 0.078 on the
   card; black to white stays under the rise limit after 1.4 s; a new visualiser shows at its own brightness at once.
   Off, its viewports stop and it is not fed; on again, it starts afresh.
@@ -363,7 +368,7 @@ watcher).
 - Flicker over an area: a swapping checkerboard dimmed (0.333 of change a frame in the picture, 0.015 shown, the
   whole-picture gain untouched); half the card swapping dims that half only. The first frames' timing (test timings
   given to it): cheap at full size, about 3 ms at 75 %, about 62 ms refused with the one before back and the reason.
-  The app's forty on the drums test signal on the real card, never dimmed (figures under "The flash limit").
+  The app's forty-five on the drums test signal on the real card, never dimmed (figures under "The flash limit").
 - Making them: a test signal's WAV (header, length, sound or none); the nine commands open to the assistant at their
   levels; the README in the user folder with this machine's paths; the watcher sees a new folder; a compile error
   comes back with its line (5, after the include on line 2) and words; the last good shader kept; a broken manifest
@@ -378,7 +383,7 @@ watcher).
 
 `tests/test_music.gd` (25 checks: an `.mp4` holding only sound plays as music; a 1 frame a second video shows as the
 card with its picture dimmed behind it, its title and the visualiser, and the switch turns it into a video and back)
-checks all forty-one styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
+checks all forty-six styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
 `feedback` is given 90 frames to build its picture up). Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
 second; the old fixed 1.5 s wait sat on that edge). `test_env_signals` still passes. `test_react` passes as before:
 its flash-size check fails on main too (it expects more than the room schema's swing ceiling allows; not this work).
@@ -415,7 +420,8 @@ its flash-size check fails on main too (it expects more than the room schema's s
   23 and clouds 25 to 27 (about 6 times). Stadium first reached 0.024 on the flash limit: its camera panned with the
   ball, sliding thousands of crowd dots past every point; the pan is now slow. Organ's dust was a fresh random
   pattern each frame (0.016); it now drifts. Clouds as steep towers showed the march's steps on their sides: a height
-  field wants soft shapes.
+  field wants soft shapes. The five after (aurora 3.8 to 3.9): musicbox 3, pinball 4.7, snowglobe 8.5, blackhole 17.5
+  and fountains 22 (about 5.7 times); all under 0.005 on the flash limit at the first try.
 - **More of the app's own.** Ideas not yet made: a Game of Life seeded by beats (with `feedback`, stepping slowly: a
   fast one would be dimmed as flicker), trails, reaction-diffusion, a starfield, a kaleidoscope of the cover.
 - **Surround.**

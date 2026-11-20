@@ -1,0 +1,20 @@
+{
+	"name": "Fountains",
+	"description": "A musical fountain in a round pool at night, in a garden. Sixteen jets stand in a ring, each a part of the spectrum and as tall as its part is loud; a great jet in the middle rises with the bass, and eight arcs of water leap from the rim, higher with the middle of the sound. Coloured lamps under the water light each jet, the colours moving slowly round the ring, and the whole display stands doubled in the rippling pool.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 440,
+	"params": {
+		"reach": {"type": "float", "min": 0.2, "max": 1.0, "default": 0.7, "label": "Height"},
+		"mist": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Mist"},
+		"lamp_a": {"type": "colour", "default": "#ffbf66", "label": "Lamps"},
+		"lamp_b": {"type": "colour", "default": "#4d99ff", "label": "Second lamps"},
+		"lamp_c": {"type": "colour", "default": "#ff5999", "label": "Third lamps"},
+		"night": {"type": "colour", "default": "#080d1f", "label": "Night"}
+	},
+	"presets": {
+		"White": {"lamp_a": "#fff2d9", "lamp_b": "#d9ecff", "lamp_c": "#ffffff"},
+		"Emerald": {"lamp_a": "#33ff99", "lamp_b": "#1a8cff", "lamp_c": "#d9ff66", "night": "#051a14"},
+		"Gold": {"lamp_a": "#ffb833", "lamp_b": "#ff731a", "lamp_c": "#ffe680", "night": "#140d1f", "mist": 0.8}
+	}
+}

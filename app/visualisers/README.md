@@ -9,7 +9,8 @@ here. The player watches this folder and shows your change within a second. Noth
   `runner`, `sakura`, `ink`, `planet`, `rose`, `clockwork`, `chrome`, `circuit`, `deep`, `cymatics`, `vinyl`,
   `fireworks`, `rain`, `topo`, `koi`, `candles`, `paper`, `bubbles`, `carousel`, `microscope`, `volcano`, `web`,
   `starlings`, `lighthouse`, `fractal`, `balloons`, `crystals`, `stage`,
-  `stadium`, `city`, `clouds`, `organ`, `kaleidoscope`)
+  `stadium`, `city`, `clouds`, `organ`, `kaleidoscope`,
+  `blackhole`, `musicbox`, `pinball`, `fountains`, `snowglobe`)
 
 This file is rewritten by the player when it changes. Keep your notes elsewhere.
 
@@ -116,7 +117,7 @@ write `previous` back unchanged.
     gentle swells.
   - Flicker over an area: every part of the picture is compared with its own recent average. Patterns that swap or
     flicker (checkerboards, stripes, strobing regions) are dimmed where they flicker, more the larger the area.
-    Moving shapes and bars are fine; the player's own forty are never dimmed on the test drums.
+    Moving shapes and bars are fine; the player's own forty-five are never dimmed on the test drums.
   Design for that: move shapes, change colour, pulse sizes; avoid swapping or strobing patterns. `visualiser_status`
   shows `flash_limit`: `dimming`, and `flicker` against `flicker_max`.
 - **The GPU budget.** A new or changed visualiser first draws a few frames small, timed: if it would take more than
@@ -169,4 +170,7 @@ along the ray) and `stage` (planes, boxes and beams, all exact). `city` walks a 
 however far); `clouds` refines a height field's hit between the last two steps; `stadium` draws crowds of dots
 and players as capsules; `kaleidoscope` folds the picture across mirrors and uses the cover; `organ` is flat but
 built field by field with one function. Two lessons from them: a camera that pans over fine, high-contrast detail
-counts as flicker, and so does anything random that changes every frame.
+counts as flicker, and so does anything random that changes every frame. `blackhole` steps each ray through
+gravity (72 steps, the disc crossing found between two steps); `musicbox` traces its scene a second time for a
+mirror; `snowglobe` refracts into a sphere and marches a small scene inside it; `fountains` reflects the ray in
+water and finds the jets again; `pinball` repeats one machine along a row by folding the hit point.

@@ -1,0 +1,21 @@
+{
+	"name": "Pinball",
+	"description": "A pinball table seen from the player's end, the music playing it. A chrome ball runs about the table on the music's clock, the flippers take turns to flip on the beat, and three pop bumpers light with the bass, the middle and the top, and when the ball comes near. An arc of inserts, the lanes at the top and the targets down the sides are the spectrum. In the back box: the cover in a sunburst, a row of bulbs, and a score that counts the beats.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 430,
+	"params": {
+		"glow": {"type": "float", "min": 0.2, "max": 1.0, "default": 0.7, "label": "Lamps"},
+		"pace": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.5, "label": "Ball speed"},
+		"field": {"type": "colour", "default": "#1a3373", "label": "Table"},
+		"lamp_a": {"type": "colour", "default": "#ff4033", "label": "Lamps"},
+		"lamp_b": {"type": "colour", "default": "#ffcc33", "label": "Second lamps"},
+		"lamp_c": {"type": "colour", "default": "#33e6ff", "label": "Third lamps"},
+		"digits": {"type": "colour", "default": "#ff731a", "label": "Score"}
+	},
+	"presets": {
+		"Green baize": {"field": "#14593a", "lamp_a": "#ff8c1a", "lamp_b": "#fff2b3", "lamp_c": "#ff4d4d"},
+		"Midnight": {"field": "#1f1438", "lamp_a": "#ff33cc", "lamp_b": "#8c66ff", "lamp_c": "#33ffcc", "digits": "#33ffcc"},
+		"Wood rail": {"field": "#8c6b40", "lamp_a": "#cc331a", "lamp_b": "#f2e6bf", "lamp_c": "#1a8c8c", "digits": "#ffd966"}
+	}
+}

@@ -1,0 +1,21 @@
+{
+	"name": "Music box",
+	"description": "The works of a music box in its open wooden case: a brass cylinder set with steel pins turns on the music's clock, and in front of it lies the steel comb, the long teeth the low notes. Each tooth glows towards its tip as its part of the spectrum sounds, and the pins in its column glow as they come round to pluck it. Under them an engine-turned brass bedplate; behind, a mirror in the open lid shows the works from the other side.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 420,
+	"params": {
+		"speed": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.5, "label": "Turning"},
+		"shine": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Glow"},
+		"brass": {"type": "colour", "default": "#d99e40", "label": "Brass"},
+		"steel": {"type": "colour", "default": "#9eadbf", "label": "Steel"},
+		"wood": {"type": "colour", "default": "#5c2e14", "label": "Case"},
+		"lining": {"type": "colour", "default": "#730d1a", "label": "Lining"},
+		"tone": {"type": "colour", "default": "#ffbf59", "label": "Sound"}
+	},
+	"presets": {
+		"Walnut and green": {"wood": "#3d2414", "lining": "#0d4026", "tone": "#b3ff8c"},
+		"Ebony and silver": {"wood": "#1a1614", "brass": "#c2c7cc", "lining": "#1a2640", "tone": "#8cc8ff"},
+		"Cherry": {"wood": "#73261a", "lining": "#f2e6d9", "tone": "#ff8c66"}
+	}
+}
