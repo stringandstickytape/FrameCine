@@ -23,7 +23,8 @@ const BUILTIN: Array[String] = ["bars", "mirror", "line", "radial", "aurora", "h
 		"ink", "planet", "rose", "clockwork", "chrome", "circuit", "deep", "cymatics", "vinyl", "fireworks", "rain", "topo",
 		"koi", "candles", "paper", "bubbles", "carousel", "microscope", "volcano", "web", "starlings",
 		"lighthouse", "fractal", "balloons", "crystals", "stage", "stadium", "city", "clouds", "organ", "kaleidoscope",
-		"blackhole", "musicbox", "pinball", "fountains", "snowglobe"]
+		"blackhole", "musicbox", "pinball", "fountains", "snowglobe",
+		"piano", "lavalamp", "cradle", "tapedeck", "zen"]
 
 var _failures := 0
 var _checks := 0

@@ -1,0 +1,20 @@
+{
+	"name": "Newton's cradle",
+	"description": "Five chrome balls hanging in a row from a chrome frame on a polished desk, ray-traced through four reflections, so the balls show each other, the frame, the desk and the wall behind. The end balls swing in turn on the music's clock, wider with the bass. The wall is the spectrum as tall soft columns of light, low notes on the left, and every chrome surface carries it, bent.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 480,
+	"params": {
+		"swing": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Swing"},
+		"wall": {"type": "float", "min": 0.1, "max": 1.0, "default": 0.6, "label": "Wall of light"},
+		"chrome": {"type": "colour", "default": "#e6ebf2", "label": "Chrome"},
+		"glow_a": {"type": "colour", "default": "#ff4d80", "label": "Low notes"},
+		"glow_b": {"type": "colour", "default": "#3399ff", "label": "High notes"},
+		"desk": {"type": "colour", "default": "#140f0d", "label": "Desk"}
+	},
+	"presets": {
+		"Gold": {"chrome": "#f2cc73", "glow_a": "#ff8c1a", "glow_b": "#ffe680", "desk": "#1a0d0d"},
+		"Ice": {"glow_a": "#66ffe6", "glow_b": "#b3ccff", "desk": "#0d1217"},
+		"Copper and green": {"chrome": "#e69973", "glow_a": "#33cc66", "glow_b": "#ccff66", "desk": "#0d140f"}
+	}
+}

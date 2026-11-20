@@ -1,0 +1,20 @@
+{
+	"name": "Grand piano",
+	"description": "A grand piano on a dark stage, seen from above its keyboard with the lid up. Inside lie forty-eight strings over the soundboard and the gilt iron plate, the long copper-wound ones the low notes: as its part of the spectrum sounds, each string swells into the spindle a real string blurs into and glows, its hammer brightens and its damper lifts. The keyboard plays itself, each key going down with its own note, and the polished lid mirrors the strings.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 460,
+	"params": {
+		"vib": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.7, "label": "String swing"},
+		"shine": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Glow"},
+		"lacquer": {"type": "colour", "default": "#050506", "label": "Case"},
+		"plate": {"type": "colour", "default": "#bf9440", "label": "Iron plate"},
+		"board": {"type": "colour", "default": "#8c612e", "label": "Soundboard"},
+		"tone": {"type": "colour", "default": "#ffb34d", "label": "Sound"}
+	},
+	"presets": {
+		"White": {"lacquer": "#d9d6cc", "tone": "#66b3ff"},
+		"Rosewood": {"lacquer": "#33140d", "plate": "#cc9933", "tone": "#ff7340"},
+		"Silver": {"plate": "#b3b8bf", "board": "#73665c", "tone": "#b3e6ff"}
+	}
+}

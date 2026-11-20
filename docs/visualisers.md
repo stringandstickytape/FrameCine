@@ -137,12 +137,17 @@ its 0.5 s average, louder than -40 dBFS, at least 0.25 s after the last. It is a
 | `pinball` | backdrop | a pinball table from the player's end, in a row of machines: a chrome ball (an exact sphere reflecting the table) runs on `drive`, flippers take turns on the beat, three pop bumpers light with bass, middle and top and when the ball is near, inserts, lanes and targets are the spectrum; in the back box the cover in a sunburst, spectrum bulbs and a seven-segment score counting beats (presets Green baize, Midnight, Wood rail) |
 | `fountains` | backdrop | a musical fountain at night: sixteen jets in a ring, each as tall as its band, a great jet with the bass, eight arcs with the middle, coloured lamps moving round; jets found by closest approach, arcs in their own planes; the pool reflects the ray and finds the jets again; a stone rim, trees, lanterns, stars, mist (presets White, Emerald, Gold) |
 | `snowglobe` | backdrop | (Snow globe) a glass globe on a wooden stand, lamps out of focus behind: the ray is bent into the sphere, a village inside is ray-marched (houses, a church, firs, a snowman), and a ray that meets nothing is bent out again; windows glow with bass, middle and top, the spire's star with the high notes, seven sheets of snow fall and sway on `drive` (presets Blue hour, Gingerbread, Blizzard) |
+| `piano` | backdrop | (Grand piano) a grand piano from above its keys, lid up, all exact planes: forty-eight strings over the soundboard and gilt plate, each a band, swelling into the spindle a sounding string blurs into, its hammer brightening and damper lifting; four octaves of keys going down with their notes; the fallboard mirrors the keys and the lid mirrors the strings (the inside found a second time) (presets White, Rosewood, Silver) |
+| `lavalamp` | backdrop | (Lava lamps) three lava lamps, ray-marched: each ray meets a lamp's round bound exactly, is marched to the metal or the glass, then through the wax (five blobs, a pool and a cap in a smooth union); the lamps are bass, middle and top, each blob swelling with its band, the liquid glowing by the depth crossed (presets Sunset, Ocean, Rose) |
+| `cradle` | backdrop | (Newton's cradle) five chrome balls on a chrome frame over a polished desk, ray-traced exactly through four reflections; the end balls swing in turn on `drive`, wider with the bass; behind, the spectrum as soft columns of light, carried bent in every chrome surface (presets Gold, Ice, Copper and green) |
+| `tapedeck` | backdrop | (Reel to reel) the front of a tape machine, flat: two reels turning on `drive`, the tape winding slowly from one to the other and back, rollers, heads, a counter; two lit meters with needles for the low and high halves, a round scope tube drawing the waveform, knobs, keys (presets Champagne, Black and blue, Amber) |
+| `zen` | backdrop | (Zen garden) raked sand and five stones under a low moon, exact (a plane, ellipsoids, boxes, a cylinder): furrows lit from one side, rings round each stone that deepen with its band and travel outwards on `drive`; a stone lantern glowing with the sound, a basin whose water rings on the beat, moss, fallen and falling maple leaves, fireflies with the high notes (presets Autumn dusk, Snow moon, Green tea) |
 
 Each manifest has a `category`, a heading the menu groups it under. The app's own say which model wrote them: the
-first thirty `Opus 5.5`, the fifteen from `lighthouse` on `Fable 5.2` (written when the budget went to 3 ms, so most are
+first thirty `Opus 5.5`, the twenty from `lighthouse` on `Fable 5.2` (written when the budget went to 3 ms, so most are
 ray-marched).
 
-The four old styles were drawn in GDScript; they are now shaders that look the same. None of the forty-five keeps any
+The four old styles were drawn in GDScript; they are now shaders that look the same. None of the fifty keeps any
 state on the CPU: everything is worked out from the sound, the clocks and their parameters (and for `ink`, its own
 last frame), so a seek, a pause or a restart never leaves them in a strange state.
 
@@ -346,10 +351,10 @@ of its own. Real motion is 10 frames a second and more, so nothing else is caugh
 
 ## Tested
 
-`tests/test_visualisers.gd`, 224 checks, with xvfb and lavapipe (headless: the 94 without the host and the
+`tests/test_visualisers.gd`, 239 checks, with xvfb and lavapipe (headless: the 99 without the host and the
 watcher).
 
-- The registry: the forty-five in order, no errors, the areas, the parameters read with their types, and every parameter
+- The registry: the fifty in order, no errors, the areas, the parameters read with their types, and every parameter
   a uniform of its shader.
 - Ten broken user folders, each left out with its reason; a good one in, its out-of-range default clamped; a user
   folder may not take an app id; a user's shader loads from its text.
@@ -358,7 +363,7 @@ watcher).
   textures, the effects on and off the bus with two holders (one freed), the delay's range.
 - `main.features`: the list, a parameter clamped and kept in the settings, unknown ones refused, a preset, reset,
   choosing by id.
-- The host: each of the forty-five starts and draws; a steady grey picture is untouched and the floor's two bytes give
+- The host: each of the fifty starts and draws; a steady grey picture is untouched and the floor's two bytes give
   back its luminance (0.2159 for 0.214); a black and white strobe changing every frame swings at most 0.078 on the
   card; black to white stays under the rise limit after 1.4 s; a new visualiser shows at its own brightness at once.
   Off, its viewports stop and it is not fed; on again, it starts afresh.
@@ -368,7 +373,7 @@ watcher).
 - Flicker over an area: a swapping checkerboard dimmed (0.333 of change a frame in the picture, 0.015 shown, the
   whole-picture gain untouched); half the card swapping dims that half only. The first frames' timing (test timings
   given to it): cheap at full size, about 3 ms at 75 %, about 62 ms refused with the one before back and the reason.
-  The app's forty-five on the drums test signal on the real card, never dimmed (figures under "The flash limit").
+  The app's fifty on the drums test signal on the real card, never dimmed (figures under "The flash limit").
 - Making them: a test signal's WAV (header, length, sound or none); the nine commands open to the assistant at their
   levels; the README in the user folder with this machine's paths; the watcher sees a new folder; a compile error
   comes back with its line (5, after the include on line 2) and words; the last good shader kept; a broken manifest
@@ -383,7 +388,7 @@ watcher).
 
 `tests/test_music.gd` (25 checks: an `.mp4` holding only sound plays as music; a 1 frame a second video shows as the
 card with its picture dimmed behind it, its title and the visualiser, and the switch turns it into a video and back)
-checks all forty-six styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
+checks all fifty-one styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
 `feedback` is given 90 frames to build its picture up). Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
 second; the old fixed 1.5 s wait sat on that edge). `test_env_signals` still passes. `test_react` passes as before:
 its flash-size check fails on main too (it expects more than the room schema's swing ceiling allows; not this work).
@@ -421,7 +426,8 @@ its flash-size check fails on main too (it expects more than the room schema's s
   ball, sliding thousands of crowd dots past every point; the pan is now slow. Organ's dust was a fresh random
   pattern each frame (0.016); it now drifts. Clouds as steep towers showed the march's steps on their sides: a height
   field wants soft shapes. The five after (aurora 3.8 to 3.9): musicbox 3, pinball 4.7, snowglobe 8.5, blackhole 17.5
-  and fountains 22 (about 5.7 times); all under 0.005 on the flash limit at the first try.
+  and fountains 22 (about 5.7 times); all under 0.005 on the flash limit at the first try. The five after those (aurora 4.3 to 4.5): piano 3.9, cradle 5.6,
+  lavalamp 6.5, tapedeck 6.6 and zen 8.3, all under twice aurora and under 0.005.
 - **More of the app's own.** Ideas not yet made: a Game of Life seeded by beats (with `feedback`, stepping slowly: a
   fast one would be dimmed as flicker), trails, reaction-diffusion, a starfield, a kaleidoscope of the cover.
 - **Surround.**

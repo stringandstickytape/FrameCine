@@ -1,0 +1,21 @@
+{
+	"name": "Reel to reel",
+	"description": "The front of a reel-to-reel tape machine. Two metal reels turn on the music's clock, the tape winding slowly from one to the other and back, running past the rollers and across the heads. Below, two lit meters swing their needles with the low and the high half of the sound, a round green scope tube between them draws the waveform itself, the knobs turn a little with the bass and the top, and a counter between the reels counts.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 490,
+	"params": {
+		"speed": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.5, "label": "Tape speed"},
+		"lamp": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.7, "label": "Lamps"},
+		"face": {"type": "colour", "default": "#9ea1a6", "label": "Plate"},
+		"tape": {"type": "colour", "default": "#4d2b17", "label": "Tape"},
+		"meter": {"type": "colour", "default": "#ffd98c", "label": "Meters"},
+		"scope": {"type": "colour", "default": "#4dff80", "label": "Scope"},
+		"cheek": {"type": "colour", "default": "#4d240f", "label": "Wood"}
+	},
+	"presets": {
+		"Champagne": {"face": "#bfb399", "meter": "#fff2cc", "scope": "#ffb84d", "cheek": "#33190d"},
+		"Black and blue": {"face": "#4d5059", "meter": "#99ccff", "scope": "#66b3ff", "cheek": "#141417"},
+		"Amber": {"meter": "#ffb34d", "scope": "#ff9933"}
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"name": "Zen garden",
+	"description": "A dry garden of raked sand and stones under a low moon. The sand is raked in straight furrows, and in rings round each of five stones: each stone is a part of the spectrum, and the rings round it deepen as its part sounds and travel slowly outwards on the music's clock. A stone lantern glows with the sound and lights the sand about it, the water in a stone basin rings on every beat, maple leaves drift down, and fireflies shine with the high notes.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 500,
+	"params": {
+		"rake": {"type": "float", "min": 0.2, "max": 1.0, "default": 0.7, "label": "Furrows"},
+		"glow": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Lantern"},
+		"sand": {"type": "colour", "default": "#bfb8a6", "label": "Sand"},
+		"rock": {"type": "colour", "default": "#4d4f54", "label": "Stone"},
+		"moss": {"type": "colour", "default": "#336626", "label": "Moss"},
+		"lantern": {"type": "colour", "default": "#ffa64d", "label": "Lantern light"},
+		"night": {"type": "colour", "default": "#0d1429", "label": "Night"},
+		"leaf": {"type": "colour", "default": "#cc261a", "label": "Leaves"}
+	},
+	"presets": {
+		"Autumn dusk": {"night": "#291a26", "lantern": "#ff8c33", "leaf": "#e6801a", "sand": "#ccb899"},
+		"Snow moon": {"sand": "#e6ebf2", "rock": "#3d4047", "moss": "#d9e0e6", "night": "#0d1a33", "leaf": "#f2f2f2", "lantern": "#ffd9a6"},
+		"Green tea": {"moss": "#4d8c26", "leaf": "#8cb833", "night": "#0a1f1a", "lantern": "#d9ff8c"}
+	}
+}

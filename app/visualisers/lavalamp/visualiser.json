@@ -1,0 +1,21 @@
+{
+	"name": "Lava lamps",
+	"description": "Three lava lamps on a shelf in a dark room: tapered glass between a spun-metal base and cap, and in each five blobs of wax that rise and sink on the music's clock, melting into each other, the pool below and the cap above. The lamps are the low, the middle and the high notes: each blob swells as its part of the spectrum sounds, and each lamp's glow on the wall and the shelf follows its third of the sound.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 470,
+	"params": {
+		"flow": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.5, "label": "Flow"},
+		"heat": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Glow"},
+		"wax_a": {"type": "colour", "default": "#ff401a", "label": "First wax"},
+		"wax_b": {"type": "colour", "default": "#33e680", "label": "Second wax"},
+		"wax_c": {"type": "colour", "default": "#994dff", "label": "Third wax"},
+		"liquid": {"type": "colour", "default": "#261a59", "label": "Liquid"},
+		"metal": {"type": "colour", "default": "#bfbfcc", "label": "Metal"}
+	},
+	"presets": {
+		"Sunset": {"wax_a": "#ff331a", "wax_b": "#ff9919", "wax_c": "#ffd940", "liquid": "#59190d", "metal": "#d9a640"},
+		"Ocean": {"wax_a": "#1a66ff", "wax_b": "#19d9cc", "wax_c": "#b3f2ff", "liquid": "#0d2e59"},
+		"Rose": {"wax_a": "#ff4d8c", "wax_b": "#ffb3cc", "wax_c": "#cc4dff", "liquid": "#4d1a33", "metal": "#e6c2b3"}
+	}
+}
