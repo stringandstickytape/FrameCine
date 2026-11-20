@@ -52,6 +52,8 @@ var _vis_body: VBoxContainer
 ## when it changes, else only its values set.
 var _vis_built := ""
 var _vis_rows := {}
+## The choices in the visualisers' order, then Off.
+var _vis_buttons: Array[Button] = []
 var _still: Button
 var _mode: VideoMode = VideoMode.new()
 var _layout_buttons: Array[ModeDiagram] = []
@@ -194,16 +196,36 @@ func _build_visualisers(list: Array[Dictionary], showing: String, broken: Dictio
 		c.queue_free()
 	_vis_rows.clear()
 	var f: Node = app.features
-	var ids: Array = list.map(func(v: Dictionary) -> String: return v["id"])
-	ids.append("off")
-	var names: Array = list.map(func(v: Dictionary) -> String: return v["name"])
-	names.append("Off")
-	var row := W.choices(names, func(i: int) -> void: f.set_visualiser(ids[i]))
-	# The visualisers' names are their manifests' (content); Off is a word.
-	for i in list.size():
-		W.content(row.get_child(i))
-	_vis_rows["_choice"] = row
-	_vis_body.add_child(row)
+	# One row of choices under each category's heading (in the order the categories first come), then Off. The
+	# visualisers' names and categories are their manifests' (content); Off is a word. Those with no category (a
+	# user's, usually) get a row of their own without a heading.
+	var chooser := W.vbox()
+	var group := ButtonGroup.new()
+	var flows := {}
+	_vis_buttons.clear()
+	for v: Dictionary in list:
+		var cat := str(v["category"])
+		if not flows.has(cat):
+			if cat != "":
+				var heading := W.caps(cat)
+				W.content(heading)
+				chooser.add_child(heading)
+			flows[cat] = W.flow()
+			chooser.add_child(flows[cat])
+		var vid: String = v["id"]
+		var b := W.button(str(v["name"]), func() -> void: f.set_visualiser(vid))
+		b.toggle_mode = true
+		b.button_group = group
+		W.content(b)
+		(flows[cat] as Container).add_child(b)
+		_vis_buttons.append(b)
+	var off := W.button("Off", func() -> void: f.set_visualiser("off"))
+	off.toggle_mode = true
+	off.button_group = group
+	chooser.add_child(W.flow([off]))
+	_vis_buttons.append(off)
+	_vis_rows["_choice"] = chooser
+	_vis_body.add_child(chooser)
 	var current: Dictionary = {}
 	for v: Dictionary in list:
 		if v["id"] == showing:
@@ -281,7 +303,8 @@ func _param_row(p: Dictionary) -> Control:
 func _set_visualiser_values(list: Array[Dictionary], showing: String) -> void:
 	var ids: Array = list.map(func(v: Dictionary) -> String: return v["id"])
 	var at := ids.find(showing)
-	W.set_choice(_vis_rows["_choice"], at if at >= 0 else ids.size())
+	for i in _vis_buttons.size():
+		_vis_buttons[i].set_pressed_no_signal(i == (at if at >= 0 else ids.size()))
 	for v: Dictionary in list:
 		if v["id"] != showing:
 			continue

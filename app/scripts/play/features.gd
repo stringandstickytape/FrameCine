@@ -400,7 +400,7 @@ func set_visualiser_checked(s: String) -> String:
 
 
 ## Every visualiser, for a menu or an assistant:
-## [{id, name, description, area, builtin, params: [spec], presets: [name]}].
+## [{id, name, description, category, area, builtin, params: [spec], presets: [name]}].
 ## A spec is {name, type, label, default, min, max (numbers only), value (now)}.
 func visualisers() -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
@@ -412,7 +412,8 @@ func visualisers() -> Array[Dictionary]:
 			var spec: Dictionary = e["params"][pname].duplicate()
 			spec["value"] = vals[pname]
 			params.append(spec)
-		out.append({"id": id, "name": e["name"], "description": e["description"], "area": e["area"],
+		out.append({"id": id, "name": e["name"], "description": e["description"], "category": e["category"],
+				"area": e["area"],
 				"builtin": e["builtin"], "params": params, "presets": (e["presets"] as Dictionary).keys()})
 	return out
 

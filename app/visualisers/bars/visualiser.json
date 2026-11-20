@@ -1,6 +1,7 @@
 {
 	"name": "Bars",
 	"description": "Bars from the low notes on the left to the high on the right.",
+	"category": "Opus 5.5",
 	"area": "strip",
 	"order": 10,
 	"params": {

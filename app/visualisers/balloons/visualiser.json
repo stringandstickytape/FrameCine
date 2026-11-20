@@ -1,0 +1,22 @@
+{
+	"name": "Balloons",
+	"description": "Hot-air balloons drifting up a valley at dawn, ray-marched: eight balloons, each a part of the spectrum, climbing with its part while its burner roars and lights the cloth from inside. Below, a patchwork of fields and hedges, woods, a river mirroring the sky, mist in the hollows thickening with the bass, and the balloons' shadows crossing the land; snow mountains far off. Night glow turns them into lanterns over a dark valley.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 330,
+	"params": {
+		"lift": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Climb"},
+		"mist": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Mist"},
+		"night": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "label": "Night glow"},
+		"sky": {"type": "colour", "default": "#73a6eb", "label": "Sky"},
+		"dawn": {"type": "colour", "default": "#ffb873", "label": "Sun"},
+		"fields": {"type": "colour", "default": "#6b943d", "label": "Fields"},
+		"cloth_a": {"type": "colour", "default": "#e63326", "label": "Cloth"},
+		"cloth_b": {"type": "colour", "default": "#ffd133", "label": "Second cloth"}
+	},
+	"presets": {
+		"Night glow": {"night": 1.0, "sky": "#4d5c99", "mist": 0.3},
+		"Autumn": {"sky": "#8fb3d9", "dawn": "#ffa64d", "fields": "#a67c33", "cloth_a": "#b33d1a", "cloth_b": "#f2e6c9"},
+		"Alpine": {"sky": "#59a6ff", "dawn": "#fff0d9", "fields": "#4d8c47", "cloth_a": "#1a66cc", "cloth_b": "#ffffff", "mist": 0.2}
+	}
+}

@@ -1,6 +1,7 @@
 {
 	"name": "Carousel",
 	"description": "A merry-go-round at a fair at night: twelve horses go round, each rising and falling with its own part of the spectrum, the jewel on its saddle cloth glowing with it; the canopy's bulbs glow with the level and swell in a wave round the ring, the ceiling's lamps with the bass and the skirt's with the high notes. A big wheel turns behind, the stalls glow along the horizon and the wet cobbles catch the light.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 260,
 	"params": {

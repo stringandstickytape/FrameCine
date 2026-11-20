@@ -122,8 +122,17 @@ its 0.5 s average, louder than -40 dBFS, at least 0.25 s after the last. It is a
 | `volcano` | backdrop | a lava field at night under an erupting cone: each pixel below the horizon is worked back into the ground, where a river of lava runs towards us with warped crust plates drifting over glowing cracks; along its length it is the spectrum (the bass nearest), each stretch's cracks widening with its band; rubble lit by it; a fountain of bombs cooling as they fall (higher when loud), the crater and the plume lit with the bass, streams down the cone with the level, embers with the high notes, heat shimmer (presets Dusk, Blue fire, Molten gold) |
 | `web` | backdrop | an orb web at dawn, backlit: thirty spokes and a spiral climbing round them, each turn a chord between two spokes (in a sector the chords are parallel, so the nearest is one division), sagging and shivering with the band of its sector (the bass at the bottom); hundreds of dew drops along it, each a lens with the meadow upside down and the sun focused to a point that brightens with the high notes; silk shining where it lies across the light, coloured with the middle notes; stabilimentum, spider, stems, an out-of-focus meadow (presets Frost, Moonlight, Autumn) |
 | `starlings` | backdrop | a murmuration over an estuary at sunset: a density field of six bodies of birds pulled about by `drive`, each swelling with its band, folded by noise with the middle notes; dark waves sweep through it, faster on a beat; birds drawn one per cell from three layers turning round the flock at their own speeds, stragglers with the high notes; channels holding the sky and the flock, a ruined pier, reeds swaying with the bass (presets Golden, Storm, Afterglow) |
+| `lighthouse` | backdrop | (Storm sea) a heavy sea at night from a boat, ray-marched as a height field: four trains of waves, the longest the bass, each as high as its band (two finer ones in the slope with the high notes), crests sharpened by pushing the water towards them; sky mirrored by the viewing angle, green in thin crests, foam. A lighthouse (a flat cut-out, far off) turns on `drive`; its two beams are exact (the ray's nearest approach to the beam's line) and light the water under them; storm clouds cross the moon (presets Grey dawn, Green storm, Calm) |
+| `fractal` | backdrop | (Fractal halls) a flight through an Apollonian fractal: space folded into a cell and turned inside out through a sphere five times, marched 40 steps. The orbit trap paints stone, two inlays and the corners' dark; the inlays glow with the low and the high half of the spectrum (which band by how deep in the folds); light gathers where the ray passes near walls, with the bass (presets Marble, Emerald, Obsidian) |
+| `balloons` | backdrop | hot-air balloons over a valley at dawn: eight, each climbing with its band while its burner lights the cloth from inside; each envelope a teardrop marched inside its bounding sphere, patterned by gores and bands. The land is a marched height field: plots and hedges, woods, a river mirroring the sky, mist in the hollows with the bass, the balloons' shadows; `night` turns them into lanterns (presets Night glow, Autumn, Alpine) |
+| `crystals` | backdrop | (Crystal cave) a walk through a cave of six-sided crystals in four kinds, each a quarter of the spectrum, glowing from inside; each crystal keeps inside its cell of a grid, so a point looks at one cell (two grids half a cell apart on the floor, one on the roof, and only those that reach the point's height). Their light on the rock is worked out at the hit point; the glow in the air is gathered per kind along the ray (presets Amethyst, Citrine, Ice) |
+| `stage` | backdrop | (Stage lights) an empty stage, every surface and beam exact: eight moving heads on a truss and six on the deck, each a band, beams in the haze (nearest approach, stopped where the beam lands) and pools on the boards; a laser fan with the high notes; an LED wall of dots showing the spectrum, mirrored in the deck; speaker cones pumping with the bass (presets Amber, Ultraviolet, White) |
 
-The four old styles were drawn in GDScript; they are now shaders that look the same. None of the thirty keeps any
+Each manifest has a `category`, a heading the menu groups it under. The app's own say which model wrote them: the
+first thirty `Opus 5.5`, the five from `lighthouse` on `Fable 5.2` (written when the budget went to 3 ms, so most are
+ray-marched).
+
+The four old styles were drawn in GDScript; they are now shaders that look the same. None of the thirty-five keeps any
 state on the CPU: everything is worked out from the sound, the clocks and their parameters (and for `ink`, its own
 last frame), so a seek, a pause or a restart never leaves them in a strange state.
 
@@ -207,12 +216,14 @@ read back to the CPU:
 - **The first frames.** A visualiser that starts (chosen, or its files changed) first draws 6 frames at about
   256 x 144, timed on the GPU (`RenderingServer.viewport_get_measured_render_time_gpu`; the first two frames have no
   timing yet). From the slowest, the cost at full size is estimated (per pixel). It then starts at the largest scale
-  (100, 75, 50, 35 %) within 2 ms. When even 35 % would take more than 4 ms, it is refused: the visualiser before it
+  (100, 75, 50, 35 %) within 3 ms. When even 35 % would take more than 4 ms, it is refused: the visualiser before it
   stays (or the default), `visualiser_use` fails with the estimate and why, and `visualiser_status` shows
   `last_refusal`. The visualiser is shown at the small size for those frames (about 0.1 s).
-- **While it runs.** More than 2 ms (averaged) for a second steps it down a scale; the log says so. It does not come
+- **While it runs.** More than 3 ms (averaged) for a second steps it down a scale; the log says so. It does not come
   back up until the visualiser starts again.
-- The headset draws a frame in 11 ms at 90 Hz, both eyes, so 2 ms is generous for a screen.
+- The headset draws a frame in 11 ms at 90 Hz, both eyes. The budget is a chosen figure, not a measured one: it was
+  2 ms until 2026-11-20, then 3 ms to try heavier (ray-marched) visualisers on the device. What the rest of the frame
+  leaves over has not been measured yet.
 - **Not covered:** a shader that never ends (an endless loop) or takes seconds even at 256 x 144 still stalls the GPU
   on its first frame, which can end the app. The probe catches the heavy, not the endless.
 
@@ -325,10 +336,10 @@ of its own. Real motion is 10 frames a second and more, so nothing else is caugh
 
 ## Tested
 
-`tests/test_visualisers.gd`, 179 checks, with xvfb and lavapipe (headless: the 79 without the host and the
+`tests/test_visualisers.gd`, 194 checks, with xvfb and lavapipe (headless: the 84 without the host and the
 watcher).
 
-- The registry: the thirty in order, no errors, the areas, the parameters read with their types, and every parameter
+- The registry: the thirty-five in order, no errors, the areas, the parameters read with their types, and every parameter
   a uniform of its shader.
 - Ten broken user folders, each left out with its reason; a good one in, its out-of-range default clamped; a user
   folder may not take an app id; a user's shader loads from its text.
@@ -337,7 +348,7 @@ watcher).
   textures, the effects on and off the bus with two holders (one freed), the delay's range.
 - `main.features`: the list, a parameter clamped and kept in the settings, unknown ones refused, a preset, reset,
   choosing by id.
-- The host: each of the thirty starts and draws; a steady grey picture is untouched and the floor's two bytes give
+- The host: each of the thirty-five starts and draws; a steady grey picture is untouched and the floor's two bytes give
   back its luminance (0.2159 for 0.214); a black and white strobe changing every frame swings at most 0.078 on the
   card; black to white stays under the rise limit after 1.4 s; a new visualiser shows at its own brightness at once.
   Off, its viewports stop and it is not fed; on again, it starts afresh.
@@ -347,7 +358,7 @@ watcher).
 - Flicker over an area: a swapping checkerboard dimmed (0.333 of change a frame in the picture, 0.015 shown, the
   whole-picture gain untouched); half the card swapping dims that half only. The first frames' timing (test timings
   given to it): cheap at full size, about 3 ms at 75 %, about 62 ms refused with the one before back and the reason.
-  The app's thirty on the drums test signal on the real card, never dimmed (figures under "The flash limit").
+  The app's thirty-five on the drums test signal on the real card, never dimmed (figures under "The flash limit").
 - Making them: a test signal's WAV (header, length, sound or none); the nine commands open to the assistant at their
   levels; the README in the user folder with this machine's paths; the watcher sees a new folder; a compile error
   comes back with its line (5, after the include on line 2) and words; the last good shader kept; a broken manifest
@@ -362,7 +373,7 @@ watcher).
 
 `tests/test_music.gd` (25 checks: an `.mp4` holding only sound plays as music; a 1 frame a second video shows as the
 card with its picture dimmed behind it, its title and the visualiser, and the switch turns it into a video and back)
-checks all thirty-one styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
+checks all thirty-six styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
 `feedback` is given 90 frames to build its picture up). Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
 second; the old fixed 1.5 s wait sat on that edge). `test_env_signals` still passes. `test_react` passes as before:
 its flash-size check fails on main too (it expects more than the room schema's swing ceiling allows; not this work).
@@ -380,7 +391,7 @@ its flash-size check fails on main too (it expects more than the room schema's s
   took 3.3 ms (tiles), 2.6 (runner), 4.5 (halftone), 7.2 (sakura), 9 to 11 (ink), 7.5 (planet), 7 (rose), 6
   (clockwork), 9 (chrome), 8.5 (circuit), 9.7 (deep), 3.8 (cymatics), 4.9 (vinyl), 8.5 (fireworks) and 4.4 (rain),
   against 3.8 for aurora (10 with a cover), which took 0.58 ms on the headset. If the ratio holds, all are under the
-  2 ms budget there; the probe scales any that are not. Clockwork first took 20 ms: every pixel drew all twelve
+  budget (then 2 ms) there; the probe scales any that are not. Clockwork first took 20 ms: every pixel drew all twelve
   balance screws and evaluated the bridges four times; it now draws only the nearest screw and takes the bridges'
   slope from screen derivatives. Rose took 18 ms while its rays marched 14 steps through the window. Fireworks took
   13 ms while it went over its shells twice (once for their light, once for their stars) and hashed each shell three
@@ -392,6 +403,10 @@ its flash-size check fails on main too (it expects more than the room schema's s
   paper skips the layers hidden behind a nearer one and those wholly below the pixel (14.5 to 12, 7.7 with a
   cover). In another session (aurora 4.1 to 5 ms) carousel took 10.3 to 12, microscope 4.4 to 4.8, volcano 7.2 to
   7.5, web 7.3 to 7.8 and starlings 7.1 to 8.2: carousel about 2.5 times aurora, the others 1.1 to 1.8 times.
+  The Fable 5.2 five aim at 3 ms (about 5 times aurora): with aurora at 4.0 to 4.6 ms, lighthouse took 19.9,
+  fractal 19.8 to 21.5, balloons 19.7, stage 17.2 and crystals 32.9 (7 times: it may start at 75 % on the headset).
+  Crystals first took 122 ms (five crystals, each with its own trigonometry, at every step) and fractal 44 (72
+  steps of seven folds).
 - **More of the app's own.** Ideas not yet made: a Game of Life seeded by beats (with `feedback`, stepping slowly: a
   fast one would be dimmed as flicker), trails, reaction-diffusion, a starfield, a kaleidoscope of the cover.
 - **Surround.**

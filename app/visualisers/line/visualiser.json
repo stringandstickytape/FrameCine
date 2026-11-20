@@ -1,6 +1,7 @@
 {
 	"name": "Line",
 	"description": "One line through the bands, with a faint fill under it.",
+	"category": "Opus 5.5",
 	"area": "strip",
 	"order": 30,
 	"params": {

@@ -1,6 +1,7 @@
 {
 	"name": "Contour map",
 	"description": "A printed topographic map: nine summits rise with their parts of the spectrum so the contour lines crowd and spread with the music, the tide comes in and goes out on the music's clock, and a dashed route runs from summit to summit across shaded, tinted land with water-lines along the coast.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 210,
 	"params": {

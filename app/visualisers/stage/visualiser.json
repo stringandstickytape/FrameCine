@@ -1,0 +1,20 @@
+{
+	"name": "Stage lights",
+	"description": "An empty stage at a sound check, seen from the floor of the hall: eight moving lights on a truss, each a part of the spectrum, swing their beams through the haze, widening and brightening with their parts and throwing pools on the boards; a fan of lasers tilts over the hall with the high notes; a wall of LEDs behind shows the spectrum as bars, mirrored in the glossy deck; the speaker cones pump with the bass.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 350,
+	"params": {
+		"sweep": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.5, "label": "Movement"},
+		"haze": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Haze"},
+		"lasers": {"type": "bool", "default": true, "label": "Lasers"},
+		"light_a": {"type": "colour", "default": "#ff4d8c", "label": "Lights"},
+		"light_b": {"type": "colour", "default": "#4099ff", "label": "Second lights"},
+		"laser": {"type": "colour", "default": "#4dff73", "label": "Lasers"}
+	},
+	"presets": {
+		"Amber": {"light_a": "#ff8c1a", "light_b": "#fff0cc", "laser": "#ff3333"},
+		"Ultraviolet": {"light_a": "#8c33ff", "light_b": "#33fff0", "laser": "#ff40ff"},
+		"White": {"light_a": "#e6f0ff", "light_b": "#fff5e0", "lasers": false, "haze": 0.9}
+	}
+}

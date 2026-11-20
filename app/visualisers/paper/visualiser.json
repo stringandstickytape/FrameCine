@@ -1,6 +1,7 @@
 {
 	"name": "Paper diorama",
 	"description": "A landscape cut from six layers of coloured paper set in a box, each throwing a soft shadow on the ones behind: each layer's hills rise and fall with its part of the spectrum (low notes at the front), reeds sway with the bass, a paper sun glows with the level, clouds and birds go by on the music's clock.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 240,
 	"params": {

@@ -1,6 +1,7 @@
 {
 	"name": "Aurora",
 	"description": "Slow curtains of colour behind the words: the low notes lift them, the high notes make them shimmer.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 50,
 	"params": {

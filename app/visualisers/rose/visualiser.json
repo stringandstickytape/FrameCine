@@ -1,6 +1,7 @@
 {
 	"name": "Rose window",
 	"description": "A gothic rose window with the sun behind it: twelve lancets and twenty-four roundels of coloured glass, each a part of the spectrum glowing as it plays, the middle with the bass; the light sweeps across the glass and falls into the room in coloured shafts.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 120,
 	"params": {

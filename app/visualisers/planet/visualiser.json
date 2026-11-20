@@ -1,6 +1,7 @@
 {
 	"name": "Planet",
 	"description": "A ringed gas giant in space: its cloud bands flow in the winds and churn with the sound (low notes at the equator, high at the poles), the rings light up as a spectrum from inside out, moons pass and cast their shadows, lightning flickers on the night side on a beat.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 110,
 	"params": {

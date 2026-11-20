@@ -1,6 +1,7 @@
 {
 	"name": "Tiles",
 	"description": "A wall of flat-colour tiles, each with a bold shape. On a beat a few of them turn a quarter, with a snap; the shapes breathe with their part of the sound.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 70,
 	"params": {

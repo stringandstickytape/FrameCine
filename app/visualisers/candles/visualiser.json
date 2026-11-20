@@ -1,6 +1,7 @@
 {
 	"name": "Candles",
 	"description": "Pillar candles burning on a polished table in a dark room: each flame grows and brightens with its own part of the spectrum and wavers on its own, all lean in the draught of the bass; the wax glows through round its pool, drips run down, smoke curls up, and the flames light the wall and lie in the table.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 230,
 	"params": {

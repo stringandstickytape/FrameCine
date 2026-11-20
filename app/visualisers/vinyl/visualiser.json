@@ -1,6 +1,7 @@
 {
 	"name": "Record deck",
 	"description": "A turntable from above: the record turns with the cover on its label and the lamp's wedges in its grooves, a row of strobe dots stands still under the lamp, the arm tracks slowly in, and a magnifier shows the groove under the needle with its walls wiggling to the sound itself.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 180,
 	"params": {

@@ -1,6 +1,7 @@
 {
 	"name": "Halftone",
 	"description": "The cover as a cheap colour print: big dots of four inks that swell with their part of the sound, and slip out of line on a beat.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 60,
 	"params": {

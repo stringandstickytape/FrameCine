@@ -21,7 +21,8 @@ const MusicSource := preload("res://scripts/play/music_source.gd")
 const W := preload("res://ui/pane_widgets.gd")
 const BUILTIN: Array[String] = ["bars", "mirror", "line", "radial", "aurora", "halftone", "tiles", "runner", "sakura",
 		"ink", "planet", "rose", "clockwork", "chrome", "circuit", "deep", "cymatics", "vinyl", "fireworks", "rain", "topo",
-		"koi", "candles", "paper", "bubbles", "carousel", "microscope", "volcano", "web", "starlings"]
+		"koi", "candles", "paper", "bubbles", "carousel", "microscope", "volcano", "web", "starlings",
+		"lighthouse", "fractal", "balloons", "crystals", "stage"]
 
 var _failures := 0
 var _checks := 0
@@ -205,7 +206,8 @@ func _features() -> void:
 	var f: Node = main.features
 	var list: Array[Dictionary] = f.visualisers()
 	_check("features: every visualiser listed with its parameters", list.size() == BUILTIN.size()
-			and list[0]["id"] == "bars" and list[0]["params"].size() == 4 and list[0]["presets"].has("Embers"))
+			and list[0]["id"] == "bars" and list[0]["params"].size() == 4 and list[0]["presets"].has("Embers")
+			and list[0]["category"] == "Opus 5.5")
 	_check("set a parameter: clamped and kept", f.set_visualiser_param("bars", 500)
 			and Registry.values("bars")["bars"] == 128 and main.settings.get_value("visualiser.bars", "bars", 0) == 128)
 	_check("an unknown parameter or a wrong type: refused", not f.set_visualiser_param("nope", 1)
@@ -478,9 +480,12 @@ func _picture_tab() -> void:
 	var rows: Dictionary = pic._vis_rows
 	_check("Visualisations shows with the music card, first in Picture", pic._vis_box.visible
 			and pic.box.get_child(0) == pic._vis_box)
-	var choice: Container = rows["_choice"]
-	_check("a choice for each visualiser and Off (%d)" % choice.get_child_count(),
-			choice.get_child_count() == Registry.ids().size() + 1)
+	var choice: Array[Button] = pic._vis_buttons
+	var headings: Array = (rows["_choice"] as Container).get_children().filter(func(c: Node) -> bool:
+			return c is Label).map(func(c: Node) -> String: return (c as Label).text)
+	_check("a choice for each visualiser and Off (%d), under their categories' headings (%s)" % [choice.size(),
+			headings], choice.size() == Registry.ids().size() + 1 and headings == ["Opus 5.5", "Fable 5.2"]
+			and choice[0].get_parent() != choice[Registry.ids().size() - 1].get_parent())
 	_check("bars' four parameters as controls", rows.has("bars") and rows.has("gap") and rows.has("colour_low")
 			and rows.has("colour_high"))
 	W.slider_of(rows["bars"]).value = 64.0
@@ -495,11 +500,11 @@ func _picture_tab() -> void:
 			and Registry.values("bars")["bars"] == 32)
 	_button_in(pic._vis_body, "Defaults").pressed.emit()
 	_check("Defaults", Registry.values("bars")["colour_low"] == Color.html("#73b3ff"))
-	(choice.get_child(Registry.ids().find("aurora")) as Button).pressed.emit()
+	choice[Registry.ids().find("aurora")].pressed.emit()
 	_check("choosing Aurora: its controls (a switch among them)", f.visualiser() == "aurora"
 			and pic._vis_rows.has("use_cover") and pic._vis_rows["use_cover"] is Button
 			and not pic._vis_rows.has("gap"))
-	(pic._vis_rows["_choice"] as Container).get_child(Registry.ids().size()).pressed.emit()
+	(pic._vis_buttons[Registry.ids().size()] as Button).pressed.emit()
 	_check("Off: no controls", f.visualiser() == "off" and pic._vis_rows.size() == 1)
 	f.set_visualiser_param("speed", 1.5, "aurora")
 	f.set_visualiser("aurora")

@@ -1,6 +1,7 @@
 {
 	"name": "Chrome",
 	"description": "A ray-traced scene: a mirror sphere on a chequered floor with seven coloured metal spheres circling it, each bouncing with its own part of the spectrum, and a ring of glowing pillars on the horizon, the spectrum again, seen in every reflection.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 140,
 	"params": {

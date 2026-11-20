@@ -1,6 +1,7 @@
 {
 	"name": "Ink",
 	"description": "Ink dropped into slowly turning water: each part of the sound pours its own colour, the low notes stir it, and a beat blooms a new drop. It keeps its own last frame, so the ink drifts and fades over seconds.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 100,
 	"feedback": true,

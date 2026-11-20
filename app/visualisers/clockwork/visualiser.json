@@ -1,6 +1,7 @@
 {
 	"name": "Clockwork",
 	"description": "A watch movement from the back: a gear train turning with the music, the escape wheel ticking on every beat, the balance swinging wider when it is loud, ruby jewels glowing each with its own part of the spectrum.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 130,
 	"params": {

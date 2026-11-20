@@ -1,6 +1,7 @@
 {
 	"name": "Deep sea",
 	"description": "Jellyfish drifting through dark water by their own light: each pulls in its bell with its own part of the spectrum, the lights round its margin glow with bands of their own, tentacles trail and sway, marine snow sinks past and plankton glints with the high notes.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 160,
 	"params": {

@@ -1,6 +1,7 @@
 {
 	"name": "Circuit",
 	"description": "A circuit board seen close: bursts of light run along the copper tracks, each lane a part of the spectrum (low notes at the bottom), between chips, small parts and a big processor; a column of LEDs on the right is a level meter.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 150,
 	"params": {

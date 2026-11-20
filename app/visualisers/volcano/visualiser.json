@@ -1,6 +1,7 @@
 {
 	"name": "Volcano",
 	"description": "A lava field at night under an erupting cone: a river of lava runs towards you, its crust plates drifting over glowing cracks, and along its length it is the spectrum (the bass where it reaches you, the high notes far off), each stretch blazing with its part. A fountain at the summit throws glowing bombs higher when it is loud, the crater lights the plume of ash with the bass, streams run down the cone with the level and embers rise with the high notes.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 280,
 	"params": {

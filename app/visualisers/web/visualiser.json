@@ -1,6 +1,7 @@
 {
 	"name": "Dew web",
 	"description": "An orb web in a meadow at dawn, the low sun behind it: each sector of the web is a part of the spectrum (the bass at the bottom, the high notes at the top) and its threads shiver with it; hundreds of dew drops along the spiral each hold the meadow upside down and the sun focused to a point that brightens with the high notes; the silk shines with colours along it with the middle notes, and the spider waits at the hub.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 290,
 	"params": {

@@ -8,7 +8,7 @@ here. The player watches this folder and shows your change within a second. Noth
 - The player's own, to read and copy: `<<APP>>` (`bars`, `mirror`, `line`, `radial`, `aurora`, `halftone`, `tiles`,
   `runner`, `sakura`, `ink`, `planet`, `rose`, `clockwork`, `chrome`, `circuit`, `deep`, `cymatics`, `vinyl`,
   `fireworks`, `rain`, `topo`, `koi`, `candles`, `paper`, `bubbles`, `carousel`, `microscope`, `volcano`, `web`,
-  `starlings`)
+  `starlings`, `lighthouse`, `fractal`, `balloons`, `crystals`, `stage`)
 
 This file is rewritten by the player when it changes. Keep your notes elsewhere.
 
@@ -52,6 +52,8 @@ names: lower case letters, digits and `_`. The folder name is the id.
   (`min`, `max`, `default`), `bool` (`default`), `colour` (`default` `"#rrggbb"`; declare it
   `uniform vec4 tint : source_color;`). `visualiser_param` sets one.
 - `presets`: named values over the defaults. `order`: place in the list (lower first).
+- `category` (optional): a heading the menu groups it under. The player's own say which model wrote them
+  (`"Opus 5.5"`, `"Fable 5.2"`); put your own model's name on yours.
 - `feedback`: `true` gives your shader its own last frame as `previous` (default `false`), for things that build up
   and move on: ink, trails, growth. Without it every frame is drawn afresh from the sound and the clocks.
 
@@ -113,12 +115,12 @@ write `previous` back unchanged.
     gentle swells.
   - Flicker over an area: every part of the picture is compared with its own recent average. Patterns that swap or
     flicker (checkerboards, stripes, strobing regions) are dimmed where they flicker, more the larger the area.
-    Moving shapes and bars are fine; the player's own thirty are never dimmed on the test drums.
+    Moving shapes and bars are fine; the player's own thirty-five are never dimmed on the test drums.
   Design for that: move shapes, change colour, pulse sizes; avoid swapping or strobing patterns. `visualiser_status`
   shows `flash_limit`: `dimming`, and `flicker` against `flicker_max`.
 - **The GPU budget.** A new or changed visualiser first draws a few frames small, timed: if it would take more than
-  2 ms a frame it starts at a lower resolution, and if far more (over 4 ms even at 35 %) it is refused and the one
-  before stays (`visualiser_use` says so, with the estimate). While it runs, over 2 ms for a second steps it down.
+  3 ms a frame it starts at a lower resolution, and if far more (over 4 ms even at 35 %) it is refused and the one
+  before stays (`visualiser_use` says so, with the estimate). While it runs, over 3 ms for a second steps it down.
   `visualiser_status` shows `gpu_ms` and `scale`. Long loops per pixel (many octaves of noise, ray-marching) cost the
   most. Never write a loop that might not end: it would stall the headset's GPU. Draw a small part only near it (test
   the distance first and skip the rest), and draw the nearest of a ring of things rather than all of them: `clockwork`
@@ -159,4 +161,7 @@ one nearest the back; `microscope` draws each thing as a filter over the lamp (w
 so the same values give bright field and dark field; `volcano` works each pixel below the horizon back into the ground
 (a plane in perspective) and drifts plates over it; `web` finds the pixel's sector between two spokes, where every
 chord of the spiral is parallel, so the nearest chord is one division; `starlings` draws a flock from a density field,
-one bird per cell from layers turning at different speeds.
+one bird per cell from layers turning at different speeds. For ray marching within the budget: `lighthouse` (a
+height field of waves; beams of light worked out exactly, not marched), `fractal` (a folded fractal with an orbit
+trap), `balloons` (a short march inside each bounding sphere), `crystals` (one object per grid cell, glow gathered
+along the ray) and `stage` (planes, boxes and beams, all exact).

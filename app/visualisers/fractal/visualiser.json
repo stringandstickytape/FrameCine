@@ -1,0 +1,21 @@
+{
+	"name": "Fractal halls",
+	"description": "A slow flight through an endless fractal building: halls of arches inside arches, pillars made of smaller halls, down to the finest detail. The inlays in its stone are the spectrum, one kind glowing with the low notes and the other with the high, so the sound runs along the building's seams; light gathers in the air with the bass.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 320,
+	"params": {
+		"speed": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.5, "label": "Speed"},
+		"glow": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Glow"},
+		"shape": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.4, "label": "Shape"},
+		"stone": {"type": "colour", "default": "#807569", "label": "Stone"},
+		"inlay_a": {"type": "colour", "default": "#ff8c26", "label": "Low notes"},
+		"inlay_b": {"type": "colour", "default": "#33b3ff", "label": "High notes"},
+		"haze": {"type": "colour", "default": "#080a14", "label": "Air"}
+	},
+	"presets": {
+		"Marble": {"stone": "#d9d4cc", "inlay_a": "#d9a84d", "inlay_b": "#8c1f33", "haze": "#1a1614"},
+		"Emerald": {"stone": "#33473d", "inlay_a": "#4dff9e", "inlay_b": "#ffe066", "haze": "#030a08", "shape": 0.7},
+		"Obsidian": {"stone": "#1f1f26", "inlay_a": "#ff3366", "inlay_b": "#b366ff", "haze": "#000000", "glow": 0.9}
+	}
+}

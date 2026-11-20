@@ -1,6 +1,7 @@
 {
 	"name": "Bubbles",
 	"description": "Soap bubbles drifting on the breeze across a sunny garden: rainbow bands swirl over each film as it flows and drains, each large bubble wobbles with its own part of the spectrum and its colours brighten with it, the sky shows in each as a bright window, and small bubbles glint with the high notes.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 250,
 	"params": {

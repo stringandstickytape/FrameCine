@@ -1,6 +1,7 @@
 {
 	"name": "Runner",
 	"description": "A little pixel game that plays itself: a runner jumps the crates and spikes, collects coins and hops on every beat, faster when the music is loud, past a city of towers that are the sound.",
+	"category": "Opus 5.5",
 	"area": "tall",
 	"order": 80,
 	"params": {

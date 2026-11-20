@@ -1,6 +1,7 @@
 {
 	"name": "Cymatics",
 	"description": "Chladni plates: sand on a shaken square plate and a round one gathers on the lines that stand still, and slides into a new figure as each plate steps to its next mode; the bass ripples the lamp's reflection in the shape of the mode, the round plate goes with the high notes, and a signal generator shows the tone.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 170,
 	"params": {

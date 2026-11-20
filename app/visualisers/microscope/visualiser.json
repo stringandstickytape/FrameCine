@@ -1,6 +1,7 @@
 {
 	"name": "Microscope",
 	"description": "A drop of pond water down a microscope: volvox colonies roll by with daughter colonies inside, breathing with the low notes; round diatoms' rings of pores and boat-shaped diatoms' oil drops glow each with its own part of the spectrum; two ciliates swim loops, their cilia beating harder with the high notes and their star-shaped vacuoles swelling with the bass; crescent desmids hold crystals that dance. Bright field or dark field.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 270,
 	"params": {

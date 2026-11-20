@@ -1,6 +1,7 @@
 {
 	"name": "Radial",
 	"description": "Spokes round a circle, the low notes at the top, going clockwise.",
+	"category": "Opus 5.5",
 	"area": "tall",
 	"order": 40,
 	"params": {

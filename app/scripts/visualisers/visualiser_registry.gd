@@ -12,7 +12,7 @@ extends RefCounted
 ## (get_shader_uniform_list()) with a Logger catching what it reports.
 ##
 ##   ids() -> Array[String]            the usable ones, in order (the manifest's "order", then the name)
-##   entry(id) -> Dictionary           {id, name, description, area, order, feedback, params, presets, shader_path,
+##   entry(id) -> Dictionary           {id, name, description, category, area, order, feedback, params, presets, shader_path,
 ##                                     dir, builtin, stale (a newer manifest is broken; this is the last good one)}
 ##   errors() -> Dictionary            id -> why its folder (or its newest manifest) is not usable
 ##   rescan()                          read the folders again (after a change in user://visualisers)
@@ -32,7 +32,8 @@ extends RefCounted
 ##    "presets": {"Warm": {"colour_low": "#ff9a40"}}}
 ## Each parameter is a uniform of the same name in the shader: float and int (min, max, default), bool (default) and
 ## colour ("#rrggbb", a vec4 uniform). "label" names it for people; the name is used without one. "feedback": true
-## gives the shader its own last frame as `previous` (default false).
+## gives the shader its own last frame as `previous` (default false). "category" (optional) is a heading the menu
+## groups it under (the app's own: the model that wrote it).
 
 const DIRS: Array[String] = ["res://visualisers", "user://visualisers"]
 const MANIFEST := "visualiser.json"
@@ -172,7 +173,8 @@ static func _read(folder: String, id: String, builtin: bool) -> Dictionary:
 					return {"error": "%s: presets.%s.%s: not a %s" % [path, pre, pname, params[pname]["type"]]}
 				vals[pname] = v
 			presets[pre] = vals
-	return {"id": id, "name": str(m.get("name", id)), "description": str(m.get("description", "")), "area": area,
+	return {"id": id, "name": str(m.get("name", id)), "description": str(m.get("description", "")),
+			"category": str(m.get("category", "")), "area": area,
 			"order": int(m.get("order", 100)), "feedback": bool(m.get("feedback", false)), "params": params,
 			"presets": presets,
 			"shader_path": folder.path_join(SHADER), "dir": folder, "builtin": builtin}

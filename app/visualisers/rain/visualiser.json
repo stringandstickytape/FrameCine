@@ -1,6 +1,7 @@
 {
 	"name": "Rain",
 	"description": "A city at night through a wet, misted window: out-of-focus windows, street lamps and passing cars glow as discs, each brightening with its part of the spectrum (low notes on the left), a neon sign follows the middle; beads sit on the glass and drops run down in wandering trails, each one a little lens with the city sharp and upside down inside.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 200,
 	"params": {

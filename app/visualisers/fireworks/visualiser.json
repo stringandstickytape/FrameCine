@@ -1,6 +1,7 @@
 {
 	"name": "Fireworks",
 	"description": "A display over a harbour at night: shells rise from the water and burst into peonies, crackling chrysanthemums, gold willows and rings, each swelling and brightening with its own part of the spectrum, lighting the smoke over the town and stretching down the rippled water; loud music fills the sky.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 190,
 	"params": {

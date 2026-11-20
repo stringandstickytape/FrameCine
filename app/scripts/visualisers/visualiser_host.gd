@@ -65,7 +65,7 @@ const RECOVER := 0.25
 ## The card behind a see-through visualiser (MusicCard's background, 0.06 0.06 0.08), as relative luminance.
 const BEHIND := 0.0049
 ## GPU milliseconds a visualiser may take each frame (the headset draws a frame in 11 ms at 90 Hz, both eyes).
-const BUDGET_MS := 2.0
+const BUDGET_MS := 3.0
 const SCALES: Array[float] = [1.0, 0.75, 0.5, 0.35]
 ## The first frames' timing: this many frames at about this many pixels; refused when even the smallest scale would
 ## take more than REFUSE_MS.

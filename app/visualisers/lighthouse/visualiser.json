@@ -1,0 +1,22 @@
+{
+	"name": "Storm sea",
+	"description": "A heavy sea at night seen from a boat, ray-marched: the swell is the spectrum, each train of waves (the longest the bass) rising with its own part, the chop with the high notes; foam streaks the crests, the moon comes and goes behind the storm clouds and glitters on the water. On its rock a lighthouse turns on the music's clock, its two beams sweeping through the mist, across the water and over you.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 310,
+	"params": {
+		"swell": {"type": "float", "min": 0.1, "max": 1.0, "default": 0.6, "label": "Swell"},
+		"sweep": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.5, "label": "Beam speed"},
+		"mist": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Mist"},
+		"sea": {"type": "colour", "default": "#0a2e33", "label": "Sea"},
+		"sky": {"type": "colour", "default": "#1c2438", "label": "Sky"},
+		"moon": {"type": "colour", "default": "#d9e6ff", "label": "Moon"},
+		"lamp": {"type": "colour", "default": "#ffdb8c", "label": "Lamp"},
+		"stripe": {"type": "colour", "default": "#b8201a", "label": "Stripes"}
+	},
+	"presets": {
+		"Grey dawn": {"sea": "#22383d", "sky": "#55606b", "moon": "#fff0d9", "mist": 0.8},
+		"Green storm": {"sea": "#0d3d2b", "sky": "#16261f", "moon": "#c9ffe0", "lamp": "#fff2b3", "swell": 0.9},
+		"Calm": {"swell": 0.25, "mist": 0.2, "sky": "#101a33"}
+	}
+}

@@ -1,6 +1,7 @@
 {
 	"name": "Sakura",
 	"description": "A blossoming branch against the moon at night, petals drifting past: the music's clock blows them along, the middle notes sway them, the high notes make the blossom glint.",
+	"category": "Opus 5.5",
 	"area": "backdrop",
 	"order": 90,
 	"params": {
