@@ -1,0 +1,20 @@
+{
+	"name": "Starlings",
+	"description": "A murmuration over an estuary at sunset: thousands of starlings make one shape that swells, folds and pours across the sky, six bodies of birds each swelling with its own part of the spectrum; folds move with the middle notes, dark waves sweep through the flock faster on the beat, stragglers scatter with the high notes. The channels hold the sky and the flock, a ruined pier stands on its stilts and the reeds in front sway with the bass.",
+	"area": "backdrop",
+	"order": 300,
+	"params": {
+		"flock": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Flock"},
+		"swirl": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.5, "label": "Swirl"},
+		"waves": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Waves"},
+		"high": {"type": "colour", "default": "#383d6b", "label": "Sky above"},
+		"low": {"type": "colour", "default": "#ff9e5c", "label": "Horizon"},
+		"sun": {"type": "colour", "default": "#ffebb3", "label": "Sun"},
+		"land": {"type": "colour", "default": "#14121a", "label": "Land"}
+	},
+	"presets": {
+		"Golden": {"high": "#7a8fb3", "low": "#ffc766", "sun": "#fff5d1"},
+		"Storm": {"high": "#2b3340", "low": "#a8a3a0", "sun": "#e6e0d1", "land": "#101214"},
+		"Afterglow": {"high": "#1c1638", "low": "#d9577a", "sun": "#ffc2b3"}
+	}
+}

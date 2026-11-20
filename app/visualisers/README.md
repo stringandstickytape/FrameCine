@@ -7,7 +7,8 @@ here. The player watches this folder and shows your change within a second. Noth
 - Your visualisers go in: `<<USER>>` (this folder; one sub-folder each)
 - The player's own, to read and copy: `<<APP>>` (`bars`, `mirror`, `line`, `radial`, `aurora`, `halftone`, `tiles`,
   `runner`, `sakura`, `ink`, `planet`, `rose`, `clockwork`, `chrome`, `circuit`, `deep`, `cymatics`, `vinyl`,
-  `fireworks`, `rain`, `topo`, `koi`, `candles`, `paper`, `bubbles`)
+  `fireworks`, `rain`, `topo`, `koi`, `candles`, `paper`, `bubbles`, `carousel`, `microscope`, `volcano`, `web`,
+  `starlings`)
 
 This file is rewritten by the player when it changes. Keep your notes elsewhere.
 
@@ -112,7 +113,7 @@ write `previous` back unchanged.
     gentle swells.
   - Flicker over an area: every part of the picture is compared with its own recent average. Patterns that swap or
     flicker (checkerboards, stripes, strobing regions) are dimmed where they flicker, more the larger the area.
-    Moving shapes and bars are fine; the player's own twenty-five are never dimmed on the test drums.
+    Moving shapes and bars are fine; the player's own thirty are never dimmed on the test drums.
   Design for that: move shapes, change colour, pulse sizes; avoid swapping or strobing patterns. `visualiser_status`
   shows `flash_limit`: `dimming`, and `flicker` against `flicker_max`.
 - **The GPU budget.** A new or changed visualiser first draws a few frames small, timed: if it would take more than
@@ -152,4 +153,10 @@ nearest one on each ring; `rain` draws its background once per pixel, sharp or s
 (a drop is a lens). `topo` draws contour lines of an even width from `fwidth` of a height; `koi` bends each fish
 along the curve of its path; `candles` works out what several loops share once, into an array; `paper` stacks
 layers that each throw a shadow on the ones behind (test the same shape at a point moved towards the light), and
-skips layers that cannot show; `bubbles` colours thin films by their thickness.
+skips layers that cannot show; `bubbles` colours thin films by their thickness. `carousel` maps things onto a
+turning cylinder (a pixel's angle round it from its x alone) and draws its horses back to front, starting from the
+one nearest the back; `microscope` draws each thing as a filter over the lamp (what it absorbs, where it bends light),
+so the same values give bright field and dark field; `volcano` works each pixel below the horizon back into the ground
+(a plane in perspective) and drifts plates over it; `web` finds the pixel's sector between two spokes, where every
+chord of the spiral is parallel, so the nearest chord is one division; `starlings` draws a flock from a density field,
+one bird per cell from layers turning at different speeds.

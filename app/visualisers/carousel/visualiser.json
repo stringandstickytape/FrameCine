@@ -1,0 +1,21 @@
+{
+	"name": "Carousel",
+	"description": "A merry-go-round at a fair at night: twelve horses go round, each rising and falling with its own part of the spectrum, the jewel on its saddle cloth glowing with it; the canopy's bulbs glow with the level and swell in a wave round the ring, the ceiling's lamps with the bass and the skirt's with the high notes. A big wheel turns behind, the stalls glow along the horizon and the wet cobbles catch the light.",
+	"area": "backdrop",
+	"order": 260,
+	"params": {
+		"spin": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.4, "label": "Speed"},
+		"lift": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Rise"},
+		"lamps": {"type": "float", "min": 0.2, "max": 1.0, "default": 0.7, "label": "Brightness"},
+		"stripe_a": {"type": "colour", "default": "#b31420", "label": "Stripe"},
+		"stripe_b": {"type": "colour", "default": "#f5e6c2", "label": "Second stripe"},
+		"gilt": {"type": "colour", "default": "#edb34d", "label": "Gilt"},
+		"bulb": {"type": "colour", "default": "#ffcc7a", "label": "Bulbs"},
+		"night": {"type": "colour", "default": "#0a0d21", "label": "Night"}
+	},
+	"presets": {
+		"Pastel": {"stripe_a": "#6fb7c9", "stripe_b": "#fbe3ec", "gilt": "#f2cf8a", "bulb": "#fff0d6"},
+		"Midnight": {"stripe_a": "#2a2f7a", "stripe_b": "#c9c3e6", "gilt": "#c7c9d6", "bulb": "#cfe0ff", "night": "#03040c"},
+		"Gaslight": {"stripe_a": "#3d5c2e", "stripe_b": "#e0c79a", "gilt": "#c98f3a", "bulb": "#ffb35c", "lamps": 0.5}
+	}
+}

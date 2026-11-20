@@ -1,0 +1,20 @@
+{
+	"name": "Dew web",
+	"description": "An orb web in a meadow at dawn, the low sun behind it: each sector of the web is a part of the spectrum (the bass at the bottom, the high notes at the top) and its threads shiver with it; hundreds of dew drops along the spiral each hold the meadow upside down and the sun focused to a point that brightens with the high notes; the silk shines with colours along it with the middle notes, and the spider waits at the hub.",
+	"area": "backdrop",
+	"order": 290,
+	"params": {
+		"shiver": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Shiver"},
+		"dew": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.7, "label": "Dew"},
+		"frost": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "label": "Frost"},
+		"sky": {"type": "colour", "default": "#f2c78c", "label": "Sky"},
+		"meadow": {"type": "colour", "default": "#4d5c33", "label": "Meadow"},
+		"silk": {"type": "colour", "default": "#fff7eb", "label": "Silk"},
+		"sun": {"type": "colour", "default": "#ffebb8", "label": "Sun"}
+	},
+	"presets": {
+		"Frost": {"frost": 1.0, "sky": "#c9dcf2", "meadow": "#3d4a59", "silk": "#f2f7ff", "sun": "#fff7e6"},
+		"Moonlight": {"sky": "#1f2a45", "meadow": "#0f1a1f", "silk": "#d9e6ff", "sun": "#c7d9ff"},
+		"Autumn": {"sky": "#e8a066", "meadow": "#5c3d1f", "sun": "#ffd18c"}
+	}
+}

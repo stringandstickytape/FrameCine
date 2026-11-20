@@ -1,0 +1,20 @@
+{
+	"name": "Volcano",
+	"description": "A lava field at night under an erupting cone: a river of lava runs towards you, its crust plates drifting over glowing cracks, and along its length it is the spectrum (the bass where it reaches you, the high notes far off), each stretch blazing with its part. A fountain at the summit throws glowing bombs higher when it is loud, the crater lights the plume of ash with the bass, streams run down the cone with the level and embers rise with the high notes.",
+	"area": "backdrop",
+	"order": 280,
+	"params": {
+		"flow": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.5, "label": "Flow"},
+		"heat": {"type": "float", "min": 0.1, "max": 1.0, "default": 0.6, "label": "Heat"},
+		"eruption": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Fountain"},
+		"lava": {"type": "colour", "default": "#ff6b1a", "label": "Lava"},
+		"crust": {"type": "colour", "default": "#1a1413", "label": "Rock"},
+		"sky": {"type": "colour", "default": "#0d0f21", "label": "Sky"},
+		"ash": {"type": "colour", "default": "#594a45", "label": "Ash"}
+	},
+	"presets": {
+		"Dusk": {"sky": "#3d2b52", "ash": "#6b5560"},
+		"Blue fire": {"lava": "#4da6ff", "crust": "#0c1016", "sky": "#04060d", "ash": "#343c4a"},
+		"Molten gold": {"lava": "#ffc24d", "crust": "#1f1a12", "ash": "#5c5240", "heat": 0.8}
+	}
+}

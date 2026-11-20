@@ -117,8 +117,13 @@ its 0.5 s average, louder than -40 dBFS, at least 0.25 s after the last. It is a
 | `candles` | backdrop | pillar candles on a polished table in a dark room: each flame a teardrop (blue root, dark heart, yellow-white, orange edge) that wavers on its own, leans in the draught of the bass and grows with its band; wax glowing through round a pool of melted wax, drips, smoke, the wall lit by the flames, reflections in the table (presets Red wax, Church, Blue) |
 | `paper` | backdrop | a paper-cut diorama: six layers of hills, darkest at the front, each throwing a soft shadow on those behind and rising with its band (the front the low notes); pines, a cottage with a window lit by the middle notes, reeds swaying with the bass, a paper sun glowing with the level, clouds and birds on `drive`, the box swaying a little (presets Forest, Winter, Night) |
 | `bubbles` | backdrop | soap bubbles drifting across a garden out of focus: each film's colour is interference from its thickness (thinner at the top, swirling), reflecting most at the edge, with the sky's light as two windows and the garden bent through it; each large bubble's outline rings in two and three lobes with its band; small ones glint with the high notes (presets Evening, Dark, Meadow) |
+| `carousel` | backdrop | a merry-go-round at a fair at night: twelve horses on twisted brass poles go round on `drive`, each rising with its band, the jewel on its saddle cloth glowing with it. Everything round it is drawn on turning cylinders and ellipses (a pixel's angle round from its x alone): a rounding board of painted panels and mirrors with two rows of bulbs (the level, a slow swell running round), a scalloped valance, a striped cone, a ceiling of rafters and lamps (the bass), a mirrored centre column, a platform of planks over a skirt of lamps (the high notes) reflected in wet cobbles. The horses are drawn back to front from the one nearest the back, so each covers the one behind; behind, a big wheel, a helter-skelter, stalls (presets Pastel, Midnight, Gaslight) |
+| `microscope` | backdrop | pond water down a microscope, the round field with a pointer and a scale: volvox colonies (cells on a turning sphere, the far side faint, daughter colonies inside) breathing with the low notes; round diatoms (rings of pores, ribs, plastids) and boat-shaped ones (striae, raphe, oil drops) glowing each with its band; ciliates with cilia beating in waves (harder with the high notes) and star-shaped vacuoles swelling with the bass; crescent desmids with dancing crystals. Each thing is a filter over the lamp (what it absorbs, where it bends light), so `dark` turns bright field into dark field (presets Dark field, Phase, Stained) |
+| `volcano` | backdrop | a lava field at night under an erupting cone: each pixel below the horizon is worked back into the ground, where a river of lava runs towards us with warped crust plates drifting over glowing cracks; along its length it is the spectrum (the bass nearest), each stretch's cracks widening with its band; rubble lit by it; a fountain of bombs cooling as they fall (higher when loud), the crater and the plume lit with the bass, streams down the cone with the level, embers with the high notes, heat shimmer (presets Dusk, Blue fire, Molten gold) |
+| `web` | backdrop | an orb web at dawn, backlit: thirty spokes and a spiral climbing round them, each turn a chord between two spokes (in a sector the chords are parallel, so the nearest is one division), sagging and shivering with the band of its sector (the bass at the bottom); hundreds of dew drops along it, each a lens with the meadow upside down and the sun focused to a point that brightens with the high notes; silk shining where it lies across the light, coloured with the middle notes; stabilimentum, spider, stems, an out-of-focus meadow (presets Frost, Moonlight, Autumn) |
+| `starlings` | backdrop | a murmuration over an estuary at sunset: a density field of six bodies of birds pulled about by `drive`, each swelling with its band, folded by noise with the middle notes; dark waves sweep through it, faster on a beat; birds drawn one per cell from three layers turning round the flock at their own speeds, stragglers with the high notes; channels holding the sky and the flock, a ruined pier, reeds swaying with the bass (presets Golden, Storm, Afterglow) |
 
-The four old styles were drawn in GDScript; they are now shaders that look the same. None of the twenty-five keeps any
+The four old styles were drawn in GDScript; they are now shaders that look the same. None of the thirty keeps any
 state on the CPU: everything is worked out from the sound, the clocks and their parameters (and for `ink`, its own
 last frame), so a seek, a pause or a restart never leaves them in a strange state.
 
@@ -168,7 +173,13 @@ read back to the CPU:
   0.0032 (chrome), 0.0029 (deep, line), 0.0025 (fireworks, bubbles), 0.0016 (circuit), 0.0012 (runner), 0.0008
   (rain), 0.0005 (vinyl), 0.0004 (radial, paper), 0.0002 (planet) and about 0 (ink, rose, cymatics, candles). Over
   longer runs topo reached 0.0187 (once dimmed a little) while its tide followed the bass and the land drifted 2.5
-  times faster; with the tide on the clock and a slower drift it measures 0.011 to 0.012. The figures vary from run to run (halftone measured
+  times faster; with the tide on the clock and a slower drift it measures 0.011 to 0.012. The later five measured
+  0.0094 (web), 0.0045 (carousel), 0.0030 (starlings), 0.0017 (volcano) and 0.0014 (microscope) in the test. Over
+  longer runs the carousel first reached 0.0206 (dimmed a little): its cream and red stripes, panels and bulbs swept
+  past every point as it turned. Slower turning, lower contrast on what turns and softer bulbs brought it to 0.012 to
+  0.017 at the old speed; the default speed is now lower too. The web's threads first shivered at 1.4 Hz, 2 px
+  (0.018); 0.8 Hz and 1.3 px brought it to 0.010. Run the cover clip in the shots script with fewer visualisers: the
+  clip is 20 s, and the later ones in a long list measure its end, not themselves. The figures vary from run to run (halftone measured
   0.0116 in another). Tiles varies most: 0.0107, 0.0158, 0.0176 and once 0.0202 in four runs (and 0.0003 and 0.0004 in two later ones), when one of its twelve
   samples was dimmed a little and the test failed; the runs before and after passed. Its bold shapes turn a quarter
   in the 0.3 s of a beat's fall, about the length of the limit's average, so how many turn together on a sample
@@ -314,10 +325,10 @@ of its own. Real motion is 10 frames a second and more, so nothing else is caugh
 
 ## Tested
 
-`tests/test_visualisers.gd`, 164 checks, with xvfb and lavapipe (headless: the 74 without the host and the
+`tests/test_visualisers.gd`, 179 checks, with xvfb and lavapipe (headless: the 79 without the host and the
 watcher).
 
-- The registry: the twenty-five in order, no errors, the areas, the parameters read with their types, and every parameter
+- The registry: the thirty in order, no errors, the areas, the parameters read with their types, and every parameter
   a uniform of its shader.
 - Ten broken user folders, each left out with its reason; a good one in, its out-of-range default clamped; a user
   folder may not take an app id; a user's shader loads from its text.
@@ -326,7 +337,7 @@ watcher).
   textures, the effects on and off the bus with two holders (one freed), the delay's range.
 - `main.features`: the list, a parameter clamped and kept in the settings, unknown ones refused, a preset, reset,
   choosing by id.
-- The host: each of the twenty-five starts and draws; a steady grey picture is untouched and the floor's two bytes give
+- The host: each of the thirty starts and draws; a steady grey picture is untouched and the floor's two bytes give
   back its luminance (0.2159 for 0.214); a black and white strobe changing every frame swings at most 0.078 on the
   card; black to white stays under the rise limit after 1.4 s; a new visualiser shows at its own brightness at once.
   Off, its viewports stop and it is not fed; on again, it starts afresh.
@@ -336,7 +347,7 @@ watcher).
 - Flicker over an area: a swapping checkerboard dimmed (0.333 of change a frame in the picture, 0.015 shown, the
   whole-picture gain untouched); half the card swapping dims that half only. The first frames' timing (test timings
   given to it): cheap at full size, about 3 ms at 75 %, about 62 ms refused with the one before back and the reason.
-  The app's twenty-five on the drums test signal on the real card, never dimmed (figures under "The flash limit").
+  The app's thirty on the drums test signal on the real card, never dimmed (figures under "The flash limit").
 - Making them: a test signal's WAV (header, length, sound or none); the nine commands open to the assistant at their
   levels; the README in the user folder with this machine's paths; the watcher sees a new folder; a compile error
   comes back with its line (5, after the include on line 2) and words; the last good shader kept; a broken manifest
@@ -351,7 +362,7 @@ watcher).
 
 `tests/test_music.gd` (25 checks: an `.mp4` holding only sound plays as music; a 1 frame a second video shows as the
 card with its picture dimmed behind it, its title and the visualiser, and the switch turns it into a video and back)
-checks all twenty-six styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
+checks all thirty-one styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
 `feedback` is given 90 frames to build its picture up). Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
 second; the old fixed 1.5 s wait sat on that edge). `test_env_signals` still passes. `test_react` passes as before:
 its flash-size check fails on main too (it expects more than the room schema's swing ceiling allows; not this work).
@@ -362,10 +373,10 @@ its flash-size check fails on main too (it expects more than the room schema's s
   right frame, but the audio clock comes back seconds ahead. An engine matter (MediaSource audio with 1 frame a
   second of video), seen in tests; not fixed here.
 - **The acceptance test:** a fresh Claude Code session on the headset, told only to make a visualiser.
-- **GPU time on the headset of the later twenty.** Halftone, tiles, runner, sakura and ink were put on the headset on
+- **GPU time on the headset of the later twenty-five.** Halftone, tiles, runner, sakura and ink were put on the headset on
   2026-11-18 and looked right there; their GPU time there has not been read yet. Planet, rose, clockwork, chrome,
-  circuit, deep, cymatics, vinyl, fireworks, rain, topo, koi, candles, paper and bubbles have run only under lavapipe
-  so far. There, on the drums, a frame
+  circuit, deep, cymatics, vinyl, fireworks, rain, topo, koi, candles, paper, bubbles, carousel, microscope,
+  volcano, web and starlings have run only under lavapipe so far. There, on the drums, a frame
   took 3.3 ms (tiles), 2.6 (runner), 4.5 (halftone), 7.2 (sakura), 9 to 11 (ink), 7.5 (planet), 7 (rose), 6
   (clockwork), 9 (chrome), 8.5 (circuit), 9.7 (deep), 3.8 (cymatics), 4.9 (vinyl), 8.5 (fireworks) and 4.4 (rain),
   against 3.8 for aurora (10 with a cover), which took 0.58 ms on the headset. If the ratio holds, all are under the
@@ -379,7 +390,8 @@ its flash-size check fails on main too (it expects more than the room schema's s
   bubbles 7.4 to 9.1, so between 1.7 and 2.8 times aurora's time then. Koi skips a fish when the pixel is far from its head (one point on its path) and
   leaves the fins out of its shadows (17 ms to 11); candles works each flame out once into an array (13 to 7.5);
   paper skips the layers hidden behind a nearer one and those wholly below the pixel (14.5 to 12, 7.7 with a
-  cover).
+  cover). In another session (aurora 4.1 to 5 ms) carousel took 10.3 to 12, microscope 4.4 to 4.8, volcano 7.2 to
+  7.5, web 7.3 to 7.8 and starlings 7.1 to 8.2: carousel about 2.5 times aurora, the others 1.1 to 1.8 times.
 - **More of the app's own.** Ideas not yet made: a Game of Life seeded by beats (with `feedback`, stepping slowly: a
   fast one would be dimmed as flicker), trails, reaction-diffusion, a starfield, a kaleidoscope of the cover.
 - **Surround.**

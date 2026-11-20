@@ -1,0 +1,20 @@
+{
+	"name": "Microscope",
+	"description": "A drop of pond water down a microscope: volvox colonies roll by with daughter colonies inside, breathing with the low notes; round diatoms' rings of pores and boat-shaped diatoms' oil drops glow each with its own part of the spectrum; two ciliates swim loops, their cilia beating harder with the high notes and their star-shaped vacuoles swelling with the bass; crescent desmids hold crystals that dance. Bright field or dark field.",
+	"area": "backdrop",
+	"order": 270,
+	"params": {
+		"dark": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "label": "Dark field"},
+		"swim": {"type": "float", "min": 0.1, "max": 1.5, "default": 0.5, "label": "Swimming"},
+		"pulse": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Response"},
+		"water": {"type": "colour", "default": "#edebdb", "label": "Light"},
+		"algae": {"type": "colour", "default": "#4d9e38", "label": "Algae"},
+		"silica": {"type": "colour", "default": "#c7994d", "label": "Diatoms"},
+		"protist": {"type": "colour", "default": "#b8b3db", "label": "Ciliates"}
+	},
+	"presets": {
+		"Dark field": {"dark": 1.0, "water": "#c8d4ff"},
+		"Phase": {"dark": 0.45, "water": "#c9cccc", "algae": "#7fae6a", "silica": "#d9c9a6"},
+		"Stained": {"water": "#f5eef2", "algae": "#2f8f86", "silica": "#8a6bb0", "protist": "#c04f9a"}
+	}
+}
