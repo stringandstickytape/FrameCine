@@ -1,0 +1,20 @@
+{
+	"name": "Honeycomb",
+	"description": "A honeycomb seen close, with light coming through the wax. The comb is the spectrum: the low notes on the left, and in each column the six-sided cells fill with honey from the bottom as that part of the sound rises, and drain as it falls. An empty cell is deep and in its rim's shadow; a full one is bright, with the lamp's glint on it. Some cells are capped with wax and some packed with pollen. Bees walk over the comb on the music's clock: they waggle with the bass, and their wings blur with the high notes.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 550,
+	"params": {
+		"glow": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Light behind"},
+		"bees": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.8, "label": "Bees"},
+		"honey": {"type": "colour", "default": "#ff9914", "label": "Honey"},
+		"wax": {"type": "colour", "default": "#e6bf66", "label": "Wax"},
+		"stripe": {"type": "colour", "default": "#f2a626", "label": "Bee stripes"},
+		"pollen": {"type": "colour", "default": "#d9661a", "label": "Pollen"}
+	},
+	"presets": {
+		"Heather": {"honey": "#cc4d0d", "wax": "#bf8c4d", "pollen": "#994d80"},
+		"Acacia": {"honey": "#ffe680", "wax": "#f2e6b3", "stripe": "#ffcc33", "pollen": "#e6cc33"},
+		"Old comb": {"honey": "#b3590d", "wax": "#735233", "stripe": "#d98c1a", "pollen": "#8c331a"}
+	}
+}

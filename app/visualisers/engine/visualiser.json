@@ -1,0 +1,22 @@
+{
+	"name": "Engine",
+	"description": "A straight-six engine cut open along its length and running on the music's clock: the crankshaft turns, the rods and pistons follow it, the valves open in their turn under a camshaft driven by a toothed belt, and a flywheel turns at the other end. Each cylinder goes through its four strokes in the true firing order, and each is a part of the spectrum, the low notes on the left: it fires as bright as its part sounds, and its exhaust port glows with it. The oil in the sump takes the shape of the waveform, and two gauges show the level and the bass.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 520,
+	"params": {
+		"revs": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Revs"},
+		"fire": {"type": "float", "min": 0.2, "max": 1.0, "default": 0.7, "label": "Fire"},
+		"iron": {"type": "colour", "default": "#333840", "label": "Block"},
+		"alloy": {"type": "colour", "default": "#b8babf", "label": "Bright metal"},
+		"flame": {"type": "colour", "default": "#ff801f", "label": "Flame"},
+		"fuel": {"type": "colour", "default": "#4d99e6", "label": "Mist"},
+		"oil": {"type": "colour", "default": "#bf801a", "label": "Oil"},
+		"wall": {"type": "colour", "default": "#0a0f1a", "label": "Wall"}
+	},
+	"presets": {
+		"Blueprint": {"wall": "#0d2647", "iron": "#26476b", "alloy": "#b3d1f2", "flame": "#ffe680", "fuel": "#80d9ff", "oil": "#66b3e6"},
+		"Racing green": {"iron": "#1f4030", "wall": "#0d120d", "flame": "#ffb31a", "fuel": "#99e680"},
+		"Red hot": {"iron": "#40262b", "flame": "#ff401a", "fuel": "#e68099", "wall": "#140a0a", "oil": "#cc661a"}
+	}
+}

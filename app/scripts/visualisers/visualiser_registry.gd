@@ -272,7 +272,8 @@ static func check(id: String) -> Dictionary:
 	var uniforms: Array[String] = []
 	for u: Dictionary in shader.get_shader_uniform_list(true):
 		uniforms.append(str(u["name"]))
-	OS.remove_logger(catch)
+	if not bool(e["builtin"]):
+		OS.remove_logger(catch)
 	var errs := catch.take()
 	if errs.is_empty() and uniforms.is_empty() and not shader.code.contains("void fragment"):
 		errs.append({"line": 0, "message": "no fragment() function"})

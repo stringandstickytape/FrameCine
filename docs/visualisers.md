@@ -142,12 +142,17 @@ its 0.5 s average, louder than -40 dBFS, at least 0.25 s after the last. It is a
 | `cradle` | backdrop | (Newton's cradle) five chrome balls on a chrome frame over a polished desk, ray-traced exactly through four reflections; the end balls swing in turn on `drive`, wider with the bass; behind, the spectrum as soft columns of light, carried bent in every chrome surface (presets Gold, Ice, Copper and green) |
 | `tapedeck` | backdrop | (Reel to reel) the front of a tape machine, flat: two reels turning on `drive`, the tape winding slowly from one to the other and back, rollers, heads, a counter; two lit meters with needles for the low and high halves, a round scope tube drawing the waveform, knobs, keys (presets Champagne, Black and blue, Amber) |
 | `zen` | backdrop | (Zen garden) raked sand and five stones under a low moon, exact (a plane, ellipsoids, boxes, a cylinder): furrows lit from one side, rings round each stone that deepen with its band and travel outwards on `drive`; a stone lantern glowing with the sound, a basin whose water rings on the beat, moss, fallen and falling maple leaves, fireflies with the high notes (presets Autumn dusk, Snow moon, Green tea) |
+| `speakers` | backdrop | (Sound system) a wall of loudspeaker cabinets square on, in two coloured lamps: four bass bins, six cabinets of two cones, eight horns; each cone pumps with its band (the cone and cap come forward, the rubber roll leans), each cabinet has a ladder of lamps for its band. A height on a plane lit from its slope, nothing marched (presets Dancehall, Warehouse, White cones) |
+| `engine` | backdrop | (Engine) a straight-six cut open along its length, flat and exact, turning on `drive`: crankshaft with its throws at their true angles, rods, pistons, two valves a cylinder under a camshaft at half speed, springs, a toothed belt, a flywheel; four strokes in the firing order 1-5-3-6-2-4, each cylinder firing as bright as its band; oil in the sump shaped by the waveform; two gauges (presets Blueprint, Racing green, Red hot) |
+| `wheat` | backdrop | (Wheat field) a field by day to the horizon, a plane in perspective: five trains of gusts, each a band, bend the wheat pale; cloud shadows and a windmill's sails on `drive`; poppies, swallows, three ranks of near ears with grains and beards swaying with bass and mid (presets Evening, Lavender, Green barley) |
+| `neon` | backdrop | (Neon) glass-tube signs on a brick wall over a wet pavement: LIVE with the bass, a bar on the beat, two joined notes with the mid, a star in a ring with the treble, three arcs with the level, fourteen columns of five tubes as the spectrum; the wall is drawn again upside down in the puddles, shaken by the treble (presets Back alley, Ultraviolet, Warm white) |
+| `honeycomb` | backdrop | (Honeycomb) a comb close up: each column of cells is a band and fills with honey from the bottom; empty cells are deep, in their rim's shadow, full ones bright with a glint; capped and pollen cells; up to five bees walking on `drive`, waggling with the bass, wings blurring with the treble (presets Heather, Acacia, Old comb) |
 
 Each manifest has a `category`, a heading the menu groups it under. The app's own say which model wrote them: the
-first thirty `Opus 5.5`, the twenty from `lighthouse` on `Fable 5.2` (written when the budget went to 3 ms, so most are
+first thirty `Opus 5.5`, the twenty-five from `lighthouse` on `Fable 5.2` (written when the budget went to 3 ms, so most are
 ray-marched).
 
-The four old styles were drawn in GDScript; they are now shaders that look the same. None of the fifty keeps any
+The four old styles were drawn in GDScript; they are now shaders that look the same. None of the fifty-five keeps any
 state on the CPU: everything is worked out from the sound, the clocks and their parameters (and for `ink`, its own
 last frame), so a seek, a pause or a restart never leaves them in a strange state.
 
@@ -228,12 +233,14 @@ read back to the CPU:
 
 ## The GPU budget
 
-- **The first frames.** A visualiser that starts (chosen, or its files changed) first draws 6 frames at about
+- **The first frames.** A visualiser that starts (chosen, or its files changed) first draws 12 frames at about
   256 x 144, timed on the GPU (`RenderingServer.viewport_get_measured_render_time_gpu`; the first two frames have no
-  timing yet). From the slowest, the cost at full size is estimated (per pixel). It then starts at the largest scale
+  timing yet, and the next two are left out). From the quickest, the cost at full size is estimated (per pixel): until
+  2026-11-21 it was the slowest of four, and on the headset single slow frames at a start made it guess 2 to 8 times
+  too high (most of the heavier ones ran at 50 or 75 %, two were refused). It then starts at the largest scale
   (100, 75, 50, 35 %) within 3 ms. When even 35 % would take more than 4 ms, it is refused: the visualiser before it
   stays (or the default), `visualiser_use` fails with the estimate and why, and `visualiser_status` shows
-  `last_refusal`. The visualiser is shown at the small size for those frames (about 0.1 s).
+  `last_refusal`. The visualiser is shown at the small size for those frames (about 0.15 s).
 - **While it runs.** More than 3 ms (averaged) for a second steps it down a scale; the log says so. It does not come
   back up until the visualiser starts again.
 - The headset draws a frame in 11 ms at 90 Hz, both eyes. The budget is a chosen figure, not a measured one: it was
@@ -354,7 +361,7 @@ of its own. Real motion is 10 frames a second and more, so nothing else is caugh
 `tests/test_visualisers.gd`, 239 checks, with xvfb and lavapipe (headless: the 99 without the host and the
 watcher).
 
-- The registry: the fifty in order, no errors, the areas, the parameters read with their types, and every parameter
+- The registry: the fifty-five in order, no errors, the areas, the parameters read with their types, and every parameter
   a uniform of its shader.
 - Ten broken user folders, each left out with its reason; a good one in, its out-of-range default clamped; a user
   folder may not take an app id; a user's shader loads from its text.
@@ -363,7 +370,7 @@ watcher).
   textures, the effects on and off the bus with two holders (one freed), the delay's range.
 - `main.features`: the list, a parameter clamped and kept in the settings, unknown ones refused, a preset, reset,
   choosing by id.
-- The host: each of the fifty starts and draws; a steady grey picture is untouched and the floor's two bytes give
+- The host: each of the fifty-five starts and draws; a steady grey picture is untouched and the floor's two bytes give
   back its luminance (0.2159 for 0.214); a black and white strobe changing every frame swings at most 0.078 on the
   card; black to white stays under the rise limit after 1.4 s; a new visualiser shows at its own brightness at once.
   Off, its viewports stop and it is not fed; on again, it starts afresh.
@@ -373,7 +380,7 @@ watcher).
 - Flicker over an area: a swapping checkerboard dimmed (0.333 of change a frame in the picture, 0.015 shown, the
   whole-picture gain untouched); half the card swapping dims that half only. The first frames' timing (test timings
   given to it): cheap at full size, about 3 ms at 75 %, about 62 ms refused with the one before back and the reason.
-  The app's fifty on the drums test signal on the real card, never dimmed (figures under "The flash limit").
+  The app's fifty-five on the drums test signal on the real card, never dimmed (figures under "The flash limit").
 - Making them: a test signal's WAV (header, length, sound or none); the nine commands open to the assistant at their
   levels; the README in the user folder with this machine's paths; the watcher sees a new folder; a compile error
   comes back with its line (5, after the include on line 2) and words; the last good shader kept; a broken manifest
@@ -388,7 +395,7 @@ watcher).
 
 `tests/test_music.gd` (25 checks: an `.mp4` holding only sound plays as music; a 1 frame a second video shows as the
 card with its picture dimmed behind it, its title and the visualiser, and the switch turns it into a video and back)
-checks all fifty-one styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
+checks all fifty-six styles on the card: "off" draws nothing in the area, the others draw, each differently (one with
 `feedback` is given 90 frames to build its picture up). Its level check waits up to 3 s for the clip's sound (the clip is quiet for about its first
 second; the old fixed 1.5 s wait sat on that edge). `test_env_signals` still passes. `test_react` passes as before:
 its flash-size check fails on main too (it expects more than the room schema's swing ceiling allows; not this work).
@@ -428,6 +435,19 @@ its flash-size check fails on main too (it expects more than the room schema's s
   field wants soft shapes. The five after (aurora 3.8 to 3.9): musicbox 3, pinball 4.7, snowglobe 8.5, blackhole 17.5
   and fountains 22 (about 5.7 times); all under 0.005 on the flash limit at the first try. The five after those (aurora 4.3 to 4.5): piano 3.9, cradle 5.6,
   lavalamp 6.5, tapedeck 6.6 and zen 8.3, all under twice aurora and under 0.005.
+  The five after those (aurora 3.8 to 5.3, measured one at a time so the test track still plays): speakers 6 to 8, engine 6.3 to 7.4,
+  honeycomb 5.8 to 6.1, wheat 7.6 to 8.6 and neon 8.6 to 9.5, all about twice aurora. On the flash limit with sound:
+  speakers 0.003, engine 0.009 to 0.010, honeycomb 0.008 to 0.010 (0.015 before its cells filled over a wider span
+  and its honey was toned down), wheat 0.008 (0.020 with a cover before its gusts were slowed and softened) and
+  neon 0.010. The scratch script that renders previews measures only its first one or two ids with sound: the
+  later ones in a list run after the track has ended and read near zero.
+- **On the headset, all fifty-five (2026-11-21, drums signal, 5 s each):** every one compiles, draws and is never
+  dimmed. GPU time as drawn: 0.02 to 2.1 ms. Aurora takes 0.28 ms. With the first probe (the slowest of four small
+  frames) 28 ran below full size and carousel and starlings were refused as 110 and 63 ms; with the quickest of
+  eight, none is refused, 35 run at full size, 12 at 75 % (sakura, planet, deep, fireworks, volcano, lighthouse,
+  stage, kaleidoscope, blackhole, fountains, snowglobe, neon among them) and 8 at 50 % (koi, carousel, fractal,
+  balloons, crystals, stadium, clouds, lavalamp). The probe still guesses high for some (neon 3.1 ms guessed, 0.9
+  drawn at 75 %): a small picture has a fixed cost that the pixel ratio multiplies. A larger probe would be closer.
 - **More of the app's own.** Ideas not yet made: a Game of Life seeded by beats (with `feedback`, stepping slowly: a
   fast one would be dimmed as flicker), trails, reaction-diffusion, a starfield, a kaleidoscope of the cover.
 - **Surround.**

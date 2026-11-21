@@ -1,0 +1,20 @@
+{
+	"name": "Neon",
+	"description": "Glass-tube signs on a brick wall at night, over a wet pavement that mirrors them. The word LIVE glows with the low notes, over a bar that brightens on each beat; a pair of joined notes glows with the middle; a star in a ring glows with the high notes; three arcs of sound light one after another as the music gets louder. Along the foot of the wall stand fourteen columns of short tubes, each column a part of the spectrum, lit as high as its part sounds. The high notes shake the picture in the puddles.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 540,
+	"params": {
+		"power": {"type": "float", "min": 0.3, "max": 1.0, "default": 0.75, "label": "Brightness"},
+		"wet": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.6, "label": "Puddles"},
+		"tube_a": {"type": "colour", "default": "#ff2666", "label": "First gas"},
+		"tube_b": {"type": "colour", "default": "#1accff", "label": "Second gas"},
+		"tube_c": {"type": "colour", "default": "#ffb31a", "label": "Third gas"},
+		"brick": {"type": "colour", "default": "#803829", "label": "Bricks"}
+	},
+	"presets": {
+		"Back alley": {"tube_a": "#ff3319", "tube_b": "#33ff80", "tube_c": "#ffe64d", "brick": "#4d3326"},
+		"Ultraviolet": {"tube_a": "#b333ff", "tube_b": "#3366ff", "tube_c": "#ff4dd2", "brick": "#33333d"},
+		"Warm white": {"tube_a": "#ffd9b3", "tube_b": "#fff2e6", "tube_c": "#ffb366", "brick": "#804d33"}
+	}
+}

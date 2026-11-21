@@ -69,7 +69,7 @@ const BUDGET_MS := 3.0
 const SCALES: Array[float] = [1.0, 0.75, 0.5, 0.35]
 ## The first frames' timing: this many frames at about this many pixels; refused when even the smallest scale would
 ## take more than REFUSE_MS.
-const PROBE_FRAMES := 6
+const PROBE_FRAMES := 12
 const PROBE_PIXELS := 256 * 144
 const REFUSE_MS := 4.0
 ## The engine makes no viewport smaller than 2 x 2.
@@ -218,7 +218,7 @@ func use(new_id: String) -> bool:
 	_start(0)
 	if budget_ms > 0.0:
 		_probe_left = PROBE_FRAMES
-		_probe_ms = 0.0
+		_probe_ms = INF
 		_resize()
 	return true
 
@@ -328,16 +328,21 @@ func _process(delta: float) -> void:
 		_budget(delta)
 
 
-## The first frames: the most the GPU took for one (the first two are not measured yet), then the decision.
+## The first frames: the least the GPU took for one, then the decision. The first two are not measured yet and the
+## next two may still hold the start's own cost. The least, not the most: on the headset single frames took many
+## times the steady cost while a visualiser started (carousel read as 110 ms, and runs at under 3), and one such frame
+## times the pixel ratio halved the size of most of them or refused them. Too low a guess is put right by _budget().
 func _probe(delta: float) -> void:
 	var ms := probe_ms_override if probe_ms_override >= 0.0 \
 			else RenderingServer.viewport_get_measured_render_time_gpu(_vp.get_viewport_rid())
 	gpu_ms = lerpf(gpu_ms, ms, clampf(delta * 4.0, 0.0, 1.0))
-	if PROBE_FRAMES - _probe_left >= 2:
-		_probe_ms = maxf(_probe_ms, ms)
+	if PROBE_FRAMES - _probe_left >= 4:
+		_probe_ms = minf(_probe_ms, ms)
 	_probe_left -= 1
 	if _probe_left > 0:
 		return
+	if is_inf(_probe_ms):
+		_probe_ms = 0.0
 	var full := _probe_ms * maxf(_area.x * _area.y, 1.0) / _probe_px
 	var step := 0
 	while step < SCALES.size() - 1 and full * SCALES[step] * SCALES[step] > budget_ms:

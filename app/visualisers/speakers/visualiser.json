@@ -1,0 +1,21 @@
+{
+	"name": "Sound system",
+	"description": "A wall of stacked loudspeaker cabinets in the light of two coloured lamps: four big bass bins at the bottom, six cabinets of two cones each above them, eight horns along the top. Each cone is a part of the spectrum, the low notes on the left of its row, and pumps with it: the cone and its dust cap come forward and the roll of rubber round them leans. Every cabinet has a small ladder of lamps that shows its part of the sound.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 510,
+	"params": {
+		"pump": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.7, "label": "Cone travel"},
+		"lamps": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.7, "label": "Lamp ladders"},
+		"lamp_a": {"type": "colour", "default": "#ff4d33", "label": "Left lamp"},
+		"lamp_b": {"type": "colour", "default": "#3380ff", "label": "Right lamp"},
+		"cabinet": {"type": "colour", "default": "#212124", "label": "Cabinets"},
+		"cone": {"type": "colour", "default": "#4d4742", "label": "Cones"},
+		"ladder": {"type": "colour", "default": "#4dff66", "label": "Ladder lamps"}
+	},
+	"presets": {
+		"Dancehall": {"lamp_a": "#ffb31a", "lamp_b": "#33cc4d", "cabinet": "#1f1a14", "ladder": "#ffcc33"},
+		"Warehouse": {"lamp_a": "#cc33ff", "lamp_b": "#1ae6e6", "cone": "#33333a"},
+		"White cones": {"lamp_a": "#ffd9b3", "lamp_b": "#b3ccff", "cone": "#bfbfb8", "cabinet": "#1a1a1c"}
+	}
+}

@@ -73,14 +73,15 @@ func _playback() -> void:
 	# draws nothing there.
 	var f: Node = main.features
 	var styles: Array[String] = src.styles()
-	_check("visualiser: bars by default; the app's fifty and off (%s)" % [styles],
+	_check("visualiser: bars by default; the app's fifty-five and off (%s)" % [styles],
 			f.visualiser() == "bars" and styles == ["bars", "mirror", "line", "radial", "aurora", "halftone", "tiles",
 			"runner", "sakura", "ink", "planet", "rose", "clockwork", "chrome", "circuit", "deep", "cymatics", "vinyl",
 			"fireworks", "rain", "topo", "koi", "candles", "paper", "bubbles", "carousel",
 			"microscope", "volcano", "web", "starlings", "lighthouse", "fractal", "balloons", "crystals", "stage",
 			"stadium", "city", "clouds", "organ", "kaleidoscope",
 			"blackhole", "musicbox", "pinball", "fountains", "snowglobe",
-			"piano", "lavalamp", "cradle", "tapedeck", "zen", "off"])
+			"piano", "lavalamp", "cradle", "tapedeck", "zen",
+			"speakers", "engine", "wheat", "neon", "honeycomb", "off"])
 	var painted := {}
 	var looks := {}
 	for s: String in styles:

@@ -1,0 +1,21 @@
+{
+	"name": "Wheat field",
+	"description": "A field of ripe wheat on a summer day, reaching to the horizon, with a windmill, far hills and heaped clouds. The wind is the music: five trains of gusts cross the field, each a part of the spectrum, the low notes the longest waves, and the wheat shines pale where a gust bends it. The clouds' shadows drift over the field and the mill's sails turn on the music's clock. Poppies stand in the wheat, swallows fly across, and close to the eye three ranks of ears sway with the low and the middle notes.",
+	"category": "Fable 5.2",
+	"area": "backdrop",
+	"order": 530,
+	"params": {
+		"gust": {"type": "float", "min": 0.2, "max": 1.0, "default": 0.7, "label": "Wind"},
+		"flowers": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.5, "label": "Flowers"},
+		"wheat": {"type": "colour", "default": "#d99e33", "label": "Crop"},
+		"sky": {"type": "colour", "default": "#3373d9", "label": "Sky"},
+		"poppy": {"type": "colour", "default": "#e61a0d", "label": "Flower colour"},
+		"sun": {"type": "colour", "default": "#ffedbf", "label": "Sun"},
+		"mill": {"type": "colour", "default": "#e6e0d1", "label": "Windmill"}
+	},
+	"presets": {
+		"Evening": {"sky": "#8c6699", "sun": "#ffb366", "wheat": "#cc7a26", "mill": "#e6bf99"},
+		"Lavender": {"wheat": "#8066cc", "poppy": "#fff2cc", "sky": "#4d8cd9", "flowers": 0.3},
+		"Green barley": {"wheat": "#8cb340", "poppy": "#3366e6", "sky": "#408cd9"}
+	}
+}

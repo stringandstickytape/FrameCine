@@ -11,7 +11,8 @@ here. The player watches this folder and shows your change within a second. Noth
   `starlings`, `lighthouse`, `fractal`, `balloons`, `crystals`, `stage`,
   `stadium`, `city`, `clouds`, `organ`, `kaleidoscope`,
   `blackhole`, `musicbox`, `pinball`, `fountains`, `snowglobe`,
-  `piano`, `lavalamp`, `cradle`, `tapedeck`, `zen`)
+  `piano`, `lavalamp`, `cradle`, `tapedeck`, `zen`,
+  `speakers`, `engine`, `wheat`, `neon`, `honeycomb`)
 
 This file is rewritten by the player when it changes. Keep your notes elsewhere.
 
@@ -118,7 +119,7 @@ write `previous` back unchanged.
     gentle swells.
   - Flicker over an area: every part of the picture is compared with its own recent average. Patterns that swap or
     flicker (checkerboards, stripes, strobing regions) are dimmed where they flicker, more the larger the area.
-    Moving shapes and bars are fine; the player's own fifty are never dimmed on the test drums.
+    Moving shapes and bars are fine; the player's own fifty-five are never dimmed on the test drums.
   Design for that: move shapes, change colour, pulse sizes; avoid swapping or strobing patterns. `visualiser_status`
   shows `flash_limit`: `dimming`, and `flicker` against `flicker_max`.
 - **The GPU budget.** A new or changed visualiser first draws a few frames small, timed: if it would take more than
@@ -177,4 +178,4 @@ mirror; `snowglobe` refracts into a sphere and marches a small scene inside it; 
 water and finds the jets again; `pinball` repeats one machine along a row by folding the hit point. `cradle` follows each ray through four
 reflections with a loop and a running tint; `lavalamp` marches only inside an exact bound; `piano` draws a
 sounding string as its blur (wider and fainter), not as a line that moves; `tapedeck` shows a flat instrument
-panel can be all signed distances; `zen` gets its relief from a normal made of a phase and its direction.
+panel can be all signed distances; `zen` gets its relief from a normal made of a phase and its direction. `speakers` and `honeycomb` are flat too: their depth is a height lit from its slope, and a shadow found by asking whether a point moved towards the lamp is still inside its cell; `engine` is a machine in section, every part placed from one angle; `neon` draws its wall as a function and calls it again upside down for the wet ground; `wheat` is a plane in true perspective under a ceiling of noise.
