@@ -358,7 +358,7 @@ of its own. Real motion is 10 frames a second and more, so nothing else is caugh
 
 ## Tested
 
-`tests/test_visualisers.gd`, 239 checks, with xvfb and lavapipe (headless: the 99 without the host and the
+`tests/test_visualisers.gd`, 254 checks, with xvfb and lavapipe (headless: the 104 without the host and the
 watcher).
 
 - The registry: the fifty-five in order, no errors, the areas, the parameters read with their types, and every parameter
