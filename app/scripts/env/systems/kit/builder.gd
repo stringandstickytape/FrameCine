@@ -328,4 +328,8 @@ func _hide_occupied_seat() -> void:
 
 
 func hidden_seat() -> int:
+	if _seats_mm == null and host != null:
+		var s: Node = host.system_of_kind("seats")
+		if s != null and s.has_method("folded"):
+			return int(s.call("folded"))
 	return _hidden_seat

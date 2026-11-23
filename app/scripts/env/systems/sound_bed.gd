@@ -26,7 +26,7 @@ const SOUNDS: Array[String] = ["silence", "projector", "wall_rumble", "cicadas",
 		"chime", "gong", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock",
 		"tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load", "switch_clunk", "valve_hum", "crt_off",
 		"channel_clunk", "sonar", "bubbles", "far_car", "scops_owl", "church_bell", "city", "tawny_owl",
-		"hooves", "boat_engine", "water_lap", "paddle_wheel", "ship_horn"]
+		"hooves", "boat_engine", "water_lap", "paddle_wheel", "ship_horn", "ferry_diesel", "ferry_chime"]
 ## Each sound's designed level: dBFS RMS on Environment at the slider's default (-18 dB), full level, no film; a
 ## one-shot's loudest second. The level check's target is -38 dBFS; every bed is 12 dB or more under it.
 const LEVELS := {"projector": -51.0, "wall_rumble": -50.0, "cicadas": -54.0, "moped": -52.0, "train": -52.0,
@@ -38,7 +38,7 @@ const LEVELS := {"projector": -51.0, "wall_rumble": -50.0, "cicadas": -54.0, "mo
 		"switch_clunk": -54.0, "valve_hum": -58.0, "crt_off": -60.0, "channel_clunk": -55.0, "sonar": -56.0,
 		"bubbles": -57.0, "far_car": -56.0, "scops_owl": -58.0, "church_bell": -54.0, "city": -58.0,
 		"tawny_owl": -58.0, "hooves": -56.0, "boat_engine": -52.0, "water_lap": -57.0,
-		"paddle_wheel": -54.0, "ship_horn": -54.0}
+		"paddle_wheel": -54.0, "ship_horn": -54.0, "ferry_diesel": -53.0, "ferry_chime": -53.0}
 ## The states in which the film plays: the bed sits film_db lower.
 const FILM_STATES: Array[String] = ["starting", "playing", "credits"]
 ## Under this linear gain a bed stops its players.
@@ -57,7 +57,7 @@ static func spec() -> Dictionary:
 				+ "sonar's ping, a vent's bubbles, a far car on a highway, a scops owl's call over the roofs, a far "
 				+ "church bell, a city's murmur from the streets below, a tawny owl in the trees, a horse and cart "
 				+ "passing on setts, a narrowboat's slow diesel through a bulkhead, water lapping on a hull, "
-				+ "a sternwheeler's paddle wheel, an ocean liner's horn, a bird, a purr or silence. It sits well under the film (its designed "
+				+ "a sternwheeler's paddle wheel, an ocean liner's horn, a ferry's twin diesels, a maritime PA chime, a bird, a purr or silence. It sits well under the film (its designed "
 				+ "level, ducked under the film, lower while the film plays) and can follow a channel by its level "
 				+ "(film.bass, weather.rain, weather.wet).",
 		"params": {

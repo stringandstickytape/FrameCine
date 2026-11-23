@@ -3,8 +3,8 @@
 Part of the environments engine: [`docs/environments.md`](../../environments.md) has the design and says where each part is.
 
 The Journeys category as it was proposed on 2026-11-09: fifteen rooms that travel, where the journey takes as long
-as the film. You board in the pre-show, leave when the film starts, and arrive with the credits. Three are built; this
-page keeps the other twelve, so the list is not only in a conversation. The built rooms have pages of their own.
+as the film. You board in the pre-show, leave when the film starts, and arrive with the credits. Four are built; this
+page keeps the other eleven, so the list is not only in a conversation. The built rooms have pages of their own.
 
 Every room is empty, as the Coronation room is: no people. Curtains and headrests hide a driver's place. No real
 place is named, and no maker's name or badge.
@@ -44,7 +44,7 @@ lead's estimate of what the engine does not have yet; it is an estimate until th
 | 4 | Liner, 1936 | **built** ([`liner_1936.md`](liner_1936.md), Gemini 4 Neon Extra High) | as built: an ocean liner's Art Deco lounge crossing at night — stepped cove-lit proscenium with torchières, walnut pelmets, working sunburst aft clock, swaying velvet drapes (the ship never rolls), open sea to the horizon on both sides, the Moon's road, a passing sister liner, breakwater lighthouses and lit piers | `cabin`, `passing`, `kit`, `motion` | nothing |
 | 5 | Showboat, 1927 | **built** ([`showboat_1927.md`](showboat_1927.md)) | as built: a floating theatre in white and gold on a wide river, the near bank's trees and a levee town, a steamer at anchor, a lamp-lit landing | `cabin`, `passing`, `kit` | nothing. The proposal's swamp banks with fireflies and its steam organ that plays itself were not built |
 | 6 | Narrowboat | **built** ([`narrowboat.md`](narrowboat.md)) | as built: a canal boat at walking pace, a stove, reeds, willows, bridges, mist, a wharf. The gentlest one, and the comfort baseline | `cabin`, `passing`, `kit` | nothing. The proposal's lock and tunnel were not built |
-| 7 | Night ferry, 1994 | not built | the video lounge: reclining seats, a telly on a bracket, salt-streaked windows, a lighthouse's slow beam | `nightowl_1993`, `hull_creak`, `deep_hum`, the rain pane, open `sea` and `lighthouse` (built for the Liner) | a lighthouse beam that turns; a television for the picture in a `cabin` |
+| 7 | Night ferry, 1994 | **built** ([`night_ferry_1994.md`](night_ferry_1994.md), Gemini 4 Neon Extra High) | as built: a 1994 cross-Channel ferry's video lounge — Pullman recliners with linen antimacassars and tray tables, a ceiling-bracketed 4:3 CRT television and locked VCR cage flashing `12:00`, salt-streaked storm windows with wind-driven rain, a slow rotating volumetric lighthouse beam, passing container freighters and floodlit Ro-Ro ferry terminals | `cabin`, `seats`, `kit`, `passing`, `weather`, `presentation` | nothing |
 | 8 | The Salon, 1870 | not built | a Victorian submarine's velvet salon. A great iris window opens as the film starts, and kelp forests glide by | the Bathysphere's whole sea (`fish`, `ray`, `whale`, seabed, caustics) | an iris window; kelp and rocks as passing shapes; the sea's life going by with the journey |
 
 ### Air
@@ -90,10 +90,11 @@ change first and the rooms second.
 1. The Narrowboat (slowest): built.
 2. The Showboat (a larger hall, twice the speed): built.
 3. The Liner, 1936 (open sea, swaying drapes, maritime landmarks): built (Gemini 4 Neon Extra High).
-4. Next: Night ferry, 1994 (reuses open sea and lighthouse), or Night sleeper, 1929 once the headset comfort test settles the near-scenery speed limit.
-5. The space rooms last: they need a different kind of journey.
+4. Night ferry, 1994 (reuses open sea and lighthouse; adds rotating volumetric lighthouse beams, multi-pane salt-streaked rain glass, ceiling-bracketed CRT in a cabin, Ro-Ro ferry ports and freighters): built (Gemini 4 Neon Extra High).
+5. Next: Night sleeper, 1929 once the headset comfort test settles the near-scenery speed limit, or The Salon, 1870.
+6. The space rooms last: they need a different kind of journey.
 
 ## Shared test helper
 
 `app/tests/room_journey.gd` holds the shared checks for journey rooms (`test_room_narrowboat.gd`,
-`test_room_showboat.gd`, `test_room_liner_1936.gd`).
+`test_room_showboat.gd`, `test_room_liner_1936.gd`, `test_room_night_ferry_1994.gd`).

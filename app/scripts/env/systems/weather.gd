@@ -78,6 +78,17 @@ static func spec() -> Dictionary:
 					"description": "the pane's width and height in metres"},
 			"pane_yaw": {"type": "float", "min": -180.0, "max": 180.0, "default": 0.0,
 					"description": "degrees the pane turns about the vertical; 0 faces +z (seen from in front)"},
+			"panes": {"type": "list", "max": 16, "default": [],
+					"of": {"type": "object", "fields": {
+							"center": {"type": "vec3", "min": -200.0, "max": 200.0},
+							"size": {"type": "vec2", "min": 0.1, "max": 10.0},
+							"yaw": {"type": "float", "min": -180.0, "max": 180.0}}},
+					"description": "several window panes merged into one rain-glass mesh (one draw)"},
+			"pane_salt": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0,
+					"description": "dried sea-salt spray rime near the edges of the window panes"},
+			"pane_drift": {"type": "float", "min": -2.0, "max": 2.0, "default": 0.0, "live": true,
+					"motion": {"max": 2.0},
+					"description": "how much wind along the glass blows rain streaks aft (bind to journey.speed)"},
 			"puddle": {"type": "bool", "default": false, "description": "a puddle on the floor that reflects the film"},
 			"puddle_center": {"type": "vec3", "min": -200.0, "max": 200.0, "default": [0.0, 0.0, -4.0],
 					"description": "the puddle's middle on the floor, the room's frame"},
@@ -118,7 +129,9 @@ func setup() -> void:
 	var falls := str(params["falls"])
 	if int(params["particles"]) > 0 and not (params["areas"] as Array).is_empty():
 		_build_areas(falls == "snow")
-	if bool(params["pane"]):
+	if not (params["panes"] as Array).is_empty():
+		_build_panes()
+	elif bool(params["pane"]):
 		_build_pane()
 	if bool(params["puddle"]):
 		_build_puddle()
@@ -197,6 +210,8 @@ func _build_pane() -> void:
 	_pane_material.shader = PANE_SHADER
 	var size := _vec2(params["pane_size"])
 	_pane_material.set_shader_parameter("pane_size", size)
+	_pane_material.set_shader_parameter("salt", float(params["pane_salt"]))
+	_pane_material.set_shader_parameter("drift", float(params["pane_drift"]))
 	var quad := QuadMesh.new()
 	quad.size = size
 	_pane = MeshInstance3D.new()
@@ -205,6 +220,72 @@ func _build_pane() -> void:
 	_pane.material_override = _pane_material
 	_pane.position = _vec3(params["pane_center"])
 	_pane.rotation.y = deg_to_rad(float(params["pane_yaw"]))
+	_pane.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_pane.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	_pane.add_to_group(ScreenFrame.SEE_THROUGH)
+	own(_pane)
+
+
+## Several window panes merged into one ArrayMesh (one draw call): each pane carries its size in UV2, its own seed in
+## COLOR.r and its aft-flow sign in COLOR.g so wind-driven rain streaks blow bow-to-stern on both sides of a cabin.
+func _build_panes() -> void:
+	_pane_material = ShaderMaterial.new()
+	_pane_material.shader = PANE_SHADER
+	_pane_material.set_shader_parameter("salt", float(params["pane_salt"]))
+	_pane_material.set_shader_parameter("drift", float(params["pane_drift"]))
+	var v := PackedVector3Array()
+	var n := PackedVector3Array()
+	var c := PackedColorArray()
+	var uv := PackedVector2Array()
+	var uv2 := PackedVector2Array()
+	var idx := PackedInt32Array()
+	var list: Array = params["panes"]
+	for i in list.size():
+		if not (list[i] is Dictionary):
+			continue
+		var entry: Dictionary = list[i]
+		var centre := _vec3(entry.get("center", [0.0, 1.5, -3.0]))
+		var size := _vec2(entry.get("size", [1.2, 1.0]))
+		var basis := Basis(Vector3.UP, deg_to_rad(float(entry.get("yaw", 0.0))))
+		var right := basis * Vector3.RIGHT
+		var up := basis * Vector3.UP
+		var fwd := basis * Vector3.BACK
+		var aft_bit := 1.0 if right.dot(Vector3.BACK) >= 0.0 else 0.0
+		var seed_v := fmod(float(i) * 0.2713 + 0.13, 1.0)
+		var col := Color(seed_v, aft_bit, 0.0, 1.0)
+		var hw := size.x * 0.5
+		var hh := size.y * 0.5
+		var first := v.size()
+		# QuadMesh UV convention: UV (0, 0) top-left, (1, 1) bottom-right.
+		var corners := [
+			[centre - right * hw + up * hh, Vector2(0.0, 0.0)],
+			[centre + right * hw + up * hh, Vector2(1.0, 0.0)],
+			[centre + right * hw - up * hh, Vector2(1.0, 1.0)],
+			[centre - right * hw - up * hh, Vector2(0.0, 1.0)],
+		]
+		for pt: Array in corners:
+			v.append(pt[0])
+			n.append(fwd)
+			c.append(col)
+			uv.append(pt[1])
+			uv2.append(size)
+		idx.append_array([first, first + 1, first + 2, first, first + 2, first + 3])
+	if v.is_empty():
+		return
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = v
+	arrays[Mesh.ARRAY_NORMAL] = n
+	arrays[Mesh.ARRAY_COLOR] = c
+	arrays[Mesh.ARRAY_TEX_UV] = uv
+	arrays[Mesh.ARRAY_TEX_UV2] = uv2
+	arrays[Mesh.ARRAY_INDEX] = idx
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	_pane = MeshInstance3D.new()
+	_pane.name = "RainPane"
+	_pane.mesh = mesh
+	_pane.material_override = _pane_material
 	_pane.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_pane.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
 	_pane.add_to_group(ScreenFrame.SEE_THROUGH)
@@ -365,6 +446,7 @@ func _apply() -> void:
 	if _pane_material != null:
 		_pane_material.set_shader_parameter("rain", rain_amount())
 		_pane_material.set_shader_parameter("wet", wet_amount())
+		_pane_material.set_shader_parameter("drift", float(params["pane_drift"]))
 	if _puddle_material != null:
 		_puddle_material.set_shader_parameter("rain", rain_amount())
 		_puddle_material.set_shader_parameter("strength", float(params["puddle_reflect"]))
@@ -374,6 +456,8 @@ func _apply() -> void:
 func _param_changed(param: String, _value: Variant) -> void:
 	if param == "puddle_reflect" and _puddle_material != null:
 		_puddle_material.set_shader_parameter("strength", float(params["puddle_reflect"]))
+	elif param == "pane_drift" and _pane_material != null:
+		_pane_material.set_shader_parameter("drift", float(params["pane_drift"]))
 
 
 func on_screen_changed(local: Transform3D, size: Vector2) -> void:

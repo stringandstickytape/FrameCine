@@ -58,7 +58,7 @@ static func spec() -> Dictionary:
 				+ "a coffee table; dressing: bunting, a tea set, sandwiches, a stool, a channel dial, a soundbar, a "
 				+ "floor lamp, a glass table, a media unit, a boat's stove, a low stage whose lamps behind its hoods glow "
 				+ "with the house lights (bright before the film, all but out during it), gilt pilasters and drapes, "
-				+ "an ocean liner's Art Deco proscenium with coves and torchières, pleated window drapes, pelmets, a sunburst bulkhead clock and a promenade deck rail.",
+				+ "an ocean liner's Art Deco proscenium with coves and torchières, pleated window drapes, pelmets, a sunburst bulkhead clock and a promenade deck rail, and a 1994 night ferry's video lounge (ceiling-bracketed CRT and VCR cage, Pullman recliner armrests, antimacassars, tray tables, marine grab-rails, fire cabinet, ship's clock and exterior life-ring deck rails).",
 		"params": PARAMS,
 		"requires": ["light"],
 		"provides": ["collision", "bake"],
@@ -148,6 +148,8 @@ const PARAMS := {
 	# defaults. Coves: plaster washed by hidden lamps (shaders/env_cove.gdshader), their colour live.
 	"cove": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
 			"description": "how bright the coves' hidden lamps are (times the house lamps' level)"},
+	"cove_floor": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "brightness": true,
+			"description": "minimum share of cove brightness kept when house lamps dim (night-crossing strips)"},
 	"cove_colour": {"type": "color", "default": [1.0, 0.74, 0.42], "live": true,
 			"description": "the coves' light (a setting or a cue moves it)"},
 	"cove_film_colour": {"type": "color", "default": [1.0, 0.74, 0.42], "live": true,
@@ -625,8 +627,10 @@ func cove_colour_now() -> Color:
 func _update_cove() -> void:
 	if _cove_m == null:
 		return
+	var fl := clampf(float(params["cove_floor"]), 0.0, 1.0)
 	_cove_m.set_shader_parameter("glow_colour", cove_colour_now())
-	_cove_m.set_shader_parameter("glow", float(params["cove"]) * _group_level("house"))
+	_cove_m.set_shader_parameter("glow", float(params["cove"]) * maxf(_group_level("house"), fl))
+	_cove_m.set_shader_parameter("cove_floor", fl)
 
 
 ## The footlights' stand-in lamps in the cove's colour, at the house lamps' level.

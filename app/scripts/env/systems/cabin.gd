@@ -93,7 +93,11 @@ const PARAMS := {
 			"description": "the picture's width and height ([0, 0]: its own, from the cabin's size)"},
 	"screen_bottom": {"type": "float", "min": 0.0, "max": 3.0, "default": 0.0,
 			"description": "the picture's bottom edge over the floor (0: its own)"},
+	"screen_standoff": {"type": "float", "min": 0.03, "max": 2.5, "default": 0.03,
+			"description": "metres in front of the front bulkhead where the picture sits (0.03: on the bulkhead)"},
 	"screen_frame": {"type": "bool", "default": true, "description": "a narrow frame round the picture"},
+	"window_glass": {"type": "bool", "default": true,
+			"description": "plain glass in the windows (false when a weather system draws rain panes there)"},
 	"seating": {"type": "enum", "values": ["none", "rows"], "default": "none",
 			"description": "none: the viewer's own seat alone; rows: seats in rows either side of an aisle"},
 	"rows_front": {"type": "int", "min": 0, "max": 30, "default": 2, "description": "rows in front of the viewer's"},
@@ -371,7 +375,8 @@ static func layout(p: Dictionary) -> SeatList:
 static func screen_for(p: Dictionary) -> Dictionary:
 	var q := resolved(p)
 	var s := U.v2(q["screen_size"])
-	return {"center": [float(q["cx"]), float(q["screen_bottom"]) + s.y / 2.0, float(q["front_z"]) + 0.03],
+	var standoff := float(p.get("screen_standoff", 0.03))
+	return {"center": [float(q["cx"]), float(q["screen_bottom"]) + s.y / 2.0, float(q["front_z"]) + standoff],
 			"size": [s.x, s.y], "facing": [0.0, 0.0, 1.0]}
 
 
@@ -619,6 +624,8 @@ func _build_windows(q: Dictionary, trim: RoomMesh) -> void:
 			trim.strip(inner, outer, face_n)
 			trim.strip(wall_line, out_line, reveal_n)
 			glass.polygon(pane, n)
+	if not bool(params.get("window_glass", true)):
+		return
 	# Fainter than a hall's glass (0.06, and 0.22 more where the view grazes it): a cabin's windows are an arm's
 	# length from a bright picture and are looked through at night, and at a hall's strength the picture's light
 	# on the panes was a grey veil over everything outside (2026-11-09, the Narrowboat's wharf at night).

@@ -9,23 +9,44 @@ render_mode unshaded, blend_mix, depth_draw_never, cull_disabled, shadows_disabl
 // Rain falling now and the glass still wet (0..1 each).
 uniform float rain = 0.0;
 uniform float wet = 0.0;
-// The pane's size in metres.
+// The pane's size in metres (fallback for single QuadMesh; merged panes carry their own size in UV2).
 uniform vec2 pane_size = vec2(1.2, 1.0);
 uniform vec3 colour : source_color = vec3(0.8, 0.85, 0.95);
 uniform float opacity = 0.55;
+// Dried sea-salt spray rime near window seals (0..1) and sideways wind drift blowing rain streaks aft (-2..2).
+uniform float salt = 0.0;
+uniform float drift = 0.0;
 
 #include "res://shaders/env_spill.gdshaderinc"
 
 varying vec3 world_pos;
+varying vec2 p_size;
+varying float p_seed;
+varying float p_aft;
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	bool merged = UV2.x > 0.01;
+	p_size = merged ? UV2 : pane_size;
+	p_seed = merged ? COLOR.r * 37.0 : 0.0;
+	p_aft = merged ? (COLOR.g * 2.0 - 1.0) : 1.0;
 }
 
 float pane_hash(vec2 p) {
 	vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
 	q += dot(q, q.yzx + 33.33);
 	return fract((q.x + q.y) * q.z);
+}
+
+float pane_noise(vec2 p) {
+	vec2 i = floor(p);
+	vec2 f = fract(p);
+	f = f * f * (3.0 - 2.0 * f);
+	float a = pane_hash(i);
+	float b = pane_hash(i + vec2(1.0, 0.0));
+	float c = pane_hash(i + vec2(0.0, 1.0));
+	float d = pane_hash(i + vec2(1.0, 1.0));
+	return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
 // One bead per cell of a grid `cells` metres apart: x lens shade (0..1), y its mask. present: share of cells with one.
@@ -46,15 +67,15 @@ vec2 beads(vec2 m, float cells, float present, float t, float seed) {
 }
 
 // Drops running down in columns `width` metres wide: x lens shade, y mask (the drop and its trail of beads).
-vec2 runners(vec2 m, float width, float amount, float t) {
+vec2 runners(vec2 m, float width, float amount, float t, float span_y, float seed) {
 	float col = floor(m.x / width);
-	float h = pane_hash(vec2(col, 17.0));
+	float h = pane_hash(vec2(col, 17.0 + seed));
 	if (h > amount) {
 		return vec2(0.0);
 	}
-	float speed = mix(0.06, 0.16, pane_hash(vec2(col, 5.0)));
-	float span = pane_size.y + 0.6;
-	float head = pane_size.y + 0.3 - mod(t * speed + h * span, span);
+	float speed = mix(0.06, 0.16, pane_hash(vec2(col, 5.0 + seed)));
+	float span = span_y + 0.6;
+	float head = span_y + 0.3 - mod(t * speed + h * span, span);
 	// The path wavers as the drop picks its way down.
 	float path = (col + 0.5) * width + width * 0.28 * sin(m.y * 9.0 + h * 30.0) * sin(m.y * 3.7 + h * 11.0);
 	float dx = (m.x - path) / width;
@@ -72,19 +93,35 @@ vec2 runners(vec2 m, float width, float amount, float t) {
 }
 
 void fragment() {
-	vec2 m = vec2(UV.x, 1.0 - UV.y) * pane_size;
+	vec2 m = vec2(UV.x, 1.0 - UV.y) * p_size;
 	float present = clamp(max(rain, wet * 0.7), 0.0, 1.0);
-	vec2 a = beads(m, 0.02, present * 0.5, TIME, 0.0);
-	vec2 b = beads(m + 0.37, 0.042, present * 0.35, TIME * 0.8, 9.0);
-	vec2 r = runners(m, 0.045, clamp(rain, 0.0, 1.0) * 0.45, TIME);
+	float marine = step(0.001, salt);
+	vec2 a = beads(m, 0.024, present * mix(0.5, 0.28, marine), TIME, p_seed);
+	vec2 b = beads(m + 0.37, 0.048, present * mix(0.35, 0.2, marine), TIME * 0.8, 9.0 + p_seed);
+	// Wind-driven sideways shear blows rain streaks bow-to-stern while the cabin moves.
+	vec2 mr = vec2(m.x + m.y * drift * p_aft * 0.42, m.y);
+	vec2 r = runners(mr, 0.05, clamp(rain, 0.0, 1.0) * 0.55, TIME, p_size.y, p_seed);
 	float mask = max(max(a.y, b.y), r.y);
 	float spot = max(max(a.x * a.y, b.x * b.y), r.x);
-	// A drop's edge darkens what is behind it; its low spot gathers the light.
+	// Dried sea-salt spray rime clinging near the rubber gaskets and bottom sills, keeping centre glass clear.
+	float salt_mask = 0.0;
+	if (salt > 0.001) {
+		float edge_d = min(min(m.x, p_size.x - m.x), min(m.y, p_size.y - m.y));
+		float sill_weight = mix(0.55, 1.0, smoothstep(0.45, 0.0, UV.y));
+		float rim_band = smoothstep(0.16, 0.0, edge_d) * sill_weight;
+		float n_rime = pane_noise(m * 16.0 + vec2(p_seed, p_seed * 0.7)) * 0.6
+				+ pane_noise(m * 38.0 + vec2(p_seed * 1.9, 3.0)) * 0.4;
+		float n_streak = pane_noise(vec2(m.x * 3.5 + m.y * p_aft * 1.4, m.y * 20.0) + p_seed);
+		salt_mask = salt * clamp(rim_band * smoothstep(0.28, 0.78, n_rime) * 0.95
+				+ smoothstep(0.76, 0.96, n_streak) * 0.09, 0.0, 1.0);
+	}
+	// A drop's edge refracts what is behind it; its low spot gathers the light.
 	vec3 light = min(room_light_at(world_pos, 0.8) * 1.6 + vec3(0.03), vec3(1.4));
-	vec3 rim = vec3(0.01);
+	vec3 rim = mix(vec3(0.01), vec3(0.16, 0.21, 0.26) * max(light, vec3(0.18)), marine);
 	vec3 shade = mix(rim, colour * light * 1.6, spot);
-	// Wet glass: a faint sheen all over while it's wet.
-	float sheen = 0.04 * wet;
-	ALBEDO = mix(colour * light, shade, step(0.001, mask));
-	ALPHA = clamp(opacity * mask * (0.45 + 0.55 * spot) + sheen, 0.0, 1.0);
+	// Wet glass & salt rime: faint marine glass sheen plus pale sea-salt residue near the seals.
+	vec3 glass_col = mix(colour * light, vec3(0.8, 0.86, 0.9) * max(light, vec3(0.14)), salt_mask);
+	float sheen = 0.035 * wet + 0.015 * marine + salt_mask * 0.28;
+	ALBEDO = mix(glass_col, shade, step(0.001, mask));
+	ALPHA = clamp(opacity * mask * (mix(0.45, 0.18, marine) + mix(0.55, 0.78, marine) * spot) + sheen, 0.0, 1.0);
 }

@@ -47,6 +47,13 @@ var _luv2 := PackedVector2Array()
 var _lc0 := PackedFloat32Array()
 var _lc1 := PackedFloat32Array()
 var _li := PackedInt32Array()
+var _bv := PackedVector3Array()
+var _bn := PackedVector3Array()
+var _bc := PackedColorArray()
+var _buv := PackedVector2Array()
+var _buv2 := PackedVector2Array()
+var _bc0 := PackedFloat32Array()
+var _bc1 := PackedFloat32Array()
 var _item0 := [0.0, 0.0, 0.0, 0.0]
 var _item1 := [0.0, 1.0, 0.0, 0.0]
 var _mat := M_PLAIN
@@ -74,6 +81,10 @@ func triangle_count() -> int:
 
 func light_count() -> int:
 	return _lv.size() / 4
+
+
+func beam_count() -> int:
+	return _bv.size() / 3
 
 
 func _vert(p: Vector3, n: Vector3, col: Color, uv: Vector2) -> void:
@@ -210,6 +221,42 @@ func light(at: Vector3, colour: Color, brightness: float, radius: float) -> void
 	_li.append_array([first, first + 1, first + 2, first, first + 2, first + 3])
 
 
+## A twin-lens rotating volumetric lighthouse beam centered at (0, origin_y, 0) about the item's foot: two opposing
+## soft open-ended cones of length `length`, radius `r_near` at the lens to `r_far` at the tip. Vertices hold offsets
+## from the lantern pivot; UV2 carries (origin_y, phase); UV.x runs 0 at the lens to 1 at the tip.
+func beam(origin_y: float, length: float, r_near: float, r_far: float, colour: Color, brightness: float,
+		phase := 0.0) -> void:
+	var sides := 12
+	var slope := (r_far - r_near) / maxf(length, 0.01)
+	var col := Color(colour.r, colour.g, colour.b, brightness)
+	var uv2 := Vector2(origin_y, phase)
+	for dir: float in [1.0, -1.0]:
+		var x0 := dir * maxf(r_near * 0.8, 0.4)
+		var x1 := dir * length
+		for i in sides:
+			var a0 := TAU * float(i) / sides
+			var a1 := TAU * float(i + 1) / sides
+			var c0 := cos(a0)
+			var s0 := sin(a0)
+			var c1 := cos(a1)
+			var s1 := sin(a1)
+			var n0 := Vector3(-dir * slope, c0, s0).normalized()
+			var n1 := Vector3(-dir * slope, c1, s1).normalized()
+			var p00 := Vector3(x0, c0 * r_near, s0 * r_near)
+			var p01 := Vector3(x0, c1 * r_near, s1 * r_near)
+			var p10 := Vector3(x1, c0 * r_far, s0 * r_far)
+			var p11 := Vector3(x1, c1 * r_far, s1 * r_far)
+			for tri_pts: Array in [[p00, n0, 0.0], [p01, n1, 0.0], [p11, n1, 1.0],
+					[p00, n0, 0.0], [p11, n1, 1.0], [p10, n0, 1.0]]:
+				_bv.append(tri_pts[0])
+				_bn.append(tri_pts[1])
+				_bc.append(col)
+				_buv.append(Vector2(float(tri_pts[2]), 0.0))
+				_buv2.append(uv2)
+				_bc0.append_array(_item0)
+				_bc1.append_array(_item1)
+
+
 const _FORMAT := (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM0_SHIFT) \
 		| (Mesh.ARRAY_CUSTOM_RGBA_FLOAT << Mesh.ARRAY_FORMAT_CUSTOM1_SHIFT)
 
@@ -245,6 +292,24 @@ func commit_lights() -> ArrayMesh:
 	a[Mesh.ARRAY_CUSTOM0] = _lc0
 	a[Mesh.ARRAY_CUSTOM1] = _lc1
 	a[Mesh.ARRAY_INDEX] = _li
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a, [], {}, _FORMAT)
+	return mesh
+
+
+## The rotating volumetric beams as one surface (null when there are none).
+func commit_beams() -> ArrayMesh:
+	if _bv.is_empty():
+		return null
+	var a := []
+	a.resize(Mesh.ARRAY_MAX)
+	a[Mesh.ARRAY_VERTEX] = _bv
+	a[Mesh.ARRAY_NORMAL] = _bn
+	a[Mesh.ARRAY_COLOR] = _bc
+	a[Mesh.ARRAY_TEX_UV] = _buv
+	a[Mesh.ARRAY_TEX_UV2] = _buv2
+	a[Mesh.ARRAY_CUSTOM0] = _bc0
+	a[Mesh.ARRAY_CUSTOM1] = _bc1
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a, [], {}, _FORMAT)
 	return mesh

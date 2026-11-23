@@ -20,7 +20,7 @@ const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale
 		"rain_leaves", "gas_hiss", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain",
 		"clock", "tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load", "switch_clunk", "valve_hum",
 		"crt_off", "channel_clunk", "sonar", "bubbles", "far_car", "scops_owl", "church_bell", "city", "tawny_owl",
-		"hooves", "boat_engine", "water_lap", "paddle_wheel", "ship_horn"]
+		"hooves", "boat_engine", "water_lap", "paddle_wheel", "ship_horn", "ferry_diesel", "ferry_chime"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
@@ -30,11 +30,11 @@ const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise
 		"vcr": 4.5, "tape_load": 8.0, "switch_clunk": 0.6, "valve_hum": 8.0, "crt_off": 1.4, "channel_clunk": 0.45,
 		"sonar": 3.0, "bubbles": 6.0, "far_car": 34.0, "scops_owl": 9.0, "church_bell": 14.0, "city": 12.0,
 		"tawny_owl": 7.0, "hooves": 16.0, "boat_engine": 8.0, "water_lap": 12.0, "paddle_wheel": 6.0,
-		"ship_horn": 5.5}
+		"ship_horn": 5.5, "ferry_diesel": 8.0, "ferry_chime": 3.4}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
 		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles",
-		"city", "boat_engine", "water_lap", "paddle_wheel"]
+		"city", "boat_engine", "water_lap", "paddle_wheel", "ferry_diesel"]
 ## Sample rates below RATE for the far and low sounds (less to make, nothing lost above their band).
 const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiator": 22050, "moped": 32000,
 		"hull_creak": 32000, "purr": 22050, "crickets": 32000, "fire": 32000, "drips": 32000, "wind": 22050,
@@ -42,7 +42,7 @@ const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiato
 		"tape_load": 32000, "switch_clunk": 32000, "valve_hum": 22050, "crt_off": 32000, "channel_clunk": 32000,
 		"sonar": 32000, "bubbles": 32000, "far_car": 22050, "scops_owl": 32000, "church_bell": 22050, "city": 22050,
 		"tawny_owl": 22050, "hooves": 32000, "boat_engine": 22050, "water_lap": 32000, "paddle_wheel": 22050,
-		"ship_horn": 22050}
+		"ship_horn": 22050, "ferry_diesel": 22050, "ferry_chime": 32000}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -1315,6 +1315,44 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 				var steam := (_lp(st, 0, wn, a_steam) - _lp(st, 1, wn, a_lo)) * 0.18 * attack * sustain
 				var v := (tone1 * 0.62 + tone2 * 0.42 + steam) * env
 				s[i] = _lp(st, 2, v, a_out)
+		"ferry_diesel":
+			# Twin medium-speed marine diesels heard through a steel passenger deck (Night ferry 1994): two deep
+			# fundamentals beating gently (34.0 and 34.375 Hz: exact 3 beats per 8 s loop, zero seam), deck-plate
+			# harmonics, a subtle 6 Hz twin-shaft vibration and warm low-passed engine-room ventilation hum.
+			var a_rumble := _a(220.0, r)
+			var a_vent := _a(420.0, r)
+			var a_out := _a(360.0, r)
+			for i in total:
+				var t := float(i) / r
+				var shaft := 0.86 + 0.14 * sin(TAU * 6.0 * t)
+				var d1 := sin(TAU * 34.0 * t) + 0.52 * sin(TAU * 68.0 * t + 0.4) + 0.24 * sin(TAU * 102.0 * t)
+				var d2 := sin(TAU * 34.375 * t + 1.1) + 0.42 * sin(TAU * 68.75 * t) + 0.16 * sin(TAU * 137.5 * t)
+				var wn := rng.randf_range(-1.0, 1.0)
+				var rumble := _lp(st, 0, wn, a_rumble) * 0.55
+				var vent := _lp(st, 1, wn, a_vent) * 0.18
+				s[i] = _lp(st, 2, ((d1 * 0.55 + d2 * 0.45) * shaft + rumble + vent) * 0.7, a_out)
+		"ferry_chime":
+			# A synthetic 3-note maritime ceiling-PA chime before departure (Night ferry 1994, no voice): tiny relay
+			# click followed by three warm struck-bar tones (E5, C5, G5) band-limited as through a lounge tannoy.
+			var a_hi := _a(2400.0, r)
+			var a_lo := _a(260.0, r)
+			var notes := [[0.14, 659.25, 1.0], [0.58, 523.25, 0.92], [1.04, 783.99, 1.0]]
+			for i in total:
+				var t := float(i) / r
+				var v := 0.0
+				# Soft PA microphone relay click before the chime.
+				if t >= 0.02 and t < 0.045:
+					v += rng.randf_range(-0.35, 0.35) * exp(-(t - 0.02) * 180.0)
+				for n: Array in notes:
+					var dt := t - float(n[0])
+					if dt >= 0.0:
+						var f := float(n[1])
+						var env := minf(dt / 0.008, 1.0) * exp(-dt * 2.15) * float(n[2])
+						var bar := sin(TAU * f * dt) + 0.22 * sin(TAU * 2.0 * f * dt) * exp(-dt * 4.5) \
+								+ 0.08 * sin(TAU * 3.0 * f * dt) * exp(-dt * 8.0)
+						v += bar * env
+				var bp := _lp(st, 0, v, a_hi) - _lp(st, 1, v, a_lo)
+				s[i] = bp
 	return s
 
 

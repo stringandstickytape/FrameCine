@@ -18,6 +18,7 @@ uniform vec3 sky_top = vec3(0.3, 0.25, 0.2);
 uniform vec3 sky_bottom = vec3(0.1, 0.08, 0.07);
 uniform float house_reference = 0.05;
 uniform float house_floor = 0.04;
+uniform float cove_floor = 0.0;
 uniform float spill = 1.0;
 // A slow mottle in the plaster (sky.gd noise_texture(): four channels of seamless noise), metres a repeat.
 uniform sampler2D mottle : filter_linear_mipmap, repeat_enable;
@@ -52,7 +53,7 @@ void fragment() {
 	// The cove's light: its colour, a whiter core where it is strongest (a lamp close by), times the house level as
 	// every house light is.
 	float w = COLOR.a;
-	vec3 cove = (glow_colour * w + mix(glow_colour, vec3(1.0), 0.45) * w * w * w * 0.8) * glow * level;
+	vec3 cove = (glow_colour * w + mix(glow_colour, vec3(1.0), 0.45) * w * w * w * 0.8) * glow * max(level, cove_floor);
 	ALBEDO = vec3(0.0);
 	ROUGHNESS = 1.0;
 	EMISSION = bake_pass ? vec3(0.0) : base * (fill + film + cove);

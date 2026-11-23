@@ -118,3 +118,16 @@ promenade railings, open sea, channel buoys, harbour lights, piers, breakwater l
 stars are made in code by the systems (`cabin.gd`, `kit.gd`, `motion.gd`, `passing.gd`, `sky.gd`; the stars from the
 catalogue under "Data") on library materials (`smooth_plaster`, `walnut_veneer`, `woven_carpet`, `brass`, `brushed_steel`,
 `oak_planks`, `velvet`, all CC0). Its sounds (the turbines, ocean wash, hull creak and ship's horn) are synthesised.
+
+## Night ferry 1994 (`night_ferry_1994.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The 1994 cross-Channel ferry video lounge, its Pullman recliners, moulded armrests, woven linen
+antimacassars, flip-up seatback tray tables, ceiling-bracketed 4:3 CRT television and locked VCR shelf cage, fluorescent
+ceiling grid, night-crossing cove strips, laminate window-bay tables with cups and timetables, red fire-hose cabinet,
+geometric EXIT sign, ship's bulkhead clock, exterior deck rails with orange lifebuoys, 1994 moquette carpet pattern,
+salt-streaked rain storm panes, open sea, channel buoys, coastal lights, Ro-Ro ferry ports, breakwater lighthouses with
+rotating volumetric beams, passing container freighters, sky and stars are made in code by the systems (`cabin.gd`,
+`seats.gd`, `kit.gd`, `kit/ferry_1994.gd`, `passing.gd`, `weather.gd`, `presentation.gd`, `sky.gd`; the stars from the
+catalogue under "Data") on library materials (`painted_wall`, `woven_carpet`, `woven_upholstery`, `linen`, `dark_metal`,
+`brushed_steel`, `brass`, `smooth_concrete`, all CC0). Its sounds (the twin marine diesels, heavy hull wash, rain on
+storm glass, hull creaks, VCR mechanism, CRT flyback whine, boarding PA chime and ship's horn) are synthesised.

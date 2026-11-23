@@ -280,13 +280,15 @@ func _test_room_tab() -> void:
 	# default one.
 	var journeys: Container = tab._category_rows["journey"]
 	var builders: Dictionary = journeys.get_meta("builders", {})
+	var gemini_journeys: Array = (tab.room_buttons(builders["Gemini 4 Neon Extra High"]) as Array).map(
+			func(b: Button) -> String: return b.text) if builders.has("Gemini 4 Neon Extra High") else []
 	_check("the journeys stand under their builders %s" % [builders.keys()],
 			builders.has("Gemini 4 Neon Extra High") and builders.has(EnvLibrary.DEFAULT_AUTHOR)
-			and (tab.room_buttons(builders["Gemini 4 Neon Extra High"]) as Array).map(
-			func(b: Button) -> String: return b.text) == [tr("Liner 1936")])
+			and gemini_journeys.has(tr("Liner 1936")) and gemini_journeys.has(tr("Night ferry 1994")))
 	_check("a room with no author is the default builder's (%s)" % EnvLibrary.builder_of("cinema"),
 			EnvLibrary.author_of("cinema") == "" and EnvLibrary.builder_of("cinema") == "Opus 5.5 High"
-			and EnvLibrary.builder_of("liner_1936") == "Gemini 4 Neon Extra High")
+			and EnvLibrary.builder_of("liner_1936") == "Gemini 4 Neon Extra High"
+			and EnvLibrary.builder_of("night_ferry_1994") == "Gemini 4 Neon Extra High")
 	_check("each builder's heading is a label above its rooms", (journeys.get_children() as Array).filter(
 			func(c: Node) -> bool: return c is Label).map(func(l: Label) -> String: return l.text) == builders.keys())
 	_check("the Void stays with the other rooms", EnvLibrary.category_of("void") == "other"

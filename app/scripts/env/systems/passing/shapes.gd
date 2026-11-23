@@ -20,7 +20,8 @@ const ShapeMesh := preload("res://scripts/env/systems/passing/shape_mesh.gd")
 
 const BANDS: Array[String] = ["reeds", "willow", "tree", "poplar", "hedge", "fence", "ridge", "lights", "cottage",
 		"post", "buoy"]
-const LANDMARKS: Array[String] = ["lamp", "bridge", "boat", "wharf", "tower", "steamer", "pier", "lighthouse", "ship"]
+const LANDMARKS: Array[String] = ["lamp", "bridge", "boat", "wharf", "tower", "steamer", "pier", "lighthouse", "ship",
+		"ferry_port", "freighter"]
 ## Shapes that stand end to end in a row, each this long along the way (metres): such a band's count is its loop's
 ## length over this, and its items stand at even steps, all at the band's `near`.
 const SEGMENT := {"hedge": 6.0, "fence": 2.4, "ridge": 12.0}
@@ -30,6 +31,7 @@ const COLOURS := {
 	"fence": "#4a4337", "ridge": "#10141c", "lights": "#ffc98a", "cottage": "#26221d", "post": "#2e2a24",
 	"lamp": "#1b1b1d", "bridge": "#4a3329", "boat": "#17301f", "wharf": "#3a3632", "tower": "#15171c",
 	"steamer": "#cfc8b8", "buoy": "#5a1512", "pier": "#3e3c38", "lighthouse": "#d4d0c6", "ship": "#c8c2b4",
+	"ferry_port": "#3a4048", "freighter": "#18202c",
 }
 ## A far village's lights: this share warm, the rest cool.
 const WARM := Color(1.0, 0.79, 0.54)
@@ -60,6 +62,7 @@ const REACH := {
 	"buoy": {"stem": [0.0, 0.45], "wide": [0.0, 0.45], "over": [0.0, 0.0]},
 	"lighthouse": {"stem": [0.0, 3.2], "wide": [0.0, 3.6], "over": [0.0, 0.0]},
 	"ship": {"stem": [0.0, 6.8], "wide": [0.0, 7.2], "over": [0.0, 0.0]},
+	"freighter": {"stem": [0.0, 6.6], "wide": [0.0, 7.0], "over": [0.0, 0.0]},
 }
 
 
@@ -109,6 +112,10 @@ static func clearing(shape: String, size: float, side: float, distance: float) -
 			return _clearing(20.0 * size, side, distance - 5.0 * size, distance + 14.0 * size)
 		"ship":
 			return _clearing(50.0 * size, side, distance - 8.0 * size, distance + 8.0 * size)
+		"ferry_port":
+			return _clearing(38.0, side, distance - 6.0, distance + 24.0)
+		"freighter":
+			return _clearing(46.0 * size, side, distance - 8.0 * size, distance + 8.0 * size)
 	return Vector3.ZERO
 
 
@@ -159,6 +166,10 @@ static func draw(shape: String, m: ShapeMesh, rng: RandomNumberGenerator, size: 
 			_lighthouse(m, size, colour, info)
 		"ship":
 			_ship(m, rng, size, colour, info)
+		"ferry_port":
+			_ferry_port(m, size, colour, info)
+		"freighter":
+			_freighter(m, rng, size, colour, info)
 
 
 ## A colour with its r, g and b multiplied by k.
@@ -707,10 +718,12 @@ static func _lighthouse(m: ShapeMesh, size: float, colour: Color, info: Dictiona
 	m.material(ShapeMesh.M_PLAIN)
 	m.tube(Vector3(0.0, 17.8, 0.0) * s, Vector3(0.0, 18.8, 0.0) * s, 1.45 * s, 0.6 * s, 8, band_red, band_red)
 	m.tube(Vector3(0.0, 18.8, 0.0) * s, Vector3(0.0, 19.5, 0.0) * s, 0.25 * s, 0.04 * s, 6, iron, iron)
-	# Beacon light (bright core + wide warm glow) and a harbour-mouth marker on the breakwater head.
+	# Beacon light (bright core + wide warm glow), twin sweeping volumetric beams, and a harbour-mouth marker.
 	var beacon := Vector3(0.0, 16.8, 0.0) * s
 	m.light(beacon, Color(1.0, 0.92, 0.7), 1.3, 2.6 * s)
 	m.light(beacon, Color(1.0, 0.97, 0.88), 1.5, 0.65 * s)
+	m.beam(16.8 * s, 68.0 * s, 0.9 * s, 11.5 * s, Color(1.0, 0.96, 0.84), 0.72,
+			fmod(float(info.get("distance", 0.0)) * 0.17, TAU))
 	var nav := Color(0.28, 1.0, 0.48) if side > 0.0 else Color(1.0, 0.25, 0.2)
 	m.light(Vector3(-side * 2.8, 3.6, 2.6) * s, nav, 1.0, 0.45 * s)
 
@@ -785,3 +798,154 @@ static func _ship(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour:
 	m.light(Vector3(0.0, 21.3, -25.5) * s, COOL, 1.0, 0.4 * s)
 	var nav := Color(1.0, 0.25, 0.2) if side > 0.0 else Color(0.28, 1.0, 0.48)
 	m.light(Vector3(-side * 7.1, 12.6, 14.5) * s, nav, 1.1, 0.45 * s)
+
+
+## A 1990s cross-Channel Ro-Ro ferry terminal: concrete quay apron with bollards, corrugated steel passenger terminal
+## with glazed elevated boarding gangway, twin-tower vehicle linkspan gantry with yellow-and-black hazard piers, four
+## high-mast cold-sodium/halide port floodlight towers, and berth alignment signals. Length along the way is 68 m.
+static func _ferry_port(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var deck := 3.0 * s
+	var steel := Color("#232930")
+	var blue_steel := Color("#243b52")
+	var hazard := Color("#b88a1e")
+	var terminal := Color("#4b535c")
+	var roof := Color("#1c2026")
+	var sodium := Color(1.0, 0.72, 0.32)
+	var halide := Color(0.82, 0.92, 1.0)
+	m.material(ShapeMesh.M_PLAIN)
+	# Quay wall, apron deck and end caps.
+	m.quad(Vector3(0.0, -1.5 * s, -34.0), Vector3(0.0, -1.5 * s, 34.0), Vector3(0.0, deck, 34.0),
+			Vector3(0.0, deck, -34.0), colour)
+	m.quad(Vector3(0.0, deck, -34.0), Vector3(side * 16.0, deck, -34.0), Vector3(side * 16.0, deck, 34.0),
+			Vector3(0.0, deck, 34.0), _mul(colour, 1.12))
+	for z: float in [-34.0, 34.0]:
+		m.quad(Vector3(0.0, -1.5 * s, z), Vector3(side * 16.0, -1.5 * s, z), Vector3(side * 16.0, deck, z),
+				Vector3(0.0, deck, z), _mul(colour, 0.85))
+	# Steel bollards along the quay edge.
+	for z: float in [-28.0, -14.0, 0.0, 14.0, 28.0]:
+		m.box(Vector3(side * 0.75, deck + 0.45 * s, z), Vector3(0.5, 0.9 * s, 0.5), steel)
+	# Modern flat-roofed terminal hall and elevated enclosed passenger gangway jutting towards the ferry.
+	var hall_x := side * 11.2
+	m.box(Vector3(hall_x, deck + 3.4 * s, -12.0), Vector3(8.5, 6.8 * s, 32.0), terminal)
+	m.box(Vector3(hall_x, deck + 7.05 * s, -12.0), Vector3(9.0, 0.5 * s, 32.8), roof)
+	# Elevated passenger walkway tunnel projecting out to the quay edge.
+	var gang_x := side * 4.4
+	m.box(Vector3(gang_x, deck + 5.2 * s, -8.0), Vector3(5.6, 2.5 * s, 4.2), _mul(terminal, 1.1))
+	m.box(Vector3(side * 2.1, deck + 2.0 * s, -8.0), Vector3(0.7, 4.0 * s, 0.7), steel)
+	# Glowing terminal departure hall windows and gangway glazing facing the ship.
+	var face_x := side * 6.92
+	m.material(ShapeMesh.M_WINDOW)
+	for i in 7:
+		var wz := -25.0 + 4.3 * i
+		m.quad(Vector3(face_x, deck + 3.9 * s, wz - 1.55), Vector3(face_x, deck + 3.9 * s, wz + 1.55),
+				Vector3(face_x, deck + 5.8 * s, wz + 1.55), Vector3(face_x, deck + 5.8 * s, wz - 1.55),
+				_mul(halide, 0.85 if i % 2 == 0 else 0.72))
+	var gang_face := side * 1.58
+	m.quad(Vector3(gang_face, deck + 4.5 * s, -9.6), Vector3(gang_face, deck + 4.5 * s, -6.4),
+			Vector3(gang_face, deck + 5.9 * s, -6.4), Vector3(gang_face, deck + 5.9 * s, -9.6), _mul(halide, 0.9))
+	# Ro-Ro steel vehicle linkspan gantry (twin hoist portal towers, hazard bases, crosshead and loading ramp).
+	m.material(ShapeMesh.M_PLAIN)
+	var lx := side * 5.2
+	for dz: float in [11.0, 25.0]:
+		m.box(Vector3(lx, deck + 1.3 * s, dz), Vector3(1.5, 2.6 * s, 1.5), hazard)
+		m.box(Vector3(lx, deck + 7.2 * s, dz), Vector3(1.2, 9.2 * s, 1.2), blue_steel)
+	m.box(Vector3(lx, deck + 12.1 * s, 18.0), Vector3(1.6, 1.3 * s, 16.4), blue_steel)
+	m.box(Vector3(lx - side * 1.6, deck + 1.8 * s, 18.0), Vector3(5.2, 0.7 * s, 12.0), steel)
+	# Illuminated amber clearance strip across the linkspan portal crosshead and warm hazard markings on its piers.
+	m.material(ShapeMesh.M_WINDOW)
+	var gx := lx - side * 0.82
+	m.quad(Vector3(gx, deck + 11.75 * s, 11.5), Vector3(gx, deck + 11.75 * s, 24.5),
+			Vector3(gx, deck + 12.25 * s, 24.5), Vector3(gx, deck + 12.25 * s, 11.5), _mul(sodium, 0.72))
+	for dz: float in [11.0, 25.0]:
+		m.quad(Vector3(lx - side * 0.78, deck + 0.5 * s, dz - 0.55),
+				Vector3(lx - side * 0.78, deck + 0.5 * s, dz + 0.55),
+				Vector3(lx - side * 0.78, deck + 2.2 * s, dz + 0.55),
+				Vector3(lx - side * 0.78, deck + 2.2 * s, dz - 0.55), _mul(hazard, 0.65))
+	# Ground-level vehicle check-in booths / concourse glow along the terminal front apron.
+	for i in 4:
+		var bz := -23.0 + 7.2 * i
+		m.quad(Vector3(face_x, deck + 0.6 * s, bz - 1.8), Vector3(face_x, deck + 0.6 * s, bz + 1.8),
+				Vector3(face_x, deck + 2.3 * s, bz + 1.8), Vector3(face_x, deck + 2.3 * s, bz - 1.8),
+				_mul(sodium, 0.6))
+	m.material(ShapeMesh.M_PLAIN)
+	# Four towering port high-mast floodlight standards (17.2 m) with sodium & halide lights.
+	for z: float in [-28.0, -8.0, 8.0, 29.0]:
+		var mx := side * 2.4
+		m.tube(Vector3(mx, deck, z), Vector3(mx, deck + 14.2 * s, z), 0.24, 0.12, 4, steel, steel)
+		m.box(Vector3(mx - side * 0.4, deck + 14.1 * s, z), Vector3(1.8, 0.45 * s, 1.4), steel)
+		var lp := Vector3(mx - side * 0.9, deck + 13.8 * s, z)
+		m.light(lp, sodium, 1.15, 1.35 * s)
+		m.light(lp + Vector3(0.0, 0.0, 0.6), halide, 0.95, 0.55 * s)
+	# Berth-mouth green/red traffic indicator lights on the linkspan piers.
+	m.light(Vector3(lx - side * 0.9, deck + 4.4 * s, 11.0), Color(0.28, 1.0, 0.48), 1.0, 0.35 * s)
+	m.light(Vector3(lx - side * 0.9, deck + 4.4 * s, 25.0), Color(1.0, 0.28, 0.2), 0.9, 0.35 * s)
+
+
+## A cross-Channel cargo / container freighter under way at night: long dark steel hull with rust-red boot-topping,
+## stacked multi-coloured shipping containers in three deck bays, tall white aft bridge superstructure with glowing
+## bridge windows, blocky funnel, radar mast, working deck floodlights and maritime navigation lights.
+static func _freighter(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var hull := colour
+	var waterline := Color("#5a1d17")
+	var white := Color("#cdd2d6")
+	var funnel := Color("#9a3822") if rng.randf() < 0.5 else Color("#244b6e")
+	var dark := Color("#12151a")
+	m.material(ShapeMesh.M_PLAIN)
+	# Main hull, waterline boot-topping, raked bow and transom stern.
+	m.box(Vector3(0.0, 2.5, -1.0) * s, Vector3(12.6, 5.8, 66.0) * s, hull)
+	for sx: float in [-6.35, 6.35]:
+		m.quad(Vector3(sx, -0.4, -34.0) * s, Vector3(sx, -0.4, 32.0) * s, Vector3(sx, 0.9, 32.0) * s,
+				Vector3(sx, 0.9, -34.0) * s, waterline)
+	for sx: float in [-6.3, 6.3]:
+		m.quad(Vector3(sx, -0.4, 32.0) * s, Vector3(0.0, -0.4, 41.0) * s, Vector3(0.0, 6.2, 43.0) * s,
+				Vector3(sx, 5.4, 32.0) * s, hull)
+	m.tri(Vector3(-6.3, 5.4, 32.0) * s, Vector3(6.3, 5.4, 32.0) * s, Vector3(0.0, 6.2, 43.0) * s, _mul(hull, 1.3))
+	# Stacked multi-coloured shipping containers in three bays forward of the bridge.
+	var palette := [Color("#6e2922"), Color("#263f59"), Color("#7d6228"), Color("#234733"), Color("#4e545c")]
+	for bay in 3:
+		var bz := -2.0 + 11.0 * bay
+		var tiers := 2 + (1 if rng.randf() < 0.65 else 0)
+		for tier in tiers:
+			var col: Color = palette[rng.randi() % palette.size()]
+			m.box(Vector3(0.0, 6.6 + 2.5 * tier, bz) * s, Vector3(10.6, 2.45, 9.6) * s, col)
+	# Tall white aft accommodation block, cantilevered bridge wings, funnel and radar mast.
+	m.box(Vector3(0.0, 9.4, -22.0) * s, Vector3(11.0, 8.2, 13.0) * s, white)
+	m.box(Vector3(0.0, 14.8, -21.0) * s, Vector3(14.0, 2.4, 5.0) * s, white)
+	m.box(Vector3(0.0, 17.6, -25.0) * s, Vector3(3.0, 3.6, 4.2) * s, funnel)
+	m.box(Vector3(0.0, 19.6, -25.0) * s, Vector3(3.1, 0.7, 4.3) * s, dark)
+	m.tube(Vector3(0.0, 16.0, -21.0) * s, Vector3(0.0, 21.6, -21.5) * s, 0.35 * s, 0.14 * s, 4, white, white)
+	m.tube(Vector3(0.0, 5.8, 36.0) * s, Vector3(0.0, 15.2, 35.5) * s, 0.3 * s, 0.12 * s, 4, white, white)
+	# Lit bridge & accommodation portholes facing the way, plus softly floodlit container faces along the deck.
+	var xb := -side * 5.56 * s
+	var xw := -side * 7.04 * s
+	m.material(ShapeMesh.M_WINDOW)
+	m.quad(Vector3(xw, 14.3 * s, -22.8 * s), Vector3(xw, 14.3 * s, -19.0 * s),
+			Vector3(xw, 15.4 * s, -19.0 * s), Vector3(xw, 15.4 * s, -22.8 * s), _mul(WARM, 1.0))
+	for row in 2:
+		for i in 4:
+			var wz := -26.5 + 3.0 * i
+			var lit := rng.randf() < 0.78
+			m.material(ShapeMesh.M_WINDOW if lit else ShapeMesh.M_PLAIN)
+			var c := _mul(WARM, rng.randf_range(0.75, 1.0)) if lit else Color("#0b0d10")
+			var y0 := (7.4 + 2.7 * row) * s
+			m.quad(Vector3(xb, y0, (wz - 0.55) * s), Vector3(xb, y0, (wz + 0.55) * s),
+					Vector3(xb, y0 + 1.05 * s, (wz + 0.55) * s), Vector3(xb, y0 + 1.05 * s, (wz - 0.55) * s), c)
+	# Subtle warm deck-flood wash on the ship-facing side of the container stacks so the cargo reads at night.
+	m.material(ShapeMesh.M_WINDOW)
+	var xc := -side * 5.34 * s
+	for bay in 3:
+		var bz := -2.0 + 11.0 * bay
+		var col: Color = palette[(bay + rng.randi()) % palette.size()]
+		m.quad(Vector3(xc, 5.6 * s, (bz - 4.4) * s), Vector3(xc, 5.6 * s, (bz + 4.4) * s),
+				Vector3(xc, 10.2 * s, (bz + 4.4) * s), Vector3(xc, 10.2 * s, (bz - 4.4) * s), _mul(col, 0.42))
+	# Masthead steaming lights, bright deck working floodlights and bridge-wing red/green nav light.
+	m.light(Vector3(0.0, 21.7, -21.5) * s, COOL, 1.2, 0.55 * s)
+	m.light(Vector3(0.0, 15.3, 35.5) * s, COOL, 1.1, 0.5 * s)
+	for bz: float in [-4.0, 8.0, 20.0]:
+		m.light(Vector3(-side * 5.8, 12.2, bz) * s, WARM, 1.1, 0.75 * s)
+	var nav := Color(1.0, 0.25, 0.2) if side > 0.0 else Color(0.28, 1.0, 0.48)
+	m.light(Vector3(-side * 7.1, 15.2, -21.0) * s, nav, 1.2, 0.55 * s)

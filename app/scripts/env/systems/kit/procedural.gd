@@ -20,11 +20,11 @@ extends RefCounted
 
 const PATTERNS: Array[String] = ["pressed_tin", "ice_blocks", "swirl_carpet", "corrugated", "plasterboard",
 		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles", "deco_carpet", "hex_pavers", "board_concrete",
-		"tufted", "shell_carpet"]
+		"tufted", "shell_carpet", "moquette_94"]
 const SIZE := 128
 ## Patterns drawn larger than SIZE (many tiles a repeat, each its own: since 2026-11-08, the Athens rooftop's floor).
 const SIZES := {"quarry_tiles": 256, "deco_carpet": 256, "hex_pavers": 256, "board_concrete": 256,
-		"shell_carpet": 256}
+		"shell_carpet": 256, "moquette_94": 256}
 const GLASS_SHADER := preload("res://scripts/env/systems/kit/env_glass.gdshader")
 const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
@@ -360,6 +360,54 @@ static func _sample(pattern: String, u: float, v: float) -> Array:
 			var fleck := _noise(u, v, 64, 307)
 			c = c * (0.9 + 0.18 * fleck)
 			return [h + 0.08 * fleck, c, 0.95]
+		# 1994 cross-Channel ferry carpet / upholstery moquette: deep marine navy-teal ground with geometric cyan,
+		# magenta and mustard confetti bars, diamonds and zigzag dashes.
+		"moquette_94":
+			var ground := Color(0.06, 0.14, 0.22)
+			var slate := Color(0.09, 0.19, 0.27)
+			var cyan := Color(0.14, 0.62, 0.66)
+			var magenta := Color(0.68, 0.18, 0.42)
+			var mustard := Color(0.78, 0.6, 0.18)
+			var twill := 0.5 + 0.5 * sin((u * 12.0 + v * 12.0) * TAU)
+			var c := ground.lerp(slate, twill * 0.35)
+			var h := 0.45 + 0.04 * twill
+			# Scattered geometric cells (6 x 6 per repeat): alternating diagonal bars, diamonds and zig-zag ticks.
+			var gx := u * 6.0
+			var gy := v * 6.0
+			var ix := int(floor(gx))
+			var iy := int(floor(gy))
+			var fx := gx - ix - 0.5
+			var fy := gy - iy - 0.5
+			var kind := posmod(ix * 7 + iy * 13, 5)
+			var ang := 0.55 if (ix + iy) % 2 == 0 else -0.55
+			var rx := fx * cos(ang) - fy * sin(ang)
+			var ry := fx * sin(ang) + fy * cos(ang)
+			if kind == 0:
+				# Cyan diagonal dash bar.
+				var m := (1.0 - smoothstep(0.24, 0.28, absf(rx))) * (1.0 - smoothstep(0.06, 0.09, absf(ry)))
+				c = c.lerp(cyan, m * 0.9)
+				h += 0.14 * m
+			elif kind == 1:
+				# Magenta geometric diamond.
+				var m := 1.0 - smoothstep(0.16, 0.2, absf(fx) + absf(fy))
+				c = c.lerp(magenta, m * 0.88)
+				h += 0.14 * m
+			elif kind == 2:
+				# Mustard short chevron / angled confetti tick.
+				var cy := fy - absf(fx) * 0.7 + 0.08
+				var m := (1.0 - smoothstep(0.2, 0.24, absf(fx))) * (1.0 - smoothstep(0.045, 0.075, absf(cy)))
+				c = c.lerp(mustard, m * 0.85)
+				h += 0.12 * m
+			elif kind == 3:
+				# Twin cyan/magenta micro-squares.
+				var m1 := (1.0 - smoothstep(0.07, 0.1, maxf(absf(fx + 0.14), absf(fy - 0.12))))
+				var m2 := (1.0 - smoothstep(0.06, 0.09, maxf(absf(fx - 0.15), absf(fy + 0.13))))
+				c = c.lerp(cyan, m1 * 0.8).lerp(magenta, m2 * 0.85)
+				h += 0.1 * maxf(m1, m2)
+			# Heavy woven wool pile fleck.
+			var fleck := _noise(u, v, 64, 419)
+			c = c * (0.88 + 0.24 * fleck)
+			return [h + 0.12 * fleck, c, 0.94]
 	return [0.5, Color(0.5, 0.5, 0.5), 0.8]
 
 

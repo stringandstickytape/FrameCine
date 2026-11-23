@@ -52,7 +52,9 @@ Measured (`test_env_atmosphere.gd`): beam, four fog layers and breath: 6 draws, 
 | `areas` | none | up to 3 boxes `{min, max}` the rain or snow falls through, top to floor: an open roof, the view outside a window |
 | `particles` | 1200 | drops or flakes over all the areas, shared by their floor area (the room's budget is 4000) |
 | `wind`, `colour` | 0.2 m/s along x, pale blue-grey | the drift; the drops' colour (lit by the room and the film) |
-| `pane`, `pane_center`, `pane_size`, `pane_yaw` | off | drops on a window pane |
+| `pane`, `pane_center`, `pane_size`, `pane_yaw` | off | drops on a single window pane |
+| `panes` | [] | up to 16 panes `{center, size, yaw}` merged into one draw (for multi-window cabins) |
+| `pane_salt`, `pane_drift` | 0, 0 | dried sea-salt edge rime (0..1) and live motion-scaled wind-driven aft rain streaks (-2..2) on the pane |
 | `puddle`, `puddle_center`, `puddle_size`, `puddle_reflect` | off | a puddle on the floor that reflects the film; `puddle_reflect` is live |
 
 Actions: `shower` (args `seconds`, `amount`: a passing shower whatever the mode) and `clear_up` (args `seconds`: the
@@ -101,3 +103,4 @@ shows over it.
 | Reclaimed | `weather`: `mode` from the Weather setting, an area under the open roof, `puddle` in front of the screen; `atmosphere.fog` bound to `weather.wet` for mist after rain |
 | Ice cinema | `atmosphere`: `breath` 0.6, a little low `fog`; `weather`: `falls` snow, `mode` light, 260 flakes in two areas outside (the doorway's and the window's) |
 | Pillow Fort | `weather`: `pane` on the window, `mode` light or changing, no areas (or one outside the window) |
+| Night ferry 1994 | `weather`: `mode` from `Weather at sea` (`squalls`, `rain`, `clear`), two falling-rain areas outside the port and starboard decks (900 drops), 8 merged storm-window `panes` in one draw with `pane_salt` 0.72 and `pane_drift` bound to `journey.speed` (0..1.35) |

@@ -59,7 +59,7 @@ Cue sounds (`env_audio.play`, the chime) and the thud still go straight to Envir
 
 | Param | Default | What |
 |---|---|---|
-| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`, `boat_engine`, `water_lap`, `paddle_wheel`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`, `hooves`, `ship_horn`; `silence` plays nothing (the sounds: below) |
+| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`, `boat_engine`, `water_lap`, `paddle_wheel`, `ferry_diesel`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`, `hooves`, `ship_horn`, `ferry_chime`; `silence` plays nothing (the sounds: below) |
 | `gain_db` | 0 | dB from the designed level (-30 to +6) |
 | `level` | 1 | 0 to 1, live. Bind it: `film.bass` for a rumble through the wall, `weather.rain` or `weather.wet` for rain, a setting |
 | `film_db` | -8 | dB lower in `starting`, `playing` and `credits`. Up again in the pre-show, paused, the intermission and the end |
@@ -116,6 +116,8 @@ tones and swells divide its length, so it has no seam.
 | `water_lap` | loop 12 | water against a steel hull, slow and uneven: a lap every 0.9 to 2.2 s, a band of noise that swells in over 0.15 s and dies away as it falls from 900 to 500 Hz, a drop after every second lap, a soft wash between 250 and 1200 Hz all the time (since 2026-11-09; designed level -57) | a boat's hull |
 | `paddle_wheel` | loop 6 | a sternwheeler's buckets slapping the water three times a second (18 strengths in the loop), wash between 200 and 1500 Hz swelling over 3 s, a 45 Hz engine chuff 1.5 times a second; all under 1800 Hz, at 22050 Hz (designed level -54) | a showboat, astern; `level` on `journey.speed` |
 | `ship_horn` | one-shot 5.5 | an ocean liner's deep twin-tone bass steam whistle (73 Hz and 92 Hz with harmonics, steam breath and a harbour echo tail), at 22050 Hz (designed level -54) | an ocean liner's departure and harbour approach cues (`horn.play`) |
+| `ferry_diesel` | loop 8 | twin medium-speed marine diesel engines under a ferry's car deck: slightly detuned 36 Hz and 36.25 Hz fundamentals creating a slow 4 s hull beat, 72/108/144 Hz firing harmonics and dampened sub-400 Hz engine-room rumble, at 22050 Hz (designed level -53) | a cross-Channel ferry; `level` on `journey.speed` |
+| `ferry_chime` | one-shot 3.4 | a three-note synthetic maritime PA boarding chime (rising major triad through a crisp overhead ceiling loudspeaker bandpass with soft steel-lounge echo), at 32000 Hz (designed level -53) | a ferry lounge's departure cue (`chime.play`) |
 | `ice_creak` | one-shot 2.6 | a crack that sings down, then a low groan | ice, `every` |
 | `candle` | one-shot 0.9 | a candle's flame puffs and wavers, three or four sputters of wax | `every`, very low |
 | `three_bells` | one-shot 3.2 | a soft house bell: three struck-bar tones, up a fifth, down a minor third (our own call) | before the show |
@@ -277,6 +279,8 @@ second.
 | `boat_engine` (2026-11-09) | -52 | -52.0 | -60.0 | -67.1 | -37.0 |
 | `water_lap` (2026-11-09) | -57 | -57.0 | -64.1 | -73.6 | -35.4 |
 | `paddle_wheel` (2026-11-10) | -54 | -54.0 | -62.1 | -69.1 | -36.8 |
+| `ferry_diesel` (2026-11-23) | -53 | -53.0 | -60.4 | -68.5 | -43.6 |
+| `ferry_chime` (2026-11-23) | -53 | -53.0 | -61.0 | | -42.4 |
 | `clock` | -56 | -56.0 | -64.0 | -71.1 | -19.9 |
 | `tube_whine` | -62 | -62.0 | -70.0 | -77.2 | -55.0 |
 | `noise` | -54 | -54.0 | -62.0 | -69.1 | -41.2 |
@@ -377,3 +381,4 @@ at 8 m they are 19 dB under their "in film" level even at -12. Without the filte
 | Narrowboat | `acoustics` `small_room`; `sound_bed` `boat_engine` astern under the deck (`reach` 3, `film_db` -10, `level` on `journey.speed` from 0.4 to 1); `water_lap` everywhere (`gain_db` -2, `film_db` -10); a `tawny_owl` far off (a cue); a `church_bell` far off as the tower comes by (a cue) |
 | Showboat 1927 | `acoustics` `shopfront`; `sound_bed` `paddle_wheel` astern (`reach` 9, `film_db` -12, `level` on `journey.speed` from 0.05 to 1); `water_lap` everywhere (`gain_db` -3, `film_db` -10); `crickets` around (`radius` 14, `reach` 10, `gain_db` -4, `film_db` -10); `train` far off (`reach` 300, `every` 800) |
 | Liner 1936 | `acoustics` `cinema`; `sound_bed` `deep_hum` below the aft deck (`reach` 7, `gain_db` -2, `film_db` -10, `level` on `journey.speed` from 0.35 to 1); `water_lap` everywhere (`gain_db` -3, `film_db` -10, `pitch` 0.78); `hull_creak` (`every` 210, `gain_db` -6, `film_db` -14); `ship_horn` forward high up (`reach` 20, `gain_db` -4, `film_db` -12, played by departure and arrival cues) |
+| Night ferry 1994 | `acoustics` `hull` (`rt60` 0.65, `wet` 0.22); `sound_bed` `ferry_diesel` below the aft deck (`reach` 8, `gain_db` -2, `film_db` -10, `level` on `journey.speed` from 0.35 to 1); `water_lap` everywhere (`gain_db` -3, `film_db` -10, `pitch` 0.72); `rain_glass` around (`radius` 3.5, `reach` 5, `level` on `weather.rain`); `hull_creak` (`every` 185); `vcr` at the VCR cage (`play` at departure); `tube_whine` at the CRT (follows `setting.picture`); `ferry_chime` overhead (`play` at departure); `ship_horn` forward high up (`play` at departure and arrival) |

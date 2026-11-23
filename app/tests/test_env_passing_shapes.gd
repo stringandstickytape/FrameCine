@@ -11,15 +11,17 @@ const ShapeMesh := preload("res://scripts/env/systems/passing/shape_mesh.gd")
 
 const BUDGET := {"reeds": 70, "willow": 400, "tree": 420, "poplar": 120, "hedge": 60, "fence": 50, "ridge": 2,
 		"lights": 0, "cottage": 80, "post": 12, "lamp": 70, "bridge": 140, "boat": 130, "wharf": 220, "tower": 130,
-		"steamer": 340, "buoy": 40, "pier": 280, "lighthouse": 240, "ship": 360}
+		"steamer": 340, "buoy": 40, "pier": 280, "lighthouse": 240, "ship": 360,
+		"ferry_port": 340, "freighter": 320}
 ## The highest point of each shape at size 1 (metres): at least, at most.
 const HEIGHT := {"reeds": [1.2, 2.4], "willow": [3.0, 6.5], "tree": [9.0, 14.0], "poplar": [13.5, 20.5],
 		"hedge": [1.4, 2.2], "fence": [1.0, 1.2], "cottage": [5.3, 5.5], "post": [1.1, 1.3], "lamp": [3.1, 3.3],
 		"bridge": [5.1, 5.3], "boat": [1.9, 2.0], "wharf": [4.7, 4.9], "tower": [19.5, 19.7], "steamer": [13.0, 13.1],
-		"buoy": [1.95, 2.05], "pier": [12.0, 12.5], "lighthouse": [19.3, 19.7], "ship": [22.3, 22.7]}
+		"buoy": [1.95, 2.05], "pier": [12.0, 12.5], "lighthouse": [19.3, 19.7], "ship": [22.3, 22.7],
+		"ferry_port": [17.0, 17.8], "freighter": [21.2, 22.0]}
 ## The shapes no two of which are alike. (Not the buoy: it is one of two, red or green, and two seeds draw the same
 ## one as often as not.)
-const VARIED: Array[String] = ["reeds", "willow", "tree", "cottage", "boat", "steamer", "ship"]
+const VARIED: Array[String] = ["reeds", "willow", "tree", "cottage", "boat", "steamer", "ship", "freighter"]
 
 var _failures := 0
 var _checks := 0
@@ -234,6 +236,12 @@ func _maritime() -> void:
 		_check("pier (side %d): lit terminal windows (%d verts)" % [side, p_win], p_win > 0)
 		var lh := _draw("lighthouse", 1234, _info(12.0, side))
 		_check("lighthouse (side %d): three lights (beacon core, halo, entrance marker)" % side, lh.light_count() == 3)
+		_check("lighthouse (side %d): twin volumetric rotating beams (%d tris)" % [side, lh.beam_count()],
+				lh.beam_count() == 48 and lh.commit_beams() != null)
+		var fp := _draw("ferry_port", 1234, _info(12.0, side))
+		_check("ferry_port (side %d): ten lights (floodlight masts and linkspan signals)" % side, fp.light_count() == 10)
+		var fr := _draw("freighter", 1234, _info(12.0, side))
+		_check("freighter (side %d): six lights (masts, deck, nav)" % side, fr.light_count() == 6)
 		var sh := _draw("ship", 1234, _info(12.0, side))
 		_check("ship (side %d): eight lights (deck, masts, nav)" % side, sh.light_count() == 8)
 		var sa := _arrays(sh)

@@ -483,7 +483,7 @@ msgstr ""
 msgid "Cinemas"
 msgstr ""
 
-#: scripts/env/env_doc.gd:84
+#: scripts/env/env_doc.gd:84 environments/night_ferry_1994.env.json
 msgid "Television"
 msgstr ""
 
@@ -2821,7 +2821,7 @@ msgid "words to search for, such as autumn forest"
 msgstr ""
 
 #: ui/picture_tab.gd:222 ui/picture_tab.gd:39 ui/room_tab.gd:23 ui/sound_tab.gd:129
-#: environments/flagship.env.json environments/ice_cinema.env.json
+#: environments/flagship.env.json environments/ice_cinema.env.json environments/night_ferry_1994.env.json
 msgid "Off"
 msgstr ""
 
@@ -4566,6 +4566,10 @@ msgstr ""
 msgid "Nave"
 msgstr ""
 
+#: environments/night_ferry_1994.env.json
+msgid "Night ferry 1994"
+msgstr ""
+
 #: environments/palace_of_culture_1974.env.json
 msgid "Palace of Culture 1974"
 msgstr ""
@@ -4692,6 +4696,10 @@ msgstr ""
 
 #: environments/nave.env.json
 msgid "A Gothic nave at night, the screen in the chancel: piers rising into rib vaults, candles on iron stands and coronae, coloured glass and a rose window in the moonlight."
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "A cross-Channel ferry's video lounge in 1994: reclining seats under a bracketed CRT telly, salt-streaked storm windows, a sweeping lighthouse beam and a floodlit ferry port with the credits."
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
@@ -4828,6 +4836,18 @@ msgstr ""
 
 #: environments/nave.env.json
 msgid "Candles"
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "Weather at sea"
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "Telly speaker"
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "Night strips"
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
@@ -4973,6 +4993,22 @@ msgstr ""
 
 #: environments/nave.env.json
 msgid "None: the church by moonlight and the film alone. A few: two candle stands either side of the screen, the coronae over the nave and the votive lights. Many: four stands a side."
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "Passing Channel squalls, steady rain on the storm glass, or a clear crossing."
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "The overhead 1994 CRT and video tape look, clean CRT glass, or a modern clean picture."
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "The film's sound through the ceiling telly's small mono speaker."
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "Low night-crossing strips along the aisle and window pelmets."
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
@@ -5159,6 +5195,38 @@ msgstr ""
 msgid "Many"
 msgstr ""
 
+#: environments/night_ferry_1994.env.json
+msgid "Squalls"
+msgstr ""
+
+#: environments/night_ferry_1994.env.json environments/tv_1993.env.json
+msgid "Raining"
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "Clear night"
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "1994 CRT & tape"
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "1994 CRT"
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "Clean picture"
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "Soft amber"
+msgstr ""
+
+#: environments/night_ferry_1994.env.json
+msgid "Marine teal"
+msgstr ""
+
 #: environments/palace_of_culture_1974.env.json
 msgid "No snow"
 msgstr ""
@@ -5221,10 +5289,6 @@ msgstr ""
 
 #: environments/tv_1987.env.json
 msgid "Worn out"
-msgstr ""
-
-#: environments/tv_1993.env.json
-msgid "Raining"
 msgstr ""
 
 #: environments/tv_1993.env.json

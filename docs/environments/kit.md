@@ -23,7 +23,7 @@ the pieces. The kit must come after its builder in the document. A room may have
 | `colour`, `accent` | the piece's main colour, and a second one (a rug's border, a lamp's pole) |
 | `text` | a neon sign's words in our own letters: A B C D E F I K L N O P R S T U W and the space |
 | `target` | the node the carpet goes on (the builder's `Floor` by default) |
-| `pattern` | the carpet's pattern, one of `procedural.gd`'s (`swirl_carpet` by default; `deco_carpet`: rising suns in rows, since 2026-11-08; `shell_carpet`: scallop shells in rows, since 2026-11-08) |
+| `pattern` | the carpet's pattern, one of `procedural.gd`'s (`swirl_carpet` by default; `deco_carpet`: rising suns in rows, since 2026-11-08; `shell_carpet`: scallop shells in rows, since 2026-11-08; `moquette_94`: 1994 geometric marine confetti carpet) |
 
 Other parameters: `builder` (the builder's id; empty: the room's first builder); materials `stone`, `plaster`,
 `wood`, `tin`, `roof`, `iron`, `plastic` (a computer), `fabric` (a rug), `china` (a tea set, plates), `cloth`
@@ -38,9 +38,7 @@ Flickering lights holds them). Two more entry keys for the courtyard's pieces: `
 features, below) and `seed` (its own variation). For the moderne hall's pieces (since 2026-11-08): materials
 `faience` (glazed tiles: it shines, a clear glaze) and `chrome` (it reflects the room: `kit/reflect.gd`), `group` (the
 pieces' meshes under one node of that name, so a motion system moves them together: an organ console on its lift),
-and live: `cove` (the coves' lamps, times the house lamps' level), `cove_colour` (their light: a setting or a cue
-moves it), `cove_film_colour` (their light in the film: bind it to `film.colour`) and `cove_film` (0: `cove_colour`,
-1: `cove_film_colour`). For the Palace of Culture's hall (since 2026-11-08): material `mosaic` (the bed under a wall
+and live: `cove` (the coves' lamps, times the house lamps' level), `cove_floor` (0..1, default 0: minimum cove share kept when house lamps dim, for night-crossing strips), `cove_colour` (their light: a setting or a cue moves it), `cove_film_colour` (their light in the film: bind it to `film.colour`) and `cove_film` (0: `cove_colour`, 1: `cove_film_colour`). For the Palace of Culture's hall (since 2026-11-08): material `mosaic` (the bed under a wall
 mosaic's tesserae; `white_marble` by default), `mosaic_glint` (how much gold and glass glint, 1) and `mosaic_wash`
 (the lamp line's wash down the mosaics, times the house lamps, 1.6). For the Flagship's hall (since 2026-11-08), live:
 `starlight` (a starlight ceiling's pinholes before the film; 0, the default: none) and `starlight_film` (the share of it
@@ -89,6 +87,8 @@ gold and its mirrors rose).
 | `liner_pelmet` | a walnut-and-brass Art Deco curtain pelmet cornice box (open underneath) hiding swaying `liner_drape` tops along a window wall. 8.7 x 0.18 x 0.26 m |
 | `liner_clock` | a streamlined walnut, brass and chrome Art Deco sunburst bulkhead clock with horizontal speed wings; its working dial draws into `PieceClock`. 2.4 x 0.76 x 0.12 m |
 | `deck_rail` | an exterior promenade deck railing (teak handrail cap, three horizontal guard bars, evenly spaced stanchions, unbaked). 12.0 x 1.02 x 0.12 m |
+| `ferry_lounge` | a 1994 cross-Channel ferry video lounge (`kit/ferry_1994.gd`, no slot): ceiling-bracketed 4:3 CRT television on bolted marine steel drop-struts with locked VCR shelf cage flashing `12:00` (`PieceDisplay`), four louvred fluorescent ceiling panels (`PieceLamps`) and night-crossing pelmet strips (`PieceCove`), window storm grab-rails and convector heaters, two laminate side tables with coffee cups and timetables, aft steel door hardware, backlit green geometric EXIT sign (`PieceWindows`), working ship's bulkhead clock (`PieceClock`), glass-fronted red fire-hose cabinet (`PieceGlass`), lifebuoy placard and exterior white deck rails with bolted orange lifebuoys |
+| `ferry_rows` | the Pullman recliner rows' hardware round `seats` (`recliner`) in a `cabin` (`kit/ferry_1994.gd`, no slot): shared moulded armrests with recline buttons and flip-lid ashtrays, curved woven white linen antimacassars hugging the headrest pillows, flush curved flip-up laminate seatback tray tables and low night-crossing aisle strips (`PieceCove`) |
 | `house` | a courtyard's house front along a wall (`kit/courtyard.gd`): `size` [width, the eave's height, how far its face stands out]; its wash `colour`, its shutters' `accent`, `seed`, `features`. Two or three storeys of windows lit from inside, a socle on the ground, string courses, quoins, an eave of tiles on rafters |
 | `palace_gate` | round the room's screen: two towers (a rusticated base, an organ's grille in a tall arch, a belfry with a bell, a pyramid roof with a gilt finial), a great segmental arch over the picture with a balustrade and urns against the sky, gilt mouldings, a keystone cartouche, velvet drapes and three swags with gilt fringe; four floodlights for the bake. `size` [the room's width, 0, depth] |
 | `cypress`, `palm`, `pine` | trees beyond the walls: `size` [spread, height, spread]. A cypress of jittered rings, a palm with feather fronds, a stone pine's umbrella of clumps |

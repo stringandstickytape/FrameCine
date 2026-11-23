@@ -3,8 +3,9 @@
 Part of the environments engine: [`docs/environments.md`](../environments.md) has the design and says where each part is.
 
 `scripts/env/systems/passing.gd`, with `scripts/env/systems/passing/shape_mesh.gd` (the mesh the scenery is written
-into), `scripts/env/systems/passing/shapes.gd` (the shapes) and three shaders: `shaders/env_passing.gdshader`,
-`env_passing_lights.gdshader`, `env_passing_ground.gdshader`. Kind `journey`; it provides `flow`.
+into), `scripts/env/systems/passing/shapes.gd` (the shapes) and four shaders: `shaders/env_passing.gdshader`,
+`env_passing_lights.gdshader`, `env_passing_ground.gdshader` and `env_passing_beam.gdshader` (rotating volumetric
+lighthouse beams, built only when a landmark emits a beam). Kind `journey`; it provides `flow`.
 
 ## What it is
 
@@ -61,6 +62,7 @@ about its item's foot (`shape_mesh.gd` has the vertex format).
 | `mist` | float 0..1, live, brightness | 0.0 | mist that takes the far scenery |
 | `mist_colour` | color, live | `#3a4250` | |
 | `spill` | float 0..4 | 1.0 | how much the near scenery catches the screen's light |
+| `beam_spin` | float 0..2, live, motion (max 2) | 1.0 | lighthouse beam rotation speed scale (1.0 ≈ 0.55 rad/s, ~11.4 s/rev; Motion scales it, 0 holds still) |
 
 ### A band
 
@@ -94,9 +96,14 @@ sternwheel river steamer at anchor, with two deck houses, twin stacks, lit windo
 Its stern wheel has twelve paddles, two rims and spokes on an axle across the way. `pier` is a lit harbour pier with
 bollard pilings, a timber deck, a dark-roofed passenger terminal shed with glowing windows, a roof lantern and nine
 warm lights along the quay. `lighthouse` is a harbour breakwater stone mound with a tapered cylindrical tower, red
-stripe band, gallery and lit lantern room (three lights). `ship` is a distant ocean liner at sea with a dark hull,
-white stepped superstructure decks, two raked striped funnels, masts, lit cabin portholes and eight navigation/deck
-lights.
+stripe band, gallery, lit lantern room (three lights) and two opposite rotating volumetric beam cones drawn into
+`PassingBeams` (`env_passing_beam.gdshader`, one additive draw, zero live lights). `ship` is a distant ocean liner at
+sea with a dark hull, white stepped superstructure decks, two raked striped funnels, masts, lit cabin portholes and
+eight navigation/deck lights. `ferry_port` is a 1990s cross-Channel Ro-Ro ferry terminal with concrete quay, glazed
+departure hall and elevated boarding gangway, twin-tower vehicle linkspan gantry with hazard bases and amber clearance
+bar, four high-mast sodium/halide floodlight towers and berth alignment lights. `freighter` is a night container cargo
+ship with stacked multi-coloured containers, tall white aft bridge superstructure, lit accommodation windows, deck
+floods, steaming lights and bridge-wing navigation light.
 
 | Field | Type | Default | What |
 |---|---|---|---|
@@ -133,9 +140,11 @@ with none gives nothing. The margins past the shape itself are for what reaches 
 | `tower` | 20 x size | its distance -+ 8 x size |
 | `lamp` | | none |
 | `steamer` | 28 x size | its distance -+ (4.5 x size + 1) |
-| `pier` | 20 x size | its distance - 2 to its distance + (14 x size + 2) |
-| `lighthouse` | 8 x size | its distance -+ (7 x size + 1) |
-| `ship` | 36 x size | its distance -+ (7 x size + 1) |
+| `pier` | 34 | its distance - 6 to its distance + 22 |
+| `lighthouse` | 20 x size | its distance - 5 x size to its distance + 14 x size |
+| `ship` | 50 x size | its distance -+ 8 x size |
+| `ferry_port` | 38 | its distance - 6 to its distance + 24 |
+| `freighter` | 46 x size | its distance -+ 8 x size |
 
 The scenery's shaders get them as `landmark_clear` (one a landmark), and `band_extent` for each band: how far one of
 its items runs on along the way from its foot (a row's piece: its `SEGMENT` length; else 0). An item whose run along
@@ -230,10 +239,11 @@ the size, metres times the size]:
 | `tower` | [0, 3.5] | [0, 3.5] | [0, 0] |
 | `steamer` | [0, 4.5] | [0, 4.5] | [0, 0] |
 | `buoy` | [0, 0.45] | [0, 0.45] | [0, 0] |
-| `lighthouse` | [0, 6.0] | [0, 6.0] | [0, 0] |
-| `ship` | [0, 6.5] | [0, 6.5] | [0, 0] |
+| `lighthouse` | [0, 3.2] | [0, 3.6] | [0, 0] |
+| `ship` | [0, 6.8] | [0, 7.2] | [0, 0] |
+| `freighter` | [0, 6.6] | [0, 7.0] | [0, 0] |
 
-A shape not in the table (`ridge`, `lights`, `wharf`, `pier`) comes no nearer than its foot. The table is worked out from the
+A shape not in the table (`ridge`, `lights`, `wharf`, `pier`, `ferry_port`) comes no nearer than its foot. The table is worked out from the
 drawing functions at the largest each draws: a change to a shape is a change to its line here.
 
 `flow_volumes()` gives, in the room's frame: for each band and side, across from where its largest item reaches (its

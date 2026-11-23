@@ -3888,6 +3888,54 @@ msgstr "阵雨"
 #~ msgid "Foveation isn't available: this build starts without it."
 #~ msgstr "注视点渲染不可用：此版本启动时没有启用它。"
 
+msgid "Night ferry 1994"
+msgstr "夜航渡轮 1994"
+
+msgid "A cross-Channel ferry's video lounge in 1994: reclining seats under a bracketed CRT telly, salt-streaked storm windows, a sweeping lighthouse beam and a floodlit ferry port with the credits."
+msgstr "1994 年跨海峡夜航渡轮的录像厅：高架显像管电视下方排列着可调靠背座椅，船窗沾着盐霜与雨痕，灯塔光束缓缓扫过夜海，片尾字幕时灯火通明的渡轮码头迎面而来。"
+
+msgid "Weather at sea"
+msgstr "海上天气"
+
+msgid "Telly speaker"
+msgstr "电视扬声器"
+
+msgid "Night strips"
+msgstr "夜间灯带"
+
+msgid "Passing Channel squalls, steady rain on the storm glass, or a clear crossing."
+msgstr "阵阵海峡风雨、持续打在船窗上的夜雨，或晴朗的夜航。"
+
+msgid "The overhead 1994 CRT and video tape look, clean CRT glass, or a modern clean picture."
+msgstr "上方 1994 年显像管与录像带质感、清晰显像管玻璃，或现代清晰画面。"
+
+msgid "The film's sound through the ceiling telly's small mono speaker."
+msgstr "让影片声音通过顶部电视的小型单声道扬声器播放。"
+
+msgid "Low night-crossing strips along the aisle and window pelmets."
+msgstr "沿过道与船窗上方的低亮度夜航灯带。"
+
+msgid "Squalls"
+msgstr "阵风阵雨"
+
+msgid "Clear night"
+msgstr "晴朗夜晚"
+
+msgid "1994 CRT & tape"
+msgstr "1994 显像管与录像带"
+
+msgid "1994 CRT"
+msgstr "1994 显像管"
+
+msgid "Clean picture"
+msgstr "清晰画面"
+
+msgid "Soft amber"
+msgstr "柔和暖黄"
+
+msgid "Marine teal"
+msgstr "深海青绿"
+
 #~ msgid "Version %s is ready. It goes in at the next start."
 #~ msgstr "版本 %s 已就绪，下次启动时生效。"
 

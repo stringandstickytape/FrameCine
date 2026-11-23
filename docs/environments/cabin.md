@@ -47,6 +47,7 @@ builder that every such room dresses, instead of one hand-made shell a room.
 | `wall_thickness` | float | 0.02..0.4 | 0.06 | the side walls' thickness (the windows' reveals) |
 | `frame_width` | float | 0.01..0.2 | 0.04 | the window frames' width round the opening |
 | `frame_depth` | float | 0..0.08 | 0.015 | how far the window frames stand out from the wall |
+| `window_glass` | bool | | true | draw plain glass panes in the windows (set false when `weather.panes` draws rain glass there) |
 | `dado_height` | float | 0..2 | 0.9 | the dado's height (0: none) |
 | `ribs` | bool | | true | ribs between the bays, up the walls and under the roof |
 | `rib_width` | float | 0.03..0.3 | 0.05 | a rib's width along Z |
@@ -61,6 +62,7 @@ builder that every such room dresses, instead of one hand-made shell a room.
 | `door_colour` | color | | [1.0, 0.85, 0.6] | the colour of the door's light |
 | `screen_size` | vec2 | 0..8 | [0, 0] | the picture's width and height ([0, 0]: its own; one 0: 16:9 from the other) |
 | `screen_bottom` | float | 0..3 | 0 | the picture's bottom edge over the floor (0: its own) |
+| `screen_standoff` | float | 0..2 | 0 | metres the picture stands forward of the front bulkhead (e.g. a ceiling-bracketed CRT) |
 | `screen_frame` | bool | | true | a narrow frame round the picture |
 | `seating` | enum | none, rows | none | none: the viewer's own seat alone; rows: seats in rows either side of an aisle |
 | `rows_front` | int | 0..30 | 2 | rows in front of the viewer's |

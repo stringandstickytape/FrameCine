@@ -20,7 +20,11 @@ const Shapes := preload("res://scripts/env/systems/passing/shapes.gd")
 const SkySystem := preload("res://scripts/env/systems/sky.gd")
 const SHADER := preload("res://shaders/env_passing.gdshader")
 const LIGHTS_SHADER := preload("res://shaders/env_passing_lights.gdshader")
+const BEAM_SHADER := preload("res://shaders/env_passing_beam.gdshader")
 const GROUND_SHADER := preload("res://shaders/env_passing_ground.gdshader")
+
+## Rotating lighthouse beam speed (radians a second at beam_spin 1: ~11.4 s per full turn, 0.175 Hz twin sweep).
+const BEAM_RAD_PER_SEC := 0.55
 
 ## Under way it may go this much faster or slower than its speed to stay with the film.
 const CATCH_UP := 0.15
@@ -148,6 +152,9 @@ static func spec() -> Dictionary:
 					"description": "the lit windows of the scenery"},
 			"lights": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
 					"description": "the scenery's points of light"},
+			"beam_spin": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true,
+					"motion": {"max": 1.0},
+					"description": "how fast a lighthouse's volumetric beam turns (the Motion setting scales it)"},
 			"moon_road": {"type": "float", "min": 0.0, "max": 2.0, "default": 1.0, "live": true, "brightness": true,
 					"description": "the Moon's road on the water: 1 as the room's sky makes it (none without a Moon "
 					+ "in that sky)"},
@@ -187,10 +194,13 @@ var _cruise := 0.0
 var _sky: Node
 var _scenery: MeshInstance3D
 var _lights: MeshInstance3D
+var _beams: MeshInstance3D
 var _ground: MeshInstance3D
 var _mat: ShaderMaterial
 var _lights_mat: ShaderMaterial
+var _beams_mat: ShaderMaterial
 var _ground_mat: ShaderMaterial
+var _beam_phase := 0.0
 var _presence_img: Image
 var _presence_tex: ImageTexture
 ## The bands, landmarks and strips as built (defaults filled); each band's loop and seems.
@@ -230,7 +240,9 @@ func setup() -> void:
 	_presence()
 	_mat = null
 	_lights_mat = null
+	_beams_mat = null
 	_ground_mat = null
+	_beam_phase = 0.0
 	var mesh := m.commit()
 	if mesh != null:
 		_mat = _material(SHADER)
@@ -239,6 +251,10 @@ func setup() -> void:
 	if lights_mesh != null:
 		_lights_mat = _material(LIGHTS_SHADER)
 		_lights = _instance("PassingLights", lights_mesh, _lights_mat)
+	var beams_mesh := m.commit_beams()
+	if beams_mesh != null:
+		_beams_mat = _material(BEAM_SHADER)
+		_beams = _instance("PassingBeams", beams_mesh, _beams_mat)
 	var strips: Array = params["ground"] if params["ground"] is Array else []
 	for s: Variant in strips:
 		if s is Dictionary:
@@ -619,7 +635,9 @@ func tick(delta: float) -> void:
 		values["journey.speed"] = clampf(speed_now / maxf(own_speed, 0.001), 0.0, 1.0)
 		values["journey.progress"] = travel / route_shown if route_shown > 0.0 \
 				else EnvSignals.progress(travel / maxf(own_speed, 0.001), 0.0)
-	# 10. The shaders.
+	# 10. The shaders (and the slow volumetric lighthouse beam rotation, scaled by beam_spin and Motion).
+	if delta > 0.0 and _beams_mat != null:
+		_beam_phase = fposmod(_beam_phase + delta * BEAM_RAD_PER_SEC * float(params["beam_spin"]), TAU)
 	_uniforms()
 
 
@@ -666,7 +684,7 @@ func _uniforms() -> void:
 			landmark_along[k] = at * route_shown + ahead - travel
 		elif at == 0.0:
 			landmark_along[k] = ahead - travel
-	for mat: ShaderMaterial in [_mat, _lights_mat, _ground_mat]:
+	for mat: ShaderMaterial in [_mat, _lights_mat, _beams_mat, _ground_mat]:
 		if mat == null:
 			continue
 		mat.set_shader_parameter("along_dir", along_dir)
@@ -682,7 +700,7 @@ func _uniforms() -> void:
 		mat.set_shader_parameter("glow_reach", float(params["glow_reach"]))
 		mat.set_shader_parameter("glow_half_length", float(params["glow_half_length"]))
 		mat.set_shader_parameter("spill", float(params["spill"]))
-	for mat: ShaderMaterial in [_mat, _lights_mat]:
+	for mat: ShaderMaterial in [_mat, _lights_mat, _beams_mat]:
 		if mat == null:
 			continue
 		mat.set_shader_parameter("phase", phase)
@@ -694,6 +712,9 @@ func _uniforms() -> void:
 		_mat.set_shader_parameter("windows", float(params["windows"]))
 	if _lights_mat != null:
 		_lights_mat.set_shader_parameter("lights", float(params["lights"]))
+	if _beams_mat != null:
+		_beams_mat.set_shader_parameter("lights", float(params["lights"]))
+		_beams_mat.set_shader_parameter("beam_phase", _beam_phase)
 	if _ground_mat != null:
 		_ground_mat.set_shader_parameter("ground_phase", fposmod(travel, GROUND_PERIOD))
 		_ground_mat.set_shader_parameter("far", FAR)
@@ -725,6 +746,8 @@ func material_of(node_name: String) -> ShaderMaterial:
 			return _mat
 		"PassingLights":
 			return _lights_mat
+		"PassingBeams":
+			return _beams_mat
 		"PassingGround":
 			return _ground_mat
 	return null
