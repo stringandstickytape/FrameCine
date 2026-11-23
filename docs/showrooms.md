@@ -61,11 +61,10 @@ The material wall holds all 42 materials' maps at once (about 50 MB of ASTC text
 
 ## Measuring (the lead, on the headset)
 
-`perf_rooms` (dev link; `app/scripts/assistant/room_perf.gd measure_rooms`) shows each room in turn and, in each, sets
-each foveation level, waits `settle` s (the room's shaders compile, the runtime takes the new level), then measures
-the GPU for `seconds` s with the same timer as `perf` (the root viewport, both eyes). A baseline room comes first, so
-each row has `delta_gpu_ms`: the room's own cost at that level. Foveation is set as the System tab does but not saved,
-and kept while the panel shows; afterwards the viewer's room and foveation come back.
+`perf_rooms` (dev link; `app/scripts/assistant/room_perf.gd measure_rooms`) shows each room in turn, waits
+`settle` s (the room's shaders compile), then measures the GPU for `seconds` s with the same timer as `perf` (the
+root viewport, both eyes). A baseline room comes first, so each row has `delta_gpu_ms`: the room's own cost.
+Afterwards the viewer's room comes back.
 
 1. Deploy the app (`tools/push-app.sh`) and start it on the headset with the dev link.
 2. Play a film, the usual 4K test film, looping (`open` it; the numbers without one are not representative, and the
@@ -77,21 +76,19 @@ and kept while the panel shows; afterwards the viewer's room and foveation come 
    python tools/listener.py send -t 600 perf_rooms
    ```
 
-   Or some rooms, some levels, longer windows:
+   Or some rooms, longer windows:
 
    ```
-   python tools/listener.py send -t 300 perf_rooms rooms=showroom:effects,showroom:materials foveation=off,high seconds=10
+   python tools/listener.py send -t 300 perf_rooms rooms=showroom:effects,showroom:materials seconds=10
    ```
 
    Arguments: `rooms` (ids from `room_settings`, a list or comma-separated; `showrooms` for all, the default),
-   `foveation` (`off`, `low`, `medium`, `high`; default off, low, high), `baseline` (default `void`; empty for none),
-   `settle` (3 s), `seconds` (5 s).
-5. Read `table` (a line per room: each level's GPU ms and the difference from the baseline) and `rows`
-   (`gpu_ms`, `gpu_ms_p95`, `cpu_ms`, `fps`, `frames`, `dropped`, `delta_gpu_ms`, and `foveation_applied`: the level
-   the runtime had, 0 off to 3 high; -1 when foveation wasn't applied). `budget_ms` is the frame's (13.9 ms at
-   72 Hz); `notes` says what makes the numbers less than representative.
+   `baseline` (default `void`; empty for none), `settle` (3 s), `seconds` (5 s).
+5. Read `table` (a line per room: the GPU ms and the difference from the baseline) and `rows`
+   (`gpu_ms`, `gpu_ms_p95`, `cpu_ms`, `fps`, `frames`, `dropped`, `delta_gpu_ms`). `budget_ms` is the frame's
+   (13.9 ms at 72 Hz); `notes` says what makes the numbers less than representative.
 
-By hand: the Room tab's Showrooms, the System tab's Foveation, and `perf` after a minute (its 60 s window).
+By hand: the Room tab's Showrooms, and `perf` after a minute (its 60 s window).
 
 Untested: on the headset (the numbers above are estimates; the measurements are the lead's), and how the labels read
 in the lenses at 2.4 m and more.

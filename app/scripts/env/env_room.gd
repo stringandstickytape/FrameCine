@@ -164,7 +164,7 @@ func _follow_builder_screen(tell_main: bool) -> void:
 			seat.home_screen()
 		else:
 			var d := get_default_screen()
-			main.set_screen(width, d["distance"], d["height_offset"])
+			main.set_screen(width, d["distance"], d["height_offset"], true)
 
 
 func _sync_curtains() -> void:

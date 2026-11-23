@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Tests for tools/room_perf.py (standard library only): `format` on a made-up result (tools/fixtures/
-room_perf_sample.json: four rooms at foveation off, 72 Hz, one over the budget, one note). Never reaches the headset.
+room_perf_sample.json: four rooms, 72 Hz, one over the budget, one note). Never reaches the headset.
   python3 tools/test_room_perf.py"""
 
 import os

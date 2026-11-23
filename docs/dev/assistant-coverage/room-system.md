@@ -87,7 +87,6 @@ The whole tab in one read: `room_settings` (read).
 | Run benchmark | excluded: dev only |
 | Stop tour | excluded: dev only (tours start from the dev link) |
 | Hardware video: which way 10-bit plays, Details | `hwvideo_status` (read) |
-| Rendering: Foveation (Off / Low / Medium / High), Sharp while the panel shows | `foveation` {level, sharp_panel} (settings); refused when the build starts without foveation |
 | Controllers: Look (the presets), its colour and Speed | `controller_looks` (read), `controller_look` {look, options} (settings) |
 | Haptic ticks, Tick strength | `haptics` {on, strength} (settings) |
 | Jog wheel, One turn | `jog_wheel` {on, seconds_per_turn} (settings) |

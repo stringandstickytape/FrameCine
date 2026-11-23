@@ -423,34 +423,41 @@ static func _register_picture(host: Node) -> void:
 
 	var angle_script := preload("res://scripts/comfort/screen_angle.gd")
 	var zoom_max: float = preload("res://scripts/play/zoom_pan.gd").MAX_ZOOM
+	# A room with seats hangs its own screen (main.screen_fixed()): its place, size and curve are the room's.
+	var screen_free := func(m: Node) -> String:
+		return "this room hangs its own screen: it can't be moved, sized or curved here; choose a seat (seat_choose)" \
+				if m.screen_fixed() else ""
 	_register_setter(host, "set_screen", "The Picture tab's Screen section: the flat screen's size (in metres or in "
 			+ "degrees), distance, height, curvature and zoom, a preset, head follow, lying down and auto crop. Give "
-			+ "width or size_degrees, not both; a preset sets the size, the distance and lying down.", [
+			+ "width or size_degrees, not both; a preset sets the size, the distance and lying down. In a room with "
+			+ "seats the screen is the room's own: preset, distance, height, width, size_degrees and curvature are "
+			+ "refused there (the viewer changes seat instead).", [
 		_field("preset", "string", "a seat preset: large_format (70 degrees at 14 m), living_room (32 degrees at "
 				+ "3.2 m) or in_bed (42 degrees at 2.4 m, lying down)",
 				func(m: Node) -> String: return str(m.features.angle.matching_preset()),
 				func(m: Node, v: String) -> void: m.features.angle.apply_preset(v),
-				{"enum": angle_script.PRESETS.keys(), "derived": true}),
+				{"enum": angle_script.PRESETS.keys(), "derived": true, "needs": screen_free}),
 		_field("distance", "float", "how far the screen is, 0.5 to 30 m (the size in degrees changes with it)",
 				func(m: Node) -> float: return float(m.screen_distance),
 				func(m: Node, v: float) -> void: m.set_screen(m.screen_width, v, m.screen_height_offset),
-				{"min": 0.5, "max": 30.0}),
+				{"min": 0.5, "max": 30.0, "needs": screen_free}),
 		_field("height", "float", "the screen's centre above eye level, -3 to 6 m",
 				func(m: Node) -> float: return float(m.screen_height_offset),
 				func(m: Node, v: float) -> void: m.set_screen(m.screen_width, m.screen_distance, v),
-				{"min": -3.0, "max": 6.0}),
+				{"min": -3.0, "max": 6.0, "needs": screen_free}),
 		_field("width", "float", "the screen's width, 0.5 to 30 m",
 				func(m: Node) -> float: return float(m.screen_width),
 				func(m: Node, v: float) -> void: m.set_screen(v, m.screen_distance, m.screen_height_offset),
-				{"min": 0.5, "max": 30.0}),
+				{"min": 0.5, "max": 30.0, "needs": screen_free}),
 		_field("size_degrees", "float", "how wide the screen looks, %d to %d degrees, at the distance it is (sets "
 				% [angle_script.MIN_ANGLE, angle_script.MAX_ANGLE] + "the width)",
 				func(m: Node) -> float: return float(m.features.angle.angle()),
 				func(m: Node, v: float) -> void: m.features.angle.set_angle(v),
-				{"min": angle_script.MIN_ANGLE, "max": angle_script.MAX_ANGLE, "derived": true}),
+				{"min": angle_script.MIN_ANGLE, "max": angle_script.MAX_ANGLE, "derived": true, "needs": screen_free}),
 		_field("curvature", "float", "0 flat to 100: the screen wraps evenly around the viewer",
 				func(m: Node) -> float: return float(m.features.curve.amount) * 100.0,
-				func(m: Node, v: float) -> void: m.features.curve.set_amount(v / 100.0), {"min": 0.0, "max": 100.0}),
+				func(m: Node, v: float) -> void: m.features.curve.set_amount(v / 100.0),
+				{"min": 0.0, "max": 100.0, "needs": screen_free}),
 		_field("zoom", "float", "magnifies the picture inside the screen, 1 (none) to %s, kept for this file"
 				% zoom_max, func(m: Node) -> float: return float(m.features.zoom.zoom),
 				func(m: Node, v: float) -> void: m.features.zoom.set_zoom(v), {"min": 1.0, "max": zoom_max}),

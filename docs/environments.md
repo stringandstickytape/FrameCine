@@ -86,7 +86,7 @@ still read, without change. Every key of version 3 keeps its meaning.
 | `schema` | 4 |
 | `name` | the room's name; a room that ships has its name as a translation key |
 | `room` | the room as a whole: `ambient` (0..1, its surfaces' light with a dark screen), `screen_glow` (0..2), `curtains` (the pre-show's curtains may close here), `reacts_to_film` (the film's transients may flash the light), `reflection` (the floor reflection's default here), `reflection_floor` (its height; null: none), `curtain_colour` (the pre-show's curtains' colour; null, the
-default: the app's red velvet; since 2026-11-08, the Palace of Culture's ochre) and `category` (where the Room tab lists it: `cinema` under Cinemas, `tv` under Television, `journey` under Journeys, `other` with the other rooms, the default; one table, `env_doc.gd ROOM_GROUPS`, which the Room tab and `env_library.gd category_of()` both read: a new category is a line there) and `description` (a line about the room under the Room tab's "This room", at most 200 characters; a key, so a room that ships translates it) |
+default: the app's red velvet; since 2026-11-08, the Palace of Culture's ochre) and `category` (where the Room tab lists it: `cinema` under Cinemas, `tv` under Television, `journey` under Journeys, `other` with the other rooms, the default; one table, `env_doc.gd ROOM_GROUPS`, which the Room tab and `env_library.gd category_of()` both read: a new category is a line there) and `description` (a line about the room under the Room tab's "This room", at most 200 characters; a key, so a room that ships translates it) and `author` (who built the room, usually the model's name, at most 64 characters; content, never translated. In each group the Room tab lists the rooms under their builder's heading, and "This room" says "Built by ..."; a shipped room with no author counts as `env_library.gd DEFAULT_AUTHOR`, "Opus 5.5 High") |
 | `screen` | as version 3: the default screen's `center` and `size` |
 | `acoustics` | the room's sound for spatial audio (`get_sound_room()`, `scripts/play/spatial_audio.gd`): `box` ({min, max}; default: the builder's walls), `reflect`, `rt60`, `wet`, `late` (the late reverb against the reflections, 0..2, default 0.5), `surround_height`, `array`, `array_spacing`, `ring`, `distance`; below, "The film's room" |
 | `systems` | the systems, in build order: `{system, id, params}`. `id` defaults to the system's name; two of one system need their own ids. Cues and bindings address a parameter as `<id>.<param>` |
@@ -379,7 +379,7 @@ through cues' `requires`. Examples from the set:
 | `app/scripts/env/env_checks.gd` | the checks |
 | `app/environments/*.env.json` | the rooms as documents |
 | `app/scripts/env/env_library.gd` | lists a document with no scene of its own as a room (`document_rooms()`) |
-| `app/ui/room_tab.gd` | "This room"; a folding group for each category of `env_doc.gd ROOM_GROUPS` |
+| `app/ui/room_tab.gd` | "This room"; a folding group for each category of `env_doc.gd ROOM_GROUPS`, its rooms under who built them (`env_library.gd builder_of()`) |
 | `app/scripts/env/proc_cache.gd` | the pictures a room draws, kept between runs |
 
 ## The next phase

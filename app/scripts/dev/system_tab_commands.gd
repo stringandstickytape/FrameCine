@@ -1,7 +1,7 @@
 extends RefCounted
 
 ## The System tab's viewer settings as commands (ui/system_tab.gd; docs/dev/assistant-coverage/room-system.md): the
-## panel's layout, accessibility, foveation, the controllers (their look, haptic ticks, jog wheel, seek bar pictures,
+## panel's layout, accessibility, the controllers (their look, haptic ticks, jog wheel, seek bar pictures,
 ## zoom lens) and the calibration cards. Each handler calls what the tab's control calls, then syncs the tab.
 ## Registered by command_host.gd; "assistant" in a spec is the consumer level that reaches it.
 ##
@@ -17,8 +17,6 @@ const ControllerLook := preload("res://scripts/xr/controller_look.gd")
 ## 2026-11-06; the front panel's size, distance and head follow went with it).
 const LAYOUT_KEYS := ["recentre_hold"]
 const EYES := ["left", "right"]
-## main.gd's FOVEATION_LEVELS.
-const FOVEATION := ["off", "low", "medium", "high"]
 
 ## scripts/dev/command_host.gd
 var host: Node
@@ -31,9 +29,9 @@ func _main() -> Node:
 func register_all() -> void:
 	var R := DevCommands
 	R.register("system_settings", _cmd_system_settings, {
-		"description": "The System tab's viewer settings: the panel's layout, accessibility, foveation, the controllers "
+		"description": "The System tab's viewer settings: the panel's layout, accessibility, the controllers "
 				+ "and the app's version.",
-		"returns": "{panel, accessibility, foveation, haptics, jog_wheel, controller_look, seek_bar_pictures, "
+		"returns": "{panel, accessibility, haptics, jog_wheel, controller_look, seek_bar_pictures, "
 				+ "zoom_lens, version}",
 		"assistant": "read"})
 	R.register("panel_layout", _cmd_panel_layout, {
@@ -58,16 +56,6 @@ func register_all() -> void:
 				{"name": "subtitles_always", "type": "bool",
 				"description": "Every file opens with subtitles on (true) or as the last file had them (false)."}],
 		"level": "change", "returns": "the accessibility settings", "assistant": "settings"})
-	R.register("foveation", _cmd_foveation, {
-		"description": "Foveation: the headset draws the edges of the view in less detail, where the eyes don't look, "
-				+ "to save GPU time. Applies at once.",
-		"params": [{"name": "level", "type": "string", "enum": FOVEATION,
-				"description": "off, low (can't be seen; the default), medium, or high (saves a little more; can look "
-				+ "blocky at the edges)."},
-				{"name": "sharp_panel", "type": "bool",
-				"description": "Foveation off while the menu panel or the agent pane shows, so their text stays sharp "
-				+ "(true, the default) or not (false)."}],
-		"level": "change", "returns": "{level, sharp_panel, available}", "assistant": "settings"})
 	R.register("controller_looks", _cmd_controller_looks, {
 		"description": "The looks both controllers can take (controller_look sets one): the black they come in, "
 				+ "plastics, metals from the material library and effects from the effect library (plasma, embers, "
@@ -133,7 +121,6 @@ static func system_settings(m: Node) -> Dictionary:
 	return {
 		"panel": _layout(m),
 		"accessibility": _access(m),
-		"foveation": _foveation(m),
 		"haptics": {"on": bool(f.haptics.enabled), "strength": snappedf(float(f.haptics.strength), 0.01)},
 		"jog_wheel": {"on": bool(f.jog.enabled), "seconds_per_turn": float(f.jog.seconds_per_turn)},
 		"controller_look": _look(m),
@@ -160,12 +147,6 @@ static func _access(m: Node) -> Dictionary:
 
 static func _look(m: Node) -> Dictionary:
 	return ControllerLook.describe(str(m.controller_look), m.controller_look_options)
-
-
-## available false: the app started without a foveated swapchain; the level can't be changed then.
-static func _foveation(m: Node) -> Dictionary:
-	return {"level": str(m.foveation), "sharp_panel": bool(m.foveation_sharp_panel),
-			"available": bool(m.foveation_available())}
 
 
 ## The System tab shows the change.
@@ -269,30 +250,6 @@ func _cmd_accessibility(args: Dictionary, ctx: DevCommands.Call) -> Variant:
 			access.set_value(k, was[k])
 		_sync_tab()
 	return _access(m)
-
-
-# --- Rendering -----------------------------------------------------------------------------------------------------
-
-func _cmd_foveation(args: Dictionary, ctx: DevCommands.Call) -> Variant:
-	if _none(args, ctx, ["level", "sharp_panel"]):
-		return null
-	var m := _main()
-	if not bool(m.foveation_available()):
-		return ctx.fail("foveation isn't available: this build starts without it")
-	var was := [str(m.foveation), bool(m.foveation_sharp_panel)]
-	# What the tab's Foveation choice and "Sharp while the panel shows" do.
-	if args.has("level"):
-		m.set_foveation(str(args["level"]))
-	if args.has("sharp_panel"):
-		m.set_foveation_sharp_panel(bool(args["sharp_panel"]))
-	_sync_tab()
-	ctx.summary = "foveation %s%s" % [m.foveation, "" if m.foveation_sharp_panel else " (panel not kept sharp)"]
-	ctx.undo = func() -> void:
-		var mm := _main()
-		mm.set_foveation(was[0])
-		mm.set_foveation_sharp_panel(was[1])
-		_sync_tab()
-	return _foveation(m)
 
 
 # --- The controllers -----------------------------------------------------------------------------------------------

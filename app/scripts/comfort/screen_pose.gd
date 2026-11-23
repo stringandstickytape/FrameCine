@@ -82,7 +82,7 @@ func set_follow(on: bool) -> void:
 	else:
 		# Pinned where it followed to: that becomes the screen's place in this room.
 		main.screen_yaw = yaw
-		main.set_screen(main.screen_width, main.screen_distance, main.screen_height_offset)
+		main.set_screen(main.screen_width, main.screen_distance, main.screen_height_offset, true)
 		if not lying:
 			pitch = 0.0
 	_apply()

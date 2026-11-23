@@ -20,7 +20,7 @@ const AREA := {
 	"intermission": "room", "crossfade": "room", "sleep_timer": "control", "room_setting": "room",
 	"time_travel": "room",
 	"system_settings": "read", "panel_layout": "settings", "reset_panel_layout": "settings",
-	"accessibility": "settings", "foveation": "settings", "controller_looks": "read", "controller_look": "settings",
+	"accessibility": "settings", "controller_looks": "read", "controller_look": "settings",
 	"haptics": "settings", "jog_wheel": "settings", "seek_bar_pictures": "settings",
 	"zoom_lens": "settings", "open_test_card": "control", "lab_cards": "read", "bandwidth_test": "control",
 	"hwvideo_status": "read", "gaze_status": "read", "gaze_calibrate": "control", "gaze_pip": "control",

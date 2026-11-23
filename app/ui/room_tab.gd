@@ -36,7 +36,7 @@ var box: VBoxContainer
 ## One row per environment, rebuilt when the list changes (photo rooms and glTF rooms come and go).
 ## The rooms that ship with the app, then the viewer's own (kept rooms, glTF rooms, photo rooms: user data, never
 ## shipped) under their own heading, as the Objects tab does (the user, 2026-11-05).
-var _envs: HFlowContainer
+var _envs: Container
 var _yours_box: VBoxContainer
 var _yours: HFlowContainer
 var _env_ids: Array[String] = []
@@ -46,9 +46,9 @@ var _category_boxes := {}
 var _category_rows := {}
 ## The first two by name (the Television group has controls of its own; tests read these).
 var _cinema_box: VBoxContainer
-var _cinemas: HFlowContainer
+var _cinemas: Container
 var _tv_box: VBoxContainer
-var _tvs: HFlowContainer
+var _tvs: Container
 var _built_in_label: Button
 ## The showrooms (scripts/env/showrooms.gd), the list's last rows: their own group under the rooms, one row each.
 var _showroom_box: VBoxContainer
@@ -80,6 +80,8 @@ var _seat_label: Label
 var _point_seat: Button
 ## An assistant moved the viewer's seat: goes there (faded).
 var _seat_moved: Button
+## Hidden where the room hangs its own screen (main.screen_fixed()).
+var _reset_screen: Button
 var _reflection_box: VBoxContainer
 var _reflection: Button
 var _reflection_strength: VBoxContainer
@@ -124,7 +126,7 @@ func bind(p_app: Node) -> void:
 	box.add_child(W.section("Environment"))
 	for category: String in EnvDoc.ROOM_GROUPS:
 		var title := str(EnvDoc.ROOM_GROUPS[category])
-		_category_boxes[category] = _group(title)
+		_category_boxes[category] = _group(title, true)
 		_category_rows[category] = _groups[title]["rows"]
 	_cinema_box = _category_boxes["cinema"]
 	_cinemas = _category_rows["cinema"]
@@ -144,7 +146,7 @@ func bind(p_app: Node) -> void:
 	tv_body.add_child(W.help("One film, and the room moves forward through the history of television, "
 			+ "an era at a time while it plays."))
 	app.features.time_travel.changed.connect(func(_on: bool) -> void: _sync_time_travel())
-	_built_in_box = _group("Built in")
+	_built_in_box = _group("Built in", true)
 	_built_in_label = _groups["Built in"]["head"]
 	_envs = _groups["Built in"]["rows"]
 	_yours_box = _group("Yours")
@@ -197,8 +199,8 @@ func bind(p_app: Node) -> void:
 	# Placement, under Current: "Reset room" replaces "Recentre", which recentred the view and turned the screen to the
 	# gaze in the same frame, before the recentre had moved the camera: the screen swung away from the room, into a
 	# wall (headset, 2026-10-31).
-	box.add_child(W.flow([W.button("Reset room", func() -> void: app.reset_room()),
-			W.button("Reset screen", func() -> void: app.reset_screen())]))
+	_reset_screen = W.button("Reset screen", func() -> void: app.reset_screen())
+	box.add_child(W.flow([W.button("Reset room", func() -> void: app.reset_room()), _reset_screen]))
 	box.add_child(W.help("Reset room: back to the room's own seat, facing the screen, view recentred."))
 
 	# Floor reflection (#62): rooms with a floor for it.
@@ -388,7 +390,9 @@ func _sync_time_travel() -> void:
 
 ## The environment rows: rebuilt when the list changed (a photo room or a glTF room added), else only the mark moves.
 ## The viewer's own rooms go under Yours, the showrooms in their own group (Showrooms), a room with a category under
-## its category's heading (EnvLibrary.category_of(): Cinemas, Television, Journeys); one mark for all.
+## its category's heading (EnvLibrary.category_of(): Cinemas, Television, Journeys); one mark for all. In each of the
+## shipped rooms' groups the rooms stand under who built them (EnvLibrary.builder_of(): the authoring model), in the
+## order the builders first come.
 func _sync_envs() -> void:
 	var list: Array = app.get_environment_list()
 	var ids: Array[String] = []
@@ -397,10 +401,11 @@ func _sync_envs() -> void:
 	if ids != _env_ids:
 		_env_ids = ids
 		_env_rows.clear()
-		for holder: HFlowContainer in _category_rows.values() + [_envs, _yours, _showrooms]:
+		for holder: Container in _category_rows.values() + [_envs, _yours, _showrooms]:
 			for c in holder.get_children():
 				holder.remove_child(c)
 				c.queue_free()
+			holder.remove_meta("builders")
 		var group := ButtonGroup.new()
 		for e: Array in list:
 			var id := str(e[0])
@@ -413,9 +418,9 @@ func _sync_envs() -> void:
 				if id.begins_with(EnvLibrary.SKY_PREFIX):
 					b.text = tr("%s (photo)") % id.trim_prefix(EnvLibrary.SKY_PREFIX).get_basename()
 					b.set_meta("photo", id.trim_prefix(EnvLibrary.SKY_PREFIX).get_basename())
-			var holder := _showrooms if Showrooms.is_showroom(id) else (_yours if is_yours(id) else _envs)
+			var holder: Container = _showrooms if Showrooms.is_showroom(id) else (_yours if is_yours(id) else _envs)
 			if holder == _envs:
-				holder = _category_rows.get(EnvLibrary.category_of(id), _envs)
+				holder = _builder_rows(_category_rows.get(EnvLibrary.category_of(id), _envs), EnvLibrary.builder_of(id))
 			holder.add_child(b)
 			_env_rows.append(b)
 		_yours_box.visible = _yours.get_child_count() > 0
@@ -432,9 +437,35 @@ func _sync_envs() -> void:
 	_sync_groups()
 
 
+## The row of rooms under a builder's heading in a group's rows (made at the builder's first room). The name is
+## content: a model's name, never translated.
+func _builder_rows(rows: Container, builder: String) -> Container:
+	var known: Dictionary = rows.get_meta("builders", {})
+	if not known.has(builder):
+		var heading := W.caps(builder)
+		W.content(heading)
+		rows.add_child(heading)
+		known[builder] = W.flow()
+		rows.add_child(known[builder])
+		rows.set_meta("builders", known)
+	return known[builder]
+
+
+## The room buttons in a group's rows: its own, and those under its builders' headings.
+static func room_buttons(rows: Node) -> Array[Button]:
+	var out: Array[Button] = []
+	for c in rows.get_children():
+		if c is Button:
+			out.append(c)
+		elif c is Container:
+			out.append_array(room_buttons(c))
+	return out
+
+
 ## A folding group of rooms under the box: its heading (a button with a chevron) and its body (the rows, then what
-## the caller adds), closed until opened. Returns the group's own box.
-func _group(title: String) -> VBoxContainer:
+## the caller adds), closed until opened. by_builder: the rows are one under another, a heading and a row of rooms
+## for each builder (_builder_rows()). Returns the group's own box.
+func _group(title: String, by_builder := false) -> VBoxContainer:
 	var outer := W.vbox()
 	box.add_child(outer)
 	var head := W.button("", func() -> void: open_group("" if _open_group == title else title))
@@ -446,7 +477,7 @@ func _group(title: String) -> VBoxContainer:
 	var body := W.vbox()
 	body.visible = false
 	outer.add_child(body)
-	var rows := W.flow()
+	var rows: Container = W.vbox() if by_builder else W.flow()
 	body.add_child(rows)
 	_groups[title] = {"head": head, "body": body, "rows": rows}
 	return outer
@@ -469,9 +500,9 @@ func _sync_groups() -> void:
 		var head: Button = g["head"]
 		var here := ""
 		if not open:
-			for row: Node in (g["rows"] as Node).get_children():
-				if row is Button and (row as Button).button_pressed:
-					here = (row as Button).atr((row as Button).text)
+			for row: Button in room_buttons(g["rows"]):
+				if row.button_pressed:
+					here = row.atr(row.text)
 		head.text = tr(title) + ("  ·  " + here if here != "" else "")
 		head.icon = Icons.texture("chevron-open" if open else "chevron-closed", px, PaneStyle.color(&"text"))
 
@@ -504,7 +535,8 @@ func _sync_this_room() -> void:
 	var about := EnvLibrary.description_of(str(app.env_id))
 	_about.text = tr(about) if about != "" else ""
 	_about.visible = about != ""
-	var author := EnvLibrary.author_of(str(app.env_id))
+	# Every room that ships has a builder (EnvLibrary.builder_of()); the viewer's own rooms name none.
+	var author := "" if is_yours(str(app.env_id)) else EnvLibrary.builder_of(str(app.env_id))
 	_author.text = tr("Built by %s") % author if author != "" else ""
 	_author.visible = author != ""
 	_this_room_box.visible = not decls.is_empty() or about != "" or author != ""
@@ -555,6 +587,7 @@ func _sync_room_parts() -> void:
 	var seat: Node = app.features.seat
 	var seats: Array = seat.seats()
 	_seat_box.visible = not seats.is_empty()
+	_reset_screen.visible = not app.screen_fixed()
 	if _seat_box.visible:
 		_seat_plan.refresh()
 	_point_seat.visible = bool(app.use_xr)

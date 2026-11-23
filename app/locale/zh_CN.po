@@ -2091,6 +2091,9 @@ msgstr "从你的图片中删除 %s？"
 msgid "words to search for, such as autumn forest"
 msgstr "要搜索的词，例如 autumn forest"
 
+msgid "Off"
+msgstr "关"
+
 msgid "Defaults"
 msgstr "默认值"
 
@@ -2370,9 +2373,6 @@ msgstr "体视"
 msgid "Polynomial"
 msgstr "多项式"
 
-msgid "Off"
-msgstr "关"
-
 msgid "Bob"
 msgstr "Bob"
 
@@ -2439,11 +2439,11 @@ msgstr "选择座位"
 msgid "Default seat"
 msgstr "默认座位"
 
-msgid "Reset room"
-msgstr "重置房间"
-
 msgid "Reset screen"
 msgstr "重置屏幕"
+
+msgid "Reset room"
+msgstr "重置房间"
 
 msgid "Reset room: back to the room's own seat, facing the screen, view recentred."
 msgstr "重置房间：回到房间默认座位，面向屏幕，视角重新居中。"
@@ -2525,6 +2525,9 @@ msgstr "然后"
 
 msgid "%s (photo)"
 msgstr "%s（照片）"
+
+msgid "Built by %s"
+msgstr "由 %s 构建"
 
 msgid "This picture can't be a room (only local pictures)."
 msgstr "这张图片不能用作房间（只能用本地图片）。"
@@ -3017,12 +3020,6 @@ msgstr "硬件视频"
 msgid "Rendering"
 msgstr "渲染"
 
-msgid "Foveation"
-msgstr "注视点渲染"
-
-msgid "Sharp while the panel shows"
-msgstr "面板显示时保持清晰"
-
 msgid "Film drawn by the headset"
 msgstr "由头显绘制影片"
 
@@ -3146,21 +3143,6 @@ msgstr "允许"
 
 msgid "Deny"
 msgstr "拒绝"
-
-msgid "Low"
-msgstr "低"
-
-msgid "Medium"
-msgstr "中"
-
-msgid "High"
-msgstr "高"
-
-msgid "Saves GPU time at the edges of your view. High can look blocky."
-msgstr "在视野边缘节省 GPU 时间。“高”可能出现块状。"
-
-msgid "Foveation isn't available: this build starts without it."
-msgstr "注视点渲染不可用：此版本启动时没有启用它。"
 
 msgid "Both controllers. The labels change ink, or get a dark outline, to stay readable."
 msgstr "两个手柄都适用。标签会改变颜色或加上深色描边，以保持清晰可读。"
@@ -3357,6 +3339,9 @@ msgstr "旗舰影院"
 msgid "Ice cinema"
 msgstr "冰雪影院"
 
+msgid "Liner 1936"
+msgstr "邮轮 1936"
+
 msgid "Narrowboat"
 msgstr "运河窄船"
 
@@ -3459,6 +3444,9 @@ msgstr "大型现代影院：陡峭的阶梯、暖黄灯光洗亮的折板吸音
 
 msgid "An ice hotel's cinema of sawn blocks and carvings under an ice vault: candles glowing inside the ice, hides on ice benches, the polar night and the northern lights outside."
 msgstr "冰酒店里的影院，由切割的冰块和冰雕砌成，顶上也是冰：烛光在冰中闪烁，冰凳上铺着兽皮，窗外是极夜和北极光。"
+
+msgid "An ocean liner's moderne lounge crossing at night: the ship never rolls while the tall velvet drapes sway gently, the Moon lays a road across open sea, and harbour lights rise with the credits."
+msgstr "夜航远洋邮轮的摩登休息厅：船身平稳不晃，高大的天鹅绒窗帘轻轻摆动，月光在海面上铺出银路，片尾字幕出现时港口灯光渐亮。"
 
 msgid "A canal boat's saloon at walking pace: dusk falls as reeds, willows and a brick bridge slide past the windows, a village's lights come up, and the boat ties up at a lamp-lit wharf with the credits."
 msgstr "以步行速度前行的运河船舱：暮色降临，芦苇、柳树和砖砌拱桥从窗外缓缓滑过，村庄的灯火渐次亮起，片尾字幕时船停靠在灯火映照的码头。"
@@ -3563,6 +3551,9 @@ msgstr "星光天花"
 
 msgid "Aurora"
 msgstr "极光"
+
+msgid "Cove lights"
+msgstr "灯槽灯光"
 
 msgid "Candles"
 msgstr "蜡烛"
@@ -3670,6 +3661,9 @@ msgstr "吸音板之间的天花上点点针孔光。"
 
 msgid "The northern lights in the window and the skylights: lively before the film and swelling in its quiet scenes, glowing all the time, or staying away."
 msgstr "窗外和天窗里的北极光：影片开始前活跃，在安静的场景中增强；或一直发光，或不出现。"
+
+msgid "The proscenium coves' colour before the film. During the film they soften towards the picture."
+msgstr "影片开始前台口灯槽的颜色。放映时会柔化并趋近画面色彩。"
 
 msgid "None: the church by moonlight and the film alone. A few: two candle stands either side of the screen, the coronae over the nave and the votive lights. Many: four stands a side."
 msgstr "无：只有月光下的教堂和影片。少量：银幕两侧各两座烛台，中殿上方的吊冠和许愿烛。多：每侧四座烛台。"
@@ -3793,6 +3787,18 @@ msgstr "安静场景中"
 msgid "Always"
 msgstr "始终"
 
+msgid "Champagne"
+msgstr "淡金色"
+
+msgid "Rose"
+msgstr "玫瑰色"
+
+msgid "Jade"
+msgstr "玉绿色"
+
+msgid "Silver blue"
+msgstr "银蓝色"
+
 msgid "None"
 msgstr "无"
 
@@ -3834,12 +3840,6 @@ msgstr "晴朗"
 msgid "Gold"
 msgstr "金色"
 
-msgid "Rose"
-msgstr "玫瑰色"
-
-msgid "Jade"
-msgstr "玉绿色"
-
 msgid "30 lines"
 msgstr "30 线"
 
@@ -3867,26 +3867,26 @@ msgstr "无雨的夜晚"
 msgid "Showers"
 msgstr "阵雨"
 
-msgid "Liner 1936"
-msgstr "邮轮 1936"
+#~ msgid "Foveation"
+#~ msgstr "注视点渲染"
 
-msgid "An ocean liner's moderne lounge crossing at night: the ship never rolls while the tall velvet drapes sway gently, the Moon lays a road across open sea, and harbour lights rise with the credits."
-msgstr "夜航远洋邮轮的摩登休息厅：船身平稳不晃，高大的天鹅绒窗帘轻轻摆动，月光在海面上铺出银路，片尾字幕出现时港口灯光渐亮。"
+#~ msgid "Sharp while the panel shows"
+#~ msgstr "面板显示时保持清晰"
 
-msgid "Cove lights"
-msgstr "灯槽灯光"
+#~ msgid "Low"
+#~ msgstr "低"
 
-msgid "The proscenium coves' colour before the film. During the film they soften towards the picture."
-msgstr "影片开始前台口灯槽的颜色。放映时会柔化并趋近画面色彩。"
+#~ msgid "Medium"
+#~ msgstr "中"
 
-msgid "Champagne"
-msgstr "淡金色"
+#~ msgid "High"
+#~ msgstr "高"
 
-msgid "Silver blue"
-msgstr "银蓝色"
+#~ msgid "Saves GPU time at the edges of your view. High can look blocky."
+#~ msgstr "在视野边缘节省 GPU 时间。“高”可能出现块状。"
 
-msgid "Built by %s"
-msgstr "由 %s 构建"
+#~ msgid "Foveation isn't available: this build starts without it."
+#~ msgstr "注视点渲染不可用：此版本启动时没有启用它。"
 
 #~ msgid "Version %s is ready. It goes in at the next start."
 #~ msgstr "版本 %s 已就绪，下次启动时生效。"

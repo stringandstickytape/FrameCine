@@ -36,18 +36,28 @@ func _test_curve() -> void:
 	var curve: Node = main.features.curve
 	_check("the Flagship's screen starts curved by its document (%.2f)" % curve.amount, is_equal_approx(curve.amount, 0.3)
 			and main.screen.curve_radius > 0.0 and is_equal_approx(main.env.get_home_curve(), 0.3))
+	# The room hangs its own screen (main.room_owns_screen()): the viewer can't flatten or move it, and nothing is kept.
 	curve.set_amount(0.0)
-	_check("flattened, it keeps 0 (%s)" % [main.settings.get_value("screen_flagship", "curve_radius", "none")],
-			main.settings.has_value("screen_flagship", "curve_radius")
-			and is_zero_approx(float(main.settings.get_value("screen_flagship", "curve_radius", -1.0))))
+	_check("the viewer can't flatten it (%.2f), and nothing is kept" % curve.amount, is_equal_approx(curve.amount, 0.3)
+			and not main.settings.has_value("screen_flagship", "curve_radius"))
+	var was := [float(main.screen_width), float(main.screen_distance)]
+	main.set_screen(5.0, 22.0, 0.0)
+	_check("nor move or resize it", main.screen_fixed() and is_equal_approx(main.screen_distance, was[1])
+			and is_equal_approx(main.screen_width, was[0]) and not main.settings.has_value("screen_flagship", "distance"))
 	main.set_environment("void")
 	await _frames(2)
 	_check("the Void has no curve of its own", main.env.get_home_curve() < 0.0 or not main.env.has_method("get_home_curve")
 			or main.env.get_home_curve() < 0.0)
+	# A placement kept before the screen was fixed (22.17 m: 4 m behind the Flagship's wall, the user, 2026-11-23).
+	main.settings.set_value("screen_flagship", "curve_radius", 73.9)
+	main.settings.set_value("screen_flagship", "distance", 22.17)
+	main.settings.set_value("screen_flagship", "room_default", "20.00 18.20 0.00")
 	main.set_environment("flagship")
 	await _frames(3)
-	_check("and the Flagship stays flat when the viewer flattened it", curve.amount == 0.0)
-	main.settings.set_value("screen_flagship", "curve_radius", null)
+	_check("an old kept placement is dropped: the room's own screen (%.2f m, curve %.2f)" % [main.screen_distance,
+			curve.amount], is_equal_approx(main.screen_distance, was[1]) and is_equal_approx(curve.amount, 0.3)
+			and not main.settings.has_value("screen_flagship", "distance")
+			and not main.settings.has_value("screen_flagship", "curve_radius"))
 	main.set_environment("crater")
 	await _frames(3)
 	_check("a room with no curve opens flat (%.2f)" % curve.amount, curve.amount == 0.0)

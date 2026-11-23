@@ -80,6 +80,17 @@ static func author_of(id: String) -> String:
 	return v if v is String else ""
 
 
+## Who built the rooms that ship without a name on them (the user, 2026-11-23).
+const DEFAULT_AUTHOR := "Opus 5.5 High"
+
+
+## Who built a room that ships: its author, or DEFAULT_AUTHOR. The Room tab groups the rooms under these and names
+## the one in use ("Built by ..."). Not for the viewer's own rooms.
+static func builder_of(id: String) -> String:
+	var a := author_of(id)
+	return a if a != "" else DEFAULT_AUTHOR
+
+
 ## The rooms that are scenes, not documents (main.gd ENVIRONMENTS, BUILT_IN above).
 const SCENE_DESCRIPTIONS := {
 	"dim_room": "A small dark room with nothing in it to look at but the film.", # i18n

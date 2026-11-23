@@ -1219,8 +1219,7 @@ and fine detail shimmers and drops out as the head moves (stars in a still 4K fr
   across it: as many along each axis as the footprint is texels long, up to `footprint_taps` (3), separately for luma
   and the half-size chroma. Near 1:1 or stretched it is one sample, as before. No mipmaps: the decoder's frames are
   imported as they are, and a mip chain per frame would cost the bandwidth this saves; the samples lie close
-  together, so most come from the texture cache. The foveated edge, where the eye image is coarser, is filtered more,
-  as it should be. The derivatives are taken in `video.gdshader` before the dual fisheye seam's branch. The screen
+  together, so most come from the texture cache. The derivatives are taken in `video.gdshader` before the dual fisheye seam's branch. The screen
   and the crossfade use it; the floor reflection, the magnifier and the film layer's copy keep one sample (blurred,
   or drawn 1:1). Flat films on the film layer are drawn by the compositor, not this shader.
 - **Measured** (`tests/test_footprint.gd`, rendered with lavapipe at 640 x 640): the 8K 360 zone plate where its
@@ -1657,9 +1656,8 @@ System tab can turn it off. Code: `app/scripts/play/film_layer.gd`, `app/shaders
   without, with no dropped frames either way; the runtime's own cost for the extra layer is not in that figure.
 
 - **Why:** in the room, the film is resampled twice: into the eye buffers, then again by the runtime's lens
-  distortion. With foveation on (D22), the eye buffers have lower resolution away from the centre. As a layer, the
-  runtime samples the film's own pixels once, at display resolution. Small text and fine detail should be sharper,
-  and foveation no longer touches the film.
+  distortion. As a layer, the runtime samples the film's own pixels once, at display resolution. Small text and
+  fine detail should be sharper.
 - **How:** each layer has a SubViewport the size of one eye's picture (at most 3840 px a side). A 2D pass of the
   screen's own picture code (`video_common.gdshaderinc`) draws into it, with the screen's uniforms copied over. The
   pass runs only on a frame with a new video frame (`VideoSource.frame_key()`) or a changed uniform. On other
@@ -1707,7 +1705,7 @@ System tab can turn it off. Code: `app/scripts/play/film_layer.gd`, `app/shaders
   layer: the screen's mesh, as always. Switching at run time keeps playback going.
 - **What to compare on the headset:** the same film and room, with the setting off and then on.
   - Small text: subtitles burnt into the film, end credits, a captured browser window.
-  - Fine detail at the edge of the view, where foveation works hardest.
+  - Fine detail at the edge of the view.
   - Colour and black level of an HDR film (the two paths should match).
   - Shimmer on a 4K film shown small: there are no mipmaps on either path.
   - GPU frame time in the overlay stats.
@@ -2443,7 +2441,7 @@ documents, made from the libraries by `app/tools/showrooms.gd` (run it again whe
 `set_environment` and `--env` take them too). Each keeps a budget for a mobile GPU (100 cost units, 150 draw calls,
 250 000 triangles, 16 text parts); a room that would go over is split. Particles are left out for now.
 
-- **Measuring:** the dev link's `perf_rooms` shows each showroom in turn at each foveation level and returns the GPU
+- **Measuring:** the dev link's `perf_rooms` shows each showroom in turn and returns the GPU
   time of each, against the void (`app/scripts/assistant/room_perf.gd`); the steps for the headset are in
   `docs/showrooms.md`.
 - **Also:** a room's sky sphere is now 180 m, inside the cameras' 200 m far plane (it was 400 m, so a room's sky

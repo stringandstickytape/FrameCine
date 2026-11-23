@@ -131,12 +131,12 @@ as `get SECTION/KEY` and changes it with `set` (`docs/dev/control-protocol.md`);
 
 | Section | Keys (default) | What |
 |---|---|---|
-| `[view]` | `environment` ("void"), `overlay` (false), `foveation` ("low"; or "off", "medium", "high"), `foveation_sharp_panel` (true) | Start environment; info overlay; foveated rendering (D22): the level, and off while the panel or the agent pane shows. Also in System, Rendering: Foveation (Off / Low / Medium / High; applies at once; High can look blocky at the edges) and Sharp while the panel shows. A build whose project.godot has `xr/openxr/foveation_level` 0 starts without foveation; the row then says it isn't available. |
+| `[view]` | `environment` ("void"), `overlay` (false) | Start environment; info overlay. There is no foveated rendering (D22, revised 2026-11-23); the old `foveation` and `foveation_sharp_panel` keys are ignored. |
 | `[audio]` | `volume` (1.0), `av_offset` (0.0 s), `av_offset_<rate>` (s, per display refresh rate; `av_offset` is the fallback), `environment_db` (-60 off to 0 dB, -18) | A/V offset per refresh rate (#24); the Environment sound slider (the room's own sound, always ducked under the film; `docs/environments.md`) |
 | `[room:<env>]` | one key per room setting changed from its default: `dim` (true), `ambience_db` (-25 off to 6 dB, 0), `life` (true), `ritual` (true), `flicker` (true), `motion` (0 to 1, 1), and the room's own (the cinema's `house_level` 0 to 1, 0.2; the Void's `ripple` 0 to 1, 0.5) | The Room tab's This room (below) |
 | `[sound]` | `night_mode` (false), `night_strength` (1.0), `dialogue_boost_db` (0) | Night mode and dialogue boost (#26) |
 | `[player]` | `last_file` | |
-| `[screen_<env>]` | `width`, `distance`, `height_offset` (per environment), `yaw` (0.0), `curve_radius` (0 = flat) | The screen in each room |
+| `[screen_<env>]` | `width`, `distance`, `height_offset` (per environment), `yaw` (0.0), `curve_radius` (0 = flat) | The screen in each room that has no seats (the Void, the Bathysphere, the Nave) and in the passthrough room. A room with seats hangs its own screen (D33): nothing is kept for it, and an older entry is removed when the room opens. |
 | `[env_<env>]` | `light` (1.0), `reflection` (on where the room has a floor that can reflect) | Room light; floor reflection |
 | `[reflection]` | `strength` (0 to 0.6, 0.25) | Floor reflection (#62) |
 | `[room]` | `follow_playback` (true), `play_level` (0.35) | Lights dim while a film plays |

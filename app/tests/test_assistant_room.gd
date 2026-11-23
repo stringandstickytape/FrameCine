@@ -1100,9 +1100,10 @@ func _seat_checks() -> void:
 	main.recenter_screen_to_gaze()
 	var to_viewer: Vector3 = -(main.screen as Node3D).global_position
 	to_viewer.y = 0.0
-	_check("the viewer's recentre turns it to them (%.1f degrees)" % rad_to_deg((main.screen as Node3D).global_basis.z
-			.angle_to(to_viewer)), is_nan(main.screen_turn) and (main.screen as Node3D).global_basis.z.angle_to(
-			to_viewer) < 0.01)
+	# A room with seats hangs its own screen (main.screen_fixed()): the recentre no longer turns it to the viewer.
+	_check("the viewer's recentre leaves the room's screen where it hangs (%.1f degrees off its own way, %.1f from "
+			% [faces.call(), rad_to_deg((main.screen as Node3D).global_basis.z.angle_to(to_viewer))]
+			+ "the viewer)", faces.call() < 0.5 and spot.call() < 0.01)
 	main.reset_room()
 	_check("and Reset room puts it back (%.1f)" % faces.call(), faces.call() < 0.5 and spot.call() < 0.01)
 	# Opened by the viewer (from the rooms list), with no seat remembered: the default seat.

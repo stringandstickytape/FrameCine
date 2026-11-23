@@ -636,6 +636,11 @@ func _sync_stereo() -> void:
 
 
 func _sync_screen() -> void:
+	# A room that hangs its own screen: nothing to place or size; the seat does that (main.screen_fixed()).
+	var free: bool = not app.screen_fixed()
+	for key in ["width", "distance", "height", "angle", "curve"]:
+		(_rows[key] as Control).visible = free
+	_presets.visible = free
 	W.set_slider(_rows["width"], app.screen_width)
 	W.set_slider(_rows["distance"], app.screen_distance)
 	W.set_slider(_rows["height"], app.screen_height_offset)

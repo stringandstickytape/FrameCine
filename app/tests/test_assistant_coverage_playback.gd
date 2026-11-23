@@ -181,6 +181,18 @@ func _picture() -> void:
 	_check("set_3d: undo", f.two_d.eye == -1 and is_equal_approx(f.depth.value, 0.0) and f.edge_fade.width == 0.0)
 	_check("set_3d depth 0.5 refused", not (await _run_cmd("set_3d", {"depth": 0.5}))["ok"])
 
+	# A room with seats hangs its own screen: its place, size and curve are refused there (main.screen_fixed()).
+	var seated: String = main.env_id
+	if main.screen_fixed():
+		var kept: float = main.screen_width
+		r = await _run_cmd("set_screen", {"width": 5.0})
+		_check("set_screen width refused where the room hangs its screen", not r["ok"]
+				and str(r["error"]).contains("hangs its own screen") and is_equal_approx(main.screen_width, kept))
+		_check("set_screen zoom still goes there", (await _run_cmd("set_screen", {"zoom": 1.5}))["ok"])
+		f.zoom.set_zoom(1.0)
+	main.set_environment("void")
+	await process_frame
+	await process_frame
 	var width: float = main.screen_width
 	var distance: float = main.screen_distance
 	r = await _run_cmd("set_screen", {"width": 5.0, "distance": 4.0, "curvature": 50.0})
@@ -208,6 +220,9 @@ func _picture() -> void:
 	_check("set_screen zoom and follow head", r["ok"] and is_equal_approx(f.zoom.zoom, 2.0) and f.pose.follow)
 	r["call"].undo.call()
 	_check("set_screen zoom and follow: undo", is_equal_approx(f.zoom.zoom, 1.0) and not f.pose.follow)
+	main.set_environment(seated)
+	await process_frame
+	await process_frame
 
 	r = await _run_cmd("set_horizon", {"pitch": 5.0, "roll": -2.0})
 	_check("set_horizon", r["ok"] and is_equal_approx(f.horizon.pitch, 5.0) and is_equal_approx(f.horizon.roll, -2.0))
@@ -251,12 +266,19 @@ func _picture() -> void:
 		r = await _run_cmd(c, args)
 		_check("%s with no picture in picture refused" % c, not r["ok"] and str(r["error"]).contains("picture in picture"))
 	_check("picture_reset part refused when unknown", not (await _run_cmd("picture_reset", {"part": "all"}))["ok"])
+	seated = main.env_id
+	main.set_environment("void")
+	await process_frame
+	await process_frame
 	r = await _run_cmd("set_screen", {"width": 6.0})
 	reset = await _run_cmd("picture_reset", {"part": "screen"})
 	_check("picture_reset screen: the room's size", reset["ok"] and not is_equal_approx(main.screen_width, 6.0))
 	reset["call"].undo.call()
 	_check("picture_reset screen: undo", is_equal_approx(main.screen_width, 6.0))
 	r["call"].undo.call()
+	main.set_environment(seated)
+	await process_frame
+	await process_frame
 
 
 func _sound() -> void:

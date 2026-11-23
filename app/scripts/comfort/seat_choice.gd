@@ -178,10 +178,10 @@ func _place_screen(width: float) -> void:
 			and not _owns_screen():
 		var d: Dictionary = env.get_default_screen()
 		main.screen_yaw = 0.0
-		main.set_screen(width, d["distance"], d["height_offset"])
+		main.set_screen(width, d["distance"], d["height_offset"], true)
 	else:
 		main.screen_yaw = atan2(a.x, -a.z)
-		main.set_screen(width, Vector2(a.x, a.z).length(), a.y - env.NOMINAL_EYE_HEIGHT)
+		main.set_screen(width, Vector2(a.x, a.z).length(), a.y - env.NOMINAL_EYE_HEIGHT, true)
 	_screen_home = {"env_id": main.env_id, "yaw": main.screen_yaw, "distance": main.screen_distance,
 			"height": main.screen_height_offset, "width": main.screen_width}
 
@@ -205,7 +205,7 @@ func home_screen() -> void:
 	main.screen.sphere_yaw = 0.0
 	_place_screen(float(env.default_screen_width) if own else main.screen_width)
 	if own and main.get("features") != null and main.features.curve != null 			and float(env.get_home_curve()) >= 0.0:
-		main.features.curve.set_amount(float(env.get_home_curve()))
+		main.features.curve.set_amount(float(env.get_home_curve()), true)
 
 
 ## choose_seat behind a short fade: out to black, the move, back in.

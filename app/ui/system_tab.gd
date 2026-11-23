@@ -3,7 +3,7 @@ extends ScrollContainer
 ## The System tab (docs/ui-design.md): the info overlay and the stats view; the panel's layout (size, distance,
 ## recentre hold, follow the head, left-handed, reset) so the numbers can be tuned in the headset; accessibility (#74);
 ## the first start's introduction again (ui/intro.gd); test patterns, calibration cards and the bandwidth meter (#48); the benchmark (#82); hardware 10-bit video (which way
-## it plays, read-only, ui/hw_video_row.gd); foveation (D22) and the film layer (#70, a prototype); the controllers' look
+## it plays, read-only, ui/hw_video_row.gd); the film layer (#70, a prototype); the controllers' look
 ## and haptics; the phone remote with its address and QR code (#13); the assistant (ui/assistant_row.gd); PC windows
 ## (ui/pc_windows_row.gd); updates (ui/update_row.gd); the dev tools when dev mode is on (theme, remote changes and
 ## their undo); about.
@@ -41,10 +41,6 @@ signal reload_theme_requested
 
 const REMOTE_MODES := ["ask", "allow", "deny"]
 const REMOTE_WORDS := ["Ask", "Allow", "Deny"] # i18n
-## main.gd's FOVEATION_LEVELS, in order.
-const FOVEATION_WORDS := ["Off", "Low", "Medium", "High"] # i18n
-const FOVEATION_HELP := "Saves GPU time at the edges of your view. High can look blocky." # i18n
-const FOVEATION_UNAVAILABLE := "Foveation isn't available: this build starts without it." # i18n
 ## A controller look's button: wide enough for the icon and a name, three to a row.
 const LOOK_WIDTH := 150
 const LOOK_HELP := "Both controllers. The labels change ink, or get a dark outline, to stay readable." # i18n
@@ -69,9 +65,6 @@ var _magnification: VBoxContainer
 var _left_handed: Button
 var _palette_box: HFlowContainer
 var _palette_buttons := {}
-var _foveation: HFlowContainer
-var _foveation_help: Label
-var _foveation_sharp: Button
 var _film_layer: Button
 var _cylinder_layers: Button
 var _film_layer_help: Label
@@ -252,15 +245,7 @@ func bind(p_app: Node) -> void:
 		box.add_child(hw_row)
 		hw_row.bind(app.features.hwvideo)
 
-	# Foveation (D22): main.gd's [view] foveation and foveation_sharp_panel; both apply at once.
 	box.add_child(W.section("Rendering"))
-	_foveation = W.choices(FOVEATION_WORDS, func(i: int) -> void: app.set_foveation(app.FOVEATION_LEVELS[i]))
-	box.add_child(W.hbox([W.label("Foveation"), _foveation]))
-	_foveation_help = W.help(FOVEATION_HELP)
-	box.add_child(_foveation_help)
-	_foveation_sharp = W.toggle("Sharp while the panel shows", func(on: bool) -> void:
-		app.set_foveation_sharp_panel(on))
-	box.add_child(W.hbox([_foveation_sharp]))
 	# Film layer (#70, a prototype): the flat film drawn by the headset's compositor, for comparison.
 	var film_layer: Node = app.features.film_layer
 	_film_layer = W.toggle("Film drawn by the headset", func(on: bool) -> void:
@@ -467,7 +452,6 @@ func sync() -> void:
 	W.set_choice(_monocular_eye, int(access.get_value("monocular_eye")))
 	_monocular_eye.visible = bool(access.get_value("monocular"))
 	W.set_on(_subs_always, bool(access.get_value("subtitles_always")))
-	_sync_foveation()
 	_sync_look()
 	_sync_benchmark()
 	_sync_remote()
@@ -550,17 +534,6 @@ func _stop_stats() -> void:
 		_stats_label.visible = false
 	if _stats_toggle != null:
 		W.set_on(_stats_toggle, false)
-
-
-## Without a foveated swapchain (xr/openxr/foveation_level 0 at start) the row says so and takes no input.
-func _sync_foveation() -> void:
-	var available: bool = app.foveation_available()
-	W.set_choice(_foveation, app.FOVEATION_LEVELS.find(app.foveation) if available else -1)
-	W.set_on(_foveation_sharp, bool(app.foveation_sharp_panel))
-	for b: Button in _foveation.get_children():
-		b.disabled = not available
-	_foveation_sharp.disabled = not available
-	_foveation_help.text = FOVEATION_HELP if available else FOVEATION_UNAVAILABLE
 
 
 ## The remote and the file share are one server (remote_server.gd); each switch shows its own part of it.

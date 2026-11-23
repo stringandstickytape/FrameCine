@@ -176,7 +176,7 @@ The largest savings: Shopfront 1906 1319 to 67 ms, Screening room 1962 935 to 95
 `tools/room_perf.py` writes `docs/environments/perf.md`: each room's GPU time (mean and p95) and dropped frames, from
 `perf_rooms`. Not run yet.
 
-- `tools/room_perf.py run [--seconds 10] [--settle 4] [--foveation off] [--rooms a,b,c]` measures every room of
+- `tools/room_perf.py run [--seconds 10] [--settle 4] [--rooms a,b,c]` measures every room of
   `app/environments/*.env.json` (sorted), or the ones given, on the headset through `tools/listener.py send
   perf_rooms` (the Void first, the baseline). It saves the result as `docs/environments/perf.json` and writes the
   table to `docs/environments/perf.md`. It needs the listener running and the headset on the dev link; play a film

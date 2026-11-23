@@ -51,6 +51,9 @@ static func amount_for(distance: float, p_radius: float) -> float:
 
 func _load() -> void:
 	var section: String = "screen_" + str(main.env_id)
+	# A room that hangs its own screen (main.room_owns_screen()) has its own curve, or none; nothing is kept for it.
+	if main.room_owns_screen():
+		main.settings.set_value(section, "curve_radius", null)
 	if main.settings.has_value(section, "curve_radius"):
 		amount = amount_for(main.screen_distance, float(main.settings.get_value(section, "curve_radius", 0.0)))
 	else:
@@ -65,8 +68,11 @@ func _home_amount() -> float:
 	return float(env.call("get_home_curve")) if env != null and env.has_method("get_home_curve") else -1.0
 
 
-## 0..1 of a full wrap (radius = the screen distance).
-func set_amount(a: float) -> void:
+## 0..1 of a full wrap (radius = the screen distance). by_room: the room setting its own curve; anything else is
+## ignored while the screen is fixed (main.screen_fixed()).
+func set_amount(a: float, by_room := false) -> void:
+	if not by_room and main.screen_fixed():
+		return
 	amount = 0.0 if a < MIN_AMOUNT else clampf(a, 0.0, 1.0)
 	_store()
 
@@ -92,6 +98,8 @@ func _store() -> void:
 	radius = radius_for(main.screen_distance, amount)
 	# Flat in a room that curves by itself is kept as 0, else it would curve again next time.
 	var keep: Variant = snappedf(radius, 0.01) if radius > 0.0 else (0.0 if _home_amount() > 0.0 else null)
+	if main.room_owns_screen():
+		keep = null
 	main.settings.set_value("screen_" + main.env_id, "curve_radius", keep)
 	_apply()
 

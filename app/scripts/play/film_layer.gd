@@ -1,10 +1,9 @@
 extends Node
 
 ## Film layer (ideas #70; on by default since 2026-11-04): the flat film shown by an OpenXR composition layer instead
-## of the screen's mesh. In the scene the film is resampled twice: into the eye buffers (at lower
-## resolution away from the centre while foveation is on), then again by the runtime's lens distortion. As a layer
-## the runtime samples the film's own pixels once, at display resolution: sharper text and fine detail, no foveation
-## on the film. On the Steam Frame, stars in a paused 4K frame stopped shimmering, and the app's GPU time with a 4K
+## of the screen's mesh. In the scene the film is resampled twice: into the eye buffers, then again by the runtime's
+## lens distortion. As a layer the runtime samples the film's own pixels once, at display resolution: sharper text
+## and fine detail. On the Steam Frame, stars in a paused 4K frame stopped shimmering, and the app's GPU time with a 4K
 ## film fell from 2.5 to 1.4 ms (docs/features.md, "Film layer").
 ##
 ## Each layer has a SubViewport the size of one eye's picture (at most MAX_EDGE pixels a side), drawn by

@@ -191,8 +191,8 @@ static func build_units(ms: float) -> float:
 
 ## The view the blended layers are counted over: this far to each side of the line from the room's own seat to the
 ## screen's centre, and this far above and below it (degrees: about what the headset shows of someone watching the
-## film), in cells this many degrees across. Equal angles, not pixels: the lenses give the middle more pixels a degree
-## and foveation gives the edges fewer, and neither is known here.
+## film), in cells this many degrees across. Equal angles, not pixels: the lenses give the middle more pixels a degree,
+## and that is not known here.
 const VIEW_HALF := Vector2(55.0, 50.0)
 const VIEW_CELL := 2.5
 ## How far a ray looks (the ground of a lot or a plain goes on to 400 m).

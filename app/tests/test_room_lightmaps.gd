@@ -56,8 +56,10 @@ func _run() -> void:
 	await _frames(1)
 	main.set_environment("cinema")
 	await _frames(1)
-	_check("one saved for this layout stays (%.1f)" % main.screen_distance,
-			is_equal_approx(main.screen_distance, float(own["distance"]) - 2.0))
+	# The cinema has seats: it hangs its own screen (main.room_owns_screen()), so nothing is kept for it at all.
+	_check("and none is kept for a room with seats (%.1f)" % main.screen_distance,
+			is_equal_approx(main.screen_distance, float(own["distance"]))
+			and not main.settings.has_value("screen_cinema", "distance"))
 	main.settings.set_value("screen_cinema", "distance", null)
 	main.settings.set_value("screen_cinema", "room_default", null)
 	if not RoomBake.can_bake():

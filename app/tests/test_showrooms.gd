@@ -256,12 +256,12 @@ func _test_room_tab() -> void:
 	_check("a Showrooms group", box.visible and str(tab._groups["Showrooms"]["head"].get_meta("label", "")) == "Showrooms")
 	_check("one row per showroom", rows.map(func(b: Button) -> String: return b.text) == rooms.map(
 			func(r: Dictionary) -> String: return str(r["name"])))
-	_check("no showroom among the rooms' own rows", (tab._envs.get_children() as Array).all(func(b: Button) -> bool:
+	_check("no showroom among the rooms' own rows", (tab.room_buttons(tab._envs) as Array).all(func(b: Button) -> bool:
 			return not str(b.text) in rooms.map(func(r: Dictionary) -> String: return str(r["name"]))))
 	var in_categories := 0
 	for holder: Node in tab._category_rows.values():
-		in_categories += holder.get_child_count()
-	_check("the rooms' rows come first", in_categories + tab._envs.get_child_count() + tab._yours.get_child_count()
+		in_categories += tab.room_buttons(holder).size()
+	_check("the rooms' rows come first", in_categories + tab.room_buttons(tab._envs).size() + tab._yours.get_child_count()
 			+ rows.size() == tab._env_ids.size())
 	# One table of categories (EnvDoc.ROOM_GROUPS): a group for each, in its order, and the library reads the same.
 	_check("a group for every category, in the table's order %s" % [tab._category_boxes.keys()],
@@ -272,10 +272,23 @@ func _test_room_tab() -> void:
 	_check("a document may name every category of the table, and no other", EnvDoc.ROOM_GROUPS.keys().all(
 			func(c: String) -> bool: return EnvDoc.validate({"schema": 4, "name": "x", "room": {"category": c}})["ok"]))
 	# The cinemas and the television rooms (a document's room.category) in their own groups.
-	var cinema_rows: Array = (tab._cinemas.get_children() as Array).map(func(b: Button) -> String: return b.text)
+	var cinema_rows: Array = (tab.room_buttons(tab._cinemas) as Array).map(func(b: Button) -> String: return b.text)
 	_check("the cinema under Cinemas (%s)" % [cinema_rows], tab._cinema_box.visible and EnvLibrary.category_of("cinema")
-			== "cinema" and cinema_rows.has(tr("Cinema")) and not (tab._envs.get_children() as Array).any(
+			== "cinema" and cinema_rows.has(tr("Cinema")) and not (tab.room_buttons(tab._envs) as Array).any(
 			func(b: Button) -> bool: return b.text == tr("Cinema")))
+	# Under who built them (EnvLibrary.builder_of()): a heading for each builder, the rooms with no author under the
+	# default one.
+	var journeys: Container = tab._category_rows["journey"]
+	var builders: Dictionary = journeys.get_meta("builders", {})
+	_check("the journeys stand under their builders %s" % [builders.keys()],
+			builders.has("Gemini 4 Neon Extra High") and builders.has(EnvLibrary.DEFAULT_AUTHOR)
+			and (tab.room_buttons(builders["Gemini 4 Neon Extra High"]) as Array).map(
+			func(b: Button) -> String: return b.text) == [tr("Liner 1936")])
+	_check("a room with no author is the default builder's (%s)" % EnvLibrary.builder_of("cinema"),
+			EnvLibrary.author_of("cinema") == "" and EnvLibrary.builder_of("cinema") == "Opus 5.5 High"
+			and EnvLibrary.builder_of("liner_1936") == "Gemini 4 Neon Extra High")
+	_check("each builder's heading is a label above its rooms", (journeys.get_children() as Array).filter(
+			func(c: Node) -> bool: return c is Label).map(func(l: Label) -> String: return l.text) == builders.keys())
 	_check("the Void stays with the other rooms", EnvLibrary.category_of("void") == "other"
 			and EnvLibrary.category_of("no_such_room") == "other")
 	_check("Television shows only with a TV room", tab._tv_box.visible == (tab._tvs.get_child_count() > 0))
@@ -306,7 +319,7 @@ func _test_room_tab() -> void:
 	await _frames(2)
 	tab.sync()
 	_check("a row shows its showroom", main.env_id == Showrooms.PREFIX + str(rooms[0]["id"]))
-	_check("and is marked", (rows[0] as Button).button_pressed and not (tab._envs.get_children() as Array).any(
+	_check("and is marked", (rows[0] as Button).button_pressed and not (tab.room_buttons(tab._envs) as Array).any(
 			func(b: Button) -> bool: return b.button_pressed))
 	main.set_environment(before)
 	await _frames(2)
@@ -316,30 +329,23 @@ func _test_room_tab() -> void:
 
 func _test_perf_rooms() -> void:
 	var before: String = main.env_id
-	var fov: String = main.foveation
 	var sky := Showrooms.PREFIX + "sky_aurora"
-	var r: Dictionary = await DevCommands.execute("perf_rooms", {"rooms": sky, "foveation": "off,high",
-			"settle": 0.2, "seconds": 0.3})
+	var r: Dictionary = await DevCommands.execute("perf_rooms", {"rooms": sky, "settle": 0.2, "seconds": 0.3})
 	_check("perf_rooms: ok %s" % r.get("error", ""), r.get("ok") == true)
 	var res: Dictionary = r.get("result", {})
 	var rows: Array = res.get("rows", [])
-	_check("perf_rooms: the baseline and the room at both levels (%d rows)" % rows.size(), rows.size() == 4
-			and rows.map(func(x: Dictionary) -> String: return "%s %s" % [x["room"], x["foveation"]]) == [
-			"void off", "void high", "%s off" % sky, "%s high" % sky])
+	_check("perf_rooms: the baseline, then the room (%d rows)" % rows.size(), rows.size() == 2
+			and rows.map(func(x: Dictionary) -> String: return str(x["room"])) == ["void", sky])
 	_check("perf_rooms: a line per room", (res.get("table", []) as Array).size() == 2)
 	_check("perf_rooms: headless says so", str(res.get("notes", [])).contains("headless"))
-	_check("perf_rooms: the room and the foveation as they were", main.env_id == before and main.foveation == fov
-			and main.foveation_sharp_panel == true)
-	var all: Dictionary = await DevCommands.execute("perf_rooms", {"rooms": ["showrooms"], "foveation": ["off"],
-			"baseline": "", "settle": 0.2, "seconds": 0.2})
+	_check("perf_rooms: the room as it was", main.env_id == before)
+	var all: Dictionary = await DevCommands.execute("perf_rooms", {"rooms": ["showrooms"], "baseline": "",
+			"settle": 0.2, "seconds": 0.2})
 	_check("perf_rooms: showrooms is every showroom", (all.get("result", {}).get("rows", []) as Array).size()
 			== rooms.size())
 	var bad: Dictionary = await DevCommands.execute("perf_rooms", {"rooms": "showroom:nope"})
 	_check("perf_rooms: an unknown room refused", bad.get("ok") == false
 			and str(bad.get("error", "")).contains("no room"))
-	var level: Dictionary = await DevCommands.execute("perf_rooms", {"rooms": sky, "foveation": "max"})
-	_check("perf_rooms: an unknown level refused", level.get("ok") == false
-			and str(level.get("error", "")).contains("foveation"))
 
 
 func _tab(which: String) -> Node:

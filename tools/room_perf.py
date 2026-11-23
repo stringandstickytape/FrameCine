@@ -3,7 +3,7 @@
 measure what a room's shading costs; the headset can. This runs the dev link's perf_rooms over every room that ships
 and writes the table to docs/environments/perf.md.
 
-  tools/room_perf.py run [--seconds 10] [--settle 4] [--foveation off] [--rooms a,b,c]
+  tools/room_perf.py run [--seconds 10] [--settle 4] [--rooms a,b,c]
                                      every room of app/environments/*.env.json (sorted), or the ones given, measured
                                      on the headset through `tools/listener.py send perf_rooms` (the Void first, the
                                      baseline); the result saved as docs/environments/perf.json and the table written
@@ -48,7 +48,7 @@ def cell(v):
 
 
 def format_markdown(result, today=None):
-    """The page from a perf_rooms result: title, date, refresh rate and budget, the notes, a table a foveation level
+    """The page from a perf_rooms result: title, date, refresh rate and budget, the notes, a table
     sorted by p95 (the highest first, over the budget in bold), and how it was measured."""
     today = today or datetime.date.today().isoformat()
     budget = float(result.get("budget_ms", 0.0))
@@ -61,17 +61,8 @@ def format_markdown(result, today=None):
     if notes:
         out.append("")
     rows = result.get("rows") or []
-    levels = list(result.get("levels") or [])
-    for r in rows:
-        if r.get("foveation") not in levels:
-            levels.append(r.get("foveation"))
-    for level in levels:
-        mine = [r for r in rows if r.get("foveation") == level]
-        if not mine:
-            continue
-        mine.sort(key=lambda r: float(r.get("gpu_ms_p95", -1.0)), reverse=True)
-        out.append("## Foveation %s" % level)
-        out.append("")
+    mine = sorted(rows, key=lambda r: float(r.get("gpu_ms_p95", -1.0)), reverse=True)
+    if mine:
         out.append("| %s |" % " | ".join(c[0] for c in COLUMNS))
         out.append("|%s" % ("---|" * len(COLUMNS)))
         for r in mine:
@@ -105,12 +96,11 @@ def cmd_format(args):
 
 def cmd_run(args):
     rooms = [r.strip() for r in args.rooms.split(",") if r.strip()] if args.rooms else room_ids()
-    levels = [x.strip() for x in args.foveation.split(",") if x.strip()]
-    timeout = (len(rooms) + 1) * len(levels) * (args.settle + args.seconds) + 60
+    timeout = (len(rooms) + 1) * (args.settle + args.seconds) + 60
     cmd = [sys.executable, LISTENER, "send", "-t", "%g" % timeout, "perf_rooms", "rooms=" + ",".join(rooms),
-           "foveation=" + ",".join(levels), "baseline=" + BASELINE, "settle=%g" % args.settle,
+           "baseline=" + BASELINE, "settle=%g" % args.settle,
            "seconds=%g" % args.seconds]
-    print("measuring %d rooms at %s on the headset (up to %.0f s)" % (len(rooms), ", ".join(levels), timeout),
+    print("measuring %d rooms on the headset (up to %.0f s)" % (len(rooms), timeout),
           flush=True)
     p = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
     if p.returncode != 0:
@@ -136,7 +126,6 @@ def main(argv=None):
     r = sub.add_parser("run")
     r.add_argument("--seconds", type=float, default=10.0)
     r.add_argument("--settle", type=float, default=4.0)
-    r.add_argument("--foveation", default="off")
     r.add_argument("--rooms", default="")
     f = sub.add_parser("format")
     f.add_argument("result")

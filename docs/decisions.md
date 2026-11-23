@@ -382,6 +382,22 @@ Rejected: subsampled images (Godot's default), which the Frame doesn't support y
 as the head turns (Godot issue 124520); dynamic foveation, which the runtime ignores. Would change if: the Frame adds
 subsampled images, or a later engine merges PR 124811 (then the fork's line goes).
 
+**Revised 2026-11-23: no foveation.** `xr/openxr/foveation_level` is 0 in project.godot, the main viewport's VRS
+mode stays off, and the System tab's Foveation rows, the `[view]` keys and the `foveation` command are gone. The
+user's reasons: it clashed badly with films, and the scenery went blocky anyway. What the headset showed that day
+(SteamOS 0.5.7 and 0.5.10, Mesa 26.3 and 27.0):
+
+- With a foveated swapchain, a late frame (a tab's first show, the browser's start) was followed by one to two
+  seconds at half rate, with vertically flipped patches in one eye. Without one, the same hitch was one late frame
+  and nothing to see. Fixed and eye-tracked foveation both did it, at level 0 and at Medium.
+- It was not Valve's FDM injection layer (its Vulkan half is not active in our app), nor the driver's auto-tuning
+  (`TU_AUTOTUNE_FLAGS` unset and `TU_DEBUG=gmem`: still there). The cause was not found.
+- GPU time per frame in the flagship room with the panel open: level 0 on a foveated swapchain 7.3 ms, no foveation
+  4.6 ms, Medium 3.1 to 4.0 ms. So "off while the panel shows" cost more than no foveation at all.
+
+The fork's `frame/foveation` line stays in the engine; nothing uses it. `--long-frames` (or `[dev] long_frames`;
+`app/scripts/dev/long_frames.gd`) logs each long frame and a summary each second, which is how this was measured.
+
 ## D23. Spatial audio: our own binaural renderer in the engine, not Steam Audio (2026-11-03)
 
 The film's channels and the sound field of 360 videos are rendered binaurally by `BinauralRenderer` in the fork's
@@ -651,6 +667,23 @@ from GitHub Releases (`docs/framedrop.md`). Not tested on the device.
 - **Would change if:** a Devkit Game can run without a compat tool (then no copy step, but the updater stays);
   the container cannot write the home folder or add the library entry (then `tools/install-on-frame.sh` stays the
   first install); FrameDrop adds updates or a launch-file field.
+
+## D33. A room with seats hangs its own screen (2026-11-23)
+
+In a room that has seats, the screen is where the room hangs it, at the room's size and curve. The viewer changes
+seat to sit nearer or further; the right squeeze still turns the viewer on the spot. The Picture tab's Size,
+Distance, Height, Size in degrees, its presets and Curvature, and the Room tab's Reset screen, do not show there, the
+`set_screen` command refuses those fields, and no `[screen_<room>]` placement is kept or read (`main.gd
+room_owns_screen()`, `screen_fixed()`).
+
+Why: the room is built round its screen (masking, frame, curve, light), so a moved screen was wrong even in front of
+the wall. And behind it the film was black: the user's Flagship screen was kept at 22.17 m, 4 m behind the wall at
+18.2 m, so the mesh was hidden wherever it drew the film (the menu open, the laser or a controller in front, the film
+layer or cylinder layers off), while the headset-drawn cylinder layer, which is not depth-tested, still showed.
+
+Still free: a room without seats (the Void, the Bathysphere, the Nave), the passthrough room, and while lying down
+(the pose places the screen; nothing is kept from it in a room with seats). Not decided: head follow in a room with
+seats, which still moves the screen.
 
 ## Open
 

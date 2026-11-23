@@ -61,6 +61,8 @@ const Pointing := preload("res://scripts/pointing/pointing.gd")
 ##                          a name in user://tours; docs/tours.md). --kiosk loops it for ever.
 ##   --pc-audio=HOST[:PORT] the film's sound on a PC (tools/audio_sink.py), the PC as the clock (docs/pc-audio.md)
 ##   --pc-audio-mode=auto|pull|capture  how PC audio gets the sound (auto: from the engine when it can)
+##   --long-frames          a log line for each frame over 1.5 refresh periods and a summary each second (a check;
+##                          also [dev] long_frames; scripts/dev/long_frames.gd)
 ##   --hands / --passthrough  XR spikes, untested on the device: hand tracking (pinch = trigger, index = laser), the
 ##                          runtime's camera view behind the scene (scripts/xr_spikes/, docs/xr-spikes.md)
 ##   --pane-layer / --video-layer  XR spike #70, untested on the device: the pane, or the flat screen, as OpenXR quad
@@ -71,7 +73,7 @@ signal file_opened(path: String)
 signal mode_changed(mode: VideoMode, auto_text: String)
 signal screen_changed(width: float, distance: float, height_offset: float)
 signal environment_changed(id: String, light_scale: float)
-## Volume, A/V offset, overlay or foveation changed.
+## Volume, A/V offset or overlay changed.
 signal audio_settings_changed
 ## The file ended and nothing plays next.
 signal playback_ended
@@ -243,8 +245,6 @@ const AUTO_RESUME_DELAY := 0.3
 const PREVIEW_PROFILE := "/interaction_profiles/valve/frame_controller_valve"
 ## Binding path segment -> label anchor of controller_visual.gd, where the names differ.
 const INPUT_ALIASES := {"select": "trigger", "primary": "a", "secondary": "b"}
-## [view] foveation: the words for OpenXRInterface.foveation_level 0 to 3 (D22).
-const FOVEATION_LEVELS := ["off", "low", "medium", "high"]
 
 @onready var xr_origin: XROrigin3D = $XROrigin3D
 @onready var xr_camera: XRCamera3D = $XROrigin3D/XRCamera3D
@@ -293,16 +293,6 @@ var screen_pose_override: Callable
 var screen_turn := NAN
 var overlay_on := false
 var volume := 1.0
-## [view] foveation: one of FOVEATION_LEVELS (D22).
-var foveation := "medium"
-## [view] foveation_sharp_panel: foveation off while the panel or the agent pane shows.
-var foveation_sharp_panel := true
-## What foveation is set on: the OpenXR interface in XR (_setup_view), else null. Tests put a stand-in here.
-var foveation_xr: Object
-## False from _setup_view until the session has drawn a few frames. The engine makes the eye swapchains foveated only
-## if the level is above 0 when it creates them (the session's first frames). Until then the level stays at
-## project.godot's: setting 0 earlier (the panel rule, at start) left foveation off for good (2026-11-09).
-var foveation_live := true
 ## [controllers] look and look_options: how both controllers look (scripts/xr/controller_look.gd).
 var controller_look := ControllerLook.DEFAULT
 var controller_look_options := {}
@@ -410,7 +400,6 @@ func _ready() -> void:
 	volume = float(settings.get_value("audio", "volume", 1.0))
 	player.av_offset = float(settings.get_value("audio", "av_offset", 0.0))
 	_apply_volume()
-	load_foveation()
 
 	_setup_view(not _args.has("no-xr"))
 	screen.head = camera
@@ -570,6 +559,8 @@ func _ready() -> void:
 	preload("res://scripts/dev/benchmark.gd").attach(self, _args)
 	# Scripted tour / kiosk (docs/tours.md): only with --tour.
 	preload("res://scripts/dev/tour.gd").attach(self, _args)
+	# Long frames in the log (a check): only with --long-frames or [dev] long_frames.
+	load("res://scripts/dev/long_frames.gd").attach(self, _args)
 	# PC audio sync (docs/pc-audio.md): only with --pc-audio.
 	if _args.has("pc-audio"):
 		load("res://scripts/dev/pc_audio.gd").attach(self, _args)
@@ -608,16 +599,8 @@ func _setup_view(want_xr: bool) -> void:
 		# The XR runtime paces frames; the window's vsync is left as it is. Asking for it off warned at every start on
 		# the Frame ("not available", so it stayed on) and changed nothing: the eye images go to the runtime, not the window.
 		get_viewport().use_xr = true
-		# Foveation ([xr] in project.godot; the level is [view] foveation): the runtime's density map shapes the eye
-		# images only with VRS XR. Set once: switching the viewport's VRS mode at run time left the eye images low
-		# resolution all over, then unfoveated whatever the level, with odd distortions (2026-11-04).
-		get_viewport().vrs_mode = Viewport.VRS_XR
-		foveation_xr = xr
-		foveation_live = false
-		xr.connect("session_visible", _foveation_go_live)
-		xr.connect("session_stopping", _foveation_hold)
-		if xr.get_session_state() >= OpenXRInterface.SESSION_STATE_VISIBLE:
-			_foveation_go_live.call_deferred()
+		# No foveation (project.godot's xr/openxr/foveation_level 0; D22 as revised 2026-11-23): the viewport's VRS mode
+		# stays off.
 		xr_camera.current = true
 		camera = xr_camera
 		use_xr = true
@@ -965,8 +948,9 @@ func use_environment(node: VREnvironment, id: String, keep_screen := false, keep
 		var section := "screen_" + env_id
 		# A placement saved against another default (the room rebuilt, its screen moved) is stale: the cinema's
 		# screen hung four metres in front of the new stage (the user, 2026-11-04). It goes; the room's own stands.
+		# A room that hangs its own screen (room_owns_screen()) keeps none at all.
 		var made_for := str(settings.get_value(section, "room_default", ""))
-		if made_for != "" and made_for != _screen_default_key(d):
+		if room_owns_screen() or (made_for != "" and made_for != _screen_default_key(d)):
 			for k in ["width", "distance", "height_offset", "yaw", "room_default"]:
 				settings.set_value(section, k, null)
 		screen_width = float(settings.get_value(section, "width", d["width"]))
@@ -996,8 +980,26 @@ func set_room_light(scale: float) -> void:
 	settings.set_value("env_" + env_id, "light", scale)
 
 
-## Flat screen: width, distance from the viewer, centre height above eye level (metres). Remembered per environment.
-func set_screen(width: float, distance: float, height_offset: float) -> void:
+## The room hangs its own screen: a room with seats. The viewer moves there, by seat; the screen does not (the user,
+## 2026-11-23: a flagship screen pushed 4 m behind its wall showed black wherever the mesh drew it). Such a room keeps
+## no screen placement in the settings. Not the passthrough room (the real room), nor a room without seats.
+func room_owns_screen() -> bool:
+	return env != null and env_id != "passthrough" and env.has_method("get_seats") and not env.get_seats().is_empty()
+
+
+## The screen can't be moved or resized now: the room hangs it (room_owns_screen()) and the viewer isn't lying down
+## (the pose places the screen then).
+func screen_fixed() -> bool:
+	var lying := features != null and features.get("pose") != null and bool(features.pose.get("lying"))
+	return room_owns_screen() and not lying
+
+
+## Flat screen: width, distance from the viewer, centre height above eye level (metres). Remembered per environment,
+## except where the room hangs its own screen. by_room: the room placing its own screen (a seat change, a rebuild,
+## the pose); anything else is ignored while the screen is fixed (screen_fixed()).
+func set_screen(width: float, distance: float, height_offset: float, by_room := false) -> void:
+	if not by_room and screen_fixed():
+		return
 	screen_width = clampf(width, 0.2, 40.0)
 	screen_distance = clampf(distance, 0.5, 40.0)
 	screen_height_offset = clampf(height_offset, -5.0, 10.0)
@@ -1028,6 +1030,9 @@ func reset_room() -> void:
 
 
 func reset_screen() -> void:
+	if room_owns_screen() and features != null and features.seat != null:
+		features.seat.home_screen()
+		return
 	var d := env.get_default_screen()
 	screen_yaw = 0.0
 	screen.sphere_yaw = 0.0
@@ -1036,6 +1041,8 @@ func reset_screen() -> void:
 
 ## The screen (or the sphere's front) to where the head looks, keeping its distance and height.
 func recenter_screen_to_gaze() -> void:
+	if screen_fixed() and not mode.is_spherical():
+		return
 	var look := -camera.global_basis.z
 	var yaw := atan2(look.x, -look.z)
 	if mode.is_spherical():
@@ -1047,6 +1054,8 @@ func recenter_screen_to_gaze() -> void:
 
 
 func _save_screen_settings() -> void:
+	if room_owns_screen():
+		return
 	var section := "screen_" + env_id
 	settings.set_value(section, "width", snappedf(screen_width, 0.01))
 	settings.set_value(section, "distance", snappedf(screen_distance, 0.01))
@@ -1154,30 +1163,6 @@ func set_menu_shown(shown: bool) -> void:
 	update_controller_labels()
 
 
-## [view] foveation and foveation_sharp_panel (the System tab's Foveation row, D22). Unknown words read as "medium" (the default since 2026-11-09).
-func load_foveation() -> void:
-	var level := str(settings.get_value("view", "foveation", "medium"))
-	foveation = level if level in FOVEATION_LEVELS else "medium"
-	foveation_sharp_panel = bool(settings.get_value("view", "foveation_sharp_panel", true))
-
-
-## level: one of FOVEATION_LEVELS. Applies at once (the runtime takes a new profile for the swapchain).
-func set_foveation(level: String) -> void:
-	if not level in FOVEATION_LEVELS:
-		return
-	foveation = level
-	settings.set_value("view", "foveation", level)
-	_update_foveation()
-	audio_settings_changed.emit()
-
-
-func set_foveation_sharp_panel(on: bool) -> void:
-	foveation_sharp_panel = on
-	settings.set_value("view", "foveation_sharp_panel", on)
-	_update_foveation()
-	audio_settings_changed.emit()
-
-
 ## [controllers] look and look_options (the System tab's Controllers section, the controller_look command). A look or
 ## options that no longer check out (a preset since renamed, a bound since narrowed) read as the default.
 func load_controller_look() -> void:
@@ -1213,53 +1198,6 @@ func set_controller_look(id: String, options := {}) -> String:
 func _apply_controller_look() -> void:
 	for hand in hands:
 		hand.visual.set_look(controller_look, controller_look_options)
-
-
-## The swapchain is foveated only if xr/openxr/foveation_level was above 0 at start; after that the level can change,
-## but foveation can't be turned on for a swapchain made without it.
-static func foveation_available() -> bool:
-	return int(ProjectSettings.get_setting("xr/openxr/foveation_level", 0)) > 0
-
-
-## The level to set (0 off to 3 High): `level`, except 0 while the panel or the agent pane is in front of the viewer and
-## `sharp_panel` is on. At Low the sharp area is small enough that the edges of the panel's text soften; text is cheap
-## to draw, so the saving isn't missed then.
-static func foveation_choice(level: int, sharp_panel: bool, panel_shown: bool, pane_shown: bool) -> int:
-	if sharp_panel and (panel_shown or pane_shown):
-		return 0
-	return clampi(level, 0, FOVEATION_LEVELS.size() - 1)
-
-
-## Sets the runtime's foveation level from [view] foveation and the panel rule. Called with the controller labels,
-## which change exactly when the panel or the agent pane opens or closes, and when either setting changes.
-func _update_foveation() -> void:
-	if foveation_xr == null or not "foveation_level" in foveation_xr or not foveation_available() \
-			or not foveation_live:
-		return
-	var want := foveation_choice(FOVEATION_LEVELS.find(foveation), foveation_sharp_panel, menu_shown,
-			local_agents != null and local_agents.pane_shown())
-	if foveation_xr.foveation_level != want:
-		foveation_xr.foveation_level = want
-
-
-## The session is visible: the engine creates the eye swapchains on the frames that follow. A few frames later the
-## level from the settings can apply (see foveation_live).
-func _foveation_go_live() -> void:
-	if foveation_live:
-		return
-	for i in 10:
-		await get_tree().process_frame
-	if foveation_live or foveation_xr == null:
-		return
-	foveation_live = true
-	_update_foveation()
-
-
-## The session ends: a new one makes new swapchains, so the level goes back to project.godot's until they exist.
-func _foveation_hold() -> void:
-	foveation_live = false
-	if foveation_xr != null and foveation_available():
-		foveation_xr.foveation_level = int(ProjectSettings.get_setting("xr/openxr/foveation_level", 1))
 
 
 func _update_overlay_visibility() -> void:
@@ -1505,7 +1443,6 @@ func _on_language_changed(_code: String) -> void:
 ## Sets each controller's label texts from CONTROL_LABELS and the bindings of the profile the runtime bound for it
 ## (menu shown or not). Called when a profile changes and when the menu shows / hides, never per frame.
 func update_controller_labels() -> void:
-	_update_foveation()
 	# A window on the big screen no longer changes what the buttons do (the laser is its pointer), nor a terminal: so
 	# neither changes the legends.
 	var on_window := false
@@ -1703,7 +1640,7 @@ func _on_key(event: InputEventKey) -> void:
 					i = k
 			set_environment(envs[(i + 1) % envs.size()][0])
 		KEY_G:
-			if player.source != null and _grab.is_empty() and not use_xr:
+			if player.source != null and _grab.is_empty() and not use_xr and not screen_fixed():
 				_start_grab(func() -> Array: return mouse_ray(get_viewport().get_mouse_position()), null)
 		KEY_F12:
 			if snapshots != null:
