@@ -74,6 +74,12 @@ static func description_of(id: String) -> String:
 	return v if v is String else ""
 
 
+## Who built a shipped room (its document's room.author, content; "" when none is given).
+static func author_of(id: String) -> String:
+	var v: Variant = _room_section(id).get("author", "")
+	return v if v is String else ""
+
+
 ## The rooms that are scenes, not documents (main.gd ENVIRONMENTS, BUILT_IN above).
 const SCENE_DESCRIPTIONS := {
 	"dim_room": "A small dark room with nothing in it to look at but the film.", # i18n

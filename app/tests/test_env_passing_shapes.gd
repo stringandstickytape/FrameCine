@@ -11,15 +11,15 @@ const ShapeMesh := preload("res://scripts/env/systems/passing/shape_mesh.gd")
 
 const BUDGET := {"reeds": 70, "willow": 400, "tree": 420, "poplar": 120, "hedge": 60, "fence": 50, "ridge": 2,
 		"lights": 0, "cottage": 80, "post": 12, "lamp": 70, "bridge": 140, "boat": 130, "wharf": 220, "tower": 130,
-		"steamer": 340, "buoy": 40}
+		"steamer": 340, "buoy": 40, "pier": 280, "lighthouse": 240, "ship": 360}
 ## The highest point of each shape at size 1 (metres): at least, at most.
 const HEIGHT := {"reeds": [1.2, 2.4], "willow": [3.0, 6.5], "tree": [9.0, 14.0], "poplar": [13.5, 20.5],
 		"hedge": [1.4, 2.2], "fence": [1.0, 1.2], "cottage": [5.3, 5.5], "post": [1.1, 1.3], "lamp": [3.1, 3.3],
 		"bridge": [5.1, 5.3], "boat": [1.9, 2.0], "wharf": [4.7, 4.9], "tower": [19.5, 19.7], "steamer": [13.0, 13.1],
-		"buoy": [1.95, 2.05]}
+		"buoy": [1.95, 2.05], "pier": [12.0, 12.5], "lighthouse": [19.3, 19.7], "ship": [22.3, 22.7]}
 ## The shapes no two of which are alike. (Not the buoy: it is one of two, red or green, and two seeds draw the same
 ## one as often as not.)
-const VARIED: Array[String] = ["reeds", "willow", "tree", "cottage", "boat", "steamer"]
+const VARIED: Array[String] = ["reeds", "willow", "tree", "cottage", "boat", "steamer", "ship"]
 
 var _failures := 0
 var _checks := 0
@@ -38,6 +38,7 @@ func _run() -> void:
 	_bridge()
 	_lamp()
 	_steamer()
+	_maritime()
 	var m := _draw("nothing", 1234, _info())
 	_check("an unknown shape draws nothing", m.triangle_count() == 0 and m.light_count() == 0)
 	print("test_env_passing_shapes: %d checks, %s" % [_checks,
@@ -219,6 +220,33 @@ func _steamer() -> void:
 			if found:
 				break
 		_check("steamer (side %d): a seed of 1 to 20 has a lit window" % side, found)
+
+
+func _maritime() -> void:
+	for side: int in [1, -1]:
+		var pier := _draw("pier", 1234, _info(12.0, side))
+		_check("pier (side %d): nine lights (lamps and gantry beacon)" % side, pier.light_count() == 9)
+		var pa := _arrays(pier)
+		var p_win := 0
+		for i in (pa[Mesh.ARRAY_VERTEX] as PackedVector3Array).size():
+			if (pa[Mesh.ARRAY_TEX_UV2] as PackedVector2Array)[i].x == float(ShapeMesh.M_WINDOW):
+				p_win += 1
+		_check("pier (side %d): lit terminal windows (%d verts)" % [side, p_win], p_win > 0)
+		var lh := _draw("lighthouse", 1234, _info(12.0, side))
+		_check("lighthouse (side %d): three lights (beacon core, halo, entrance marker)" % side, lh.light_count() == 3)
+		var sh := _draw("ship", 1234, _info(12.0, side))
+		_check("ship (side %d): eight lights (deck, masts, nav)" % side, sh.light_count() == 8)
+		var sa := _arrays(sh)
+		var s_verts: PackedVector3Array = sa[Mesh.ARRAY_VERTEX]
+		var s_uv2: PackedVector2Array = sa[Mesh.ARRAY_TEX_UV2]
+		var s_ok := true
+		var s_lit := 0
+		for i in s_verts.size():
+			if s_uv2[i].x == float(ShapeMesh.M_WINDOW):
+				s_lit += 1
+				if signf(s_verts[i].x) != -side:
+					s_ok = false
+		_check("ship (side %d): lit windows face the way (%d verts)" % [side, s_lit], s_lit > 0 and s_ok)
 
 
 func _check(what: String, ok: bool) -> void:

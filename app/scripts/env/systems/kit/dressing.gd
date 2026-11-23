@@ -21,6 +21,11 @@ extends RefCounted
 ##   show_stage    a low wooden stage with a front moulding and seven iron footlight hoods; the lamps behind them
 ##                 glow with the house lights: bright before the film, all but out during it
 ##   show_proscenium  gilt pilasters and drawn-back drapes either side of a hall's picture
+##   liner_proscenium  an Art Deco stepped walnut, brass and cove-lit screen surround, low dais and two torchières
+##   liner_drape   a deeply pleated floor-length velvet curtain panel (unbaked, for motion sway)
+##   liner_pelmet  a walnut-and-brass Art Deco curtain pelmet cornice box hiding swaying drape tops
+##   liner_clock   an Art Deco sunburst bulkhead clock with brass speed wings (working dial in PieceClock)
+##   deck_rail     a ship's teak-and-brass promenade deck railing (unbaked, outside the windows)
 ##
 ## The china (`china`) and the cloth (`cloth`: bunting, bread and filling) are one material each, coloured per vertex
 ## (the house shader's instance tint): bunting, a tea set and three plates of sandwiches cost two draws.
@@ -31,7 +36,8 @@ const PhysicsShapes := preload("res://scripts/play/physics_shapes.gd")
 
 ## Its pieces (pieces.gd lists them with the others, their sizes and which stand on a floor).
 const PIECES: Array[String] = ["bunting", "tea_set", "sandwiches", "stool", "channel_dial", "soundbar", "floor_lamp",
-		"glass_table", "media_unit", "boat_stove", "show_stage", "show_proscenium"]
+		"glass_table", "media_unit", "boat_stove", "show_stage", "show_proscenium", "liner_proscenium",
+		"liner_drape", "liner_pelmet", "liner_clock", "deck_rail"]
 ## The bunting's colours when the entry gives none: a red, a white, a blue (cloth, faded a little).
 const RED := Color(0.62, 0.07, 0.09)
 const WHITE := Color(0.86, 0.84, 0.8)
@@ -51,6 +57,15 @@ const STAGE_IRON := Color(0.05, 0.05, 0.055)
 const SHOW_SIZE := Vector3(5.6, 3.0, 0.3)
 const SHOW_GILT := Color(0.95, 0.68, 0.25)
 const SHOW_DRAPE := Color(0.4, 0.05, 0.06)
+## The ocean liner lounge's pieces: their natural sizes and default colours.
+const LINER_PROS_SIZE := Vector3(7.6, 3.8, 0.9)
+const LINER_DRAPE_SIZE := Vector3(0.52, 2.72, 0.14)
+const DECK_RAIL_SIZE := Vector3(12.0, 1.02, 0.12)
+const LINER_WALNUT := Color(0.24, 0.14, 0.08)
+const LINER_CREAM := Color(0.86, 0.8, 0.68)
+const LINER_GILT := Color(0.9, 0.7, 0.34)
+const LINER_DRAPE := Color(0.44, 0.12, 0.15)
+const LINER_TORCH := Color(1.0, 0.85, 0.6)
 
 
 static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
@@ -79,6 +94,16 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			_show_stage(c, xf, size, e)
 		"show_proscenium":
 			_show_proscenium(c, xf, size, e)
+		"liner_proscenium":
+			_liner_proscenium(c, xf, size, e)
+		"liner_drape":
+			_liner_drape(c, xf, size, e)
+		"liner_pelmet":
+			_liner_pelmet(c, xf, size, e)
+		"liner_clock":
+			_liner_clock(c, xf, size, e)
+		"deck_rail":
+			_deck_rail(c, xf, size, e)
 
 
 # --- Helpers ---------------------------------------------------------------------------------------------------
@@ -486,3 +511,239 @@ static func _show_proscenium(c: Object, xf: Transform3D, size: Vector3, e: Dicti
 			var up := Vector3(0.0, 2.8, 0.0) * k
 			var normal := (xf.basis * (p1 - p0).cross(up)).normalized()
 			b.face([xf * p0, xf * p1, xf * (p1 + up), xf * (p0 + up)], normal)
+
+
+# --- An ocean liner's lounge --------------------------------------------------------------------------------------
+
+## An Art Deco stepped screen surround for an ocean liner's lounge: a low walnut dais with a brass speed-line lip,
+## three-tier stepped walnut and cream flanks with chrome speed lines and recessed glowing coves (PieceCove), a
+## stepped header with a brass sunburst chevron above the picture, and two fluted brass and opal-glass torchières.
+## Back at local z 0, facing local +Z. Stretches cleanly with `size`.
+static func _liner_proscenium(c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
+	var k := size / LINER_PROS_SIZE
+	var wood := _colour(e, "colour", LINER_WALNUT)
+	var gilt := _colour(e, "accent", LINER_GILT)
+	var s: RoomMesh = c.s
+	var u: RoomMesh = c.u
+	var fwd := (xf.basis * Vector3.BACK).normalized()
+	# Low stepped walnut dais with a dark plinth and gleaming brass speed-line band along its front lip.
+	s.surface(c.mat("iron", Color(0.06, 0.055, 0.05)))
+	_box(s, xf, Vector3(0.0, 0.05, 0.4) * k, Vector3(6.4, 0.1, 0.8) * k)
+	s.surface(c.mat("wood", wood))
+	_box(s, xf, Vector3(0.0, 0.22, 0.43) * k, Vector3(6.6, 0.24, 0.86) * k)
+	_solid(c, xf, Vector3(0.0, 0.17, 0.43) * k, Vector3(6.6, 0.34, 0.86) * k)
+	# Stepped walnut flanks either side of the screen (three receding tiers, clearing the arched roof).
+	for side: float in [-1.0, 1.0]:
+		var tiers := [[2.38, 0.34, 3.52, 0.32, 0.22], [2.74, 0.34, 3.42, 0.36, 0.30], [3.08, 0.34, 3.30, 0.32, 0.38]]
+		for tr: Array in tiers:
+			var h := float(tr[2]) - float(tr[1])
+			var d := float(tr[4])
+			_box(s, xf, Vector3(side * float(tr[0]), float(tr[1]) + h * 0.5, d * 0.5) * k,
+					Vector3(float(tr[3]), h, d) * k)
+		_solid(c, xf, Vector3(side * 2.74, 1.84, 0.19) * k, Vector3(1.04, 3.0, 0.38) * k)
+	# Stepped header lintel above the screen (y 3.52..3.76).
+	_box(s, xf, Vector3(0.0, 3.64, 0.14) * k, Vector3(4.9, 0.24, 0.28) * k)
+	# Recessed glowing Art Deco coves (PieceCove: live colour and brightness, dims with house lamps).
+	var cove: RoomMesh = c.cove
+	cove.surface(c.kit.cove_material())
+	var cream_lin := LINER_CREAM.srgb_to_linear()
+	cove.colour = Color(cream_lin.r, cream_lin.g, cream_lin.b, 0.96)
+	for side: float in [-1.0, 1.0]:
+		# Two vertical lit plaster cove strips nested in the stepped setbacks on each side.
+		for cx_d: Array in [[2.55, 0.24, 3.44], [2.91, 0.32, 3.32]]:
+			var x := side * float(cx_d[0])
+			var z := float(cx_d[1])
+			var top := float(cx_d[2])
+			cove.face([xf * (Vector3(x - 0.06, 0.42, z) * k), xf * (Vector3(x + 0.06, 0.42, z) * k),
+					xf * (Vector3(x + 0.06, top, z) * k), xf * (Vector3(x - 0.06, top, z) * k)], fwd)
+	# Horizontal lit cove soffit band along the header above the picture.
+	cove.face([xf * (Vector3(-2.35, 3.49, 0.29) * k), xf * (Vector3(2.35, 3.49, 0.29) * k),
+			xf * (Vector3(2.35, 3.61, 0.29) * k), xf * (Vector3(-2.35, 3.61, 0.29) * k)], fwd)
+	cove.colour = Color.WHITE
+	# Gleaming reflecting brass trim: dais speed lines, stepped vertical mouldings, header sunburst chevron.
+	u.surface(c.shiny("gilt", 0.85, 0.65, 0.16))
+	u.colour = gilt.srgb_to_linear()
+	_box(u, xf, Vector3(0.0, 0.33, 0.865) * k, Vector3(6.62, 0.035, 0.025) * k)
+	_box(u, xf, Vector3(0.0, 0.24, 0.865) * k, Vector3(6.62, 0.02, 0.02) * k)
+	for side: float in [-1.0, 1.0]:
+		_box(u, xf, Vector3(side * 2.21, 1.93, 0.225) * k, Vector3(0.04, 3.18, 0.03) * k)
+		_box(u, xf, Vector3(side * 3.24, 1.82, 0.385) * k, Vector3(0.045, 2.96, 0.03) * k)
+	# Sunburst fan of seven gilt rays centered on the header above the picture.
+	for r in 7:
+		var ang := deg_to_rad(-60.0 + 20.0 * r)
+		var ray_len := 0.22 if r % 2 == 0 else 0.16
+		var mid := Vector3(sin(ang) * ray_len * 0.5, 3.57 + cos(ang) * ray_len * 0.5, 0.305) * k
+		_box(u, xf, mid, Vector3(0.028, ray_len, 0.022) * k, Basis(Vector3.BACK, -ang))
+	_box(u, xf, Vector3(0.0, 3.56, 0.31) * k, Vector3(0.18, 0.07, 0.03) * k)
+	# Two stepped Art Deco fluted brass & 3-tier opal-glass torchières standing on the dais flanks.
+	var lit: RoomMesh = c.lit
+	lit.surface(c.shade(LINER_TORCH))
+	var sc := xf.basis.get_scale().x
+	for side: float in [-1.0, 1.0]:
+		var tx := side * 2.78
+		var tz := 0.56
+		var base_at := Vector3(tx, 0.34, tz) * k
+		# Stepped octagonal/fluted brass plinth, slim column, and flared Art Deco tulip cup.
+		_lathe(u, xf, [Vector2(0.24, 0.0), Vector2(0.24, 0.045), Vector2(0.18, 0.05), Vector2(0.18, 0.10),
+				Vector2(0.115, 0.11), Vector2(0.065, 0.17), Vector2(0.055, 1.14), Vector2(0.16, 1.22),
+				Vector2(0.19, 1.25), Vector2(0.17, 1.26)], base_at, 12)
+		# Brass collar bands separating the three stepped opal-glass tiers.
+		_lathe(u, xf, [Vector2(0.155, 1.41), Vector2(0.175, 1.425), Vector2(0.145, 1.44)], base_at, 12)
+		_lathe(u, xf, [Vector2(0.115, 1.565), Vector2(0.132, 1.58), Vector2(0.095, 1.595)], base_at, 12)
+		# Three-tier stepped Art Deco opal-glass lantern flame.
+		_lathe(lit, xf, [Vector2(0.145, 1.25), Vector2(0.168, 1.28), Vector2(0.158, 1.415),
+				Vector2(0.132, 1.435), Vector2(0.122, 1.57),
+				Vector2(0.088, 1.59), Vector2(0.072, 1.70), Vector2(0.0, 1.76)], base_at, 12)
+		c.lamps.append([xf * (Vector3(tx, 1.82, tz) * k), LINER_TORCH, 0.65])
+	# Chrome speed bands flanking the screen's stepped opening.
+	u.surface(c.shiny("chrome", 1.0, 0.85, 0.08))
+	u.colour = Color(0.86, 0.88, 0.9).srgb_to_linear()
+	for side: float in [-1.0, 1.0]:
+		_box(u, xf, Vector3(side * 2.57, 1.88, 0.305) * k, Vector3(0.025, 3.08, 0.025) * k)
+		_box(u, xf, Vector3(side * 2.93, 1.82, 0.385) * k, Vector3(0.025, 2.96, 0.025) * k)
+	_box(u, xf, Vector3(0.0, 3.75, 0.285) * k, Vector3(4.92, 0.028, 0.025) * k)
+	u.colour = Color.WHITE
+	var _unused := sc
+
+
+## A deeply pleated floor-length velvet curtain panel for an ocean liner's windows (unbaked, so a motion system can
+## sway the group smoothly with the sea swell). Local y 0 is the hem, y = size.y the rod, front faces +Z.
+static func _liner_drape(c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
+	var w := size.x
+	var h := size.y
+	var d := size.z
+	var col := _colour(e, "colour", LINER_DRAPE).srgb_to_linear()
+	var hem := _colour(e, "accent", LINER_GILT).srgb_to_linear()
+	var u: RoomMesh = c.u
+	u.surface(c.soft("drapes", true))
+	var folds := 6
+	var up := Vector3(0.0, h, 0.0)
+	var hem_h := minf(0.08, h * 0.06)
+	var hem_up := Vector3(0.0, hem_h, 0.0)
+	for j in folds:
+		var x0 := -w * 0.5 + w * float(j) / folds
+		var x1 := -w * 0.5 + w * float(j + 1) / folds
+		var xm := (x0 + x1) * 0.5
+		var z_back := -d * 0.45
+		var z_front := d * 0.55
+		# Each pleat: two slanted faces forming a rounded rib towards +Z, shaded deeper in the trough.
+		var left_n := (xf.basis * Vector3(-d, 0.0, (x1 - x0) * 0.5)).normalized()
+		var right_n := (xf.basis * Vector3(d, 0.0, (x1 - x0) * 0.5)).normalized()
+		u.colour = col * 0.68
+		u.face([xf * Vector3(x0, hem_h, z_back), xf * Vector3(xm, hem_h, z_front),
+				xf * Vector3(xm, h, z_front), xf * Vector3(x0, h, z_back)], left_n)
+		u.colour = col
+		u.face([xf * Vector3(xm, hem_h, z_front), xf * Vector3(x1, hem_h, z_back),
+				xf * Vector3(x1, h, z_back), xf * Vector3(xm, h, z_front)], right_n)
+		# Tailored weighted gold hem band at the foot of the curtain, capped cleanly underneath.
+		u.colour = hem * 0.72
+		u.face([xf * Vector3(x0, 0.0, z_back), xf * Vector3(xm, 0.0, z_front),
+				xf * Vector3(xm, hem_h, z_front), xf * Vector3(x0, hem_h, z_back)], left_n)
+		u.colour = hem
+		u.face([xf * Vector3(xm, 0.0, z_front), xf * Vector3(x1, 0.0, z_back),
+				xf * Vector3(x1, hem_h, z_back), xf * Vector3(xm, hem_h, z_front)], right_n)
+		u.colour = hem * 0.5
+		u.face([xf * Vector3(x0, 0.0, z_back), xf * Vector3(x1, 0.0, z_back), xf * Vector3(xm, 0.0, z_front)],
+				(xf.basis * Vector3.DOWN).normalized())
+	# Subtle outer return edges so the curtain reads solid from oblique angles.
+	u.colour = col * 0.55
+	var side_l := (xf.basis * Vector3.LEFT).normalized()
+	var side_r := (xf.basis * Vector3.RIGHT).normalized()
+	u.face([xf * Vector3(-w * 0.5, 0.0, -d * 0.5), xf * Vector3(-w * 0.5, 0.0, -d * 0.45),
+			xf * Vector3(-w * 0.5, h, -d * 0.45), xf * Vector3(-w * 0.5, h, -d * 0.5)], side_l)
+	u.face([xf * Vector3(w * 0.5, 0.0, -d * 0.45), xf * Vector3(w * 0.5, 0.0, -d * 0.5),
+			xf * Vector3(w * 0.5, h, -d * 0.5), xf * Vector3(w * 0.5, h, -d * 0.45)], side_r)
+	u.colour = Color.WHITE
+	var _u2 := up + hem_up
+
+
+## A walnut-and-brass Art Deco curtain pelmet cornice box: open underneath so swaying window drapes hang freely up
+## inside it with no visible cut edges. Back at local z 0, foot at local y 0, front facing +Z.
+static func _liner_pelmet(c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
+	var w := size.x
+	var h := size.y
+	var d := size.z
+	var wood := _colour(e, "colour", LINER_WALNUT)
+	var gilt := _colour(e, "accent", LINER_GILT)
+	var s: RoomMesh = c.s
+	var u: RoomMesh = c.u
+	s.surface(c.mat("wood", wood))
+	# Front valance fascia, top cover and two end returns (open underneath for the drapes).
+	_box(s, xf, Vector3(0.0, h * 0.5, d - 0.02), Vector3(w, h, 0.04))
+	_box(s, xf, Vector3(0.0, h - 0.015, d * 0.5), Vector3(w, 0.03, d))
+	for side: float in [-1.0, 1.0]:
+		_box(s, xf, Vector3(side * (w * 0.5 - 0.02), h * 0.5, d * 0.5), Vector3(0.04, h, d))
+	# Twin gleaming brass Art Deco speed lines along the lower front lip.
+	u.surface(c.shiny("gilt", 0.85, 0.65, 0.16))
+	u.colour = gilt.srgb_to_linear()
+	_box(u, xf, Vector3(0.0, 0.026, d + 0.008), Vector3(w + 0.01, 0.018, 0.016))
+	_box(u, xf, Vector3(0.0, 0.068, d + 0.006), Vector3(w + 0.01, 0.012, 0.012))
+	u.colour = Color.WHITE
+
+
+## An Art Deco sunburst bulkhead clock with stepped walnut backing, gleaming brass bezel, radial rays and horizontal
+## chrome/brass speed wings. Its working dial draws into PieceClock. Centered at local (0, 0, 0), back at z 0, facing +Z.
+static func _liner_clock(c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
+	var w := size.x
+	var h := size.y
+	var r := clampf(h * 0.41, 0.16, 0.36)
+	var sc := xf.basis.get_scale().x
+	var basis := xf.basis.orthonormalized()
+	var wood := _colour(e, "colour", LINER_WALNUT)
+	var gilt := _colour(e, "accent", LINER_GILT)
+	var s: RoomMesh = c.s
+	var u: RoomMesh = c.u
+	# Stepped streamlined walnut backing plaque along the bulkhead.
+	s.surface(c.mat("wood", wood))
+	_box(s, xf, Vector3(0.0, 0.0, 0.02), Vector3(w * 0.82, h * 0.44, 0.04))
+	_box(s, xf, Vector3(0.0, 0.0, 0.028), Vector3(r * 2.55, h * 0.78, 0.056))
+	# Reflecting brass circular bezel, twelve sunburst rays and horizontal wing speed lines.
+	u.surface(c.shiny("gilt", 0.85, 0.65, 0.16))
+	u.colour = gilt.srgb_to_linear()
+	Shapes.arch(u, xf * Vector3(0.0, 0.0, 0.062), r * sc, (r + 0.048) * sc, 0.056 * sc, 24, basis, 0.0, TAU,
+			["front", "inner", "outer"])
+	for k in 12:
+		var ang := TAU * float(k) / 12.0
+		var ray_len := 0.11 if k % 3 == 0 else 0.07
+		var mid := Vector3(sin(ang) * (r + 0.044 + ray_len * 0.5), cos(ang) * (r + 0.044 + ray_len * 0.5), 0.056)
+		_box(u, xf, mid, Vector3(0.022, ray_len, 0.018), Basis(Vector3.BACK, -ang))
+	for side: float in [-1.0, 1.0]:
+		var wing_w := w * 0.5 - (r + 0.12)
+		if wing_w > 0.08:
+			var x_mid := side * (r + 0.12 + wing_w * 0.5)
+			_box(u, xf, Vector3(x_mid, 0.075, 0.046), Vector3(wing_w * 0.96, 0.022, 0.018))
+			_box(u, xf, Vector3(x_mid - side * wing_w * 0.08, 0.0, 0.048), Vector3(wing_w * 0.8, 0.026, 0.02))
+			_box(u, xf, Vector3(x_mid - side * wing_w * 0.16, -0.075, 0.046), Vector3(wing_w * 0.64, 0.022, 0.018))
+	# Chrome outer rim accents on the stepped walnut plaque.
+	u.surface(c.shiny("chrome", 1.0, 0.85, 0.08))
+	u.colour = Color(0.86, 0.88, 0.9).srgb_to_linear()
+	_box(u, xf, Vector3(0.0, h * 0.39, 0.058), Vector3(r * 2.58, 0.016, 0.016))
+	_box(u, xf, Vector3(0.0, -h * 0.39, 0.058), Vector3(r * 2.58, 0.016, 0.016))
+	u.colour = Color.WHITE
+	# Live illuminated Art Deco clock face (PieceClock, hands driven by real wall-clock time).
+	c.clocks.append([xf * Vector3(0.0, 0.0, 0.078), xf.basis * Vector3(r, 0.0, 0.0), xf.basis * Vector3(0.0, r, 0.0),
+			(xf.basis * Vector3.BACK).normalized()])
+
+
+## A ship's teak-and-brass promenade deck railing along an exterior ledge (unbaked, no interior collision boxes).
+## Runs along local X for `size.x`, height `size.y`, foot at local y 0.
+static func _deck_rail(c: Object, xf: Transform3D, size: Vector3, e: Dictionary) -> void:
+	var w := size.x
+	var h := size.y
+	var teak := _colour(e, "colour", Color(0.38, 0.22, 0.12)).srgb_to_linear()
+	var rail_col := _colour(e, "accent", Color(0.82, 0.78, 0.72)).srgb_to_linear()
+	var u: RoomMesh = c.u
+	# Polished teak cap handrail along the top.
+	u.surface(c.soft("wood", true))
+	u.colour = teak
+	_box(u, xf, Vector3(0.0, h - 0.025, 0.0), Vector3(w, 0.05, 0.09))
+	# Three horizontal painted-white / brass guard bars and evenly spaced vertical stanchions.
+	u.surface(c.soft("gilt", true))
+	u.colour = rail_col
+	for frac: float in [0.26, 0.50, 0.74]:
+		_box(u, xf, Vector3(0.0, h * frac, 0.0), Vector3(w, 0.028, 0.028))
+	var bays := maxi(roundi(w / 1.5), 2)
+	for i in bays + 1:
+		var x := -w * 0.5 + w * float(i) / bays
+		_box(u, xf, Vector3(x, (h - 0.05) * 0.5, 0.0), Vector3(0.036, h - 0.05, 0.036))
+	u.colour = Color.WHITE

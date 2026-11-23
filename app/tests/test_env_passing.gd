@@ -47,6 +47,7 @@ func run_tests() -> void:
 	await _backward()
 	await _moon_road()
 	await _ahead()
+	await _sea()
 
 
 ## The test room's passing parameters: a row of posts near by, a far ridge that seems further off still, far lights
@@ -402,4 +403,33 @@ func _ahead() -> void:
 	_step(room, DT)
 	along = m.get_shader_parameter("landmark_along")
 	check("arrived: that lamp is 12 m astern (%.3f)" % along[1], absf(along[1] + 12.0) < 0.05)
+	await done(room)
+
+
+## 19. Open sea (kind "sea"): circular sea out to `to` with a horizon ring rising to EYE_HEIGHT at SEA_HORIZON
+## (inside FAR and the sky dome), carrying kind index 7 and horizon_t = 1 on its outer rim.
+func _sea() -> void:
+	var room := await _build(_doc("Open sea test", {"speed": 4.0, "ground": [
+			{"kind": "sea", "side": "both", "from": 0.0, "to": 175.0, "height_from": -5.5, "height_to": -5.5}]}))
+	var g := room.get_node_or_null("PassingGround") as MeshInstance3D
+	check("sea: PassingGround built", g != null and g.mesh != null)
+	if g != null and g.mesh != null:
+		var a := g.mesh.surface_get_arrays(0)
+		var verts: PackedVector3Array = a[Mesh.ARRAY_VERTEX]
+		var uv2: PackedVector2Array = a[Mesh.ARRAY_TEX_UV2]
+		var max_r := 0.0
+		var max_y := -INF
+		var rim := 0
+		var kind_ok := true
+		for i in verts.size():
+			var v := verts[i]
+			max_r = maxf(max_r, Vector2(v.x, v.z).length())
+			max_y = maxf(max_y, v.y)
+			if roundi(uv2[i].x) != 7:
+				kind_ok = false
+			if uv2[i].y > 0.99:
+				rim += 1
+		check("sea: radius %.1f m inside FAR, rim at eye height %.2f m (%d rim verts), kind 7" % [max_r, max_y, rim],
+				absf(max_r - Passing.SEA_HORIZON) < 0.05 and max_r < Passing.FAR
+				and absf(max_y - EnvChecks.EYE_HEIGHT) < 0.01 and rim >= Passing.SEA_SEGMENTS and kind_ok)
 	await done(room)

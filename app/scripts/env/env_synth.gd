@@ -20,7 +20,7 @@ const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale
 		"rain_leaves", "gas_hiss", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain",
 		"clock", "tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load", "switch_clunk", "valve_hum",
 		"crt_off", "channel_clunk", "sonar", "bubbles", "far_car", "scops_owl", "church_bell", "city", "tawny_owl",
-		"hooves", "boat_engine", "water_lap", "paddle_wheel"]
+		"hooves", "boat_engine", "water_lap", "paddle_wheel", "ship_horn"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
@@ -29,7 +29,8 @@ const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise
 		"fountain": 6.0, "clock": 4.0, "tube_whine": 2.0, "three_bells": 3.2, "candle": 0.9, "ice_creak": 2.6,
 		"vcr": 4.5, "tape_load": 8.0, "switch_clunk": 0.6, "valve_hum": 8.0, "crt_off": 1.4, "channel_clunk": 0.45,
 		"sonar": 3.0, "bubbles": 6.0, "far_car": 34.0, "scops_owl": 9.0, "church_bell": 14.0, "city": 12.0,
-		"tawny_owl": 7.0, "hooves": 16.0, "boat_engine": 8.0, "water_lap": 12.0, "paddle_wheel": 6.0}
+		"tawny_owl": 7.0, "hooves": 16.0, "boat_engine": 8.0, "water_lap": 12.0, "paddle_wheel": 6.0,
+		"ship_horn": 5.5}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
 		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles",
@@ -40,7 +41,8 @@ const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiato
 		"hum": 22050, "deep_hum": 22050, "fountain": 32000, "candle": 32000, "ice_creak": 32000, "vcr": 32000,
 		"tape_load": 32000, "switch_clunk": 32000, "valve_hum": 22050, "crt_off": 32000, "channel_clunk": 32000,
 		"sonar": 32000, "bubbles": 32000, "far_car": 22050, "scops_owl": 32000, "church_bell": 22050, "city": 22050,
-		"tawny_owl": 22050, "hooves": 32000, "boat_engine": 22050, "water_lap": 32000, "paddle_wheel": 22050}
+		"tawny_owl": 22050, "hooves": 32000, "boat_engine": 22050, "water_lap": 32000, "paddle_wheel": 22050,
+		"ship_horn": 22050}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -1287,6 +1289,32 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 				var dt2: float = tt - floor(tt * 1.5) / 1.5
 				var chuff := sin(TAU * 45.0 * dt2) * exp(-dt2 * 12.0) * 0.5
 				s[i] = _lp(st, 3, slap + wash + chuff, a_out)
+		"ship_horn":
+			# An ocean liner's deep twin-tone steam whistle heard inside a lounge (Liner 1936): two warm resonant
+			# bass tones a major third apart (73 and 92 Hz) with mellow harmonics, soft steam breath and a gentle
+			# harbour echo tail, low-passed as through glass and distance.
+			var a_steam := _a(650.0, r)
+			var a_lo := _a(180.0, r)
+			var a_out := _a(480.0, r)
+			var ph1 := 0.0
+			var ph2 := 0.0
+			for i in total:
+				var t := float(i) / r
+				var attack := smoothstep(0.0, 0.55, t)
+				var sustain := 1.0 - smoothstep(2.6, 3.6, t)
+				var tail := 0.24 * smoothstep(1.2, 2.8, t) * exp(-maxf(t - 2.8, 0.0) * 1.15)
+				var env := attack * sustain + tail
+				# Slight warm pitch settle on attack and gentle sag at release, as steam pressure falls.
+				var bend := 1.0 - 0.015 * exp(-t * 4.0) - 0.012 * smoothstep(2.6, 3.8, t)
+				ph1 += 73.0 * bend / r
+				ph2 += 92.0 * bend / r
+				var tone1 := sin(TAU * ph1) + 0.55 * sin(TAU * 2.0 * ph1 + 0.3) + 0.28 * sin(TAU * 3.0 * ph1) \
+						+ 0.12 * sin(TAU * 4.0 * ph1)
+				var tone2 := sin(TAU * ph2 + 0.7) + 0.45 * sin(TAU * 2.0 * ph2) + 0.2 * sin(TAU * 3.0 * ph2)
+				var wn := rng.randf_range(-1.0, 1.0)
+				var steam := (_lp(st, 0, wn, a_steam) - _lp(st, 1, wn, a_lo)) * 0.18 * attack * sustain
+				var v := (tone1 * 0.62 + tone2 * 0.42 + steam) * env
+				s[i] = _lp(st, 2, v, a_out)
 	return s
 
 

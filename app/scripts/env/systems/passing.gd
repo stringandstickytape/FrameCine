@@ -39,15 +39,18 @@ const GROUND_PERIOD := 64.0
 const PRESENCE_WIDTH := 64
 ## How far ahead and astern the ground strips reach (metres).
 const GROUND_REACH := 175.0
+## Open sea: radial segments around 360 degrees, and the horizon skirt's outer radius (inside the 190 m sky dome).
+const SEA_SEGMENTS := 32
+const SEA_HORIZON := 185.0
 ## The shaders' uniform arrays: at most this many bands and landmarks (the spec's list maxima).
 const MAX_BANDS := 10
 const MAX_LANDMARKS := 12
 ## Where the scenery can be drawn, about the origin (its vertices are placed in the shader, not on the CPU).
 const SCENERY_AABB := AABB(Vector3(-190.0, -30.0, -190.0), Vector3(380.0, 100.0, 380.0))
 ## The ground's kinds, in the order of their index (UV2.x), and their own colours.
-const GROUND_KINDS: Array[String] = ["water", "grass", "path", "field", "snow", "sand", "stone"]
+const GROUND_KINDS: Array[String] = ["water", "grass", "path", "field", "snow", "sand", "stone", "sea"]
 const KIND_COLOURS := {"water": "#0c1218", "grass": "#1a2414", "path": "#3b362c", "field": "#201c16",
-		"snow": "#c8ccd6", "sand": "#4a4232", "stone": "#34322e"}
+		"snow": "#c8ccd6", "sand": "#4a4232", "stone": "#34322e", "sea": "#08101c"}
 
 
 static func spec() -> Dictionary:
@@ -450,6 +453,9 @@ func _ground_mesh() -> ArrayMesh:
 		var kind := str(s["kind"])
 		var col := _written(s["colour"], str(KIND_COLOURS.get(kind, KIND_COLOURS["grass"])))
 		var k := float(maxi(GROUND_KINDS.find(kind), 0))
+		if kind == "sea":
+			_add_sea(v, n, c, uv, uv2, idx, s, col, k)
+			continue
 		for side in _sides(str(s["side"])):
 			var edges := [[float(s["from"]), float(s["height_from"])], [float(s["to"]), float(s["height_to"])]]
 			var first := v.size()
@@ -474,6 +480,66 @@ func _ground_mesh() -> ArrayMesh:
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	return mesh
+
+
+## Open sea (kind "sea"): a circular fan (half-disc per side, whole sea when `side` is both) out to `to` metres,
+## staying strictly inside the camera's far plane at every angle; where `to` reaches the outer sea (>= 165 m), a
+## horizon ring lifts gently to eye height at SEA_HORIZON (185 m, inside the 190 m sky dome) so open sea meets the
+## sky at the true horizon without showing the sky's ground band. UV2.y is 0 on the sea and 1 at the horizon rim.
+func _add_sea(v: PackedVector3Array, n: PackedVector3Array, c: PackedColorArray, uv: PackedVector2Array,
+		uv2: PackedVector2Array, idx: PackedInt32Array, s: Dictionary, col: Color, k: float) -> void:
+	var r_in := maxf(minf(float(s["from"]), float(s["to"])), 0.0)
+	var r_out := maxf(float(s["from"]), float(s["to"]))
+	if r_out <= r_in:
+		return
+	var y0 := float(s["height_from"])
+	var y1 := float(s["height_to"])
+	var steps := SEA_SEGMENTS / 2
+	var add_skirt := r_out >= 165.0
+	for side in _sides(str(s["side"])):
+		for i in steps:
+			var a0 := -PI * 0.5 + PI * float(i) / steps
+			var a1 := -PI * 0.5 + PI * float(i + 1) / steps
+			var c0 := cos(a0)
+			var s0 := sin(a0)
+			var c1 := cos(a1)
+			var s1 := sin(a1)
+			var out0 := Vector2(side * c0 * r_out, s0 * r_out)
+			var out1 := Vector2(side * c1 * r_out, s1 * r_out)
+			var first := v.size()
+			if r_in <= 0.001:
+				for pt: Array in [[Vector2.ZERO, y0], [out0, y1], [out1, y1]]:
+					var p: Vector2 = pt[0]
+					v.append(across_dir * p.x + Vector3.UP * float(pt[1]) + along_dir * p.y)
+					n.append(Vector3.UP)
+					c.append(col)
+					uv.append(p)
+					uv2.append(Vector2(k, 0.0))
+				idx.append_array([first, first + 1, first + 2])
+			else:
+				var in0 := Vector2(side * c0 * r_in, s0 * r_in)
+				var in1 := Vector2(side * c1 * r_in, s1 * r_in)
+				for pt: Array in [[in0, y0], [out0, y1], [out1, y1], [in1, y0]]:
+					var p: Vector2 = pt[0]
+					v.append(across_dir * p.x + Vector3.UP * float(pt[1]) + along_dir * p.y)
+					n.append(Vector3.UP)
+					c.append(col)
+					uv.append(p)
+					uv2.append(Vector2(k, 0.0))
+				idx.append_array([first, first + 1, first + 2, first, first + 2, first + 3])
+			if add_skirt:
+				var rim0 := Vector2(side * c0 * SEA_HORIZON, s0 * SEA_HORIZON)
+				var rim1 := Vector2(side * c1 * SEA_HORIZON, s1 * SEA_HORIZON)
+				var base := v.size()
+				for pt: Array in [[out0, y1, 0.0], [rim0, EnvChecks.EYE_HEIGHT, 1.0],
+						[rim1, EnvChecks.EYE_HEIGHT, 1.0], [out1, y1, 0.0]]:
+					var p: Vector2 = pt[0]
+					v.append(across_dir * p.x + Vector3.UP * float(pt[1]) + along_dir * p.y)
+					n.append(Vector3.UP)
+					c.append(col)
+					uv.append(p)
+					uv2.append(Vector2(k, float(pt[2])))
+				idx.append_array([base, base + 1, base + 2, base, base + 2, base + 3])
 
 
 # --- The journey ------------------------------------------------------------------------------------------------------

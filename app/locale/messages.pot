@@ -491,31 +491,31 @@ msgstr ""
 msgid "Journeys"
 msgstr ""
 
-#: scripts/env/env_library.gd:79
+#: scripts/env/env_library.gd:85
 msgid "A small dark room with nothing in it to look at but the film."
 msgstr ""
 
-#: scripts/env/env_library.gd:80
+#: scripts/env/env_library.gd:86
 msgid "Your own room through the headset's cameras, with the film in front of you."
 msgstr ""
 
-#: scripts/env/env_library.gd:81
+#: scripts/env/env_library.gd:87
 msgid "A small home theatre: a sofa in a dark room, the screen above a low cabinet, tower speakers either side."
 msgstr ""
 
-#: scripts/env/env_library.gd:82
+#: scripts/env/env_library.gd:88
 msgid "A drive-in at night, seen from a car in the middle of the lot: other cars, speaker posts and stars."
 msgstr ""
 
-#: scripts/env/env_library.gd:83
+#: scripts/env/env_library.gd:89
 msgid "A planetarium: reclined seats under a dark dome full of stars, a skyline round its foot."
 msgstr ""
 
-#: scripts/env/env_library.gd:84
+#: scripts/env/env_library.gd:90
 msgid "An open geodesic dome on a wide plain at dusk, the first stars coming out overhead."
 msgstr ""
 
-#: scripts/env/room_settings.gd:204 ui/room_tab.gd:286 ui/sound_tab.gd:76
+#: scripts/env/room_settings.gd:204 ui/room_tab.gd:290 ui/sound_tab.gd:76
 msgid "off"
 msgstr ""
 
@@ -529,7 +529,7 @@ msgstr ""
 msgid "%.1f s"
 msgstr ""
 
-#: scripts/env/room_settings.gd:213 ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:277
+#: scripts/env/room_settings.gd:213 ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:281
 #, c-format
 msgid "%d min"
 msgstr ""
@@ -593,7 +593,7 @@ msgstr ""
 msgid "Already in your pictures: %s"
 msgstr ""
 
-#: scripts/pictures/picture_library.gd:85 ui/object_section.gd:499 ui/pane_ui.gd:56 ui/picture_tab.gd:456
+#: scripts/pictures/picture_library.gd:85 ui/object_section.gd:499 ui/pane_ui.gd:56 ui/picture_tab.gd:479
 msgid "Picture"
 msgstr ""
 
@@ -2820,339 +2820,344 @@ msgstr ""
 msgid "words to search for, such as autumn forest"
 msgstr ""
 
-#: ui/picture_tab.gd:225
+#: ui/picture_tab.gd:222 ui/picture_tab.gd:39 ui/room_tab.gd:23 ui/sound_tab.gd:129
+#: ui/system_tab.gd:45 environments/flagship.env.json environments/ice_cinema.env.json
+msgid "Off"
+msgstr ""
+
+#: ui/picture_tab.gd:247
 msgid "Defaults"
 msgstr ""
 
-#: ui/picture_tab.gd:232
+#: ui/picture_tab.gd:254
 #, c-format
 msgid "Not loaded: %s"
 msgstr ""
 
-#: ui/picture_tab.gd:304
+#: ui/picture_tab.gd:327
 msgid "Visualisations"
 msgstr ""
 
-#: ui/picture_tab.gd:305
+#: ui/picture_tab.gd:328
 msgid "Shown on the screen while something without a picture plays, such as music."
 msgstr ""
 
-#: ui/picture_tab.gd:309
+#: ui/picture_tab.gd:332
 msgid "Show videos with a still picture as music"
 msgstr ""
 
-#: ui/picture_tab.gd:312
+#: ui/picture_tab.gd:335
 msgid "Mode"
 msgstr ""
 
-#: ui/picture_tab.gd:337 ui/picture_tab.gd:39 ui/sound_tab.gd:133
+#: ui/picture_tab.gd:360 ui/picture_tab.gd:39 ui/sound_tab.gd:133
 msgid "Auto"
 msgstr ""
 
-#: ui/picture_tab.gd:338
+#: ui/picture_tab.gd:361
 msgid "Half"
 msgstr ""
 
-#: ui/picture_tab.gd:339
+#: ui/picture_tab.gd:362
 msgid "Swap eyes"
 msgstr ""
 
-#: ui/picture_tab.gd:343
+#: ui/picture_tab.gd:366
 msgid "Clear folder rule"
 msgstr ""
 
-#: ui/picture_tab.gd:347
+#: ui/picture_tab.gd:370
 msgid "Use for this folder"
 msgstr ""
 
-#: ui/picture_tab.gd:352
+#: ui/picture_tab.gd:375
 msgid "Fisheye field"
 msgstr ""
 
-#: ui/picture_tab.gd:360
+#: ui/picture_tab.gd:383
 msgid "Lens"
 msgstr ""
 
-#: ui/picture_tab.gd:368
+#: ui/picture_tab.gd:391
 msgid "Camera"
 msgstr ""
 
-#: ui/picture_tab.gd:370
+#: ui/picture_tab.gd:393
 msgid "Lens field"
 msgstr ""
 
-#: ui/picture_tab.gd:372
+#: ui/picture_tab.gd:395
 msgid "Seam"
 msgstr ""
 
-#: ui/picture_tab.gd:376
+#: ui/picture_tab.gd:399
 msgid "Reset lens"
 msgstr ""
 
-#: ui/picture_tab.gd:380 ui/picture_tab.gd:381
+#: ui/picture_tab.gd:403 ui/picture_tab.gd:404
 msgid "3D"
 msgstr ""
 
-#: ui/picture_tab.gd:381 ui/system_tab.gd:196
+#: ui/picture_tab.gd:404 ui/system_tab.gd:196
 msgid "Left eye"
 msgstr ""
 
-#: ui/picture_tab.gd:381 ui/system_tab.gd:196
+#: ui/picture_tab.gd:404 ui/system_tab.gd:196
 msgid "Right eye"
 msgstr ""
 
-#: ui/picture_tab.gd:382
+#: ui/picture_tab.gd:405
 msgid "Show"
 msgstr ""
 
-#: ui/picture_tab.gd:384 environments/bathysphere.env.json
+#: ui/picture_tab.gd:407 environments/bathysphere.env.json
 msgid "Depth"
 msgstr ""
 
-#: ui/picture_tab.gd:388
+#: ui/picture_tab.gd:411
 msgid "This file only"
 msgstr ""
 
-#: ui/picture_tab.gd:394
+#: ui/picture_tab.gd:417
 msgid "Soft edges"
 msgstr ""
 
-#: ui/picture_tab.gd:397 ui/seat_plan.gd:128
+#: ui/picture_tab.gd:420 ui/seat_plan.gd:128
 msgid "Screen"
 msgstr ""
 
-#: ui/picture_tab.gd:401 ui/subtitles_tab.gd:68
+#: ui/picture_tab.gd:424 ui/subtitles_tab.gd:68
 msgid "Size"
 msgstr ""
 
-#: ui/picture_tab.gd:402
+#: ui/picture_tab.gd:425
 msgid "Distance"
 msgstr ""
 
-#: ui/picture_tab.gd:403
+#: ui/picture_tab.gd:426
 msgid "Height"
 msgstr ""
 
-#: ui/picture_tab.gd:403
+#: ui/picture_tab.gd:426
 #, c-format
 msgid "%+.2f m"
 msgstr ""
 
-#: ui/picture_tab.gd:408
+#: ui/picture_tab.gd:431
 msgid "Curvature"
 msgstr ""
 
-#: ui/picture_tab.gd:409
+#: ui/picture_tab.gd:432
 msgid "flat"
 msgstr ""
 
-#: ui/picture_tab.gd:412
+#: ui/picture_tab.gd:435
 msgid "Zoom"
 msgstr ""
 
-#: ui/picture_tab.gd:416
+#: ui/picture_tab.gd:439
 msgid "Size in degrees"
 msgstr ""
 
-#: ui/picture_tab.gd:430
+#: ui/picture_tab.gd:453
 msgid "Follow my head"
 msgstr ""
 
-#: ui/picture_tab.gd:431
+#: ui/picture_tab.gd:454
 msgid "Lying down"
 msgstr ""
 
-#: ui/picture_tab.gd:435
+#: ui/picture_tab.gd:458
 msgid "Reset zoom"
 msgstr ""
 
-#: ui/picture_tab.gd:438
+#: ui/picture_tab.gd:461
 msgid "Auto crop bars"
 msgstr ""
 
-#: ui/picture_tab.gd:439
+#: ui/picture_tab.gd:462
 msgid "Grow the screen to keep its height"
 msgstr ""
 
-#: ui/picture_tab.gd:445
+#: ui/picture_tab.gd:468
 msgid "Horizon"
 msgstr ""
 
-#: ui/picture_tab.gd:450
+#: ui/picture_tab.gd:473
 msgid "Pitch"
 msgstr ""
 
-#: ui/picture_tab.gd:451
+#: ui/picture_tab.gd:474
 msgid "Roll"
 msgstr ""
 
-#: ui/picture_tab.gd:454
+#: ui/picture_tab.gd:477
 msgid "Level"
 msgstr ""
 
-#: ui/picture_tab.gd:466
+#: ui/picture_tab.gd:489
 msgid "Deinterlace"
 msgstr ""
 
-#: ui/picture_tab.gd:469
+#: ui/picture_tab.gd:492
 msgid "Film grain"
 msgstr ""
 
-#: ui/picture_tab.gd:471
+#: ui/picture_tab.gd:494
 msgid "Gate weave"
 msgstr ""
 
-#: ui/picture_tab.gd:475
+#: ui/picture_tab.gd:498
 msgid "Reset picture"
 msgstr ""
 
-#: ui/picture_tab.gd:480
+#: ui/picture_tab.gd:503
 msgid "HDR"
 msgstr ""
 
-#: ui/picture_tab.gd:486
+#: ui/picture_tab.gd:509
 msgid "Tone map"
 msgstr ""
 
-#: ui/picture_tab.gd:487
+#: ui/picture_tab.gd:510
 msgid "Reset HDR"
 msgstr ""
 
-#: ui/picture_tab.gd:489
+#: ui/picture_tab.gd:512
 msgid "Exposure"
 msgstr ""
 
-#: ui/picture_tab.gd:490
+#: ui/picture_tab.gd:513
 #, c-format
 msgid "%+.1f stops"
 msgstr ""
 
-#: ui/picture_tab.gd:491
+#: ui/picture_tab.gd:514
 msgid "Knee"
 msgstr ""
 
-#: ui/picture_tab.gd:493
+#: ui/picture_tab.gd:516
 msgid "HDR brightness"
 msgstr ""
 
-#: ui/picture_tab.gd:494
+#: ui/picture_tab.gd:517
 #, c-format
 msgid "%d nits"
 msgstr ""
 
-#: ui/picture_tab.gd:501 ui/picture_tab.gd:503
+#: ui/picture_tab.gd:524 ui/picture_tab.gd:526
 msgid "Slideshow"
 msgstr ""
 
-#: ui/picture_tab.gd:505
+#: ui/picture_tab.gd:528
 msgid "Each picture"
 msgstr ""
 
-#: ui/picture_tab.gd:505 ui/room_tab.gd:274 ui/room_tab.gd:286
+#: ui/picture_tab.gd:528 ui/room_tab.gd:278 ui/room_tab.gd:290
 #, c-format
 msgid "%d s"
 msgstr ""
 
-#: ui/picture_tab.gd:508
+#: ui/picture_tab.gd:531
 msgid "Crossfade"
 msgstr ""
 
-#: ui/picture_tab.gd:509
+#: ui/picture_tab.gd:532
 msgid "cut"
 msgstr ""
 
-#: ui/picture_tab.gd:509
+#: ui/picture_tab.gd:532
 #, c-format
 msgid "%s s"
 msgstr ""
 
-#: ui/picture_tab.gd:514
+#: ui/picture_tab.gd:537
 msgid "Frame"
 msgstr ""
 
-#: ui/picture_tab.gd:516
+#: ui/picture_tab.gd:539
 msgid "Frame back"
 msgstr ""
 
-#: ui/picture_tab.gd:517
+#: ui/picture_tab.gd:540
 msgid "Frame forward"
 msgstr ""
 
-#: ui/picture_tab.gd:518
+#: ui/picture_tab.gd:541
 msgid "Mark A / B"
 msgstr ""
 
-#: ui/picture_tab.gd:519
+#: ui/picture_tab.gd:542
 msgid "Clear loop"
 msgstr ""
 
-#: ui/picture_tab.gd:520
+#: ui/picture_tab.gd:543
 msgid "Screenshot"
 msgstr ""
 
-#: ui/picture_tab.gd:524
+#: ui/picture_tab.gd:547
 msgid "Corner film"
 msgstr ""
 
-#: ui/picture_tab.gd:529
+#: ui/picture_tab.gd:552
 msgid "Swap"
 msgstr ""
 
-#: ui/picture_tab.gd:530
+#: ui/picture_tab.gd:553
 msgid "Close corner"
 msgstr ""
 
-#: ui/picture_tab.gd:531
+#: ui/picture_tab.gd:554
 msgid "Corner size"
 msgstr ""
 
-#: ui/picture_tab.gd:534
+#: ui/picture_tab.gd:557
 msgid "Top right"
 msgstr ""
 
-#: ui/picture_tab.gd:534
+#: ui/picture_tab.gd:557
 msgid "Top left"
 msgstr ""
 
-#: ui/picture_tab.gd:534
+#: ui/picture_tab.gd:557
 msgid "Bottom right"
 msgstr ""
 
-#: ui/picture_tab.gd:534
+#: ui/picture_tab.gd:557
 msgid "Bottom left"
 msgstr ""
 
-#: ui/picture_tab.gd:544
+#: ui/picture_tab.gd:567
 #, c-format
 msgid "%.1f m"
 msgstr ""
 
-#: ui/picture_tab.gd:600
+#: ui/picture_tab.gd:623
 #, c-format
 msgid "Auto: %s (%s)"
 msgstr ""
 
-#: ui/picture_tab.gd:600
+#: ui/picture_tab.gd:623
 #, c-format
 msgid "Auto: %s"
 msgstr ""
 
-#: ui/picture_tab.gd:650
+#: ui/picture_tab.gd:673
 #, c-format
 msgid "Folder rule: %s for %s"
 msgstr ""
 
-#: ui/picture_tab.gd:683
+#: ui/picture_tab.gd:706
 #, c-format
 msgid "%s  (opening...)"
 msgstr ""
 
-#: ui/picture_tab.gd:705
+#: ui/picture_tab.gd:728
 #, c-format
 msgid "Screenshot saved: %s"
 msgstr ""
 
-#: ui/picture_tab.gd:705
+#: ui/picture_tab.gd:728
 #, c-format
 msgid "No screenshot: %s"
 msgstr ""
@@ -3205,11 +3210,6 @@ msgstr ""
 msgid "Polynomial"
 msgstr ""
 
-#: ui/picture_tab.gd:39 ui/room_tab.gd:23 ui/sound_tab.gd:129 ui/system_tab.gd:45
-#: environments/flagship.env.json environments/ice_cinema.env.json
-msgid "Off"
-msgstr ""
-
 #: ui/picture_tab.gd:39
 msgid "Bob"
 msgstr ""
@@ -3253,232 +3253,237 @@ msgstr ""
 msgid "%s (the folder's rule)"
 msgstr ""
 
-#: ui/room_tab.gd:123
+#: ui/room_tab.gd:124
 msgid "Environment"
 msgstr ""
 
-#: ui/room_tab.gd:134
+#: ui/room_tab.gd:135
 msgid "A journey is as long as the film: it leaves when the film starts and arrives with the credits. Pause, and it waits."
 msgstr ""
 
-#: ui/room_tab.gd:138
+#: ui/room_tab.gd:139
 msgid "Time travel"
 msgstr ""
 
-#: ui/room_tab.gd:140
+#: ui/room_tab.gd:141
 msgid "Over the film"
 msgstr ""
 
-#: ui/room_tab.gd:140
+#: ui/room_tab.gd:141
 msgid "Every 5 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:140
+#: ui/room_tab.gd:141
 msgid "Every 10 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:140
+#: ui/room_tab.gd:141
 msgid "Every 15 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:143
+#: ui/room_tab.gd:144
 msgid "One film, and the room moves forward through the history of television, an era at a time while it plays."
 msgstr ""
 
-#: ui/room_tab.gd:151
+#: ui/room_tab.gd:152
 msgid "Use this picture as the room"
 msgstr ""
 
-#: ui/room_tab.gd:162
+#: ui/room_tab.gd:163
 msgid "Current"
 msgstr ""
 
-#: ui/room_tab.gd:167
+#: ui/room_tab.gd:171
 msgid "Back to defaults"
 msgstr ""
 
-#: ui/room_tab.gd:185
+#: ui/room_tab.gd:189
 msgid "Pick a seat"
 msgstr ""
 
-#: ui/room_tab.gd:189 ui/seat_plan.gd:183
+#: ui/room_tab.gd:193 ui/seat_plan.gd:183
 msgid "Default seat"
 msgstr ""
 
-#: ui/room_tab.gd:196
+#: ui/room_tab.gd:200
 msgid "Reset room"
 msgstr ""
 
-#: ui/room_tab.gd:197
+#: ui/room_tab.gd:201
 msgid "Reset screen"
 msgstr ""
 
-#: ui/room_tab.gd:198
+#: ui/room_tab.gd:202
 msgid "Reset room: back to the room's own seat, facing the screen, view recentred."
 msgstr ""
 
-#: ui/room_tab.gd:204
+#: ui/room_tab.gd:208
 msgid "Floor reflection"
 msgstr ""
 
-#: ui/room_tab.gd:206
+#: ui/room_tab.gd:210
 msgid "Reflection"
 msgstr ""
 
-#: ui/room_tab.gd:212
+#: ui/room_tab.gd:216
 msgid "Effects"
 msgstr ""
 
-#: ui/room_tab.gd:214 ui/room_tab.gd:226
+#: ui/room_tab.gd:218 ui/room_tab.gd:230
 msgid "Bias light"
 msgstr ""
 
-#: ui/room_tab.gd:218
+#: ui/room_tab.gd:222
 msgid "React to the film"
 msgstr ""
 
-#: ui/room_tab.gd:222
+#: ui/room_tab.gd:226
 msgid "Projector beam"
 msgstr ""
 
-#: ui/room_tab.gd:229
+#: ui/room_tab.gd:233
 msgid "Reaction"
 msgstr ""
 
-#: ui/room_tab.gd:243
+#: ui/room_tab.gd:247
 msgid "Time of day"
 msgstr ""
 
-#: ui/room_tab.gd:244
+#: ui/room_tab.gd:248
 msgid "Night"
 msgstr ""
 
-#: ui/room_tab.gd:244
+#: ui/room_tab.gd:248
 msgid "Now"
 msgstr ""
 
-#: ui/room_tab.gd:244
+#: ui/room_tab.gd:248
 msgid "Dusk"
 msgstr ""
 
-#: ui/room_tab.gd:244
+#: ui/room_tab.gd:248
 msgid "Day"
 msgstr ""
 
-#: ui/room_tab.gd:248
+#: ui/room_tab.gd:252
 msgid "Latitude"
 msgstr ""
 
-#: ui/room_tab.gd:251
+#: ui/room_tab.gd:255
 msgid "Room light"
 msgstr ""
 
-#: ui/room_tab.gd:255
+#: ui/room_tab.gd:259
 msgid "Dim while playing"
 msgstr ""
 
-#: ui/room_tab.gd:257
+#: ui/room_tab.gd:261
 msgid "Dimmed to"
 msgstr ""
 
-#: ui/room_tab.gd:261
+#: ui/room_tab.gd:265
 msgid "The showing"
 msgstr ""
 
-#: ui/room_tab.gd:263
+#: ui/room_tab.gd:267
 msgid "Curtains"
 msgstr ""
 
-#: ui/room_tab.gd:265
+#: ui/room_tab.gd:269
 msgid "Up next countdown"
 msgstr ""
 
-#: ui/room_tab.gd:267 ui/room_tab.gd:276
+#: ui/room_tab.gd:271 ui/room_tab.gd:280
 msgid "Intermission"
 msgstr ""
 
-#: ui/room_tab.gd:273
+#: ui/room_tab.gd:277
 msgid "Up next in"
 msgstr ""
 
-#: ui/room_tab.gd:287
+#: ui/room_tab.gd:291
 msgid "Crossfade music"
 msgstr ""
 
-#: ui/room_tab.gd:290
+#: ui/room_tab.gd:294
 msgid "Crossfade films"
 msgstr ""
 
-#: ui/room_tab.gd:294
+#: ui/room_tab.gd:298
 msgid "Sleep timer"
 msgstr ""
 
-#: ui/room_tab.gd:309
+#: ui/room_tab.gd:313
 msgid "Then"
 msgstr ""
 
-#: ui/room_tab.gd:410 ui/room_tab.gd:426
+#: ui/room_tab.gd:414 ui/room_tab.gd:430
 #, c-format
 msgid "%s (photo)"
 msgstr ""
 
-#: ui/room_tab.gd:540
+#: ui/room_tab.gd:508
+#, c-format
+msgid "Built by %s"
+msgstr ""
+
+#: ui/room_tab.gd:547
 msgid "This picture can't be a room (only local pictures)."
 msgstr ""
 
-#: ui/room_tab.gd:558
+#: ui/room_tab.gd:565
 #, c-format
 msgid "%s (moved) (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:558
+#: ui/room_tab.gd:565
 #, c-format
 msgid "%s (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:561
+#: ui/room_tab.gd:568
 #, c-format
 msgid "Where %s was (%d seat)"
 msgid_plural "Where %s was (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:563
+#: ui/room_tab.gd:570
 #, c-format
 msgid "The room's own spot (%d seat)"
 msgid_plural "The room's own spot (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:565
+#: ui/room_tab.gd:572
 #, c-format
 msgid "Go to %s"
 msgstr ""
 
-#: ui/room_tab.gd:578
+#: ui/room_tab.gd:585
 msgid "Flashes only in rooms that react, such as the drive-in; the room pulses with the bass."
 msgstr ""
 
-#: ui/room_tab.gd:592 ui/seat_plan.gd:186
+#: ui/room_tab.gd:599 ui/seat_plan.gd:186
 #, c-format
 msgid "Seat %d"
 msgstr ""
 
-#: ui/room_tab.gd:600
+#: ui/room_tab.gd:607
 msgid "Curtains: in the cinema and the home theatre, flat screen."
 msgstr ""
 
-#: ui/room_tab.gd:610
+#: ui/room_tab.gd:617
 #, c-format
 msgid "Intermission: %s left. Play ends it."
 msgstr ""
 
-#: ui/room_tab.gd:613
+#: ui/room_tab.gd:620
 #, c-format
 msgid "This film stops at %s."
 msgstr ""
 
-#: ui/room_tab.gd:614
+#: ui/room_tab.gd:621
 #, c-format
 msgid "Films over %d min with chapters stop once, near the middle."
 msgstr ""
@@ -4577,6 +4582,10 @@ msgstr ""
 msgid "Ice cinema"
 msgstr ""
 
+#: environments/liner_1936.env.json
+msgid "Liner 1936"
+msgstr ""
+
 #: environments/narrowboat.env.json
 msgid "Narrowboat"
 msgstr ""
@@ -4699,6 +4708,10 @@ msgstr ""
 
 #: environments/ice_cinema.env.json
 msgid "An ice hotel's cinema of sawn blocks and carvings under an ice vault: candles glowing inside the ice, hides on ice benches, the polar night and the northern lights outside."
+msgstr ""
+
+#: environments/liner_1936.env.json
+msgid "An ocean liner's moderne lounge crossing at night: the ship never rolls while the tall velvet drapes sway gently, the Moon lays a road across open sea, and harbour lights rise with the credits."
 msgstr ""
 
 #: environments/narrowboat.env.json
@@ -4835,6 +4848,10 @@ msgstr ""
 
 #: environments/ice_cinema.env.json
 msgid "Aurora"
+msgstr ""
+
+#: environments/liner_1936.env.json
+msgid "Cove lights"
 msgstr ""
 
 #: environments/nave.env.json
@@ -4976,6 +4993,10 @@ msgstr ""
 
 #: environments/ice_cinema.env.json
 msgid "The northern lights in the window and the skylights: lively before the film and swelling in its quiet scenes, glowing all the time, or staying away."
+msgstr ""
+
+#: environments/liner_1936.env.json
+msgid "The proscenium coves' colour before the film. During the film they soften towards the picture."
 msgstr ""
 
 #: environments/nave.env.json
@@ -5138,6 +5159,22 @@ msgstr ""
 msgid "Always"
 msgstr ""
 
+#: environments/liner_1936.env.json
+msgid "Champagne"
+msgstr ""
+
+#: environments/liner_1936.env.json environments/streamline_1937.env.json
+msgid "Rose"
+msgstr ""
+
+#: environments/liner_1936.env.json environments/streamline_1937.env.json
+msgid "Jade"
+msgstr ""
+
+#: environments/liner_1936.env.json
+msgid "Silver blue"
+msgstr ""
+
 #: environments/nave.env.json environments/pillow_fort_1993.env.json
 msgid "None"
 msgstr ""
@@ -5188,14 +5225,6 @@ msgstr ""
 
 #: environments/streamline_1937.env.json
 msgid "Gold"
-msgstr ""
-
-#: environments/streamline_1937.env.json
-msgid "Rose"
-msgstr ""
-
-#: environments/streamline_1937.env.json
-msgid "Jade"
 msgstr ""
 
 #: environments/tv_1930.env.json

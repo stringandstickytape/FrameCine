@@ -57,7 +57,8 @@ static func spec() -> Dictionary:
 				+ "furniture: a desk, a computer, a video recorder flashing 12:00, a sideboard, a standard lamp, a rug, "
 				+ "a coffee table; dressing: bunting, a tea set, sandwiches, a stool, a channel dial, a soundbar, a "
 				+ "floor lamp, a glass table, a media unit, a boat's stove, a low stage whose lamps behind its hoods glow "
-				+ "with the house lights (bright before the film, all but out during it), gilt pilasters and drapes.",
+				+ "with the house lights (bright before the film, all but out during it), gilt pilasters and drapes, "
+				+ "an ocean liner's Art Deco proscenium with coves and torchières, pleated window drapes, pelmets, a sunburst bulkhead clock and a promenade deck rail.",
 		"params": PARAMS,
 		"requires": ["light"],
 		"provides": ["collision", "bake"],

@@ -110,3 +110,11 @@ trees, poplars, the fence, cottages, lights, ridges, buoys, steamers, the tower 
 are made in code by the systems (`cabin.gd`, `kit.gd`, `passing.gd`, `sky.gd`; the stars from the catalogue under
 "Data") on library materials (`painted_wall`, `wood_panelling`, `oak_planks`, `velvet`, `felt`, `dark_metal`,
 `brass`, the kit's `oak_veneer`, all CC0). Its sounds (the paddle wheel, water, crickets and train) are synthesised.
+
+## Liner 1936 (`liner_1936.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The Art Deco lounge, its seats, proscenium, torchières, pelmets, bulkhead clock, swaying velvet drapes,
+promenade railings, open sea, channel buoys, harbour lights, piers, breakwater lighthouses, passing ocean liners, sky and
+stars are made in code by the systems (`cabin.gd`, `kit.gd`, `motion.gd`, `passing.gd`, `sky.gd`; the stars from the
+catalogue under "Data") on library materials (`smooth_plaster`, `walnut_veneer`, `woven_carpet`, `brass`, `brushed_steel`,
+`oak_planks`, `velvet`, all CC0). Its sounds (the turbines, ocean wash, hull creak and ship's horn) are synthesised.

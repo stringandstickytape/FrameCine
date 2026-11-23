@@ -91,7 +91,12 @@ Where a band's presence is under 1, items drop out in their order: at 0.5, half 
 
 Something that stands once on the route: it comes into view ahead, passes and goes astern. `steamer` is a
 sternwheel river steamer at anchor, with two deck houses, twin stacks, lit windows facing the way and six lights.
-Its stern wheel has twelve paddles, two rims and spokes on an axle across the way.
+Its stern wheel has twelve paddles, two rims and spokes on an axle across the way. `pier` is a lit harbour pier with
+bollard pilings, a timber deck, a dark-roofed passenger terminal shed with glowing windows, a roof lantern and nine
+warm lights along the quay. `lighthouse` is a harbour breakwater stone mound with a tapered cylindrical tower, red
+stripe band, gallery and lit lantern room (three lights). `ship` is a distant ocean liner at sea with a dark hull,
+white stepped superstructure decks, two raked striped funnels, masts, lit cabin portholes and eight navigation/deck
+lights.
 
 | Field | Type | Default | What |
 |---|---|---|---|
@@ -128,6 +133,9 @@ with none gives nothing. The margins past the shape itself are for what reaches 
 | `tower` | 20 x size | its distance -+ 8 x size |
 | `lamp` | | none |
 | `steamer` | 28 x size | its distance -+ (4.5 x size + 1) |
+| `pier` | 20 x size | its distance - 2 to its distance + (14 x size + 2) |
+| `lighthouse` | 8 x size | its distance -+ (7 x size + 1) |
+| `ship` | 36 x size | its distance -+ (7 x size + 1) |
 
 The scenery's shaders get them as `landmark_clear` (one a landmark), and `band_extent` for each band: how far one of
 its items runs on along the way from its foot (a row's piece: its `SEGMENT` length; else 0). An item whose run along
@@ -141,10 +149,13 @@ the landmark's pace (`seems` 1) keeps its place against it, so this holds for th
 | `side` | left, right, both | both | which side of the way |
 | `from`, `to` | float 0..175, required | | metres from the way's line |
 | `height_from`, `height_to` | float -20..40 | 0 | its height at each edge |
-| `kind` | water, grass, path, field, snow, sand, stone | grass | what it is |
-| `colour` | color | the kind's own | water `#0c1218`, grass `#1a2414`, path `#3b362c`, field `#201c16`, snow `#c8ccd6`, sand `#4a4232`, stone `#34322e` |
+| `kind` | water, grass, path, field, snow, sand, stone, sea | grass | what it is |
+| `colour` | color | the kind's own | water `#0c1218`, grass `#1a2414`, path `#3b362c`, field `#201c16`, snow `#c8ccd6`, sand `#4a4232`, stone `#34322e`, sea `#08101c` |
 
-A strip runs 175 m ahead and astern. It stands still; its pattern goes by.
+A strip runs 175 m ahead and astern. It stands still; its pattern goes by. `sea` draws a full 360-degree circular sea
+disc out to 185 m (`SEA_HORIZON`) with an outer skirt rising to eye height (`1.2 m`) so open ocean meets the sky dome
+cleanly all round with no edge gap; its shader blends ocean swells, open-sky Fresnel reflection and a broader
+(`SEA_MOON_ROUGH` 0.16) Moon's road seamlessly into `sky_low` at the horizon.
 
 `shape` (a band's and a landmark's), `at` (a landmark's), `from` and `to` (a strip's) are required: the schema says
 `"required": true` and refuses an entry without them (`docs/environments/checks.md`, item 1). A band of scenery with
@@ -219,8 +230,10 @@ the size, metres times the size]:
 | `tower` | [0, 3.5] | [0, 3.5] | [0, 0] |
 | `steamer` | [0, 4.5] | [0, 4.5] | [0, 0] |
 | `buoy` | [0, 0.45] | [0, 0.45] | [0, 0] |
+| `lighthouse` | [0, 6.0] | [0, 6.0] | [0, 0] |
+| `ship` | [0, 6.5] | [0, 6.5] | [0, 0] |
 
-A shape not in the table (`ridge`, `lights`, `wharf`) comes no nearer than its foot. The table is worked out from the
+A shape not in the table (`ridge`, `lights`, `wharf`, `pier`) comes no nearer than its foot. The table is worked out from the
 drawing functions at the largest each draws: a change to a shape is a change to its line here.
 
 `flow_volumes()` gives, in the room's frame: for each band and side, across from where its largest item reaches (its

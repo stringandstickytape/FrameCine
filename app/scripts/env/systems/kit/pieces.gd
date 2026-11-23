@@ -33,7 +33,7 @@ const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk
 		"booth", "snack_bar", "screen_tower", "bougainvillea", "ivy", "ferns", "carpet", "partition", "curves",
 		"desk", "computer", "video_recorder", "sideboard", "standard_lamp", "rug", "coffee_table", "bunting", "tea_set",
 		"sandwiches", "stool", "channel_dial", "soundbar", "floor_lamp", "glass_table", "media_unit", "boat_stove",
-		"show_stage", "show_proscenium",
+		"show_stage", "show_proscenium", "liner_proscenium", "liner_drape", "liner_pelmet", "liner_clock", "deck_rail",
 		"house", "palace_gate", "cypress", "palm", "pine", "lantern", "pedestal",
 		"ice_shell", "ice_screen", "ice_benches", "ice_outside",
 		"moderne_hall", "ziggurat", "organ_console",
@@ -56,6 +56,8 @@ const SIZES := {
 	"stool": [0.36, 0.46, 0.36], "channel_dial": [0.07, 0.07, 0.025], "soundbar": [0.9, 0.065, 0.09],
 	"floor_lamp": [0.3, 1.5, 0.3], "glass_table": [1.1, 0.4, 0.6], "media_unit": [1.8, 0.4, 0.42],
 	"boat_stove": [0.4, 2.0, 0.38], "show_stage": [7.2, 0.6, 1.2], "show_proscenium": [5.6, 3.0, 0.3],
+	"liner_proscenium": [7.6, 3.8, 0.9], "liner_drape": [0.52, 2.72, 0.14], "liner_pelmet": [8.7, 0.18, 0.26],
+	"liner_clock": [2.4, 0.76, 0.12], "deck_rail": [12.0, 1.02, 0.12],
 	"house": [4.0, 8.0, 0.3], "palace_gate": [0.0, 0.0, 1.5], "cypress": [1.4, 9.0, 1.4], "palm": [4.0, 9.0, 4.0],
 	"pine": [7.0, 10.0, 7.0], "lantern": [0.3, 0.6, 0.6], "pedestal": [0.8, 1.1, 1.2],
 	"ice_shell": [0.0, 0.0, 0.0], "ice_screen": [0.0, 0.0, 0.0], "ice_benches": [0.0, 0.0, 0.0],
@@ -74,7 +76,7 @@ const SIZES := {
 const STANDING: Array[String] = ["urn", "lion", "obelisk", "column", "booth", "snack_bar", "ferns", "partition",
 		"desk", "computer", "video_recorder", "sideboard", "standard_lamp", "rug", "coffee_table", "tea_set",
 		"sandwiches", "stool", "soundbar", "floor_lamp", "glass_table", "media_unit", "boat_stove", "show_stage",
-		"show_proscenium", "cypress", "palm", "pine", "pedestal"]
+		"show_proscenium", "liner_proscenium", "liner_drape", "deck_rail", "cypress", "palm", "pine", "pedestal"]
 ## What a video recorder's clock shows (kit.gd flashes it).
 const CLOCK := "12:00"
 
@@ -131,7 +133,8 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			Furniture.rug(c.s, xf, size, {"body": c.mat("fabric", field),
 					"detail": c.mat("fabric", _to_color(accent) if accent != null else field * 0.55)})
 		"bunting", "tea_set", "sandwiches", "stool", "channel_dial", "soundbar", "floor_lamp", "glass_table", \
-				"media_unit", "boat_stove", "show_stage", "show_proscenium":
+				"media_unit", "boat_stove", "show_stage", "show_proscenium", "liner_proscenium", "liner_drape", \
+				"liner_pelmet", "liner_clock", "deck_rail":
 			Dressing.build(piece, c, xf, size, e)
 		"house", "palace_gate", "cypress", "palm", "pine", "lantern", "pedestal":
 			Courtyard.build(piece, c, xf, size, e)

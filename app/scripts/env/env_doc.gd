@@ -101,6 +101,8 @@ static var ROOM_OPTIONS := {
 	"category": {"type": "enum", "values": ROOM_CATEGORIES, "default": OTHER},
 	# A line about the room under "This room" (a key: a room that ships translates it; env_library.gd description_of()).
 	"description": {"type": "string", "max": 200},
+	# Who built the room (optional, e.g. the model name; content, never translated; env_library.gd author_of()).
+	"author": {"type": "string", "max": 64},
 }
 const ACOUSTICS_OPTIONS := {
 	"box": {"type": "object", "fields": {"min": {"type": "vec3"}, "max": {"type": "vec3"}}},

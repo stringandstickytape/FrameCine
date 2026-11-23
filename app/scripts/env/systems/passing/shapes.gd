@@ -20,7 +20,7 @@ const ShapeMesh := preload("res://scripts/env/systems/passing/shape_mesh.gd")
 
 const BANDS: Array[String] = ["reeds", "willow", "tree", "poplar", "hedge", "fence", "ridge", "lights", "cottage",
 		"post", "buoy"]
-const LANDMARKS: Array[String] = ["lamp", "bridge", "boat", "wharf", "tower", "steamer"]
+const LANDMARKS: Array[String] = ["lamp", "bridge", "boat", "wharf", "tower", "steamer", "pier", "lighthouse", "ship"]
 ## Shapes that stand end to end in a row, each this long along the way (metres): such a band's count is its loop's
 ## length over this, and its items stand at even steps, all at the band's `near`.
 const SEGMENT := {"hedge": 6.0, "fence": 2.4, "ridge": 12.0}
@@ -29,7 +29,7 @@ const COLOURS := {
 	"reeds": "#3a4127", "willow": "#2f3a22", "tree": "#1f2a1b", "poplar": "#1b2618", "hedge": "#1c2617",
 	"fence": "#4a4337", "ridge": "#10141c", "lights": "#ffc98a", "cottage": "#26221d", "post": "#2e2a24",
 	"lamp": "#1b1b1d", "bridge": "#4a3329", "boat": "#17301f", "wharf": "#3a3632", "tower": "#15171c",
-	"steamer": "#cfc8b8", "buoy": "#5a1512",
+	"steamer": "#cfc8b8", "buoy": "#5a1512", "pier": "#3e3c38", "lighthouse": "#d4d0c6", "ship": "#c8c2b4",
 }
 ## A far village's lights: this share warm, the rest cool.
 const WARM := Color(1.0, 0.79, 0.54)
@@ -58,6 +58,8 @@ const REACH := {
 	"tower": {"stem": [0.0, 3.5], "wide": [0.0, 3.5], "over": [0.0, 0.0]},
 	"steamer": {"stem": [0.0, 4.5], "wide": [0.0, 4.5], "over": [0.0, 0.0]},
 	"buoy": {"stem": [0.0, 0.45], "wide": [0.0, 0.45], "over": [0.0, 0.0]},
+	"lighthouse": {"stem": [0.0, 3.2], "wide": [0.0, 3.6], "over": [0.0, 0.0]},
+	"ship": {"stem": [0.0, 6.8], "wide": [0.0, 7.2], "over": [0.0, 0.0]},
 }
 
 
@@ -101,6 +103,12 @@ static func clearing(shape: String, size: float, side: float, distance: float) -
 			return _clearing(20.0 * size, side, distance - 8.0 * size, distance + 8.0 * size)
 		"steamer":
 			return _clearing(28.0 * size, side, distance - 4.5 * size - 1.0, distance + 4.5 * size + 1.0)
+		"pier":
+			return _clearing(34.0, side, distance - 6.0, distance + 22.0)
+		"lighthouse":
+			return _clearing(20.0 * size, side, distance - 5.0 * size, distance + 14.0 * size)
+		"ship":
+			return _clearing(50.0 * size, side, distance - 8.0 * size, distance + 8.0 * size)
 	return Vector3.ZERO
 
 
@@ -145,6 +153,12 @@ static func draw(shape: String, m: ShapeMesh, rng: RandomNumberGenerator, size: 
 			_steamer(m, rng, size, colour, info)
 		"buoy":
 			_buoy(m, rng, size)
+		"pier":
+			_pier(m, size, colour, info)
+		"lighthouse":
+			_lighthouse(m, size, colour, info)
+		"ship":
+			_ship(m, rng, size, colour, info)
 
 
 ## A colour with its r, g and b multiplied by k.
@@ -600,3 +614,174 @@ static func _buoy(m: ShapeMesh, rng: RandomNumberGenerator, size: float) -> void
 	# A navigation light is the brightest small thing on dark water, and is seen from 30 or 40 m: at a deck lamp's
 	# size (0.22) it was hardly a dot in the first pictures.
 	m.light(Vector3(0.0, 2.0, 0.0) * size, c, 1.0, 0.4 * size)
+
+
+## An ocean terminal pier: a long stone quay facing the ship, five heavy bollards, a long transit shed with warm lit
+## upper windows and boarding bays, four harbour lamp standards and a steel cargo gantry at one end. Heights scale
+## with `size`; its length along the way is 60 m.
+static func _pier(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var deck := 3.2 * s
+	m.material(ShapeMesh.M_PLAIN)
+	# Quay face, deck apron and end caps.
+	m.quad(Vector3(0.0, -1.5 * s, -30.0), Vector3(0.0, -1.5 * s, 30.0), Vector3(0.0, deck, 30.0),
+			Vector3(0.0, deck, -30.0), colour)
+	m.quad(Vector3(0.0, deck, -30.0), Vector3(side * 14.0, deck, -30.0), Vector3(side * 14.0, deck, 30.0),
+			Vector3(0.0, deck, 30.0), _mul(colour, 1.12))
+	for z: float in [-30.0, 30.0]:
+		m.quad(Vector3(0.0, -1.5 * s, z), Vector3(side * 14.0, -1.5 * s, z), Vector3(side * 14.0, deck, z),
+				Vector3(0.0, deck, z), _mul(colour, 0.85))
+	# Heavy iron bollards along the quay edge.
+	var iron := Color("#16171a")
+	for z: float in [-24.0, -12.0, 0.0, 12.0, 24.0]:
+		m.box(Vector3(side * 0.7, deck + 0.45 * s, z), Vector3(0.45, 0.9 * s, 0.45), iron)
+	# Transit shed with pitched clerestory roof.
+	var shed_x := side * 9.0
+	var shed_wall := Color("#4b463e")
+	var roof := Color("#232428")
+	m.box(Vector3(shed_x, deck + 3.4 * s, -2.0), Vector3(8.0, 6.8 * s, 44.0), shed_wall)
+	for dx: float in [-4.3, 4.3]:
+		m.quad(Vector3(shed_x + dx, deck + 6.8 * s, -24.5), Vector3(shed_x + dx, deck + 6.8 * s, 20.5),
+				Vector3(shed_x, deck + 9.0 * s, 20.5), Vector3(shed_x, deck + 9.0 * s, -24.5), roof)
+	for z: float in [-24.0, 20.0]:
+		m.tri(Vector3(shed_x - 4.0, deck + 6.8 * s, z), Vector3(shed_x + 4.0, deck + 6.8 * s, z),
+				Vector3(shed_x, deck + 9.0 * s, z), shed_wall)
+	# Lit upper terminal windows and lower boarding bays on the face towards the ship.
+	var face_x := side * 4.98
+	m.material(ShapeMesh.M_WINDOW)
+	for i in 10:
+		var wz := -20.5 + 4.1 * i
+		m.quad(Vector3(face_x, deck + 4.2 * s, wz - 1.15), Vector3(face_x, deck + 4.2 * s, wz + 1.15),
+				Vector3(face_x, deck + 5.7 * s, wz + 1.15), Vector3(face_x, deck + 5.7 * s, wz - 1.15),
+				_mul(WARM, 0.85 if i % 2 == 0 else 0.7))
+	for z: float in [-14.0, -2.0, 10.0]:
+		m.quad(Vector3(face_x, deck + 0.1 * s, z - 2.2), Vector3(face_x, deck + 0.1 * s, z + 2.2),
+				Vector3(face_x, deck + 3.0 * s, z + 2.2), Vector3(face_x, deck + 3.0 * s, z - 2.2), _mul(WARM, 0.6))
+	# Four tall harbour lamp standards along the quay apron.
+	m.material(ShapeMesh.M_PLAIN)
+	for z: float in [-21.0, -7.0, 7.0, 21.0]:
+		var px := side * 2.2
+		m.tube(Vector3(px, deck, z), Vector3(px, deck + 6.4 * s, z), 0.12, 0.08, 4, iron, iron)
+		m.box(Vector3(px - side * 0.45, deck + 6.25 * s, z), Vector3(0.9, 0.25 * s, 0.35), iron)
+		var lp := Vector3(px - side * 0.75, deck + 6.1 * s, z)
+		m.light(lp, WARM, 1.0, 0.9 * s)
+		m.light(lp, WARM, 0.8, 0.22 * s)
+	# Cargo crane gantry near the forward end of the quay.
+	var gx := side * 3.0
+	var gz := 23.0
+	m.box(Vector3(gx, deck + 4.2 * s, gz - 2.2), Vector3(0.45, 8.4 * s, 0.45), iron)
+	m.box(Vector3(gx, deck + 4.2 * s, gz + 2.2), Vector3(0.45, 8.4 * s, 0.45), iron)
+	m.box(Vector3(gx, deck + 8.3 * s, gz), Vector3(0.6, 0.55 * s, 5.2), iron)
+	m.box(Vector3(gx - side * 1.4, deck + 8.85 * s, gz), Vector3(4.2, 0.45 * s, 0.45), iron)
+	m.light(Vector3(gx, deck + 9.0 * s, gz), Color(1.0, 0.24, 0.18), 0.9, 0.35 * s)
+
+
+## A harbour breakwater and lighthouse: a stone sea wall with a tapered banded tower, gallery deck, glowing lantern
+## room, domed cupola and bright warm beacon light.
+static func _lighthouse(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var stone := Color("#2f3134")
+	var band_red := Color("#6a1d1a")
+	var iron := Color("#16171a")
+	m.material(ShapeMesh.M_PLAIN)
+	# Stone breakwater wall and head apron.
+	m.box(Vector3(side * 4.0, 0.5, -5.0) * s, Vector3(10.0, 4.0, 22.0) * s, stone)
+	m.box(Vector3(0.0, 0.75, 0.0) * s, Vector3(6.4, 4.5, 6.4) * s, _mul(stone, 1.1))
+	# Tapered banded masonry tower (white / red / white / red).
+	var tiers := [[2.8, 6.2, 2.5, 2.25, colour], [6.2, 9.2, 2.25, 2.02, band_red],
+			[9.2, 12.6, 2.02, 1.78, colour], [12.6, 15.3, 1.78, 1.6, band_red]]
+	for tier: Array in tiers:
+		var c: Color = tier[4]
+		m.tube(Vector3(0.0, float(tier[0]), 0.0) * s, Vector3(0.0, float(tier[1]), 0.0) * s,
+				float(tier[2]) * s, float(tier[3]) * s, 8, c, _mul(c, 1.05))
+	# Gallery deck and parapet.
+	m.tube(Vector3(0.0, 15.1, 0.0) * s, Vector3(0.0, 15.7, 0.0) * s, 1.65 * s, 2.35 * s, 8, iron, iron)
+	m.tube(Vector3(0.0, 15.7, 0.0) * s, Vector3(0.0, 16.2, 0.0) * s, 2.35 * s, 2.35 * s, 8, iron, iron)
+	# Glowing glass lantern room.
+	m.material(ShapeMesh.M_WINDOW)
+	m.tube(Vector3(0.0, 15.8, 0.0) * s, Vector3(0.0, 17.8, 0.0) * s, 1.35 * s, 1.35 * s, 8,
+			Color(1.0, 0.94, 0.78), Color(1.0, 0.94, 0.78))
+	# Domed cupola and finial.
+	m.material(ShapeMesh.M_PLAIN)
+	m.tube(Vector3(0.0, 17.8, 0.0) * s, Vector3(0.0, 18.8, 0.0) * s, 1.45 * s, 0.6 * s, 8, band_red, band_red)
+	m.tube(Vector3(0.0, 18.8, 0.0) * s, Vector3(0.0, 19.5, 0.0) * s, 0.25 * s, 0.04 * s, 6, iron, iron)
+	# Beacon light (bright core + wide warm glow) and a harbour-mouth marker on the breakwater head.
+	var beacon := Vector3(0.0, 16.8, 0.0) * s
+	m.light(beacon, Color(1.0, 0.92, 0.7), 1.3, 2.6 * s)
+	m.light(beacon, Color(1.0, 0.97, 0.88), 1.5, 0.65 * s)
+	var nav := Color(0.28, 1.0, 0.48) if side > 0.0 else Color(1.0, 0.25, 0.2)
+	m.light(Vector3(-side * 2.8, 3.6, 2.6) * s, nav, 1.0, 0.45 * s)
+
+
+## A 1930s ocean liner at sea or moored in harbour: dark steel hull with raked bow, three stepped white promenade
+## decks, bridge wings, two raked funnels, two masts, rows of warmly lit promenade windows and hull portholes, and
+## steaming and navigation lights.
+static func _ship(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var hull := Color("#12151a")
+	var waterline := Color("#4d1714")
+	var stack_body := Color("#a85824") if rng.randf() < 0.5 else Color("#78201e")
+	var stack_top := Color("#121215")
+	m.material(ShapeMesh.M_PLAIN)
+	# Main hull, waterline boot-topping, raked bow and cruiser stern.
+	m.box(Vector3(0.0, 2.4, -2.0) * s, Vector3(13.0, 5.8, 72.0) * s, hull)
+	for sx: float in [-6.55, 6.55]:
+		m.quad(Vector3(sx, -0.4, -38.0) * s, Vector3(sx, -0.4, 34.0) * s, Vector3(sx, 0.7, 34.0) * s,
+				Vector3(sx, 0.7, -38.0) * s, waterline)
+	for sx: float in [-6.5, 6.5]:
+		m.quad(Vector3(sx, -0.4, 34.0) * s, Vector3(0.0, -0.4, 44.0) * s, Vector3(0.0, 5.6, 47.0) * s,
+				Vector3(sx, 5.3, 34.0) * s, hull)
+		m.quad(Vector3(sx, -0.4, -38.0) * s, Vector3(0.0, -0.4, -44.0) * s, Vector3(0.0, 4.9, -45.5) * s,
+				Vector3(sx, 5.3, -38.0) * s, hull)
+	m.tri(Vector3(-6.5, 5.3, 34.0) * s, Vector3(6.5, 5.3, 34.0) * s, Vector3(0.0, 5.6, 47.0) * s, _mul(hull, 1.3))
+	m.tri(Vector3(-6.5, 5.3, -38.0) * s, Vector3(6.5, 5.3, -38.0) * s, Vector3(0.0, 4.9, -45.5) * s, _mul(hull, 1.3))
+	# Three stepped cream-white promenade decks and forward bridge wings.
+	m.box(Vector3(0.0, 6.7, -2.0) * s, Vector3(11.4, 2.8, 56.0) * s, colour)
+	m.box(Vector3(0.0, 9.4, -1.0) * s, Vector3(9.8, 2.6, 44.0) * s, _mul(colour, 0.96))
+	m.box(Vector3(0.0, 11.7, 1.0) * s, Vector3(7.6, 2.0, 30.0) * s, colour)
+	m.box(Vector3(0.0, 12.1, 14.5) * s, Vector3(14.2, 1.4, 3.2) * s, colour)
+	# Two bold raked Art Deco funnels.
+	for zf: float in [4.0, -10.0]:
+		m.tube(Vector3(0.0, 12.6, zf) * s, Vector3(0.0, 18.2, zf - 1.4) * s, 2.1 * s, 1.9 * s, 8,
+				stack_body, stack_body)
+		m.tube(Vector3(0.0, 18.2, zf - 1.4) * s, Vector3(0.0, 20.4, zf - 2.0) * s, 1.9 * s, 1.85 * s, 8,
+				stack_top, stack_top)
+	# Foremast and mainmast.
+	var mast := Color("#b89c6a")
+	m.tube(Vector3(0.0, 12.6, 20.0) * s, Vector3(0.0, 22.5, 18.5) * s, 0.35 * s, 0.14 * s, 4, mast, mast)
+	m.tube(Vector3(0.0, 10.6, -24.0) * s, Vector3(0.0, 21.2, -25.5) * s, 0.35 * s, 0.14 * s, 4, mast, mast)
+	# Warmly lit promenade deck windows and hull portholes on the side facing the way.
+	var x_lo := -side * 5.75 * s
+	var x_hi := -side * 4.95 * s
+	var x_hull := -side * 6.56 * s
+	for i in 14:
+		var wz := -26.0 + 3.7 * i
+		var lit := rng.randf() < 0.8
+		m.material(ShapeMesh.M_WINDOW if lit else ShapeMesh.M_PLAIN)
+		var c := _mul(WARM, rng.randf_range(0.75, 1.0)) if lit else Color("#0b0d10")
+		m.quad(Vector3(x_lo, 6.2 * s, (wz - 0.85) * s), Vector3(x_lo, 6.2 * s, (wz + 0.85) * s),
+				Vector3(x_lo, 7.4 * s, (wz + 0.85) * s), Vector3(x_lo, 7.4 * s, (wz - 0.85) * s), c)
+	for i in 11:
+		var wz := -20.0 + 3.8 * i
+		var lit := rng.randf() < 0.72
+		m.material(ShapeMesh.M_WINDOW if lit else ShapeMesh.M_PLAIN)
+		var c := _mul(WARM, rng.randf_range(0.7, 1.0)) if lit else Color("#0b0d10")
+		m.quad(Vector3(x_hi, 8.9 * s, (wz - 0.8) * s), Vector3(x_hi, 8.9 * s, (wz + 0.8) * s),
+				Vector3(x_hi, 10.0 * s, (wz + 0.8) * s), Vector3(x_hi, 10.0 * s, (wz - 0.8) * s), c)
+	for i in 10:
+		var wz := -27.0 + 5.8 * i
+		var lit := rng.randf() < 0.55
+		m.material(ShapeMesh.M_WINDOW if lit else ShapeMesh.M_PLAIN)
+		var c := _mul(WARM, rng.randf_range(0.65, 0.95)) if lit else Color("#090b0e")
+		m.quad(Vector3(x_hull, 3.2 * s, (wz - 0.35) * s), Vector3(x_hull, 3.2 * s, (wz + 0.35) * s),
+				Vector3(x_hull, 3.9 * s, (wz + 0.35) * s), Vector3(x_hull, 3.9 * s, (wz - 0.35) * s), c)
+	# Promenade glow lights, masthead steaming lights and bridge wing navigation light.
+	for i in 5:
+		m.light(Vector3(-side * 6.0, 8.1, -20.0 + 10.0 * i) * s, WARM, 0.85, 0.55 * s)
+	m.light(Vector3(0.0, 22.6, 18.5) * s, COOL, 1.1, 0.45 * s)
+	m.light(Vector3(0.0, 21.3, -25.5) * s, COOL, 1.0, 0.4 * s)
+	var nav := Color(1.0, 0.25, 0.2) if side > 0.0 else Color(0.28, 1.0, 0.48)
+	m.light(Vector3(-side * 7.1, 12.6, 14.5) * s, nav, 1.1, 0.45 * s)

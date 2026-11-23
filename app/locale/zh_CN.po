@@ -3867,6 +3867,27 @@ msgstr "无雨的夜晚"
 msgid "Showers"
 msgstr "阵雨"
 
+msgid "Liner 1936"
+msgstr "邮轮 1936"
+
+msgid "An ocean liner's moderne lounge crossing at night: the ship never rolls while the tall velvet drapes sway gently, the Moon lays a road across open sea, and harbour lights rise with the credits."
+msgstr "夜航远洋邮轮的摩登休息厅：船身平稳不晃，高大的天鹅绒窗帘轻轻摆动，月光在海面上铺出银路，片尾字幕出现时港口灯光渐亮。"
+
+msgid "Cove lights"
+msgstr "灯槽灯光"
+
+msgid "The proscenium coves' colour before the film. During the film they soften towards the picture."
+msgstr "影片开始前台口灯槽的颜色。放映时会柔化并趋近画面色彩。"
+
+msgid "Champagne"
+msgstr "淡金色"
+
+msgid "Silver blue"
+msgstr "银蓝色"
+
+msgid "Built by %s"
+msgstr "由 %s 构建"
+
 #~ msgid "Version %s is ready. It goes in at the next start."
 #~ msgstr "版本 %s 已就绪，下次启动时生效。"
 

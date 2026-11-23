@@ -68,8 +68,9 @@ var _this_room_box: VBoxContainer
 ## Time travel through television (scripts/env/time_travel.gd), under Television.
 var _time_travel: Button
 var _time_travel_every: HFlowContainer
-## The room's line about itself, under This room (EnvLibrary.description_of()).
+## The room's line about itself, under This room (EnvLibrary.description_of()), and who built it (author_of()).
 var _about: Label
+var _author: Label
 var _this_room: VBoxContainer
 var _this_room_controls := {}
 var _this_room_key := ""
@@ -162,6 +163,9 @@ func bind(p_app: Node) -> void:
 	_this_room_box.add_child(W.section("Current"))
 	_about = W.help("")
 	_this_room_box.add_child(_about)
+	_author = W.help("")
+	W.content(_author)
+	_this_room_box.add_child(_author)
 	_this_room = W.vbox()
 	_this_room_box.add_child(_this_room)
 	_this_room_box.add_child(W.flow([W.button("Back to defaults", func() -> void:
@@ -500,7 +504,10 @@ func _sync_this_room() -> void:
 	var about := EnvLibrary.description_of(str(app.env_id))
 	_about.text = tr(about) if about != "" else ""
 	_about.visible = about != ""
-	_this_room_box.visible = not decls.is_empty() or about != ""
+	var author := EnvLibrary.author_of(str(app.env_id))
+	_author.text = tr("Built by %s") % author if author != "" else ""
+	_author.visible = author != ""
+	_this_room_box.visible = not decls.is_empty() or about != "" or author != ""
 
 
 func _setting_control(d: Dictionary) -> Control:

@@ -32,12 +32,13 @@ people.
 
 A cabin that goes somewhere for as long as the film lasts: the scenery goes by outside its windows, a pause holds it,
 and a film of known length arrives as it ends (`cabin`, `passing`). The Room tab lists them under Journeys
-(`category` `journey`). Fifteen were proposed and two are built: [`journeys.md`](journeys.md) has the whole list.
+(`category` `journey`). Fifteen were proposed and three are built: [`journeys.md`](journeys.md) has the whole list.
 
 | # | Room | Builders and kits | Light, sky, atmosphere | Life, sound, music | Timeline and cues | Screen | Settings |
 |---|---|---|---|---|---|---|---|
 | 1 | Narrowboat | `cabin` (a canal boat's saloon: leaning walls, an arched roof, round-cornered windows, wall lamps), a stove, a rug and a sideboard (`kit`) | dusk to night over the film (`sky`, film-time tracks); reeds, willows, a hedge, bridges, a village's lights and a wharf going by (`passing`), mist later on | an owl, a far church bell, the engine (following `journey.speed`) and water on the hull (`sound_bed`) | the lamps down with the film, the bell as the church comes by | on the front bulkhead | |
 | 2 | Showboat 1927 | `cabin` (a floating theatre in white and gold: an arched roof with gilt ribs and a cornice, tall windows, wall lamps, seven rows of eight folding seats), a low stage with footlights and gilt pilasters with drapes either side of the picture (`kit`) | dusk to night over the film (`sky`, film-time tracks); a near bank's trees and town, open water with channel buoys and the Moon's road on it, a steamer at anchor, a wharf to leave and a lamp-lit landing with a moored steamer to tie up at (`passing`), mist later on | the paddle wheel (following `journey.speed`), water on the hull, crickets and a far train (`sound_bed`) | the lamps down with the film, up at the landing | on the front bulkhead above the stage | |
+| 3 | Liner 1936 (Gemini 4 Neon Extra High) | `cabin` (a 1936 ocean liner's Streamline Moderne lounge: arched roof, brass ribs, five tall windows a side, five rows of four club armchairs, teak exterior promenade), stepped Art Deco proscenium with coves and 3-tier torchières, walnut pelmets, working sunburst aft clock, deck rails, swaying pleated velvet drapes (`kit`, `motion` sway) | dusk to deep Atlantic night (`sky`, film-time tracks); open `sea` to the horizon on both sides with the Moon's road, a passing sister liner, breakwater lighthouses, channel buoys and lit harbour piers (`passing`), mist on approach | ship turbines (following `journey.speed`), deep ocean wash, occasional hull creak and twin-tone steam horn (`sound_bed`), cinema acoustics | lamps down and departure horn at start, arrival horn on approach, lamps up at the arrival pier | framed in the stepped Art Deco proscenium | Cove lights |
 
 ## TV-era rooms
 

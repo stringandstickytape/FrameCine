@@ -35,24 +35,30 @@ uniform float moon = 0.0;
 
 // passing.gd GROUND_PERIOD.
 const float GROUND_PERIOD = 64.0;
-// The kinds (passing.gd GROUND_KINDS): water is 0.
+// The kinds (passing.gd GROUND_KINDS): water is 0, open sea is 7.
 const int K_WATER = 0;
+const int K_SEA = 7;
 // The Moon's face (env_sky_moon.gdshader moon_colour, in linear light).
 const vec3 MOON_COLOUR = vec3(1.0, 0.91, 0.71);
 // How far the water's ripples tilt, as a slope (the spread of a bell curve): 0.12 is about 7 degrees, a river's or a
 // canal's quiet water. It sets the road's shape: narrow, and long towards the eye. Rougher, and the road would be a
 // broad dim fan; smoother, and it would be the Moon's own disc in a mirror.
 const float MOON_ROUGH = 0.12;
+// Open ocean swells are broader than a canal's quiet ripples: about 9 degrees.
+const float SEA_MOON_ROUGH = 0.16;
 // The road at its brightest against the Moon's face: half of it, and still the brightest thing on dark water.
 const float MOON_ROAD = 0.5;
 
 varying vec3 world_pos;
 // From the ground to the eye, in the room's frame (the Moon's direction is given in it).
 varying vec3 eye_room;
+// 0 on the flat sea, 1 at the horizon ring's rim (open sea only; 0 for every other strip).
+varying float horizon_t;
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	eye_room = (inverse(MODEL_MATRIX) * vec4(CAMERA_POSITION_WORLD, 1.0)).xyz - VERTEX;
+	horizon_t = UV2.y;
 	// Written as every colour of a document is (sRGB): to linear light, as env_passing_place.gdshaderinc does it.
 	COLOR.rgb = mix(pow((COLOR.rgb + vec3(0.055)) / 1.055, vec3(2.4)), COLOR.rgb / 12.92,
 			lessThan(COLOR.rgb, vec3(0.04045)));
@@ -69,7 +75,8 @@ void fragment() {
 	vec3 cabin = glow_colour * glow * shown * from_windows;
 	vec3 lit = sky + screen + cabin;
 	vec3 c;
-	if (int(UV2.x + 0.5) == K_WATER) {
+	int kind = int(UV2.x + 0.5);
+	if (kind == K_WATER) {
 		float ripple = texture(noise_tex, g / GROUND_PERIOD * 8.0).b - 0.5;
 		vec3 e = normalize(CAMERA_POSITION_WORLD - world_pos);
 		float fres = pow(1.0 - max(e.y, 0.0), 4.0);
@@ -97,12 +104,42 @@ void fragment() {
 		float crests = texture(noise_tex, g / GROUND_PERIOD * 8.0).a
 				* texture(noise_tex, g.yx / GROUND_PERIOD * 5.0 + vec2(0.37)).g * 4.0;
 		c += MOON_COLOUR * (moon * MOON_ROAD * road * fres * mix(1.0, crests, still) * shown);
+	} else if (kind == K_SEA) {
+		// Open ocean: broad swells and finer chop (quietened inside `nearest` for comfort), mirroring the open sky
+		// all the way to the horizon (no dark far bank), with a broader, livelier Moon's road.
+		float swell = texture(noise_tex, g / GROUND_PERIOD * 2.2).r - 0.5;
+		float chop = texture(noise_tex, g / GROUND_PERIOD * 7.5 + vec2(0.19, 0.43)).b - 0.5;
+		float wave = swell * 0.65 + chop * 0.35;
+		vec3 e = normalize(CAMERA_POSITION_WORLD - world_pos);
+		float fres = pow(1.0 - max(e.y, 0.0), 3.2);
+		float glint = max(chop, 0.0) * 0.22 * still;
+		vec3 sky_refl = mix(mix(sky_low, sky_top, 0.35), sky_top, smoothstep(0.05, 0.45, e.y));
+		vec3 mirrored = sky_refl * light * shown;
+		c = COLOR.rgb * (1.0 + swell * 0.55 * still) * light * shown
+				+ mirrored * fres * (0.85 + wave * 0.9 * still)
+				+ cabin * (0.04 + glint) + screen * (0.02 + glint * 0.5);
+		vec3 h = normalize(eye_room) + moon_dir;
+		vec2 tilt = h.xz / max(h.y, 0.04);
+		float road = exp(-dot(tilt, tilt) / (2.0 * SEA_MOON_ROUGH * SEA_MOON_ROUGH));
+		float crests = texture(noise_tex, g / GROUND_PERIOD * 6.0).a
+				* texture(noise_tex, g.yx / GROUND_PERIOD * 3.5 + vec2(0.37)).g * 4.2;
+		float d_sea = distance(world_pos, CAMERA_POSITION_WORLD);
+		float crest_mix = still * (1.0 - smoothstep(45.0, 140.0, d_sea));
+		float road_fade = 1.0 - smoothstep(0.55, 1.0, horizon_t) * 0.45;
+		vec3 moon_glitter = MOON_COLOUR * (moon * 0.62 * road * fres * mix(0.85, crests, crest_mix)
+				* road_fade * shown);
+		float f_sea = max(mist * smoothstep(20.0, 150.0, d_sea),
+				max(smoothstep(125.0, 180.0, d_sea) * 0.72, smoothstep(0.0, 1.0, horizon_t)));
+		c = mix(c, mix(sky_low, mist_colour, mist) * light * shown, f_sea);
+		c += moon_glitter * (1.0 - mist * smoothstep(30.0, 150.0, d_sea) * 0.65);
 	} else {
 		float v = texture(noise_tex, g / GROUND_PERIOD * 4.0).g;
 		c = COLOR.rgb * (1.0 + (v - 0.5) * 0.5 * still) * lit;
 	}
-	float d = distance(world_pos, CAMERA_POSITION_WORLD);
-	float f = max(mist * smoothstep(15.0, 140.0, d), smoothstep(120.0, far, d) * 0.85);
-	c = mix(c, mix(sky_low, mist_colour, mist) * light * shown, f);
+	if (kind != K_SEA) {
+		float d = distance(world_pos, CAMERA_POSITION_WORLD);
+		float f = max(mist * smoothstep(15.0, 140.0, d), smoothstep(120.0, far, d) * 0.85);
+		c = mix(c, mix(sky_low, mist_colour, mist) * light * shown, f);
+	}
 	ALBEDO = c;
 }
