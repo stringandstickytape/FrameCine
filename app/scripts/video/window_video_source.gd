@@ -25,14 +25,16 @@ const AgentTerminal := preload("res://scripts/agents/agent_terminal.gd")
 const ENGINE_CLASS := "X11WindowSource"
 ## How often the current page is read from the browser's DevTools endpoint while it is shown (ms).
 const PAGE_EVERY_MSEC := 3000
+const BrowserChoice := preload("res://scripts/video/browser_choice.gd")
 const BROWSER_PREFIX := "browser://"
 const WINDOW_PREFIX := "window://"
 ## An agent's terminal on the big screen (scripts/agents/): terminal://claude. It is found by its window class, started
 ## if it isn't running, and never closed by the player.
 const TERMINAL_PREFIX := "terminal://"
-## The browser command (docs/window-source.md, "In short"); "--app=<url>" follows.
+## The browser command (docs/window-source.md, "In short"): flatpak run <the browser chosen, BrowserChoice.current()>,
+## then BROWSER_ARGS; "--app=<url>" follows.
 const BROWSER_COMMAND := "flatpak"
-const BROWSER_ARGS: Array[String] = ["run", "org.chromium.Chromium", "--ozone-platform=x11", "--window-size=1920,1080",
+const BROWSER_ARGS: Array[String] = ["--ozone-platform=x11", "--window-size=1920,1080",
 		"--window-position=0,0", "--no-first-run", "--disable-backgrounding-occluded-windows",
 		"--disable-renderer-backgrounding", "--disable-background-timer-throttling",
 		"--autoplay-policy=no-user-gesture-required"]
@@ -226,7 +228,8 @@ func _start_process() -> Error:
 	for e: Dictionary in win.call("list_windows", true):
 		_known_ids[int(e.get("id", 0))] = true
 	var command := BROWSER_COMMAND
-	var args: Array[String] = BROWSER_ARGS.duplicate()
+	var args: Array[String] = ["run", str(BrowserChoice.current()["id"])]
+	args.append_array(BROWSER_ARGS)
 	if not browser_command.is_empty():
 		command = browser_command[0]
 		args = browser_command.slice(1)

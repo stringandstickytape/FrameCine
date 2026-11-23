@@ -149,6 +149,8 @@ static func _read(folder: String, id: String, builtin: bool) -> Dictionary:
 		return {"error": "%s: area must be one of %s, not %s" % [path, ", ".join(AREAS), area]}
 	if not m.get("feedback", false) is bool:
 		return {"error": "%s: feedback must be true or false" % path}
+	if not m.get("picture", false) is bool:
+		return {"error": "%s: picture must be true or false" % path}
 	var params := {}
 	var raw_params: Variant = m.get("params", {})
 	if not raw_params is Dictionary:
@@ -175,7 +177,8 @@ static func _read(folder: String, id: String, builtin: bool) -> Dictionary:
 			presets[pre] = vals
 	return {"id": id, "name": str(m.get("name", id)), "description": str(m.get("description", "")),
 			"category": str(m.get("category", "")), "area": area,
-			"order": int(m.get("order", 100)), "feedback": bool(m.get("feedback", false)), "params": params,
+			"order": int(m.get("order", 100)), "feedback": bool(m.get("feedback", false)),
+			"picture": bool(m.get("picture", false)), "params": params,
 			"presets": presets,
 			"shader_path": folder.path_join(SHADER), "dir": folder, "builtin": builtin}
 

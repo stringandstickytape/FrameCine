@@ -1682,6 +1682,15 @@ System tab can turn it off. Code: `app/scripts/play/film_layer.gd`, `app/shaders
     its dot, whose bounds, seen from the eyes, cover part of the picture. The layer comes back one second after the
     view is clear (`film_layer.gd _covered()`, `COVER_RELEASE`). The same for a curved screen drawn by cylinder layers
     ([view] cylinder_layers): tested against the plane through its middle, widened by how far its edges come forward.
+  - **Since 2026-11-23, what is in front is drawn over the film instead.** Tried on the Frame: the film still shows
+    with the hole off, and still draws over a controller with a true alpha in the eye buffers, so the runtime puts a
+    quad layer over the scene whatever the order. The scene can never cover it. So while something is in front, two
+    more quad layers (one an eye, above the film's, blended) show it: each has a viewport with a camera at that eye
+    whose frustum goes through the picture's rectangle and ends just short of it. They draw only render layer 18:
+    the panels, the controllers and lasers, the room objects that can be picked up, a room's things in front
+    (`_mark_front()`); a room's own haze or beam would fill the view. The film stays sharp: a page can be read with
+    the laser on it. For a curved screen the layers stand on the plane through the curve's edges. The old way (the
+    mesh while something is in front) remains for `front_off` and the file `user://no_front_layer`.
 - **A room that draws the film itself:** a room whose presentation has a picture stage (a telly's tube and glass, a
   worn print's dust; `docs/environments.md`, "The presentation system") asks with `request_scene(who, on)`. While any
   room asks, no layer is made and the screen's mesh draws the film with the room's material. The setting is not

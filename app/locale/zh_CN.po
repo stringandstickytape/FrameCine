@@ -1199,6 +1199,9 @@ msgstr "停止显示：%s"
 msgid "+ Open a web page or a stream..."
 msgstr "+ 打开网页或流……"
 
+msgid "Browser: %s (press to change)"
+msgstr "浏览器：%s（按下可更改）"
+
 msgid "Desktop windows"
 msgstr "桌面窗口"
 
@@ -2624,6 +2627,9 @@ msgstr "你的"
 msgid "Showrooms"
 msgstr "展示厅"
 
+msgid "Visualiser"
+msgstr "可视化效果"
+
 msgid "Search your favourites, history, queue and the last local folder"
 msgstr "搜索收藏、历史记录、队列和上次打开的本地文件夹"
 
@@ -3348,6 +3354,9 @@ msgstr "运河窄船"
 msgid "Nave"
 msgstr "中殿"
 
+msgid "Night ferry 1994"
+msgstr "夜航渡轮 1994"
+
 #. A room: the cinema hall of a 1970s palace of culture (a civic arts centre).
 msgid "Palace of Culture 1974"
 msgstr "文化宫 1974"
@@ -3454,6 +3463,9 @@ msgstr "以步行速度前行的运河船舱：暮色降临，芦苇、柳树和
 msgid "A Gothic nave at night, the screen in the chancel: piers rising into rib vaults, candles on iron stands and coronae, coloured glass and a rose window in the moonlight."
 msgstr "夜晚的哥特式中殿，银幕在圣坛里：束柱升入肋拱，铁架与吊冠上的烛光，月光下的彩色玻璃与玫瑰窗。"
 
+msgid "A cross-Channel ferry's video lounge in 1994: reclining seats under a bracketed CRT telly, salt-streaked storm windows, a sweeping lighthouse beam and a floodlit ferry port with the credits."
+msgstr "1994 年跨海峡夜航渡轮的录像厅：高架显像管电视下方排列着可调靠背座椅，船窗沾着盐霜与雨痕，灯塔光束缓缓扫过夜海，片尾字幕时灯火通明的渡轮码头迎面而来。"
+
 msgid "A palace of culture, 1974: board-marked concrete, two great mosaics that glitter in the screen's light, a field of glowing globes, and snow falling through the open roof."
 msgstr "1974年的文化宫：木纹清水混凝土、两幅在银幕光下闪烁的巨幅马赛克、一片发光的球形吊灯，雪花从敞开的屋顶飘落。"
 
@@ -3557,6 +3569,15 @@ msgstr "灯槽灯光"
 
 msgid "Candles"
 msgstr "蜡烛"
+
+msgid "Weather at sea"
+msgstr "海上天气"
+
+msgid "Telly speaker"
+msgstr "电视扬声器"
+
+msgid "Night strips"
+msgstr "夜间灯带"
 
 msgid "Snow"
 msgstr "雪"
@@ -3667,6 +3688,18 @@ msgstr "影片开始前台口灯槽的颜色。放映时会柔化并趋近画面
 
 msgid "None: the church by moonlight and the film alone. A few: two candle stands either side of the screen, the coronae over the nave and the votive lights. Many: four stands a side."
 msgstr "无：只有月光下的教堂和影片。少量：银幕两侧各两座烛台，中殿上方的吊冠和许愿烛。多：每侧四座烛台。"
+
+msgid "Passing Channel squalls, steady rain on the storm glass, or a clear crossing."
+msgstr "阵阵海峡风雨、持续打在船窗上的夜雨，或晴朗的夜航。"
+
+msgid "The overhead 1994 CRT and video tape look, clean CRT glass, or a modern clean picture."
+msgstr "上方 1994 年显像管与录像带质感、清晰显像管玻璃，或现代清晰画面。"
+
+msgid "The film's sound through the ceiling telly's small mono speaker."
+msgstr "让影片声音通过顶部电视的小型单声道扬声器播放。"
+
+msgid "Low night-crossing strips along the aisle and window pelmets."
+msgstr "沿过道与船窗上方的低亮度夜航灯带。"
 
 msgid "Snow through the open back of the roof, over the birches outside."
 msgstr "雪从屋顶敞开的后部飘进来，也落在外面的树林里。"
@@ -3808,6 +3841,30 @@ msgstr "少量"
 msgid "Many"
 msgstr "大量"
 
+msgid "Squalls"
+msgstr "阵风阵雨"
+
+msgid "Raining"
+msgstr "下雨"
+
+msgid "Clear night"
+msgstr "晴朗夜晚"
+
+msgid "1994 CRT & tape"
+msgstr "1994 显像管与录像带"
+
+msgid "1994 CRT"
+msgstr "1994 显像管"
+
+msgid "Clean picture"
+msgstr "清晰画面"
+
+msgid "Soft amber"
+msgstr "柔和暖黄"
+
+msgid "Marine teal"
+msgstr "深海青绿"
+
 msgid "No snow"
 msgstr "无雪"
 
@@ -3858,9 +3915,6 @@ msgstr "租来的"
 msgid "Worn out"
 msgstr "磨损的"
 
-msgid "Raining"
-msgstr "下雨"
-
 msgid "A dry night"
 msgstr "无雨的夜晚"
 
@@ -3887,54 +3941,6 @@ msgstr "阵雨"
 
 #~ msgid "Foveation isn't available: this build starts without it."
 #~ msgstr "注视点渲染不可用：此版本启动时没有启用它。"
-
-msgid "Night ferry 1994"
-msgstr "夜航渡轮 1994"
-
-msgid "A cross-Channel ferry's video lounge in 1994: reclining seats under a bracketed CRT telly, salt-streaked storm windows, a sweeping lighthouse beam and a floodlit ferry port with the credits."
-msgstr "1994 年跨海峡夜航渡轮的录像厅：高架显像管电视下方排列着可调靠背座椅，船窗沾着盐霜与雨痕，灯塔光束缓缓扫过夜海，片尾字幕时灯火通明的渡轮码头迎面而来。"
-
-msgid "Weather at sea"
-msgstr "海上天气"
-
-msgid "Telly speaker"
-msgstr "电视扬声器"
-
-msgid "Night strips"
-msgstr "夜间灯带"
-
-msgid "Passing Channel squalls, steady rain on the storm glass, or a clear crossing."
-msgstr "阵阵海峡风雨、持续打在船窗上的夜雨，或晴朗的夜航。"
-
-msgid "The overhead 1994 CRT and video tape look, clean CRT glass, or a modern clean picture."
-msgstr "上方 1994 年显像管与录像带质感、清晰显像管玻璃，或现代清晰画面。"
-
-msgid "The film's sound through the ceiling telly's small mono speaker."
-msgstr "让影片声音通过顶部电视的小型单声道扬声器播放。"
-
-msgid "Low night-crossing strips along the aisle and window pelmets."
-msgstr "沿过道与船窗上方的低亮度夜航灯带。"
-
-msgid "Squalls"
-msgstr "阵风阵雨"
-
-msgid "Clear night"
-msgstr "晴朗夜晚"
-
-msgid "1994 CRT & tape"
-msgstr "1994 显像管与录像带"
-
-msgid "1994 CRT"
-msgstr "1994 显像管"
-
-msgid "Clean picture"
-msgstr "清晰画面"
-
-msgid "Soft amber"
-msgstr "柔和暖黄"
-
-msgid "Marine teal"
-msgstr "深海青绿"
 
 #~ msgid "Version %s is ready. It goes in at the next start."
 #~ msgstr "版本 %s 已就绪，下次启动时生效。"

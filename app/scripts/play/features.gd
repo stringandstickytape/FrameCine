@@ -159,6 +159,8 @@ const RoomSettings := preload("res://scripts/env/room_settings.gd")
 const TimeTravel := preload("res://scripts/env/time_travel.gd")
 const PcWindows := preload("res://scripts/pc/pc_windows.gd")
 const Updater := preload("res://scripts/update/updater.gd")
+const ScreenVisualiser := preload("res://scripts/play/screen_visualiser.gd")
+const WindowAudio := preload("res://scripts/play/window_audio.gd")
 
 ## The app core (scripts/main.gd). Untyped: main.gd preloads this script, so a typed reference would be circular.
 var main: Node3D
@@ -212,6 +214,10 @@ var react: FilmReact
 var projector: Projector
 var time_of_day: TimeOfDay
 var zoom_lens: ZoomLens
+## A visualiser on the screen in place of a film's or a window's picture (scripts/play/screen_visualiser.gd).
+var screen_vis: ScreenVisualiser
+## A captured window's sound for the analysis, while the screen's visualiser shows over it (scripts/play/window_audio.gd).
+var window_audio: WindowAudio
 var gaze: EyeGaze
 var latency: AvLatency
 var auto_crop: AutoCrop
@@ -309,6 +315,8 @@ func _ready() -> void:
 	crossfade = _add(Crossfade.new(), "Crossfade")
 	hwvideo = _add(HwVideo.new(), "HwVideo")
 	film_layer = _add(FilmLayer.new(), "FilmLayer")
+	window_audio = _add(WindowAudio.new(), "WindowAudio")
+	screen_vis = _add(ScreenVisualiser.new(), "ScreenVisualiser")
 	lightmaps = _add(RoomLightmaps.new(), "RoomLightmaps")
 	real_windows = _add(RealWindows.new(), "RealWindows")
 	physics = _add(ObjectPhysics.new(), "ObjectPhysics")

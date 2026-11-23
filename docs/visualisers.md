@@ -319,6 +319,22 @@ Built again when the list, the chosen one or its parameters' shape change (an ag
 under the finger. Names, labels, descriptions and preset names are the manifests' (content, not translated).
 `ui/picture_tab.gd`.
 
+## On the screen for anything
+
+Since 2026-11-23 (`scripts/play/screen_visualiser.gd`, `ui/screen_buttons.gd`). While the menu shows and something
+flat plays, a small panel hangs beside the picture's bottom-right corner: **Visualiser** (on / off), previous and
+next, with the name of the one chosen. On, the visualiser takes the picture's place on the screen for a film or a
+captured window; the film plays on behind it. A new file starts with its own picture. `--visualiser[=ID]` turns it
+on for the first file (desktop checks).
+
+- **A window's sound** (`scripts/play/window_audio.gd`): a browser plays straight to the headset's sound server, past
+  the app. While the visualiser shows over a window, `pw-record` records that program's stream (found with
+  `pw-dump`; a browser first), the samples play on a muted bus, and the analysis listens there (`set_bus()`).
+- **The picture inside a visualiser:** `"picture": true` in `visualiser.json` gives the shader `screen_pic`,
+  `has_screen_pic`, `screen_pic_aspect` and `screen_pic_at(uv)`: what plays, to put where it likes. No shipped visualiser
+  uses it yet.
+- Tested: `tests/test_screen_visualiser.gd`. On the headset: a browser's sound drives the visualiser (2026-11-23).
+
 ## Sound with no picture
 
 The music card shows for music files (by extension), and now also for a video's container that holds only sound (an

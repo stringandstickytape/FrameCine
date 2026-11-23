@@ -47,6 +47,7 @@ const ControllerBattery := preload("res://scripts/xr/controller_battery.gd")
 const WorldToast := preload("res://ui/world_toast.gd")
 const HandHint := preload("res://ui/hand_hint.gd")
 const WatchCard := preload("res://ui/watch_card.gd")
+const ScreenButtons := preload("res://ui/screen_buttons.gd")
 const Assistant := preload("res://scripts/assistant/assistant.gd")
 const I18n := preload("res://scripts/i18n.gd")
 const Intro := preload("res://ui/intro.gd")
@@ -128,6 +129,9 @@ var world_toast: WorldToast
 var hand_hint: HandHint
 ## The watch-along card beside the screen (#54); the laser and the trigger dismiss it.
 var card: WatchCard
+## The buttons beside the screen while the menu shows (the visualiser: on / off, previous, next); the laser and the
+## trigger press them. Its hit goes the card's way, marked {"buttons": true}.
+var screen_buttons: ScreenButtons
 var _card_pointed := false
 var _card_hit := {}
 ## Push-to-talk (#14, scripts/dev/push_to_talk.gd), there only while the dev link is on; looked up once a second.
@@ -229,6 +233,10 @@ func setup(p_app: Node3D) -> void:
 	card.app = app
 	add_child(card)
 	card.register_commands()
+	screen_buttons = ScreenButtons.new()
+	screen_buttons.name = "ScreenButtons"
+	screen_buttons.app = app
+	add_child(screen_buttons)
 	hand_hint = HandHint.new()
 	add_child(hand_hint)
 	world_toast = WorldToast.new()
@@ -823,6 +831,10 @@ func point_hit(hand: Object, origin: Vector3, direction: Vector3) -> Dictionary:
 		h = card.ray_hit(origin, direction)
 		what = "card"
 	if h.is_empty():
+		h = screen_buttons.ray_hit(origin, direction)
+		if not h.is_empty():
+			h["buttons"] = true
+	if h.is_empty():
 		h = tablet.ray_hit(origin, direction)
 		what = "tablet"
 	if h.is_empty():
@@ -1394,7 +1406,9 @@ func on_trigger(hand: XRHand, pressed: bool) -> bool:
 		return true
 	if _card_pointed:
 		if pressed:
-			if _card_hit.has("point"):
+			if _card_hit.get("buttons", false):
+				screen_buttons.click(_card_hit["point"])
+			elif _card_hit.has("point"):
 				card.click(_card_hit["point"])
 			else:
 				card.dismiss("user")
@@ -1544,6 +1558,9 @@ func on_mouse(event: InputEventMouse, ray: Array) -> bool:
 	var button := event as InputEventMouseButton
 	if button.button_index == MOUSE_BUTTON_LEFT and button.pressed and hit.is_empty() 			and not card.ray_hit(ray[0], ray[1]).is_empty():
 		card.click(card.ray_hit(ray[0], ray[1])["point"])
+		return true
+	if button.button_index == MOUSE_BUTTON_LEFT and button.pressed and hit.is_empty() 			and not screen_buttons.ray_hit(ray[0], ray[1]).is_empty():
+		screen_buttons.click(screen_buttons.ray_hit(ray[0], ray[1])["point"])
 		return true
 	if button.button_index == MOUSE_BUTTON_LEFT:
 		if button.pressed and not hit.is_empty():

@@ -8,6 +8,7 @@ extends RefCounted
 ##
 ##   read_now(window_title) -> {url, title, via: "history", reader, note?} or {error}   blocking: a worker thread
 
+const BrowserChoice := preload("res://scripts/video/browser_choice.gd")
 ## Chromium's profile in the flatpak (the Frame's browser), else the usual places.
 const PATHS: Array[String] = [".var/app/org.chromium.Chromium/config/chromium/Default/History",
 		".config/chromium/Default/History"]
@@ -28,6 +29,10 @@ static func history_path() -> String:
 	if path_override != "":
 		return path_override
 	var home := OS.get_environment("HOME")
+	# The browser in use first (scripts/video/browser_choice.gd), then the usual places.
+	var mine := home.path_join(str(BrowserChoice.current().get("history", "")))
+	if FileAccess.file_exists(mine):
+		return mine
 	for p in PATHS:
 		if FileAccess.file_exists(home.path_join(p)):
 			return home.path_join(p)

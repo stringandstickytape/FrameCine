@@ -30,6 +30,9 @@ func _run() -> void:
 		quit(0)
 		return
 	var film: Node = main.features.film_layer
+	# The older way first (the film in the scene while something is in front); the layers over the film at the end.
+	film.front_off = true
+	film._front_check = 0
 	var flat: Node3D = main.screen.get_node("Flat")
 	main.set_environment("void")
 	main.open_path("stub://flat_mono")
@@ -215,6 +218,38 @@ func _run() -> void:
 	_check("the feature taken out: the quad drawn", flat.visible and main.screen.get_children().filter(
 			func(n: Node) -> bool: return n.name.begins_with("FilmLayer")).is_empty())
 	hub.add_child(film)
+	# What is in front drawn over the film (quad layers): the menu open, the film's layer stays and two layers over it.
+	main.open_path("stub://flat_mono")
+	main.set_environment("void")
+	main.ui.hide_panel()
+	film.force = true
+	film.front_off = false
+	film._front_check = 0
+	await _frames(4)
+	_check("nothing in front: the film's layer alone", film.kind == "quad" and not film.held and not film.front)
+	main.ui.show_panel()
+	await _frames(4)
+	_check("the menu open: the film's layer stays, two layers over it", not film.held and film.front
+			and film.layers[0].visible and film.front_layers.size() == 2 and film.front_layers[0].visible
+			and film.front_layers[0].get("sort_order") == 1 and film.front_layers[0].get("alpha_blend")
+			and film.front_layers[0].get("eye_visibility") == 1 and film.front_layers[1].get("eye_visibility") == 2)
+	var fsize: Vector2 = main.screen.get_flat_size()
+	var fcam: Camera3D = film._front_cams[0]
+	var fflat: Node3D = main.screen.get_node("Flat")
+	var eye_at: Vector3 = fflat.global_transform.affine_inverse() * film.eye_position(0)
+	_check("each eye's camera at that eye, ending just short of the screen", fcam.global_position.distance_to(
+			film.eye_position(0)) < 0.001 and fcam.projection == Camera3D.PROJECTION_FRUSTUM
+			and absf(fcam.far - (eye_at.z - 0.004)) < 0.001 and film.front_views[0].transparent_bg)
+	# The frustum's far rectangle is the picture: its corner goes to the viewport's corner.
+	var corner: Vector3 = fflat.global_transform * Vector3(fsize.x * 0.5, fsize.y * 0.5, 0.01)
+	var spot: Vector2 = fcam.unproject_position(corner) / Vector2(film.front_views[0].size)
+	_check("the picture's top-right corner is the view's (%s)" % spot, absf(spot.x - 1.0) < 0.01 and absf(spot.y) < 0.01)
+	main.ui.hide_panel()
+	await _frames(4)
+	_check("the menu closed: the layers over it go", not film.front and not film.front_layers[0].visible
+			and film.front_views[0].render_target_update_mode == SubViewport.UPDATE_DISABLED)
+	film.force = false
+
 	print("test_film_layer: %d checks, %s" % [_checks, "all passed" if _failures == 0 else "%d FAILED" % _failures])
 	quit(_failures)
 

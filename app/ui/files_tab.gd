@@ -24,6 +24,7 @@ const HostForm := preload("res://ui/host_form.gd")
 const UrlForm := preload("res://ui/url_form.gd")
 const WindowVideoSource := preload("res://scripts/video/window_video_source.gd")
 const WebPages := preload("res://scripts/net/web_pages.gd")
+const BrowserChoice := preload("res://scripts/video/browser_choice.gd")
 const AssistantFetch := preload("res://scripts/assistant/assistant_fetch.gd")
 const LibraryIndex := preload("res://scripts/library/library_index.gd")
 const LibraryImages := preload("res://scripts/library/library_images.gd")
@@ -617,6 +618,11 @@ func _list_browser() -> void:
 		_add_row(tr("Stop showing: %s") % (active_title if active_title != ""
 				else WindowVideoSource.describe_path(active_path)), {"kind": "stop", "path": active_path})
 	_add_row(tr("+ Open a web page or a stream..."), {"kind": "url", "path": ""})
+	# Which browser opens the pages, when more than one is installed (scripts/video/browser_choice.gd): the row
+	# switches to the next. Each has its own profile and sign-ins. The names are the programs' own.
+	if BrowserChoice.installed().size() > 1:
+		_add_row(tr("Browser: %s (press to change)") % BrowserChoice.current()["name"],
+				{"kind": "browser_choice", "path": ""})
 	for u in WebPages.pages:
 		_add_row(tr("Edit: %s") % u if _edit_pages else u,
 				{"kind": "page", "path": WindowVideoSource.browser_path(u), "url": u})
@@ -1041,6 +1047,10 @@ func _on_row_pressed(index: int) -> void:
 				file_selected.emit(row["path"])
 		"stop":
 			close_requested.emit()
+		"browser_choice":
+			# For the pages opened from now on; a page on show stays in the browser that opened it.
+			BrowserChoice.next()
+			_list_browser()
 		"discover":
 			start_discovery()
 		"rediscover":

@@ -61,6 +61,7 @@ const Pointing := preload("res://scripts/pointing/pointing.gd")
 ##                          a name in user://tours; docs/tours.md). --kiosk loops it for ever.
 ##   --pc-audio=HOST[:PORT] the film's sound on a PC (tools/audio_sink.py), the PC as the clock (docs/pc-audio.md)
 ##   --pc-audio-mode=auto|pull|capture  how PC audio gets the sound (auto: from the engine when it can)
+##   --visualiser[=ID]      the visualiser in place of the first file's picture (scripts/play/screen_visualiser.gd)
 ##   --long-frames          a log line for each frame over 1.5 refresh periods and a summary each second (a check;
 ##                          also [dev] long_frames; scripts/dev/long_frames.gd)
 ##   --hands / --passthrough  XR spikes, untested on the device: hand tracking (pinch = trigger, index = laser), the
@@ -91,6 +92,7 @@ const ControllerLook := preload("res://scripts/xr/controller_look.gd")
 const InfoOverlay := preload("res://scripts/info_overlay.gd")
 const NetworkHosts := preload("res://scripts/net/network_hosts.gd")
 const WebPages := preload("res://scripts/net/web_pages.gd")
+const BrowserChoice := preload("res://scripts/video/browser_choice.gd")
 const SavedPlaces := preload("res://scripts/net/saved_places.gd")
 const WindowVideoSource := preload("res://scripts/video/window_video_source.gd")
 const LibraryIndex := preload("res://scripts/library/library_index.gd")
@@ -364,6 +366,7 @@ func _ready() -> void:
 	I18n.holder().changed.connect(_on_language_changed)
 	NetworkHosts.load_from(settings)
 	WebPages.load_from(settings)
+	BrowserChoice.load_from(settings)
 	SavedPlaces.load_from(settings)
 	if _args.has("browser-command"):
 		WindowVideoSource.browser_command.assign(str(_args["browser-command"]).split(" ", false))

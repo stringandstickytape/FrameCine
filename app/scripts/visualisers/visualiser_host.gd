@@ -34,6 +34,9 @@ extends Node
 ##   id, entry, scale, gpu_ms, budget_ms (0: no budget and no probe), cover, playing, frames, vis_time, drive,
 ##   last_refusal
 ##   feedback() -> bool     the visualiser's last frame is being kept for it (`previous`)
+##   film, film_aspect      what plays, as a texture, for a visualiser with "picture" in its manifest (set by
+##                          scripts/play/screen_visualiser.gd while it shows over a film or a window; null: none)
+##   wants_picture() -> bool   the visualiser running asks for it
 ##   stats() -> Dictionary  id, area, viewport size, scale, gpu_ms, frames, probe, feedback
 ##   signal refused(id, why)
 
@@ -95,6 +98,9 @@ var vis_time := 0.0
 var drive := 0.0
 ## {id, why, estimate_ms} of the last visualiser refused by the probe, or {}.
 var last_refusal := {}
+## The picture of what plays, for a visualiser that asks for it (see the header).
+var film: Texture2D
+var film_aspect := 16.0 / 9.0
 ## Tests: the probe's measured milliseconds instead of the GPU's (-1: the GPU's).
 var probe_ms_override := -1.0
 
@@ -246,6 +252,10 @@ func _sync_copy() -> void:
 	_vis_copy.render_target_update_mode = SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
 
 
+func wants_picture() -> bool:
+	return _mat != null and bool(entry.get("picture", false))
+
+
 func feedback() -> bool:
 	return _vis_copy != null and _vis_copy.render_target_update_mode == SubViewport.UPDATE_ALWAYS
 
@@ -315,6 +325,9 @@ func _process(delta: float) -> void:
 	_mat.set_shader_parameter("size", _area)
 	_mat.set_shader_parameter("cover", cover if cover != null else _grey)
 	_mat.set_shader_parameter("has_cover", 1.0 if cover != null else 0.0)
+	_mat.set_shader_parameter("screen_pic", film if film != null else _grey)
+	_mat.set_shader_parameter("has_screen_pic", 1.0 if film != null else 0.0)
+	_mat.set_shader_parameter("screen_pic_aspect", film_aspect)
 	var vals := Registry.values(id)
 	for pname: String in vals:
 		_mat.set_shader_parameter(pname, vals[pname])

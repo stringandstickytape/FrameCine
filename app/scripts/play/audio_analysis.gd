@@ -110,7 +110,25 @@ func _exit_tree() -> void:
 
 
 static func bus_name() -> String:
+	if bus_override != "" and AudioServer.get_bus_index(bus_override) >= 0:
+		return bus_override
 	return BUS if AudioServer.get_bus_index(BUS) >= 0 else FALLBACK_BUS
+
+
+## Another bus to listen on in place of the Film bus ("": the Film bus again): a captured window's sound
+## (scripts/play/window_audio.gd). The effects move there at once. That sound is heard as it is recorded, so the
+## snapshots are not held back for the output latency while it is set (delay()).
+static var bus_override := ""
+
+
+func set_bus(name: String) -> void:
+	if name == bus_override:
+		return
+	bus_override = name
+	if _spectrum_fx != null:
+		_set_capture(false)
+		_set_spectrum(false)
+		_apply()
 
 
 ## Keeps the analysis on for `who` (and the waveform with `wave`); off again when everyone has let go or been freed.
@@ -214,6 +232,8 @@ func _rest() -> void:
 func delay() -> float:
 	if delay_override >= 0.0:
 		return delay_override
+	if bus_override != "":
+		return 0.0
 	var offset := 0.0
 	if main != null and main.get("player") != null:
 		offset = float(main.player.av_offset)

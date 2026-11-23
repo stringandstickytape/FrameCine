@@ -39,6 +39,7 @@ var dual_lens := {}
 var size_scale := 1.0
 ## False while an OpenXR layer shows the flat picture instead (scripts/play/film_layer.gd): the quad is not drawn.
 var flat_drawn := true
+var _before_override: Material
 var material: ShaderMaterial
 
 ## The render layer of what never leaves the headset: the snapshot cameras leave it out.
@@ -91,6 +92,19 @@ func set_rgb_texture(tex: Texture2D) -> void:
 	material.set_shader_parameter("uv_tex", null)
 	material.set_shader_parameter("rgb_tex", tex)
 	material.set_shader_parameter("rgb_source", true)
+
+
+## Another material on the flat screen's mesh in place of the video's (a visualiser, scripts/play/screen_visualiser.gd);
+## null: the video's again. The sphere keeps the video's.
+func set_override(mat: Material) -> void:
+	if mat != null:
+		# What was there comes back after: the video's, or a room's own (scripts/env/systems/presentation.gd).
+		if _before_override == null:
+			_before_override = _flat.material_override
+		_flat.material_override = mat
+	elif _before_override != null:
+		_flat.material_override = _before_override
+		_before_override = null
 
 
 func set_visible_rect(r: Rect2) -> void:

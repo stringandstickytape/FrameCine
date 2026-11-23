@@ -28,8 +28,18 @@ extends Node
 ## touched. The same while something is between the viewer and the screen: a room object (object_physics.gd
 ## solid_nodes(): placed, held, thrown, attached), a controller, the laser or its dot. The runtime draws a quad layer
 ## over everything in front of it, hole punch or not: the panels (2026-11-04), a ham lobbed at the screen and a
-## controller held up in front of the film (the user, 2026-11-06). Its bounds seen from the eyes cover part of the
+## controller held up in front of the film (the user, 2026-11-06). Not the laser that is a captured window's pointer:
+## see _covered(). Its bounds seen from the eyes cover part of the
 ## picture -> held at once; clear for COVER_RELEASE seconds -> the layer again (no flicker at the picture's edge).
+## In front of the film (2026-11-23): tried on the Frame, the runtime draws a quad layer over the scene's layer
+## whatever the order asked for, with or without the hole, with or without a true alpha in the eye buffers. So the
+## scene can never cover the film, and the mesh's picture is too coarse to read a page by with a laser on it (the
+## user). For a quad layer, what is in front is therefore drawn again as layers over the film: for each eye a
+## viewport with a camera at that eye, its frustum through the picture's rectangle and ending just short of it, on a
+## clear ground, shown by a quad layer where the screen is (sort_order 1, blended, that eye only). The room's own
+## drawing of the same things lies under the film; outside the picture it is what is seen. Only while something is in
+## front (the menu, a laser, a controller, a room object); the film's layer stays. Over a cylinder layer too, on the
+## plane through the curve's edges (_place_front()).
 ## A room that draws the film itself (its presentation: a telly's glass, a worn print; scripts/env/systems/
 ## presentation.gd) asks with request_scene(who, true): while any asks, no layer is made (wanted_kind() ""), so the
 ## screen's mesh draws the film with the room's material; the setting is not touched.
@@ -58,11 +68,31 @@ const SNAP := 8
 const EYES_BOTH := 0
 ## Seconds clear of room objects before the layer comes back.
 const COVER_RELEASE := 1.0
+## The layers over the film: the picture's height in pixels (the width follows its shape), and the nearest drawn.
+const FRONT_HEIGHT := 1440
+const FRONT_MAX_WIDTH := 3072
+const FRONT_NEAR := 0.03
+## The render layer (18; 19 and 20 are the mirrors' and the private one) of what the layers over the film draw: the menu and the other panels, the controllers with
+## their lasers, the room objects that can be picked up, and a room's things in front of the screen. Not the room
+## itself: a projector's beam or a haze adds light with a full alpha, and the film behind went black (2026-11-23).
+const FRONT_BIT := 1 << 17
 
 var main: Node3D
 var enabled := false
 ## The layers are hidden for the menu (see the header).
 var held := false
+## What is in front of the film, drawn over it (see "In front of the film" in the header): one quad layer an eye,
+## above the film's, each with a camera at that eye looking through the picture's rectangle.
+var front_layers: Array[Node3D] = []
+var front_views: Array[SubViewport] = []
+var _front_cams: Array[Camera3D] = []
+## In use now: something is in front of the film and the layers over it draw it.
+var front := false
+## Off (tests; user://no_front_layer on the device, read once a second): the film is drawn in the scene instead while
+## something is in front, as before.
+var front_enabled := true
+var _front_check := 0
+var _front_mark := 0
 ## The room object that last covered the picture ("" none), and when the view was last covered (ticks, ms).
 var covered_by := ""
 var _covered_ms := -1000000
@@ -87,6 +117,8 @@ var _cylinder := -1
 ## room (an icicle in front of the screen, the user, 2026-11-04): the hole punch that keeps a quad layer behind the
 ## scene did not hold for them. The mesh draws a curved screen in the right place; this is for trying the layers.
 var cylinder_layers := true
+## Tests: no layers over the film.
+var front_off := false
 ## Who asks for the film in the scene (request_scene): {who: true}.
 var scene_requests := {}
 
@@ -195,10 +227,19 @@ func _covered() -> String:
 	var nodes: Array = physics.solid_nodes() if physics != null and physics.has_method("solid_nodes") else []
 	# The controllers (their models and legends, which load late: not kept), the laser and its dot while they show.
 	var fresh := {}
+	var wp: Node = main.get("window_pointer")
 	for hand: Node in main.get("hands") if main.get("hands") != null else []:
 		if not (hand is Node3D) or not (hand as Node3D).is_visible_in_tree():
 			continue
+		# A laser that is the pointer on a captured window (scripts/window_pointer.gd) does not count: the window is
+		# read and worked with the laser on it, and the mesh's picture is too coarse for a page's text (the user,
+		# 2026-11-23). The layer stays; the beam ends at the picture's edge, and the cursor drawn into the picture
+		# shows where it points.
+		# Only where nothing can be drawn over the film (front_enabled off, a cylinder layer).
+		var pointing: bool = not front_enabled and wp != null and bool(wp.has_cursor()) 				and bool(wp.owns_laser(hand))
 		for part: String in ["Visual", "Laser", "Dot"]:
+			if pointing and part != "Visual":
+				continue
 			var n := hand.get_node_or_null(part) as Node3D
 			if n != null and n.is_visible_in_tree():
 				nodes.append(n)
@@ -331,6 +372,21 @@ func _update() -> void:
 			covered_by = by
 			_covered_ms = Time.get_ticks_msec()
 		hold = Time.get_ticks_msec() - _covered_ms < int(COVER_RELEASE * 1000.0)
+	# A quad layer: what is in front is drawn over the film instead (the header, "In front of the film").
+	_front_check -= 1
+	if _front_check <= 0:
+		_front_check = 60
+		front_enabled = not FileAccess.file_exists("user://no_front_layer") and not front_off
+	var marking := rw != null and bool(rw.get("marking"))
+	var want_front := hold and kind in ["quad", "cylinder"] and front_enabled and not marking
+	_set_front(want_front)
+	if want_front:
+		hold = false
+		_front_mark -= 1
+		if _front_mark <= 0:
+			_front_mark = 30
+			_mark_front()
+		_place_front()
 	if hold != held:
 		held = hold
 		for layer in layers:
@@ -403,9 +459,13 @@ func _make(p_kind: String, eyes: int) -> void:
 
 func _drop() -> void:
 	# The layers live under the screen, which may be gone first when the app quits.
-	for n: Variant in layers + viewports:
+	for n: Variant in layers + viewports + front_layers + front_views:
 		if is_instance_valid(n):
 			(n as Node).free()
+	front_layers.clear()
+	front_views.clear()
+	_front_cams.clear()
+	front = false
 	layers.clear()
 	viewports.clear()
 	_materials.clear()
@@ -417,6 +477,120 @@ func _drop() -> void:
 
 ## The layers on the screen's picture: a quad of its flat size at its centre, or a cylinder whose axis is `radius`
 ## in front of it (the curved mesh bends toward the viewer; the layer's arc lies at -Z from its pose).
+## The layers over the film on or off; made the first time.
+func _set_front(on: bool) -> void:
+	if on == front:
+		return
+	front = on
+	if on and front_layers.is_empty():
+		for eye in 2:
+			var vp := SubViewport.new()
+			vp.name = "FilmFrontView%d" % eye
+			vp.transparent_bg = true
+			vp.gui_disable_input = true
+			vp.msaa_3d = Viewport.MSAA_2X
+			var cam := Camera3D.new()
+			cam.name = "FilmFrontCamera%d" % eye
+			cam.keep_aspect = Camera3D.KEEP_HEIGHT
+			cam.cull_mask = FRONT_BIT
+			vp.add_child(cam)
+			add_child(vp)
+			cam.current = true
+			var layer: Node3D = ClassDB.instantiate("OpenXRCompositionLayerQuad")
+			layer.name = "FilmFront%d" % eye
+			layer.set("layer_viewport", vp)
+			layer.set("sort_order", 1 + eye)
+			layer.set("alpha_blend", true)
+			layer.set("eye_visibility", 1 + eye)
+			main.screen.add_child(layer)
+			front_views.append(vp)
+			_front_cams.append(cam)
+			front_layers.append(layer)
+		print("Film layer: what is in front is drawn over the film (two layers)")
+	if on:
+		_front_mark = 0
+	for layer in front_layers:
+		layer.visible = on
+	for vp in front_views:
+		vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS if on else SubViewport.UPDATE_DISABLED
+
+
+## Puts what can be in front of the film on the layers' render layer (again every half second while in use: models
+## and legends load late, objects are made).
+func _mark_front() -> void:
+	var roots: Array = []
+	for hand: Node in main.get("hands") if main.get("hands") != null else []:
+		roots.append(hand)
+	if main.get("ui") != null:
+		roots.append(main.ui)
+	var physics: Node = main.features.get("physics") if main.get("features") != null else null
+	if physics != null and physics.has_method("solid_nodes"):
+		roots.append_array(physics.solid_nodes())
+	if main.is_inside_tree():
+		roots.append_array(main.get_tree().get_nodes_in_group("env_in_front"))
+	while not roots.is_empty():
+		var n: Node = roots.pop_back()
+		if not is_instance_valid(n) or n in front_layers:
+			continue
+		if n is VisualInstance3D and (n as VisualInstance3D).layers & FRONT_BIT == 0:
+			(n as VisualInstance3D).layers |= FRONT_BIT
+		# Not into a panel's own viewport: hundreds of controls, none of them drawn in the room (walking them
+		# every half second was a stutter, the user, 2026-11-23).
+		if not (n is Viewport):
+			roots.append_array(n.get_children())
+
+
+## Each eye's camera at that eye, square to the screen, its frustum through the picture's rectangle and ending just
+## short of the screen.
+func _place_front() -> void:
+	var flat := main.screen.get_node_or_null("Flat") as Node3D
+	if flat == null:
+		return
+	var size: Vector2 = main.screen.get_flat_size()
+	var w := mini(FRONT_MAX_WIDTH, roundi(FRONT_HEIGHT * size.x / maxf(size.y, 0.01)))
+	var px := Vector2i(maxi(2, w - w % 2), FRONT_HEIGHT)
+	var screen := Transform3D(flat.global_transform.basis.orthonormalized(), flat.global_transform.origin)
+	# A curved screen: its edges come forward by the sagitta. The layers stand on the plane through those edges (the
+	# chord, as wide as the curve is seen), and the cameras draw on to the curve's middle behind it.
+	var sag := 0.0
+	var radius := float(main.screen.get("curve_radius")) if kind == "cylinder" else 0.0
+	if radius > 0.0:
+		var phi := size.x * 0.5 / radius
+		sag = radius * (1.0 - cos(phi))
+		size.x = 2.0 * radius * sin(phi)
+		w = mini(FRONT_MAX_WIDTH, roundi(FRONT_HEIGHT * size.x / maxf(size.y, 0.01)))
+		px = Vector2i(maxi(2, w - w % 2), FRONT_HEIGHT)
+		screen = screen * Transform3D(Basis(), Vector3(0.0, 0.0, sag))
+	for eye in front_layers.size():
+		if not (front_layers[eye].get("quad_size") as Vector2).is_equal_approx(size):
+			front_layers[eye].set("quad_size", size)
+		front_layers[eye].position = Vector3(0.0, 0.0, sag)
+		if front_views[eye].size != px:
+			front_views[eye].size = px
+		var at := screen.affine_inverse() * eye_position(eye)
+		var cam := _front_cams[eye]
+		if at.z <= FRONT_NEAR * 2.0:
+			# At or behind the screen: nothing is in front.
+			front_layers[eye].visible = false
+			continue
+		front_layers[eye].visible = true
+		cam.global_transform = Transform3D(screen.basis, screen * at)
+		var k := FRONT_NEAR / at.z
+		cam.set_frustum(size.y * k, Vector2(-at.x, -at.y) * k, FRONT_NEAR, at.z + sag - 0.004)
+
+
+## Where an eye is in the world (0 left, 1 right): the headset's, or beside the camera without a session.
+func eye_position(eye: int) -> Vector3:
+	var xr := XRServer.primary_interface
+	var origin := main.get_node_or_null("XROrigin3D") as Node3D
+	if xr != null and xr.is_initialized() and origin != null and xr.get_view_count() > eye:
+		return xr.get_transform_for_view(eye, origin.global_transform).origin
+	var cam := main.get_viewport().get_camera_3d()
+	if cam == null:
+		return Vector3.ZERO
+	return cam.global_transform * Vector3(-0.032 if eye == 0 else 0.032, 0.0, 0.0)
+
+
 func _place() -> void:
 	var size: Vector2 = main.screen.get_flat_size()
 	var r := float(main.screen.curve_radius)

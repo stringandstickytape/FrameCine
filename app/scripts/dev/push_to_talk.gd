@@ -18,6 +18,7 @@ signal recording_changed(on: bool)
 signal clip_sent(seconds: float)
 
 const DevCommands := preload("res://scripts/dev/dev_commands.gd")
+const OtherSound := preload("res://scripts/play/other_sound.gd")
 
 const NODE_NAME := "PushToTalk"
 const BUS := "PushToTalk"
@@ -137,6 +138,8 @@ func _duck(on: bool) -> void:
 	var main := get_tree().current_scene
 	var v := float(main.get("volume")) if main != null and main.get("volume") != null else 1.0
 	AudioServer.set_bus_volume_db(0, linear_to_db(maxf(v * (DUCK if on else 1.0), 0.0001)))
+	# A browser's sound is not the app's: muted at the sound server for as long (scripts/play/other_sound.gd).
+	OtherSound.hush(on)
 
 
 ## Starts recording (no-op while recording). False when there is no microphone input.

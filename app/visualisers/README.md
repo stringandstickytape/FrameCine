@@ -60,6 +60,8 @@ names: lower case letters, digits and `_`. The folder name is the id.
   (`"Opus 5.5"`, `"Fable 5.2"`); put your own model's name on yours.
 - `feedback`: `true` gives your shader its own last frame as `previous` (default `false`), for things that build up
   and move on: ink, trails, growth. Without it every frame is drawn afresh from the sound and the clocks.
+- `picture`: `true` gives your shader the picture of what plays as `screen_pic` (default `false`), when the visualiser
+  shows on the screen in place of a film or a web page: put it on a surface of your own, or on several.
 
 ## visualiser.gdshader
 
@@ -94,6 +96,7 @@ grey), so a `strip` visualiser draws only its shapes. The include gives you, set
 | `previous`, `fresh` | with `"feedback": true` only: your last frame (sample it at `UV`), and 1 for the first frames after a start (draw a clean background then) |
 | `size` | the area in pixels |
 | `cover`, `has_cover` | the track's cover texture; `has_cover` is 0 without one (`cover` is then plain grey) |
+| `screen_pic`, `has_screen_pic`, `screen_pic_aspect` | with `"picture": true` only: the picture of the film or window the visualiser replaces on the screen (`screen_pic_at(uv)` samples it, black outside 0..1); `has_screen_pic` is 0 without one |
 
 And functions: `band(x)` (smoothed level at x, 0 low .. 1 high), `band_now(x)`, `band_between(x0, x1)` (average),
 `wave_at(x)` (-1..1), `fill_px(d)` (1 inside a shape whose signed distance in pixels is `d`, smooth over one pixel).

@@ -35,6 +35,12 @@ uniform vec2 size = vec2(1280.0, 720.0);
 // The track's cover (a plain grey square without one; has_cover is then 0).
 uniform sampler2D cover : filter_linear_mipmap, repeat_disable;
 uniform float has_cover = 0.0;
+// With "picture": true in visualiser.json: the picture of what plays (a film's frame, a captured window), when the
+// visualiser shows in its place on the screen. has_screen_pic is 0 without one (a music file; screen_pic is then plain
+// grey), and screen_pic_aspect is its width over its height. Sample it wherever and as often as you like: screen_pic_at().
+uniform sampler2D screen_pic : filter_linear, repeat_disable;
+uniform float has_screen_pic = 0.0;
+uniform float screen_pic_aspect = 1.7778;
 
 // The smoothed level at x (0 low .. 1 high).
 float band(float x) {
@@ -63,4 +69,12 @@ float wave_at(float x) {
 // 1 inside a shape whose signed distance in pixels is d, 0 outside, smooth over one pixel.
 float fill_px(float d) {
 	return clamp(0.5 - d, 0.0, 1.0);
+}
+
+// The picture at uv (0..1 over it, (0, 0) top left); black outside it, and grey when there is none.
+vec3 screen_pic_at(vec2 uv) {
+	if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+		return vec3(0.0);
+	}
+	return texture(screen_pic, uv).rgb;
 }
