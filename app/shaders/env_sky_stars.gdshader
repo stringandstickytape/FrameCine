@@ -33,7 +33,7 @@ void vertex() {
 	float show = mix(clamp(1.0 - lum * 14.0, 0.0, 1.0), 1.0, space);
 	show = mix(show, max(show, clamp(1.2 - lum * 2.0, 0.0, 1.0)), bright_in_twilight * smoothstep(0.0, -1.0, UV2.y));
 	float low = 1.0 - clamp(d.y * 3.0, 0.0, 1.0);
-	float ext = mix(smoothstep(-0.01, 0.1, d.y), step(-0.02, d.y), space);
+	float ext = mix(mix(smoothstep(-0.01, 0.1, d.y), step(-0.02, d.y), space), 1.0, all_sky * space);
 	float cover = sky_cloud_cover(d, 3.0);
 	float tw = 1.0 - twinkle * 0.4 * (0.5 + 0.5 * sin(TIME * (1.5 + 4.0 * UV2.x) + UV2.x * 40.0)) * mix(0.7, 1.4, low);
 	vis = stars * show * ext * (1.0 - cover) * tw * (1.0 - blackout);

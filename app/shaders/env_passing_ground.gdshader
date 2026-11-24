@@ -35,10 +35,13 @@ uniform float moon = 0.0;
 
 // passing.gd GROUND_PERIOD.
 const float GROUND_PERIOD = 64.0;
-// The kinds (passing.gd GROUND_KINDS): water is 0, open sea is 7, cloud deck below is 8.
+// The kinds (passing.gd GROUND_KINDS): water 0, sea 7, cloud_deck 8, seabed 9, asphalt 10, regolith 11.
 const int K_WATER = 0;
 const int K_SEA = 7;
 const int K_CLOUD_DECK = 8;
+const int K_SEABED = 9;
+const int K_ASPHALT = 10;
+const int K_REGOLITH = 11;
 // The Moon's face (env_sky_moon.gdshader moon_colour, in linear light).
 const vec3 MOON_COLOUR = vec3(1.0, 0.91, 0.71);
 // How far the water's ripples tilt, as a slope (the spread of a bell curve): 0.12 is about 7 degrees, a river's or a
@@ -159,6 +162,35 @@ void fragment() {
 		float f_cd = max(mist * smoothstep(25.0, 155.0, d_cd),
 				max(smoothstep(120.0, 180.0, d_cd) * 0.78, smoothstep(0.0, 1.0, horizon_t)));
 		c = mix(c, mix(sky_low, mist_colour, mist) * light * shown, f_cd);
+	} else if (kind == K_SEABED) {
+		// Sandy ocean floor with gentle sand ripples and shimmering turquoise underwater caustic web.
+		float sand = texture(noise_tex, g / GROUND_PERIOD * 3.5).g;
+		float rip = sin(g.x * 2.2 + g.y * 0.7 + sand * 3.0) * 0.5 + 0.5;
+		float c1 = texture(noise_tex, g / GROUND_PERIOD * 4.2 + vec2(TIME * 0.025, TIME * 0.018)).r;
+		float c2 = texture(noise_tex, g / GROUND_PERIOD * 4.8 - vec2(TIME * 0.021, TIME * 0.029)).g;
+		float web = pow(clamp(1.0 - abs(c1 - c2) * 2.4, 0.0, 1.0), 4.0) * still;
+		c = COLOR.rgb * (0.82 + 0.34 * mix(0.5, rip, still)) * lit
+				+ vec3(0.14, 0.42, 0.48) * web * 0.55 * light * shown;
+	} else if (kind == K_ASPHALT) {
+		// Damp night motorway tarmac: fine aggregate grain, subtle wet sky sheen and faint far lane dashes.
+		float grit = texture(noise_tex, g / GROUND_PERIOD * 12.0).b;
+		float damp = texture(noise_tex, g / GROUND_PERIOD * 2.4 + vec2(0.17, 0.41)).r;
+		vec3 e = normalize(CAMERA_POSITION_WORLD - world_pos);
+		float fres = pow(1.0 - max(e.y, 0.0), 3.6);
+		float lane_x = 1.0 - smoothstep(0.05, 0.14, abs(fract(abs(UV.x) / 3.7) - 0.5));
+		float dash = smoothstep(0.42, 0.52, fract(g.y / 9.0));
+		float mark = lane_x * dash * still * (1.0 - smoothstep(10.0, 26.0, abs(UV.x)));
+		c = COLOR.rgb * (0.82 + 0.32 * grit) * lit
+				+ mix(sky_low, glow_colour * 0.25, 0.35) * fres * (0.35 + 0.55 * damp) * light * shown
+				+ vec3(0.55, 0.52, 0.44) * mark * 0.28 * (light * 0.6 + glow * from_windows) * shown;
+	} else if (kind == K_REGOLITH) {
+		// Cratered planetary regolith (lunar grey or Martian rust ochre from COLOR): broad dunes and crater pocks.
+		float dune = texture(noise_tex, g / GROUND_PERIOD * 1.4).r;
+		float pock = texture(noise_tex, g / GROUND_PERIOD * 5.2 + vec2(0.29, 0.61)).g;
+		float dust = texture(noise_tex, g / GROUND_PERIOD * 11.0).b;
+		float crater = smoothstep(0.66, 0.86, pock) * 0.32;
+		float shade = 0.78 + 0.32 * dune - crater + (dust - 0.5) * 0.18;
+		c = COLOR.rgb * mix(1.0, shade, still) * lit;
 	} else {
 		float v = texture(noise_tex, g / GROUND_PERIOD * 4.0).g;
 		c = COLOR.rgb * (1.0 + (v - 0.5) * 0.5 * still) * lit;

@@ -290,6 +290,12 @@ func _test_room_tab() -> void:
 		["dome_car_1955", "Dome car 1955"],
 		["airship_1931", "Airship 1931"],
 		["jet_1964", "Jet 1964"],
+		["salon_1870", "The Salon 1870"],
+		["coach_trip_1988", "Coach trip 1988"],
+		["back_seat_2004", "Back seat 2004"],
+		["sky_lift", "Sky lift"],
+		["moon_ferry", "Moon ferry"],
+		["mars_train", "Mars train"],
 	]
 	_check("the journeys stand under their builders %s" % [builders.keys()],
 			builders.has("Gemini 4 Neon Extra High") and builders.has(EnvLibrary.DEFAULT_AUTHOR)

@@ -2827,8 +2827,10 @@ msgid "words to search for, such as autumn forest"
 msgstr ""
 
 #: ui/picture_tab.gd:222 ui/picture_tab.gd:39 ui/room_tab.gd:23 ui/sound_tab.gd:129
-#: environments/airship_1931.env.json environments/cinema_coach_1935.env.json environments/dome_car_1955.env.json environments/flagship.env.json
-#: environments/ice_cinema.env.json environments/jet_1964.env.json environments/night_ferry_1994.env.json environments/night_sleeper_1929.env.json
+#: environments/airship_1931.env.json environments/cinema_coach_1935.env.json environments/coach_trip_1988.env.json environments/dome_car_1955.env.json
+#: environments/flagship.env.json environments/ice_cinema.env.json environments/jet_1964.env.json environments/mars_train.env.json
+#: environments/moon_ferry.env.json environments/night_ferry_1994.env.json environments/night_sleeper_1929.env.json environments/salon_1870.env.json
+#: environments/sky_lift.env.json
 msgid "Off"
 msgstr ""
 
@@ -4549,12 +4551,20 @@ msgstr ""
 msgid "Atmospheric 1928"
 msgstr ""
 
+#: environments/back_seat_2004.env.json
+msgid "Back seat 2004"
+msgstr ""
+
 #: environments/bathysphere.env.json
 msgid "Bathysphere"
 msgstr ""
 
 #: environments/cinema_coach_1935.env.json
 msgid "Cinema coach 1935"
+msgstr ""
+
+#: environments/coach_trip_1988.env.json
+msgid "Coach trip 1988"
 msgstr ""
 
 #: environments/crater.env.json
@@ -4583,6 +4593,14 @@ msgstr ""
 
 #: environments/liner_1936.env.json
 msgid "Liner 1936"
+msgstr ""
+
+#: environments/mars_train.env.json
+msgid "Mars train"
+msgstr ""
+
+#: environments/moon_ferry.env.json
+msgid "Moon ferry"
 msgstr ""
 
 #: environments/narrowboat.env.json
@@ -4621,6 +4639,10 @@ msgstr ""
 msgid "Athens rooftop"
 msgstr ""
 
+#: environments/salon_1870.env.json
+msgid "The Salon 1870"
+msgstr ""
+
 #: environments/screen_3_1983.env.json
 msgid "Screen 3 - 1983"
 msgstr ""
@@ -4635,6 +4657,10 @@ msgstr ""
 
 #: environments/showboat_1927.env.json
 msgid "Showboat 1927"
+msgstr ""
+
+#: environments/sky_lift.env.json
+msgid "Sky lift"
 msgstr ""
 
 #: environments/streamline_1937.env.json
@@ -4697,6 +4723,10 @@ msgstr ""
 msgid "A picture palace built as a Mediterranean courtyard at dusk: lit windows, iron balconies, a palace gate with an organ, a crescent moon and real stars."
 msgstr ""
 
+#: environments/back_seat_2004.env.json
+msgid "The rain-streaked back seat of a 2004 family car cruising a night motorway: a flip-down roof screen, glowing dashboard dials, tartan blanket, drifting raindrops and lit services at arrival."
+msgstr ""
+
 #: environments/bathysphere.env.json
 msgid "A glass dome on the sea floor: kelp and coral in the floodlights, schools of fish, glowing creatures drawn to the screen, a manta overhead, and in a quiet scene now and then a whale."
 msgstr ""
@@ -4707,6 +4737,10 @@ msgstr ""
 
 #: environments/cinema_coach_1935.env.json
 msgid "A 1935 express railway cinema carriage rolling through autumn night: mahogany panelling, swaying brass lamps, telegraph poles, a dark railway tunnel mid-reel and a warm terminus with the credits."
+msgstr ""
+
+#: environments/coach_trip_1988.env.json
+msgid "An overnight touring coach in 1988: swirly moquette, overhead 4:3 CRT and flashing video deck, drawn cab curtain, sodium-lit motorway night and glowing intermission services."
 msgstr ""
 
 #: environments/crater.env.json
@@ -4735,6 +4769,14 @@ msgstr ""
 
 #: environments/liner_1936.env.json
 msgid "An ocean liner's moderne lounge crossing at night: the ship never rolls while the tall velvet drapes sway gently, the Moon lays a road across open sea, and harbour lights rise with the credits."
+msgstr ""
+
+#: environments/mars_train.env.json
+msgid "A pressurised Martian rover-train crossing a rust-ochre plain under a real blue Martian sunset: dust devils fade as starlight takes the sky, arriving at a glowing domed night colony."
+msgstr ""
+
+#: environments/moon_ferry.env.json
+msgid "A retro-future cislunar passenger liner gliding silently through star-filled space: Earth shrinks astern while the cratered Moon grows ahead, ending in a gentle touchdown at the lunar Crater base."
 msgstr ""
 
 #: environments/narrowboat.env.json
@@ -4773,6 +4815,10 @@ msgstr ""
 msgid "A summer cinema on an Athens roof: director's chairs on terracotta tiles, bougainvillea, strings of bulbs, the picture painted on a blind wall, a floodlit temple on its hill, the city all round."
 msgstr ""
 
+#: environments/salon_1870.env.json
+msgid "A Victorian 1870 submarine salon in crimson velvet and mahogany: twin brass iris viewports spiral open to reveal swaying giant kelp, silver fish, a sunken wreck, and deep volcanic vents."
+msgstr ""
+
 #: environments/screen_3_1983.env.json
 msgid "A tired multiplex screen, 1983: plasterboard, a swirly carpet, a broken seat, smoke in the beam and a worn print."
 msgstr ""
@@ -4787,6 +4833,10 @@ msgstr ""
 
 #: environments/showboat_1927.env.json
 msgid "A floating theatre drifting down a wide river: cottonwoods and a levee town slide past the tall windows at dusk, a steamer lies at anchor, and the show ties up at a lamp-lit landing with the credits."
+msgstr ""
+
+#: environments/sky_lift.env.json
+msgid "An orbital elevator climber car ascending from an equatorial ocean tether platform through the cloud deck into black star-filled orbit, with Earth's glowing curved limb opening out beneath you."
 msgstr ""
 
 #: environments/streamline_1937.env.json
@@ -4849,7 +4899,7 @@ msgstr ""
 msgid "Lounge piano"
 msgstr ""
 
-#: environments/airship_1931.env.json
+#: environments/airship_1931.env.json environments/salon_1870.env.json
 msgid "Cove glow"
 msgstr ""
 
@@ -4859,6 +4909,18 @@ msgstr ""
 
 #: environments/atmospheric_1928.env.json
 msgid "Organ before the film"
+msgstr ""
+
+#: environments/back_seat_2004.env.json environments/pillow_fort_1993.env.json environments/reclaimed.env.json
+msgid "Rain"
+msgstr ""
+
+#: environments/back_seat_2004.env.json
+msgid "Dash glow"
+msgstr ""
+
+#: environments/back_seat_2004.env.json
+msgid "Car audio"
 msgstr ""
 
 #: environments/bathysphere.env.json
@@ -4877,6 +4939,22 @@ msgstr ""
 msgid "Lighting"
 msgstr ""
 
+#: environments/coach_trip_1988.env.json
+msgid "Tape wear"
+msgstr ""
+
+#: environments/coach_trip_1988.env.json
+msgid "Coach speaker"
+msgstr ""
+
+#: environments/coach_trip_1988.env.json environments/night_ferry_1994.env.json
+msgid "Night strips"
+msgstr ""
+
+#: environments/coach_trip_1988.env.json
+msgid "Motorway weather"
+msgstr ""
+
 #: environments/crater.env.json
 msgid "Earth's speed"
 msgstr ""
@@ -4885,7 +4963,7 @@ msgstr ""
 msgid "Dome coves"
 msgstr ""
 
-#: environments/dome_car_1955.env.json
+#: environments/dome_car_1955.env.json environments/moon_ferry.env.json environments/sky_lift.env.json
 msgid "Starlight"
 msgstr ""
 
@@ -4917,6 +4995,18 @@ msgstr ""
 msgid "Cove lights"
 msgstr ""
 
+#: environments/mars_train.env.json
+msgid "Cabin lighting"
+msgstr ""
+
+#: environments/mars_train.env.json
+msgid "Martian sky"
+msgstr ""
+
+#: environments/moon_ferry.env.json environments/sky_lift.env.json
+msgid "Cabin light"
+msgstr ""
+
 #: environments/nave.env.json
 msgid "Candles"
 msgstr ""
@@ -4927,10 +5017,6 @@ msgstr ""
 
 #: environments/night_ferry_1994.env.json
 msgid "Telly speaker"
-msgstr ""
-
-#: environments/night_ferry_1994.env.json
-msgid "Night strips"
 msgstr ""
 
 #: environments/night_sleeper_1929.env.json
@@ -4963,6 +5049,14 @@ msgstr ""
 
 #: environments/rooftop_athens.env.json
 msgid "Floodlights on the hill"
+msgstr ""
+
+#: environments/salon_1870.env.json
+msgid "Viewport iris"
+msgstr ""
+
+#: environments/salon_1870.env.json
+msgid "Salon organ"
 msgstr ""
 
 #: environments/screen_3_1983.env.json
@@ -5054,6 +5148,18 @@ msgstr ""
 msgid "The theatre organ behind the grilles plays for a minute or so when the room opens and between films, and finishes as the film starts."
 msgstr ""
 
+#: environments/back_seat_2004.env.json
+msgid "Steady motorway rain streaking sideways across the car glass, light drizzle, passing showers, or a dry night."
+msgstr ""
+
+#: environments/back_seat_2004.env.json
+msgid "The glowing 2004 instrument dials, stereo faceplate and climate control rings ahead between the front seats."
+msgstr ""
+
+#: environments/back_seat_2004.env.json
+msgid "Full spatial cinema sound, or the roof flip-down screen's small built-in mono speaker."
+msgstr ""
+
 #: environments/bathysphere.env.json
 msgid "How deep the dome lies: sunlit shallows with shafts of light and caustics, the blue twilight, or the black abyss where only the lamps and what glows show."
 msgstr ""
@@ -5076,6 +5182,22 @@ msgstr ""
 
 #: environments/cinema_coach_1935.env.json
 msgid "1935 back-projection newsreel film print with gentle weave, dust and lamp hotspot, or a clean picture."
+msgstr ""
+
+#: environments/coach_trip_1988.env.json
+msgid "Worn 1988 rented video tape on the overhead CRT, clean CRT glass, or a modern clean picture."
+msgstr ""
+
+#: environments/coach_trip_1988.env.json
+msgid "The film's sound through the overhead telly's small mono speaker."
+msgstr ""
+
+#: environments/coach_trip_1988.env.json
+msgid "Low night-travel strips along the aisle floor and overhead parcel racks."
+msgstr ""
+
+#: environments/coach_trip_1988.env.json
+msgid "Light night motorway drizzle on the coach glass, steady rain, or a clear autumn night."
 msgstr ""
 
 #: environments/crater.env.json
@@ -5120,6 +5242,22 @@ msgstr ""
 
 #: environments/liner_1936.env.json
 msgid "The proscenium coves' colour before the film. During the film they soften towards the picture."
+msgstr ""
+
+#: environments/mars_train.env.json
+msgid "Indirect expedition cove strips along the overhead raceways, screen surround and aisle floor guides."
+msgstr ""
+
+#: environments/mars_train.env.json
+msgid "Authentic blue Martian sunset fading to the Milky Way, heightened clear starlight, or faint constellation lines."
+msgstr ""
+
+#: environments/moon_ferry.env.json
+msgid "Recessed orbital valance, cornice and aisle floor-guide lighting along the cislunar cabin."
+msgstr ""
+
+#: environments/moon_ferry.env.json
+msgid "Full cislunar Milky Way across the glazed canopy, quiet starlight, or faint constellation lines."
 msgstr ""
 
 #: environments/nave.env.json
@@ -5178,6 +5316,18 @@ msgstr ""
 msgid "How brightly the temple on the hill is lit. At the bottom: dark."
 msgstr ""
 
+#: environments/salon_1870.env.json
+msgid "When the riveted brass iris shutters over both circular viewports spiral open to reveal the seabed."
+msgstr ""
+
+#: environments/salon_1870.env.json
+msgid "The aft Victorian pipe organ plays soft flute chorales in the pre-show, interval and after the end."
+msgstr ""
+
+#: environments/salon_1870.env.json
+msgid "Indirect glow along the gilded screen proscenium and vaulted iron hull eaves."
+msgstr ""
+
 #: environments/screen_3_1983.env.json
 msgid "How much the worn print drifts in the gate, and how crooked the projector stands. At the bottom: steady and straight."
 msgstr ""
@@ -5188,6 +5338,14 @@ msgstr ""
 
 #: environments/shopfront_1906.env.json
 msgid "A player piano by the screen plays along with the film. Off: no piano."
+msgstr ""
+
+#: environments/sky_lift.env.json
+msgid "Recessed canopy brow coves, bulkhead wash, docking halo and floor pathway lighting."
+msgstr ""
+
+#: environments/sky_lift.env.json
+msgid "Full orbital Milky Way wrapping all round in space, quiet starlight, or faint constellation lines."
 msgstr ""
 
 #: environments/streamline_1937.env.json
@@ -5278,6 +5436,42 @@ msgstr ""
 msgid "Moonlight silver"
 msgstr ""
 
+#: environments/back_seat_2004.env.json environments/coach_trip_1988.env.json
+msgid "Steady rain"
+msgstr ""
+
+#: environments/back_seat_2004.env.json environments/pillow_fort_1993.env.json
+msgid "Drizzle"
+msgstr ""
+
+#: environments/back_seat_2004.env.json
+msgid "Passing showers"
+msgstr ""
+
+#: environments/back_seat_2004.env.json
+msgid "Dry night"
+msgstr ""
+
+#: environments/back_seat_2004.env.json
+msgid "Ice blue & amber"
+msgstr ""
+
+#: environments/back_seat_2004.env.json
+msgid "Warm emerald"
+msgstr ""
+
+#: environments/back_seat_2004.env.json
+msgid "Dim"
+msgstr ""
+
+#: environments/back_seat_2004.env.json
+msgid "Full cinema"
+msgstr ""
+
+#: environments/back_seat_2004.env.json
+msgid "Small screen speaker"
+msgstr ""
+
 #: environments/bathysphere.env.json
 msgid "Sunlit shallows"
 msgstr ""
@@ -5302,7 +5496,8 @@ msgstr ""
 msgid "Sometimes"
 msgstr ""
 
-#: environments/cinema_coach_1935.env.json environments/night_sleeper_1929.env.json
+#: environments/cinema_coach_1935.env.json environments/coach_trip_1988.env.json environments/moon_ferry.env.json environments/night_sleeper_1929.env.json
+#: environments/salon_1870.env.json
 msgid "Warm amber"
 msgstr ""
 
@@ -5314,8 +5509,29 @@ msgstr ""
 msgid "Newsreel print"
 msgstr ""
 
-#: environments/cinema_coach_1935.env.json environments/jet_1964.env.json environments/night_ferry_1994.env.json environments/night_sleeper_1929.env.json
+#: environments/cinema_coach_1935.env.json environments/coach_trip_1988.env.json environments/jet_1964.env.json environments/night_ferry_1994.env.json
+#: environments/night_sleeper_1929.env.json
 msgid "Clean picture"
+msgstr ""
+
+#: environments/coach_trip_1988.env.json
+msgid "1988 rental tape"
+msgstr ""
+
+#: environments/coach_trip_1988.env.json
+msgid "1988 CRT"
+msgstr ""
+
+#: environments/coach_trip_1988.env.json
+msgid "Retro teal"
+msgstr ""
+
+#: environments/coach_trip_1988.env.json
+msgid "Light drizzle"
+msgstr ""
+
+#: environments/coach_trip_1988.env.json environments/night_ferry_1994.env.json environments/night_sleeper_1929.env.json
+msgid "Clear night"
 msgstr ""
 
 #: environments/dome_car_1955.env.json
@@ -5334,11 +5550,11 @@ msgstr ""
 msgid "Milky Way & meteors"
 msgstr ""
 
-#: environments/dome_car_1955.env.json
+#: environments/dome_car_1955.env.json environments/moon_ferry.env.json environments/sky_lift.env.json
 msgid "Quiet stars"
 msgstr ""
 
-#: environments/dome_car_1955.env.json
+#: environments/dome_car_1955.env.json environments/mars_train.env.json environments/moon_ferry.env.json environments/sky_lift.env.json
 msgid "Constellations"
 msgstr ""
 
@@ -5362,7 +5578,7 @@ msgstr ""
 msgid "16 mm print"
 msgstr ""
 
-#: environments/jet_1964.env.json
+#: environments/jet_1964.env.json environments/sky_lift.env.json
 msgid "Warm ivory"
 msgstr ""
 
@@ -5380,6 +5596,30 @@ msgstr ""
 
 #: environments/liner_1936.env.json
 msgid "Silver blue"
+msgstr ""
+
+#: environments/mars_train.env.json
+msgid "Habitat amber"
+msgstr ""
+
+#: environments/mars_train.env.json
+msgid "Telemetry teal"
+msgstr ""
+
+#: environments/mars_train.env.json
+msgid "Blue sunset to stars"
+msgstr ""
+
+#: environments/mars_train.env.json
+msgid "Clear starlight"
+msgstr ""
+
+#: environments/moon_ferry.env.json
+msgid "Ice blue"
+msgstr ""
+
+#: environments/moon_ferry.env.json
+msgid "Deep Milky Way"
 msgstr ""
 
 #: environments/nave.env.json environments/pillow_fort_1993.env.json
@@ -5400,10 +5640,6 @@ msgstr ""
 
 #: environments/night_ferry_1994.env.json environments/tv_1993.env.json
 msgid "Raining"
-msgstr ""
-
-#: environments/night_ferry_1994.env.json environments/night_sleeper_1929.env.json
-msgid "Clear night"
 msgstr ""
 
 #: environments/night_ferry_1994.env.json
@@ -5442,14 +5678,6 @@ msgstr ""
 msgid "No snow"
 msgstr ""
 
-#: environments/pillow_fort_1993.env.json environments/reclaimed.env.json
-msgid "Rain"
-msgstr ""
-
-#: environments/pillow_fort_1993.env.json
-msgid "Drizzle"
-msgstr ""
-
 #: environments/pillow_fort_1993.env.json
 msgid "Coming and going"
 msgstr ""
@@ -5464,6 +5692,34 @@ msgstr ""
 
 #: environments/reclaimed.env.json
 msgid "Clear"
+msgstr ""
+
+#: environments/salon_1870.env.json
+msgid "Open for the film"
+msgstr ""
+
+#: environments/salon_1870.env.json
+msgid "Always open"
+msgstr ""
+
+#: environments/salon_1870.env.json
+msgid "Half open"
+msgstr ""
+
+#: environments/salon_1870.env.json
+msgid "Sea turquoise"
+msgstr ""
+
+#: environments/sky_lift.env.json
+msgid "Orbital cyan"
+msgstr ""
+
+#: environments/sky_lift.env.json
+msgid "Amber night"
+msgstr ""
+
+#: environments/sky_lift.env.json
+msgid "Milky Way"
 msgstr ""
 
 #: environments/streamline_1937.env.json

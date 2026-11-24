@@ -26,6 +26,7 @@ uniform float earth_radius = 175.0;
 // How bright Earth's day side is, and its night side's lights.
 uniform float day_level = 1.0;
 uniform float city_level = 1.0;
+uniform float earth_alpha = 1.0;
 
 // The atmosphere reaches this far over the ball (in Earth's radii; the real one's glow is thinner still).
 const float AIR = 0.035;
@@ -127,10 +128,10 @@ void fragment() {
 		float h = (miss - 1.0) / AIR;
 		float glow = exp(-h * 3.2) * (1.0 - smoothstep(0.85, 1.0, h));
 		vec3 col = mix(vec3(0.3, 0.12, 0.08) * 0.6, vec3(0.32, 0.55, 1.0), lit);
-		ALBEDO = col * (0.08 + 0.95 * lit) * day_level;
-		ALPHA = clamp(glow * (0.25 + 0.75 * lit), 0.0, 1.0);
+		ALBEDO = col * (0.08 + 0.95 * lit) * day_level * (1.0 - blackout);
+		ALPHA = clamp(glow * (0.25 + 0.75 * lit), 0.0, 1.0) * earth_alpha;
 	} else {
-		ALBEDO = earth_face(d, c, b, r, sun) * day_level;
-		ALPHA = 1.0;
+		ALBEDO = earth_face(d, c, b, r, sun) * day_level * (1.0 - blackout);
+		ALPHA = earth_alpha;
 	}
 }

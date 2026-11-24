@@ -35,6 +35,9 @@ uniform vec3 cloud_glow : source_color = vec3(1.0, 0.6, 0.32);
 uniform float cloud_glow_level = 0.0;
 uniform vec3 moon_dir = vec3(0.0, 0.7, -0.7);
 uniform float moon_light = 0.0;
+// Small distant Sun disc at glow_dir + sun_altitude (0: off; e.g. a Martian blue sunset).
+uniform float sun_disc = 0.0;
+uniform float sun_altitude = 5.0;
 
 const float MILKY_GAIN = 0.05;
 const float AURORA_GAIN = 0.22;
@@ -57,8 +60,17 @@ void fragment() {
 	vec3 d = normalize(dir);
 	vec3 base = sky_base(d);
 	vec3 c = base;
-	float above = mix(smoothstep(-0.01, 0.14, d.y), step(-0.02, d.y), space);
+	float above = mix(mix(smoothstep(-0.01, 0.14, d.y), step(-0.02, d.y), space), 1.0, all_sky * space);
 	float dark = mix(clamp(1.0 - lum(base) * 14.0, 0.0, 1.0), 1.0, space);
+	if (sun_disc > 0.0) {
+		float sa = radians(sun_altitude);
+		vec3 sdir = normalize(glow_dir * cos(sa) + vec3(0.0, sin(sa), 0.0));
+		float ang = acos(clamp(dot(d, sdir), -1.0, 1.0));
+		float core = 1.0 - smoothstep(0.0045, 0.0075, ang);
+		float corona = exp(-ang * 22.0) * 0.45 + exp(-ang * 5.5) * 0.18;
+		vec3 sun_col = mix(glow_colour, vec3(0.88, 0.94, 1.0), 0.65);
+		c += (sun_col * corona + vec3(1.0, 0.98, 0.96) * core * 2.2) * sun_disc * smoothstep(-0.03, 0.01, d.y);
+	}
 	if (milky_way > 0.0) {
 		vec3 g = galactic * d;
 		float l = atan(g.y, g.x);

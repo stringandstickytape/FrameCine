@@ -15,6 +15,7 @@ uniform mat3 earth_basis = mat3(1.0);
 uniform vec3 sun_dir = vec3(1.0, 0.0, 0.0);
 uniform float earth_spin = 0.0;
 uniform float earth_radius = 175.0;
+uniform float earth_alpha = 1.0;
 
 varying vec3 n_local;
 varying vec3 n_room;
@@ -44,5 +45,6 @@ void fragment() {
 	vec3 nr = normalize(n_room);
 	float light = smoothstep(-0.06, 0.22, dot(nr, sun_dir));
 	float rim = pow(1.0 - clamp(dot(nr, -earth_dir), 0.0, 1.0), 3.0);
-	ALBEDO = surf * (light * 1.15 + 0.012) + vec3(0.12, 0.28, 0.7) * rim * (light * 0.9 + 0.04);
+	ALBEDO = (surf * (light * 1.15 + 0.012) + vec3(0.12, 0.28, 0.7) * rim * (light * 0.9 + 0.04))
+			* earth_alpha * (1.0 - blackout);
 }

@@ -10,6 +10,7 @@ render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabl
 // The uniforms every passing shader takes (passing.gd sets them each tick; some only the scenery uses).
 uniform vec3 along_dir = vec3(0.0, 0.0, -1.0);
 uniform vec3 across_dir = vec3(1.0, 0.0, 0.0);
+uniform float vertical = 0.0;
 uniform float shown = 1.0;
 uniform float light = 1.0;
 uniform vec3 sky_top : source_color = vec3(0.106, 0.133, 0.212);
@@ -36,7 +37,10 @@ void vertex() {
 	float grow;
 	vec3 foot = passing_foot(CUSTOM0, CUSTOM1, grow);
 	vec3 q = foot + VERTEX * grow;
-	vec3 p_room = across_dir * q.x + vec3(0.0, 1.0, 0.0) * q.y + along_dir * q.z;
+	vec3 p_room = vertical > 0.5
+			? across_dir * (foot.x + VERTEX.x * grow) + vec3(0.0, 1.0, 0.0) * (foot.z + VERTEX.y * grow)
+					+ along_dir * (foot.y + VERTEX.z * grow)
+			: across_dir * q.x + vec3(0.0, 1.0, 0.0) * q.y + along_dir * q.z;
 	vec4 c = MODELVIEW_MATRIX * vec4(p_room, 1.0);
 	float d = length(c.xyz);
 	// A light grows from nothing with its item, as the scenery does: one that is not there must not be drawn at the

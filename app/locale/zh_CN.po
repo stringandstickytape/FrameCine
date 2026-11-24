@@ -4065,6 +4065,195 @@ msgstr "宝石蓝"
 msgid "1929 home print"
 msgstr "1929 家用胶片"
 
+msgid "Back seat 2004"
+msgstr "后座 2004"
+
+msgid "Coach trip 1988"
+msgstr "长途客车 1988"
+
+msgid "Mars train"
+msgstr "火星列车"
+
+msgid "Moon ferry"
+msgstr "月球渡轮"
+
+msgid "The Salon 1870"
+msgstr "海底沙龙 1870"
+
+msgid "Sky lift"
+msgstr "太空电梯"
+
+msgid "The rain-streaked back seat of a 2004 family car cruising a night motorway: a flip-down roof screen, glowing dashboard dials, tartan blanket, drifting raindrops and lit services at arrival."
+msgstr "夜间高速路上的 2004 年家用车后座：车顶翻盖小屏、微亮仪表盘、格纹毛毯、车窗斜滑雨滴与终点亮灯服务区。"
+
+msgid "An overnight touring coach in 1988: swirly moquette, overhead 4:3 CRT and flashing video deck, drawn cab curtain, sodium-lit motorway night and glowing intermission services."
+msgstr "1988 年夜行长途客车：花纹绒面地毯、顶挂 4:3 显像管电视与闪烁录像机、拉上的驾驶室布帘、钠灯高速路与中场亮灯服务区。"
+
+msgid "A pressurised Martian rover-train crossing a rust-ochre plain under a real blue Martian sunset: dust devils fade as starlight takes the sky, arriving at a glowing domed night colony."
+msgstr "在真实火星蓝色日落下穿越铁锈色平原的加压漫游列车：尘风渐歇、星光满天，最终抵达夜晚亮灯的圆顶基地。"
+
+msgid "A retro-future cislunar passenger liner gliding silently through star-filled space: Earth shrinks astern while the cratered Moon grows ahead, ending in a gentle touchdown at the lunar Crater base."
+msgstr "在满天星海间无声滑行的复古未来地月客轮：后方地球渐小，前方环形山月球渐大，最终轻柔降落于月球环形山基地。"
+
+msgid "A Victorian 1870 submarine salon in crimson velvet and mahogany: twin brass iris viewports spiral open to reveal swaying giant kelp, silver fish, a sunken wreck, and deep volcanic vents."
+msgstr "深红丝绒与红木装饰的 1870 年维多利亚潜艇沙龙：两侧黄铜光圈观景窗旋转开启，展现摇摆海带、银色鱼群、沉船与深海热泉。"
+
+msgid "An orbital elevator climber car ascending from an equatorial ocean tether platform through the cloud deck into black star-filled orbit, with Earth's glowing curved limb opening out beneath you."
+msgstr "从赤道海洋基座升空的轨道电梯轿厢：穿过云层进入漆黑星空轨道，脚下逐渐展开地球明亮的蓝色弧边。"
+
+msgid "Dash glow"
+msgstr "仪表盘微光"
+
+msgid "Car audio"
+msgstr "车内音效"
+
+msgid "Tape wear"
+msgstr "录像带质感"
+
+msgid "Coach speaker"
+msgstr "客车小扬声器"
+
+msgid "Motorway weather"
+msgstr "高速天气"
+
+msgid "Cabin lighting"
+msgstr "车厢灯光"
+
+msgid "Martian sky"
+msgstr "火星夜空"
+
+msgid "Cabin light"
+msgstr "舱内灯光"
+
+msgid "Viewport iris"
+msgstr "观景窗光圈"
+
+msgid "Salon organ"
+msgstr "沙龙管风琴"
+
+msgid "Steady motorway rain streaking sideways across the car glass, light drizzle, passing showers, or a dry night."
+msgstr "高速雨夜里横向划过车窗的细雨、小雨、阵雨，或干燥晴夜。"
+
+msgid "The glowing 2004 instrument dials, stereo faceplate and climate control rings ahead between the front seats."
+msgstr "前排座椅之间亮起的 2004 年仪表表盘、音响面板与空调旋钮光环。"
+
+msgid "Full spatial cinema sound, or the roof flip-down screen's small built-in mono speaker."
+msgstr "完整空间影院音效，或车顶翻盖屏幕内置的小单声道扬声器。"
+
+msgid "Worn 1988 rented video tape on the overhead CRT, clean CRT glass, or a modern clean picture."
+msgstr "顶挂显像管电视上的 1988 年租借旧录像带质感、清晰显像管玻璃，或现代清晰画面。"
+
+msgid "The film's sound through the overhead telly's small mono speaker."
+msgstr "通过头顶小电视的单声道扬声器播放影片声音。"
+
+msgid "Low night-travel strips along the aisle floor and overhead parcel racks."
+msgstr "过道地面与头顶行李架下方柔和的夜行灯带。"
+
+msgid "Light night motorway drizzle on the coach glass, steady rain, or a clear autumn night."
+msgstr "客车车窗上的夜间高速小雨、细雨，或晴朗秋夜。"
+
+msgid "Indirect expedition cove strips along the overhead raceways, screen surround and aisle floor guides."
+msgstr "头顶线槽、银幕边框与过道地面的柔和间接灯带。"
+
+msgid "Authentic blue Martian sunset fading to the Milky Way, heightened clear starlight, or faint constellation lines."
+msgstr "真实火星蓝色日落渐入银河、明亮清晰星光，或淡淡的星座连线。"
+
+msgid "Recessed orbital valance, cornice and aisle floor-guide lighting along the cislunar cabin."
+msgstr "地月客舱顶部嵌入式灯槽、边线与过道地面引导照明。"
+
+msgid "Full cislunar Milky Way across the glazed canopy, quiet starlight, or faint constellation lines."
+msgstr "铺满玻璃天顶的深空银河、宁静星光，或淡淡的星座连线。"
+
+msgid "When the riveted brass iris shutters over both circular viewports spiral open to reveal the seabed."
+msgstr "控制两侧圆形观景窗上的黄铜光圈百叶何时旋转开启以展现海底。"
+
+msgid "The aft Victorian pipe organ plays soft flute chorales in the pre-show, interval and after the end."
+msgstr "后部维多利亚管风琴在开场前、中场休息和散场后轻柔演奏笛音曲调。"
+
+msgid "Indirect glow along the gilded screen proscenium and vaulted iron hull eaves."
+msgstr "金色银幕边框与拱形铁质船体顶部边缘处的柔和间接光。"
+
+msgid "Recessed canopy brow coves, bulkhead wash, docking halo and floor pathway lighting."
+msgstr "嵌入式天顶灯槽、舱壁洗墙灯、对接光环与地面引导灯。"
+
+msgid "Full orbital Milky Way wrapping all round in space, quiet starlight, or faint constellation lines."
+msgstr "环绕太空四周的轨道银河、宁静星光，或淡淡的星座连线。"
+
+msgid "Steady rain"
+msgstr "持续细雨"
+
+msgid "Passing showers"
+msgstr "间歇阵雨"
+
+msgid "Dry night"
+msgstr "干燥晴夜"
+
+msgid "Ice blue & amber"
+msgstr "冰蓝配琥珀"
+
+msgid "Warm emerald"
+msgstr "暖翠绿"
+
+msgid "Dim"
+msgstr "微暗"
+
+msgid "Full cinema"
+msgstr "完整影院音效"
+
+msgid "Small screen speaker"
+msgstr "小屏扬声器"
+
+msgid "1988 rental tape"
+msgstr "1988 租借录像带"
+
+msgid "1988 CRT"
+msgstr "1988 显像管"
+
+msgid "Retro teal"
+msgstr "复古青绿"
+
+msgid "Light drizzle"
+msgstr "夜间小雨"
+
+msgid "Habitat amber"
+msgstr "基地琥珀色"
+
+msgid "Telemetry teal"
+msgstr "仪表青色"
+
+msgid "Blue sunset to stars"
+msgstr "蓝色日落入星空"
+
+msgid "Clear starlight"
+msgstr "清晰星光"
+
+msgid "Ice blue"
+msgstr "冰蓝色"
+
+msgid "Deep Milky Way"
+msgstr "深空银河"
+
+msgid "Open for the film"
+msgstr "放映时开启"
+
+msgid "Always open"
+msgstr "始终开启"
+
+msgid "Half open"
+msgstr "半开"
+
+msgid "Sea turquoise"
+msgstr "海松石绿"
+
+msgid "Orbital cyan"
+msgstr "轨道青蓝"
+
+msgid "Amber night"
+msgstr "琥珀夜色"
+
+msgid "Milky Way"
+msgstr "银河"
+
 #~ msgid "Foveation"
 #~ msgstr "注视点渲染"
 

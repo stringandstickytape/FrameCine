@@ -26,24 +26,25 @@ is moved on the CPU: each tick sets the shaders' uniforms, and the shaders carry
 
 ## The way's frame
 
-The cabin goes along the room's Z axis. With `facing` forward it goes towards -Z (the way the viewer faces); backward,
-towards +Z.
+The cabin goes along the room's Z axis (`forward` towards -Z, `backward` towards +Z), or straight vertically upward
+along +Y (`up`, used by `sky_lift` while keeping shapes oriented upright in world space).
 
-| | Forward | Backward |
-|---|---|---|
-| along | (0, 0, -1) | (0, 0, 1) |
-| across (to the right of the way it goes) | (1, 0, 0) | (-1, 0, 0) |
-| up | (0, 1, 0) | (0, 1, 0) |
+| | Forward | Backward | Up |
+|---|---|---|---|
+| along | (0, 0, -1) | (0, 0, 1) | (0, 1, 0) |
+| across (to the right of the way it goes) | (1, 0, 0) | (-1, 0, 0) | (1, 0, 0) |
+| up | (0, 1, 0) | (0, 1, 0) | (0, 0, -1) |
 
 A point (a, y, t) of the way's frame (a across, y up, t along, ahead positive) is `across * a + up * y + along * t` in
-the room's frame. The system's nodes have identity transforms in the room. A shape is written in the way's frame
-about its item's foot (`shape_mesh.gd` has the vertex format).
+the room's frame (for `up`, the scenery shader translates vertically by `travel` along Y while keeping shapes upright).
+The system's nodes have identity transforms in the room. A shape is written in the way's frame about its item's foot
+(`shape_mesh.gd` has the vertex format).
 
 ## Parameters
 
 | Name | Type | Default | What |
 |---|---|---|---|
-| `facing` | enum forward, backward | forward | which way the cabin goes |
+| `facing` | enum forward, backward, up | forward | which way the cabin goes (`up` ascends vertically along +Y) |
 | `speed` | float 0..12, live, motion (max 12) | 1.0 | metres a second under way |
 | `arrive` | bool | true | with a film of known length, slow down and stop at the route's end |
 | `bands` | list (max 10) of object | [] | the scenery that comes round (below) |
@@ -64,6 +65,7 @@ about its item's foot (`shape_mesh.gd` has the vertex format).
 | `spill` | float 0..4 | 1.0 | how much the near scenery catches the screen's light |
 | `beam_spin` | float 0..2, live, motion (max 2) | 1.0 | lighthouse beam rotation speed scale (1.0 ≈ 0.55 rad/s, ~11.4 s/rev; Motion scales it, 0 holds still) |
 | `tunnel` | float 0..1, live | 0.0 | scales all passing scenery, lights, ground and beams smoothly down to pitch black for railway tunnels (pair with `sky.blackout`) |
+| `ground_vis` | float 0..1, live | 1.0 | scales the ground strips' visibility (hiding `_ground` cleanly when 0 so 360-degree space and Earth shine below on `sky_lift` and `moon_ferry`) |
 
 ### A band
 
@@ -71,8 +73,12 @@ Many of one shape on a loop that comes round again. `buoy` is a channel buoy on 
 and a red or green light. Its colour marks the channel's side, so the band's `colour` is not used. `telegraph` is a
 tall wooden railway pole with dual cross-arms and porcelain insulators; `pine` is a tiered winter conifer (with snow
 caps when placed over snow); `birch` is a slender white-barked winter birch with bare twigs; `mesa` is a flat-topped
-Southwest canyon butte with stepped talus slopes; `cactus` is a multi-armed desert saguaro; and `cloud_bank` is a
-layered drifting cumulus puff for high-altitude air journeys.
+Southwest canyon butte with stepped talus slopes; `cactus` is a multi-armed desert saguaro; `cloud_bank` is a
+layered drifting cumulus puff for high-altitude air journeys; `kelp` is a tall swaying giant kelp stalk with ribbon
+fronds; `sea_rock` is a craggy underwater basalt and coral outcrop; `highway_lamp` is a tall motorway sodium lighting
+column with curved outreach arm; `gantry` is a motorway steel sign gantry with illuminated reflective directional board;
+`tether_ring` is an orbital elevator guide collar with warning beacons; `dust_devil` is a towering ochre Martian dust
+vortex funnel; and `mars_rock` is an angular iron-oxide Martian boulder outcrop.
 
 | Field | Type | Default | What |
 |---|---|---|---|
@@ -114,6 +120,13 @@ lamps and lit waiting-room windows; `water_tower` is a timber-stave railway wate
 conical roof, water spout and warning lantern; `airship_mast` is a 36 m lattice steel mooring tower with glazed
 illuminated passenger boarding gallery, nose cone and red aviation beacons; and `airport` is a 1960s jetport terminal
 with cantilevered roof, glowing panoramic departure bays, canted glass control tower and blue taxiway edge lights.
+`sunken_wreck` is a tilted 18th-century timber galleon hull with broken masts and glowing stern gallery; `hydro_vent` is
+a dark mineral deep-sea volcanic chimney cluster with glowing fissures; `services` is a floodlit motorway service area
+with illuminated fuel canopy, glazed amenity hall and warm parking lamps; `ocean_platform` is an equatorial sea-anchored
+elevator launch rig with caisson legs, gantry frame and beacons; `orbital_station` is a glowing high-orbit docking ring
+station with solar arrays and approach lights; `lunar_base` is a lunar Crater outpost with geodesic glass domes, airlock
+tunnels and perimeter landing lights; and `mars_base` is a red-planet night colony of glowing pressurised geodesic domes,
+pressurised corridors and communications masts.
 
 | Field | Type | Default | What |
 |---|---|---|---|
@@ -160,6 +173,13 @@ with none gives nothing. The margins past the shape itself are for what reaches 
 | `water_tower` | 9 x size | its distance - 4 x size to its distance + 10 x size |
 | `airship_mast` | 14 x size | its distance - 6 x size to its distance + 14 x size |
 | `airport` | 38 | its distance - 6 to its distance + 24 |
+| `sunken_wreck` | 18 x size | its distance - 6 x size to its distance + 8 x size |
+| `hydro_vent` | 10 x size | its distance - 5 x size to its distance + 7 x size |
+| `services` | 32 | its distance - 4 to its distance + 24 |
+| `ocean_platform` | 24 x size | its distance - 14 x size to its distance + 16 x size |
+| `orbital_station` | 24 x size | its distance - 14 x size to its distance + 16 x size |
+| `lunar_base` | 32 | its distance - 6 to its distance + 24 |
+| `mars_base` | 32 | its distance - 6 to its distance + 24 |
 
 The scenery's shaders get them as `landmark_clear` (one a landmark), and `band_extent` for each band: how far one of
 its items runs on along the way from its foot (a row's piece: its `SEGMENT` length; else 0). An item whose run along
@@ -173,15 +193,18 @@ the landmark's pace (`seems` 1) keeps its place against it, so this holds for th
 | `side` | left, right, both | both | which side of the way |
 | `from`, `to` | float 0..175, required | | metres from the way's line |
 | `height_from`, `height_to` | float -40..40 | 0 | its height at each edge |
-| `kind` | water, grass, path, field, snow, sand, stone, sea, cloud_deck | grass | what it is |
-| `colour` | color | the kind's own | water `#0c1218`, grass `#1a2414`, path `#3b362c`, field `#201c16`, snow `#c8ccd6`, sand `#4a4232`, stone `#34322e`, sea `#08101c`, cloud_deck `#647490` |
+| `kind` | water, grass, path, field, snow, sand, stone, sea, cloud_deck, seabed, asphalt, regolith | grass | what it is |
+| `colour` | color | the kind's own | water `#0c1218`, grass `#1a2414`, path `#3b362c`, field `#201c16`, snow `#c8ccd6`, sand `#4a4232`, stone `#34322e`, sea `#08101c`, cloud_deck `#647490`, seabed `#18343a`, asphalt `#181a1f`, regolith `#484440` |
 
 A strip runs 175 m ahead and astern. It stands still; its pattern goes by. `sea` draws a full 360-degree circular sea
 disc out to 185 m (`SEA_HORIZON`) with an outer skirt rising to eye height (`1.2 m`) so open ocean meets the sky dome
 cleanly all round with no edge gap; its shader blends ocean swells, open-sky Fresnel reflection and a broader
 (`SEA_MOON_ROUGH` 0.16) Moon's road seamlessly into `sky_low` at the horizon. `cloud_deck` draws the same 360-degree
 disc and horizon skirt far below an airborne cabin (`height_from` down to `-40 m`), shading billowing moonlit cloud tops
-with subtle sleeping-town light glowing through rare cloud rifts and blending cleanly into the horizon.
+with subtle sleeping-town light glowing through rare cloud rifts and blending cleanly into the horizon. `seabed` shades
+rippled ocean-floor sand crossed by an animated turquoise caustic web (`salon_1870`); `asphalt` shades damp night
+motorway tarmac with subtle far dashed lane markings beyond `still_within` (`coach_trip_1988`, `back_seat_2004`); and
+`regolith` shades cratered lunar or iron-oxide Martian planetary dust (`moon_ferry`, `mars_train`).
 
 `shape` (a band's and a landmark's), `at` (a landmark's), `from` and `to` (a strip's) are required: the schema says
 `"required": true` and refuses an entry without them (`docs/environments/checks.md`, item 1). A band of scenery with
@@ -268,8 +291,19 @@ the size, metres times the size]:
 | `signal` | [0, 0.45] | [0, 1.8] | [0, 6.5] |
 | `water_tower` | [0, 2.8] | [0, 3.2] | [0, 5.0] |
 | `airship_mast` | [0, 4.5] | [0, 5.5] | [0, 0] |
+| `kelp` | [0, 0.4] | [0, 1.8] | [0, 0.8] |
+| `sea_rock` | [0, 2.6] | [0, 3.0] | [0, 0] |
+| `highway_lamp` | [0, 0.25] | [0, 2.7] | [0, 9.8] |
+| `gantry` | [0, 0.4] | [0, 4.5] | [0, 5.2] |
+| `tether_ring` | [0, 1.5] | [0, 2.5] | [0, 0] |
+| `dust_devil` | [0, 1.5] | [0, 5.0] | [0, 0] |
+| `mars_rock` | [0, 2.5] | [0, 2.8] | [0, 0] |
+| `sunken_wreck` | [0, 5.0] | [0, 5.5] | [0, 0] |
+| `hydro_vent` | [0, 4.0] | [0, 4.5] | [0, 0] |
+| `ocean_platform` | [0, 12.0] | [0, 14.0] | [0, 0] |
+| `orbital_station` | [0, 10.0] | [0, 14.0] | [0, 0] |
 
-A shape not in the table (`ridge`, `lights`, `wharf`, `pier`, `ferry_port`, `station`, `airport`) comes no nearer than its foot. The table is worked out from the
+A shape not in the table (`ridge`, `lights`, `wharf`, `pier`, `ferry_port`, `station`, `airport`, `services`, `lunar_base`, `mars_base`) comes no nearer than its foot. The table is worked out from the
 drawing functions at the largest each draws: a change to a shape is a change to its line here.
 
 `flow_volumes()` gives, in the room's frame: for each band and side, across from where its largest item reaches (its

@@ -89,6 +89,14 @@ static func spec() -> Dictionary:
 					"description": "where the sunset or dawn glow lies on the horizon (compass bearing)"},
 			"blackout": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
 					"description": "darkens the sky dome, stars and Moon smoothly (e.g. a railway tunnel)"},
+			"space_mix": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
+					"description": "blends smoothly from atmospheric sky into black star-filled space (e.g. an orbital climb)"},
+			"all_sky": {"type": "bool", "default": false,
+					"description": "show stars and the Milky Way below the horizon too once in space (orbital or cislunar flight)"},
+			"sun_disc": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "brightness": true,
+					"description": "draws a small distant Sun disc at glow_bearing and sun_altitude (e.g. a Martian sunset)"},
+			"sun_altitude": {"type": "float", "min": -10.0, "max": 45.0, "default": 5.0, "live": true,
+					"description": "altitude of the Sun disc in degrees above the horizon"},
 			"ground": {"type": "color", "default": "#0a0a0c", "description": "below the horizon"},
 			"stars": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true, "brightness": true,
 					"description": "how bright the stars are (they also hide in the twilight and behind clouds)"},
@@ -137,13 +145,16 @@ static func spec() -> Dictionary:
 			"meteors": {"type": "float", "min": 0.0, "max": 30.0, "default": 0.0, "live": true,
 					"description": "shooting stars an hour, at random (the action shooting_star sends one)"},
 			"earth": {"type": "bool", "default": false, "description": "Earth in the sky, as seen from the Moon"},
-			"earth_bearing": compass.call(180.0, "where Earth hangs (compass bearing)"),
-			"earth_altitude": {"type": "float", "min": 0.0, "max": 90.0, "default": 35.0,
-					"description": "Earth's height over the horizon in degrees"},
-			"earth_size": {"type": "float", "min": 0.5, "max": 12.0, "default": 2.0,
-					"description": "Earth's size across in degrees (from the Moon it is about 1.9)"},
-			"earth_phase": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.65,
+			"earth_bearing": {"type": "float", "min": 0.0, "max": 360.0, "default": 180.0, "live": true,
+					"description": "where Earth hangs (compass bearing)"},
+			"earth_altitude": {"type": "float", "min": -85.0, "max": 90.0, "default": 35.0, "live": true,
+					"description": "Earth's height over the horizon in degrees (negative: below the horizon in orbit)"},
+			"earth_size": {"type": "float", "min": 0.5, "max": 80.0, "default": 2.0, "live": true,
+					"description": "Earth's size across in degrees (from the Moon it is about 1.9; up to 80 for an orbital limb)"},
+			"earth_phase": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.65, "live": true,
 					"description": "how much of Earth's face is lit: 0 new, 1 full"},
+			"earth_alpha": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true, "brightness": true,
+					"description": "Earth's visibility (0 hides Earth until above the cloud deck)"},
 			"earth_angle": {"type": "float", "min": -3600.0, "max": 3600.0, "default": 0.0, "live": true,
 					"description": "how far Earth has turned on its axis, in degrees (a film-time track can turn it "
 					+ "over the film)"},
@@ -165,13 +176,13 @@ static func spec() -> Dictionary:
 			"moon": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true, "brightness": true,
 					"description": "the Moon's brightness (its crescent, the faint earthshine on the rest, a soft halo, "
 					+ "the clouds near it silvered); 0: no Moon"},
-			"moon_bearing": compass.call(220.0, "where the Moon stands (compass bearing)"),
-			"moon_altitude": {"type": "float", "min": 0.0, "max": 90.0, "default": 45.0,
+			"moon_bearing": {"type": "float", "min": 0.0, "max": 360.0, "default": 220.0, "live": true,
+					"description": "where the Moon stands (compass bearing)"},
+			"moon_altitude": {"type": "float", "min": -85.0, "max": 90.0, "default": 45.0, "live": true,
 					"description": "the Moon's height over the horizon in degrees"},
-			"moon_size": {"type": "float", "min": 0.3, "max": 8.0, "default": 1.6,
-					"description": "the Moon's size across in degrees (the real one is half a degree; a little larger "
-					+ "reads in a headset)"},
-			"moon_phase": {"type": "float", "min": 0.02, "max": 1.0, "default": 0.22,
+			"moon_size": {"type": "float", "min": 0.3, "max": 45.0, "default": 1.6, "live": true,
+					"description": "the Moon's size across in degrees (the real one is half a degree; grows on lunar approach)"},
+			"moon_phase": {"type": "float", "min": 0.02, "max": 1.0, "default": 0.22, "live": true,
 					"description": "how much of the Moon's face is lit: a young crescent 0.1 to 0.3, full 1; the lit "
 					+ "side faces where the sun went down (glow_bearing)"},
 			"cloud_glow": {"type": "color", "default": "#ff9a52",
@@ -383,7 +394,8 @@ func sky_light() -> Dictionary:
 	if str(params["mode"]) != "sky":
 		return {"zenith": Color(0.0, 0.0, 0.0), "horizon": color_param("ground"), "dusk": 1.0}
 	var k := smoothstep(0.0, 1.0, float(params["dusk"]))
-	var vis := 1.0 - clampf(float(params["blackout"]), 0.0, 1.0)
+	var air := 1.0 - clampf(float(params["space_mix"]), 0.0, 1.0)
+	var vis := (1.0 - clampf(float(params["blackout"]), 0.0, 1.0)) * air
 	return {"zenith": color_param("twilight_zenith").lerp(color_param("night_zenith"), k) * vis,
 			"horizon": color_param("twilight_horizon").lerp(color_param("night_horizon"), k) * vis,
 			"dusk": float(params["dusk"])}
@@ -437,7 +449,7 @@ func setup() -> void:
 		var dir := _earth_dir()
 		var half := tan(deg_to_rad(float(params["earth_size"])) * 0.5) * EARTH_RADIUS
 		_earth.transform = Transform3D(Basis().scaled(Vector3.ONE * half), dir * EARTH_RADIUS)
-	if float(params["moon"]) > 0.0 and str(params["mode"]) == "sky":
+	if float(params["moon"]) > 0.0 and str(params["mode"]) != "black":
 		_moon = _instance("SkyMoon", _moon_mesh(), _material(MOON_SHADER, noise))
 		_moon.material_override.render_priority = 2
 	_apply_all()
@@ -650,7 +662,9 @@ func _apply_all() -> void:
 	_set_all("ground_colour", color_param("ground"))
 	_set_all("glow_colour", color_param("glow"))
 	_set_all("glow_dir", _bearing("glow_bearing"))
-	_set_all("space", 1.0 if str(params["mode"]) == "space" else 0.0)
+	var sp := 1.0 if str(params["mode"]) == "space" else clampf(float(params["space_mix"]), 0.0, 1.0)
+	_set_all("space", sp)
+	_set_all("all_sky", 1.0 if bool(params["all_sky"]) else 0.0)
 	_set_all("afterglow", float(params["afterglow"]))
 	_set_all("belt_colour", color_param("belt_colour"))
 	_set_all("blackout", clampf(float(params["blackout"]), 0.0, 1.0))
@@ -674,6 +688,8 @@ func _apply_all() -> void:
 	dm.set_shader_parameter("cloud_glow_level", float(params["cloud_glow_level"]))
 	dm.set_shader_parameter("moon_dir", _moon_dir())
 	dm.set_shader_parameter("moon_light", float(params["moon"]) if _moon != null else 0.0)
+	dm.set_shader_parameter("sun_disc", float(params["sun_disc"]))
+	dm.set_shader_parameter("sun_altitude", float(params["sun_altitude"]))
 	if _moon != null:
 		var mm := _moon.material_override as ShaderMaterial
 		var f := _moon_frame()
@@ -698,15 +714,20 @@ func _apply_all() -> void:
 		var em := _earth.material_override as ShaderMaterial
 		var dir := _earth_dir()
 		var eb := _earth_basis()
+		var half := tan(deg_to_rad(float(params["earth_size"])) * 0.5)
 		var theta := (1.0 - float(params["earth_phase"])) * PI
+		var ea := clampf(float(params["earth_alpha"]), 0.0, 1.0)
+		_earth.visible = ea > 0.001
+		_earth.transform = Transform3D(Basis().scaled(Vector3.ONE * (half * EARTH_RADIUS)), dir * EARTH_RADIUS)
 		em.set_shader_parameter("earth_dir", dir)
-		em.set_shader_parameter("earth_half", tan(deg_to_rad(float(params["earth_size"])) * 0.5))
+		em.set_shader_parameter("earth_half", half)
 		em.set_shader_parameter("earth_basis", eb)
 		em.set_shader_parameter("earth_radius", EARTH_RADIUS)
 		var la := deg_to_rad(float(params["earth_light_angle"]))
 		var side := eb.x * cos(la) + eb.y * sin(la)
 		em.set_shader_parameter("sun_dir", (-dir * cos(theta) + side * sin(theta)).normalized())
 		em.set_shader_parameter("city_level", float(params["earth_lights"]))
+		em.set_shader_parameter("earth_alpha", ea)
 		_set_spin()
 
 

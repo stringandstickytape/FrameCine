@@ -3,8 +3,8 @@
 Part of the environments engine: [`docs/environments.md`](../../environments.md) has the design and says where each part is.
 
 The Journeys category as it was proposed on 2026-11-09: fifteen rooms that travel, where the journey takes as long
-as the film. You board in the pre-show, leave when the film starts, and arrive with the credits. Nine are built; this
-page keeps the other six, so the list is not only in a conversation. The built rooms have pages of their own.
+as the film. You board in the pre-show, leave when the film starts, and arrive with the credits. All fifteen are built;
+each room has a page of its own.
 
 Every room is empty, as the Coronation room is: no people. Curtains and headrests hide a driver's place. No real
 place is named, and no maker's name or badge.
@@ -45,7 +45,7 @@ lead's estimate of what the engine does not have yet; it is an estimate until th
 | 5 | Showboat, 1927 | **built** ([`showboat_1927.md`](showboat_1927.md)) | as built: a floating theatre in white and gold on a wide river, the near bank's trees and a levee town, a steamer at anchor, a lamp-lit landing | `cabin`, `passing`, `kit` | nothing. The proposal's swamp banks with fireflies and its steam organ that plays itself were not built |
 | 6 | Narrowboat | **built** ([`narrowboat.md`](narrowboat.md)) | as built: a canal boat at walking pace, a stove, reeds, willows, bridges, mist, a wharf. The gentlest one, and the comfort baseline | `cabin`, `passing`, `kit` | nothing. The proposal's lock and tunnel were not built |
 | 7 | Night ferry, 1994 | **built** ([`night_ferry_1994.md`](night_ferry_1994.md), Gemini 4 Neon Extra High) | as built: a 1994 cross-Channel ferry's video lounge — Pullman recliners with linen antimacassars and tray tables, a ceiling-bracketed 4:3 CRT television and locked VCR cage flashing `12:00`, salt-streaked storm windows with wind-driven rain, a slow rotating volumetric lighthouse beam, passing container freighters and floodlit Ro-Ro ferry terminals | `cabin`, `seats`, `kit`, `passing`, `weather`, `presentation` | nothing |
-| 8 | The Salon, 1870 | not built | a Victorian submarine's velvet salon. A great iris window opens as the film starts, and kelp forests glide by | the Bathysphere's whole sea (`fish`, `ray`, `whale`, seabed, caustics) | an iris window; kelp and rocks as passing shapes; the sea's life going by with the journey |
+| 8 | The Salon, 1870 | **built** ([`salon_1870.md`](salon_1870.md), Gemini 4 Neon Extra High) | as built: a 1870 Victorian submarine velvet salon in crimson velvet and mahogany with two monumental bolted-brass circular viewports housing animated 10-blade mechanical brass iris shutters (`c.halls`), diamond-lattice bookcases, specimen credenzas, brass chronometer, compass binnacle, ballast manifold, and a 21-pipe aft salon organ; irides spiral wide open as the engine-room telegraph double-rings, revealing caustics-lit `seabed`, swaying `kelp`, `sea_rock`, schooling `fish`, bioluminescent `jelly`, `ray`, rare `whale`, a `sunken_wreck` and glowing `hydro_vent` chimneys | `cabin`, `seats`, `kit`, `passing`, `life`, `music` (`organ`), `sky` | nothing |
 
 ### Air
 
@@ -58,16 +58,16 @@ lead's estimate of what the engine does not have yet; it is an estimate until th
 
 | # | Room | State | What it is | Reuses | Still needs |
 |---|---|---|---|---|---|
-| 11 | Coach trip, 1988 | not built | an overnight coach: swirly moquette, a telly behind the driver's drawn curtain, a rented tape, a services stop at the intermission | `rewinder_1987`, `vcr`, `tape_load`, `cabin` rows | a stop at the intermission (the journey only holds on a pause today); road lamps and signs that pass close (see "The limit on speed") |
-| 12 | Back seat, 2004 | not built | the back of the family car on a night motorway: a flip-down screen, the dash glowing between tall headrests, rain crawling sideways on the glass, a blanket. The Pillow Fort's cousin | the `vehicle` dash, the rain pane | a car's cabin (the `cabin` builder makes rooms, not a car's inside); the same close lamps |
+| 11 | Coach trip, 1988 | **built** ([`coach_trip_1988.md`](coach_trip_1988.md), Gemini 4 Neon Extra High) | as built: a 1988 overnight express touring coach with swirly `moquette_88` carpet, drawn burgundy driver's curtain, overhead ceiling-mounted 4:3 CRT television and top-shelf video recorder flashing `12:00` beside rented tape cases, recliners with cream linen antimacassars and tray tables, cream tied-back curtains, red break-glass hammers, wind-drifting rain panes, wet `asphalt` motorway, distant `highway_lamp` and `gantry` silhouettes, and a mid-film intermission stop beside lit motorway `services` | `cabin`, `seats`, `kit`, `passing`, `weather`, `presentation`, `sky` | nothing |
+| 12 | Back seat, 2004 | **built** ([`back_seat_2004.md`](back_seat_2004.md), Gemini 4 Neon Extra High) | as built: the rain-streaked back seat of a 2004 family car on a night motorway — roof clamshell flip-down portable LCD screen, glowing ice-blue and amber 2004 dashboard dials, `23:14` clock and climate knobs framed between empty front headrests with map pockets, draped `tartan_blanket`, cushions, disc case and wired headphones on the rear bench, sideways-drifting raindrops on all four side panes, damp `asphalt`, distant motorway lamps/gantries and floodlit `services` | `cabin`, `kit`, `passing`, `weather`, `presentation`, `sky` | nothing |
 
 ### Space
 
 | # | Room | State | What it is | Reuses | Still needs |
 |---|---|---|---|---|---|
-| 13 | Sky lift | not built | a climber car from an ocean platform to orbit. The film is the climb: through the cloud deck, blue to black, Earth's curve by the end. Only far scenery: the biggest view with the least flow | `sky`, `earth_detail` | a journey that goes up, not along: the sky and Earth changing by `film.progress`, not the `passing` system |
-| 14 | Moon ferry | not built | Earth shrinking astern and the Moon growing ahead, landing at the Crater | `earth_detail`, `vacuum` acoustics, the Crater's ground | `earth_size` and `moon_size` as live parameters; the landing |
-| 15 | Mars train | not built | a pressurised rover-train across a rust plain: the blue sunset Mars really has, far dust devils, a domed base at night | `lunar_surface` and `lunar_dome` in new colours, sand and stone as ground kinds | a sky for Mars (its colours, its small Sun); dust devils and the base as shapes |
+| 13 | Sky lift | **built** ([`sky_lift.md`](sky_lift.md), Gemini 4 Neon Extra High) | as built: a sleek orbital elevator climber car with curved glazed roof ascending vertically (`passing.facing: "up"`) along its glowing carbon-ribbon tether from an equatorial `ocean_platform` through a billowing `cloud_bank` deck into black 360° star-filled space (`sky.space_mix`, `sky.all_sky`), as Earth's curved blue limb (`earth_detail` live `earth_size`/`earth_altitude`/`earth_alpha`) emerges beneath you before docking at the glowing `orbital_station` | `cabin` (`glazed_roof`), `seats`, `kit`, `passing` (`facing: "up"`), `sky` (`space_mix`, `all_sky`, `earth_detail`) | nothing |
+| 14 | Moon ferry | **built** ([`moon_ferry.md`](moon_ferry.md), Gemini 4 Neon Extra High) | as built: a retro-future 1968 cislunar passenger liner with wrap-around glazed canopy, crimson contour seats and twin-aisle console gliding silently (`vacuum` acoustics) through 360° starlight (`mode: "space"`, `all_sky: true`): Earth shrinks astern (`28° -> 2.2°`) while the cratered Moon grows ahead (`2.4° -> 34°`), descending onto lunar `regolith` (`ground_vis: 0 -> 1`) beside the glowing Crater `lunar_base` | `cabin` (`glazed_roof`), `seats`, `kit`, `passing` (`ground_vis`, `regolith`), `sky` (`space`, `all_sky`, live Earth & Moon) | nothing |
+| 15 | Mars train | **built** ([`mars_train.md`](mars_train.md), Gemini 4 Neon Extra High) | as built: a pressurised Martian rover-train cabin crossing an iron-oxide rust `regolith` plain under the authentic pale-blue Martian sunset (`sky.sun_disc`, `sky.sun_altitude`, blue `glow`) with expedition sample rack, core canisters, airlock door and geology display; ochre `dust_devil` vortices and `mars_rock` boulders fade into clear Martian starlight before arriving at a glowing domed night colony (`mars_base`) | `cabin`, `seats`, `kit`, `passing` (`regolith`, `dust_devil`, `mars_rock`, `mars_base`), `sky` (`sun_disc`, `sun_altitude`) | nothing |
 
 ## The limit on speed
 
@@ -92,12 +92,13 @@ change first and the rooms second.
 3. The Liner, 1936 (open sea, swaying drapes, maritime landmarks): built (Gemini 4 Neon Extra High).
 4. Night ferry, 1994 (reuses open sea and lighthouse; adds rotating volumetric lighthouse beams, multi-pane salt-streaked rain glass, ceiling-bracketed CRT in a cabin, Ro-Ro ferry ports and freighters): built (Gemini 4 Neon Extra High).
 5. Rail & Air set — Cinema coach 1935, Night sleeper 1929, Dome car 1955, Airship 1931, Jet 1964 (completes Rail and Air; adds `cabin.glazed_roof`, `sky.blackout` and live `glow_bearing`, `passing.tunnel`, `cloud_deck`, 11 rail/desert/snow/air shapes and 6 synths): built (Gemini 4 Neon Extra High).
-6. Next: The Salon, 1870 (submarine iris window and gliding marine life) or the Road rooms once the headset comfort test settles the near-scenery speed limit.
-7. The space rooms last: they need a different kind of journey.
+6. Final six — The Salon 1870, Coach trip 1988, Back seat 2004, Sky lift, Moon ferry, Mars train (completes Water, Road, Space and all 15/15 Journeys; adds `sky.space_mix`, `sky.all_sky`, `sky.sun_disc`, `sky.sun_altitude`, live Earth & Moon sizing/positioning and space-mode cratered Moon, `passing.facing: "up"`, `passing.ground_vis`, `seabed`/`asphalt`/`regolith` ground kinds, 14 ocean/road/space shapes, `moquette_88`/`tartan_blanket` procedural textures and 5 synths): built (Gemini 4 Neon Extra High).
 
 ## Shared test helper
 
 `app/tests/room_journey.gd` holds the shared checks for journey rooms (`test_room_narrowboat.gd`,
 `test_room_showboat.gd`, `test_room_liner_1936.gd`, `test_room_night_ferry_1994.gd`,
 `test_room_cinema_coach_1935.gd`, `test_room_night_sleeper_1929.gd`, `test_room_dome_car_1955.gd`,
-`test_room_airship_1931.gd`, `test_room_jet_1964.gd`).
+`test_room_airship_1931.gd`, `test_room_jet_1964.gd`, `test_room_salon_1870.gd`,
+`test_room_coach_trip_1988.gd`, `test_room_back_seat_2004.gd`, `test_room_sky_lift.gd`,
+`test_room_moon_ferry.gd`, `test_room_mars_train.gd`).

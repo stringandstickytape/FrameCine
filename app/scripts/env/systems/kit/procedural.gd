@@ -20,11 +20,13 @@ extends RefCounted
 
 const PATTERNS: Array[String] = ["pressed_tin", "ice_blocks", "swirl_carpet", "corrugated", "plasterboard",
 		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles", "deco_carpet", "hex_pavers", "board_concrete",
-		"tufted", "shell_carpet", "moquette_94", "art_deco_runner", "midcentury_weave"]
+		"tufted", "shell_carpet", "moquette_94", "art_deco_runner", "midcentury_weave",
+		"moquette_88", "tartan_blanket"]
 const SIZE := 128
 ## Patterns drawn larger than SIZE (many tiles a repeat, each its own: since 2026-11-08, the Athens rooftop's floor).
 const SIZES := {"quarry_tiles": 256, "deco_carpet": 256, "hex_pavers": 256, "board_concrete": 256,
-		"shell_carpet": 256, "moquette_94": 256, "art_deco_runner": 256, "midcentury_weave": 256}
+		"shell_carpet": 256, "moquette_94": 256, "art_deco_runner": 256, "midcentury_weave": 256,
+		"moquette_88": 256, "tartan_blanket": 256}
 const GLASS_SHADER := preload("res://scripts/env/systems/kit/env_glass.gdshader")
 const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
@@ -441,6 +443,46 @@ static func _sample(pattern: String, u: float, v: float) -> Array:
 			c = c.lerp(accent, stripe * smoothstep(0.45, 0.85, n1) * 0.42)
 			var h := 0.46 + 0.08 * rib + 0.1 * n2
 			return [h, c * (0.92 + 0.16 * n1), 0.93]
+		# 1988 overnight touring coach swirly moquette: chocolate-brown/slate ground with sweeping ochre, burnt-orange
+		# and teal geometric ribbons and flecked wool pile.
+		"moquette_88":
+			var ground := Color(0.18, 0.12, 0.1)
+			var ochre := Color(0.76, 0.56, 0.2)
+			var rust := Color(0.68, 0.26, 0.14)
+			var teal := Color(0.14, 0.46, 0.48)
+			var w1 := sin((u * 2.0 + v * 2.0 + 0.35 * sin(v * 4.0 * TAU)) * TAU)
+			var w2 := cos((u * 3.0 - v * 2.0 + 0.25 * cos(u * 3.0 * TAU)) * TAU)
+			var band1 := 1.0 - smoothstep(0.14, 0.28, absf(w1))
+			var band2 := 1.0 - smoothstep(0.12, 0.24, absf(w2))
+			var dots := smoothstep(0.76, 0.9, _noise(u, v, 32, 601))
+			var c := ground.lerp(rust, band1 * 0.72)
+			c = c.lerp(ochre, band2 * 0.65)
+			c = c.lerp(teal, dots * 0.75)
+			var fleck := _noise(u, v, 64, 613)
+			var h := 0.46 + 0.14 * maxf(band1, band2) + 0.12 * fleck
+			return [h, c * (0.88 + 0.24 * fleck), 0.95]
+		# Cozy woven wool tartan plaid: deep navy-charcoal and burgundy-crimson intersecting bands with fine gold/cream
+		# overcheck lines and soft brushed twill texture.
+		"tartan_blanket":
+			var navy := Color(0.1, 0.14, 0.24)
+			var crimson := Color(0.46, 0.1, 0.14)
+			var forest := Color(0.1, 0.24, 0.18)
+			var gold := Color(0.84, 0.68, 0.28)
+			var su := fposmod(u * 2.0, 1.0)
+			var sv := fposmod(v * 2.0, 1.0)
+			var bu := smoothstep(0.18, 0.22, su) * (1.0 - smoothstep(0.56, 0.60, su))
+			var bv := smoothstep(0.18, 0.22, sv) * (1.0 - smoothstep(0.56, 0.60, sv))
+			var fu := smoothstep(0.68, 0.72, su) * (1.0 - smoothstep(0.92, 0.96, su))
+			var fv := smoothstep(0.68, 0.72, sv) * (1.0 - smoothstep(0.92, 0.96, sv))
+			var gu := 1.0 - smoothstep(0.015, 0.032, absf(su - 0.39))
+			var gv := 1.0 - smoothstep(0.015, 0.032, absf(sv - 0.39))
+			var c := navy.lerp(forest, clampf((fu + fv) * 0.55, 0.0, 1.0))
+			c = c.lerp(crimson, clampf((bu + bv) * 0.58, 0.0, 1.0))
+			c = c.lerp(gold, clampf(maxf(gu, gv) * 0.85, 0.0, 1.0))
+			var twill := 0.5 + 0.5 * sin((u * 48.0 + v * 48.0) * TAU)
+			var fuzz := _noise(u, v, 64, 709)
+			var h := 0.48 + 0.08 * twill + 0.08 * fuzz
+			return [h, c * (0.9 + 0.2 * fuzz), 0.96]
 	return [0.5, Color(0.5, 0.5, 0.5), 0.8]
 
 

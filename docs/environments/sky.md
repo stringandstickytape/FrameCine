@@ -19,6 +19,9 @@ Way, clouds, an aurora, shooting stars, and Earth as seen from the Moon.
 | `dusk` | 1 | 0 the last light of the evening, 1 full night. Live, a brightness |
 | `night_zenith`, `night_horizon`, `twilight_zenith`, `twilight_horizon`, `ground` | dark blues, a warm horizon | the gradient's colours |
 | `glow`, `glow_bearing` | orange, 300 | the sunset's or dawn's glow low over the horizon, where the sun went down or rises (`glow_bearing` is live, so a track can shift the horizon glow from dusk to eastern dawn); it fades as dusk falls |
+| `sun_disc`, `sun_altitude` | 0, 4 | live: draws a small glowing solar disc (`sun_disc` 0..1) at `glow_bearing` and `sun_altitude` (-10..45 degrees) with a Mie scattering halo in `glow` (used for the authentic pale-blue Martian sunset in `mars_train`) |
+| `space_mix` | 0 | live (0..1): smoothly fades an atmospheric `sky` dome into pitch-black orbital space while bringing stars and the Milky Way to full orbital clarity (`sky_lift`) |
+| `all_sky` | false | when true (with `mode` `space` or `space_mix`), draws stars and the Milky Way across the full 360-degree sphere including below the horizon |
 | `blackout` | 0 | live (0..1): smoothly scales the sky dome, stars, Moon and `sky_light()` down to pitch black for tunnels or shuttered crossings |
 | `stars` | 1 | the stars' brightness. Live, a brightness |
 | `faint_stars` | 1600 | generated faint stars besides the catalogue's bright ones (0..4000) |
@@ -35,14 +38,14 @@ Way, clouds, an aurora, shooting stars, and Earth as seen from the Moon.
 | `aurora` | 0 | an aurora's brightness. Live, a brightness (bind it to `film.quiet`, smoothed) |
 | `aurora_low`, `aurora_high`, `aurora_bearing`, `aurora_speed` | green, violet, 0, 0.4 | its colours low and high, where it hangs, how fast its curtains wave (motion, at most 1) |
 | `meteors` | 0 | shooting stars an hour, at random (0..30) |
-| `earth`, `earth_bearing`, `earth_altitude`, `earth_size`, `earth_phase` | off, 180, 35, 2, 0.65 | Earth in the sky: where, how high, how big (degrees), how much of it is lit |
+| `earth`, `earth_bearing`, `earth_altitude`, `earth_size`, `earth_phase`, `earth_alpha` | off, 180, 35, 2, 0.65, 1 | Earth in the sky: where, how high (-85..90, live), how big (0.5..80 degrees, live), how much of it is lit (live) and its visibility fade (`earth_alpha` 0..1, live — lets Earth emerge cleanly as `sky_lift` climbs into orbit or shrink astern on `moon_ferry`) |
 | `earth_angle` | 0 | how far Earth has turned on its axis (degrees). Live: a track can turn it over the film |
 | `earth_turn` | 1 | Earth's own turning in times its real speed (motion, at most 60: once in 24 minutes) |
 | `earth_detail` | off | Earth as itself (`shaders/env_sky_earth_detail.gdshader`, since 2026-11-08 for the Crater): the continents, deserts, ice and cities from a small map drawn from coarse outlines (`kit/earth_map.gd`, 512 x 256, made once), the coasts broken by noise, cloud bands by latitude, the sun's glint on the sea, a terminator with rosy clouds, the cities' lights on the night side, a thin blue atmosphere round the limb (each pixel finds the ball itself, so the limb is exact). It turns west to east. Off: the plain Earth-like world as before |
 | `earth_light_angle` | 0 | where the sunlight comes from round Earth's face, degrees from its right (90 above, -90 below) |
 | `earth_lights` | 1 | `earth_detail`: the cities' lights. Live, a brightness |
-| `moon` | 0 | the Moon seen from the Earth (`mode` `sky`): its brightness. Live, a brightness. 0 draws nothing (the layer is made only when it is over 0) |
-| `moon_bearing`, `moon_altitude`, `moon_size`, `moon_phase` | 220, 45, 1.6, 0.22 | where it hangs, how high, how big (degrees; the real Moon is 0.5, drawn larger as the eye sees it low), how much of it is lit (0.22: a crescent). It is lit from the sunset's side (`glow_bearing`), the dark part a faint earthshine; a halo round it; clouds dim it |
+| `moon` | 0 | the Moon (`mode` `sky` or `space`): its brightness. Live, a brightness. 0 draws nothing (the layer is made only when it is over 0). In `space` mode, draws procedural lunar maria and craters when large (`moon_size` up to 45 degrees) and occludes background stars behind its dark limb (`moon_ferry`) |
+| `moon_bearing`, `moon_altitude`, `moon_size`, `moon_phase` | 220, 45, 1.6, 0.22 | live: where it hangs, how high (-85..90), how big (0.3..45 degrees; the real Moon is 0.5, drawn larger as the eye sees it low or on cislunar approach), how much of it is lit (0.22: a crescent). It is lit from the sunset's side (`glow_bearing`), the dark part a faint earthshine; a halo round it; clouds dim it |
 | `cloud_glow`, `cloud_glow_level` | warm orange, 0 | a town's lamps lighting the clouds from below, strongest low over the walls; a silver edge near the Moon. Live, a brightness |
 
 Action: `shooting_star` (no args).

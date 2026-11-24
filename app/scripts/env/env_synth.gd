@@ -21,7 +21,8 @@ const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale
 		"clock", "tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load", "switch_clunk", "valve_hum",
 		"crt_off", "channel_clunk", "sonar", "bubbles", "far_car", "scops_owl", "church_bell", "city", "tawny_owl",
 		"hooves", "boat_engine", "water_lap", "paddle_wheel", "ship_horn", "ferry_diesel", "ferry_chime",
-		"rail_joints", "train_whistle", "diesel_horn", "airship_engines", "jet_cabin", "cabin_chime"]
+		"rail_joints", "train_whistle", "diesel_horn", "airship_engines", "jet_cabin", "cabin_chime",
+		"coach_diesel", "car_motorway", "climber_hum", "rover_drive", "telegraph_bell"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
@@ -33,12 +34,14 @@ const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise
 		"tawny_owl": 7.0, "hooves": 16.0, "boat_engine": 8.0, "water_lap": 12.0, "paddle_wheel": 6.0,
 		"ship_horn": 5.5, "ferry_diesel": 8.0, "ferry_chime": 3.4,
 		"rail_joints": 8.0, "train_whistle": 4.5, "diesel_horn": 4.2, "airship_engines": 8.0,
-		"jet_cabin": 8.0, "cabin_chime": 2.4}
+		"jet_cabin": 8.0, "cabin_chime": 2.4,
+		"coach_diesel": 8.0, "car_motorway": 8.0, "climber_hum": 8.0, "rover_drive": 8.0, "telegraph_bell": 3.0}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
 		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles",
 		"city", "boat_engine", "water_lap", "paddle_wheel", "ferry_diesel",
-		"rail_joints", "airship_engines", "jet_cabin"]
+		"rail_joints", "airship_engines", "jet_cabin",
+		"coach_diesel", "car_motorway", "climber_hum", "rover_drive"]
 ## Sample rates below RATE for the far and low sounds (less to make, nothing lost above their band).
 const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiator": 22050, "moped": 32000,
 		"hull_creak": 32000, "purr": 22050, "crickets": 32000, "fire": 32000, "drips": 32000, "wind": 22050,
@@ -48,7 +51,9 @@ const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiato
 		"tawny_owl": 22050, "hooves": 32000, "boat_engine": 22050, "water_lap": 32000, "paddle_wheel": 22050,
 		"ship_horn": 22050, "ferry_diesel": 22050, "ferry_chime": 32000,
 		"rail_joints": 22050, "train_whistle": 22050, "diesel_horn": 22050, "airship_engines": 22050,
-		"jet_cabin": 22050, "cabin_chime": 32000}
+		"jet_cabin": 22050, "cabin_chime": 32000,
+		"coach_diesel": 22050, "car_motorway": 22050, "climber_hum": 22050, "rover_drive": 22050,
+		"telegraph_bell": 32000}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -1459,6 +1464,82 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 						var env := minf(dt / 0.006, 1.0) * exp(-dt * 2.5) * float(n[2])
 						v += (sin(TAU * f * dt) + 0.18 * sin(TAU * 2.0 * f * dt) * exp(-dt * 5.0)) * env
 				s[i] = _lp(st, 0, v, a_hi) - _lp(st, 1, v, a_lo)
+		"coach_diesel":
+			# 1988 touring coach rear-mounted turbocharged diesel & soft motorway tyre hum (54 Hz + 54.25 Hz: 2 gentle
+			# beats per 8 s loop, zero seam, mellow low-passed coach interior resonance).
+			var a_tyre := _a(520.0, r)
+			var a_lo := _a(95.0, r)
+			var a_out := _a(460.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var tyre := (_lp(st, 0, wn, a_tyre) - _lp(st, 1, wn, a_lo)) * 0.55
+				var eng := sin(TAU * 54.0 * t) * 0.42 + sin(TAU * 54.25 * t + 0.7) * 0.34 \
+						+ sin(TAU * 108.0 * t) * 0.2 + sin(TAU * 162.0 * t) * 0.08
+				var sway := 0.92 + 0.08 * sin(TAU * 0.375 * t)
+				s[i] = _lp(st, 2, (eng * 0.65 + tyre) * sway, a_out)
+		"car_motorway":
+			# Enclosed 2004 family car cruising on a wet night motorway: silky petrol engine purr (68 Hz + 136 Hz)
+			# blended with smooth wet-tarmac tyre hush and soft cabin ventilation.
+			var a_wet := _a(980.0, r)
+			var a_lo := _a(140.0, r)
+			var a_bass := _a(210.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var wet := (_lp(st, 0, wn, a_wet) - _lp(st, 1, wn, a_lo)) * 0.58
+				var bass := _lp(st, 2, wn, a_bass) * 0.48
+				var eng := sin(TAU * 68.0 * t) * 0.14 + sin(TAU * 136.0 * t + 0.5) * 0.07 \
+						+ sin(TAU * 68.25 * t) * 0.08
+				var swell := 0.94 + 0.06 * sin(TAU * 0.25 * t)
+				s[i] = (wet + bass + eng) * swell
+		"climber_hum":
+			# Silky electromagnetic linear-motor drive hum of an orbital elevator climber ascending its carbon tether:
+			# pure low harmonic shimmer (60, 120, 180 Hz with slow 0.25 Hz magnetic beat) + faint pressurised air.
+			var a_air := _a(680.0, r)
+			var a_lo := _a(150.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var air := (_lp(st, 0, wn, a_air) - _lp(st, 1, wn, a_lo)) * 0.28
+				var mag := sin(TAU * 60.0 * t) * 0.38 + sin(TAU * 60.25 * t + 1.1) * 0.26 \
+						+ sin(TAU * 120.0 * t + 0.4) * 0.18 + sin(TAU * 180.0 * t) * 0.09 \
+						+ sin(TAU * 240.0 * t) * 0.035
+				var shimmer := 0.9 + 0.1 * sin(TAU * 0.25 * t)
+				s[i] = mag * shimmer * 0.65 + air
+		"rover_drive":
+			# Pressurised Mars rover-train electric bogies rolling across Martian regolith: gentle muted electric
+			# traction whine (90 / 180 Hz) over a deep soft granular crunch heard through a thick pressure hull.
+			var a_grit := _a(560.0, r)
+			var a_lo := _a(90.0, r)
+			var a_hull := _a(380.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var grit := (_lp(st, 0, wn, a_grit) - _lp(st, 1, wn, a_lo)) * 0.68
+				var motor := sin(TAU * 90.0 * t) * 0.22 + sin(TAU * 90.25 * t + 0.8) * 0.16 \
+						+ sin(TAU * 180.0 * t) * 0.08
+				var pulse := 0.88 + 0.12 * sin(TAU * 1.5 * t)
+				s[i] = _lp(st, 2, (grit * pulse + motor * 0.75), a_hull)
+		"telegraph_bell":
+			# Crisp brass Victorian submarine engine-room Chadburn telegraph double-ring chime (two bright bronze
+			# bell strikes 0.34 s apart with metallic inharmonic partials ringing inside a steel hull).
+			var a_out := _a(4200.0, r)
+			var strikes := [[0.06, 1.0], [0.40, 0.92]]
+			for i in total:
+				var t := float(i) / r
+				var v := 0.0
+				for st_ev: Array in strikes:
+					var dt := t - float(st_ev[0])
+					if dt >= 0.0:
+						var amp := float(st_ev[1])
+						var env := minf(dt / 0.004, 1.0) * exp(-dt * 2.4) * amp
+						var ring := sin(TAU * 880.0 * dt) * 0.55 \
+								+ sin(TAU * 1764.0 * dt + 0.3) * 0.28 * exp(-dt * 1.4) \
+								+ sin(TAU * 2385.0 * dt + 0.9) * 0.18 * exp(-dt * 2.2) \
+								+ sin(TAU * 3510.0 * dt) * 0.1 * exp(-dt * 4.5)
+						v += ring * env
+				s[i] = _lp(st, 0, v, a_out)
 	return s
 
 

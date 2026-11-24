@@ -50,11 +50,13 @@ const SEA_HORIZON := 185.0
 const MAX_BANDS := 10
 const MAX_LANDMARKS := 12
 ## Where the scenery can be drawn, about the origin (its vertices are placed in the shader, not on the CPU).
-const SCENERY_AABB := AABB(Vector3(-190.0, -50.0, -190.0), Vector3(380.0, 120.0, 380.0))
+const SCENERY_AABB := AABB(Vector3(-190.0, -190.0, -190.0), Vector3(380.0, 380.0, 380.0))
 ## The ground's kinds, in the order of their index (UV2.x), and their own colours.
-const GROUND_KINDS: Array[String] = ["water", "grass", "path", "field", "snow", "sand", "stone", "sea", "cloud_deck"]
+const GROUND_KINDS: Array[String] = ["water", "grass", "path", "field", "snow", "sand", "stone", "sea", "cloud_deck",
+		"seabed", "asphalt", "regolith"]
 const KIND_COLOURS := {"water": "#0c1218", "grass": "#1a2414", "path": "#3b362c", "field": "#201c16",
-		"snow": "#c8ccd6", "sand": "#4a4232", "stone": "#34322e", "sea": "#08101c", "cloud_deck": "#1f2a3e"}
+		"snow": "#c8ccd6", "sand": "#4a4232", "stone": "#34322e", "sea": "#08101c", "cloud_deck": "#1f2a3e",
+		"seabed": "#15282e", "asphalt": "#181a1e", "regolith": "#54504c"}
 
 
 static func spec() -> Dictionary:
@@ -119,8 +121,8 @@ static func spec() -> Dictionary:
 				+ "trees, hedges, far ridges and lights that come round, landmarks that stand once on the route, "
 				+ "strips of ground and water. The viewer never moves. A pause holds it; a seek goes dark and moves.",
 		"params": {
-			"facing": {"type": "enum", "values": ["forward", "backward"], "default": "forward",
-					"description": "which way the cabin goes: forward towards the screen's side (-Z), or backward"},
+			"facing": {"type": "enum", "values": ["forward", "backward", "up"], "default": "forward",
+					"description": "which way the cabin goes: forward (-Z), backward (+Z), or up (+Y vertical climb)"},
 			"speed": {"type": "float", "min": 0.0, "max": 12.0, "default": 1.0, "live": true,
 					"motion": {"max": 12.0}, "description": "metres a second under way"},
 			"arrive": {"type": "bool", "default": true,
@@ -165,6 +167,8 @@ static func spec() -> Dictionary:
 					"description": "how much the near scenery catches the screen's light"},
 			"tunnel": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
 					"description": "darkens outside scenery, lights and ground smoothly (e.g. a railway tunnel)"},
+			"ground_vis": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true,
+					"description": "fades the ground strip in or out (0 hides ground in deep space or high orbit)"},
 		},
 		"cost": {"draws": 3, "triangles": 30000, "lights": 0, "particles": 0, "texture_mb": 0.3},
 		"requires": [],
@@ -187,6 +191,7 @@ var route_shown := 0.0
 ## The way's directions in the room's frame (from `facing`).
 var along_dir := Vector3(0.0, 0.0, -1.0)
 var across_dir := Vector3(1.0, 0.0, 0.0)
+var _vertical := false
 
 var _placed := false
 ## The blink: 0 none, 1 going dark, 2 coming back.
@@ -222,7 +227,9 @@ func setup() -> void:
 			if s.has_method("sky_light"):
 				_sky = s
 				break
-	var backward := str(params["facing"]) == "backward"
+	var facing := str(params["facing"])
+	var backward := facing == "backward"
+	_vertical = facing == "up"
 	along_dir = Vector3(0.0, 0.0, 1.0) if backward else Vector3(0.0, 0.0, -1.0)
 	across_dir = Vector3(-1.0, 0.0, 0.0) if backward else Vector3(1.0, 0.0, 0.0)
 	_bands.clear()
@@ -705,6 +712,7 @@ func _uniforms() -> void:
 	for mat: ShaderMaterial in [_mat, _lights_mat, _beams_mat]:
 		if mat == null:
 			continue
+		mat.set_shader_parameter("vertical", 1.0 if _vertical else 0.0)
 		mat.set_shader_parameter("phase", phase)
 		mat.set_shader_parameter("landmark_along", landmark_along)
 		mat.set_shader_parameter("travel", travel)
@@ -718,6 +726,10 @@ func _uniforms() -> void:
 		_beams_mat.set_shader_parameter("lights", float(params["lights"]))
 		_beams_mat.set_shader_parameter("beam_phase", _beam_phase)
 	if _ground_mat != null:
+		var gvis := clampf(float(params["ground_vis"]), 0.0, 1.0)
+		if _ground != null:
+			_ground.visible = gvis > 0.001
+		_ground_mat.set_shader_parameter("shown", shown * gvis)
 		_ground_mat.set_shader_parameter("ground_phase", fposmod(travel, GROUND_PERIOD))
 		_ground_mat.set_shader_parameter("far", FAR)
 		_ground_mat.set_shader_parameter("nearest", still_within(own_speed))
@@ -812,14 +824,22 @@ func flow_volumes() -> Array:
 		var reach := minf(_loops[b] * 0.5, GROUND_REACH)
 		var h := float(band["height"])
 		for side in _sides(str(band["side"])):
-			out.append(_volume(side, maxf(float(band["near"]) - _reach(band), 0.0), float(band["far"]), reach,
-					h - 2.0, h + 30.0))
+			if _vertical:
+				out.append(_vertical_volume(side, maxf(float(band["near"]) - _reach(band), 0.0), float(band["far"]),
+						reach, h - 15.0, h + 15.0))
+			else:
+				out.append(_volume(side, maxf(float(band["near"]) - _reach(band), 0.0), float(band["far"]), reach,
+						h - 2.0, h + 30.0))
 	for lm: Dictionary in _landmarks:
 		var d := float(lm["distance"])
 		var h := float(lm["height"])
 		# A landmark comes by along the whole way that is drawn.
-		out.append(_volume(-1.0 if str(lm["side"]) == "left" else 1.0, maxf(d - 15.0, EnvChecks.FLOW_NEAREST),
-				d + 15.0, GROUND_REACH, h - 2.0, h + 30.0))
+		if _vertical:
+			out.append(_vertical_volume(-1.0 if str(lm["side"]) == "left" else 1.0,
+					maxf(d - 15.0, EnvChecks.FLOW_NEAREST), d + 15.0, GROUND_REACH, h - 15.0, h + 15.0))
+		else:
+			out.append(_volume(-1.0 if str(lm["side"]) == "left" else 1.0, maxf(d - 15.0, EnvChecks.FLOW_NEAREST),
+					d + 15.0, GROUND_REACH, h - 2.0, h + 30.0))
 	for s: Dictionary in _strips:
 		var from := maxf(minf(float(s["from"]), float(s["to"])), EnvChecks.FLOW_NEAREST)
 		var to := maxf(float(s["from"]), float(s["to"]))
@@ -845,4 +865,10 @@ static func _reach(band: Dictionary) -> float:
 func _volume(side: float, a0: float, a1: float, reach: float, y0: float, y1: float) -> AABB:
 	var p0 := across_dir * (side * a0) + along_dir * -reach + Vector3.UP * y0
 	var p1 := across_dir * (side * a1) + along_dir * reach + Vector3.UP * y1
+	return AABB(p0, Vector3.ZERO).expand(p1)
+
+
+func _vertical_volume(side: float, a0: float, a1: float, reach: float, z0: float, z1: float) -> AABB:
+	var p0 := across_dir * (side * a0) + Vector3.UP * -reach + along_dir * z0
+	var p1 := across_dir * (side * a1) + Vector3.UP * reach + along_dir * z1
 	return AABB(p0, Vector3.ZERO).expand(p1)

@@ -14,7 +14,10 @@ const BUDGET := {"reeds": 70, "willow": 400, "tree": 420, "poplar": 120, "hedge"
 		"steamer": 340, "buoy": 40, "pier": 280, "lighthouse": 240, "ship": 360,
 		"ferry_port": 340, "freighter": 320,
 		"telegraph": 140, "pine": 160, "birch": 150, "mesa": 120, "cactus": 120, "cloud_bank": 140,
-		"signal": 140, "station": 260, "water_tower": 220, "airship_mast": 240, "airport": 260}
+		"signal": 140, "station": 260, "water_tower": 220, "airship_mast": 240, "airport": 260,
+		"kelp": 160, "sea_rock": 140, "highway_lamp": 70, "gantry": 140, "tether_ring": 120, "dust_devil": 120,
+		"mars_rock": 120, "sunken_wreck": 280, "hydro_vent": 220, "services": 280, "ocean_platform": 280,
+		"orbital_station": 280, "lunar_base": 280, "mars_base": 280}
 ## The highest point of each shape at size 1 (metres): at least, at most.
 const HEIGHT := {"reeds": [1.2, 2.4], "willow": [3.0, 6.5], "tree": [9.0, 14.0], "poplar": [13.5, 20.5],
 		"hedge": [1.4, 2.2], "fence": [1.0, 1.2], "cottage": [5.3, 5.5], "post": [1.1, 1.3], "lamp": [3.1, 3.3],
@@ -23,11 +26,16 @@ const HEIGHT := {"reeds": [1.2, 2.4], "willow": [3.0, 6.5], "tree": [9.0, 14.0],
 		"ferry_port": [17.0, 17.8], "freighter": [21.2, 22.0],
 		"telegraph": [8.2, 8.6], "pine": [8.4, 13.2], "birch": [7.5, 13.0], "mesa": [14.8, 25.2],
 		"cactus": [3.2, 5.6], "cloud_bank": [6.0, 14.5], "signal": [9.4, 9.8], "station": [7.0, 7.6],
-		"water_tower": [13.5, 13.9], "airship_mast": [35.4, 36.2], "airport": [22.0, 22.6]}
+		"water_tower": [13.5, 13.9], "airship_mast": [35.4, 36.2], "airport": [22.0, 22.6],
+		"kelp": [7.5, 14.2], "sea_rock": [2.8, 7.0], "highway_lamp": [10.8, 11.6], "gantry": [8.0, 8.6],
+		"tether_ring": [5.6, 6.4], "dust_devil": [16.0, 31.0], "mars_rock": [1.4, 4.4],
+		"sunken_wreck": [11.5, 13.5], "hydro_vent": [13.8, 14.6], "services": [14.4, 15.2],
+		"ocean_platform": [23.8, 24.6], "orbital_station": [21.0, 22.0], "lunar_base": [16.0, 16.8],
+		"mars_base": [17.0, 17.8]}
 ## The shapes no two of which are alike. (Not the buoy: it is one of two, red or green, and two seeds draw the same
 ## one as often as not.)
 const VARIED: Array[String] = ["reeds", "willow", "tree", "cottage", "boat", "steamer", "ship", "freighter",
-		"pine", "birch", "mesa", "cactus", "cloud_bank"]
+		"pine", "birch", "mesa", "cactus", "cloud_bank", "kelp", "sea_rock", "dust_devil", "mars_rock", "sunken_wreck"]
 
 var _failures := 0
 var _checks := 0

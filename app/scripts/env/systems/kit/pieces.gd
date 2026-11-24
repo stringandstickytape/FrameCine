@@ -34,6 +34,12 @@ const NightSleeper1929 := preload("res://scripts/env/systems/kit/night_sleeper_1
 const DomeCar1955 := preload("res://scripts/env/systems/kit/dome_car_1955.gd")
 const Airship1931 := preload("res://scripts/env/systems/kit/airship_1931.gd")
 const Jet1964 := preload("res://scripts/env/systems/kit/jet_1964.gd")
+const Salon1870 := preload("res://scripts/env/systems/kit/salon_1870.gd")
+const CoachTrip1988 := preload("res://scripts/env/systems/kit/coach_trip_1988.gd")
+const BackSeat2004 := preload("res://scripts/env/systems/kit/back_seat_2004.gd")
+const SkyLift := preload("res://scripts/env/systems/kit/sky_lift.gd")
+const MoonFerry := preload("res://scripts/env/systems/kit/moon_ferry.gd")
+const MarsTrain := preload("res://scripts/env/systems/kit/mars_train.gd")
 
 const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk", "column", "facade", "castle_gate",
 		"booth", "snack_bar", "screen_tower", "bougainvillea", "ivy", "ferns", "carpet", "partition", "curves",
@@ -53,7 +59,13 @@ const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk
 		"sleeper_1929_cabin", "sleeper_1929_props",
 		"dome_1955_lounge", "dome_1955_rows",
 		"airship_1931_promenade", "airship_1931_piano",
-		"jet_1964_cabin", "jet_1964_rows"]
+		"jet_1964_cabin", "jet_1964_rows",
+		"salon_1870_interior", "salon_1870_iris",
+		"coach_1988_cabin", "coach_1988_rows",
+		"car_2004_cabin", "car_2004_props",
+		"skylift_cabin", "skylift_console",
+		"moonferry_cabin", "moonferry_console",
+		"marstrain_cabin", "marstrain_rows"]
 ## Each piece's size when neither the entry nor its slot gives one: [width, height, depth].
 const SIZES := {
 	"balcony_front": [6.0, 1.0, 0.25], "niche": [1.3, 2.6, 0.4], "urn": [0.5, 1.0, 0.5], "lion": [0.55, 0.9, 1.0],
@@ -89,6 +101,12 @@ const SIZES := {
 	"dome_1955_lounge": [0.0, 0.0, 0.0], "dome_1955_rows": [0.0, 0.0, 0.0],
 	"airship_1931_promenade": [0.0, 0.0, 0.0], "airship_1931_piano": [0.0, 0.0, 0.0],
 	"jet_1964_cabin": [0.0, 0.0, 0.0], "jet_1964_rows": [0.0, 0.0, 0.0],
+	"salon_1870_interior": [0.0, 0.0, 0.0], "salon_1870_iris": [0.0, 0.0, 0.0],
+	"coach_1988_cabin": [0.0, 0.0, 0.0], "coach_1988_rows": [0.0, 0.0, 0.0],
+	"car_2004_cabin": [0.0, 0.0, 0.0], "car_2004_props": [0.0, 0.0, 0.0],
+	"skylift_cabin": [0.0, 0.0, 0.0], "skylift_console": [0.0, 0.0, 0.0],
+	"moonferry_cabin": [0.0, 0.0, 0.0], "moonferry_console": [0.0, 0.0, 0.0],
+	"marstrain_cabin": [0.0, 0.0, 0.0], "marstrain_rows": [0.0, 0.0, 0.0],
 }
 ## The pieces that stand on a floor (their slot's origin is a floor point); the others hang on a wall.
 const STANDING: Array[String] = ["urn", "lion", "obelisk", "column", "booth", "snack_bar", "ferns", "partition",
@@ -182,6 +200,18 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			Airship1931.build(piece, c, xf, size, e)
 		"jet_1964_cabin", "jet_1964_rows":
 			Jet1964.build(piece, c, xf, size, e)
+		"salon_1870_interior", "salon_1870_iris":
+			Salon1870.build(piece, c, xf, size, e)
+		"coach_1988_cabin", "coach_1988_rows":
+			CoachTrip1988.build(piece, c, xf, size, e)
+		"car_2004_cabin", "car_2004_props":
+			BackSeat2004.build(piece, c, xf, size, e)
+		"skylift_cabin", "skylift_console":
+			SkyLift.build(piece, c, xf, size, e)
+		"moonferry_cabin", "moonferry_console":
+			MoonFerry.build(piece, c, xf, size, e)
+		"marstrain_cabin", "marstrain_rows":
+			MarsTrain.build(piece, c, xf, size, e)
 
 
 # --- Furniture (furniture.gd draws it) -----------------------------------------------------------------------------

@@ -19,9 +19,11 @@ extends RefCounted
 const ShapeMesh := preload("res://scripts/env/systems/passing/shape_mesh.gd")
 
 const BANDS: Array[String] = ["reeds", "willow", "tree", "poplar", "hedge", "fence", "ridge", "lights", "cottage",
-		"post", "buoy", "telegraph", "pine", "birch", "mesa", "cactus", "cloud_bank"]
+		"post", "buoy", "telegraph", "pine", "birch", "mesa", "cactus", "cloud_bank",
+		"kelp", "sea_rock", "highway_lamp", "gantry", "tether_ring", "dust_devil", "mars_rock"]
 const LANDMARKS: Array[String] = ["lamp", "bridge", "boat", "wharf", "tower", "steamer", "pier", "lighthouse", "ship",
-		"ferry_port", "freighter", "signal", "station", "water_tower", "airship_mast", "airport"]
+		"ferry_port", "freighter", "signal", "station", "water_tower", "airship_mast", "airport",
+		"sunken_wreck", "hydro_vent", "services", "ocean_platform", "orbital_station", "lunar_base", "mars_base"]
 ## Shapes that stand end to end in a row, each this long along the way (metres): such a band's count is its loop's
 ## length over this, and its items stand at even steps, all at the band's `near`.
 const SEGMENT := {"hedge": 6.0, "fence": 2.4, "ridge": 12.0}
@@ -35,6 +37,10 @@ const COLOURS := {
 	"telegraph": "#2b2119", "pine": "#15261c", "birch": "#cfd4dc", "mesa": "#6b3828", "cactus": "#25402b",
 	"cloud_bank": "#5e6f8c", "signal": "#22262b", "station": "#3f3832", "water_tower": "#47372a",
 	"airship_mast": "#767d86", "airport": "#4b525c",
+	"kelp": "#27422a", "sea_rock": "#223238", "highway_lamp": "#32363c", "gantry": "#3b424a",
+	"tether_ring": "#7a8490", "dust_devil": "#b86a42", "mars_rock": "#5c3122",
+	"sunken_wreck": "#382c22", "hydro_vent": "#283034", "services": "#3e434a",
+	"ocean_platform": "#444c54", "orbital_station": "#c6ccd4", "lunar_base": "#8c8a86", "mars_base": "#9a5c3c",
 }
 ## A far village's lights: this share warm, the rest cool.
 const WARM := Color(1.0, 0.79, 0.54)
@@ -75,6 +81,17 @@ const REACH := {
 	"signal": {"stem": [0.0, 0.45], "wide": [0.0, 1.8], "over": [0.0, 6.5]},
 	"water_tower": {"stem": [0.0, 2.8], "wide": [0.0, 3.2], "over": [0.0, 5.0]},
 	"airship_mast": {"stem": [0.0, 4.5], "wide": [0.0, 5.5], "over": [0.0, 0.0]},
+	"kelp": {"stem": [0.0, 0.4], "wide": [0.0, 1.8], "over": [0.0, 0.8]},
+	"sea_rock": {"stem": [0.0, 2.6], "wide": [0.0, 3.0], "over": [0.0, 0.0]},
+	"highway_lamp": {"stem": [0.0, 0.25], "wide": [0.0, 2.7], "over": [0.0, 9.8]},
+	"gantry": {"stem": [0.0, 0.4], "wide": [0.0, 4.5], "over": [0.0, 5.2]},
+	"tether_ring": {"stem": [0.0, 1.5], "wide": [0.0, 2.5], "over": [0.0, 0.0]},
+	"dust_devil": {"stem": [0.0, 1.5], "wide": [0.0, 5.0], "over": [0.0, 0.0]},
+	"mars_rock": {"stem": [0.0, 2.5], "wide": [0.0, 2.8], "over": [0.0, 0.0]},
+	"sunken_wreck": {"stem": [0.0, 5.0], "wide": [0.0, 5.5], "over": [0.0, 0.0]},
+	"hydro_vent": {"stem": [0.0, 4.0], "wide": [0.0, 4.5], "over": [0.0, 0.0]},
+	"ocean_platform": {"stem": [0.0, 12.0], "wide": [0.0, 14.0], "over": [0.0, 0.0]},
+	"orbital_station": {"stem": [0.0, 10.0], "wide": [0.0, 14.0], "over": [0.0, 0.0]},
 }
 
 
@@ -138,6 +155,20 @@ static func clearing(shape: String, size: float, side: float, distance: float) -
 			return _clearing(14.0 * size, side, distance - 6.0 * size, distance + 14.0 * size)
 		"airport":
 			return _clearing(38.0, side, distance - 6.0, distance + 24.0)
+		"sunken_wreck":
+			return _clearing(18.0 * size, side, distance - 6.0 * size, distance + 8.0 * size)
+		"hydro_vent":
+			return _clearing(10.0 * size, side, distance - 5.0 * size, distance + 7.0 * size)
+		"services":
+			return _clearing(32.0, side, distance - 4.0, distance + 24.0)
+		"ocean_platform":
+			return _clearing(24.0 * size, side, distance - 14.0 * size, distance + 16.0 * size)
+		"orbital_station":
+			return _clearing(24.0 * size, side, distance - 14.0 * size, distance + 16.0 * size)
+		"lunar_base":
+			return _clearing(32.0, side, distance - 6.0, distance + 24.0)
+		"mars_base":
+			return _clearing(32.0, side, distance - 6.0, distance + 24.0)
 	return Vector3.ZERO
 
 
@@ -214,6 +245,34 @@ static func draw(shape: String, m: ShapeMesh, rng: RandomNumberGenerator, size: 
 			_airship_mast(m, size, colour, info)
 		"airport":
 			_airport(m, size, colour, info)
+		"kelp":
+			_kelp(m, rng, size, colour)
+		"sea_rock":
+			_sea_rock(m, rng, size, colour)
+		"highway_lamp":
+			_highway_lamp(m, size, colour, info)
+		"gantry":
+			_gantry(m, size, colour, info)
+		"tether_ring":
+			_tether_ring(m, size, colour, info)
+		"dust_devil":
+			_dust_devil(m, rng, size, colour)
+		"mars_rock":
+			_mars_rock(m, rng, size, colour)
+		"sunken_wreck":
+			_sunken_wreck(m, rng, size, colour, info)
+		"hydro_vent":
+			_hydro_vent(m, size, colour, info)
+		"services":
+			_services(m, size, colour, info)
+		"ocean_platform":
+			_ocean_platform(m, size, colour, info)
+		"orbital_station":
+			_orbital_station(m, size, colour, info)
+		"lunar_base":
+			_lunar_base(m, size, colour, info)
+		"mars_base":
+			_mars_base(m, size, colour, info)
 
 
 ## A colour with its r, g and b multiplied by k.
@@ -1291,3 +1350,446 @@ static func _airport(m: ShapeMesh, size: float, colour: Color, info: Dictionary)
 		m.light(Vector3(side * 6.8, 8.2 * s, z), halide, 1.05, 0.85 * s)
 	for z: float in [-28.0, -10.0, 10.0, 28.0]:
 		m.light(Vector3(side * 0.6, 0.6 * s, z), taxi_blue, 1.0, 0.36 * s)
+
+
+## Giant swaying underwater kelp cluster: three undulating stalks rising from a dark holdfast with golden-olive
+## ribbon fronds fanning out up the water column.
+static func _kelp(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color) -> void:
+	var s := size
+	var holdfast := _mul(colour, 0.65)
+	var frond_col := Color(colour.r * 1.45, colour.g * 1.35, colour.b * 0.85)
+	m.material(ShapeMesh.M_STEM)
+	m.tube(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 0.6 * s, 0.0), 0.52 * s, 0.28 * s, 5, holdfast, holdfast)
+	var stalks := 3
+	for i in stalks:
+		var ang := rng.randf() * TAU
+		var h := rng.randf_range(8.5, 12.8) * s
+		var ox := cos(ang) * rng.randf_range(0.18, 0.42) * s
+		var oz := sin(ang) * rng.randf_range(0.18, 0.42) * s
+		var sway_x := rng.randf_range(-0.9, 0.9) * s
+		var sway_z := rng.randf_range(-0.9, 0.9) * s
+		var p0 := Vector3(ox, 0.2 * s, oz)
+		var p1 := Vector3(ox + sway_x * 0.45, h * 0.48, oz + sway_z * 0.45)
+		var p2 := Vector3(ox + sway_x, h, oz + sway_z)
+		m.material(ShapeMesh.M_STEM)
+		m.tube(p0, p1, 0.09 * s, 0.065 * s, 4, colour, colour)
+		m.tube(p1, p2, 0.065 * s, 0.04 * s, 4, colour, frond_col)
+		m.material(ShapeMesh.M_LEAF)
+		for k in 3:
+			var t := 0.28 + 0.28 * k
+			var base := p0.lerp(p1, t * 2.0) if t < 0.5 else p1.lerp(p2, (t - 0.5) * 2.0)
+			var fa := ang + k * 2.1 + rng.randf_range(-0.4, 0.4)
+			var dir := Vector3(cos(fa), 0.22, sin(fa)).normalized()
+			var side_v := Vector3(-dir.z, 0.0, dir.x) * (0.34 * s)
+			var tip := base + dir * rng.randf_range(0.95, 1.45) * s
+			var fc := frond_col.lerp(colour, 0.35 * (k % 2))
+			m.quad(base - side_v * 0.25, base + side_v * 0.25, tip + side_v * 0.45, tip - side_v * 0.45, fc)
+
+
+## Craggy layered seabed basalt outcrop with pale coral/sea-fan tufts and a tiny cyan bioluminescent polyp.
+static func _sea_rock(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color) -> void:
+	var s := size
+	var dark := _mul(colour, 0.78)
+	var hi := _mul(colour, 1.2)
+	var coral := Color(0.68, 0.34, 0.26)
+	m.material(ShapeMesh.M_PLAIN)
+	var spires := 3
+	for i in spires:
+		var ang := i * TAU / spires + rng.randf_range(-0.4, 0.4)
+		var rad := rng.randf_range(0.8, 1.65) * s if i > 0 else 0.0
+		var h := (rng.randf_range(3.6, 6.2) if i == 0 else rng.randf_range(1.9, 4.2)) * s
+		var r0 := rng.randf_range(1.1, 1.75) * s
+		var r1 := r0 * rng.randf_range(0.28, 0.55)
+		var p0 := Vector3(cos(ang) * rad, -0.2 * s, sin(ang) * rad)
+		var p1 := p0 + Vector3(rng.randf_range(-0.4, 0.4) * s, h, rng.randf_range(-0.4, 0.4) * s)
+		m.tube(p0, p1, r0, r1, 5, dark, hi)
+	m.material(ShapeMesh.M_LEAF)
+	for j in 2:
+		var a := rng.randf() * TAU
+		var d := Vector3(cos(a), 0.0, sin(a))
+		var b := d * (0.9 * s) + Vector3(0.0, 1.3 * s, 0.0)
+		var perp := Vector3(-d.z, 0.0, d.x) * (0.55 * s)
+		m.quad(b - perp, b + perp, b + perp * 1.2 + Vector3(0.0, 1.15 * s, 0.0),
+				b - perp * 1.2 + Vector3(0.0, 1.15 * s, 0.0), coral if j == 0 else Color(0.24, 0.56, 0.58))
+	m.light(Vector3(0.0, 2.2 * s, 0.0), Color(0.25, 0.92, 0.95), 0.65, 0.24 * s)
+
+
+## Swept-arm motorway sodium lighting mast with warm amber cobra-head luminaire.
+static func _highway_lamp(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var arm_dir := -side
+	var sodium := Color(1.0, 0.62, 0.22)
+	m.material(ShapeMesh.M_PLAIN)
+	m.tube(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 10.2 * s, 0.0), 0.16 * s, 0.09 * s, 5, _mul(colour, 0.85), colour)
+	m.tube(Vector3(0.0, 10.0 * s, 0.0), Vector3(arm_dir * 2.2 * s, 11.15 * s, 0.0), 0.08 * s, 0.06 * s, 4, colour, colour)
+	m.box(Vector3(arm_dir * 2.35 * s, 11.2 * s, 0.0), Vector3(0.72, 0.18, 0.34) * s, _mul(colour, 1.15))
+	m.material(ShapeMesh.M_WINDOW)
+	var lx := arm_dir * 2.35 * s
+	var ly := 11.09 * s
+	m.quad(Vector3(lx - 0.3 * s, ly, -0.14 * s), Vector3(lx + 0.3 * s, ly, -0.14 * s),
+			Vector3(lx + 0.3 * s, ly, 0.14 * s), Vector3(lx - 0.3 * s, ly, 0.14 * s), sodium)
+	m.light(Vector3(lx, 10.95 * s, 0.0), sodium, 1.35, 0.48 * s)
+	m.light(Vector3(lx, 10.75 * s, 0.0), Color(1.0, 0.72, 0.38), 0.7, 0.95 * s)
+
+
+## Roadside motorway cantilever gantry with dark-blue reflective sign board, clean white geometric lane arrows and
+## overhead luminaire lamps (zero text or trademarks).
+static func _gantry(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var reach := -side
+	var sign_blue := Color("#123664")
+	var white := Color("#e4e8ee")
+	m.material(ShapeMesh.M_PLAIN)
+	# Twin vertical truss columns and cantilevered horizontal beam.
+	for dz: float in [-0.45, 0.45]:
+		m.tube(Vector3(0.0, 0.0, dz * s), Vector3(0.0, 8.2 * s, dz * s), 0.16 * s, 0.14 * s, 4, _mul(colour, 0.85), colour)
+	m.box(Vector3(reach * 2.2 * s, 7.6 * s, 0.0), Vector3(4.4, 0.35, 0.95) * s, colour)
+	m.box(Vector3(reach * 2.2 * s, 5.7 * s, 0.0), Vector3(4.4, 0.25, 0.75) * s, _mul(colour, 0.9))
+	# Blue motorway signboard facing oncoming traffic (-Z) and rear (+Z), with crisp white border bars.
+	m.box(Vector3(reach * 2.4 * s, 6.7 * s, 0.0), Vector3(3.6, 2.0, 0.18) * s, sign_blue)
+	m.material(ShapeMesh.M_WINDOW)
+	for sz: float in [-0.11, 0.11]:
+		m.quad(Vector3((reach * 2.4 - 1.65) * s, 7.42 * s, sz * s),
+				Vector3((reach * 2.4 + 1.65) * s, 7.42 * s, sz * s),
+				Vector3((reach * 2.4 + 1.65) * s, 7.56 * s, sz * s),
+				Vector3((reach * 2.4 - 1.65) * s, 7.56 * s, sz * s), _mul(white, 0.55))
+		m.quad(Vector3((reach * 2.4 - 1.35) * s, 6.2 * s, sz * s),
+				Vector3((reach * 2.4 + 1.35) * s, 6.2 * s, sz * s),
+				Vector3((reach * 2.4 + 1.35) * s, 6.36 * s, sz * s),
+				Vector3((reach * 2.4 - 1.35) * s, 6.36 * s, sz * s), _mul(white, 0.55))
+	for ax: float in [1.4, 3.4]:
+		m.light(Vector3(reach * ax * s, 8.25 * s, 0.35 * s), COOL, 1.0, 0.35 * s)
+
+
+## Orbital elevator distant carbon-tether repeater pylon / beacon ring gliding vertically outside the climber car.
+static func _tether_ring(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var foil := Color("#c49a38")
+	var dark := Color("#2c323a")
+	m.material(ShapeMesh.M_PLAIN)
+	m.tube(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 6.0 * s, 0.0), 0.38 * s, 0.38 * s, 6, dark, colour)
+	m.box(Vector3(0.0, 3.0 * s, 0.0), Vector3(3.8, 0.75, 2.2) * s, colour)
+	m.box(Vector3(-side * 1.4 * s, 3.0 * s, 0.0), Vector3(1.1, 1.35, 1.2) * s, foil)
+	m.material(ShapeMesh.M_WINDOW)
+	var wx := -side * 1.98 * s
+	m.quad(Vector3(wx, 2.75 * s, -0.4 * s), Vector3(wx, 2.75 * s, 0.4 * s),
+			Vector3(wx, 3.25 * s, 0.4 * s), Vector3(wx, 3.25 * s, -0.4 * s), Color(0.55, 0.9, 1.0))
+	m.light(Vector3(-side * 2.1 * s, 3.6 * s, 0.0), Color(0.45, 0.88, 1.0), 1.15, 0.42 * s)
+	m.light(Vector3(side * 1.9 * s, 2.4 * s, 0.0), Color(1.0, 0.58, 0.22), 0.95, 0.36 * s)
+
+
+## Tall tapered Martian dust-devil vortex column drifting slowly across the rust plain.
+static func _dust_devil(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color) -> void:
+	var s := size
+	var h := rng.randf_range(18.0, 29.0) * s
+	var lean_x := rng.randf_range(-1.6, 1.6) * s
+	var lean_z := rng.randf_range(-1.6, 1.6) * s
+	var base_col := _mul(colour, 0.72)
+	var top_col := Color(minf(colour.r * 1.22, 1.0), minf(colour.g * 1.18, 1.0), minf(colour.b * 1.15, 1.0))
+	m.material(ShapeMesh.M_PLAIN)
+	var segs := 4
+	var prev := Vector3.ZERO
+	var prev_r := 0.85 * s
+	for i in segs:
+		var t1 := float(i + 1) / segs
+		var next := Vector3(lean_x * t1 + sin(t1 * PI) * 0.45 * s, h * t1, lean_z * t1)
+		var next_r := lerpf(0.85, 3.8, pow(t1, 1.25)) * s
+		var c0 := base_col.lerp(top_col, float(i) / segs)
+		var c1 := base_col.lerp(top_col, t1)
+		m.tube(prev, next, prev_r, next_r, 7, c0, c1)
+		prev = next
+		prev_r = next_r
+
+
+## Wind-carved Martian basalt ventifact boulders and stratified iron-oxide rocks.
+static func _mars_rock(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color) -> void:
+	var s := size
+	var dark := _mul(colour, 0.62)
+	var ochre := Color(minf(colour.r * 1.3, 1.0), minf(colour.g * 1.15, 1.0), colour.b * 0.9)
+	m.material(ShapeMesh.M_PLAIN)
+	for i in 3:
+		var ang := i * TAU / 3.0 + rng.randf_range(-0.4, 0.4)
+		var d := rng.randf_range(0.6, 1.7) * s if i > 0 else 0.0
+		var h := (rng.randf_range(1.9, 3.9) if i == 0 else rng.randf_range(0.9, 2.2)) * s
+		var r0 := rng.randf_range(0.9, 1.6) * s
+		var p0 := Vector3(cos(ang) * d, -0.15 * s, sin(ang) * d)
+		var p1 := p0 + Vector3(rng.randf_range(-0.3, 0.3) * s, h, rng.randf_range(-0.3, 0.3) * s)
+		m.tube(p0, p1, r0, r0 * rng.randf_range(0.45, 0.85), 5, dark, ochre)
+
+
+## Sunken 18th-century wooden sailing hull canted on the seabed: stern castle with eerie bioluminescent ports,
+## exposed curved hull ribs, and broken tilted mainmast.
+static func _sunken_wreck(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var dark := _mul(colour, 0.68)
+	var moss := Color(0.18, 0.32, 0.26)
+	var bio := Color(0.28, 0.92, 0.85)
+	m.material(ShapeMesh.M_PLAIN)
+	# Main timber hull and raised stern castle.
+	m.box(Vector3(0.0, 1.8 * s, 0.0), Vector3(6.2, 3.6, 22.0) * s, dark)
+	m.box(Vector3(0.0, 4.4 * s, -7.2 * s), Vector3(5.6, 2.8, 7.6) * s, colour)
+	m.box(Vector3(0.0, 1.2 * s, 12.2 * s), Vector3(3.4, 2.2, 5.2) * s, moss)
+	# Five exposed wooden hull ribs curving up along the broken flank.
+	for i in 5:
+		var rz := (-4.0 + 3.2 * i) * s
+		var rx := -side * 2.9 * s
+		m.tube(Vector3(rx, 2.2 * s, rz), Vector3(rx + side * 0.4 * s, 5.2 * s, rz), 0.24 * s, 0.16 * s, 4, colour, moss)
+	# Broken tilted mainmast and canted yardarm.
+	var tilt := rng.randf_range(0.8, 1.8) * s
+	m.tube(Vector3(0.0, 3.2 * s, 1.5 * s), Vector3(-side * tilt, 12.8 * s, 2.2 * s), 0.36 * s, 0.22 * s, 5, colour, dark)
+	m.tube(Vector3(-side * (tilt * 0.65) - 3.6 * s, 8.8 * s, 1.8 * s),
+			Vector3(-side * (tilt * 0.65) + 3.6 * s, 9.6 * s, 2.0 * s), 0.18 * s, 0.14 * s, 4, dark, colour)
+	# Glowing turquoise bioluminescent stern-castle cabin windows facing the submarine.
+	m.material(ShapeMesh.M_WINDOW)
+	var wx := -side * 2.85 * s
+	for i in 3:
+		var wz := (-9.4 + 2.2 * i) * s
+		m.quad(Vector3(wx, 4.0 * s, wz - 0.6 * s), Vector3(wx, 4.0 * s, wz + 0.6 * s),
+				Vector3(wx, 5.1 * s, wz + 0.6 * s), Vector3(wx, 5.1 * s, wz - 0.6 * s), _mul(bio, 0.72))
+	m.light(Vector3(wx, 4.6 * s, -7.2 * s), bio, 0.95, 0.65 * s)
+	m.light(Vector3(-side * 1.4 * s, 3.8 * s, 5.5 * s), Color(0.4, 0.95, 0.78), 0.75, 0.45 * s)
+	m.light(Vector3(-side * tilt, 12.6 * s, 2.2 * s), bio, 0.7, 0.38 * s)
+
+
+## Towering deep-sea hydrothermal chimney cluster with glowing volcanic mineral fissures and plume rings.
+static func _hydro_vent(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var dark := _mul(colour, 0.65)
+	var mineral := Color("#3d4a4c")
+	var ember := Color(1.0, 0.48, 0.16)
+	var cyan := Color(0.28, 0.88, 0.95)
+	m.material(ShapeMesh.M_PLAIN)
+	m.tube(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 14.2 * s, 0.0), 3.6 * s, 0.95 * s, 7, dark, mineral)
+	m.tube(Vector3(side * 2.2 * s, 0.0, 2.8 * s), Vector3(side * 2.0 * s, 9.6 * s, 2.6 * s), 2.4 * s, 0.7 * s, 6, dark, colour)
+	m.tube(Vector3(-side * 1.8 * s, 0.0, -2.5 * s), Vector3(-side * 1.6 * s, 7.2 * s, -2.3 * s), 1.9 * s, 0.55 * s, 6, dark, colour)
+	m.material(ShapeMesh.M_WINDOW)
+	var fx := -side * 1.35 * s
+	m.quad(Vector3(fx, 11.2 * s, -0.35 * s), Vector3(fx, 11.2 * s, 0.35 * s),
+			Vector3(fx, 13.6 * s, 0.25 * s), Vector3(fx, 13.6 * s, -0.25 * s), ember)
+	m.light(Vector3(0.0, 14.5 * s, 0.0), ember, 1.3, 0.85 * s)
+	m.light(Vector3(side * 2.0 * s, 9.9 * s, 2.6 * s), cyan, 1.0, 0.6 * s)
+	m.light(Vector3(-side * 1.6 * s, 7.5 * s, -2.3 * s), ember, 0.95, 0.55 * s)
+	m.light(Vector3(0.0, 12.2 * s, -side * 1.4 * s), cyan, 0.8, 0.5 * s)
+
+
+## 1988 night motorway service station: tarmac forecourt, bright cantilevered petrol canopy, two-storey glass
+## cafeteria block, retro three-stripe unbranded totem pylon and sodium car-park floodlights.
+static func _services(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var tarmac := Color("#1c1f24")
+	var canopy := Color("#cfd4da")
+	var trim_teal := Color("#1a6b6e")
+	var sodium := Color(1.0, 0.68, 0.28)
+	var fluor := Color(0.88, 0.96, 1.0)
+	m.material(ShapeMesh.M_PLAIN)
+	# Tarmac forecourt apron.
+	m.quad(Vector3(0.0, 0.0, -28.0), Vector3(side * 22.0, 0.0, -28.0), Vector3(side * 22.0, 0.0, 28.0),
+			Vector3(0.0, 0.0, 28.0), tarmac)
+	# Cantilevered petrol forecourt canopy with bright teal fascia band and four support stanchions.
+	var cx := side * 9.0
+	m.box(Vector3(cx, 5.2 * s, -10.0), Vector3(11.0, 0.9 * s, 18.0), canopy)
+	m.box(Vector3(cx, 5.35 * s, -10.0), Vector3(11.15, 0.35 * s, 18.15), trim_teal)
+	for px: float in [6.0, 12.0]:
+		for pz: float in [-16.0, -4.0]:
+			m.box(Vector3(side * px, 2.5 * s, pz), Vector3(0.45, 5.0 * s, 0.45), colour)
+			m.box(Vector3(side * px, 0.85 * s, pz + 1.8), Vector3(0.85, 1.7 * s, 1.6), _mul(canopy, 0.85))
+	# Two-storey motorway cafeteria and shop building.
+	var bx := side * 14.5
+	m.box(Vector3(bx, 3.8 * s, 11.0), Vector3(10.0, 7.6 * s, 22.0), colour)
+	m.box(Vector3(bx - side * 0.6, 7.8 * s, 11.0), Vector3(11.6, 0.55 * s, 23.0), _mul(colour, 0.72))
+	# Unbranded 1988 illuminated price/brand totem pylon at forecourt entry (three coloured bands, zero text).
+	var tx := side * 3.2
+	var tz := -22.0
+	m.box(Vector3(tx, 7.4 * s, tz), Vector3(1.1, 14.8 * s, 2.6), _mul(colour, 0.85))
+	m.material(ShapeMesh.M_WINDOW)
+	# Bright glowing under-canopy strips, cafeteria windows and totem colour blocks.
+	var face_x := side * 9.45
+	for i in 5:
+		var wz := 2.0 + 4.4 * i
+		m.quad(Vector3(face_x, 1.2 * s, wz - 1.6), Vector3(face_x, 1.2 * s, wz + 1.6),
+				Vector3(face_x, 6.2 * s, wz + 1.6), Vector3(face_x, 6.2 * s, wz - 1.6),
+				_mul(WARM if i % 2 == 0 else fluor, 0.92))
+	var tot_x := tx - side * 0.58
+	m.quad(Vector3(tot_x, 12.2 * s, tz - 1.0), Vector3(tot_x, 12.2 * s, tz + 1.0),
+			Vector3(tot_x, 14.1 * s, tz + 1.0), Vector3(tot_x, 14.1 * s, tz - 1.0), Color(0.18, 0.78, 0.76))
+	m.quad(Vector3(tot_x, 9.8 * s, tz - 1.0), Vector3(tot_x, 9.8 * s, tz + 1.0),
+			Vector3(tot_x, 11.8 * s, tz + 1.0), Vector3(tot_x, 11.8 * s, tz - 1.0), sodium)
+	m.quad(Vector3(tot_x, 7.6 * s, tz - 1.0), Vector3(tot_x, 7.6 * s, tz + 1.0),
+			Vector3(tot_x, 9.4 * s, tz + 1.0), Vector3(tot_x, 9.4 * s, tz - 1.0), Color(0.95, 0.32, 0.22))
+	# Forecourt canopy floods and sodium car-park masts.
+	for pz: float in [-15.0, -5.0]:
+		m.light(Vector3(cx - side * 2.5, 4.7 * s, pz), fluor, 1.2, 0.9 * s)
+	for mz: float in [-22.0, -10.0, 6.0, 22.0]:
+		m.light(Vector3(side * 4.2, 11.5 * s, mz), sodium, 1.15, 0.85 * s)
+
+
+## Equatorial semi-submersible orbital elevator sea-launch tether platform with twin tension gantry pylons, glazed
+## control deck and warm perimeter deck beacons.
+static func _ocean_platform(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var dark := _mul(colour, 0.68)
+	var deck := _mul(colour, 1.08)
+	var orange := Color("#c85a24")
+	var cyan := Color(0.62, 0.92, 1.0)
+	m.material(ShapeMesh.M_PLAIN)
+	# Heavy semi-submersible deck and four deep ocean caisson legs.
+	m.box(Vector3(0.0, 2.2 * s, 0.0), Vector3(22.0, 3.6, 26.0) * s, deck)
+	for lx: float in [-9.0, 9.0]:
+		for lz: float in [-10.0, 10.0]:
+			m.tube(Vector3(lx, -2.0, lz) * s, Vector3(lx, 1.0, lz) * s, 2.2 * s, 2.2 * s, 6, dark, dark)
+	# Twin angled tension-gantry pylons rising 24 m to anchor the orbital tether.
+	for gz: float in [-8.5, 8.5]:
+		m.tube(Vector3(side * 6.0, 4.0, gz) * s, Vector3(side * 1.2, 24.0, gz * 0.55) * s, 1.3 * s, 0.75 * s, 5,
+				colour, orange)
+		m.tube(Vector3(-side * 6.0, 4.0, gz) * s, Vector3(-side * 1.2, 24.0, gz * 0.55) * s, 1.3 * s, 0.75 * s, 5,
+				colour, orange)
+	m.box(Vector3(0.0, 23.6 * s, 0.0), Vector3(5.2, 1.4, 11.0) * s, orange)
+	# Operations control house facing the climber car.
+	m.box(Vector3(side * 6.8 * s, 6.2 * s, 0.0), Vector3(6.2, 4.4, 12.0) * s, colour)
+	m.material(ShapeMesh.M_WINDOW)
+	var wx := side * 3.65 * s
+	for i in 4:
+		var wz := (-4.5 + 3.0 * i) * s
+		m.quad(Vector3(wx, 5.6 * s, wz - 1.1 * s), Vector3(wx, 5.6 * s, wz + 1.1 * s),
+				Vector3(wx, 7.6 * s, wz + 1.1 * s), Vector3(wx, 7.6 * s, wz - 1.1 * s), cyan)
+	for gz: float in [-5.2, 5.2]:
+		m.light(Vector3(0.0, 24.3 * s, gz * s), Color(1.0, 0.34, 0.2), 1.3, 0.75 * s)
+	for dz: float in [-11.0, 0.0, 11.0]:
+		m.light(Vector3(-side * 10.5 * s, 4.6 * s, dz * s), WARM, 1.1, 0.7 * s)
+	for dz: float in [-9.0, 9.0]:
+		m.light(Vector3(side * 10.5 * s, 4.6 * s, dz * s), cyan, 1.05, 0.65 * s)
+
+
+## Gleaming orbital elevator docking station terminus: pressurised habitat ring modules, gold foil thermal trusses,
+## sweeping photovoltaic radiator wings and crisp docking alignment beacons.
+static func _orbital_station(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var white := colour
+	var foil := Color("#c89d3a")
+	var panel := Color("#162848")
+	var dark := Color("#363d48")
+	var cyan := Color(0.68, 0.94, 1.0)
+	m.material(ShapeMesh.M_PLAIN)
+	# Central pressurised docking core and octagonal ring modules.
+	m.tube(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 18.5 * s, 0.0), 4.6 * s, 4.2 * s, 8, dark, white)
+	m.box(Vector3(0.0, 9.5 * s, 0.0), Vector3(20.0, 4.4, 20.0) * s, white)
+	m.box(Vector3(0.0, 12.2 * s, 0.0), Vector3(14.0, 2.2, 14.0) * s, foil)
+	m.tube(Vector3(0.0, 18.5 * s, 0.0), Vector3(0.0, 21.5 * s, 0.0), 2.8 * s, 1.2 * s, 8, foil, white)
+	# Four sweeping dark-blue solar radiator wings extending fore/aft and outward.
+	for sz: float in [-16.0, 16.0]:
+		m.box(Vector3(0.0, 9.5 * s, sz * s), Vector3(12.0, 0.35, 11.0) * s, panel)
+		m.box(Vector3(0.0, 9.5 * s, (sz * 0.62) * s), Vector3(1.2, 1.0, 4.5) * s, foil)
+	# Bright cyan-white observation bay windows facing the climber.
+	m.material(ShapeMesh.M_WINDOW)
+	var wx := -side * 10.06 * s
+	for i in 5:
+		var wz := (-7.2 + 3.6 * i) * s
+		m.quad(Vector3(wx, 8.4 * s, wz - 1.2 * s), Vector3(wx, 8.4 * s, wz + 1.2 * s),
+				Vector3(wx, 10.6 * s, wz + 1.2 * s), Vector3(wx, 10.6 * s, wz - 1.2 * s), cyan)
+	for bz: float in [-9.0, 0.0, 9.0]:
+		m.light(Vector3(-side * 10.4 * s, 11.8 * s, bz * s), Color(0.28, 1.0, 0.56), 1.25, 0.65 * s)
+	for bz: float in [-9.0, 9.0]:
+		m.light(Vector3(-side * 10.4 * s, 7.0 * s, bz * s), WARM, 1.1, 0.6 * s)
+	m.light(Vector3(0.0, 21.8 * s, 0.0), Color(1.0, 0.36, 0.22), 1.35, 0.72 * s)
+	for sz: float in [-21.5, 21.5]:
+		m.light(Vector3(0.0, 9.8 * s, sz * s), cyan, 1.0, 0.55 * s)
+
+
+## Moon Crater landing complex: sintered regolith landing apron, two illuminated geodesic lunar habitat domes,
+## connecting airlock tunnel, communications dish mast and amber approach strobes.
+static func _lunar_base(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var pad := Color("#464542")
+	var dome := colour
+	var steel := Color("#545960")
+	var warm_win := Color(1.0, 0.84, 0.58)
+	var cyan := Color(0.64, 0.9, 1.0)
+	m.material(ShapeMesh.M_PLAIN)
+	# Sintered regolith landing apron.
+	m.quad(Vector3(0.0, 0.0, -30.0), Vector3(side * 24.0, 0.0, -30.0), Vector3(side * 24.0, 0.0, 30.0),
+			Vector3(0.0, 0.0, 30.0), pad)
+	# Main Crater geodesic habitat dome and secondary dome linked by pressurised airlock tunnel.
+	var dx := side * 14.0
+	m.tube(Vector3(dx, 0.0, -4.0), Vector3(dx, 5.2 * s, -4.0), 8.2, 7.6, 10, steel, dome)
+	m.tube(Vector3(dx, 5.2 * s, -4.0), Vector3(dx, 10.4 * s, -4.0), 7.6, 4.2, 10, dome, _mul(dome, 1.1))
+	m.tube(Vector3(dx, 10.4 * s, -4.0), Vector3(dx, 12.6 * s, -4.0), 4.2, 0.8, 10, _mul(dome, 1.1), dome)
+	m.tube(Vector3(dx, 0.0, 14.0), Vector3(dx, 3.8 * s, 14.0), 5.4, 5.0, 8, steel, dome)
+	m.tube(Vector3(dx, 3.8 * s, 14.0), Vector3(dx, 7.4 * s, 14.0), 5.0, 1.2, 8, dome, _mul(dome, 1.08))
+	m.box(Vector3(dx, 2.2 * s, 5.5), Vector3(3.2, 3.2 * s, 10.0), steel)
+	# Tall lunar comms mast and dish.
+	m.tube(Vector3(dx, 0.0, -19.0), Vector3(dx, 16.4 * s, -19.0), 0.7, 0.35, 5, steel, dome)
+	m.box(Vector3(dx - side * 1.4, 14.2 * s, -19.0), Vector3(2.8, 2.6 * s, 2.8), _mul(dome, 1.15))
+	# Glowing habitat dome observation windows facing the landing pad.
+	m.material(ShapeMesh.M_WINDOW)
+	var wx := dx - side * 7.85
+	for i in 4:
+		var wz := -8.8 + 3.2 * i
+		m.quad(Vector3(wx, 2.4 * s, wz - 1.1), Vector3(wx, 2.4 * s, wz + 1.1),
+				Vector3(wx, 4.6 * s, wz + 1.1), Vector3(wx, 4.6 * s, wz - 1.1), warm_win)
+	var wx2 := dx - side * 5.25
+	for i in 2:
+		var wz := 12.2 + 3.6 * i
+		m.quad(Vector3(wx2, 1.8 * s, wz - 1.2), Vector3(wx2, 1.8 * s, wz + 1.2),
+				Vector3(wx2, 3.4 * s, wz + 1.2), Vector3(wx2, 3.4 * s, wz - 1.2), cyan)
+	# Approach pad strobe pylons and dome beacons.
+	for pz: float in [-24.0, -8.0, 8.0, 24.0]:
+		m.light(Vector3(side * 2.2, 1.4 * s, pz), WARM, 1.2, 0.55 * s)
+	m.light(Vector3(dx, 13.0 * s, -4.0), cyan, 1.25, 0.7 * s)
+	m.light(Vector3(dx, 16.7 * s, -19.0), Color(1.0, 0.28, 0.2), 1.35, 0.65 * s)
+	for dz: float in [-4.0, 14.0]:
+		m.light(Vector3(dx - side * 8.2, 5.6 * s, dz), warm_win, 1.05, 0.65 * s)
+
+
+## Pressurised Martian domed night colony: grand translucent-glow biodome, flank habitat domes, dust-coated solar
+## wing arrays, rover docking airlock tunnel and warm amber/red colony beacons.
+static func _mars_base(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var pad := Color("#5a3222")
+	var dome := colour
+	var steel := Color("#463832")
+	var panel := Color("#2c2a3a")
+	var amber := Color(1.0, 0.72, 0.34)
+	var red := Color(1.0, 0.26, 0.18)
+	m.material(ShapeMesh.M_PLAIN)
+	m.quad(Vector3(0.0, 0.0, -30.0), Vector3(side * 24.0, 0.0, -30.0), Vector3(side * 24.0, 0.0, 30.0),
+			Vector3(0.0, 0.0, 30.0), pad)
+	# Central geodesic Martian biodome + two flank habitat modules.
+	var dx := side * 14.5
+	m.tube(Vector3(dx, 0.0, 0.0), Vector3(dx, 5.4 * s, 0.0), 8.6, 8.0, 10, steel, dome)
+	m.tube(Vector3(dx, 5.4 * s, 0.0), Vector3(dx, 10.8 * s, 0.0), 8.0, 4.4, 10, dome, _mul(dome, 1.15))
+	m.tube(Vector3(dx, 10.8 * s, 0.0), Vector3(dx, 13.2 * s, 0.0), 4.4, 0.9, 10, _mul(dome, 1.15), dome)
+	for fz: float in [-16.0, 16.0]:
+		m.tube(Vector3(dx, 0.0, fz), Vector3(dx, 3.8 * s, fz), 5.0, 4.6, 8, steel, dome)
+		m.tube(Vector3(dx, 3.8 * s, fz), Vector3(dx, 7.2 * s, fz), 4.6, 1.0, 8, dome, _mul(dome, 1.12))
+	# Rover docking airlock tunnel extending towards the trackway + solar arrays + comms tower.
+	m.box(Vector3(side * 4.8, 2.2 * s, 0.0), Vector3(6.2, 3.4 * s, 4.4), steel)
+	for sz: float in [-25.0, 25.0]:
+		m.box(Vector3(side * 12.0, 2.4 * s, sz), Vector3(9.0, 0.35 * s, 5.5), panel)
+	m.tube(Vector3(dx, 0.0, -21.0), Vector3(dx, 17.4 * s, -21.0), 0.7, 0.3, 5, steel, dome)
+	# Glowing warm greenhouse/biodome window bands facing the Martian rover-train.
+	m.material(ShapeMesh.M_WINDOW)
+	var wx := dx - side * 8.2
+	for i in 5:
+		var wz := -6.4 + 3.2 * i
+		m.quad(Vector3(wx, 2.2 * s, wz - 1.1), Vector3(wx, 2.2 * s, wz + 1.1),
+				Vector3(wx, 5.0 * s, wz + 1.1), Vector3(wx, 5.0 * s, wz - 1.1), amber)
+	var wx2 := dx - side * 4.9
+	for fz: float in [-16.0, 16.0]:
+		m.quad(Vector3(wx2, 1.8 * s, fz - 2.2), Vector3(wx2, 1.8 * s, fz + 2.2),
+				Vector3(wx2, 3.6 * s, fz + 2.2), Vector3(wx2, 3.6 * s, fz - 2.2), amber)
+	for pz: float in [-22.0, -6.0, 6.0, 22.0]:
+		m.light(Vector3(side * 1.8, 1.8 * s, pz), amber, 1.2, 0.55 * s)
+	m.light(Vector3(dx, 13.6 * s, 0.0), amber, 1.25, 0.8 * s)
+	m.light(Vector3(dx, 17.7 * s, -21.0), red, 1.35, 0.7 * s)
+	for fz: float in [-16.0, 16.0]:
+		m.light(Vector3(dx, 7.6 * s, fz), amber, 1.0, 0.6 * s)

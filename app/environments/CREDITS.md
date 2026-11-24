@@ -191,3 +191,73 @@ are made in code by the systems (`cabin.gd`, `seats.gd`, `kit.gd`, `kit/jet_1964
 `atmosphere.gd`, `passing.gd`, `presentation.gd`, `sky.gd`; the stars from the catalogue under "Data") on library
 materials (`painted_wall`, `walnut_veneer`, `woven_carpet`, `woven_upholstery`, `linen`, `brushed_steel`, `dark_metal`,
 `brass`, all CC0). Its sounds (pressurised jet cabin drone, ceiling projector and cabin boarding chime) are synthesised.
+
+## The Salon 1870 (`salon_1870.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The 1870 Victorian submarine velvet salon, its riveted wrought-iron pressure hull ribs, two monumental
+bolted-brass circular viewports with animated 10-blade mechanical brass iris shutters, mahogany diamond-lattice
+bookcases, terrestrial globe, naturalist credenzas, armillary sphere, chambered shell sculpture, marine chronometer,
+compass binnacle, ballast valve manifold, 21-pipe aft salon organ, Chesterfield club chairs, Art Deco runner carpet,
+caustics-lit seabed, giant kelp forests, coral sea rocks, sunken galleon wrecks, hydrothermal volcanic vents, schooling
+fish, bioluminescent jellies, gliding manta ray and whale are made in code by the systems (`cabin.gd`, `seats.gd`,
+`kit.gd`, `kit/salon_1870.gd`, `kit/procedural.gd`, `passing.gd`, `life.gd`, `music.gd`, `sky.gd`) on library materials
+(`wood_panelling`, `walnut_veneer`, `velvet`, `dark_metal`, `brass`, `tufted_leather`, `woven_carpet`, `white_marble`,
+all CC0). Its sounds (hull hum, water wash, vent bubbles, hull creaks, brass engine-room telegraph bell and pipe organ)
+are synthesised.
+
+## Coach trip 1988 (`coach_trip_1988.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The 1988 overnight express touring coach, its 1988 swirly moquette carpet, drawn burgundy driver's
+curtain, overhead ceiling-mounted 4:3 CRT television and top-shelf video recorder flashing `12:00` beside rental tape
+cases, luggage racks with eyeball vents and night strips, tied-back cream window curtains, red break-glass hammer boxes,
+recliners with woven linen antimacassars, flip-down tray tables and net magazine pockets, aft vestibule door, backlit
+EXIT placard, working quartz clock, wind-drifting rain panes, wet asphalt motorway, distant sodium highway lamps,
+direction gantries, motorway services, sky and stars are made in code by the systems (`cabin.gd`, `seats.gd`, `kit.gd`,
+`kit/coach_trip_1988.gd`, `kit/procedural.gd`, `passing.gd`, `weather.gd`, `presentation.gd`, `sky.gd`; the stars from
+the catalogue under "Data") on library materials (`painted_wall`, `corduroy`, `walnut_veneer`, `wood_panelling`,
+`woven_carpet`, `woven_upholstery`, `brown_leather`, `brushed_steel`, `dark_metal`, all CC0). Its sounds (rear coach
+diesel, VCR tape load, CRT whine, rain on glass and motorway wind) are synthesised.
+
+## Back seat 2004 (`back_seat_2004.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The 2004 family car back seat, its clamshell roof-mounted flip-down portable LCD screen and courtesy
+map lamps, contoured empty front seats with map pockets, paperback and road atlas, glowing 2004 dashboard dials, hooded
+`23:14` stereo clock, illuminated climate knobs, steering wheel, gearstick and travel mug, rear bench with draped wool
+tartan blanket, cushions, disc carry-case, wired headphones and heated tailgate glass, sideways-drifting raindrops on
+four car panes, damp asphalt motorway, distant highway lamps, direction gantries, motorway services, sky and stars are
+made in code by the systems (`cabin.gd`, `kit.gd`, `kit/back_seat_2004.gd`, `kit/procedural.gd`, `passing.gd`,
+`weather.gd`, `presentation.gd`, `sky.gd`; the stars from the catalogue under "Data") on library materials
+(`melange_fabric`, `plush_carpet`, `woven_upholstery`, `painted_wall`, `brushed_steel`, `dark_metal`, all CC0). Its
+sounds (car motorway engine/tyres, rain on car glass and roof wind) are synthesised.
+
+## Sky lift (`sky_lift.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The orbital elevator climber car, its curved glazed roof canopy, structural titanium ribs, glowing
+carbon-ribbon tether spine, status displays, contour recliners, orbital valance coves, aft airlock bulkhead, mid-century
+weave carpet, ocean tether launch platform, drifting cloud banks, tether guide collars, orbital ring docking station,
+atmospheric-to-space sky transition, Earth's curved limb (`earth_map.gd`) and 360-degree stars are made in code by the
+systems (`cabin.gd`, `seats.gd`, `kit.gd`, `kit/sky_lift.gd`, `kit/procedural.gd`, `passing.gd`, `sky.gd`; the stars
+from the catalogue under "Data") on library materials (`painted_wall`, `brushed_steel`, `dark_metal`, `woven_carpet`,
+`woven_upholstery`, all CC0). Its sounds (electromagnetic climber hum, fading atmospheric wind and docking chime) are
+synthesised.
+
+## Moon ferry (`moon_ferry.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The retro-future cislunar passenger liner, its curved glazed canopy, crimson contour recliners,
+stepped white structural cabin frames, overhead valance and floor-guide coves, forward telemetry console, aft circular
+airlock hatch and star-chart display, mid-century weave carpet, 360-degree deep space Milky Way, shrinking Earth
+(`earth_map.gd`), growing cratered Moon, lunar regolith plain and glowing Crater lunar base are made in code by the
+systems (`cabin.gd`, `seats.gd`, `kit.gd`, `kit/moon_ferry.gd`, `kit/procedural.gd`, `passing.gd`, `sky.gd`; the stars
+from the catalogue under "Data") on library materials (`painted_wall`, `brushed_steel`, `dark_metal`, `woven_carpet`,
+`woven_upholstery`, all CC0). Its sounds (quiet life-support murmur and cabin arrival chime) are synthesised.
+
+## Mars train (`mars_train.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The pressurised Martian rover-train cabin, its ribbed habitat bulkheads, expedition recliners,
+indirect raceway and floor-guide coves, geology sample rack with core canisters, forward telemetry console, aft round
+airlock door, Martian topography placard, mid-century weave carpet, pale-blue Martian sunset and small solar disc,
+cratered rust-ochre regolith, swirling dust devils, Martian rocks, red mesas, glowing domed Martian night colony, sky
+and stars are made in code by the systems (`cabin.gd`, `seats.gd`, `kit.gd`, `kit/mars_train.gd`, `kit/procedural.gd`,
+`passing.gd`, `sky.gd`; the stars from the catalogue under "Data") on library materials (`painted_wall`, `brushed_steel`,
+`dark_metal`, `woven_carpet`, `woven_upholstery`, all CC0). Its sounds (electric rover-train drive, thin Martian wind
+and arrival chime) are synthesised.

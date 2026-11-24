@@ -12,6 +12,8 @@ render_mode unshaded, cull_disabled, shadows_disabled, specular_disabled;
 // The way's directions in the room's frame.
 uniform vec3 along_dir = vec3(0.0, 0.0, -1.0);
 uniform vec3 across_dir = vec3(1.0, 0.0, 0.0);
+// 1.0 when facing == "up": items move vertically along Y while staying upright.
+uniform float vertical = 0.0;
 // 1 - the blink's dark: every term of light is multiplied by it.
 uniform float shown = 1.0;
 uniform float light = 1.0;
@@ -47,14 +49,19 @@ void vertex() {
 	vec3 foot = passing_foot(CUSTOM0, CUSTOM1, grow);
 	vec3 q = foot + VERTEX * grow;
 	COLOR.rgb = passing_colour(COLOR.rgb);
-	VERTEX = across_dir * q.x + vec3(0.0, 1.0, 0.0) * q.y + along_dir * q.z;
+	if (vertical > 0.5) {
+		vec3 vpos = vec3(foot.x + VERTEX.x * grow, foot.z + VERTEX.y * grow, foot.y + VERTEX.z * grow);
+		VERTEX = across_dir * vpos.x + vec3(0.0, 1.0, 0.0) * vpos.y + along_dir * vpos.z;
+	} else {
+		VERTEX = across_dir * q.x + vec3(0.0, 1.0, 0.0) * q.y + along_dir * q.z;
+	}
 	NORMAL = across_dir * NORMAL.x + vec3(0.0, 1.0, 0.0) * NORMAL.y + along_dir * NORMAL.z;
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	mat = int(UV2.x + 0.5);
 	extra = UV2.y;
-	across = abs(q.x);
-	along = q.z;
+	across = abs(foot.x);
+	along = vertical > 0.5 ? foot.z : q.z;
 }
 
 void fragment() {

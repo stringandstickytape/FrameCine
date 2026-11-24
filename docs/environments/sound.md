@@ -59,7 +59,7 @@ Cue sounds (`env_audio.play`, the chime) and the thud still go straight to Envir
 
 | Param | Default | What |
 |---|---|---|
-| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`, `boat_engine`, `water_lap`, `paddle_wheel`, `ferry_diesel`, `rail_joints`, `airship_engines`, `jet_cabin`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`, `hooves`, `ship_horn`, `ferry_chime`, `train_whistle`, `diesel_horn`, `cabin_chime`; `silence` plays nothing (the sounds: below) |
+| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`, `boat_engine`, `water_lap`, `paddle_wheel`, `ferry_diesel`, `rail_joints`, `airship_engines`, `jet_cabin`, `coach_diesel`, `car_motorway`, `climber_hum`, `rover_drive`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`, `hooves`, `ship_horn`, `ferry_chime`, `train_whistle`, `diesel_horn`, `cabin_chime`, `telegraph_bell`; `silence` plays nothing (the sounds: below) |
 | `gain_db` | 0 | dB from the designed level (-30 to +6) |
 | `level` | 1 | 0 to 1, live. Bind it: `film.bass` for a rumble through the wall, `weather.rain` or `weather.wet` for rain, a setting |
 | `film_db` | -8 | dB lower in `starting`, `playing` and `credits`. Up again in the pre-show, paused, the intermission and the end |
@@ -123,7 +123,12 @@ tones and swells divide its length, so it has no seam.
 | `diesel_horn` | one-shot 4.6 | a 1950s streamliner multi-chime diesel air horn (rich warm triad with desert canyon echo), at 22050 Hz (designed level -54) | mid-century dome car departure and arrival cues (`horn.play`) |
 | `airship_engines` | loop 8 | distant rigid-airship outboard petrol-engine cars and slow timber propellers heard softly through a fabric-and-duralumin hull (gentle low drone and slow propeller beat under 500 Hz), at 22050 Hz (designed level -55) | `airship_1931`; `level` on `journey.speed` |
 | `jet_cabin` | loop 8 | steady pressurised 1964 turbojet cabin hush (smooth shaped pink-noise airflow, faint 140 Hz turbine undertone and gentle vent whisper), at 22050 Hz (designed level -55) | `jet_1964`; `level` on `journey.speed` |
-| `cabin_chime` | one-shot 2.2 | a crisp two-tone aircraft overhead fasten-seatbelt cabin chime (pure bell ding-dong with soft pressurised cabin decay), at 32000 Hz (designed level -53) | `jet_1964` departure and arrival cues (`chime.play`) |
+| `cabin_chime` | one-shot 2.2 | a crisp two-tone aircraft overhead fasten-seatbelt cabin chime (pure bell ding-dong with soft pressurised cabin decay), at 32000 Hz (designed level -53) | `jet_1964`, `sky_lift`, `moon_ferry`, `mars_train` departure and arrival cues (`chime.play`) |
+| `coach_diesel` | loop 8 | a 1988 touring coach's rear-mounted 6-cylinder diesel and wet-tarmac tyre roll through a carpeted floor (warm low engine thrum and damp road hush), at 22050 Hz (designed level -53) | `coach_trip_1988`, astern; `level` on `journey.speed` |
+| `car_motorway` | loop 8 | a 2004 family car's smooth petrol engine, wet motorway tyre hiss and gentle cabin road drone, at 22050 Hz (designed level -54) | `back_seat_2004`, forward; `level` on `journey.speed` |
+| `climber_hum` | loop 8 | an orbital elevator's quiet electromagnetic ribbon-drive hum (clean harmonic whine and soft structural resonance), at 22050 Hz (designed level -55) | `sky_lift`; `level` on `journey.speed` |
+| `rover_drive` | loop 8 | a Martian rover-train's electric bogie drive and subtle gravel crunch over regolith, at 22050 Hz (designed level -54) | `mars_train`; `level` on `journey.speed` |
+| `telegraph_bell` | one-shot 2.8 | a Victorian submarine brass engine-room order telegraph double-ring (twin bright bronze bell strikes with damped metallic shimmer), at 32000 Hz (designed level -53) | `salon_1870` departure and arrival cues (`telegraph.play`) |
 | `ice_creak` | one-shot 2.6 | a crack that sings down, then a low groan | ice, `every` |
 | `candle` | one-shot 0.9 | a candle's flame puffs and wavers, three or four sputters of wax | `every`, very low |
 | `three_bells` | one-shot 3.2 | a soft house bell: three struck-bar tones, up a fifth, down a minor third (our own call) | before the show |
@@ -293,6 +298,11 @@ second.
 | `airship_engines` (2026-11-23) | -55 | -55.0 | -63.0 | -70.1 | -44.2 |
 | `jet_cabin` (2026-11-23) | -55 | -55.2 | -63.2 | -70.3 | -43.5 |
 | `cabin_chime` (2026-11-23) | -53 | -53.0 | -61.0 | | -41.0 |
+| `coach_diesel` (2026-11-24) | -53 | -53.0 | -61.4 | -68.1 | -42.7 |
+| `car_motorway` (2026-11-24) | -54 | -54.1 | -62.0 | -69.2 | -42.5 |
+| `climber_hum` (2026-11-24) | -55 | -55.0 | -62.9 | -70.2 | -44.6 |
+| `rover_drive` (2026-11-24) | -54 | -54.0 | -62.1 | -69.2 | -44.2 |
+| `telegraph_bell` (2026-11-24) | -53 | -53.0 | -61.0 | | -41.8 |
 | `clock` | -56 | -56.0 | -64.0 | -71.1 | -19.9 |
 | `tube_whine` | -62 | -62.0 | -70.0 | -77.2 | -55.0 |
 | `noise` | -54 | -54.0 | -62.0 | -69.1 | -41.2 |
@@ -399,3 +409,9 @@ at 8 m they are 19 dB under their "in film" level even at -12. Without the filte
 | Dome car 1955 | `acoustics` `small_room` (`rt60` 0.45, `wet` 0.16); `sound_bed` `rail_joints` below (`pitch` 1.12, `level` on `journey.speed`); soft desert `wind`; `crickets` in the pre-show and stop; `diesel_horn` ahead (`play` at departure and arrival) |
 | Airship 1931 | `acoustics` `small_room` (`rt60` 0.62, `wet` 0.16); `sound_bed` `airship_engines` aft (`level` on `journey.speed`); soft high-altitude `wind`; `chime` at departure and arrival; self-playing `music` `piano` at the forward-port grand piano (`on` on `setting.piano`) |
 | Jet 1964 | `acoustics` `vehicle` (`rt60` 0.28, `wet` 0.1); `sound_bed` `jet_cabin` (`level` on `journey.speed`); ceiling `projector` (`level` on `setting.picture`); `cabin_chime` overhead (`play` at departure and arrival); optional `"Air-tube headset"` (`presentation.speaker: "window"`) |
+| The Salon 1870 | `acoustics` `hull` (`rt60` 0.85, `damping` 0.42, `wet` 0.24); `sound_bed` `deep_hum` below (`level` on `journey.speed`); `water_lap` around the hull; `bubbles` at the starboard viewport; `hull_creak` (`every` 140); `telegraph_bell` aft (`play` at departure and arrival); aft Victorian flute `music` `organ` (`on` on `setting.organ`) |
+| Coach trip 1988 | `acoustics` `vehicle` (`rt60` 0.32, `wet` 0.12); `sound_bed` `coach_diesel` astern (`level` on `journey.speed`); `vcr` at the top shelf (`play` at departure); `tube_whine` at the overhead CRT (follows `setting.picture`); `rain_glass` around (`level` on `weather.rain`); `wind` (`level` on `journey.speed`) |
+| Back seat 2004 | `acoustics` `vehicle` (`rt60` 0.16, `wet` 0.08); `sound_bed` `car_motorway` forward (`level` on `journey.speed`); `rain_glass` around (`level` on `weather.rain`); roof `wind` (`level` on `journey.speed`); optional small screen speaker (`presentation.speaker: "telly"`) |
+| Sky lift | `acoustics` `small_room` (`rt60` 0.42, `wet` 0.14); `sound_bed` `climber_hum` (`level` on `journey.speed`); fading atmospheric `wind`; `cabin_chime` at launch and orbital docking |
+| Moon ferry | `acoustics` `vacuum` (`rt60` 0.05, `wet` 0); subtle `deep_hum` life-support murmur fading in transit; gentle `cabin_chime` at departure and lunar Crater touchdown |
+| Mars train | `acoustics` `small_room` (`rt60` 0.36, `wet` 0.14); `sound_bed` `rover_drive` (`level` on `journey.speed`); thin Martian `wind`; `cabin_chime` at departure and Martian night colony arrival |

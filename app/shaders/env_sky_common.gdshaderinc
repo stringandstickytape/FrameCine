@@ -15,6 +15,8 @@ uniform vec3 glow_dir = vec3(-1.0, 0.0, 0.0);
 uniform float dusk = 1.0;
 // 0: a sky with air (the gradient); 1: space (black, the stars at full).
 uniform float space = 0.0;
+// 1: keep stars and Milky Way below the horizon too when in space (orbital or cislunar flight).
+uniform float all_sky = 0.0;
 // The twilight's finer structure (since 2026-11-08, the drive-in's desert dusk; 0, the default, is the plain
 // gradient): the warm light held in a thinner band along the horizon under a clearer blue, and opposite the sunset the
 // Earth's shadow rising as a blue-grey band under the pink belt of Venus.
@@ -64,8 +66,8 @@ vec3 sky_base(vec3 d) {
 	twilight += glow_colour * pow(max(g, 0.0), 6.0) * exp(-up * 9.0) * 0.9;
 	vec3 c = mix(twilight, night, smoothstep(0.0, 1.0, dusk));
 	c *= 1.0 - space;
-	// Below the horizon: the ground, quickly.
-	return mix(c, ground_colour, smoothstep(0.0, -0.04, d.y));
+	// Below the horizon: the ground, quickly (skipped when all_sky is on in space).
+	return mix(c, ground_colour, smoothstep(0.0, -0.04, d.y) * (1.0 - all_sky * space));
 }
 
 // How much of the sky the clouds cover in the direction d (0..1). lod: a mip level for the vertex stage (-1: the
