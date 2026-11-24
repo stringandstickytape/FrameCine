@@ -29,6 +29,11 @@ const Flagship := preload("res://scripts/env/systems/kit/flagship.gd")
 const PinkPalace := preload("res://scripts/env/systems/kit/pink_palace.gd")
 const Screening1962 := preload("res://scripts/env/systems/kit/screening_1962.gd")
 const Ferry1994 := preload("res://scripts/env/systems/kit/ferry_1994.gd")
+const CinemaCoach1935 := preload("res://scripts/env/systems/kit/cinema_coach_1935.gd")
+const NightSleeper1929 := preload("res://scripts/env/systems/kit/night_sleeper_1929.gd")
+const DomeCar1955 := preload("res://scripts/env/systems/kit/dome_car_1955.gd")
+const Airship1931 := preload("res://scripts/env/systems/kit/airship_1931.gd")
+const Jet1964 := preload("res://scripts/env/systems/kit/jet_1964.gd")
 
 const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk", "column", "facade", "castle_gate",
 		"booth", "snack_bar", "screen_tower", "bougainvillea", "ivy", "ferns", "carpet", "partition", "curves",
@@ -43,7 +48,12 @@ const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk
 		"flagship_hall", "flagship_rows",
 		"pink_hall", "pink_proscenium", "pink_balcony", "pink_dome",
 		"screening_room", "screening_hearth", "screening_furniture", "screening_garden",
-		"ferry_lounge", "ferry_rows"]
+		"ferry_lounge", "ferry_rows",
+		"coach_1935_interior", "coach_1935_lamps",
+		"sleeper_1929_cabin", "sleeper_1929_props",
+		"dome_1955_lounge", "dome_1955_rows",
+		"airship_1931_promenade", "airship_1931_piano",
+		"jet_1964_cabin", "jet_1964_rows"]
 ## Each piece's size when neither the entry nor its slot gives one: [width, height, depth].
 const SIZES := {
 	"balcony_front": [6.0, 1.0, 0.25], "niche": [1.3, 2.6, 0.4], "urn": [0.5, 1.0, 0.5], "lion": [0.55, 0.9, 1.0],
@@ -74,6 +84,11 @@ const SIZES := {
 	"screening_room": [0.0, 0.0, 0.0], "screening_hearth": [0.0, 0.0, 0.0], "screening_furniture": [0.0, 0.0, 0.0],
 	"screening_garden": [0.0, 0.0, 0.0],
 	"ferry_lounge": [0.0, 0.0, 0.0], "ferry_rows": [0.0, 0.0, 0.0],
+	"coach_1935_interior": [0.0, 0.0, 0.0], "coach_1935_lamps": [0.0, 0.0, 0.0],
+	"sleeper_1929_cabin": [0.0, 0.0, 0.0], "sleeper_1929_props": [0.0, 0.0, 0.0],
+	"dome_1955_lounge": [0.0, 0.0, 0.0], "dome_1955_rows": [0.0, 0.0, 0.0],
+	"airship_1931_promenade": [0.0, 0.0, 0.0], "airship_1931_piano": [0.0, 0.0, 0.0],
+	"jet_1964_cabin": [0.0, 0.0, 0.0], "jet_1964_rows": [0.0, 0.0, 0.0],
 }
 ## The pieces that stand on a floor (their slot's origin is a floor point); the others hang on a wall.
 const STANDING: Array[String] = ["urn", "lion", "obelisk", "column", "booth", "snack_bar", "ferns", "partition",
@@ -157,6 +172,16 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			Screening1962.build(piece, c, xf, size, e)
 		"ferry_lounge", "ferry_rows":
 			Ferry1994.build(piece, c, xf, size, e)
+		"coach_1935_interior", "coach_1935_lamps":
+			CinemaCoach1935.build(piece, c, xf, size, e)
+		"sleeper_1929_cabin", "sleeper_1929_props":
+			NightSleeper1929.build(piece, c, xf, size, e)
+		"dome_1955_lounge", "dome_1955_rows":
+			DomeCar1955.build(piece, c, xf, size, e)
+		"airship_1931_promenade", "airship_1931_piano":
+			Airship1931.build(piece, c, xf, size, e)
+		"jet_1964_cabin", "jet_1964_rows":
+			Jet1964.build(piece, c, xf, size, e)
 
 
 # --- Furniture (furniture.gd draws it) -----------------------------------------------------------------------------

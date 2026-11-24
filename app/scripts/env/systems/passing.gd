@@ -50,11 +50,11 @@ const SEA_HORIZON := 185.0
 const MAX_BANDS := 10
 const MAX_LANDMARKS := 12
 ## Where the scenery can be drawn, about the origin (its vertices are placed in the shader, not on the CPU).
-const SCENERY_AABB := AABB(Vector3(-190.0, -30.0, -190.0), Vector3(380.0, 100.0, 380.0))
+const SCENERY_AABB := AABB(Vector3(-190.0, -50.0, -190.0), Vector3(380.0, 120.0, 380.0))
 ## The ground's kinds, in the order of their index (UV2.x), and their own colours.
-const GROUND_KINDS: Array[String] = ["water", "grass", "path", "field", "snow", "sand", "stone", "sea"]
+const GROUND_KINDS: Array[String] = ["water", "grass", "path", "field", "snow", "sand", "stone", "sea", "cloud_deck"]
 const KIND_COLOURS := {"water": "#0c1218", "grass": "#1a2414", "path": "#3b362c", "field": "#201c16",
-		"snow": "#c8ccd6", "sand": "#4a4232", "stone": "#34322e", "sea": "#08101c"}
+		"snow": "#c8ccd6", "sand": "#4a4232", "stone": "#34322e", "sea": "#08101c", "cloud_deck": "#1f2a3e"}
 
 
 static func spec() -> Dictionary:
@@ -72,7 +72,7 @@ static func spec() -> Dictionary:
 				"description": "the loop's length, metres: after it the band comes round again"},
 		"seems": {"type": "float", "min": 1.0, "max": 200.0, "default": 1.0,
 				"description": "how many times further off it seems than it is drawn; it goes by that much slower"},
-		"height": {"type": "float", "min": -20.0, "max": 40.0, "default": 0.0, "description": "its feet's height"},
+		"height": {"type": "float", "min": -40.0, "max": 40.0, "default": 0.0, "description": "its feet's height"},
 		"size": {"type": "float", "min": 0.1, "max": 6.0, "default": 1.0, "description": "times its natural size"},
 		"colour": {"type": "color", "description": "its main colour (none: the shape's own)"},
 		"seed": {"type": "int", "min": 0, "max": 100000, "default": 0,
@@ -92,7 +92,7 @@ static func spec() -> Dictionary:
 				"description": "which side of the way"},
 		"distance": {"type": "float", "min": 3.0, "max": 170.0, "default": 8.0,
 				"description": "metres from the way's line"},
-		"height": {"type": "float", "min": -20.0, "max": 40.0, "default": 0.0, "description": "its foot's height"},
+		"height": {"type": "float", "min": -40.0, "max": 40.0, "default": 0.0, "description": "its foot's height"},
 		"size": {"type": "float", "min": 0.1, "max": 6.0, "default": 1.0, "description": "times its natural size"},
 		"colour": {"type": "color", "description": "its main colour (none: the shape's own)"},
 		"seed": {"type": "int", "min": 0, "max": 100000, "default": 0,
@@ -105,9 +105,9 @@ static func spec() -> Dictionary:
 				"description": "its near edge, metres from the way's line"},
 		"to": {"type": "float", "min": 0.0, "max": 175.0, "required": true,
 				"description": "its far edge, metres from the way's line"},
-		"height_from": {"type": "float", "min": -20.0, "max": 40.0, "default": 0.0,
+		"height_from": {"type": "float", "min": -40.0, "max": 40.0, "default": 0.0,
 				"description": "its height at its near edge"},
-		"height_to": {"type": "float", "min": -20.0, "max": 40.0, "default": 0.0,
+		"height_to": {"type": "float", "min": -40.0, "max": 40.0, "default": 0.0,
 				"description": "its height at its far edge"},
 		"kind": {"type": "enum", "values": GROUND_KINDS, "default": "grass", "description": "what it is"},
 		"colour": {"type": "color", "description": "its colour (none: the kind's own)"},
@@ -163,6 +163,8 @@ static func spec() -> Dictionary:
 			"mist_colour": {"type": "color", "default": "#3a4250", "live": true, "description": "the mist's colour"},
 			"spill": {"type": "float", "min": 0.0, "max": 4.0, "default": 1.0,
 					"description": "how much the near scenery catches the screen's light"},
+			"tunnel": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
+					"description": "darkens outside scenery, lights and ground smoothly (e.g. a railway tunnel)"},
 		},
 		"cost": {"draws": 3, "triangles": 30000, "lights": 0, "particles": 0, "texture_mb": 0.3},
 		"requires": [],
@@ -469,7 +471,7 @@ func _ground_mesh() -> ArrayMesh:
 		var kind := str(s["kind"])
 		var col := _written(s["colour"], str(KIND_COLOURS.get(kind, KIND_COLOURS["grass"])))
 		var k := float(maxi(GROUND_KINDS.find(kind), 0))
-		if kind == "sea":
+		if kind == "sea" or kind == "cloud_deck":
 			_add_sea(v, n, c, uv, uv2, idx, s, col, k)
 			continue
 		for side in _sides(str(s["side"])):
@@ -667,7 +669,7 @@ func _uniforms() -> void:
 	else:
 		top = color_param("night")
 		low = top
-	var shown := 1.0 - dark
+	var shown := (1.0 - dark) * (1.0 - clampf(float(params["tunnel"]), 0.0, 1.0))
 	var phase := PackedFloat32Array()
 	phase.resize(MAX_BANDS)
 	for b in _loops.size():

@@ -18,7 +18,8 @@ Way, clouds, an aurora, shooting stars, and Earth as seen from the Moon.
 | `facing` | 180 | the compass bearing the screen faces (180: south). Every other bearing is a compass bearing too |
 | `dusk` | 1 | 0 the last light of the evening, 1 full night. Live, a brightness |
 | `night_zenith`, `night_horizon`, `twilight_zenith`, `twilight_horizon`, `ground` | dark blues, a warm horizon | the gradient's colours |
-| `glow`, `glow_bearing` | orange, 300 | the sunset's glow low over the horizon, where the sun went down; it fades as dusk falls |
+| `glow`, `glow_bearing` | orange, 300 | the sunset's or dawn's glow low over the horizon, where the sun went down or rises (`glow_bearing` is live, so a track can shift the horizon glow from dusk to eastern dawn); it fades as dusk falls |
+| `blackout` | 0 | live (0..1): smoothly scales the sky dome, stars, Moon and `sky_light()` down to pitch black for tunnels or shuttered crossings |
 | `stars` | 1 | the stars' brightness. Live, a brightness |
 | `faint_stars` | 1600 | generated faint stars besides the catalogue's bright ones (0..4000) |
 | `twinkle` | 0 | a slow, small twinkle, under 1 Hz; off by default for comfort. Live, a brightness |

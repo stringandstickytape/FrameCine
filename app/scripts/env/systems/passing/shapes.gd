@@ -19,9 +19,9 @@ extends RefCounted
 const ShapeMesh := preload("res://scripts/env/systems/passing/shape_mesh.gd")
 
 const BANDS: Array[String] = ["reeds", "willow", "tree", "poplar", "hedge", "fence", "ridge", "lights", "cottage",
-		"post", "buoy"]
+		"post", "buoy", "telegraph", "pine", "birch", "mesa", "cactus", "cloud_bank"]
 const LANDMARKS: Array[String] = ["lamp", "bridge", "boat", "wharf", "tower", "steamer", "pier", "lighthouse", "ship",
-		"ferry_port", "freighter"]
+		"ferry_port", "freighter", "signal", "station", "water_tower", "airship_mast", "airport"]
 ## Shapes that stand end to end in a row, each this long along the way (metres): such a band's count is its loop's
 ## length over this, and its items stand at even steps, all at the band's `near`.
 const SEGMENT := {"hedge": 6.0, "fence": 2.4, "ridge": 12.0}
@@ -32,6 +32,9 @@ const COLOURS := {
 	"lamp": "#1b1b1d", "bridge": "#4a3329", "boat": "#17301f", "wharf": "#3a3632", "tower": "#15171c",
 	"steamer": "#cfc8b8", "buoy": "#5a1512", "pier": "#3e3c38", "lighthouse": "#d4d0c6", "ship": "#c8c2b4",
 	"ferry_port": "#3a4048", "freighter": "#18202c",
+	"telegraph": "#2b2119", "pine": "#15261c", "birch": "#cfd4dc", "mesa": "#6b3828", "cactus": "#25402b",
+	"cloud_bank": "#5e6f8c", "signal": "#22262b", "station": "#3f3832", "water_tower": "#47372a",
+	"airship_mast": "#767d86", "airport": "#4b525c",
 }
 ## A far village's lights: this share warm, the rest cool.
 const WARM := Color(1.0, 0.79, 0.54)
@@ -63,6 +66,15 @@ const REACH := {
 	"lighthouse": {"stem": [0.0, 3.2], "wide": [0.0, 3.6], "over": [0.0, 0.0]},
 	"ship": {"stem": [0.0, 6.8], "wide": [0.0, 7.2], "over": [0.0, 0.0]},
 	"freighter": {"stem": [0.0, 6.6], "wide": [0.0, 7.0], "over": [0.0, 0.0]},
+	"telegraph": {"stem": [0.0, 0.16], "wide": [0.0, 1.1], "over": [0.0, 6.8]},
+	"pine": {"stem": [0.0, 0.25], "wide": [0.0, 2.4], "over": [0.0, 1.4]},
+	"birch": {"stem": [0.0, 0.16], "wide": [0.0, 1.8], "over": [0.0, 2.4]},
+	"mesa": {"stem": [0.0, 10.0], "wide": [0.0, 14.0], "over": [0.0, 0.0]},
+	"cactus": {"stem": [0.0, 0.28], "wide": [0.0, 1.25], "over": [0.0, 1.2]},
+	"cloud_bank": {"stem": [0.0, 6.0], "wide": [0.0, 12.0], "over": [0.0, 0.0]},
+	"signal": {"stem": [0.0, 0.45], "wide": [0.0, 1.8], "over": [0.0, 6.5]},
+	"water_tower": {"stem": [0.0, 2.8], "wide": [0.0, 3.2], "over": [0.0, 5.0]},
+	"airship_mast": {"stem": [0.0, 4.5], "wide": [0.0, 5.5], "over": [0.0, 0.0]},
 }
 
 
@@ -116,6 +128,16 @@ static func clearing(shape: String, size: float, side: float, distance: float) -
 			return _clearing(38.0, side, distance - 6.0, distance + 24.0)
 		"freighter":
 			return _clearing(46.0 * size, side, distance - 8.0 * size, distance + 8.0 * size)
+		"signal":
+			return _clearing(4.0 * size, side, distance - 2.0 * size, distance + 2.5 * size)
+		"station":
+			return _clearing(22.0, side, distance - 2.0, distance + 14.0)
+		"water_tower":
+			return _clearing(9.0 * size, side, distance - 4.0 * size, distance + 10.0 * size)
+		"airship_mast":
+			return _clearing(14.0 * size, side, distance - 6.0 * size, distance + 14.0 * size)
+		"airport":
+			return _clearing(38.0, side, distance - 6.0, distance + 24.0)
 	return Vector3.ZERO
 
 
@@ -170,6 +192,28 @@ static func draw(shape: String, m: ShapeMesh, rng: RandomNumberGenerator, size: 
 			_ferry_port(m, size, colour, info)
 		"freighter":
 			_freighter(m, rng, size, colour, info)
+		"telegraph":
+			_telegraph(m, size, colour)
+		"pine":
+			_pine(m, rng, size, colour)
+		"birch":
+			_birch(m, rng, size, colour)
+		"mesa":
+			_mesa(m, rng, size, colour)
+		"cactus":
+			_cactus(m, rng, size, colour)
+		"cloud_bank":
+			_cloud_bank(m, rng, size, colour)
+		"signal":
+			_signal(m, size, colour, info)
+		"station":
+			_station(m, rng, size, colour, info)
+		"water_tower":
+			_water_tower(m, size, colour, info)
+		"airship_mast":
+			_airship_mast(m, size, colour, info)
+		"airport":
+			_airport(m, size, colour, info)
 
 
 ## A colour with its r, g and b multiplied by k.
@@ -949,3 +993,301 @@ static func _freighter(m: ShapeMesh, rng: RandomNumberGenerator, size: float, co
 		m.light(Vector3(-side * 5.8, 12.2, bz) * s, WARM, 1.1, 0.75 * s)
 	var nav := Color(1.0, 0.25, 0.2) if side > 0.0 else Color(0.28, 1.0, 0.48)
 	m.light(Vector3(-side * 7.1, 15.2, -21.0) * s, nav, 1.2, 0.55 * s)
+
+
+## A vintage railway telegraph pole: creosoted timber shaft, twin crossarms and pale porcelain insulator pins.
+static func _telegraph(m: ShapeMesh, size: float, colour: Color) -> void:
+	var s := size
+	m.material(ShapeMesh.M_BARK)
+	m.tube(Vector3(0.0, 0.0, 0.0), Vector3(0.0, 8.4, 0.0) * s, 0.16 * s, 0.11 * s, 6, colour, _mul(colour, 1.1))
+	m.material(ShapeMesh.M_PLAIN)
+	var arm := _mul(colour, 1.15)
+	var ins := Color("#cfd6dc")
+	for ay: float in [7.2, 7.9]:
+		m.box(Vector3(0.0, ay, 0.0) * s, Vector3(2.1, 0.12, 0.12) * s, arm)
+		for ax: float in [-0.9, -0.42, 0.42, 0.9]:
+			m.box(Vector3(ax, ay + 0.12, 0.0) * s, Vector3(0.07, 0.14, 0.07) * s, ins)
+
+
+## A snow-dusted alpine spruce / pine tree: dark bark trunk, four stacked evergreen bough cones and moonlit snow caps.
+static func _pine(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color) -> void:
+	var s := size
+	var h := rng.randf_range(8.5, 13.0) * s
+	var r := rng.randf_range(1.75, 2.35) * s
+	var bark := Color("#231914")
+	var snow := Color("#c6d1df")
+	m.material(ShapeMesh.M_BARK)
+	m.tube(Vector3.ZERO, Vector3(0.0, h * 0.45, 0.0), 0.22 * s, 0.11 * s, 5, bark, bark)
+	for tier in 4:
+		var t0 := float(tier) / 4.0
+		var y0 := h * (0.18 + 0.19 * tier)
+		var y1 := h * (0.44 + 0.187 * tier)
+		var rad := r * (1.0 - 0.21 * tier)
+		m.material(ShapeMesh.M_LEAF)
+		m.tube(Vector3(0.0, y0, 0.0), Vector3(0.0, y1, 0.0), rad, rad * 0.12, 6, colour, _mul(colour, 1.25))
+		m.material(ShapeMesh.M_PLAIN)
+		m.tube(Vector3(0.0, y0 + (y1 - y0) * 0.35, 0.0), Vector3(0.0, y1 + 0.06 * s, 0.0), rad * 0.78, rad * 0.08, 6,
+				_mul(snow, 0.85 + 0.15 * t0), snow)
+
+
+## A slender frosted silver birch: pale bark trunk with dark bands, forked limbs and a light frosty winter crown.
+static func _birch(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color) -> void:
+	var s := size
+	var h := rng.randf_range(7.5, 11.2) * s
+	var lean := Vector3(rng.randf_range(-0.35, 0.35), 0.0, rng.randf_range(-0.35, 0.35)) * s
+	var dark := Color("#24262a")
+	var frost := Color("#9fb0c4")
+	m.material(ShapeMesh.M_BARK)
+	m.tube(Vector3.ZERO, Vector3(0.0, h * 0.72, 0.0) + lean, 0.15 * s, 0.07 * s, 5, _mul(colour, 0.85), colour)
+	for k in 3:
+		var by := h * (0.18 + 0.18 * k)
+		m.box(Vector3(lean.x * (by / h), by, lean.z * (by / h)), Vector3(0.24, 0.14, 0.24) * s, dark)
+	for k in 3:
+		var a := TAU * (float(k) / 3.0 + rng.randf_range(-0.12, 0.12))
+		var base := Vector3(0.0, h * rng.randf_range(0.48, 0.68), 0.0) + lean * 0.8
+		var tip := base + Vector3(cos(a) * rng.randf_range(0.9, 1.55) * s, h * rng.randf_range(0.24, 0.34),
+				sin(a) * rng.randf_range(0.9, 1.55) * s)
+		m.material(ShapeMesh.M_BARK)
+		m.tube(base, tip, 0.06 * s, 0.025 * s, 4, colour, _mul(colour, 0.9))
+		m.material(ShapeMesh.M_LEAF)
+		m.ball(tip, rng.randf_range(0.55, 0.85) * s, 2, 5, frost, 0.85, 0.18, rng)
+
+
+## A flat-topped Southwest red-rock desert mesa / butte: broad talus apron, sheer stepped sandstone cliffs and flat cap.
+static func _mesa(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color) -> void:
+	var s := size
+	var h := rng.randf_range(15.0, 25.0) * s
+	var rw := rng.randf_range(10.0, 13.8) * s
+	var talus := _mul(colour, 0.72)
+	var cap := _mul(colour, 1.18)
+	m.material(ShapeMesh.M_PLAIN)
+	m.tube(Vector3(0.0, -0.5, 0.0) * s, Vector3(0.0, h * 0.42, 0.0), rw, rw * 0.68, 7, talus, colour)
+	m.tube(Vector3(0.0, h * 0.42, 0.0), Vector3(0.0, h * 0.94, 0.0), rw * 0.68, rw * 0.62, 7, colour, cap)
+	m.tube(Vector3(0.0, h * 0.94, 0.0), Vector3(0.0, h, 0.0), rw * 0.62, 0.1 * s, 7, cap, cap)
+	if rng.randf() < 0.55:
+		var sx := rng.randf_range(-4.5, 4.5) * s
+		var sz := rng.randf_range(-5.5, 5.5) * s
+		var sh := h * rng.randf_range(0.65, 0.9)
+		m.tube(Vector3(sx, 0.0, sz), Vector3(sx, sh, sz), rw * 0.34, rw * 0.22, 6, talus, cap)
+
+
+## A Southwest saguaro cactus: ribbed sage-green main trunk with one or two iconic upturned elbow arms.
+static func _cactus(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color) -> void:
+	var s := size
+	var h := rng.randf_range(3.3, 5.4) * s
+	m.material(ShapeMesh.M_LEAF)
+	m.tube(Vector3.ZERO, Vector3(0.0, h, 0.0), 0.26 * s, 0.2 * s, 6, _mul(colour, 0.85), _mul(colour, 1.15))
+	var arms := 1 + (1 if rng.randf() < 0.75 else 0)
+	for k in arms:
+		var dir := -1.0 if k == 0 else 1.0
+		if arms == 1 and rng.randf() < 0.5:
+			dir = 1.0
+		var ay := h * rng.randf_range(0.36, 0.58)
+		var out := rng.randf_range(0.65, 1.05) * s
+		var rise := rng.randf_range(1.1, 1.9) * s
+		var elbow := Vector3(dir * out, ay, rng.randf_range(-0.18, 0.18) * s)
+		m.tube(Vector3(0.0, ay, 0.0), elbow, 0.18 * s, 0.15 * s, 5, colour, colour)
+		m.tube(elbow, Vector3(elbow.x, minf(ay + rise, h * 0.96), elbow.z), 0.16 * s, 0.13 * s, 5, colour,
+				_mul(colour, 1.15))
+
+
+## A soft multi-lobed cloud puff floating at altitude beside an airship or jetliner above the cloud deck.
+static func _cloud_bank(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color) -> void:
+	var s := size
+	m.material(ShapeMesh.M_PLAIN)
+	var main_r := rng.randf_range(7.0, 10.5) * s
+	var sq := rng.randf_range(0.45, 0.65)
+	m.ball(Vector3(0.0, main_r * sq, 0.0), main_r, 3, 6, colour, sq, 0.14, rng)
+	for k in 2:
+		var ang := TAU * (0.25 + 0.5 * k + rng.randf_range(-0.15, 0.15))
+		var r2 := main_r * rng.randf_range(0.55, 0.78)
+		var at := Vector3(cos(ang) * main_r * 0.55, r2 * sq * 0.85, sin(ang) * main_r * 0.65)
+		m.ball(at, r2, 2, 5, _mul(colour, 0.92), sq * 0.95, 0.16, rng)
+
+
+## A vintage 1930s railway lattice semaphore signal post with angled red-and-white arm, finial and glowing green lamp.
+static func _signal(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var iron := colour
+	var red := Color("#8a1e18")
+	var white := Color("#d8d4c8")
+	m.material(ShapeMesh.M_PLAIN)
+	# Base relay box and tapered lattice signal post.
+	m.box(Vector3(side * 0.5, 0.65, 0.0) * s, Vector3(0.9, 1.3, 0.8) * s, iron)
+	m.tube(Vector3.ZERO, Vector3(0.0, 9.2, 0.0) * s, 0.24 * s, 0.14 * s, 4, iron, _mul(iron, 1.15))
+	m.tube(Vector3(0.0, 9.2, 0.0) * s, Vector3(0.0, 9.6, 0.0) * s, 0.18 * s, 0.04 * s, 4, white, white)
+	# Semaphore arm angled upwards (clear line) extending towards the track with a crisp white stripe.
+	var arm_dir := Vector3(-side, 0.65, 0.0).normalized()
+	m.tube(Vector3(0.0, 7.9, 0.0) * s, Vector3(0.0, 7.9, 0.0) * s + arm_dir * 1.85 * s, 0.16 * s, 0.14 * s, 4, red, red)
+	m.tube(Vector3(0.0, 7.9, 0.0) * s + arm_dir * 1.1 * s, Vector3(0.0, 7.9, 0.0) * s + arm_dir * 1.45 * s,
+			0.17 * s, 0.16 * s, 4, white, white)
+	# Glowing emerald-green aspect lamp facing oncoming train + soft halo.
+	var lp := Vector3(-side * 0.35, 7.8, 0.3) * s
+	m.light(lp, Color(0.24, 1.0, 0.52), 1.25, 0.32 * s)
+	m.light(lp, Color(0.24, 1.0, 0.52), 0.45, 0.9 * s)
+
+
+## A sleeping 1920s/30s wayside railway station: raised stone platform (36 m), pitched canopy, ticket hall with warm
+## glowing windows facing the line, station clock fascia and six warm platform globe lamps.
+static func _station(m: ShapeMesh, rng: RandomNumberGenerator, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var plat_h := 1.15 * s
+	var wall := colour
+	var roof := Color("#232830")
+	var snow_roof := Color("#9aa6b8")
+	var iron := Color("#1a1c20")
+	m.material(ShapeMesh.M_PLAIN)
+	# Raised stone platform and trackside coping.
+	m.quad(Vector3(0.0, -0.4 * s, -18.0), Vector3(0.0, -0.4 * s, 18.0), Vector3(0.0, plat_h, 18.0),
+			Vector3(0.0, plat_h, -18.0), _mul(wall, 0.82))
+	m.quad(Vector3(0.0, plat_h, -18.0), Vector3(side * 10.0, plat_h, -18.0), Vector3(side * 10.0, plat_h, 18.0),
+			Vector3(0.0, plat_h, 18.0), _mul(wall, 1.08))
+	# Station house set back on the platform with pitched roof and snow-tinted eaves.
+	var bx := side * 6.8
+	m.box(Vector3(bx, plat_h + 2.2 * s, 0.0), Vector3(5.6, 4.4 * s, 16.0), wall)
+	for dx: float in [-3.1, 3.1]:
+		m.quad(Vector3(bx + dx, plat_h + 4.4 * s, -8.4), Vector3(bx + dx, plat_h + 4.4 * s, 8.4),
+				Vector3(bx, plat_h + 6.2 * s, 8.4), Vector3(bx, plat_h + 6.2 * s, -8.4), roof)
+	# Overhanging platform canopy on four cast-iron columns.
+	m.box(Vector3(side * 2.5, plat_h + 3.55 * s, 0.0), Vector3(3.4, 0.24 * s, 20.0), snow_roof)
+	for cz: float in [-8.5, -2.8, 2.8, 8.5]:
+		m.tube(Vector3(side * 1.2, plat_h, cz), Vector3(side * 1.2, plat_h + 3.5 * s, cz), 0.11, 0.09, 5, iron, iron)
+	# Warm glowing ticket-hall and waiting-room windows facing the railway line.
+	var fx := side * 3.96
+	for i in 5:
+		var wz := -6.0 + 3.0 * i
+		var lit := i == 2 or rng.randf() < 0.72
+		m.material(ShapeMesh.M_WINDOW if lit else ShapeMesh.M_PLAIN)
+		var wc := _mul(WARM, rng.randf_range(0.72, 1.0)) if lit else Color("#0b0d10")
+		m.quad(Vector3(fx, plat_h + 1.1 * s, wz - 0.75), Vector3(fx, plat_h + 1.1 * s, wz + 0.75),
+				Vector3(fx, plat_h + 2.65 * s, wz + 0.75), Vector3(fx, plat_h + 2.65 * s, wz - 0.75), wc)
+	# Illuminated round-ish station clock box on the canopy edge.
+	m.material(ShapeMesh.M_WINDOW)
+	m.quad(Vector3(side * 0.78, plat_h + 3.0 * s, -0.45), Vector3(side * 0.78, plat_h + 3.0 * s, 0.45),
+			Vector3(side * 0.78, plat_h + 3.8 * s, 0.45), Vector3(side * 0.78, plat_h + 3.8 * s, -0.45),
+			_mul(WARM, 0.95))
+	# Six warm platform globe lamps along the platform edge.
+	m.material(ShapeMesh.M_PLAIN)
+	for z: float in [-15.0, -9.0, -3.0, 3.0, 9.0, 15.0]:
+		var px := side * 1.0
+		m.tube(Vector3(px, plat_h, z), Vector3(px, plat_h + 3.1 * s, z), 0.07, 0.05, 4, iron, iron)
+		m.light(Vector3(px, plat_h + 3.25 * s, z), WARM, 1.0, 0.45 * s)
+
+
+## A classic 1950s desert railway water tower: hooped timber tank on four braced trestle legs, conical cap, delivery
+## spout and a small lit pump-house shed with two depot lanterns.
+static func _water_tower(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var timber := colour
+	var steel := Color("#1c1f24")
+	var roof := Color("#2a2624")
+	m.material(ShapeMesh.M_PLAIN)
+	# Four battered trestle legs and cross-braces.
+	for lx: float in [-1.8, 1.8]:
+		for lz: float in [-1.8, 1.8]:
+			m.tube(Vector3(lx * 1.25, 0.0, lz * 1.25) * s, Vector3(lx, 7.6, lz) * s, 0.24 * s, 0.2 * s, 4, timber,
+					timber)
+	m.box(Vector3(0.0, 3.8, 0.0) * s, Vector3(4.2, 0.26, 4.2) * s, steel)
+	m.box(Vector3(0.0, 7.55, 0.0) * s, Vector3(4.4, 0.4, 4.4) * s, timber)
+	# Cylindrical hooped water tank and conical roof cap.
+	m.tube(Vector3(0.0, 7.75, 0.0) * s, Vector3(0.0, 12.1, 0.0) * s, 2.75 * s, 2.75 * s, 10, timber, _mul(timber, 1.1))
+	m.tube(Vector3(0.0, 12.1, 0.0) * s, Vector3(0.0, 13.7, 0.0) * s, 3.05 * s, 0.15 * s, 10, roof, roof)
+	# Track-facing steel locomotive water spout.
+	m.tube(Vector3(-side * 2.5, 8.2, 0.0) * s, Vector3(-side * 3.15, 6.2, 0.0) * s, 0.24 * s, 0.2 * s, 5, steel, steel)
+	# Small pump-house shed beneath the legs with a glowing window.
+	m.box(Vector3(side * 3.8, 1.5, 4.2) * s, Vector3(3.4, 3.0, 4.4) * s, _mul(timber, 0.9))
+	m.material(ShapeMesh.M_WINDOW)
+	var wx := side * 2.08 * s
+	m.quad(Vector3(wx, 1.2 * s, 3.5 * s), Vector3(wx, 1.2 * s, 4.9 * s), Vector3(wx, 2.2 * s, 4.9 * s),
+			Vector3(wx, 2.2 * s, 3.5 * s), WARM)
+	m.light(Vector3(-side * 2.4, 7.8, 0.0) * s, WARM, 1.0, 0.42 * s)
+	m.light(Vector3(0.0, 13.85, 0.0) * s, Color(1.0, 0.28, 0.2), 1.1, 0.35 * s)
+
+
+## A 1930s steel lattice airship mooring mast tower: tapered four-legged pylon, circular glazed passenger boarding
+## gallery, conical nose-docking cup, aviation red obstruction beacons and airfield floodlights.
+static func _airship_mast(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var steel := colour
+	var dark := Color("#232933")
+	var base := Color("#363b42")
+	m.material(ShapeMesh.M_PLAIN)
+	# Concrete airfield base pavilion and tapered four-legged lattice pylon rising 34 m.
+	m.box(Vector3(0.0, 2.2, 0.0) * s, Vector3(9.6, 4.4, 9.6) * s, base)
+	for lx: float in [-1.0, 1.0]:
+		for lz: float in [-1.0, 1.0]:
+			m.tube(Vector3(lx * 4.2, 4.2, lz * 4.2) * s, Vector3(lx * 1.4, 32.0, lz * 1.4) * s, 0.42 * s, 0.26 * s, 4,
+					steel, _mul(steel, 1.15))
+	for ry: float in [11.0, 19.0, 26.5]:
+		var rw := lerpf(7.6, 3.4, (ry - 4.2) / 27.8)
+		m.box(Vector3(0.0, ry, 0.0) * s, Vector3(rw, 0.55, rw) * s, dark)
+	# Central elevator shaft and cantilevered circular passenger boarding gallery at y 28.5..31.5 m.
+	m.tube(Vector3(0.0, 4.2, 0.0) * s, Vector3(0.0, 32.0, 0.0) * s, 1.2 * s, 1.0 * s, 6, dark, dark)
+	m.tube(Vector3(0.0, 28.2, 0.0) * s, Vector3(0.0, 31.6, 0.0) * s, 4.8 * s, 5.2 * s, 10, steel, _mul(steel, 1.15))
+	# Conical nose-cone docking masthead cup.
+	m.tube(Vector3(0.0, 31.6, 0.0) * s, Vector3(0.0, 35.8, 0.0) * s, 2.2 * s, 0.45 * s, 8, dark, steel)
+	# Glowing Art Deco boarding-gallery observation windows facing the airship.
+	m.material(ShapeMesh.M_WINDOW)
+	var gx := -side * 5.05 * s
+	for i in 4:
+		var wz := -3.0 + 2.0 * i
+		m.quad(Vector3(gx, 29.0 * s, (wz - 0.65) * s), Vector3(gx, 29.0 * s, (wz + 0.65) * s),
+				Vector3(gx, 30.8 * s, (wz + 0.65) * s), Vector3(gx, 30.8 * s, (wz - 0.65) * s), _mul(WARM, 0.95))
+	# Red aviation warning beacons at masthead + warm gallery & airfield searchlight lamps.
+	var red := Color(1.0, 0.22, 0.18)
+	m.light(Vector3(0.0, 36.1, 0.0) * s, red, 1.35, 0.65 * s)
+	m.light(Vector3(-side * 5.1, 31.8, 0.0) * s, red, 1.05, 0.45 * s)
+	for gz: float in [-3.8, 3.8]:
+		m.light(Vector3(-side * 5.2, 28.4, gz) * s, WARM, 1.0, 0.6 * s)
+	for bz: float in [-4.5, 4.5]:
+		m.light(Vector3(-side * 5.0, 4.8, bz) * s, COOL, 1.1, 0.9 * s)
+
+
+## A 1960s mid-century jet-age airport terminal: concrete apron, cantilevered departure concourse with bright lounge
+## glazing, dramatic canted glass-cab control tower, aviation beacon and runway/apron edge lights.
+static func _airport(m: ShapeMesh, size: float, colour: Color, info: Dictionary) -> void:
+	var side := float(info["side"])
+	var s := size
+	var conc := colour
+	var roof := Color("#20262e")
+	var steel := Color("#2a313b")
+	var halide := Color(0.84, 0.93, 1.0)
+	var taxi_blue := Color(0.24, 0.56, 1.0)
+	m.material(ShapeMesh.M_PLAIN)
+	# Apron slab and main mid-century terminal concourse with sweeping cantilevered roof overhang.
+	m.quad(Vector3(0.0, 0.0, -34.0), Vector3(side * 22.0, 0.0, -34.0), Vector3(side * 22.0, 0.0, 34.0),
+			Vector3(0.0, 0.0, 34.0), _mul(conc, 0.72))
+	var hall_x := side * 12.5
+	m.box(Vector3(hall_x, 3.6 * s, -4.0), Vector3(9.5, 7.2 * s, 44.0), conc)
+	m.box(Vector3(hall_x - side * 1.4, 7.55 * s, -4.0), Vector3(12.8, 0.65 * s, 46.0), roof)
+	# Enclosed jetway boarding pier extending towards the aircraft stand.
+	m.box(Vector3(side * 4.8, 3.6 * s, 2.0), Vector3(6.4, 2.6 * s, 3.6), _mul(conc, 1.12))
+	m.box(Vector3(side * 2.4, 1.2 * s, 2.0), Vector3(0.7, 2.4 * s, 0.7), steel)
+	# Sweeping 1960s air traffic control tower: tapered pedestal + flared canted glass cab at 19..22 m.
+	var tx := side * 14.5
+	var tz := 22.0
+	m.tube(Vector3(tx, 0.0, tz), Vector3(tx, 17.8 * s, tz), 2.8, 1.9, 6, _mul(conc, 0.95), conc)
+	m.tube(Vector3(tx, 17.8 * s, tz), Vector3(tx, 21.4 * s, tz), 2.6, 4.2, 8, roof, _mul(conc, 1.1))
+	m.tube(Vector3(tx, 21.4 * s, tz), Vector3(tx, 22.3 * s, tz), 4.5, 1.2, 8, roof, roof)
+	# Bright departure concourse floor-to-ceiling windows and glowing ATC tower cab glazing.
+	var face_x := side * 7.72
+	m.material(ShapeMesh.M_WINDOW)
+	for i in 9:
+		var wz := -24.0 + 4.8 * i
+		m.quad(Vector3(face_x, 1.4 * s, wz - 1.9), Vector3(face_x, 1.4 * s, wz + 1.9),
+				Vector3(face_x, 6.2 * s, wz + 1.9), Vector3(face_x, 6.2 * s, wz - 1.9),
+				_mul(halide if i % 3 != 0 else WARM, 0.9))
+	var cab_x := tx - side * 3.7
+	m.quad(Vector3(cab_x, 18.6 * s, tz - 2.4), Vector3(cab_x, 18.6 * s, tz + 2.4),
+			Vector3(cab_x, 20.9 * s, tz + 2.4), Vector3(cab_x, 20.9 * s, tz - 2.4), _mul(halide, 0.95))
+	# Control tower green/white rotating-style aviation beacons, apron halide masts and blue taxiway edge lights.
+	m.light(Vector3(tx, 22.8 * s, tz), Color(0.28, 1.0, 0.52), 1.35, 0.7 * s)
+	m.light(Vector3(tx - side * 1.2, 22.5 * s, tz), COOL, 1.15, 0.55 * s)
+	for z: float in [-24.0, -8.0, 8.0, 26.0]:
+		m.light(Vector3(side * 6.8, 8.2 * s, z), halide, 1.05, 0.85 * s)
+	for z: float in [-28.0, -10.0, 10.0, 28.0]:
+		m.light(Vector3(side * 0.6, 0.6 * s, z), taxi_blue, 1.0, 0.36 * s)

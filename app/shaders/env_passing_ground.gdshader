@@ -35,9 +35,10 @@ uniform float moon = 0.0;
 
 // passing.gd GROUND_PERIOD.
 const float GROUND_PERIOD = 64.0;
-// The kinds (passing.gd GROUND_KINDS): water is 0, open sea is 7.
+// The kinds (passing.gd GROUND_KINDS): water is 0, open sea is 7, cloud deck below is 8.
 const int K_WATER = 0;
 const int K_SEA = 7;
+const int K_CLOUD_DECK = 8;
 // The Moon's face (env_sky_moon.gdshader moon_colour, in linear light).
 const vec3 MOON_COLOUR = vec3(1.0, 0.91, 0.71);
 // How far the water's ripples tilt, as a slope (the spread of a bell curve): 0.12 is about 7 degrees, a river's or a
@@ -132,11 +133,37 @@ void fragment() {
 				max(smoothstep(125.0, 180.0, d_sea) * 0.72, smoothstep(0.0, 1.0, horizon_t)));
 		c = mix(c, mix(sky_low, mist_colour, mist) * light * shown, f_sea);
 		c += moon_glitter * (1.0 - mist * smoothstep(30.0, 150.0, d_sea) * 0.65);
+	} else if (kind == K_CLOUD_DECK) {
+		// Moonlit sea of clouds far below an airship or jet: multi-layer billowing cloud tops gliding gently below
+		// eye level, silvered by the Moon and sky, with faint sleeping-coast light peeking through deep cloud rifts.
+		vec2 cg = vec2(UV.x, UV.y + ground_phase * 0.35);
+		float n1 = texture(noise_tex, cg / GROUND_PERIOD * 0.85).r;
+		float n2 = texture(noise_tex, cg / GROUND_PERIOD * 2.1 + vec2(0.31, 0.17)).g;
+		float n3 = texture(noise_tex, cg / GROUND_PERIOD * 4.5 + vec2(0.67, 0.52)).b;
+		float billows = n1 * 0.56 + n2 * 0.3 + n3 * 0.14;
+		float crest = smoothstep(0.28, 0.82, billows);
+		float d_cd = distance(world_pos, CAMERA_POSITION_WORLD);
+		float drift_vis = mix(0.45, 1.0, still);
+		vec3 trough = COLOR.rgb * 0.45 * light * shown;
+		vec3 tops = mix(COLOR.rgb * 1.4, mix(sky_low, sky_top, 0.4) * 1.65, 0.48) * light * shown;
+		c = mix(trough, tops, mix(0.45, crest, drift_vis));
+		// Silver moonlight sheen across the cloud tops toward the Moon's azimuth.
+		vec2 hdir = normalize(world_pos.xz - CAMERA_POSITION_WORLD.xz + vec2(1e-5));
+		vec2 mdir = normalize(moon_dir.xz + vec2(1e-5));
+		float toward_moon = pow(max(dot(hdir, mdir), 0.0), 3.0);
+		c += MOON_COLOUR * (moon * (0.14 + 0.32 * toward_moon) * smoothstep(0.42, 0.88, billows) * shown);
+		// Faint amber pinprick glow of sleeping towns far below showing dimly through rare thin cloud rifts.
+		float rift = smoothstep(0.3, 0.14, billows) * (1.0 - smoothstep(0.0, 0.45, horizon_t));
+		float city_n = texture(noise_tex, cg / GROUND_PERIOD * 6.5 + vec2(0.11, 0.73)).a;
+		c += vec3(1.0, 0.66, 0.32) * rift * smoothstep(0.74, 0.94, city_n) * 0.32 * shown;
+		float f_cd = max(mist * smoothstep(25.0, 155.0, d_cd),
+				max(smoothstep(120.0, 180.0, d_cd) * 0.78, smoothstep(0.0, 1.0, horizon_t)));
+		c = mix(c, mix(sky_low, mist_colour, mist) * light * shown, f_cd);
 	} else {
 		float v = texture(noise_tex, g / GROUND_PERIOD * 4.0).g;
 		c = COLOR.rgb * (1.0 + (v - 0.5) * 0.5 * still) * lit;
 	}
-	if (kind != K_SEA) {
+	if (kind != K_SEA && kind != K_CLOUD_DECK) {
 		float d = distance(world_pos, CAMERA_POSITION_WORLD);
 		float f = max(mist * smoothstep(15.0, 140.0, d), smoothstep(120.0, far, d) * 0.85);
 		c = mix(c, mix(sky_low, mist_colour, mist) * light * shown, f);

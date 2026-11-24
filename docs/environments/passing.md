@@ -63,11 +63,16 @@ about its item's foot (`shape_mesh.gd` has the vertex format).
 | `mist_colour` | color, live | `#3a4250` | |
 | `spill` | float 0..4 | 1.0 | how much the near scenery catches the screen's light |
 | `beam_spin` | float 0..2, live, motion (max 2) | 1.0 | lighthouse beam rotation speed scale (1.0 ≈ 0.55 rad/s, ~11.4 s/rev; Motion scales it, 0 holds still) |
+| `tunnel` | float 0..1, live | 0.0 | scales all passing scenery, lights, ground and beams smoothly down to pitch black for railway tunnels (pair with `sky.blackout`) |
 
 ### A band
 
 Many of one shape on a loop that comes round again. `buoy` is a channel buoy on the water line: a can, a staff
-and a red or green light. Its colour marks the channel's side, so the band's `colour` is not used.
+and a red or green light. Its colour marks the channel's side, so the band's `colour` is not used. `telegraph` is a
+tall wooden railway pole with dual cross-arms and porcelain insulators; `pine` is a tiered winter conifer (with snow
+caps when placed over snow); `birch` is a slender white-barked winter birch with bare twigs; `mesa` is a flat-topped
+Southwest canyon butte with stepped talus slopes; `cactus` is a multi-armed desert saguaro; and `cloud_bank` is a
+layered drifting cumulus puff for high-altitude air journeys.
 
 | Field | Type | Default | What |
 |---|---|---|---|
@@ -78,7 +83,7 @@ and a red or green light. Its colour marks the channel's side, so the band's `co
 | `count` | int 1..600 | 40 | how many |
 | `length` | float 60..340 | 240 | the loop's length |
 | `seems` | float 1..200 | 1 | how many times further off it seems than it is drawn; it goes by that much slower |
-| `height` | float -20..40 | 0 | its feet's height |
+| `height` | float -40..40 | 0 | its feet's height |
 | `size` | float 0.1..6 | 1 | times its natural size |
 | `colour` | color | the shape's own (`Shapes.COLOURS`) | its main colour |
 | `seed` | int 0..100000 | 0 | another arrangement of the same |
@@ -103,7 +108,12 @@ eight navigation/deck lights. `ferry_port` is a 1990s cross-Channel Ro-Ro ferry 
 departure hall and elevated boarding gangway, twin-tower vehicle linkspan gantry with hazard bases and amber clearance
 bar, four high-mast sodium/halide floodlight towers and berth alignment lights. `freighter` is a night container cargo
 ship with stacked multi-coloured containers, tall white aft bridge superstructure, lit accommodation windows, deck
-floods, steaming lights and bridge-wing navigation light.
+floods, steaming lights and bridge-wing navigation light. `signal` is a railway semaphore post with ladder, angled
+blade and emerald/amber signal lamp; `station` is a raised wayside railway platform with timber canopy, warm globe
+lamps and lit waiting-room windows; `water_tower` is a timber-stave railway water tank on braced trestle legs with
+conical roof, water spout and warning lantern; `airship_mast` is a 36 m lattice steel mooring tower with glazed
+illuminated passenger boarding gallery, nose cone and red aviation beacons; and `airport` is a 1960s jetport terminal
+with cantilevered roof, glowing panoramic departure bays, canted glass control tower and blue taxiway edge lights.
 
 | Field | Type | Default | What |
 |---|---|---|---|
@@ -112,7 +122,7 @@ floods, steaming lights and bridge-wing navigation light.
 | `ahead` | float -400..400 | 0 | metres further along the way than `at` (negative: before it) |
 | `side` | left, right | left | which side of the way |
 | `distance` | float 3..170 | 8 | metres from the way's line |
-| `height` | float -20..40 | 0 | its foot's height |
+| `height` | float -40..40 | 0 | its foot's height |
 | `size` | float 0.1..6 | 1 | times its natural size |
 | `colour` | color | the shape's own | its main colour |
 | `seed` | int 0..100000 | 0 | another arrangement of the same |
@@ -145,6 +155,11 @@ with none gives nothing. The margins past the shape itself are for what reaches 
 | `ship` | 50 x size | its distance -+ 8 x size |
 | `ferry_port` | 38 | its distance - 6 to its distance + 24 |
 | `freighter` | 46 x size | its distance -+ 8 x size |
+| `signal` | 4 x size | its distance - 2 x size to its distance + 2.5 x size |
+| `station` | 22 | its distance - 2 to its distance + 14 |
+| `water_tower` | 9 x size | its distance - 4 x size to its distance + 10 x size |
+| `airship_mast` | 14 x size | its distance - 6 x size to its distance + 14 x size |
+| `airport` | 38 | its distance - 6 to its distance + 24 |
 
 The scenery's shaders get them as `landmark_clear` (one a landmark), and `band_extent` for each band: how far one of
 its items runs on along the way from its foot (a row's piece: its `SEGMENT` length; else 0). An item whose run along
@@ -157,14 +172,16 @@ the landmark's pace (`seems` 1) keeps its place against it, so this holds for th
 |---|---|---|---|
 | `side` | left, right, both | both | which side of the way |
 | `from`, `to` | float 0..175, required | | metres from the way's line |
-| `height_from`, `height_to` | float -20..40 | 0 | its height at each edge |
-| `kind` | water, grass, path, field, snow, sand, stone, sea | grass | what it is |
-| `colour` | color | the kind's own | water `#0c1218`, grass `#1a2414`, path `#3b362c`, field `#201c16`, snow `#c8ccd6`, sand `#4a4232`, stone `#34322e`, sea `#08101c` |
+| `height_from`, `height_to` | float -40..40 | 0 | its height at each edge |
+| `kind` | water, grass, path, field, snow, sand, stone, sea, cloud_deck | grass | what it is |
+| `colour` | color | the kind's own | water `#0c1218`, grass `#1a2414`, path `#3b362c`, field `#201c16`, snow `#c8ccd6`, sand `#4a4232`, stone `#34322e`, sea `#08101c`, cloud_deck `#647490` |
 
 A strip runs 175 m ahead and astern. It stands still; its pattern goes by. `sea` draws a full 360-degree circular sea
 disc out to 185 m (`SEA_HORIZON`) with an outer skirt rising to eye height (`1.2 m`) so open ocean meets the sky dome
 cleanly all round with no edge gap; its shader blends ocean swells, open-sky Fresnel reflection and a broader
-(`SEA_MOON_ROUGH` 0.16) Moon's road seamlessly into `sky_low` at the horizon.
+(`SEA_MOON_ROUGH` 0.16) Moon's road seamlessly into `sky_low` at the horizon. `cloud_deck` draws the same 360-degree
+disc and horizon skirt far below an airborne cabin (`height_from` down to `-40 m`), shading billowing moonlit cloud tops
+with subtle sleeping-town light glowing through rare cloud rifts and blending cleanly into the horizon.
 
 `shape` (a band's and a landmark's), `at` (a landmark's), `from` and `to` (a strip's) are required: the schema says
 `"required": true` and refuses an entry without them (`docs/environments/checks.md`, item 1). A band of scenery with
@@ -242,8 +259,17 @@ the size, metres times the size]:
 | `lighthouse` | [0, 3.2] | [0, 3.6] | [0, 0] |
 | `ship` | [0, 6.8] | [0, 7.2] | [0, 0] |
 | `freighter` | [0, 6.6] | [0, 7.0] | [0, 0] |
+| `telegraph` | [0, 0.16] | [0, 1.1] | [0, 6.8] |
+| `pine` | [0, 0.25] | [0, 2.4] | [0, 1.4] |
+| `birch` | [0, 0.16] | [0, 1.8] | [0, 2.4] |
+| `mesa` | [0, 10.0] | [0, 14.0] | [0, 0] |
+| `cactus` | [0, 0.28] | [0, 1.25] | [0, 1.2] |
+| `cloud_bank` | [0, 6.0] | [0, 12.0] | [0, 0] |
+| `signal` | [0, 0.45] | [0, 1.8] | [0, 6.5] |
+| `water_tower` | [0, 2.8] | [0, 3.2] | [0, 5.0] |
+| `airship_mast` | [0, 4.5] | [0, 5.5] | [0, 0] |
 
-A shape not in the table (`ridge`, `lights`, `wharf`, `pier`, `ferry_port`) comes no nearer than its foot. The table is worked out from the
+A shape not in the table (`ridge`, `lights`, `wharf`, `pier`, `ferry_port`, `station`, `airport`) comes no nearer than its foot. The table is worked out from the
 drawing functions at the largest each draws: a change to a shape is a change to its line here.
 
 `flow_volumes()` gives, in the room's frame: for each band and side, across from where its largest item reaches (its

@@ -3,8 +3,8 @@
 Part of the environments engine: [`docs/environments.md`](../../environments.md) has the design and says where each part is.
 
 The Journeys category as it was proposed on 2026-11-09: fifteen rooms that travel, where the journey takes as long
-as the film. You board in the pre-show, leave when the film starts, and arrive with the credits. Four are built; this
-page keeps the other eleven, so the list is not only in a conversation. The built rooms have pages of their own.
+as the film. You board in the pre-show, leave when the film starts, and arrive with the credits. Nine are built; this
+page keeps the other six, so the list is not only in a conversation. The built rooms have pages of their own.
 
 Every room is empty, as the Coronation room is: no people. Curtains and headrests hide a driver's place. No real
 place is named, and no maker's name or badge.
@@ -33,9 +33,9 @@ lead's estimate of what the engine does not have yet; it is an estimate until th
 
 | # | Room | State | What it is | Reuses | Still needs |
 |---|---|---|---|---|---|
-| 1 | Cinema coach, 1935 | not built | an express carriage fitted as a newsreel cinema: paired tip-up seats, a back-projection screen at the end, swaying rack lamps, a tunnel | `worn_print`, the `train` sound, plush `seats`, `cabin` | rail-joint sound; telegraph poles and a signal as shapes; a tunnel (the scenery has no way to go dark for a stretch) |
-| 2 | Night sleeper, 1929 | not built | a marquetry compartment with a blue night lamp and a home projector on the folding table. Moonlit snow, a sleeping station gliding by, mountains at dawn | `birches` with `frost`, `weather` snow, the Moon, snow as a ground kind | a compartment (one window wall, a door to the corridor); a station as a landmark; dawn (the sky's tracks only go from dusk to night so far) |
-| 3 | Dome car, 1955 | not built | a glass-roofed observation car crossing the desert under the Milky Way | the drive-in's `mesas`, `cacti`, `milky_detail`, sand as a ground kind | a glazed roof in the `cabin`; mesas and cacti as passing shapes |
+| 1 | Cinema coach, 1935 | **built** ([`cinema_coach_1935.md`](cinema_coach_1935.md), Gemini 4 Neon Extra High) | as built: a 1935 mahogany newsreel express carriage — 20 claret seats on Art Deco runner carpet, curved brass-hooded screen cove with sunburst crest, slotted brass speaker apron, diamond-netting luggage racks, holland blinds with crimson tassels, 8 swaying opal tulip rack lamps, telegraph poles, semaphore signals, stations and a pitch-dark mid-reel railway tunnel | `cabin`, `kit`, `motion`, `passing`, `presentation`, `sky` | nothing |
+| 2 | Night sleeper, 1929 | **built** ([`night_sleeper_1929.md`](night_sleeper_1929.md), Gemini 4 Neon Extra High) | as built: an intimate Art Deco walnut-and-mahogany marquetry sleeping compartment with a single left panoramic window, glowing frosted sliding corridor door, claret lower berth and stowed upper berth, sapphire ceiling night lamp, folding table with twin-reel 16 mm home projector and dusty beam onto a roller screen, falling snow, snowbound alpine pines, birches and stations, turning to golden-rose alpine dawn with the credits | `cabin`, `kit`, `atmosphere`, `weather`, `passing`, `presentation`, `sky` | nothing |
+| 3 | Dome car, 1955 | **built** ([`dome_car_1955.md`](dome_car_1955.md), Gemini 4 Neon Extra High) | as built: an upper-deck stainless-steel observation dome car with a curved glazed roof open to desert sunset, the full Milky Way, meteors and crescent Moon overhead, sculpted coral observation recliners, atomic saucer table lamps, turquoise dome valances, red-rock desert mesas, saguaro cacti, water towers and desert stations | `cabin` (`glazed_roof`), `seats`, `kit`, `passing`, `sky` | nothing |
 
 ### Water
 
@@ -51,8 +51,8 @@ lead's estimate of what the engine does not have yet; it is an estimate until th
 
 | # | Room | State | What it is | Reuses | Still needs |
 |---|---|---|---|---|---|
-| 9 | Airship, 1931 | not built | a promenade lounge with slanted windows over moonlit cloud and a sleeping coast, a featherweight piano that plays itself | `sky` clouds, `music` piano, `cabin` walls that lean out | scenery far below the way (cloud tops, a coast's lights): the ground is at the way's height today |
-| 10 | Jet, 1964 | not built | the first inflight films: a 16 mm projector in the ceiling, a pull-down screen at the bulkhead, air-tube headset sound as a "tinny" setting, aurora over the pole in quiet scenes | `worn_print`, `presentation.speaker`, `aurora` on `film.quiet` | cloud below, as the Airship; small high windows; an engine drone |
+| 9 | Airship, 1931 | **built** ([`airship_1931.md`](airship_1931.md), Gemini 4 Neon Extra High) | as built: a 1931 rigid airship promenade lounge with `-12°` outward-leaning panoramic windows, exposed brushed-duralumin triangular lattice ring-girders and trusses, Art Deco proscenium with torchières, aft navigation chart table and modernist clock, forward-port self-playing featherweight brushed-aluminium baby grand piano with 61 animated keys, endless moonlit cloud sea, cloud banks, sleeping coastal town lights and illuminated mooring masts | `cabin` (`lean`), `kit`, `music` (`piano`), `passing` (`cloud_deck`), `sky` | nothing |
+| 10 | Jet, 1964 | **built** ([`jet_1964.md`](jet_1964.md), Gemini 4 Neon Extra High) | as built: a 1964 first-class transpolar narrow-body jet cabin — small high oval fuselage windows, ceiling-mounted 16 mm twin-reel projector with beam haze onto a pull-down bulkhead screen, backlit seatbelt sign, burnt-orange recliners with flip-up tray tables and air-tube headset armrests, optional tinny air-tube audio (`speaker: "window"`), moonlit cloud sea, 1960s jetport terminals and emerald-violet Aurora Borealis blooming in quiet scenes | `cabin`, `seats`, `kit`, `atmosphere`, `passing` (`cloud_deck`), `presentation`, `sky` (`aurora` on `film.quiet`) | nothing |
 
 ### Road
 
@@ -91,10 +91,13 @@ change first and the rooms second.
 2. The Showboat (a larger hall, twice the speed): built.
 3. The Liner, 1936 (open sea, swaying drapes, maritime landmarks): built (Gemini 4 Neon Extra High).
 4. Night ferry, 1994 (reuses open sea and lighthouse; adds rotating volumetric lighthouse beams, multi-pane salt-streaked rain glass, ceiling-bracketed CRT in a cabin, Ro-Ro ferry ports and freighters): built (Gemini 4 Neon Extra High).
-5. Next: Night sleeper, 1929 once the headset comfort test settles the near-scenery speed limit, or The Salon, 1870.
-6. The space rooms last: they need a different kind of journey.
+5. Rail & Air set — Cinema coach 1935, Night sleeper 1929, Dome car 1955, Airship 1931, Jet 1964 (completes Rail and Air; adds `cabin.glazed_roof`, `sky.blackout` and live `glow_bearing`, `passing.tunnel`, `cloud_deck`, 11 rail/desert/snow/air shapes and 6 synths): built (Gemini 4 Neon Extra High).
+6. Next: The Salon, 1870 (submarine iris window and gliding marine life) or the Road rooms once the headset comfort test settles the near-scenery speed limit.
+7. The space rooms last: they need a different kind of journey.
 
 ## Shared test helper
 
 `app/tests/room_journey.gd` holds the shared checks for journey rooms (`test_room_narrowboat.gd`,
-`test_room_showboat.gd`, `test_room_liner_1936.gd`, `test_room_night_ferry_1994.gd`).
+`test_room_showboat.gd`, `test_room_liner_1936.gd`, `test_room_night_ferry_1994.gd`,
+`test_room_cinema_coach_1935.gd`, `test_room_night_sleeper_1929.gd`, `test_room_dome_car_1955.gd`,
+`test_room_airship_1931.gd`, `test_room_jet_1964.gd`).

@@ -20,11 +20,11 @@ extends RefCounted
 
 const PATTERNS: Array[String] = ["pressed_tin", "ice_blocks", "swirl_carpet", "corrugated", "plasterboard",
 		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles", "deco_carpet", "hex_pavers", "board_concrete",
-		"tufted", "shell_carpet", "moquette_94"]
+		"tufted", "shell_carpet", "moquette_94", "art_deco_runner", "midcentury_weave"]
 const SIZE := 128
 ## Patterns drawn larger than SIZE (many tiles a repeat, each its own: since 2026-11-08, the Athens rooftop's floor).
 const SIZES := {"quarry_tiles": 256, "deco_carpet": 256, "hex_pavers": 256, "board_concrete": 256,
-		"shell_carpet": 256, "moquette_94": 256}
+		"shell_carpet": 256, "moquette_94": 256, "art_deco_runner": 256, "midcentury_weave": 256}
 const GLASS_SHADER := preload("res://scripts/env/systems/kit/env_glass.gdshader")
 const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
@@ -408,6 +408,39 @@ static func _sample(pattern: String, u: float, v: float) -> Array:
 			var fleck := _noise(u, v, 64, 419)
 			c = c * (0.88 + 0.24 * fleck)
 			return [h + 0.12 * fleck, c, 0.94]
+		# 1929/1935 Pullman railway wool carpet: rich geometric Art Deco diamond trellis and stepped gold motifs.
+		"art_deco_runner":
+			var base := Color(0.28, 0.08, 0.11)
+			var deep := Color(0.18, 0.05, 0.08)
+			var gold := Color(0.76, 0.58, 0.26)
+			var cream := Color(0.82, 0.75, 0.62)
+			var gx := fposmod(u * 4.0, 1.0) - 0.5
+			var gy := fposmod(v * 4.0, 1.0) - 0.5
+			var dm := absf(gx) + absf(gy)
+			var lattice := 1.0 - smoothstep(0.03, 0.055, absf(dm - 0.48))
+			var inner := 1.0 - smoothstep(0.02, 0.04, absf(dm - 0.26))
+			var medallion := 1.0 - smoothstep(0.11, 0.15, dm)
+			var c := base.lerp(deep, smoothstep(0.22, 0.46, dm) * 0.55)
+			c = c.lerp(gold, maxf(lattice * 0.85, inner * 0.72))
+			c = c.lerp(cream, medallion * 0.65)
+			var fleck := _noise(u, v, 64, 461)
+			var h := 0.45 + 0.14 * maxf(lattice, medallion) + 0.1 * fleck
+			return [h, c * (0.9 + 0.2 * fleck), 0.94]
+		# 1955/1964 mid-century modern flecked wool tweed with crisp subtle longitudinal pinstripe ribs.
+		"midcentury_weave":
+			var base := Color(0.22, 0.34, 0.36)
+			var dark := Color(0.15, 0.24, 0.27)
+			var fleck_hi := Color(0.66, 0.72, 0.68)
+			var accent := Color(0.78, 0.52, 0.24)
+			var rib := 0.5 + 0.5 * sin(u * 16.0 * TAU)
+			var stripe := 1.0 - smoothstep(0.03, 0.07, absf(fposmod(u * 4.0, 1.0) - 0.5))
+			var n1 := _noise(u, v, 64, 509)
+			var n2 := _noise(u, v, 128, 521)
+			var c := base.lerp(dark, rib * 0.28)
+			c = c.lerp(fleck_hi, smoothstep(0.72, 0.9, n2) * 0.38)
+			c = c.lerp(accent, stripe * smoothstep(0.45, 0.85, n1) * 0.42)
+			var h := 0.46 + 0.08 * rib + 0.1 * n2
+			return [h, c * (0.92 + 0.16 * n1), 0.93]
 	return [0.5, Color(0.5, 0.5, 0.5), 0.8]
 
 

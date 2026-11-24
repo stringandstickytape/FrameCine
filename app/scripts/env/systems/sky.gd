@@ -85,7 +85,10 @@ static func spec() -> Dictionary:
 					"description": "the twilight sky at the horizon"},
 			"glow": {"type": "color", "default": "#ff8a3c",
 					"description": "the sunset's glow low over the horizon (it fades as dusk falls)"},
-			"glow_bearing": compass.call(300.0, "where the sun went down (compass bearing)"),
+			"glow_bearing": {"type": "float", "min": 0.0, "max": 360.0, "default": 300.0, "live": true,
+					"description": "where the sunset or dawn glow lies on the horizon (compass bearing)"},
+			"blackout": {"type": "float", "min": 0.0, "max": 1.0, "default": 0.0, "live": true,
+					"description": "darkens the sky dome, stars and Moon smoothly (e.g. a railway tunnel)"},
 			"ground": {"type": "color", "default": "#0a0a0c", "description": "below the horizon"},
 			"stars": {"type": "float", "min": 0.0, "max": 1.0, "default": 1.0, "live": true, "brightness": true,
 					"description": "how bright the stars are (they also hide in the twilight and behind clouds)"},
@@ -380,8 +383,9 @@ func sky_light() -> Dictionary:
 	if str(params["mode"]) != "sky":
 		return {"zenith": Color(0.0, 0.0, 0.0), "horizon": color_param("ground"), "dusk": 1.0}
 	var k := smoothstep(0.0, 1.0, float(params["dusk"]))
-	return {"zenith": color_param("twilight_zenith").lerp(color_param("night_zenith"), k),
-			"horizon": color_param("twilight_horizon").lerp(color_param("night_horizon"), k),
+	var vis := 1.0 - clampf(float(params["blackout"]), 0.0, 1.0)
+	return {"zenith": color_param("twilight_zenith").lerp(color_param("night_zenith"), k) * vis,
+			"horizon": color_param("twilight_horizon").lerp(color_param("night_horizon"), k) * vis,
 			"dusk": float(params["dusk"])}
 
 
@@ -649,6 +653,7 @@ func _apply_all() -> void:
 	_set_all("space", 1.0 if str(params["mode"]) == "space" else 0.0)
 	_set_all("afterglow", float(params["afterglow"]))
 	_set_all("belt_colour", color_param("belt_colour"))
+	_set_all("blackout", clampf(float(params["blackout"]), 0.0, 1.0))
 	_set_all("radius", DOME_RADIUS)
 	for k: String in ["dusk", "clouds"]:
 		_set_all(k, float(params[k]))

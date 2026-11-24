@@ -3921,6 +3921,150 @@ msgstr "无雨的夜晚"
 msgid "Showers"
 msgstr "阵雨"
 
+msgid "Airship 1931"
+msgstr "飞艇 1931"
+
+msgid "Cinema coach 1935"
+msgstr "影院车厢 1935"
+
+msgid "Dome car 1955"
+msgstr "玻璃顶观景车 1955"
+
+msgid "Jet 1964"
+msgstr "喷气客机 1964"
+
+msgid "Night sleeper 1929"
+msgstr "夜行卧铺 1929"
+
+msgid "A 1931 rigid airship's promenade lounge: leaning-out observation windows in duralumin girders, a self-playing featherweight grand piano, and an endless moonlit sea of clouds far below."
+msgstr "1931 年硬式飞艇的观景休息厅：铝制骨架间向外倾斜的观景窗、自动演奏的轻质三角钢琴，以及下方无边无际的月光云海。"
+
+msgid "A 1935 express railway cinema carriage rolling through autumn night: mahogany panelling, swaying brass lamps, telegraph poles, a dark railway tunnel mid-reel and a warm terminus with the credits."
+msgstr "驶过秋夜的 1935 年特快影院车厢：红木护墙板、轻摇的黄铜车灯、电线杆、影片中途的漆黑隧道，以及片尾字幕时抵达的温暖终点站。"
+
+msgid "An upper-deck stainless-steel observation dome car crossing moonlit Southwest canyon country: desert twilight deepens to the full Milky Way and shooting stars arching across the curved glass roof."
+msgstr "穿越月色大峡谷荒漠的上层不锈钢观景车厢：沙漠暮色渐深，满天银河与流星横跨弧形玻璃车顶。"
+
+msgid "A 1964 first-class transpolar jet cabin: oval windows over a moonlit cloud sea, a ceiling 16 mm twin-reel projector onto a pull-down screen, air-tube audio, and polar aurora in quiet scenes."
+msgstr "1964 年跨极地头等舱喷气客机客舱：望向月色云海的椭圆机窗、向拉下式银幕投映的顶置 16 毫米双盘放映机、气管耳机音效，以及安静场景中浮现的极光。"
+
+msgid "A 1929 Art Deco marquetry sleeping compartment crossing a snowy alpine night: flakes drift past the window under the Moon, a tabletop 16 mm projector hums, and rosy dawn rises with the credits."
+msgstr "穿越高山雪夜的 1929 年装饰艺术拼花卧铺包厢：月色下雪花掠过车窗，桌上 16 毫米放映机轻声作响，玫瑰色晨光随片尾字幕升起。"
+
+msgid "Lounge piano"
+msgstr "休息厅钢琴"
+
+msgid "Cove glow"
+msgstr "灯槽光晕"
+
+msgid "Lighting"
+msgstr "照明"
+
+msgid "Dome coves"
+msgstr "车顶灯槽"
+
+msgid "Starlight"
+msgstr "星光"
+
+msgid "Film print"
+msgstr "胶片画面"
+
+msgid "Air-tube headset"
+msgstr "气管耳机"
+
+msgid "Cabin mood"
+msgstr "客舱氛围灯"
+
+msgid "Night lamp"
+msgstr "夜灯"
+
+msgid "Snowfall"
+msgstr "降雪"
+
+msgid "The featherweight grand piano plays itself in the pre-show, interval and after the end."
+msgstr "轻质三角钢琴会在开场前、中场休息和散场后自动演奏。"
+
+msgid "Indirect light along the screen proscenium and upper deckhead coves."
+msgstr "银幕边框与上方顶棚灯槽的柔和间接照明。"
+
+msgid "The brass-hooded screen cove and cornice wash during the film and inside the railway tunnel."
+msgstr "影片放映时及穿过铁路隧道期间，黄铜银幕灯槽与顶部灯带的柔和照明。"
+
+msgid "1935 back-projection newsreel film print with gentle weave, dust and lamp hotspot, or a clean picture."
+msgstr "带有轻微抖动、微尘与光斑的 1935 年背投新闻片质感，或清晰画面。"
+
+msgid "Recessed dome valance and aisle floor-guide lighting along the observation deck."
+msgstr "观景车顶嵌入式灯槽与过道地面引导灯。"
+
+msgid "Full desert Milky Way and shooting stars overhead, quiet starlight, or faint constellation lines."
+msgstr "头顶完整的沙漠银河与流星、安静星光，或淡淡的星座连线。"
+
+msgid "The polar aurora outside the oval windows: blooming softly in quiet scenes, glowing throughout the crossing, or off."
+msgstr "椭圆机窗外的极地极光：在安静场景中柔和绽放、全程持续闪耀，或关闭。"
+
+msgid "The 1964 ceiling 16 mm film print look and subtle projector purr, or a clean picture."
+msgstr "1964 年顶置 16 毫米胶片放映质感与轻柔运转声，或清晰画面。"
+
+msgid "Routes the film's sound through tinny 1964 pneumatic air-tube cabin headphones."
+msgstr "将影片声音改为 1964 年单薄发闷的机舱气管耳机听感。"
+
+msgid "Soft indirect cove light along the overhead hat-racks and aisle carpet guide strips."
+msgstr "头顶行李架与过道地毯引导灯带的柔和间接光。"
+
+msgid "The sleeper compartment's ceiling night lamp. Keeps a soft glow once the reading sconces dim."
+msgstr "卧铺包厢顶部的夜灯。阅读壁灯调暗后仍保持柔和微光。"
+
+msgid "Winter snow drifting past the compartment window: light flurries, heavy snowfall, or clear starlight."
+msgstr "掠过包厢车窗的冬雪：轻柔小雪、漫天大雪，或晴朗星夜。"
+
+msgid "Subtle 16 mm home-projector weave, dust, lamp flicker and vignette, or a clean picture."
+msgstr "细微的 16 毫米家用放映机画面抖动、微尘、灯泡闪烁与暗角，或清晰画面。"
+
+msgid "Moonlight silver"
+msgstr "月光银"
+
+msgid "Warm amber"
+msgstr "暖琥珀"
+
+msgid "Ruby cove"
+msgstr "红宝石灯槽"
+
+msgid "Newsreel print"
+msgstr "新闻片质感"
+
+msgid "Turquoise"
+msgstr "松石绿"
+
+msgid "Desert coral"
+msgstr "沙漠珊瑚色"
+
+msgid "Warm chrome"
+msgstr "暖银白"
+
+msgid "Milky Way & meteors"
+msgstr "银河与流星"
+
+msgid "Quiet stars"
+msgstr "安静星空"
+
+msgid "Constellations"
+msgstr "星座连线"
+
+msgid "16 mm print"
+msgstr "16 毫米胶片"
+
+msgid "Warm ivory"
+msgstr "暖象牙白"
+
+msgid "Polar blue"
+msgstr "极地蓝"
+
+msgid "Sapphire blue"
+msgstr "宝石蓝"
+
+msgid "1929 home print"
+msgstr "1929 家用胶片"
+
 #~ msgid "Foveation"
 #~ msgstr "注视点渲染"
 

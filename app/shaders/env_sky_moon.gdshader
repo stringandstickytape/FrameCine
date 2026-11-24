@@ -29,7 +29,7 @@ void vertex() {
 	VERTEX = (VIEW_MATRIX * vec4(world, 1.0)).xyz;
 	// Clouds over it hide it (not wholly: the Moon glows through thin cloud); the air low down dims it a little.
 	float cover = sky_cloud_cover(normalize(moon_dir), 3.0);
-	vis = moon * (1.0 - 0.75 * cover) * mix(0.6, 1.0, smoothstep(0.05, 0.3, moon_dir.y));
+	vis = moon * (1.0 - 0.75 * cover) * mix(0.6, 1.0, smoothstep(0.05, 0.3, moon_dir.y)) * (1.0 - blackout);
 }
 
 void fragment() {

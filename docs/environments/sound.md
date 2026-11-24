@@ -59,7 +59,7 @@ Cue sounds (`env_audio.play`, the chime) and the thud still go straight to Envir
 
 | Param | Default | What |
 |---|---|---|
-| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`, `boat_engine`, `water_lap`, `paddle_wheel`, `ferry_diesel`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`, `hooves`, `ship_horn`, `ferry_chime`; `silence` plays nothing (the sounds: below) |
+| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`, `boat_engine`, `water_lap`, `paddle_wheel`, `ferry_diesel`, `rail_joints`, `airship_engines`, `jet_cabin`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`, `hooves`, `ship_horn`, `ferry_chime`, `train_whistle`, `diesel_horn`, `cabin_chime`; `silence` plays nothing (the sounds: below) |
 | `gain_db` | 0 | dB from the designed level (-30 to +6) |
 | `level` | 1 | 0 to 1, live. Bind it: `film.bass` for a rumble through the wall, `weather.rain` or `weather.wet` for rain, a setting |
 | `film_db` | -8 | dB lower in `starting`, `playing` and `credits`. Up again in the pre-show, paused, the intermission and the end |
@@ -118,6 +118,12 @@ tones and swells divide its length, so it has no seam.
 | `ship_horn` | one-shot 5.5 | an ocean liner's deep twin-tone bass steam whistle (73 Hz and 92 Hz with harmonics, steam breath and a harbour echo tail), at 22050 Hz (designed level -54) | an ocean liner's departure and harbour approach cues (`horn.play`) |
 | `ferry_diesel` | loop 8 | twin medium-speed marine diesel engines under a ferry's car deck: slightly detuned 36 Hz and 36.25 Hz fundamentals creating a slow 4 s hull beat, 72/108/144 Hz firing harmonics and dampened sub-400 Hz engine-room rumble, at 22050 Hz (designed level -53) | a cross-Channel ferry; `level` on `journey.speed` |
 | `ferry_chime` | one-shot 3.4 | a three-note synthetic maritime PA boarding chime (rising major triad through a crisp overhead ceiling loudspeaker bandpass with soft steel-lounge echo), at 32000 Hz (designed level -53) | a ferry lounge's departure cue (`chime.play`) |
+| `rail_joints` | loop 6 | rhythmic express-carriage bogie clack-clack over steel rail joints (paired damped wheel impacts with 4-bar cadence over warm low carriage roll), at 22050 Hz (designed level -53) | railway carriages (`cinema_coach_1935`, `night_sleeper_1929`, `dome_car_1955`); `level` on `journey.speed` |
+| `train_whistle` | one-shot 4.8 | a vintage 1930s steam locomotive chime whistle (warm multi-pipe chord with breathy steam hiss and distant valley decay), at 22050 Hz (designed level -54) | steam-era railway departure and arrival cues (`whistle.play`) |
+| `diesel_horn` | one-shot 4.6 | a 1950s streamliner multi-chime diesel air horn (rich warm triad with desert canyon echo), at 22050 Hz (designed level -54) | mid-century dome car departure and arrival cues (`horn.play`) |
+| `airship_engines` | loop 8 | distant rigid-airship outboard petrol-engine cars and slow timber propellers heard softly through a fabric-and-duralumin hull (gentle low drone and slow propeller beat under 500 Hz), at 22050 Hz (designed level -55) | `airship_1931`; `level` on `journey.speed` |
+| `jet_cabin` | loop 8 | steady pressurised 1964 turbojet cabin hush (smooth shaped pink-noise airflow, faint 140 Hz turbine undertone and gentle vent whisper), at 22050 Hz (designed level -55) | `jet_1964`; `level` on `journey.speed` |
+| `cabin_chime` | one-shot 2.2 | a crisp two-tone aircraft overhead fasten-seatbelt cabin chime (pure bell ding-dong with soft pressurised cabin decay), at 32000 Hz (designed level -53) | `jet_1964` departure and arrival cues (`chime.play`) |
 | `ice_creak` | one-shot 2.6 | a crack that sings down, then a low groan | ice, `every` |
 | `candle` | one-shot 0.9 | a candle's flame puffs and wavers, three or four sputters of wax | `every`, very low |
 | `three_bells` | one-shot 3.2 | a soft house bell: three struck-bar tones, up a fifth, down a minor third (our own call) | before the show |
@@ -281,6 +287,12 @@ second.
 | `paddle_wheel` (2026-11-10) | -54 | -54.0 | -62.1 | -69.1 | -36.8 |
 | `ferry_diesel` (2026-11-23) | -53 | -53.0 | -60.4 | -68.5 | -43.6 |
 | `ferry_chime` (2026-11-23) | -53 | -53.0 | -61.0 | | -42.4 |
+| `rail_joints` (2026-11-23) | -53 | -53.2 | -61.2 | -68.3 | -36.5 |
+| `train_whistle` (2026-11-23) | -54 | -54.0 | -62.0 | | -43.0 |
+| `diesel_horn` (2026-11-23) | -54 | -54.0 | -62.0 | | -42.8 |
+| `airship_engines` (2026-11-23) | -55 | -55.0 | -63.0 | -70.1 | -44.2 |
+| `jet_cabin` (2026-11-23) | -55 | -55.2 | -63.2 | -70.3 | -43.5 |
+| `cabin_chime` (2026-11-23) | -53 | -53.0 | -61.0 | | -41.0 |
 | `clock` | -56 | -56.0 | -64.0 | -71.1 | -19.9 |
 | `tube_whine` | -62 | -62.0 | -70.0 | -77.2 | -55.0 |
 | `noise` | -54 | -54.0 | -62.0 | -69.1 | -41.2 |
@@ -382,3 +394,8 @@ at 8 m they are 19 dB under their "in film" level even at -12. Without the filte
 | Showboat 1927 | `acoustics` `shopfront`; `sound_bed` `paddle_wheel` astern (`reach` 9, `film_db` -12, `level` on `journey.speed` from 0.05 to 1); `water_lap` everywhere (`gain_db` -3, `film_db` -10); `crickets` around (`radius` 14, `reach` 10, `gain_db` -4, `film_db` -10); `train` far off (`reach` 300, `every` 800) |
 | Liner 1936 | `acoustics` `cinema`; `sound_bed` `deep_hum` below the aft deck (`reach` 7, `gain_db` -2, `film_db` -10, `level` on `journey.speed` from 0.35 to 1); `water_lap` everywhere (`gain_db` -3, `film_db` -10, `pitch` 0.78); `hull_creak` (`every` 210, `gain_db` -6, `film_db` -14); `ship_horn` forward high up (`reach` 20, `gain_db` -4, `film_db` -12, played by departure and arrival cues) |
 | Night ferry 1994 | `acoustics` `hull` (`rt60` 0.65, `wet` 0.22); `sound_bed` `ferry_diesel` below the aft deck (`reach` 8, `gain_db` -2, `film_db` -10, `level` on `journey.speed` from 0.35 to 1); `water_lap` everywhere (`gain_db` -3, `film_db` -10, `pitch` 0.72); `rain_glass` around (`radius` 3.5, `reach` 5, `level` on `weather.rain`); `hull_creak` (`every` 185); `vcr` at the VCR cage (`play` at departure); `tube_whine` at the CRT (follows `setting.picture`); `ferry_chime` overhead (`play` at departure); `ship_horn` forward high up (`play` at departure and arrival) |
+| Cinema coach 1935 | `acoustics` `small_room` (`rt60` 0.42, `wet` 0.16); `sound_bed` `rail_joints` below the carriage (`level` on `journey.speed`); `projector` behind the screen bulkhead (follows `setting.picture`); `wind` subtle outside; `train_whistle` ahead (`play` at departure and arrival) |
+| Night sleeper 1929 | `acoustics` `small_room` (`rt60` 0.32, `wet` 0.12); `sound_bed` `rail_joints` below (`pitch` 0.88, `level` on `journey.speed`); tabletop `projector` (`level` on `playback.playing`); `wind` outside the left window; `train_whistle` ahead (`play` at departure and arrival) |
+| Dome car 1955 | `acoustics` `small_room` (`rt60` 0.45, `wet` 0.16); `sound_bed` `rail_joints` below (`pitch` 1.12, `level` on `journey.speed`); soft desert `wind`; `crickets` in the pre-show and stop; `diesel_horn` ahead (`play` at departure and arrival) |
+| Airship 1931 | `acoustics` `small_room` (`rt60` 0.62, `wet` 0.16); `sound_bed` `airship_engines` aft (`level` on `journey.speed`); soft high-altitude `wind`; `chime` at departure and arrival; self-playing `music` `piano` at the forward-port grand piano (`on` on `setting.piano`) |
+| Jet 1964 | `acoustics` `vehicle` (`rt60` 0.28, `wet` 0.1); `sound_bed` `jet_cabin` (`level` on `journey.speed`); ceiling `projector` (`level` on `setting.picture`); `cabin_chime` overhead (`play` at departure and arrival); optional `"Air-tube headset"` (`presentation.speaker: "window"`) |

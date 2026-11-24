@@ -135,6 +135,7 @@ void fragment() {
 			c = mix(c, lit, cover);
 		}
 	}
+	c *= 1.0 - blackout;
 	// A dither of half an 8-bit step (in the display's sRGB terms): the night's smooth gradient would otherwise show
 	// rings round the zenith where the dark levels step.
 	float h = fract(sin(dot(FRAGCOORD.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;

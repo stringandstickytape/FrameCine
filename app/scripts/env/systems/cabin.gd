@@ -45,6 +45,8 @@ const PARAMS := {
 	"roof": {"type": "enum", "values": ["flat", "arched"], "default": "arched", "description": "the roof's shape"},
 	"roof_rise": {"type": "float", "min": 0.0, "max": 1.5, "default": 0.25,
 			"description": "how far an arched roof rises over the walls' tops at its middle"},
+	"glazed_roof": {"type": "bool", "default": false,
+			"description": "open panoramic glass roof canopy (a dome observation car) with steel mullions"},
 	"front_z": {"type": "float", "min": -30.0, "max": -1.5, "default": -3.0,
 			"description": "z of the front bulkhead (the screen's)"},
 	"back_z": {"type": "float", "min": 0.6, "max": 30.0, "default": 2.4, "description": "z of the rear bulkhead"},
@@ -544,24 +546,25 @@ func _build_lining(q: Dictionary) -> void:
 					var p := centre + Vector2(cos(a), sin(a)) * r
 					poly.append(_pt(q, s, p.x, p.y))
 				lin.polygon(poly, _n(q, s))
-	# The roof.
-	lin.surface(_mat("ceiling"))
+	# The roof (skipped when glazed_roof is true: _build_windows adds the glass dome canopy instead).
 	var roof: Array = _roof(q)
 	var pts: PackedVector2Array = roof[0]
 	var normals: PackedVector2Array = roof[1]
-	if float(q["rise"]) < 0.001:
-		var y := float(q["wall_height"])
-		lin.face([Vector3(pts[0].x, y, fz), Vector3(pts[1].x, y, fz), Vector3(pts[1].x, y, bz), Vector3(pts[0].x, y, bz)],
-				Vector3.DOWN)
-	else:
-		var front := PackedVector3Array()
-		var back := PackedVector3Array()
-		var n3 := PackedVector3Array()
-		for i in pts.size():
-			front.append(Vector3(pts[i].x, pts[i].y, fz))
-			back.append(Vector3(pts[i].x, pts[i].y, bz))
-			n3.append(Vector3(normals[i].x, normals[i].y, 0.0))
-		lin.strip(front, back, n3)
+	if not bool(q["glazed_roof"]):
+		lin.surface(_mat("ceiling"))
+		if float(q["rise"]) < 0.001:
+			var y := float(q["wall_height"])
+			lin.face([Vector3(pts[0].x, y, fz), Vector3(pts[1].x, y, fz), Vector3(pts[1].x, y, bz),
+					Vector3(pts[0].x, y, bz)], Vector3.DOWN)
+		else:
+			var front := PackedVector3Array()
+			var back := PackedVector3Array()
+			var n3 := PackedVector3Array()
+			for i in pts.size():
+				front.append(Vector3(pts[i].x, pts[i].y, fz))
+				back.append(Vector3(pts[i].x, pts[i].y, bz))
+				n3.append(Vector3(normals[i].x, normals[i].y, 0.0))
+			lin.strip(front, back, n3)
 	# The bulkheads: the section's outline (the roof's points begin and end at the walls' tops).
 	lin.surface(_mat("bulkhead"))
 	var cx := float(q["cx"])
@@ -624,7 +627,21 @@ func _build_windows(q: Dictionary, trim: RoomMesh) -> void:
 			trim.strip(inner, outer, face_n)
 			trim.strip(wall_line, out_line, reveal_n)
 			glass.polygon(pane, n)
-	if not bool(params.get("window_glass", true)):
+	if bool(q["glazed_roof"]):
+		var roof: Array = _roof(q)
+		var rpts: PackedVector2Array = roof[0]
+		var rns: PackedVector2Array = roof[1]
+		var fz := float(q["front_z"])
+		var bz := float(q["back_z"])
+		var front := PackedVector3Array()
+		var back := PackedVector3Array()
+		var n3 := PackedVector3Array()
+		for i in rpts.size():
+			front.append(Vector3(rpts[i].x, rpts[i].y, fz))
+			back.append(Vector3(rpts[i].x, rpts[i].y, bz))
+			n3.append(Vector3(rns[i].x, rns[i].y, 0.0))
+		glass.strip(front, back, n3)
+	if not bool(params.get("window_glass", true)) and not bool(q["glazed_roof"]):
 		return
 	# Fainter than a hall's glass (0.06, and 0.22 more where the view grazes it): a cabin's windows are an arm's
 	# length from a bright picture and are looked through at night, and at a hall's strength the picture's light
@@ -679,6 +696,14 @@ func _build_ribs(q: Dictionary, trim: RoomMesh) -> void:
 			b.append(Vector3(p.x, p.y, z + rw * 0.5))
 			n3.append(Vector3(normals[i].x, normals[i].y, 0.0))
 		trim.strip(a, b, n3)
+	if bool(q["glazed_roof"]) and float(q["rise"]) >= 0.001 and pts.size() >= 7:
+		# Longitudinal purlin mullions along a panoramic glazed dome roof (crown + flanking curved glass divisions).
+		var mid_z := (fz + bz) * 0.5
+		var span := bz - fz
+		for idx: int in [3, pts.size() / 2, pts.size() - 4]:
+			var p := pts[idx] + normals[idx] * (rd * 0.55)
+			var ang := atan2(-normals[idx].x, -normals[idx].y)
+			trim.box(Vector3(p.x, p.y, mid_z), Vector3(rw * 0.85, rd * 0.9, span), Basis(Vector3.BACK, ang))
 
 
 ## Four boxes round the picture, on the front bulkhead.

@@ -20,7 +20,8 @@ const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale
 		"rain_leaves", "gas_hiss", "bird", "purr", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain",
 		"clock", "tube_whine", "three_bells", "candle", "ice_creak", "vcr", "tape_load", "switch_clunk", "valve_hum",
 		"crt_off", "channel_clunk", "sonar", "bubbles", "far_car", "scops_owl", "church_bell", "city", "tawny_owl",
-		"hooves", "boat_engine", "water_lap", "paddle_wheel", "ship_horn", "ferry_diesel", "ferry_chime"]
+		"hooves", "boat_engine", "water_lap", "paddle_wheel", "ship_horn", "ferry_diesel", "ferry_chime",
+		"rail_joints", "train_whistle", "diesel_horn", "airship_engines", "jet_cabin", "cabin_chime"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
@@ -30,11 +31,14 @@ const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise
 		"vcr": 4.5, "tape_load": 8.0, "switch_clunk": 0.6, "valve_hum": 8.0, "crt_off": 1.4, "channel_clunk": 0.45,
 		"sonar": 3.0, "bubbles": 6.0, "far_car": 34.0, "scops_owl": 9.0, "church_bell": 14.0, "city": 12.0,
 		"tawny_owl": 7.0, "hooves": 16.0, "boat_engine": 8.0, "water_lap": 12.0, "paddle_wheel": 6.0,
-		"ship_horn": 5.5, "ferry_diesel": 8.0, "ferry_chime": 3.4}
+		"ship_horn": 5.5, "ferry_diesel": 8.0, "ferry_chime": 3.4,
+		"rail_joints": 8.0, "train_whistle": 4.5, "diesel_horn": 4.2, "airship_engines": 8.0,
+		"jet_cabin": 8.0, "cabin_chime": 2.4}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
 		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles",
-		"city", "boat_engine", "water_lap", "paddle_wheel", "ferry_diesel"]
+		"city", "boat_engine", "water_lap", "paddle_wheel", "ferry_diesel",
+		"rail_joints", "airship_engines", "jet_cabin"]
 ## Sample rates below RATE for the far and low sounds (less to make, nothing lost above their band).
 const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiator": 22050, "moped": 32000,
 		"hull_creak": 32000, "purr": 22050, "crickets": 32000, "fire": 32000, "drips": 32000, "wind": 22050,
@@ -42,7 +46,9 @@ const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiato
 		"tape_load": 32000, "switch_clunk": 32000, "valve_hum": 22050, "crt_off": 32000, "channel_clunk": 32000,
 		"sonar": 32000, "bubbles": 32000, "far_car": 22050, "scops_owl": 32000, "church_bell": 22050, "city": 22050,
 		"tawny_owl": 22050, "hooves": 32000, "boat_engine": 22050, "water_lap": 32000, "paddle_wheel": 22050,
-		"ship_horn": 22050, "ferry_diesel": 22050, "ferry_chime": 32000}
+		"ship_horn": 22050, "ferry_diesel": 22050, "ferry_chime": 32000,
+		"rail_joints": 22050, "train_whistle": 22050, "diesel_horn": 22050, "airship_engines": 22050,
+		"jet_cabin": 22050, "cabin_chime": 32000}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -1353,6 +1359,106 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 						v += bar * env
 				var bp := _lp(st, 0, v, a_hi) - _lp(st, 1, v, a_lo)
 				s[i] = bp
+		"rail_joints":
+			# Rhythmic railway carriage bogies crossing rail joints (da-dum ... da-dum, 4 cycles per 8 s loop, zero
+			# seam): paired front/rear axle knocks with bogie steel resonance over a warm low-passed rolling bed.
+			var a_roll := _a(280.0, r)
+			var a_out := _a(680.0, r)
+			var bogie := _res_c(185.0, 0.94, r)
+			var rail := _res_c(480.0, 0.9, r)
+			var hits := [0.05, 0.19, 0.72, 0.86]
+			for i in total:
+				var t := float(i) / r
+				var cyc := fposmod(t, 2.0)
+				var wn := rng.randf_range(-1.0, 1.0)
+				var ex := 0.0
+				for h: float in hits:
+					var dt := cyc - h
+					if dt >= 0.0 and dt < 0.045:
+						ex += (0.55 + 0.45 * wn) * exp(-dt * 75.0)
+				var knock := _res(st, 0, ex, bogie) * 2.2 + _res(st, 2, ex, rail) * 1.1
+				var sway := 0.88 + 0.12 * sin(TAU * 0.5 * t)
+				var roll := _lp(st, 4, wn, a_roll) * 0.65 * sway + sin(TAU * 42.0 * t) * 0.08
+				s[i] = _lp(st, 5, roll + knock * 0.52, a_out)
+		"train_whistle":
+			# Vintage three-chime steam locomotive whistle drifting across night hills/snow: warm multi-pipe chord
+			# (311, 392, 466 Hz) with slight steam-pressure attack sag, breath hiss and soft valley echo tail.
+			var a_steam := _a(1100.0, r)
+			var a_lo := _a(260.0, r)
+			var a_out := _a(1200.0, r)
+			var ph1 := 0.0
+			var ph2 := 0.0
+			var ph3 := 0.0
+			for i in total:
+				var t := float(i) / r
+				var env := smoothstep(0.0, 0.28, t) * (1.0 - smoothstep(2.1, 2.9, t)) \
+						+ 0.25 * smoothstep(1.2, 2.3, t) * exp(-maxf(t - 2.3, 0.0) * 1.3)
+				var bend := 1.0 - 0.014 * exp(-t * 6.0) - 0.01 * smoothstep(2.0, 2.9, t)
+				ph1 += 311.13 * bend / r
+				ph2 += 392.0 * bend / r
+				ph3 += 466.16 * bend / r
+				var chord := (sin(TAU * ph1) + 0.35 * sin(TAU * 2.0 * ph1)) * 0.45 \
+						+ (sin(TAU * ph2 + 0.4) + 0.28 * sin(TAU * 2.0 * ph2)) * 0.38 \
+						+ (sin(TAU * ph3 + 0.9) + 0.22 * sin(TAU * 2.0 * ph3)) * 0.32
+				var wn := rng.randf_range(-1.0, 1.0)
+				var steam := (_lp(st, 0, wn, a_steam) - _lp(st, 1, wn, a_lo)) * 0.22
+				s[i] = _lp(st, 2, (chord + steam) * env, a_out)
+		"diesel_horn":
+			# 1950s streamliner three-chime air horn over desert plains (261.6, 311.1, 440.0 Hz): brassy reed harmonics,
+			# crisp air attack and wide open-desert decay.
+			var a_out := _a(1400.0, r)
+			var a_air := _a(900.0, r)
+			for i in total:
+				var t := float(i) / r
+				var blast1 := smoothstep(0.0, 0.14, t) * (1.0 - smoothstep(1.35, 1.7, t))
+				var blast2 := smoothstep(1.9, 2.04, t) * (1.0 - smoothstep(3.15, 3.6, t))
+				var echo := 0.18 * exp(-maxf(t - 3.3, 0.0) * 1.8) * smoothstep(2.9, 3.4, t)
+				var env := clampf(blast1 + blast2 + echo, 0.0, 1.0)
+				var v := 0.0
+				for f: float in [261.63, 311.13, 440.0]:
+					v += sin(TAU * f * t) * 0.4 + sin(TAU * 2.0 * f * t) * 0.22 + sin(TAU * 3.0 * f * t) * 0.1
+				var air := _lp(st, 0, rng.randf_range(-1.0, 1.0), a_air) * 0.14
+				s[i] = _lp(st, 1, (v + air) * env, a_out)
+		"airship_engines":
+			# Distant multi-blade Zeppelin aero-engines heard from a promenade lounge: soft low-frequency propeller
+			# thrum (24 Hz + 24.25 Hz: 2 gentle beats per 8 s loop, zero seam) under a silky high-altitude air whisper.
+			var a_air := _a(420.0, r)
+			var a_out := _a(340.0, r)
+			for i in total:
+				var t := float(i) / r
+				var p1 := sin(TAU * 24.0 * t) + 0.55 * sin(TAU * 48.0 * t + 0.3) + 0.25 * sin(TAU * 72.0 * t)
+				var p2 := sin(TAU * 24.25 * t + 1.0) + 0.45 * sin(TAU * 48.5 * t) + 0.2 * sin(TAU * 97.0 * t)
+				var air := _lp(st, 0, rng.randf_range(-1.0, 1.0), a_air) * 0.48
+				s[i] = _lp(st, 1, (p1 * 0.34 + p2 * 0.3 + air) * 0.8, a_out)
+		"jet_cabin":
+			# High-altitude 1960s jetliner cabin ambience: silky band-shaped fuselage airflow with a faint steady
+			# twin-turbine hum (112 Hz + 112.25 Hz, 2 soft beats per 8 s loop, zero seam).
+			var a_hi := _a(1350.0, r)
+			var a_lo := _a(110.0, r)
+			var a_bass := _a(220.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var rush := (_lp(st, 0, wn, a_hi) - _lp(st, 1, wn, a_lo)) * 0.72
+				var bass := _lp(st, 2, wn, a_bass) * 0.45
+				var turb := (sin(TAU * 112.0 * t) + sin(TAU * 112.25 * t + 0.8)) * 0.045 \
+						+ sin(TAU * 224.0 * t) * 0.02
+				s[i] = rush + bass + turb
+		"cabin_chime":
+			# Crisp 1960s two-tone airline seatbelt / boarding cabin chime (G5 -> E5) through an overhead speaker.
+			var a_hi := _a(2800.0, r)
+			var a_lo := _a(320.0, r)
+			var notes := [[0.08, 783.99, 1.0], [0.58, 659.25, 0.92]]
+			for i in total:
+				var t := float(i) / r
+				var v := 0.0
+				for n: Array in notes:
+					var dt := t - float(n[0])
+					if dt >= 0.0:
+						var f := float(n[1])
+						var env := minf(dt / 0.006, 1.0) * exp(-dt * 2.5) * float(n[2])
+						v += (sin(TAU * f * dt) + 0.18 * sin(TAU * 2.0 * f * dt) * exp(-dt * 5.0)) * env
+				s[i] = _lp(st, 0, v, a_hi) - _lp(st, 1, v, a_lo)
 	return s
 
 

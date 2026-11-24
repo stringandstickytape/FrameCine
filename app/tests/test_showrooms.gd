@@ -282,13 +282,22 @@ func _test_room_tab() -> void:
 	var builders: Dictionary = journeys.get_meta("builders", {})
 	var gemini_journeys: Array = (tab.room_buttons(builders["Gemini 4 Neon Extra High"]) as Array).map(
 			func(b: Button) -> String: return b.text) if builders.has("Gemini 4 Neon Extra High") else []
+	var gemini_expected := [
+		["liner_1936", "Liner 1936"],
+		["night_ferry_1994", "Night ferry 1994"],
+		["cinema_coach_1935", "Cinema coach 1935"],
+		["night_sleeper_1929", "Night sleeper 1929"],
+		["dome_car_1955", "Dome car 1955"],
+		["airship_1931", "Airship 1931"],
+		["jet_1964", "Jet 1964"],
+	]
 	_check("the journeys stand under their builders %s" % [builders.keys()],
 			builders.has("Gemini 4 Neon Extra High") and builders.has(EnvLibrary.DEFAULT_AUTHOR)
-			and gemini_journeys.has(tr("Liner 1936")) and gemini_journeys.has(tr("Night ferry 1994")))
+			and gemini_expected.all(func(e: Array) -> bool: return gemini_journeys.has(tr(str(e[1])))))
 	_check("a room with no author is the default builder's (%s)" % EnvLibrary.builder_of("cinema"),
 			EnvLibrary.author_of("cinema") == "" and EnvLibrary.builder_of("cinema") == "Opus 5.5 High"
-			and EnvLibrary.builder_of("liner_1936") == "Gemini 4 Neon Extra High"
-			and EnvLibrary.builder_of("night_ferry_1994") == "Gemini 4 Neon Extra High")
+			and gemini_expected.all(func(e: Array) -> bool:
+				return EnvLibrary.builder_of(str(e[0])) == "Gemini 4 Neon Extra High"))
 	_check("each builder's heading is a label above its rooms", (journeys.get_children() as Array).filter(
 			func(c: Node) -> bool: return c is Label).map(func(l: Label) -> String: return l.text) == builders.keys())
 	_check("the Void stays with the other rooms", EnvLibrary.category_of("void") == "other"

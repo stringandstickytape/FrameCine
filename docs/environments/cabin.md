@@ -33,6 +33,7 @@ builder that every such room dresses, instead of one hand-made shell a room.
 | `lean` | float | -15..15 | 0 | degrees the side walls lean in towards their tops (negative: out) |
 | `roof` | enum | flat, arched | arched | the roof's shape |
 | `roof_rise` | float | 0..1.5 | 0.25 | how far an arched roof rises over the walls' tops at its middle |
+| `glazed_roof` | bool | | false | replace the opaque roof ceiling with curved dome sky glass in `Glass` and three longitudinal purlin mullions in `Trim` (observation dome cars) |
 | `front_z` | float | -30..-1.5 | -3.0 | z of the front bulkhead (the screen's) |
 | `back_z` | float | 0.6..30 | 2.4 | z of the rear bulkhead |
 | `centre_x` | float | -3..3 | 0 | the cabin's centre line (used with seating none) |

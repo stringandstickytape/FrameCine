@@ -594,6 +594,7 @@ msgid "Already in your pictures: %s"
 msgstr ""
 
 #: scripts/pictures/picture_library.gd:85 ui/object_section.gd:499 ui/pane_ui.gd:56 ui/picture_tab.gd:479
+#: environments/cinema_coach_1935.env.json
 msgid "Picture"
 msgstr ""
 
@@ -2826,7 +2827,8 @@ msgid "words to search for, such as autumn forest"
 msgstr ""
 
 #: ui/picture_tab.gd:222 ui/picture_tab.gd:39 ui/room_tab.gd:23 ui/sound_tab.gd:129
-#: environments/flagship.env.json environments/ice_cinema.env.json environments/night_ferry_1994.env.json
+#: environments/airship_1931.env.json environments/cinema_coach_1935.env.json environments/dome_car_1955.env.json environments/flagship.env.json
+#: environments/ice_cinema.env.json environments/jet_1964.env.json environments/night_ferry_1994.env.json environments/night_sleeper_1929.env.json
 msgid "Off"
 msgstr ""
 
@@ -4539,6 +4541,10 @@ msgstr ""
 msgid "Cloud layers sky"
 msgstr ""
 
+#: environments/airship_1931.env.json
+msgid "Airship 1931"
+msgstr ""
+
 #: environments/atmospheric_1928.env.json
 msgid "Atmospheric 1928"
 msgstr ""
@@ -4547,8 +4553,16 @@ msgstr ""
 msgid "Bathysphere"
 msgstr ""
 
+#: environments/cinema_coach_1935.env.json
+msgid "Cinema coach 1935"
+msgstr ""
+
 #: environments/crater.env.json
 msgid "Crater"
+msgstr ""
+
+#: environments/dome_car_1955.env.json
+msgid "Dome car 1955"
 msgstr ""
 
 #: environments/drive_in_1958.env.json
@@ -4561,6 +4575,10 @@ msgstr ""
 
 #: environments/ice_cinema.env.json
 msgid "Ice cinema"
+msgstr ""
+
+#: environments/jet_1964.env.json
+msgid "Jet 1964"
 msgstr ""
 
 #: environments/liner_1936.env.json
@@ -4577,6 +4595,10 @@ msgstr ""
 
 #: environments/night_ferry_1994.env.json
 msgid "Night ferry 1994"
+msgstr ""
+
+#: environments/night_sleeper_1929.env.json
+msgid "Night sleeper 1929"
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
@@ -4667,6 +4689,10 @@ msgstr ""
 msgid "TV today - the present"
 msgstr ""
 
+#: environments/airship_1931.env.json
+msgid "A 1931 rigid airship's promenade lounge: leaning-out observation windows in duralumin girders, a self-playing featherweight grand piano, and an endless moonlit sea of clouds far below."
+msgstr ""
+
 #: environments/atmospheric_1928.env.json
 msgid "A picture palace built as a Mediterranean courtyard at dusk: lit windows, iron balconies, a palace gate with an organ, a crescent moon and real stars."
 msgstr ""
@@ -4679,8 +4705,16 @@ msgstr ""
 msgid "The converted cinema: rows on a rake, curtains that part when the film starts, and the house lights going down."
 msgstr ""
 
+#: environments/cinema_coach_1935.env.json
+msgid "A 1935 express railway cinema carriage rolling through autumn night: mahogany panelling, swaying brass lamps, telegraph poles, a dark railway tunnel mid-reel and a warm terminus with the credits."
+msgstr ""
+
 #: environments/crater.env.json
 msgid "A Moon base's cinema under a geodesic glass dome: Earth turns slowly over the screen, the crater's peaks catch the sun, and the Milky Way comes out when the lights go down."
+msgstr ""
+
+#: environments/dome_car_1955.env.json
+msgid "An upper-deck stainless-steel observation dome car crossing moonlit Southwest canyon country: desert twilight deepens to the full Milky Way and shooting stars arching across the curved glass roof."
 msgstr ""
 
 #: environments/drive_in_1958.env.json
@@ -4693,6 +4727,10 @@ msgstr ""
 
 #: environments/ice_cinema.env.json
 msgid "An ice hotel's cinema of sawn blocks and carvings under an ice vault: candles glowing inside the ice, hides on ice benches, the polar night and the northern lights outside."
+msgstr ""
+
+#: environments/jet_1964.env.json
+msgid "A 1964 first-class transpolar jet cabin: oval windows over a moonlit cloud sea, a ceiling 16 mm twin-reel projector onto a pull-down screen, air-tube audio, and polar aurora in quiet scenes."
 msgstr ""
 
 #: environments/liner_1936.env.json
@@ -4709,6 +4747,10 @@ msgstr ""
 
 #: environments/night_ferry_1994.env.json
 msgid "A cross-Channel ferry's video lounge in 1994: reclining seats under a bracketed CRT telly, salt-streaked storm windows, a sweeping lighthouse beam and a floodlit ferry port with the credits."
+msgstr ""
+
+#: environments/night_sleeper_1929.env.json
+msgid "A 1929 Art Deco marquetry sleeping compartment crossing a snowy alpine night: flakes drift past the window under the Moon, a tabletop 16 mm projector hums, and rosy dawn rises with the credits."
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
@@ -4803,6 +4845,14 @@ msgstr ""
 msgid "Nothing but black and a mirror floor that gives back the film, with a ripple where you move."
 msgstr ""
 
+#: environments/airship_1931.env.json
+msgid "Lounge piano"
+msgstr ""
+
+#: environments/airship_1931.env.json
+msgid "Cove glow"
+msgstr ""
+
 #: environments/atmospheric_1928.env.json
 msgid "Clouds"
 msgstr ""
@@ -4823,8 +4873,20 @@ msgstr ""
 msgid "House lights in the film"
 msgstr ""
 
+#: environments/cinema_coach_1935.env.json
+msgid "Lighting"
+msgstr ""
+
 #: environments/crater.env.json
 msgid "Earth's speed"
+msgstr ""
+
+#: environments/dome_car_1955.env.json
+msgid "Dome coves"
+msgstr ""
+
+#: environments/dome_car_1955.env.json
+msgid "Starlight"
 msgstr ""
 
 #: environments/drive_in_1958.env.json
@@ -4835,8 +4897,20 @@ msgstr ""
 msgid "Starlight ceiling"
 msgstr ""
 
-#: environments/ice_cinema.env.json
+#: environments/ice_cinema.env.json environments/jet_1964.env.json
 msgid "Aurora"
+msgstr ""
+
+#: environments/jet_1964.env.json environments/night_sleeper_1929.env.json
+msgid "Film print"
+msgstr ""
+
+#: environments/jet_1964.env.json
+msgid "Air-tube headset"
+msgstr ""
+
+#: environments/jet_1964.env.json
+msgid "Cabin mood"
 msgstr ""
 
 #: environments/liner_1936.env.json
@@ -4857,6 +4931,14 @@ msgstr ""
 
 #: environments/night_ferry_1994.env.json
 msgid "Night strips"
+msgstr ""
+
+#: environments/night_sleeper_1929.env.json
+msgid "Night lamp"
+msgstr ""
+
+#: environments/night_sleeper_1929.env.json
+msgid "Snowfall"
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
@@ -4956,6 +5038,14 @@ msgstr ""
 msgid "Ripple"
 msgstr ""
 
+#: environments/airship_1931.env.json
+msgid "The featherweight grand piano plays itself in the pre-show, interval and after the end."
+msgstr ""
+
+#: environments/airship_1931.env.json
+msgid "Indirect light along the screen proscenium and upper deckhead coves."
+msgstr ""
+
 #: environments/atmospheric_1928.env.json
 msgid "How much of the open sky the clouds cover. They catch the film's light."
 msgstr ""
@@ -4980,8 +5070,24 @@ msgstr ""
 msgid "How bright the house lamps stay once the film has started."
 msgstr ""
 
+#: environments/cinema_coach_1935.env.json
+msgid "The brass-hooded screen cove and cornice wash during the film and inside the railway tunnel."
+msgstr ""
+
+#: environments/cinema_coach_1935.env.json
+msgid "1935 back-projection newsreel film print with gentle weave, dust and lamp hotspot, or a clean picture."
+msgstr ""
+
 #: environments/crater.env.json
 msgid "How fast Earth turns in the sky. At 1 x it turns once in two hours, about once a film."
+msgstr ""
+
+#: environments/dome_car_1955.env.json
+msgid "Recessed dome valance and aisle floor-guide lighting along the observation deck."
+msgstr ""
+
+#: environments/dome_car_1955.env.json
+msgid "Full desert Milky Way and shooting stars overhead, quiet starlight, or faint constellation lines."
 msgstr ""
 
 #: environments/drive_in_1958.env.json
@@ -4994,6 +5100,22 @@ msgstr ""
 
 #: environments/ice_cinema.env.json
 msgid "The northern lights in the window and the skylights: lively before the film and swelling in its quiet scenes, glowing all the time, or staying away."
+msgstr ""
+
+#: environments/jet_1964.env.json
+msgid "The polar aurora outside the oval windows: blooming softly in quiet scenes, glowing throughout the crossing, or off."
+msgstr ""
+
+#: environments/jet_1964.env.json
+msgid "The 1964 ceiling 16 mm film print look and subtle projector purr, or a clean picture."
+msgstr ""
+
+#: environments/jet_1964.env.json
+msgid "Routes the film's sound through tinny 1964 pneumatic air-tube cabin headphones."
+msgstr ""
+
+#: environments/jet_1964.env.json
+msgid "Soft indirect cove light along the overhead hat-racks and aisle carpet guide strips."
 msgstr ""
 
 #: environments/liner_1936.env.json
@@ -5018,6 +5140,18 @@ msgstr ""
 
 #: environments/night_ferry_1994.env.json
 msgid "Low night-crossing strips along the aisle and window pelmets."
+msgstr ""
+
+#: environments/night_sleeper_1929.env.json
+msgid "The sleeper compartment's ceiling night lamp. Keeps a soft glow once the reading sconces dim."
+msgstr ""
+
+#: environments/night_sleeper_1929.env.json
+msgid "Winter snow drifting past the compartment window: light flurries, heavy snowfall, or clear starlight."
+msgstr ""
+
+#: environments/night_sleeper_1929.env.json
+msgid "Subtle 16 mm home-projector weave, dust, lamp flicker and vignette, or a clean picture."
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
@@ -5136,6 +5270,14 @@ msgstr ""
 msgid "A faint ring on the floor where you move. At the bottom: none."
 msgstr ""
 
+#: environments/airship_1931.env.json environments/liner_1936.env.json
+msgid "Champagne"
+msgstr ""
+
+#: environments/airship_1931.env.json
+msgid "Moonlight silver"
+msgstr ""
+
 #: environments/bathysphere.env.json
 msgid "Sunlit shallows"
 msgstr ""
@@ -5160,6 +5302,46 @@ msgstr ""
 msgid "Sometimes"
 msgstr ""
 
+#: environments/cinema_coach_1935.env.json environments/night_sleeper_1929.env.json
+msgid "Warm amber"
+msgstr ""
+
+#: environments/cinema_coach_1935.env.json
+msgid "Ruby cove"
+msgstr ""
+
+#: environments/cinema_coach_1935.env.json
+msgid "Newsreel print"
+msgstr ""
+
+#: environments/cinema_coach_1935.env.json environments/jet_1964.env.json environments/night_ferry_1994.env.json environments/night_sleeper_1929.env.json
+msgid "Clean picture"
+msgstr ""
+
+#: environments/dome_car_1955.env.json
+msgid "Turquoise"
+msgstr ""
+
+#: environments/dome_car_1955.env.json
+msgid "Desert coral"
+msgstr ""
+
+#: environments/dome_car_1955.env.json
+msgid "Warm chrome"
+msgstr ""
+
+#: environments/dome_car_1955.env.json
+msgid "Milky Way & meteors"
+msgstr ""
+
+#: environments/dome_car_1955.env.json
+msgid "Quiet stars"
+msgstr ""
+
+#: environments/dome_car_1955.env.json
+msgid "Constellations"
+msgstr ""
+
 #: environments/flagship.env.json
 msgid "Before the film"
 msgstr ""
@@ -5168,16 +5350,24 @@ msgstr ""
 msgid "Always (faint in the film)"
 msgstr ""
 
-#: environments/ice_cinema.env.json
+#: environments/ice_cinema.env.json environments/jet_1964.env.json
 msgid "In quiet scenes"
 msgstr ""
 
-#: environments/ice_cinema.env.json
+#: environments/ice_cinema.env.json environments/jet_1964.env.json
 msgid "Always"
 msgstr ""
 
-#: environments/liner_1936.env.json
-msgid "Champagne"
+#: environments/jet_1964.env.json
+msgid "16 mm print"
+msgstr ""
+
+#: environments/jet_1964.env.json
+msgid "Warm ivory"
+msgstr ""
+
+#: environments/jet_1964.env.json
+msgid "Polar blue"
 msgstr ""
 
 #: environments/liner_1936.env.json environments/streamline_1937.env.json
@@ -5212,7 +5402,7 @@ msgstr ""
 msgid "Raining"
 msgstr ""
 
-#: environments/night_ferry_1994.env.json
+#: environments/night_ferry_1994.env.json environments/night_sleeper_1929.env.json
 msgid "Clear night"
 msgstr ""
 
@@ -5225,10 +5415,6 @@ msgid "1994 CRT"
 msgstr ""
 
 #: environments/night_ferry_1994.env.json
-msgid "Clean picture"
-msgstr ""
-
-#: environments/night_ferry_1994.env.json
 msgid "Soft amber"
 msgstr ""
 
@@ -5236,16 +5422,24 @@ msgstr ""
 msgid "Marine teal"
 msgstr ""
 
-#: environments/palace_of_culture_1974.env.json
-msgid "No snow"
+#: environments/night_sleeper_1929.env.json
+msgid "Sapphire blue"
 msgstr ""
 
-#: environments/palace_of_culture_1974.env.json
+#: environments/night_sleeper_1929.env.json environments/palace_of_culture_1974.env.json
 msgid "Light snow"
 msgstr ""
 
-#: environments/palace_of_culture_1974.env.json
+#: environments/night_sleeper_1929.env.json environments/palace_of_culture_1974.env.json
 msgid "Heavy snow"
+msgstr ""
+
+#: environments/night_sleeper_1929.env.json
+msgid "1929 home print"
+msgstr ""
+
+#: environments/palace_of_culture_1974.env.json
+msgid "No snow"
 msgstr ""
 
 #: environments/pillow_fort_1993.env.json environments/reclaimed.env.json

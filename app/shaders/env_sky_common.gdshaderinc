@@ -20,6 +20,8 @@ uniform float space = 0.0;
 // Earth's shadow rising as a blue-grey band under the pink belt of Venus.
 uniform float afterglow = 0.0;
 uniform vec3 belt_colour : source_color = vec3(0.62, 0.36, 0.42);
+// Smooth blackout (0..1) for enclosed stretches such as a railway tunnel.
+uniform float blackout = 0.0;
 
 // The clouds: a tiling noise (sky.gd noise_texture(): r, g two sizes of cloud, b the galaxy's mottling, a rays).
 uniform sampler2D sky_noise : filter_linear_mipmap, repeat_enable;
