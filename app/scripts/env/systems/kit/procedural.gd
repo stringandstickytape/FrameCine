@@ -21,12 +21,12 @@ extends RefCounted
 const PATTERNS: Array[String] = ["pressed_tin", "ice_blocks", "swirl_carpet", "corrugated", "plasterboard",
 		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles", "deco_carpet", "hex_pavers", "board_concrete",
 		"tufted", "shell_carpet", "moquette_94", "art_deco_runner", "midcentury_weave",
-		"moquette_88", "tartan_blanket"]
+		"moquette_88", "tartan_blanket", "mosaic_medallion", "leather_blotter"]
 const SIZE := 128
 ## Patterns drawn larger than SIZE (many tiles a repeat, each its own: since 2026-11-08, the Athens rooftop's floor).
 const SIZES := {"quarry_tiles": 256, "deco_carpet": 256, "hex_pavers": 256, "board_concrete": 256,
 		"shell_carpet": 256, "moquette_94": 256, "art_deco_runner": 256, "midcentury_weave": 256,
-		"moquette_88": 256, "tartan_blanket": 256}
+		"moquette_88": 256, "tartan_blanket": 256, "mosaic_medallion": 256, "leather_blotter": 256}
 const GLASS_SHADER := preload("res://scripts/env/systems/kit/env_glass.gdshader")
 const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
@@ -483,6 +483,48 @@ static func _sample(pattern: String, u: float, v: float) -> Array:
 			var fuzz := _noise(u, v, 64, 709)
 			var h := 0.48 + 0.08 * twill + 0.08 * fuzz
 			return [h, c * (0.9 + 0.2 * fuzz), 0.96]
+		"mosaic_medallion":
+			# Classical stone tesserae floor mosaic: cream marble field, turquoise sea-jade bands, warm gold accent
+			# star rosette, fine dark mortar grout lines and per-tessera shade variation.
+			var p := Vector2(u - 0.5, v - 0.5) * 2.0
+			var r := p.length()
+			var ang := atan2(p.y, p.x)
+			var gx := fposmod(u * 24.0, 1.0)
+			var gy := fposmod(v * 24.0, 1.0)
+			var grout := 1.0 - smoothstep(0.05, 0.11, minf(minf(gx, 1.0 - gx), minf(gy, 1.0 - gy)))
+			var tid_x := int(floor(u * 24.0))
+			var tid_y := int(floor(v * 24.0))
+			var tvar := 0.88 + 0.24 * _hash(tid_x, tid_y, 821)
+			var cream := Color(0.80, 0.77, 0.70)
+			var jade := Color(0.16, 0.44, 0.46)
+			var gold := Color(0.78, 0.62, 0.28)
+			var slate := Color(0.24, 0.28, 0.30)
+			var petal := 0.24 + 0.14 * cos(ang * 8.0)
+			var c := cream
+			if r < petal:
+				c = gold if r < 0.14 else jade
+			elif absf(r - 0.62) < 0.09:
+				c = jade
+			elif absf(r - 0.78) < 0.045:
+				c = gold
+			elif maxf(absf(p.x), absf(p.y)) > 0.88:
+				c = slate
+			c = c * tvar
+			c = c.lerp(Color(0.26, 0.26, 0.25), grout * 0.75)
+			var h := 0.62 - grout * 0.35 + (tvar - 1.0) * 0.18
+			return [h, c, 0.38 + grout * 0.48]
+		"leather_blotter":
+			# Deep green gold-tooled leather desk blotter with subtle magnified pebble grain and fine gilt border rule.
+			var deep_green := Color(0.08, 0.22, 0.14)
+			var gold_leaf := Color(0.84, 0.68, 0.26)
+			var pebble := _noise(u, v, 36, 913) * 0.65 + _noise(u, v, 72, 919) * 0.35
+			var edge := minf(minf(u, 1.0 - u), minf(v, 1.0 - v))
+			var outer_rule := 1.0 - smoothstep(0.004, 0.011, absf(edge - 0.06))
+			var inner_rule := 1.0 - smoothstep(0.003, 0.009, absf(edge - 0.088))
+			var gilt := clampf(maxf(outer_rule, inner_rule), 0.0, 1.0)
+			var c := (deep_green * (0.84 + 0.32 * pebble)).lerp(gold_leaf, gilt * 0.9)
+			var h := 0.45 + 0.16 * pebble - gilt * 0.12
+			return [h, c, lerpf(0.58, 0.24, gilt)]
 	return [0.5, Color(0.5, 0.5, 0.5), 0.8]
 
 

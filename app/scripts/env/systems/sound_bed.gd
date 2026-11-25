@@ -28,7 +28,8 @@ const SOUNDS: Array[String] = ["silence", "projector", "wall_rumble", "cicadas",
 		"channel_clunk", "sonar", "bubbles", "far_car", "scops_owl", "church_bell", "city", "tawny_owl",
 		"hooves", "boat_engine", "water_lap", "paddle_wheel", "ship_horn", "ferry_diesel", "ferry_chime",
 		"rail_joints", "train_whistle", "diesel_horn", "airship_engines", "jet_cabin", "cabin_chime",
-		"coach_diesel", "car_motorway", "climber_hum", "rover_drive", "telegraph_bell"]
+		"coach_diesel", "car_motorway", "climber_hum", "rover_drive", "telegraph_bell",
+		"cavern_hum", "cloud_wind", "temple_bell", "aerostat_hum", "giant_clock"]
 ## Each sound's designed level: dBFS RMS on Environment at the slider's default (-18 dB), full level, no film; a
 ## one-shot's loudest second. The level check's target is -38 dBFS; every bed is 12 dB or more under it.
 const LEVELS := {"projector": -51.0, "wall_rumble": -50.0, "cicadas": -54.0, "moped": -52.0, "train": -52.0,
@@ -44,7 +45,9 @@ const LEVELS := {"projector": -51.0, "wall_rumble": -50.0, "cicadas": -54.0, "mo
 		"rail_joints": -53.0, "train_whistle": -54.0, "diesel_horn": -54.0, "airship_engines": -55.0,
 		"jet_cabin": -55.0, "cabin_chime": -53.0,
 		"coach_diesel": -53.0, "car_motorway": -54.0, "climber_hum": -55.0, "rover_drive": -54.0,
-		"telegraph_bell": -53.0}
+		"telegraph_bell": -53.0,
+		"cavern_hum": -55.0, "cloud_wind": -56.0, "temple_bell": -54.0, "aerostat_hum": -55.0,
+		"giant_clock": -56.0}
 ## The states in which the film plays: the bed sits film_db lower.
 const FILM_STATES: Array[String] = ["starting", "playing", "credits"]
 ## Under this linear gain a bed stops its players.

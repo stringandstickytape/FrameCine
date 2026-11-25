@@ -491,6 +491,10 @@ msgstr ""
 msgid "Journeys"
 msgstr ""
 
+#: scripts/env/env_doc.gd:84
+msgid "Other worlds"
+msgstr ""
+
 #: scripts/env/env_library.gd:96
 msgid "A small dark room with nothing in it to look at but the film."
 msgstr ""
@@ -515,7 +519,7 @@ msgstr ""
 msgid "An open geodesic dome on a wide plain at dusk, the first stars coming out overhead."
 msgstr ""
 
-#: scripts/env/room_settings.gd:204 ui/room_tab.gd:292 ui/sound_tab.gd:76
+#: scripts/env/room_settings.gd:204 ui/room_tab.gd:295 ui/sound_tab.gd:76
 msgid "off"
 msgstr ""
 
@@ -529,7 +533,7 @@ msgstr ""
 msgid "%.1f s"
 msgstr ""
 
-#: scripts/env/room_settings.gd:213 ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:283
+#: scripts/env/room_settings.gd:213 ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:286
 #, c-format
 msgid "%d min"
 msgstr ""
@@ -2827,10 +2831,10 @@ msgid "words to search for, such as autumn forest"
 msgstr ""
 
 #: ui/picture_tab.gd:222 ui/picture_tab.gd:39 ui/room_tab.gd:23 ui/sound_tab.gd:129
-#: environments/airship_1931.env.json environments/cinema_coach_1935.env.json environments/coach_trip_1988.env.json environments/dome_car_1955.env.json
-#: environments/flagship.env.json environments/ice_cinema.env.json environments/jet_1964.env.json environments/mars_train.env.json
-#: environments/moon_ferry.env.json environments/night_ferry_1994.env.json environments/night_sleeper_1929.env.json environments/salon_1870.env.json
-#: environments/sky_lift.env.json
+#: environments/airship_1931.env.json environments/cinema_coach_1935.env.json environments/cloud_temple.env.json environments/coach_trip_1988.env.json
+#: environments/dome_car_1955.env.json environments/flagship.env.json environments/ice_cinema.env.json environments/jet_1964.env.json
+#: environments/mars_train.env.json environments/moon_ferry.env.json environments/night_ferry_1994.env.json environments/night_sleeper_1929.env.json
+#: environments/orbital_ring.env.json environments/salon_1870.env.json environments/sky_lift.env.json environments/venus_aerostat.env.json
 msgid "Off"
 msgstr ""
 
@@ -3062,7 +3066,7 @@ msgstr ""
 msgid "Each picture"
 msgstr ""
 
-#: ui/picture_tab.gd:528 ui/room_tab.gd:280 ui/room_tab.gd:292
+#: ui/picture_tab.gd:528 ui/room_tab.gd:283 ui/room_tab.gd:295
 #, c-format
 msgid "%d s"
 msgstr ""
@@ -3270,229 +3274,233 @@ msgstr ""
 msgid "A journey is as long as the film: it leaves when the film starts and arrives with the credits. Pause, and it waits."
 msgstr ""
 
-#: ui/room_tab.gd:141
+#: ui/room_tab.gd:140
+msgid "Impossible sanctuaries to watch a film: crystal caverns, orbital rings, cloud temples, floating aerostats, sunken ruins and miniature worlds."
+msgstr ""
+
+#: ui/room_tab.gd:144
 msgid "Time travel"
 msgstr ""
 
-#: ui/room_tab.gd:143
+#: ui/room_tab.gd:146
 msgid "Over the film"
 msgstr ""
 
-#: ui/room_tab.gd:143
+#: ui/room_tab.gd:146
 msgid "Every 5 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:143
+#: ui/room_tab.gd:146
 msgid "Every 10 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:143
+#: ui/room_tab.gd:146
 msgid "Every 15 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:146
+#: ui/room_tab.gd:149
 msgid "One film, and the room moves forward through the history of television, an era at a time while it plays."
 msgstr ""
 
-#: ui/room_tab.gd:154
+#: ui/room_tab.gd:157
 msgid "Use this picture as the room"
 msgstr ""
 
-#: ui/room_tab.gd:165
+#: ui/room_tab.gd:168
 msgid "Current"
 msgstr ""
 
-#: ui/room_tab.gd:173
+#: ui/room_tab.gd:176
 msgid "Back to defaults"
 msgstr ""
 
-#: ui/room_tab.gd:191
+#: ui/room_tab.gd:194
 msgid "Pick a seat"
 msgstr ""
 
-#: ui/room_tab.gd:195 ui/seat_plan.gd:183
+#: ui/room_tab.gd:198 ui/seat_plan.gd:183
 msgid "Default seat"
 msgstr ""
 
-#: ui/room_tab.gd:202
+#: ui/room_tab.gd:205
 msgid "Reset screen"
 msgstr ""
 
-#: ui/room_tab.gd:203
+#: ui/room_tab.gd:206
 msgid "Reset room"
 msgstr ""
 
-#: ui/room_tab.gd:204
+#: ui/room_tab.gd:207
 msgid "Reset room: back to the room's own seat, facing the screen, view recentred."
 msgstr ""
 
-#: ui/room_tab.gd:210
+#: ui/room_tab.gd:213
 msgid "Floor reflection"
 msgstr ""
 
-#: ui/room_tab.gd:212
+#: ui/room_tab.gd:215
 msgid "Reflection"
 msgstr ""
 
-#: ui/room_tab.gd:218
+#: ui/room_tab.gd:221
 msgid "Effects"
 msgstr ""
 
-#: ui/room_tab.gd:220 ui/room_tab.gd:232
+#: ui/room_tab.gd:223 ui/room_tab.gd:235
 msgid "Bias light"
 msgstr ""
 
-#: ui/room_tab.gd:224
+#: ui/room_tab.gd:227
 msgid "React to the film"
 msgstr ""
 
-#: ui/room_tab.gd:228
+#: ui/room_tab.gd:231
 msgid "Projector beam"
 msgstr ""
 
-#: ui/room_tab.gd:235
+#: ui/room_tab.gd:238
 msgid "Reaction"
 msgstr ""
 
-#: ui/room_tab.gd:249
+#: ui/room_tab.gd:252
 msgid "Time of day"
 msgstr ""
 
-#: ui/room_tab.gd:250
+#: ui/room_tab.gd:253
 msgid "Night"
 msgstr ""
 
-#: ui/room_tab.gd:250
+#: ui/room_tab.gd:253
 msgid "Now"
 msgstr ""
 
-#: ui/room_tab.gd:250
+#: ui/room_tab.gd:253
 msgid "Dusk"
 msgstr ""
 
-#: ui/room_tab.gd:250
+#: ui/room_tab.gd:253
 msgid "Day"
 msgstr ""
 
-#: ui/room_tab.gd:254
+#: ui/room_tab.gd:257
 msgid "Latitude"
 msgstr ""
 
-#: ui/room_tab.gd:257
+#: ui/room_tab.gd:260
 msgid "Room light"
 msgstr ""
 
-#: ui/room_tab.gd:261
+#: ui/room_tab.gd:264
 msgid "Dim while playing"
 msgstr ""
 
-#: ui/room_tab.gd:263
+#: ui/room_tab.gd:266
 msgid "Dimmed to"
 msgstr ""
 
-#: ui/room_tab.gd:267
+#: ui/room_tab.gd:270
 msgid "The showing"
 msgstr ""
 
-#: ui/room_tab.gd:269
+#: ui/room_tab.gd:272
 msgid "Curtains"
 msgstr ""
 
-#: ui/room_tab.gd:271
+#: ui/room_tab.gd:274
 msgid "Up next countdown"
 msgstr ""
 
-#: ui/room_tab.gd:273 ui/room_tab.gd:282
+#: ui/room_tab.gd:276 ui/room_tab.gd:285
 msgid "Intermission"
 msgstr ""
 
-#: ui/room_tab.gd:279
+#: ui/room_tab.gd:282
 msgid "Up next in"
 msgstr ""
 
-#: ui/room_tab.gd:293
+#: ui/room_tab.gd:296
 msgid "Crossfade music"
 msgstr ""
 
-#: ui/room_tab.gd:296
+#: ui/room_tab.gd:299
 msgid "Crossfade films"
 msgstr ""
 
-#: ui/room_tab.gd:300
+#: ui/room_tab.gd:303
 msgid "Sleep timer"
 msgstr ""
 
-#: ui/room_tab.gd:315
+#: ui/room_tab.gd:318
 msgid "Then"
 msgstr ""
 
-#: ui/room_tab.gd:419 ui/room_tab.gd:435
+#: ui/room_tab.gd:422 ui/room_tab.gd:438
 #, c-format
 msgid "%s (photo)"
 msgstr ""
 
-#: ui/room_tab.gd:540
+#: ui/room_tab.gd:543
 #, c-format
 msgid "Built by %s"
 msgstr ""
 
-#: ui/room_tab.gd:579
+#: ui/room_tab.gd:582
 msgid "This picture can't be a room (only local pictures)."
 msgstr ""
 
-#: ui/room_tab.gd:598
+#: ui/room_tab.gd:601
 #, c-format
 msgid "%s (moved) (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:598
+#: ui/room_tab.gd:601
 #, c-format
 msgid "%s (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:601
+#: ui/room_tab.gd:604
 #, c-format
 msgid "Where %s was (%d seat)"
 msgid_plural "Where %s was (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:603
+#: ui/room_tab.gd:606
 #, c-format
 msgid "The room's own spot (%d seat)"
 msgid_plural "The room's own spot (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:605
+#: ui/room_tab.gd:608
 #, c-format
 msgid "Go to %s"
 msgstr ""
 
-#: ui/room_tab.gd:618
+#: ui/room_tab.gd:621
 msgid "Flashes only in rooms that react, such as the drive-in; the room pulses with the bass."
 msgstr ""
 
-#: ui/room_tab.gd:632 ui/seat_plan.gd:186
+#: ui/room_tab.gd:635 ui/seat_plan.gd:186
 #, c-format
 msgid "Seat %d"
 msgstr ""
 
-#: ui/room_tab.gd:640
+#: ui/room_tab.gd:643
 msgid "Curtains: in the cinema and the home theatre, flat screen."
-msgstr ""
-
-#: ui/room_tab.gd:650
-#, c-format
-msgid "Intermission: %s left. Play ends it."
 msgstr ""
 
 #: ui/room_tab.gd:653
 #, c-format
+msgid "Intermission: %s left. Play ends it."
+msgstr ""
+
+#: ui/room_tab.gd:656
+#, c-format
 msgid "This film stops at %s."
 msgstr ""
 
-#: ui/room_tab.gd:654
+#: ui/room_tab.gd:657
 #, c-format
 msgid "Films over %d min with chapters stop once, near the middle."
 msgstr ""
@@ -4559,8 +4567,16 @@ msgstr ""
 msgid "Bathysphere"
 msgstr ""
 
+#: environments/cenote_cavern.env.json
+msgid "Cenote cavern"
+msgstr ""
+
 #: environments/cinema_coach_1935.env.json
 msgid "Cinema coach 1935"
+msgstr ""
+
+#: environments/cloud_temple.env.json
+msgid "Cloud temple"
 msgstr ""
 
 #: environments/coach_trip_1988.env.json
@@ -4581,6 +4597,10 @@ msgstr ""
 
 #: environments/flagship.env.json
 msgid "Flagship"
+msgstr ""
+
+#: environments/giants_study.env.json
+msgid "Giants study"
 msgstr ""
 
 #: environments/ice_cinema.env.json
@@ -4617,6 +4637,10 @@ msgstr ""
 
 #: environments/night_sleeper_1929.env.json
 msgid "Night sleeper 1929"
+msgstr ""
+
+#: environments/orbital_ring.env.json
+msgid "Orbital ring"
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
@@ -4667,6 +4691,10 @@ msgstr ""
 msgid "Streamline 1937"
 msgstr ""
 
+#: environments/sunken_rotunda.env.json
+msgid "Sunken rotunda"
+msgstr ""
+
 #: environments/tv_1930.env.json
 msgid "TV 1930 - glowing box"
 msgstr ""
@@ -4715,6 +4743,10 @@ msgstr ""
 msgid "TV today - the present"
 msgstr ""
 
+#: environments/venus_aerostat.env.json
+msgid "Venus aerostat"
+msgstr ""
+
 #: environments/airship_1931.env.json
 msgid "A 1931 rigid airship's promenade lounge: leaning-out observation windows in duralumin girders, a self-playing featherweight grand piano, and an endless moonlit sea of clouds far below."
 msgstr ""
@@ -4731,12 +4763,20 @@ msgstr ""
 msgid "A glass dome on the sea floor: kelp and coral in the floodlights, schools of fish, glowing creatures drawn to the screen, a manta overhead, and in a quiet scene now and then a whale."
 msgstr ""
 
+#: environments/cenote_cavern.env.json
+msgid "An underground limestone sinkhole and crystal grotto cinema: turquoise cenote water, glowing mineral crystals, warm cave lanterns, and a jungle oculus open to the tropical night sky."
+msgstr ""
+
 #: environments/cinema.env.json
 msgid "The converted cinema: rows on a rake, curtains that part when the film starts, and the house lights going down."
 msgstr ""
 
 #: environments/cinema_coach_1935.env.json
 msgid "A 1935 express railway cinema carriage rolling through autumn night: mahogany panelling, swaying brass lamps, telegraph poles, a dark railway tunnel mid-reel and a warm terminus with the credits."
+msgstr ""
+
+#: environments/cloud_temple.env.json
+msgid "An open-air white-marble sanctuary suspended above an endless golden-dusk sea of clouds: sixteen fluted columns, a sky-reflecting water basin, four bronze braziers, and rising stars."
 msgstr ""
 
 #: environments/coach_trip_1988.env.json
@@ -4757,6 +4797,10 @@ msgstr ""
 
 #: environments/flagship.env.json
 msgid "A big modern cinema: a steep rake, folded acoustic walls washed in amber, recliners, a starlit ceiling of baffles and a huge curved screen in velvet."
+msgstr ""
+
+#: environments/giants_study.env.json
+msgid "Ten centimetres tall on a giant mahogany desk in a rainy late-night study: leather-bound books, steaming porcelain teacup, ticking brass pocket watch, banker's lamp, and a propped pocket display."
 msgstr ""
 
 #: environments/ice_cinema.env.json
@@ -4793,6 +4837,10 @@ msgstr ""
 
 #: environments/night_sleeper_1929.env.json
 msgid "A 1929 Art Deco marquetry sleeping compartment crossing a snowy alpine night: flakes drift past the window under the Moon, a tabletop 16 mm projector hums, and rosy dawn rises with the credits."
+msgstr ""
+
+#: environments/orbital_ring.env.json
+msgid "A cantilevered travertine and titanium observation terrace inside a rotating space habitat cylinder: upside-down valleys, silver rivers and night cities curve overhead between Milky Way windows."
 msgstr ""
 
 #: environments/palace_of_culture_1974.env.json
@@ -4843,6 +4891,10 @@ msgstr ""
 msgid "A streamline cinema, 1937: coves that glow and change colour, a stepped proscenium round a rising sun, faience bands round the hall, an organ that rises from the pit, a festoon."
 msgstr ""
 
+#: environments/sunken_rotunda.env.json
+msgid "A flooded marble rotunda on the sunlit sea floor: mosaic dais, fluted colonnade under a ruined oculus, rippling canal, schooling fish, glowing jellies, a manta ray and a rare whale."
+msgstr ""
+
 #: environments/tv_1930.env.json
 msgid "The first television, 1930: a small glowing picture in a cabinet, the chair pulled up close."
 msgstr ""
@@ -4891,6 +4943,10 @@ msgstr ""
 msgid "A living room today: a thin panel on a dark wall, a soundbar under it, a floor lamp by the sofa. The film at its best."
 msgstr ""
 
+#: environments/venus_aerostat.env.json
+msgid "A gilded hammered-copper and brass Art Nouveau cloud gondola suspended 52 km above Venus inside sunlit golden-amber cloud canyons beneath a glowing ivory buoyant gas envelope."
+msgstr ""
+
 #: environments/void.env.json
 msgid "Nothing but black and a mirror floor that gives back the film, with a ripple where you move."
 msgstr ""
@@ -4911,7 +4967,7 @@ msgstr ""
 msgid "Organ before the film"
 msgstr ""
 
-#: environments/back_seat_2004.env.json environments/pillow_fort_1993.env.json environments/reclaimed.env.json
+#: environments/back_seat_2004.env.json environments/giants_study.env.json environments/pillow_fort_1993.env.json environments/reclaimed.env.json
 msgid "Rain"
 msgstr ""
 
@@ -4927,8 +4983,20 @@ msgstr ""
 msgid "Lights outside in the film"
 msgstr ""
 
-#: environments/bathysphere.env.json
+#: environments/bathysphere.env.json environments/sunken_rotunda.env.json
 msgid "Whale"
+msgstr ""
+
+#: environments/cenote_cavern.env.json
+msgid "Sky and shaft"
+msgstr ""
+
+#: environments/cenote_cavern.env.json
+msgid "Mineral crystals"
+msgstr ""
+
+#: environments/cenote_cavern.env.json
+msgid "Water mist"
 msgstr ""
 
 #: environments/cinema.env.json
@@ -4937,6 +5005,18 @@ msgstr ""
 
 #: environments/cinema_coach_1935.env.json
 msgid "Lighting"
+msgstr ""
+
+#: environments/cloud_temple.env.json
+msgid "Sky mood"
+msgstr ""
+
+#: environments/cloud_temple.env.json
+msgid "Bronze braziers"
+msgstr ""
+
+#: environments/cloud_temple.env.json
+msgid "Sunset shafts"
 msgstr ""
 
 #: environments/coach_trip_1988.env.json
@@ -4973,6 +5053,14 @@ msgstr ""
 
 #: environments/flagship.env.json
 msgid "Starlight ceiling"
+msgstr ""
+
+#: environments/giants_study.env.json
+msgid "Desk lamp"
+msgstr ""
+
+#: environments/giants_study.env.json
+msgid "Pocket watch"
 msgstr ""
 
 #: environments/ice_cinema.env.json environments/jet_1964.env.json
@@ -5027,6 +5115,18 @@ msgstr ""
 msgid "Snowfall"
 msgstr ""
 
+#: environments/orbital_ring.env.json
+msgid "Habitat time"
+msgstr ""
+
+#: environments/orbital_ring.env.json
+msgid "Terrace glow"
+msgstr ""
+
+#: environments/orbital_ring.env.json
+msgid "Sky windows"
+msgstr ""
+
 #: environments/palace_of_culture_1974.env.json
 msgid "Snow"
 msgstr ""
@@ -5074,6 +5174,14 @@ msgstr ""
 
 #: environments/streamline_1937.env.json
 msgid "Cove colours"
+msgstr ""
+
+#: environments/sunken_rotunda.env.json
+msgid "Water light"
+msgstr ""
+
+#: environments/sunken_rotunda.env.json
+msgid "Lanterns"
 msgstr ""
 
 #: environments/tv_1930.env.json
@@ -5128,6 +5236,18 @@ msgstr ""
 msgid "Floor lamp in the film"
 msgstr ""
 
+#: environments/venus_aerostat.env.json
+msgid "Cloud light"
+msgstr ""
+
+#: environments/venus_aerostat.env.json
+msgid "Cabin coves"
+msgstr ""
+
+#: environments/venus_aerostat.env.json
+msgid "Sheet lightning"
+msgstr ""
+
 #: environments/void.env.json
 msgid "Ripple"
 msgstr ""
@@ -5172,6 +5292,18 @@ msgstr ""
 msgid "How often a whale swims past behind the screen in a quiet scene."
 msgstr ""
 
+#: environments/cenote_cavern.env.json
+msgid "The light pouring through the overhead jungle oculus: silver moonlight, warm tropical dusk, or quiet starlight."
+msgstr ""
+
+#: environments/cenote_cavern.env.json
+msgid "The glow of the cavern's crystal clusters: bioluminescent cyan, amethyst crystal, or warm bronze lanterns only."
+msgstr ""
+
+#: environments/cenote_cavern.env.json
+msgid "Soft cool mist drifting low over the emerald cenote pool, or clear cavern air."
+msgstr ""
+
 #: environments/cinema.env.json
 msgid "How bright the house lamps stay once the film has started."
 msgstr ""
@@ -5182,6 +5314,18 @@ msgstr ""
 
 #: environments/cinema_coach_1935.env.json
 msgid "1935 back-projection newsreel film print with gentle weave, dust and lamp hotspot, or a clean picture."
+msgstr ""
+
+#: environments/cloud_temple.env.json
+msgid "Let golden dusk deepen into the Milky Way over the film, or hold the sky at sunset or starlight."
+msgstr ""
+
+#: environments/cloud_temple.env.json
+msgid "How brightly the four bronze tripod braziers burn around the marble colonnade."
+msgstr ""
+
+#: environments/cloud_temple.env.json
+msgid "Slanting golden sunset light shafts streaming through the outer marble colonnade."
 msgstr ""
 
 #: environments/coach_trip_1988.env.json
@@ -5218,6 +5362,18 @@ msgstr ""
 
 #: environments/flagship.env.json
 msgid "Pinholes of light in the ceiling between the baffles."
+msgstr ""
+
+#: environments/giants_study.env.json
+msgid "The soaring banker's desk lamp over the blotter: warm brass glow, emerald green glass, or dim."
+msgstr ""
+
+#: environments/giants_study.env.json
+msgid "Autumn rain falling outside the tall leaded study window and beading on the glass."
+msgstr ""
+
+#: environments/giants_study.env.json
+msgid "The deep slow tick of the giant brass pocket watch beside the stack of books."
 msgstr ""
 
 #: environments/ice_cinema.env.json
@@ -5292,6 +5448,18 @@ msgstr ""
 msgid "Subtle 16 mm home-projector weave, dust, lamp flicker and vignette, or a clean picture."
 msgstr ""
 
+#: environments/orbital_ring.env.json
+msgid "Lighting inside the rotating cylinder: glowing night cities, sunlit golden valleys, or rose-violet twilight."
+msgstr ""
+
+#: environments/orbital_ring.env.json
+msgid "Colour of the indirect architectural cove ribbons along the terrace rim, canopy ribs and aft promenade."
+msgstr ""
+
+#: environments/orbital_ring.env.json
+msgid "Deep space seen through the cylinder's three open window strips: bright Milky Way, constellation lines, or quiet stars."
+msgstr ""
+
 #: environments/palace_of_culture_1974.env.json
 msgid "Snow through the open back of the roof, over the birches outside."
 msgstr ""
@@ -5350,6 +5518,18 @@ msgstr ""
 
 #: environments/streamline_1937.env.json
 msgid "The cove lights' colour before the film. Changing: they move through the colours. In the film they take the film's colour."
+msgstr ""
+
+#: environments/sunken_rotunda.env.json
+msgid "How brightly the ocean above shines through the ruined oculus: sunlit turquoise shallows, deep sapphire blue, or dark bioluminescent night."
+msgstr ""
+
+#: environments/sunken_rotunda.env.json
+msgid "The colour and brightness of the waterproof bronze-and-crystal lanterns and marble coves around the sanctuary."
+msgstr ""
+
+#: environments/sunken_rotunda.env.json
+msgid "How often a whale glides beyond the far colonnade arches during quiet scenes of the film."
 msgstr ""
 
 #: environments/tv_1930.env.json
@@ -5424,6 +5604,18 @@ msgstr ""
 msgid "How bright the floor lamp by the sofa stays once the film has started."
 msgstr ""
 
+#: environments/venus_aerostat.env.json
+msgid "Sunlit mood across the Venusian golden-amber cloud canyons and buoyant gas envelope."
+msgstr ""
+
+#: environments/venus_aerostat.env.json
+msgid "Indirect Art Nouveau cove lighting along the screen proscenium, mezzanine cornice and skylight ring."
+msgstr ""
+
+#: environments/venus_aerostat.env.json
+msgid "Very slow, soft distant sheet lightning blooming deep inside the lower Venusian cloud deck."
+msgstr ""
+
 #: environments/void.env.json
 msgid "A faint ring on the floor where you move. At the bottom: none."
 msgstr ""
@@ -5436,7 +5628,7 @@ msgstr ""
 msgid "Moonlight silver"
 msgstr ""
 
-#: environments/back_seat_2004.env.json environments/coach_trip_1988.env.json
+#: environments/back_seat_2004.env.json environments/coach_trip_1988.env.json environments/giants_study.env.json
 msgid "Steady rain"
 msgstr ""
 
@@ -5448,7 +5640,7 @@ msgstr ""
 msgid "Passing showers"
 msgstr ""
 
-#: environments/back_seat_2004.env.json
+#: environments/back_seat_2004.env.json environments/giants_study.env.json
 msgid "Dry night"
 msgstr ""
 
@@ -5460,7 +5652,7 @@ msgstr ""
 msgid "Warm emerald"
 msgstr ""
 
-#: environments/back_seat_2004.env.json
+#: environments/back_seat_2004.env.json environments/giants_study.env.json environments/sunken_rotunda.env.json environments/venus_aerostat.env.json
 msgid "Dim"
 msgstr ""
 
@@ -5484,16 +5676,48 @@ msgstr ""
 msgid "Abyss"
 msgstr ""
 
-#: environments/bathysphere.env.json
+#: environments/bathysphere.env.json environments/sunken_rotunda.env.json
 msgid "Never"
 msgstr ""
 
-#: environments/bathysphere.env.json
+#: environments/bathysphere.env.json environments/sunken_rotunda.env.json
 msgid "Rarely"
 msgstr ""
 
-#: environments/bathysphere.env.json
+#: environments/bathysphere.env.json environments/sunken_rotunda.env.json
 msgid "Sometimes"
+msgstr ""
+
+#: environments/cenote_cavern.env.json
+msgid "Moonlight shaft"
+msgstr ""
+
+#: environments/cenote_cavern.env.json
+msgid "Dusk emerald"
+msgstr ""
+
+#: environments/cenote_cavern.env.json
+msgid "Starlight grotto"
+msgstr ""
+
+#: environments/cenote_cavern.env.json
+msgid "Bioluminescent cyan"
+msgstr ""
+
+#: environments/cenote_cavern.env.json
+msgid "Amethyst crystal"
+msgstr ""
+
+#: environments/cenote_cavern.env.json
+msgid "Lanterns only"
+msgstr ""
+
+#: environments/cenote_cavern.env.json
+msgid "Soft mist"
+msgstr ""
+
+#: environments/cenote_cavern.env.json
+msgid "Clear air"
 msgstr ""
 
 #: environments/cinema_coach_1935.env.json environments/coach_trip_1988.env.json environments/moon_ferry.env.json environments/night_sleeper_1929.env.json
@@ -5514,6 +5738,30 @@ msgstr ""
 msgid "Clean picture"
 msgstr ""
 
+#: environments/cloud_temple.env.json
+msgid "Sunset to stars"
+msgstr ""
+
+#: environments/cloud_temple.env.json
+msgid "Eternal golden dusk"
+msgstr ""
+
+#: environments/cloud_temple.env.json
+msgid "Starlight clouds"
+msgstr ""
+
+#: environments/cloud_temple.env.json
+msgid "Lit flames"
+msgstr ""
+
+#: environments/cloud_temple.env.json
+msgid "Low embers"
+msgstr ""
+
+#: environments/cloud_temple.env.json
+msgid "Soft shafts"
+msgstr ""
+
 #: environments/coach_trip_1988.env.json
 msgid "1988 rental tape"
 msgstr ""
@@ -5526,7 +5774,7 @@ msgstr ""
 msgid "Retro teal"
 msgstr ""
 
-#: environments/coach_trip_1988.env.json
+#: environments/coach_trip_1988.env.json environments/giants_study.env.json
 msgid "Light drizzle"
 msgstr ""
 
@@ -5550,11 +5798,12 @@ msgstr ""
 msgid "Milky Way & meteors"
 msgstr ""
 
-#: environments/dome_car_1955.env.json environments/moon_ferry.env.json environments/sky_lift.env.json
+#: environments/dome_car_1955.env.json environments/moon_ferry.env.json environments/orbital_ring.env.json environments/sky_lift.env.json
 msgid "Quiet stars"
 msgstr ""
 
-#: environments/dome_car_1955.env.json environments/mars_train.env.json environments/moon_ferry.env.json environments/sky_lift.env.json
+#: environments/dome_car_1955.env.json environments/mars_train.env.json environments/moon_ferry.env.json environments/orbital_ring.env.json
+#: environments/sky_lift.env.json
 msgid "Constellations"
 msgstr ""
 
@@ -5564,6 +5813,22 @@ msgstr ""
 
 #: environments/flagship.env.json
 msgid "Always (faint in the film)"
+msgstr ""
+
+#: environments/giants_study.env.json environments/venus_aerostat.env.json
+msgid "Warm brass"
+msgstr ""
+
+#: environments/giants_study.env.json
+msgid "Green banker's glow"
+msgstr ""
+
+#: environments/giants_study.env.json
+msgid "Soft tick"
+msgstr ""
+
+#: environments/giants_study.env.json
+msgid "Quiet"
 msgstr ""
 
 #: environments/ice_cinema.env.json environments/jet_1964.env.json
@@ -5674,6 +5939,30 @@ msgstr ""
 msgid "1929 home print"
 msgstr ""
 
+#: environments/orbital_ring.env.json
+msgid "Night city lights"
+msgstr ""
+
+#: environments/orbital_ring.env.json
+msgid "Golden hour"
+msgstr ""
+
+#: environments/orbital_ring.env.json
+msgid "Twilight glow"
+msgstr ""
+
+#: environments/orbital_ring.env.json environments/sunken_rotunda.env.json
+msgid "Warm gold"
+msgstr ""
+
+#: environments/orbital_ring.env.json environments/sky_lift.env.json
+msgid "Orbital cyan"
+msgstr ""
+
+#: environments/orbital_ring.env.json environments/sky_lift.env.json
+msgid "Milky Way"
+msgstr ""
+
 #: environments/palace_of_culture_1974.env.json
 msgid "No snow"
 msgstr ""
@@ -5711,19 +6000,27 @@ msgid "Sea turquoise"
 msgstr ""
 
 #: environments/sky_lift.env.json
-msgid "Orbital cyan"
-msgstr ""
-
-#: environments/sky_lift.env.json
 msgid "Amber night"
-msgstr ""
-
-#: environments/sky_lift.env.json
-msgid "Milky Way"
 msgstr ""
 
 #: environments/streamline_1937.env.json
 msgid "Gold"
+msgstr ""
+
+#: environments/sunken_rotunda.env.json
+msgid "Sunlit turquoise"
+msgstr ""
+
+#: environments/sunken_rotunda.env.json
+msgid "Deep sapphire"
+msgstr ""
+
+#: environments/sunken_rotunda.env.json
+msgid "Bioluminescent night"
+msgstr ""
+
+#: environments/sunken_rotunda.env.json
+msgid "Sea cyan"
 msgstr ""
 
 #: environments/tv_1930.env.json
@@ -5756,5 +6053,25 @@ msgstr ""
 
 #: environments/tv_1993.env.json
 msgid "Showers"
+msgstr ""
+
+#: environments/venus_aerostat.env.json
+msgid "Amber noon"
+msgstr ""
+
+#: environments/venus_aerostat.env.json
+msgid "Copper sunset"
+msgstr ""
+
+#: environments/venus_aerostat.env.json
+msgid "Stormy gold"
+msgstr ""
+
+#: environments/venus_aerostat.env.json
+msgid "Botanical emerald"
+msgstr ""
+
+#: environments/venus_aerostat.env.json
+msgid "Distant glow"
 msgstr ""
 

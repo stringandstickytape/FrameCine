@@ -306,6 +306,24 @@ func _test_room_tab() -> void:
 				return EnvLibrary.builder_of(str(e[0])) == "Gemini 4 Neon Extra High"))
 	_check("each builder's heading is a label above its rooms", (journeys.get_children() as Array).filter(
 			func(c: Node) -> bool: return c is Label).map(func(l: Label) -> String: return l.text) == builders.keys())
+	var worlds: Container = tab._category_rows["world"]
+	var world_builders: Dictionary = worlds.get_meta("builders", {})
+	var gemini_worlds: Array = (tab.room_buttons(world_builders["Gemini 4 Neon Extra High"]) as Array).map(
+			func(b: Button) -> String: return b.text) if world_builders.has("Gemini 4 Neon Extra High") else []
+	var world_expected := [
+		["cenote_cavern", "Cenote cavern"],
+		["orbital_ring", "Orbital ring"],
+		["cloud_temple", "Cloud temple"],
+		["venus_aerostat", "Venus aerostat"],
+		["sunken_rotunda", "Sunken rotunda"],
+		["giants_study", "Giants study"],
+	]
+	_check("the other worlds stand under their builder %s" % [world_builders.keys()],
+			world_builders.has("Gemini 4 Neon Extra High")
+			and world_expected.all(func(e: Array) -> bool:
+				return (gemini_worlds.has(tr(str(e[1])))
+					and EnvLibrary.category_of(str(e[0])) == "world"
+					and EnvLibrary.builder_of(str(e[0])) == "Gemini 4 Neon Extra High")))
 	_check("the Void stays with the other rooms", EnvLibrary.category_of("void") == "other"
 			and EnvLibrary.category_of("no_such_room") == "other")
 	_check("Television shows only with a TV room", tab._tv_box.visible == (tab._tvs.get_child_count() > 0))

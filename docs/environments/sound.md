@@ -59,7 +59,7 @@ Cue sounds (`env_audio.play`, the chime) and the thud still go straight to Envir
 
 | Param | Default | What |
 |---|---|---|
-| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`, `boat_engine`, `water_lap`, `paddle_wheel`, `ferry_diesel`, `rail_joints`, `airship_engines`, `jet_cabin`, `coach_diesel`, `car_motorway`, `climber_hum`, `rover_drive`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`, `hooves`, `ship_horn`, `ferry_chime`, `train_whistle`, `diesel_horn`, `cabin_chime`, `telegraph_bell`; `silence` plays nothing (the sounds: below) |
+| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`, `boat_engine`, `water_lap`, `paddle_wheel`, `ferry_diesel`, `rail_joints`, `airship_engines`, `jet_cabin`, `coach_diesel`, `car_motorway`, `climber_hum`, `rover_drive`, `cavern_hum`, `cloud_wind`, `aerostat_hum`, `giant_clock`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`, `hooves`, `ship_horn`, `ferry_chime`, `train_whistle`, `diesel_horn`, `cabin_chime`, `telegraph_bell`, `temple_bell`; `silence` plays nothing (the sounds: below) |
 | `gain_db` | 0 | dB from the designed level (-30 to +6) |
 | `level` | 1 | 0 to 1, live. Bind it: `film.bass` for a rumble through the wall, `weather.rain` or `weather.wet` for rain, a setting |
 | `film_db` | -8 | dB lower in `starting`, `playing` and `credits`. Up again in the pre-show, paused, the intermission and the end |
@@ -129,6 +129,11 @@ tones and swells divide its length, so it has no seam.
 | `climber_hum` | loop 8 | an orbital elevator's quiet electromagnetic ribbon-drive hum (clean harmonic whine and soft structural resonance), at 22050 Hz (designed level -55) | `sky_lift`; `level` on `journey.speed` |
 | `rover_drive` | loop 8 | a Martian rover-train's electric bogie drive and subtle gravel crunch over regolith, at 22050 Hz (designed level -54) | `mars_train`; `level` on `journey.speed` |
 | `telegraph_bell` | one-shot 2.8 | a Victorian submarine brass engine-room order telegraph double-ring (twin bright bronze bell strikes with damped metallic shimmer), at 32000 Hz (designed level -53) | `salon_1870` departure and arrival cues (`telegraph.play`) |
+| `cavern_hum` | loop 8 | resonant subterranean limestone cenote air and distant underground river murmur (55 / 82.5 / 110 Hz cave modes with slow breath), at 22050 Hz (designed level -55) | `cenote_cavern` |
+| `cloud_wind` | loop 12 | silky high-altitude sunlit breeze across marble columns above an endless cloud sea, at 22050 Hz (designed level -56) | `cloud_temple` |
+| `temple_bell` | one-shot 5.5 | deep warm bronze singing-bowl / temple bell strike (196 Hz fundamental + warm beating fifth & octave overtones), at 32000 Hz (designed level -54) | `cloud_temple` and `sunken_rotunda` arrival/ritual cues |
+| `aerostat_hum` | loop 8 | buoyant copper-and-glass cloud gondola cabin airflow and gentle harmonic hull resonance (48 / 96 Hz), at 22050 Hz (designed level -55) | `venus_aerostat` |
+| `giant_clock` | loop 4 | magnified brass pocket-watch escapement tick-tock resonating softly across a giant mahogany desk (1 Hz warm wood-body thumps), at 32000 Hz (designed level -56) | `giants_study` |
 | `ice_creak` | one-shot 2.6 | a crack that sings down, then a low groan | ice, `every` |
 | `candle` | one-shot 0.9 | a candle's flame puffs and wavers, three or four sputters of wax | `every`, very low |
 | `three_bells` | one-shot 3.2 | a soft house bell: three struck-bar tones, up a fifth, down a minor third (our own call) | before the show |
@@ -303,6 +308,11 @@ second.
 | `climber_hum` (2026-11-24) | -55 | -55.0 | -62.9 | -70.2 | -44.6 |
 | `rover_drive` (2026-11-24) | -54 | -54.0 | -62.1 | -69.2 | -44.2 |
 | `telegraph_bell` (2026-11-24) | -53 | -53.0 | -61.0 | | -41.8 |
+| `cavern_hum` (2026-11-24) | -55 | -55.0 | -63.0 | -70.2 | -43.4 |
+| `cloud_wind` (2026-11-24) | -56 | -56.1 | -63.9 | -72.5 | -43.2 |
+| `temple_bell` (2026-11-24) | -54 | -54.0 | -62.0 | | -45.4 |
+| `aerostat_hum` (2026-11-24) | -55 | -55.0 | -62.9 | -70.2 | -44.5 |
+| `giant_clock` (2026-11-24) | -56 | -56.0 | -64.0 | -71.0 | -24.5 |
 | `clock` | -56 | -56.0 | -64.0 | -71.1 | -19.9 |
 | `tube_whine` | -62 | -62.0 | -70.0 | -77.2 | -55.0 |
 | `noise` | -54 | -54.0 | -62.0 | -69.1 | -41.2 |
@@ -415,3 +425,9 @@ at 8 m they are 19 dB under their "in film" level even at -12. Without the filte
 | Sky lift | `acoustics` `small_room` (`rt60` 0.42, `wet` 0.14); `sound_bed` `climber_hum` (`level` on `journey.speed`); fading atmospheric `wind`; `cabin_chime` at launch and orbital docking |
 | Moon ferry | `acoustics` `vacuum` (`rt60` 0.05, `wet` 0); subtle `deep_hum` life-support murmur fading in transit; gentle `cabin_chime` at departure and lunar Crater touchdown |
 | Mars train | `acoustics` `small_room` (`rt60` 0.36, `wet` 0.14); `sound_bed` `rover_drive` (`level` on `journey.speed`); thin Martian `wind`; `cabin_chime` at departure and Martian night colony arrival |
+| Cenote cavern | `acoustics` `stone_nave` (`rt60` 1.75); `sound_bed` `cavern_hum`, `drips` around the cavern, `water_lap` on the pool, overhead `crickets` at the jungle oculus |
+| Orbital ring | `acoustics` `cinema` (`rt60` 0.58); `sound_bed` soft `wind`, distant upside-down `city`, terrace reflecting-pool `fountain`, `cabin_chime` on ritual |
+| Cloud temple | `acoustics` `outdoors` (`rt60` 0.58); `sound_bed` `cloud_wind`, brazier `fire` (`level` on `setting.braziers`), `temple_bell` on arrival and ritual |
+| Venus aerostat | `acoustics` `hull` (`rt60` 0.88); `sound_bed` `aerostat_hum`, distant deep cloud `rumble` (`every` 190), warm brass `chime` on ritual |
+| Sunken rotunda | `acoustics` `stone_nave` (`rt60` 1.55); `sound_bed` `deep_hum`, `water_lap` around the canal, `bubbles`, `temple_bell` on ritual, distant `whale` song on quiet scenes |
+| Giants study | `acoustics` `small_room` (`rt60` 0.72); `sound_bed` `giant_clock` at the 2.3 m pocket watch (`level` on `setting.watch_tick`), `rain_glass` on the towering window (`weather.rain`), distant hearth `fire`, sleeping-cat `purr` (`every` 110) |

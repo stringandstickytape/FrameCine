@@ -40,6 +40,12 @@ const BackSeat2004 := preload("res://scripts/env/systems/kit/back_seat_2004.gd")
 const SkyLift := preload("res://scripts/env/systems/kit/sky_lift.gd")
 const MoonFerry := preload("res://scripts/env/systems/kit/moon_ferry.gd")
 const MarsTrain := preload("res://scripts/env/systems/kit/mars_train.gd")
+const CenoteCavern := preload("res://scripts/env/systems/kit/cenote_cavern.gd")
+const OrbitalRing := preload("res://scripts/env/systems/kit/orbital_ring.gd")
+const CloudTemple := preload("res://scripts/env/systems/kit/cloud_temple.gd")
+const VenusAerostat := preload("res://scripts/env/systems/kit/venus_aerostat.gd")
+const SunkenRotunda := preload("res://scripts/env/systems/kit/sunken_rotunda.gd")
+const GiantsStudy := preload("res://scripts/env/systems/kit/giants_study.gd")
 
 const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk", "column", "facade", "castle_gate",
 		"booth", "snack_bar", "screen_tower", "bougainvillea", "ivy", "ferns", "carpet", "partition", "curves",
@@ -65,7 +71,13 @@ const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk
 		"car_2004_cabin", "car_2004_props",
 		"skylift_cabin", "skylift_console",
 		"moonferry_cabin", "moonferry_console",
-		"marstrain_cabin", "marstrain_rows"]
+		"marstrain_cabin", "marstrain_rows",
+		"cenote_shell", "cenote_water",
+		"ring_terrace", "ring_cylinder",
+		"cloud_sanctuary", "cloud_sky_sea",
+		"venus_gondola", "venus_clouds",
+		"rotunda_hall", "rotunda_water",
+		"study_desk", "study_room"]
 ## Each piece's size when neither the entry nor its slot gives one: [width, height, depth].
 const SIZES := {
 	"balcony_front": [6.0, 1.0, 0.25], "niche": [1.3, 2.6, 0.4], "urn": [0.5, 1.0, 0.5], "lion": [0.55, 0.9, 1.0],
@@ -107,6 +119,12 @@ const SIZES := {
 	"skylift_cabin": [0.0, 0.0, 0.0], "skylift_console": [0.0, 0.0, 0.0],
 	"moonferry_cabin": [0.0, 0.0, 0.0], "moonferry_console": [0.0, 0.0, 0.0],
 	"marstrain_cabin": [0.0, 0.0, 0.0], "marstrain_rows": [0.0, 0.0, 0.0],
+	"cenote_shell": [0.0, 0.0, 0.0], "cenote_water": [0.0, 0.0, 0.0],
+	"ring_terrace": [0.0, 0.0, 0.0], "ring_cylinder": [0.0, 0.0, 0.0],
+	"cloud_sanctuary": [0.0, 0.0, 0.0], "cloud_sky_sea": [0.0, 0.0, 0.0],
+	"venus_gondola": [0.0, 0.0, 0.0], "venus_clouds": [0.0, 0.0, 0.0],
+	"rotunda_hall": [0.0, 0.0, 0.0], "rotunda_water": [0.0, 0.0, 0.0],
+	"study_desk": [0.0, 0.0, 0.0], "study_room": [0.0, 0.0, 0.0],
 }
 ## The pieces that stand on a floor (their slot's origin is a floor point); the others hang on a wall.
 const STANDING: Array[String] = ["urn", "lion", "obelisk", "column", "booth", "snack_bar", "ferns", "partition",
@@ -212,6 +230,18 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			MoonFerry.build(piece, c, xf, size, e)
 		"marstrain_cabin", "marstrain_rows":
 			MarsTrain.build(piece, c, xf, size, e)
+		"cenote_shell", "cenote_water":
+			CenoteCavern.build(piece, c, xf, size, e)
+		"ring_terrace", "ring_cylinder":
+			OrbitalRing.build(piece, c, xf, size, e)
+		"cloud_sanctuary", "cloud_sky_sea":
+			CloudTemple.build(piece, c, xf, size, e)
+		"venus_gondola", "venus_clouds":
+			VenusAerostat.build(piece, c, xf, size, e)
+		"rotunda_hall", "rotunda_water":
+			SunkenRotunda.build(piece, c, xf, size, e)
+		"study_desk", "study_room":
+			GiantsStudy.build(piece, c, xf, size, e)
 
 
 # --- Furniture (furniture.gd draws it) -----------------------------------------------------------------------------

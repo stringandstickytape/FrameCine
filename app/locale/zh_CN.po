@@ -4254,6 +4254,243 @@ msgstr "琥珀夜色"
 msgid "Milky Way"
 msgstr "银河"
 
+msgid "Other worlds"
+msgstr "异界奇境"
+
+msgid "Impossible sanctuaries to watch a film: crystal caverns, orbital rings, cloud temples, floating aerostats, sunken ruins and miniature worlds."
+msgstr "不可思议的观影秘境：水晶溶洞、轨道环城、云端神殿、金星浮空艇、海底遗迹与微缩世界。"
+
+msgid "Cenote cavern"
+msgstr "溶洞天坑"
+
+msgid "Cloud temple"
+msgstr "云端神殿"
+
+msgid "Giants study"
+msgstr "巨人书房"
+
+msgid "Orbital ring"
+msgstr "轨道环城"
+
+msgid "Sunken rotunda"
+msgstr "海底圆殿"
+
+msgid "Venus aerostat"
+msgstr "金星浮空艇"
+
+msgid "An underground limestone sinkhole and crystal grotto cinema: turquoise cenote water, glowing mineral crystals, warm cave lanterns, and a jungle oculus open to the tropical night sky."
+msgstr "地下石灰岩天坑与水晶溶洞影院：碧绿地下湖、微光水晶簇、暖色岩洞灯笼，以及通向热带夜空的丛林天窗。"
+
+msgid "An open-air white-marble sanctuary suspended above an endless golden-dusk sea of clouds: sixteen fluted columns, a sky-reflecting water basin, four bronze braziers, and rising stars."
+msgstr "悬浮在无边金色暮色云海之上的露天白大理石神殿：十六根石柱、倒映天色的水池、四座青铜火盆与升起的星河。"
+
+msgid "Ten centimetres tall on a giant mahogany desk in a rainy late-night study: leather-bound books, steaming porcelain teacup, ticking brass pocket watch, banker's lamp, and a propped pocket display."
+msgstr "化作十厘米小人坐在雨夜巨人红木书桌上：巨型皮面精装书、冒热气的瓷茶杯、滴答作响的黄铜怀表、台灯与立起的掌上银幕。"
+
+msgid "A cantilevered travertine and titanium observation terrace inside a rotating space habitat cylinder: upside-down valleys, silver rivers and night cities curve overhead between Milky Way windows."
+msgstr "旋转太空圆筒生态城内的悬挑石材与合金观景露台：倒悬的山谷、银色河流与夜色灯火城邦在银河天窗间环绕头顶。"
+
+msgid "A flooded marble rotunda on the sunlit sea floor: mosaic dais, fluted colonnade under a ruined oculus, rippling canal, schooling fish, glowing jellies, a manta ray and a rare whale."
+msgstr "静立于海底微光中的浸水大理石圆殿：马赛克高台、破顶天窗下的柱廊、波光水道、游鱼、发光水母、魔鬼鱼与罕见巨鲸。"
+
+msgid "A gilded hammered-copper and brass Art Nouveau cloud gondola suspended 52 km above Venus inside sunlit golden-amber cloud canyons beneath a glowing ivory buoyant gas envelope."
+msgstr "悬停于金星五十二公里高空金色云峡中的红铜与黄铜装饰艺术吊舱，头顶是散发暖光的象牙白浮空气囊。"
+
+msgid "Sky and shaft"
+msgstr "天窗光柱"
+
+msgid "Mineral crystals"
+msgstr "矿石水晶"
+
+msgid "Water mist"
+msgstr "水面薄雾"
+
+msgid "Sky mood"
+msgstr "天色氛围"
+
+msgid "Bronze braziers"
+msgstr "青铜火盆"
+
+msgid "Sunset shafts"
+msgstr "夕阳光束"
+
+msgid "Desk lamp"
+msgstr "书桌台灯"
+
+msgid "Pocket watch"
+msgstr "黄铜怀表"
+
+msgid "Habitat time"
+msgstr "环城时辰"
+
+msgid "Terrace glow"
+msgstr "露台灯带"
+
+msgid "Sky windows"
+msgstr "太空天窗"
+
+msgid "Water light"
+msgstr "海水天光"
+
+msgid "Lanterns"
+msgstr "石台灯笼"
+
+msgid "Cloud light"
+msgstr "云峡天色"
+
+msgid "Cabin coves"
+msgstr "吊舱灯槽"
+
+msgid "Sheet lightning"
+msgstr "远云微闪"
+
+msgid "The light pouring through the overhead jungle oculus: silver moonlight, warm tropical dusk, or quiet starlight."
+msgstr "从头顶丛林天窗洒下的天光：银色月光、温暖热带黄昏，或宁静星光。"
+
+msgid "The glow of the cavern's crystal clusters: bioluminescent cyan, amethyst crystal, or warm bronze lanterns only."
+msgstr "溶洞内矿石水晶簇的微光：青蓝荧光、紫水晶光，或只留暖色青铜灯笼。"
+
+msgid "Soft cool mist drifting low over the emerald cenote pool, or clear cavern air."
+msgstr "在碧绿地下湖面上低低飘浮的微凉薄雾，或清澈空气。"
+
+msgid "Let golden dusk deepen into the Milky Way over the film, or hold the sky at sunset or starlight."
+msgstr "让金色暮色随影片渐入银河，或固定在黄金日落或满天星光。"
+
+msgid "How brightly the four bronze tripod braziers burn around the marble colonnade."
+msgstr "大理石柱廊四周四座青铜三足火盆的火焰亮度。"
+
+msgid "Slanting golden sunset light shafts streaming through the outer marble colonnade."
+msgstr "斜穿过外圈大理石柱廊的金色夕阳光束。"
+
+msgid "The soaring banker's desk lamp over the blotter: warm brass glow, emerald green glass, or dim."
+msgstr "俯照在皮革桌垫上的高大银行家台灯：暖黄铜光、翠绿玻璃光，或微暗。"
+
+msgid "Autumn rain falling outside the tall leaded study window and beading on the glass."
+msgstr "落在高大铅框书房窗外并挂满玻璃的秋夜细雨。"
+
+msgid "The deep slow tick of the giant brass pocket watch beside the stack of books."
+msgstr "巨型书堆旁黄铜怀表低沉舒缓的滴答声。"
+
+msgid "Lighting inside the rotating cylinder: glowing night cities, sunlit golden valleys, or rose-violet twilight."
+msgstr "旋转圆筒生态城内的光景：万家灯火夜城、金色阳光山谷，或玫瑰紫暮色。"
+
+msgid "Colour of the indirect architectural cove ribbons along the terrace rim, canopy ribs and aft promenade."
+msgstr "露台边缘、弧顶肋条与后廊柔和间接灯带的颜色。"
+
+msgid "Deep space seen through the cylinder's three open window strips: bright Milky Way, constellation lines, or quiet stars."
+msgstr "透过圆筒三条敞开天窗望见的深空：明亮银河、星座连线，或宁静星空。"
+
+msgid "How brightly the ocean above shines through the ruined oculus: sunlit turquoise shallows, deep sapphire blue, or dark bioluminescent night."
+msgstr "上方海水透过残缺天窗洒下的光色：阳光浅海青绿、深海蓝宝石色，或幽暗生物荧光夜。"
+
+msgid "The colour and brightness of the waterproof bronze-and-crystal lanterns and marble coves around the sanctuary."
+msgstr "圆殿四周防水青铜水晶灯笼与大理石灯槽的颜色和亮度。"
+
+msgid "How often a whale glides beyond the far colonnade arches during quiet scenes of the film."
+msgstr "影片安静片段里，巨鲸从远处柱廊拱门外游过的频率。"
+
+msgid "Sunlit mood across the Venusian golden-amber cloud canyons and buoyant gas envelope."
+msgstr "金星琥珀云峡与上方浮空气囊之间的日照氛围。"
+
+msgid "Indirect Art Nouveau cove lighting along the screen proscenium, mezzanine cornice and skylight ring."
+msgstr "银幕边框、夹层边缘与天窗环处的柔和装饰艺术间接灯光。"
+
+msgid "Very slow, soft distant sheet lightning blooming deep inside the lower Venusian cloud deck."
+msgstr "在下方金星深云层中缓慢轻柔绽放的远方片状微闪。"
+
+msgid "Moonlight shaft"
+msgstr "月光光柱"
+
+msgid "Dusk emerald"
+msgstr "暮色翠光"
+
+msgid "Starlight grotto"
+msgstr "星光岩洞"
+
+msgid "Bioluminescent cyan"
+msgstr "荧光青蓝"
+
+msgid "Amethyst crystal"
+msgstr "紫水晶"
+
+msgid "Lanterns only"
+msgstr "仅留灯笼"
+
+msgid "Soft mist"
+msgstr "轻柔薄雾"
+
+msgid "Clear air"
+msgstr "清澈空气"
+
+msgid "Sunset to stars"
+msgstr "日落入星空"
+
+msgid "Eternal golden dusk"
+msgstr "永恒金色黄昏"
+
+msgid "Starlight clouds"
+msgstr "星光云海"
+
+msgid "Lit flames"
+msgstr "明亮火焰"
+
+msgid "Low embers"
+msgstr "微亮余烬"
+
+msgid "Soft shafts"
+msgstr "柔和光束"
+
+msgid "Warm brass"
+msgstr "暖黄铜光"
+
+msgid "Green banker's glow"
+msgstr "翠绿台灯光"
+
+msgid "Soft tick"
+msgstr "轻柔滴答"
+
+msgid "Quiet"
+msgstr "静音"
+
+msgid "Night city lights"
+msgstr "灯火夜城"
+
+msgid "Golden hour"
+msgstr "金色时光"
+
+msgid "Twilight glow"
+msgstr "暮色微光"
+
+msgid "Warm gold"
+msgstr "暖金色"
+
+msgid "Sunlit turquoise"
+msgstr "日光青绿"
+
+msgid "Deep sapphire"
+msgstr "深海宝石蓝"
+
+msgid "Bioluminescent night"
+msgstr "生物荧光夜"
+
+msgid "Sea cyan"
+msgstr "海青色"
+
+msgid "Amber noon"
+msgstr "琥珀正午"
+
+msgid "Copper sunset"
+msgstr "红铜日落"
+
+msgid "Stormy gold"
+msgstr "风暴流金"
+
+msgid "Botanical emerald"
+msgstr "植物翠绿"
+
+msgid "Distant glow"
+msgstr "远云微闪"
+
 #~ msgid "Foveation"
 #~ msgstr "注视点渲染"
 

@@ -22,7 +22,8 @@ const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale
 		"crt_off", "channel_clunk", "sonar", "bubbles", "far_car", "scops_owl", "church_bell", "city", "tawny_owl",
 		"hooves", "boat_engine", "water_lap", "paddle_wheel", "ship_horn", "ferry_diesel", "ferry_chime",
 		"rail_joints", "train_whistle", "diesel_horn", "airship_engines", "jet_cabin", "cabin_chime",
-		"coach_diesel", "car_motorway", "climber_hum", "rover_drive", "telegraph_bell"]
+		"coach_diesel", "car_motorway", "climber_hum", "rover_drive", "telegraph_bell",
+		"cavern_hum", "cloud_wind", "temple_bell", "aerostat_hum", "giant_clock"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
@@ -35,13 +36,15 @@ const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise
 		"ship_horn": 5.5, "ferry_diesel": 8.0, "ferry_chime": 3.4,
 		"rail_joints": 8.0, "train_whistle": 4.5, "diesel_horn": 4.2, "airship_engines": 8.0,
 		"jet_cabin": 8.0, "cabin_chime": 2.4,
-		"coach_diesel": 8.0, "car_motorway": 8.0, "climber_hum": 8.0, "rover_drive": 8.0, "telegraph_bell": 3.0}
+		"coach_diesel": 8.0, "car_motorway": 8.0, "climber_hum": 8.0, "rover_drive": 8.0, "telegraph_bell": 3.0,
+		"cavern_hum": 8.0, "cloud_wind": 12.0, "temple_bell": 5.5, "aerostat_hum": 8.0, "giant_clock": 4.0}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
 		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles",
 		"city", "boat_engine", "water_lap", "paddle_wheel", "ferry_diesel",
 		"rail_joints", "airship_engines", "jet_cabin",
-		"coach_diesel", "car_motorway", "climber_hum", "rover_drive"]
+		"coach_diesel", "car_motorway", "climber_hum", "rover_drive",
+		"cavern_hum", "cloud_wind", "aerostat_hum", "giant_clock"]
 ## Sample rates below RATE for the far and low sounds (less to make, nothing lost above their band).
 const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiator": 22050, "moped": 32000,
 		"hull_creak": 32000, "purr": 22050, "crickets": 32000, "fire": 32000, "drips": 32000, "wind": 22050,
@@ -53,7 +56,8 @@ const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiato
 		"rail_joints": 22050, "train_whistle": 22050, "diesel_horn": 22050, "airship_engines": 22050,
 		"jet_cabin": 22050, "cabin_chime": 32000,
 		"coach_diesel": 22050, "car_motorway": 22050, "climber_hum": 22050, "rover_drive": 22050,
-		"telegraph_bell": 32000}
+		"telegraph_bell": 32000,
+		"cavern_hum": 22050, "cloud_wind": 22050, "temple_bell": 32000, "aerostat_hum": 22050, "giant_clock": 32000}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -1540,6 +1544,82 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 								+ sin(TAU * 3510.0 * dt) * 0.1 * exp(-dt * 4.5)
 						v += ring * env
 				s[i] = _lp(st, 0, v, a_out)
+		"cavern_hum":
+			# Resonant subterranean limestone cenote air and distant underground river murmur: soft cave Helmholz
+			# modes (55 / 82.5 / 110 Hz with slow 0.25 Hz breath) over warm low-passed stone-filtered water flow.
+			var a_water := _a(380.0, r)
+			var a_lo := _a(70.0, r)
+			var a_out := _a(420.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var water := (_lp(st, 0, wn, a_water) - _lp(st, 1, wn, a_lo)) * 0.72
+				var mode := sin(TAU * 55.0 * t) * 0.22 + sin(TAU * 82.5 * t + 0.6) * 0.14 \
+						+ sin(TAU * 110.25 * t + 1.1) * 0.08
+				var breath := 0.86 + 0.14 * sin(TAU * 0.25 * t)
+				s[i] = _lp(st, 2, (water + mode) * breath, a_out)
+		"cloud_wind":
+			# Silky high-altitude sunlit breeze sweeping softly across marble columns above an endless cloud sea:
+			# smooth drifting mid-air band with gentle 0.1667 Hz swell (2 slow swells per 12 s loop, zero harshness).
+			var a_hi := _a(920.0, r)
+			var a_lo := _a(190.0, r)
+			var a_air := _a(1800.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var body := (_lp(st, 0, wn, a_hi) - _lp(st, 1, wn, a_lo)) * 0.78
+				var silk := (_lp(st, 2, wn, a_air) - _lp(st, 0, wn, a_hi)) * 0.22
+				var swell := 0.72 + 0.22 * sin(TAU * (2.0 / 12.0) * t) + 0.06 * sin(TAU * (3.0 / 12.0) * t + 1.2)
+				s[i] = (body + silk) * swell
+		"temple_bell":
+			# Deep warm bronze singing-bowl / temple bell strike (196 Hz G3 fundamental + warm slightly beating fifth
+			# and octave partials with slow golden bloom and smooth decay).
+			var a_out := _a(3400.0, r)
+			for i in total:
+				var t := float(i) / r
+				var env := smoothstep(0.0, 0.025, t) * exp(-t * 0.72)
+				var beat := 0.88 + 0.12 * sin(TAU * 1.4 * t)
+				var v := sin(TAU * 196.0 * t) * 0.65 * beat \
+						+ sin(TAU * 293.66 * t + 0.4) * 0.24 * exp(-t * 0.55) \
+						+ sin(TAU * 392.4 * t + 1.1) * 0.20 * exp(-t * 0.85) \
+						+ sin(TAU * 587.3 * t + 0.2) * 0.10 * exp(-t * 1.35) \
+						+ sin(TAU * 784.0 * t) * 0.05 * exp(-t * 2.2)
+				s[i] = _lp(st, 0, v * env, a_out)
+		"aerostat_hum":
+			# Buoyant copper-and-glass Venusian cloud gondola: warm pressurised cabin airflow, faint harmonic hull
+			# resonance (48 / 96 Hz) and slow gentle cloud-canyon atmospheric surge (0.25 Hz, zero seam).
+			var a_hi := _a(640.0, r)
+			var a_lo := _a(105.0, r)
+			var a_out := _a(520.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var air := (_lp(st, 0, wn, a_hi) - _lp(st, 1, wn, a_lo)) * 0.66
+				var hull := sin(TAU * 48.0 * t) * 0.28 + sin(TAU * 48.25 * t + 0.9) * 0.22 \
+						+ sin(TAU * 96.0 * t + 0.4) * 0.10
+				var surge := 0.88 + 0.12 * sin(TAU * 0.25 * t)
+				s[i] = _lp(st, 2, (air + hull * 0.65) * surge, a_out)
+		"giant_clock":
+			# Magnified brass pocket watch resting on a giant's mahogany study desk: velvety low-mid wooden-desk
+			# resonance tick-tock (4 ticks per 4 s loop, alternating 340 Hz / 295 Hz damped wood-body thumps + warm
+			# brass gear ring, over a faint warm study-room air floor so RMS stays gentle without spiky clicks).
+			var a_room := _a(320.0, r)
+			var a_out := _a(1800.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var room_air := _lp(st, 0, wn, a_room) * 0.09
+				var idx := int(floor(t))
+				var dt := t - float(idx)
+				var is_tock := (idx % 2) == 1
+				var f_body := 295.0 if is_tock else 340.0
+				var f_brass := 920.0 if is_tock else 1080.0
+				var e_body := smoothstep(0.0, 0.004, dt) * exp(-dt * 26.0)
+				var e_brass := smoothstep(0.0, 0.002, dt) * exp(-dt * 42.0)
+				var tick_v := sin(TAU * f_body * dt) * 0.72 * e_body \
+						+ sin(TAU * (f_body * 0.5) * dt) * 0.45 * e_body \
+						+ sin(TAU * f_brass * dt + 0.5) * 0.22 * e_brass
+				s[i] = _lp(st, 1, room_air + tick_v * 0.85, a_out)
 	return s
 
 

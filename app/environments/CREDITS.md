@@ -261,3 +261,65 @@ and stars are made in code by the systems (`cabin.gd`, `seats.gd`, `kit.gd`, `ki
 `passing.gd`, `sky.gd`; the stars from the catalogue under "Data") on library materials (`painted_wall`, `brushed_steel`,
 `dark_metal`, `woven_carpet`, `woven_upholstery`, all CC0). Its sounds (electric rover-train drive, thin Martian wind
 and arrival chime) are synthesised.
+
+## Cenote cavern (`cenote_cavern.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The underground limestone sinkhole, tiered viewing island, timber boardwalk bridge, arched grotto
+portal, karst cavern dome, stalactites, stalagmites, jungle oculus roots/vines/ferns, carved basalt screen pylons,
+hanging bronze lanterns, faceted mineral crystals, emerald-turquoise cenote pool (`env_world_water.gdshader`),
+volumetric moonlight/dusk shafts (`env_world_shaft.gdshader`), fireflies, mist, sky and stars are made in code by the
+systems (`domestic.gd`, `seats.gd`, `kit.gd`, `kit/cenote_cavern.gd`, `kit/procedural.gd`, `life.gd`, `atmosphere.gd`,
+`sky.gd`; the stars from the catalogue under "Data") on library materials (all CC0). Its sounds (cavern hum, drips,
+water lap and crickets) are synthesised.
+
+## Orbital ring (`orbital_ring.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The cantilevered travertine and titanium observation terrace, crescent sapphire infinity pool
+(`env_world_water.gdshader`), gull-wing canopy ribs, glass balustrades, cedar planters with bamboo and cypresses,
+moulded cedar lounge-chair shells, working orbital clock, backlit geometric schematic displays, colossal rotating
+O'Neill cylinder interior shell with land valleys, silver rivers, snow-crowned alpine end-caps, radial spokes and night
+cities (`env_ring_world.gdshader`), sky and stars are made in code by the systems (`domestic.gd`, `seats.gd`, `kit.gd`,
+`kit/orbital_ring.gd`, `sky.gd`; the stars from the catalogue under "Data") on library materials (all CC0). Its sounds
+(wind, distant city murmur, fountain and cabin chime) are synthesised.
+
+## Cloud temple (`cloud_temple.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The floating stepped white-marble sky sanctuary, inlaid brass astrolabe floor rings, procedural mosaic
+medallion (`mosaic_medallion`), 16 fluted Ionic columns, broken classical entablatures, carved marble benches, twilight
+reflecting water basin (`env_world_water.gdshader`), fluted screen pylons, four bronze tripod braziers with flickering
+flames, aft brass armillary altar, 360-degree sunlit-to-starlit cloud sea (`env_cloud_sea.gdshader`), distant floating
+ruin islands, volumetric sunset shafts (`env_world_shaft.gdshader`), sky and stars are made in code by the systems
+(`domestic.gd`, `seats.gd`, `kit.gd`, `kit/cloud_temple.gd`, `kit/procedural.gd`, `sky.gd`; the stars from the catalogue
+under "Data") on library materials (all CC0). Its sounds (cloud wind, brazier fire and temple bell) are synthesised.
+
+## Venus aerostat (`venus_aerostat.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The octagonal hammered-copper and brass Art Nouveau cloud gondola, parquet floor with brass compass
+rose, mezzanine filigree gallery, arched panoramic bays, glowing overhead buoyant gas envelope and rigging, hanging
+glass fern terrariums, atmospheric barometer and spectrometer console, working astronomical clock, riveted circular
+airlock, 360-degree golden-amber Venusian cloud canyons (`env_venus_clouds.gdshader`), companion aerostat silhouettes
+and golden cloud shafts (`env_world_shaft.gdshader`) are made in code by the systems (`domestic.gd`, `seats.gd`,
+`kit.gd`, `kit/venus_aerostat.gd`, `sky.gd`) on library materials (all CC0). Its sounds (aerostat hum, distant cloud
+rumble and chime) are synthesised.
+
+## Sunken rotunda (`sunken_rotunda.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The flooded classical Atlantis marble rotunda, stepped circular mosaic dais (`mosaic_medallion`),
+knee-deep rippling peristyle canal (`env_world_water.gdshader`), 12 fluted columns with one romantically ruined breach
+and tumbled drums, coffered open-oculus dome, monumental wave-scroll screen pylons, waterproof bronze lanterns,
+terracotta amphorae, coral, sea-ferns, distant outer aqueduct arches, underwater light shafts (`env_world_shaft.gdshader`),
+caustics, schooling fish, bioluminescent jellies, manta ray and whale are made in code by the systems (`domestic.gd`,
+`seats.gd`, `kit.gd`, `kit/sunken_rotunda.gd`, `kit/procedural.gd`, `life.gd`, `sky.gd`) on library materials (all CC0).
+Its sounds (deep hum, water lap, vent bubbles, temple bell and whale song) are synthesised.
+
+## Giants study (`giants_study.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The 10:1 miniature-scale late-night Victorian study desk, baked gold-tooled green leather blotter
+(`leather_blotter`), stitched felt coaster nook, brushed-brass and walnut pocket display on folded notebook and ruler,
+leaning gilded leather book stack, working 2.3 m brass pocket watch, steaming porcelain teacup and saucer, lacquered
+fountain pen, soaring 7.8 m banker's desk lamp with light cone (`env_world_shaft.gdshader`), crystal inkwell, ceramic
+pencil pot, brass spectacles, magnifying glass, paperclip, shadowy bookshelves, roaring fireplace hearth, colossal
+leaded window, rain panes, sky and stars are made in code by the systems (`domestic.gd`, `seats.gd`, `kit.gd`,
+`kit/giants_study.gd`, `kit/procedural.gd`, `weather.gd`, `atmosphere.gd`, `sky.gd`; the stars from the catalogue under
+"Data") on library materials (all CC0). Its sounds (magnified pocket watch tick, rain on glass, distant fire and
+sleeping-cat purr) are synthesised.
