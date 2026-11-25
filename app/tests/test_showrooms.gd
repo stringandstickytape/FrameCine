@@ -324,6 +324,24 @@ func _test_room_tab() -> void:
 				return (gemini_worlds.has(tr(str(e[1])))
 					and EnvLibrary.category_of(str(e[0])) == "world"
 					and EnvLibrary.builder_of(str(e[0])) == "Gemini 4 Neon Extra High")))
+	var retreats: Container = tab._category_rows["retreat"]
+	var retreat_builders: Dictionary = retreats.get_meta("builders", {})
+	var gemini_retreats: Array = (tab.room_buttons(retreat_builders["Gemini 4 Neon Extra High"]) as Array).map(
+			func(b: Button) -> String: return b.text) if retreat_builders.has("Gemini 4 Neon Extra High") else []
+	var retreat_expected := [
+		["snowed_in_cabin", "Snowed-in cabin"],
+		["lighthouse_watchroom", "Lighthouse watchroom"],
+		["rainy_treehouse", "Rainy treehouse"],
+		["kyoto_pavilion", "Kyoto garden pavilion"],
+		["night_greenhouse", "Greenhouse at night"],
+		["bookshop_loft", "Bookshop loft"],
+	]
+	_check("the cozy retreats stand under their builder %s" % [retreat_builders.keys()],
+			retreat_builders.has("Gemini 4 Neon Extra High")
+			and retreat_expected.all(func(e: Array) -> bool:
+				return (gemini_retreats.has(tr(str(e[1])))
+					and EnvLibrary.category_of(str(e[0])) == "retreat"
+					and EnvLibrary.builder_of(str(e[0])) == "Gemini 4 Neon Extra High")))
 	_check("the Void stays with the other rooms", EnvLibrary.category_of("void") == "other"
 			and EnvLibrary.category_of("no_such_room") == "other")
 	_check("Television shows only with a TV room", tab._tv_box.visible == (tab._tvs.get_child_count() > 0))

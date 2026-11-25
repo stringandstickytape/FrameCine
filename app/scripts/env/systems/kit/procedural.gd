@@ -21,12 +21,14 @@ extends RefCounted
 const PATTERNS: Array[String] = ["pressed_tin", "ice_blocks", "swirl_carpet", "corrugated", "plasterboard",
 		"roof_tiles", "ashlar", "lime_wash", "quarry_tiles", "deco_carpet", "hex_pavers", "board_concrete",
 		"tufted", "shell_carpet", "moquette_94", "art_deco_runner", "midcentury_weave",
-		"moquette_88", "tartan_blanket", "mosaic_medallion", "leather_blotter"]
+		"moquette_88", "tartan_blanket", "mosaic_medallion", "leather_blotter",
+		"tatami_weave", "nordic_rug"]
 const SIZE := 128
 ## Patterns drawn larger than SIZE (many tiles a repeat, each its own: since 2026-11-08, the Athens rooftop's floor).
 const SIZES := {"quarry_tiles": 256, "deco_carpet": 256, "hex_pavers": 256, "board_concrete": 256,
 		"shell_carpet": 256, "moquette_94": 256, "art_deco_runner": 256, "midcentury_weave": 256,
-		"moquette_88": 256, "tartan_blanket": 256, "mosaic_medallion": 256, "leather_blotter": 256}
+		"moquette_88": 256, "tartan_blanket": 256, "mosaic_medallion": 256, "leather_blotter": 256,
+		"tatami_weave": 256, "nordic_rug": 256}
 const GLASS_SHADER := preload("res://scripts/env/systems/kit/env_glass.gdshader")
 const ProcCache := preload("res://scripts/env/proc_cache.gd")
 
@@ -525,6 +527,50 @@ static func _sample(pattern: String, u: float, v: float) -> Array:
 			var c := (deep_green * (0.84 + 0.32 * pebble)).lerp(gold_leaf, gilt * 0.9)
 			var h := 0.45 + 0.16 * pebble - gilt * 0.12
 			return [h, c, lerpf(0.58, 0.24, gilt)]
+		"tatami_weave":
+			# Traditional woven igusa rush tatami matting with dark pine-brocade heri cloth borders along the edges.
+			var edge_u := minf(u, 1.0 - u)
+			var is_heri := 1.0 - smoothstep(0.048, 0.058, edge_u)
+			var seam_v := 1.0 - smoothstep(0.008, 0.016, minf(v, 1.0 - v))
+			var rush := 0.5 + 0.5 * sin(v * TAU * 64.0)
+			var warp := 0.5 + 0.5 * cos(u * TAU * 20.0 + floor(v * 64.0) * 1.57)
+			var straw_var := _noise2(u, v, 8, 48, 941) * 0.14 + _noise2(u, v, 24, 16, 947) * 0.06
+			var straw_col := Color(0.67, 0.65, 0.44) * (0.86 + straw_var + 0.08 * rush)
+			var brocade := 0.5 + 0.5 * sin(u * TAU * 32.0) * sin(v * TAU * 32.0)
+			var heri_col := Color(0.11, 0.21, 0.14).lerp(Color(0.24, 0.34, 0.20), brocade * 0.45)
+			var c := straw_col.lerp(heri_col, is_heri) * (1.0 - seam_v * 0.38)
+			var h := lerpf(0.44 + 0.24 * rush + 0.08 * warp, 0.56 + 0.08 * brocade, is_heri) - seam_v * 0.28
+			return [clampf(h, 0.0, 1.0), c, lerpf(0.78, 0.56, is_heri)]
+		"nordic_rug":
+			# Cozy hand-loomed wool alpine cabin rug: warm oatmeal-cream woven yarn with crimson, spruce-pine and
+			# ochre geometric diamond bands.
+			var yarn := 0.5 + 0.5 * sin(u * TAU * 48.0) * cos(v * TAU * 28.0)
+			var weave_n := _noise2(u, v, 32, 24, 967) * 0.16 + _noise2(u, v, 64, 64, 971) * 0.08
+			var cream := Color(0.82, 0.77, 0.68)
+			var crimson := Color(0.58, 0.16, 0.13)
+			var spruce := Color(0.14, 0.28, 0.21)
+			var ochre := Color(0.76, 0.56, 0.22)
+			var c := cream
+			# Repeating horizontal woven bands & stepped Nordic diamonds along v.
+			var bv := fposmod(v * 2.0, 1.0)
+			var dv := absf(bv - 0.5)
+			var du := absf(fposmod(u * 4.0, 1.0) - 0.5)
+			var diamond := du + dv * 1.35
+			if dv < 0.055:
+				c = ochre
+			elif dv > 0.36 and dv < 0.43:
+				c = spruce
+			elif dv > 0.45:
+				c = crimson
+			if diamond < 0.30 and diamond > 0.17:
+				c = crimson
+			elif diamond <= 0.17 and diamond > 0.09:
+				c = cream
+			elif diamond <= 0.09:
+				c = spruce
+			c = c * (0.84 + weave_n + 0.08 * yarn)
+			var h := 0.46 + 0.22 * yarn + 0.14 * weave_n
+			return [clampf(h, 0.0, 1.0), c, 0.88]
 	return [0.5, Color(0.5, 0.5, 0.5), 0.8]
 
 

@@ -59,7 +59,7 @@ Cue sounds (`env_audio.play`, the chime) and the thud still go straight to Envir
 
 | Param | Default | What |
 |---|---|---|
-| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`, `boat_engine`, `water_lap`, `paddle_wheel`, `ferry_diesel`, `rail_joints`, `airship_engines`, `jet_cabin`, `coach_diesel`, `car_motorway`, `climber_hum`, `rover_drive`, `cavern_hum`, `cloud_wind`, `aerostat_hum`, `giant_clock`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`, `hooves`, `ship_horn`, `ferry_chime`, `train_whistle`, `diesel_horn`, `cabin_chime`, `telegraph_bell`, `temple_bell`; `silence` plays nothing (the sounds: below) |
+| `sound` | `silence` | loops: `projector`, `wall_rumble`, `cicadas`, `radiator`, `rain_glass`, `rain_leaves`, `gas_hiss`, `noise`, `crickets`, `fire`, `drips`, `wind`, `hum`, `deep_hum`, `fountain`, `clock`, `tube_whine`, `bubbles`, `city`, `boat_engine`, `water_lap`, `paddle_wheel`, `ferry_diesel`, `rail_joints`, `airship_engines`, `jet_cabin`, `coach_diesel`, `car_motorway`, `climber_hum`, `rover_drive`, `cavern_hum`, `cloud_wind`, `aerostat_hum`, `giant_clock`, `ocean_surf`, `rain_tin`, `grand_clock`; one-shots: `moped`, `train`, `huskies`, `hull_creak`, `rumble`, `tick`, `creak`, `whale`, `chime`, `gong`, `bird`, `purr`, `three_bells`, `candle`, `ice_creak`, `vcr`, `tape_load`, `sonar`, `church_bell`, `tawny_owl`, `hooves`, `ship_horn`, `ferry_chime`, `train_whistle`, `diesel_horn`, `cabin_chime`, `telegraph_bell`, `temple_bell`, `foghorn`, `bamboo_clack`; `silence` plays nothing (the sounds: below) |
 | `gain_db` | 0 | dB from the designed level (-30 to +6) |
 | `level` | 1 | 0 to 1, live. Bind it: `film.bass` for a rumble through the wall, `weather.rain` or `weather.wet` for rain, a setting |
 | `film_db` | -8 | dB lower in `starting`, `playing` and `credits`. Up again in the pre-show, paused, the intermission and the end |
@@ -134,6 +134,11 @@ tones and swells divide its length, so it has no seam.
 | `temple_bell` | one-shot 5.5 | deep warm bronze singing-bowl / temple bell strike (196 Hz fundamental + warm beating fifth & octave overtones), at 32000 Hz (designed level -54) | `cloud_temple` and `sunken_rotunda` arrival/ritual cues |
 | `aerostat_hum` | loop 8 | buoyant copper-and-glass cloud gondola cabin airflow and gentle harmonic hull resonance (48 / 96 Hz), at 22050 Hz (designed level -55) | `venus_aerostat` |
 | `giant_clock` | loop 4 | magnified brass pocket-watch escapement tick-tock resonating softly across a giant mahogany desk (1 Hz warm wood-body thumps), at 32000 Hz (designed level -56) | `giants_study` |
+| `foghorn` | one-shot 6.0 | haunting two-tone coastal lighthouse diaphone foghorn (110 Hz gliding down into an 82.4 Hz grunt with soft sea-echo decay), at 22050 Hz (designed level -54) | `lighthouse_watchroom` (`every` 95 s and ritual cues) |
+| `ocean_surf` | loop 12 | rhythmic Atlantic headland ocean swells rolling and breaking on rocky cliffs below a lighthouse (2 slow seamless wave cycles), at 22050 Hz (designed level -55) | `lighthouse_watchroom`, below the tower |
+| `bamboo_clack` | one-shot 3.2 | Kyoto garden *shishi-odoshi* hollow bamboo tube knocking gently on wet river stone with trickling water, at 32000 Hz (designed level -55) | `kyoto_pavilion` (`every` 52 s and ritual cues) |
+| `rain_tin` | loop 6 | cozy rain pattering on a corrugated tin treehouse roof (warm rain wash blended with dense soft damped roof-panel drop pings), at 32000 Hz (designed level -53) | `rainy_treehouse`, overhead (`level` on `weather.rain`) |
+| `grand_clock` | loop 4 | stately oak-case grandfather pendulum clock tick-tock resonating in a quiet late-night bookshop (1 Hz warm deep wood-cabinet beats), at 32000 Hz (designed level -56) | `bookshop_loft`, aft landing (`level` on `setting.clock`) |
 | `ice_creak` | one-shot 2.6 | a crack that sings down, then a low groan | ice, `every` |
 | `candle` | one-shot 0.9 | a candle's flame puffs and wavers, three or four sputters of wax | `every`, very low |
 | `three_bells` | one-shot 3.2 | a soft house bell: three struck-bar tones, up a fifth, down a minor third (our own call) | before the show |
@@ -313,6 +318,11 @@ second.
 | `temple_bell` (2026-11-24) | -54 | -54.0 | -62.0 | | -45.4 |
 | `aerostat_hum` (2026-11-24) | -55 | -55.0 | -62.9 | -70.2 | -44.5 |
 | `giant_clock` (2026-11-24) | -56 | -56.0 | -64.0 | -71.0 | -24.5 |
+| `foghorn` (2026-11-25) | -54 | -54.0 | -62.0 | | -48.6 |
+| `ocean_surf` (2026-11-25) | -55 | -55.0 | -62.8 | -71.3 | -40.9 |
+| `bamboo_clack` (2026-11-25) | -55 | -55.0 | -63.0 | | -35.1 |
+| `rain_tin` (2026-11-25) | -53 | -53.1 | -61.0 | -68.2 | -40.3 |
+| `grand_clock` (2026-11-25) | -56 | -56.0 | -64.0 | -71.1 | -34.3 |
 | `clock` | -56 | -56.0 | -64.0 | -71.1 | -19.9 |
 | `tube_whine` | -62 | -62.0 | -70.0 | -77.2 | -55.0 |
 | `noise` | -54 | -54.0 | -62.0 | -69.1 | -41.2 |
@@ -431,3 +441,9 @@ at 8 m they are 19 dB under their "in film" level even at -12. Without the filte
 | Venus aerostat | `acoustics` `hull` (`rt60` 0.88); `sound_bed` `aerostat_hum`, distant deep cloud `rumble` (`every` 190), warm brass `chime` on ritual |
 | Sunken rotunda | `acoustics` `stone_nave` (`rt60` 1.55); `sound_bed` `deep_hum`, `water_lap` around the canal, `bubbles`, `temple_bell` on ritual, distant `whale` song on quiet scenes |
 | Giants study | `acoustics` `small_room` (`rt60` 0.72); `sound_bed` `giant_clock` at the 2.3 m pocket watch (`level` on `setting.watch_tick`), `rain_glass` on the towering window (`weather.rain`), distant hearth `fire`, sleeping-cat `purr` (`every` 110) |
+| Snowed-in cabin | `acoustics` `small_room` (`rt60` 0.52); `sound_bed` starboard hearth `fire` (`level` on `setting.hearth`), muffled alpine `wind`, occasional `tawny_owl` |
+| Lighthouse watchroom | `acoustics` `hull` (`rt60` 0.68); `sound_bed` `ocean_surf` below, `rain_glass` on curved storm panes (`weather.rain`), coastal `wind`, two-tone `foghorn` (`every` 95 and arrival/ritual cues) |
+| Rainy treehouse | `acoustics` `small_room` (`rt60` 0.42); `sound_bed` overhead `rain_tin` and canopy `rain_leaves` (`weather.rain`), soft forest `wind`, distant `tawny_owl` |
+| Kyoto garden pavilion | `acoustics` `small_room` (`rt60` 0.48); `sound_bed` port `bamboo_clack` (`every` 52 and arrival/ritual cues), pond `fountain`, evening `crickets`, whisper-soft `wind` |
+| Greenhouse at night | `acoustics` `small_room` (`rt60` 0.82); `sound_bed` vault `rain_glass` (`weather.rain`), conservatory `drips`, stone `fountain`, clear-night `crickets`, `wind` |
+| Bookshop loft | `acoustics` `small_room` (`rt60` 0.44); `sound_bed` aft `grand_clock` (`level` on `setting.clock`), dormer `rain_glass` (`weather.rain`), lower-shop stove `fire`, sleeping shop-cat `purr` (`every` 110) |

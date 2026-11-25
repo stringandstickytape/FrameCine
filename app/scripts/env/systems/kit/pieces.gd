@@ -46,6 +46,12 @@ const CloudTemple := preload("res://scripts/env/systems/kit/cloud_temple.gd")
 const VenusAerostat := preload("res://scripts/env/systems/kit/venus_aerostat.gd")
 const SunkenRotunda := preload("res://scripts/env/systems/kit/sunken_rotunda.gd")
 const GiantsStudy := preload("res://scripts/env/systems/kit/giants_study.gd")
+const SnowedInCabin := preload("res://scripts/env/systems/kit/snowed_in_cabin.gd")
+const LighthouseWatchroom := preload("res://scripts/env/systems/kit/lighthouse_watchroom.gd")
+const RainyTreehouse := preload("res://scripts/env/systems/kit/rainy_treehouse.gd")
+const KyotoPavilion := preload("res://scripts/env/systems/kit/kyoto_pavilion.gd")
+const NightGreenhouse := preload("res://scripts/env/systems/kit/night_greenhouse.gd")
+const BookshopLoft := preload("res://scripts/env/systems/kit/bookshop_loft.gd")
 
 const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk", "column", "facade", "castle_gate",
 		"booth", "snack_bar", "screen_tower", "bougainvillea", "ivy", "ferns", "carpet", "partition", "curves",
@@ -77,7 +83,13 @@ const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk
 		"cloud_sanctuary", "cloud_sky_sea",
 		"venus_gondola", "venus_clouds",
 		"rotunda_hall", "rotunda_water",
-		"study_desk", "study_room"]
+		"study_desk", "study_room",
+		"cabin_chalet", "cabin_hearth",
+		"lighthouse_tower", "lighthouse_lens",
+		"treehouse_canopy", "treehouse_deck",
+		"kyoto_engawa", "kyoto_garden",
+		"greenhouse_vault", "greenhouse_flora",
+		"bookshop_mezzanine", "bookshop_shelves"]
 ## Each piece's size when neither the entry nor its slot gives one: [width, height, depth].
 const SIZES := {
 	"balcony_front": [6.0, 1.0, 0.25], "niche": [1.3, 2.6, 0.4], "urn": [0.5, 1.0, 0.5], "lion": [0.55, 0.9, 1.0],
@@ -125,6 +137,12 @@ const SIZES := {
 	"venus_gondola": [0.0, 0.0, 0.0], "venus_clouds": [0.0, 0.0, 0.0],
 	"rotunda_hall": [0.0, 0.0, 0.0], "rotunda_water": [0.0, 0.0, 0.0],
 	"study_desk": [0.0, 0.0, 0.0], "study_room": [0.0, 0.0, 0.0],
+	"cabin_chalet": [0.0, 0.0, 0.0], "cabin_hearth": [0.0, 0.0, 0.0],
+	"lighthouse_tower": [0.0, 0.0, 0.0], "lighthouse_lens": [0.0, 0.0, 0.0],
+	"treehouse_canopy": [0.0, 0.0, 0.0], "treehouse_deck": [0.0, 0.0, 0.0],
+	"kyoto_engawa": [0.0, 0.0, 0.0], "kyoto_garden": [0.0, 0.0, 0.0],
+	"greenhouse_vault": [0.0, 0.0, 0.0], "greenhouse_flora": [0.0, 0.0, 0.0],
+	"bookshop_mezzanine": [0.0, 0.0, 0.0], "bookshop_shelves": [0.0, 0.0, 0.0],
 }
 ## The pieces that stand on a floor (their slot's origin is a floor point); the others hang on a wall.
 const STANDING: Array[String] = ["urn", "lion", "obelisk", "column", "booth", "snack_bar", "ferns", "partition",
@@ -242,6 +260,18 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			SunkenRotunda.build(piece, c, xf, size, e)
 		"study_desk", "study_room":
 			GiantsStudy.build(piece, c, xf, size, e)
+		"cabin_chalet", "cabin_hearth":
+			SnowedInCabin.build(piece, c, xf, size, e)
+		"lighthouse_tower", "lighthouse_lens":
+			LighthouseWatchroom.build(piece, c, xf, size, e)
+		"treehouse_canopy", "treehouse_deck":
+			RainyTreehouse.build(piece, c, xf, size, e)
+		"kyoto_engawa", "kyoto_garden":
+			KyotoPavilion.build(piece, c, xf, size, e)
+		"greenhouse_vault", "greenhouse_flora":
+			NightGreenhouse.build(piece, c, xf, size, e)
+		"bookshop_mezzanine", "bookshop_shelves":
+			BookshopLoft.build(piece, c, xf, size, e)
 
 
 # --- Furniture (furniture.gd draws it) -----------------------------------------------------------------------------

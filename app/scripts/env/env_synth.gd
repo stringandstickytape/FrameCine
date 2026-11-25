@@ -23,7 +23,8 @@ const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale
 		"hooves", "boat_engine", "water_lap", "paddle_wheel", "ship_horn", "ferry_diesel", "ferry_chime",
 		"rail_joints", "train_whistle", "diesel_horn", "airship_engines", "jet_cabin", "cabin_chime",
 		"coach_diesel", "car_motorway", "climber_hum", "rover_drive", "telegraph_bell",
-		"cavern_hum", "cloud_wind", "temple_bell", "aerostat_hum", "giant_clock"]
+		"cavern_hum", "cloud_wind", "temple_bell", "aerostat_hum", "giant_clock",
+		"foghorn", "ocean_surf", "bamboo_clack", "rain_tin", "grand_clock"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
@@ -37,14 +38,16 @@ const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise
 		"rail_joints": 8.0, "train_whistle": 4.5, "diesel_horn": 4.2, "airship_engines": 8.0,
 		"jet_cabin": 8.0, "cabin_chime": 2.4,
 		"coach_diesel": 8.0, "car_motorway": 8.0, "climber_hum": 8.0, "rover_drive": 8.0, "telegraph_bell": 3.0,
-		"cavern_hum": 8.0, "cloud_wind": 12.0, "temple_bell": 5.5, "aerostat_hum": 8.0, "giant_clock": 4.0}
+		"cavern_hum": 8.0, "cloud_wind": 12.0, "temple_bell": 5.5, "aerostat_hum": 8.0, "giant_clock": 4.0,
+		"foghorn": 6.0, "ocean_surf": 12.0, "bamboo_clack": 3.2, "rain_tin": 6.0, "grand_clock": 4.0}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
 		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles",
 		"city", "boat_engine", "water_lap", "paddle_wheel", "ferry_diesel",
 		"rail_joints", "airship_engines", "jet_cabin",
 		"coach_diesel", "car_motorway", "climber_hum", "rover_drive",
-		"cavern_hum", "cloud_wind", "aerostat_hum", "giant_clock"]
+		"cavern_hum", "cloud_wind", "aerostat_hum", "giant_clock",
+		"ocean_surf", "rain_tin", "grand_clock"]
 ## Sample rates below RATE for the far and low sounds (less to make, nothing lost above their band).
 const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiator": 22050, "moped": 32000,
 		"hull_creak": 32000, "purr": 22050, "crickets": 32000, "fire": 32000, "drips": 32000, "wind": 22050,
@@ -57,7 +60,8 @@ const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiato
 		"jet_cabin": 22050, "cabin_chime": 32000,
 		"coach_diesel": 22050, "car_motorway": 22050, "climber_hum": 22050, "rover_drive": 22050,
 		"telegraph_bell": 32000,
-		"cavern_hum": 22050, "cloud_wind": 22050, "temple_bell": 32000, "aerostat_hum": 22050, "giant_clock": 32000}
+		"cavern_hum": 22050, "cloud_wind": 22050, "temple_bell": 32000, "aerostat_hum": 22050, "giant_clock": 32000,
+		"foghorn": 22050, "ocean_surf": 22050, "bamboo_clack": 32000, "rain_tin": 32000, "grand_clock": 32000}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -1620,6 +1624,126 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 						+ sin(TAU * (f_body * 0.5) * dt) * 0.45 * e_body \
 						+ sin(TAU * f_brass * dt + 0.5) * 0.22 * e_brass
 				s[i] = _lp(st, 1, room_air + tick_v * 0.85, a_out)
+		"foghorn":
+			# Haunting two-tone coastal lighthouse diaphone foghorn: warm brassy 110 Hz (A2) note gliding down into
+			# a classic falling 82.4 Hz (E2) diaphone grunt over misty Atlantic air, with soft sea-echo decay.
+			var a_horn := _a(580.0, r)
+			var a_air := _a(340.0, r)
+			var phase := 0.0
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var air := _lp(st, 0, wn, a_air) * 0.08
+				var glide := smoothstep(2.45, 2.90, t)
+				var f := lerpf(110.0, 82.4, glide)
+				phase += TAU * f / r
+				var env := smoothstep(0.06, 0.24, t) * (1.0 - smoothstep(3.55, 4.15, t))
+				var echo_env := smoothstep(0.45, 0.90, t) * exp(-maxf(t - 3.6, 0.0) * 1.15) * 0.28
+				var tone := sin(phase) * 0.62 + sin(phase * 2.0 + 0.3) * 0.34 \
+						+ sin(phase * 3.0 + 0.8) * 0.16 + sin(phase * 4.0) * 0.07
+				var v := tone * (env + echo_env) + air * (env + echo_env * 1.2)
+				s[i] = _lp(st, 1, v, a_horn)
+		"ocean_surf":
+			# Rhythmic Atlantic headland ocean surf rolling against rocks below a lighthouse: 2 slow wave cycles per
+			# 12 s loop, pairing deep sub-surf swell with slightly delayed cresting foam wash (seamless loop).
+			var a_deep := _a(190.0, r)
+			var a_foam := _a(1280.0, r)
+			var a_lo := _a(220.0, r)
+			var a_out := _a(1400.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var deep := _lp(st, 0, wn, a_deep) * 0.85
+				var foam := (_lp(st, 1, wn, a_foam) - _lp(st, 2, wn, a_lo)) * 0.48
+				var w_cyc := TAU * (2.0 / 12.0) * t
+				var swell_deep := 0.62 + 0.38 * (0.5 + 0.5 * sin(w_cyc))
+				var swell_foam := 0.38 + 0.62 * pow(0.5 + 0.5 * sin(w_cyc - 0.65), 1.6)
+				var undertow := 0.92 + 0.08 * sin(TAU * (3.0 / 12.0) * t + 0.9)
+				s[i] = _lp(st, 3, (deep * swell_deep + foam * swell_foam) * undertow, a_out)
+		"bamboo_clack":
+			# Serene Japanese garden shishi-odoshi (bamboo deer-scarer): gentle filling water trickle followed by a
+			# hollow resonant bamboo-on-wet-stone knock (335 / 682 / 1140 Hz wood-tube modes) and soft settling splash.
+			var a_water := _a(2200.0, r)
+			var a_wlo := _a(380.0, r)
+			var a_out := _a(3600.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var trickle := (_lp(st, 0, wn, a_water) - _lp(st, 1, wn, a_wlo)) * 0.22
+				var water_env := smoothstep(0.0, 0.12, t) * (1.0 - smoothstep(2.65, 3.15, t)) \
+						* (0.45 + 0.55 * exp(-absf(t - 0.55) * 2.2))
+				var knock := 0.0
+				for ev: Array in [[0.34, 1.0, 1.0], [0.435, 0.34, 1.03]]:
+					var dt := t - float(ev[0])
+					if dt >= 0.0:
+						var amp := float(ev[1])
+						var p := float(ev[2])
+						var e1 := minf(dt / 0.0025, 1.0) * exp(-dt * 12.5)
+						var e2 := minf(dt / 0.0018, 1.0) * exp(-dt * 24.0)
+						knock += amp * (sin(TAU * 335.0 * p * dt) * 0.64 * e1
+								+ sin(TAU * 682.0 * p * dt + 0.4) * 0.38 * e1
+								+ sin(TAU * 1140.0 * p * dt + 1.1) * 0.22 * e2
+								+ sin(TAU * 1760.0 * p * dt) * 0.10 * e2)
+				s[i] = _lp(st, 2, trickle * water_env + knock * 0.78, a_out)
+		"rain_tin":
+			# Warm cozy rain pattering on a corrugated tin treehouse roof: soft steady rain wash blended with dense
+			# damped roof-panel drop pings (580-1750 Hz, ~22 drops/s) so it feels soothing and organic, zero harshness.
+			var a_hi := _a(3200.0, r)
+			var a_lo := _a(220.0, r)
+			var a_body := _a(760.0, r)
+			var a_out := _a(3400.0, r)
+			# Pre-schedule seamless soft drop hits across the full buffer (including crossfade lead).
+			var n_drops := 148
+			var drop_t := PackedFloat32Array()
+			var drop_f := PackedFloat32Array()
+			var drop_a := PackedFloat32Array()
+			drop_t.resize(n_drops)
+			drop_f.resize(n_drops)
+			drop_a.resize(n_drops)
+			var dur_s := float(total) / r
+			for d in n_drops:
+				drop_t[d] = rng.randf() * dur_s
+				drop_f[d] = rng.randf_range(580.0, 1750.0)
+				drop_a[d] = rng.randf_range(0.18, 0.52)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var wash := (_lp(st, 0, wn, a_hi) - _lp(st, 1, wn, a_lo)) * 0.44
+				var body := _lp(st, 2, wn, a_body) * 0.34
+				s[i] = wash + body
+			for d in n_drops:
+				var i0 := int(drop_t[d] * r)
+				var f := drop_f[d]
+				var amp := drop_a[d] * 0.48
+				var span := mini(int(0.055 * r), total)
+				for k in span:
+					var dt := float(k) / r
+					var env := minf(dt / 0.0015, 1.0) * exp(-dt * 72.0)
+					var ping := (sin(TAU * f * dt) * 0.72 + sin(TAU * f * 1.48 * dt + 0.6) * 0.28) * env * amp
+					s[(i0 + k) % total] += ping
+			for i in total:
+				s[i] = _lp(st, 3, s[i], a_out)
+		"grand_clock":
+			# Stately oak-case grandfather pendulum clock in a quiet late-night bookshop: warm deep cabinet tick-tock
+			# (4 beats per 4 s loop, alternating 215 Hz / 182 Hz wood-case resonance + soft brass escapement over a
+			# hushed bookshop room-air floor).
+			var a_room := _a(280.0, r)
+			var a_out := _a(1500.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var room_air := _lp(st, 0, wn, a_room) * 0.11
+				var idx := int(floor(t))
+				var dt := t - float(idx)
+				var is_tock := (idx % 2) == 1
+				var f_cab := 182.0 if is_tock else 215.0
+				var f_esc := 650.0 if is_tock else 760.0
+				var e_cab := smoothstep(0.0, 0.005, dt) * exp(-dt * 20.0)
+				var e_esc := smoothstep(0.0, 0.002, dt) * exp(-dt * 38.0)
+				var beat := sin(TAU * f_cab * dt) * 0.74 * e_cab \
+						+ sin(TAU * (f_cab * 0.5) * dt) * 0.42 * e_cab \
+						+ sin(TAU * f_esc * dt + 0.4) * 0.18 * e_esc
+				s[i] = _lp(st, 1, room_air + beat * 0.80, a_out)
 	return s
 
 

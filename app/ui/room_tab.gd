@@ -140,6 +140,9 @@ func bind(p_app: Node) -> void:
 	(_groups[EnvDoc.ROOM_GROUPS["world"]]["body"] as VBoxContainer).add_child(W.help(
 			"Impossible sanctuaries to watch a film: crystal caverns, orbital rings, cloud temples, "
 			+ "floating aerostats, sunken ruins and miniature worlds."))
+	(_groups[EnvDoc.ROOM_GROUPS["retreat"]]["body"] as VBoxContainer).add_child(W.help(
+			"Warm, intimate hideaways sheltered from the weather: snowed-in cabins, stormy lighthouses, "
+			+ "rainy treehouses, quiet gardens, glasshouses and late-night bookshops."))
 	var tv_body: VBoxContainer = _groups[EnvDoc.ROOM_GROUPS["tv"]]["body"]
 	_time_travel = W.toggle("Time travel", _on_time_travel)
 	tv_body.add_child(W.hbox([_time_travel]))

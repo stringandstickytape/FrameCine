@@ -323,3 +323,70 @@ leaded window, rain panes, sky and stars are made in code by the systems (`domes
 `kit/giants_study.gd`, `kit/procedural.gd`, `weather.gd`, `atmosphere.gd`, `sky.gd`; the stars from the catalogue under
 "Data") on library materials (all CC0). Its sounds (magnified pocket watch tick, rain on glass, distant fire and
 sleeping-cat purr) are synthesised.
+
+## Snowed-in cabin (`snowed_in_cabin.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The steep alpine timber A-frame chalet, Douglas-fir scissor trusses, woven Nordic rug (`nordic_rug`),
+river-stone hearth with dancing fire flames (`env_screening_glow.gdshader`) and hearth glow shaft
+(`env_world_shaft.gdshader`), copper kettle, firewood alcove, live-edge cedar coffee table with steaming cocoa mugs,
+forged-iron wagon-wheel chandelier, aft sleeping loft, skis, snow-laden spruces outside, falling alpine snow, sky and
+stars are made in code by the systems (`domestic.gd`, `seats.gd`, `kit.gd`, `kit/snowed_in_cabin.gd`,
+`kit/procedural.gd`, `weather.gd`, `sky.gd`; the stars from the catalogue under "Data") on library materials (all CC0).
+Its sounds (hearth fire, alpine wind and tawny owl) are synthesised.
+
+## Lighthouse watchroom (`lighthouse_watchroom.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The circular whitewashed-stone and riveted cast-iron coastal lighthouse lantern room, inlaid brass
+compass rose, 360-degree helical diamond storm-glass cage, ribbed copper cupola dome, exterior iron catwalk, aft spiral
+staircase hatch, working mahogany ship's chronometer clock (`PieceClock`), port chart desk, brass refractor telescope,
+live rotating first-order brass-and-crystal Fresnel dioptric optical drum sweeping twin volumetric beams
+(`env_world_shaft.gdshader`), stormy Atlantic ocean swells (`env_world_water.gdshader`), basalt sea stacks, channel bell
+buoy, rain-beaded storm panes, sky and stars are made in code by the systems (`domestic.gd`, `seats.gd`, `kit.gd`,
+`kit/lighthouse_watchroom.gd`, `weather.gd`, `sky.gd`; the stars from the catalogue under "Data") on library materials
+(all CC0). Its sounds (ocean surf, rain on glass, coastal wind and two-tone foghorn) are synthesised.
+
+## Rainy treehouse (`rainy_treehouse.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The cedar-plank and pitched corrugated-tin treehouse cabin, gnarled mossy host oak trunk and canopy
+boughs, 21 misty neighbouring woodland oaks and cedars, wide propped-open timber shutter awnings, woven rug
+(`nordic_rug`), festooned fairy lanterns, hand-lashed cedar screen frame, cedar-stump tea table, aft trapdoor and rope
+ladder, curving 34-slat wooden rope suspension bridge, outside canopy rain, forest mist, fireflies, sky and stars are
+made in code by the systems (`domestic.gd`, `seats.gd`, `kit.gd`, `kit/rainy_treehouse.gd`, `kit/procedural.gd`,
+`weather.gd`, `atmosphere.gd`, `life.gd`, `sky.gd`; the stars from the catalogue under "Data") on library materials
+(all CC0). Its sounds (rain on tin roof, rain on leaves, forest wind and tawny owl) are synthesised.
+
+## Kyoto garden pavilion (`kyoto_pavilion.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The hinoki-cypress *engawa* garden pavilion, procedural *tatami* matting (`tatami_weave`), *kawara*
+hipped roof eaves, backlit *shoji* lattice screens, recessed *tokonoma* scroll and ikebana alcove, low *chabudai* tea
+table with cast-iron *kyusu* teapot and matcha cups, four *andon* floor lanterns, freestanding cypress screen frame,
+animated mirror-emerald koi pond (`env_world_water.gdshader`), 18 living Nishikigoi (`life.gd`), arched vermilion
+footbridge, granite *yukimi-doro* stone lanterns, live tipping bamboo *shishi-odoshi* water clack, raked *karesansui*
+Zen gravel courtyard, bamboo groves, seasonal cherry/maple trees, drifting petals, summer fireflies, sky and stars are
+made in code by the systems (`domestic.gd`, `seats.gd`, `kit.gd`, `kit/kyoto_pavilion.gd`, `kit/procedural.gd`,
+`weather.gd`, `life.gd`, `sky.gd`; the stars from the catalogue under "Data") on library materials (all CC0). Its sounds
+(bamboo *shishi-odoshi* clack, pond fountain, crickets and wind) are synthesised.
+
+## Greenhouse at night (`night_greenhouse.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The curved Victorian wrought-iron and ribbed-glass barrel-vault conservatory, terracotta-and-slate
+quarry-tile floor (`quarry_tiles`) with slotted cast-iron heating grate and copper pipes, rose-brick dwarf walls,
+botanical screen trellis, circular limestone drip fountain (`env_world_water.gdshader`), kentia and fan palms, fruiting
+dwarf lemon and tangerine trees, hanging fern baskets, slatted cedar potting benches with terracotta pots, glass bell
+cloches and brass watering can, aft Victorian double glass doors, dark garden cypress silhouettes, moonbeam shafts
+(`env_world_shaft.gdshader`), warm mist, outside midnight rain, sky and stars are made in code by the systems
+(`domestic.gd`, `seats.gd`, `kit.gd`, `kit/night_greenhouse.gd`, `kit/procedural.gd`, `weather.gd`, `atmosphere.gd`,
+`sky.gd`; the stars from the catalogue under "Data") on library materials (all CC0). Its sounds (rain on glass, drips,
+fountain, crickets and wind) are synthesised.
+
+## Bookshop loft (`bookshop_loft.env.json`, built by Gemini 4 Neon Extra High)
+
+No bundled asset. The two-storey walnut-and-oak antique bookshop mezzanine loft, woven rugs (`nordic_rug`), turned-oak
+and brass balustrade, grand central mahogany arched bookcase screen bay, floor-to-ceiling jewel-toned leather and cloth
+bookshelves across both storeys, three rolling oak-and-brass library ladders, reading tables with emerald-glass banker's
+lamps, terrestrial globe, teacup, tall carved oak grandfather clock (`PieceClock`), aft descending staircase, lower
+atrium open-folio reading table and cast-iron stove, four rain-beaded dormer skylights, exterior wet-slate chimneys,
+outside night rain, sky and stars are made in code by the systems (`domestic.gd`, `seats.gd`, `kit.gd`,
+`kit/bookshop_loft.gd`, `kit/procedural.gd`, `weather.gd`, `sky.gd`; the stars from the catalogue under "Data") on
+library materials (all CC0). Its sounds (oak grandfather clock, rain on glass, distant stove fire and sleeping-cat purr)
+are synthesised.

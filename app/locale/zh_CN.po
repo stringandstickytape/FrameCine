@@ -381,6 +381,12 @@ msgstr "电视"
 msgid "Journeys"
 msgstr "旅程"
 
+msgid "Other worlds"
+msgstr "异界奇境"
+
+msgid "Cozy retreats"
+msgstr "温暖隐居"
+
 msgid "A small dark room with nothing in it to look at but the film."
 msgstr "一间昏暗的小房间，除了影片别无可看。"
 
@@ -2409,6 +2415,12 @@ msgstr "环境"
 msgid "A journey is as long as the film: it leaves when the film starts and arrives with the credits. Pause, and it waits."
 msgstr "旅程与影片一样长：影片开始时出发，片尾字幕时到达。暂停时，它会等待。"
 
+msgid "Impossible sanctuaries to watch a film: crystal caverns, orbital rings, cloud temples, floating aerostats, sunken ruins and miniature worlds."
+msgstr "不可思议的观影秘境：水晶溶洞、轨道环城、云端神殿、金星浮空艇、海底遗迹与微缩世界。"
+
+msgid "Warm, intimate hideaways sheltered from the weather: snowed-in cabins, stormy lighthouses, rainy treehouses, quiet gardens, glasshouses and late-night bookshops."
+msgstr "躲避风雨的温暖私密角落：雪夜木屋、风暴灯塔、雨中树屋、宁静庭院、午夜玻璃花房与深夜书店阁楼。"
+
 msgid "Time travel"
 msgstr "时光旅行"
 
@@ -3322,17 +3334,41 @@ msgstr "日落天空"
 msgid "Cloud layers sky"
 msgstr "云层天空"
 
+msgid "Airship 1931"
+msgstr "飞艇 1931"
+
 #. A room: an atmospheric picture palace of 1928, a courtyard open to the twilight sky.
 msgid "Atmospheric 1928"
 msgstr "星空庭院影院 1928"
+
+msgid "Back seat 2004"
+msgstr "后座 2004"
 
 #. The Room tab: a room, a glass dome hall in deep water.
 msgid "Bathysphere"
 msgstr "深海球舱"
 
+msgid "Bookshop loft"
+msgstr "书店阁楼"
+
+msgid "Cenote cavern"
+msgstr "溶洞天坑"
+
+msgid "Cinema coach 1935"
+msgstr "影院车厢 1935"
+
+msgid "Cloud temple"
+msgstr "云端神殿"
+
+msgid "Coach trip 1988"
+msgstr "长途客车 1988"
+
 #. The Room tab: a room, a Moon base's cinema under a geodesic glass dome.
 msgid "Crater"
 msgstr "环形山"
+
+msgid "Dome car 1955"
+msgstr "玻璃顶观景车 1955"
 
 #. A room: a drive-in cinema of 1958, seen from a car (the room list).
 msgid "Drive-in - 1958"
@@ -3342,11 +3378,29 @@ msgstr "汽车影院 - 1958"
 msgid "Flagship"
 msgstr "旗舰影院"
 
+msgid "Giants study"
+msgstr "巨人书房"
+
 msgid "Ice cinema"
 msgstr "冰雪影院"
 
+msgid "Jet 1964"
+msgstr "喷气客机 1964"
+
+msgid "Kyoto garden pavilion"
+msgstr "京都庭院凉亭"
+
+msgid "Lighthouse watchroom"
+msgstr "灯塔守望室"
+
 msgid "Liner 1936"
 msgstr "邮轮 1936"
+
+msgid "Mars train"
+msgstr "火星列车"
+
+msgid "Moon ferry"
+msgstr "月球渡轮"
 
 msgid "Narrowboat"
 msgstr "运河窄船"
@@ -3356,6 +3410,15 @@ msgstr "中殿"
 
 msgid "Night ferry 1994"
 msgstr "夜航渡轮 1994"
+
+msgid "Greenhouse at night"
+msgstr "午夜玻璃花房"
+
+msgid "Night sleeper 1929"
+msgstr "夜行卧铺 1929"
+
+msgid "Orbital ring"
+msgstr "轨道环城"
 
 #. A room: the cinema hall of a 1970s palace of culture (a civic arts centre).
 msgid "Palace of Culture 1974"
@@ -3369,12 +3432,18 @@ msgstr "枕头城堡 1993"
 msgid "Pink Palace"
 msgstr "粉色宫殿"
 
+msgid "Rainy treehouse"
+msgstr "雨夜树屋"
+
 msgid "Reclaimed"
 msgstr "荒野影院"
 
 #. A room's name: an open-air summer cinema on a roof in Athens.
 msgid "Athens rooftop"
 msgstr "雅典屋顶影院"
+
+msgid "The Salon 1870"
+msgstr "海底沙龙 1870"
 
 #. A room: a small multiplex screen of 1983 (the room list).
 msgid "Screen 3 - 1983"
@@ -3391,9 +3460,18 @@ msgstr "1906 年店面影院"
 msgid "Showboat 1927"
 msgstr "演艺船 1927"
 
+msgid "Sky lift"
+msgstr "太空电梯"
+
+msgid "Snowed-in cabin"
+msgstr "雪夜木屋"
+
 #. A room: a 1937 cinema in the streamline style.
 msgid "Streamline 1937"
 msgstr "1937 年流线型影院"
+
+msgid "Sunken rotunda"
+msgstr "海底圆殿"
 
 #. The TV-era rooms (app/environments/tv_*.env.json): names and settings.
 msgid "TV 1930 - glowing box"
@@ -3433,17 +3511,44 @@ msgstr "电视 明天 - 那面墙"
 msgid "TV today - the present"
 msgstr "电视 今天 - 当下"
 
+msgid "Venus aerostat"
+msgstr "金星浮空艇"
+
+msgid "A 1931 rigid airship's promenade lounge: leaning-out observation windows in duralumin girders, a self-playing featherweight grand piano, and an endless moonlit sea of clouds far below."
+msgstr "1931 年硬式飞艇的观景休息厅：铝制骨架间向外倾斜的观景窗、自动演奏的轻质三角钢琴，以及下方无边无际的月光云海。"
+
 msgid "A picture palace built as a Mediterranean courtyard at dusk: lit windows, iron balconies, a palace gate with an organ, a crescent moon and real stars."
 msgstr "一座建成地中海庭院模样的电影宫，正值黄昏：亮灯的窗户、铁艺阳台、带管风琴的宫门、一弯新月和真实的星空。"
+
+msgid "The rain-streaked back seat of a 2004 family car cruising a night motorway: a flip-down roof screen, glowing dashboard dials, tartan blanket, drifting raindrops and lit services at arrival."
+msgstr "夜间高速路上的 2004 年家用车后座：车顶翻盖小屏、微亮仪表盘、格纹毛毯、车窗斜滑雨滴与终点亮灯服务区。"
 
 msgid "A glass dome on the sea floor: kelp and coral in the floodlights, schools of fish, glowing creatures drawn to the screen, a manta overhead, and in a quiet scene now and then a whale."
 msgstr "海底的玻璃圆顶：探照灯下的海带和珊瑚、成群的鱼、被屏幕吸引的发光生物、头顶游过的魔鬼鱼，安静的片段里偶尔还有鲸鱼。"
 
+msgid "Warm timber mezzanine overlooking a two-storey antique bookshop on a rainy night: Chesterfield armchairs, glowing banker's lamps, rolling brass ladders, dormers, and a tall oak clock."
+msgstr "雨夜俯望两层古旧书店的温暖木质阁楼：真皮扶手椅、台灯微光、滑轨黄铜书梯、阁楼天窗与高大橡木落地钟。"
+
+msgid "An underground limestone sinkhole and crystal grotto cinema: turquoise cenote water, glowing mineral crystals, warm cave lanterns, and a jungle oculus open to the tropical night sky."
+msgstr "地下石灰岩天坑与水晶溶洞影院：碧绿地下湖、微光水晶簇、暖色岩洞灯笼，以及通向热带夜空的丛林天窗。"
+
 msgid "The converted cinema: rows on a rake, curtains that part when the film starts, and the house lights going down."
 msgstr "改建的电影院：阶梯座位，影片开始时幕布拉开，场灯渐暗。"
 
+msgid "A 1935 express railway cinema carriage rolling through autumn night: mahogany panelling, swaying brass lamps, telegraph poles, a dark railway tunnel mid-reel and a warm terminus with the credits."
+msgstr "驶过秋夜的 1935 年特快影院车厢：红木护墙板、轻摇的黄铜车灯、电线杆、影片中途的漆黑隧道，以及片尾字幕时抵达的温暖终点站。"
+
+msgid "An open-air white-marble sanctuary suspended above an endless golden-dusk sea of clouds: sixteen fluted columns, a sky-reflecting water basin, four bronze braziers, and rising stars."
+msgstr "悬浮在无边金色暮色云海之上的露天白大理石神殿：十六根石柱、倒映天色的水池、四座青铜火盆与升起的星河。"
+
+msgid "An overnight touring coach in 1988: swirly moquette, overhead 4:3 CRT and flashing video deck, drawn cab curtain, sodium-lit motorway night and glowing intermission services."
+msgstr "1988 年夜行长途客车：花纹绒面地毯、顶挂 4:3 显像管电视与闪烁录像机、拉上的驾驶室布帘、钠灯高速路与中场亮灯服务区。"
+
 msgid "A Moon base's cinema under a geodesic glass dome: Earth turns slowly over the screen, the crater's peaks catch the sun, and the Milky Way comes out when the lights go down."
 msgstr "月球基地里网格玻璃圆顶下的影院：地球在银幕上方缓缓转动，环形山的峰顶映着阳光，灯光暗下时银河显现。"
+
+msgid "An upper-deck stainless-steel observation dome car crossing moonlit Southwest canyon country: desert twilight deepens to the full Milky Way and shooting stars arching across the curved glass roof."
+msgstr "穿越月色大峡谷荒漠的上层不锈钢观景车厢：沙漠暮色渐深，满天银河与流星横跨弧形玻璃车顶。"
 
 msgid "A drive-in lot at dusk, seen from a convertible's bench seat: the stars come out over the film, moths in the beam, mesas on the horizon."
 msgstr "黄昏时的汽车影院，从敞篷车的长椅上观看：星星在影片上方出现，光束里有飞蛾，地平线上是平顶山。"
@@ -3451,11 +3556,29 @@ msgstr "黄昏时的汽车影院，从敞篷车的长椅上观看：星星在影
 msgid "A big modern cinema: a steep rake, folded acoustic walls washed in amber, recliners, a starlit ceiling of baffles and a huge curved screen in velvet."
 msgstr "大型现代影院：陡峭的阶梯、暖黄灯光洗亮的折板吸音墙、躺椅、星光点点的吸音板天花，以及镶在丝绒中的巨大弧形银幕。"
 
+msgid "Ten centimetres tall on a giant mahogany desk in a rainy late-night study: leather-bound books, steaming porcelain teacup, ticking brass pocket watch, banker's lamp, and a propped pocket display."
+msgstr "化作十厘米小人坐在雨夜巨人红木书桌上：巨型皮面精装书、冒热气的瓷茶杯、滴答作响的黄铜怀表、台灯与立起的掌上银幕。"
+
 msgid "An ice hotel's cinema of sawn blocks and carvings under an ice vault: candles glowing inside the ice, hides on ice benches, the polar night and the northern lights outside."
 msgstr "冰酒店里的影院，由切割的冰块和冰雕砌成，顶上也是冰：烛光在冰中闪烁，冰凳上铺着兽皮，窗外是极夜和北极光。"
 
+msgid "A 1964 first-class transpolar jet cabin: oval windows over a moonlit cloud sea, a ceiling 16 mm twin-reel projector onto a pull-down screen, air-tube audio, and polar aurora in quiet scenes."
+msgstr "1964 年跨极地头等舱喷气客机客舱：望向月色云海的椭圆机窗、向拉下式银幕投映的顶置 16 毫米双盘放映机、气管耳机音效，以及安静场景中浮现的极光。"
+
+msgid "A tranquil hinoki-cypress engawa pavilion opening onto a lantern-lit Kyoto night garden with animated koi pond, red footbridge, raked Zen gravel, stone lanterns, and seasonal trees."
+msgstr "三面通透的柏木长廊凉亭，面向灯火柔和的京都夜庭：锦鲤池塘、朱红拱桥、枯山水白砂、石灯笼与四季庭树。"
+
+msgid "A circular whitewashed-stone and cast-iron lighthouse watchroom perched high on a stormy Atlantic headland, crowned by a slowly turning brass Fresnel lens sweeping golden beams across the sea."
+msgstr "矗立于风暴海角高处的圆形白石铸铁灯塔守望室，头顶缓缓旋转的黄铜透镜将金色光束扫过夜海。"
+
 msgid "An ocean liner's moderne lounge crossing at night: the ship never rolls while the tall velvet drapes sway gently, the Moon lays a road across open sea, and harbour lights rise with the credits."
 msgstr "夜航远洋邮轮的摩登休息厅：船身平稳不晃，高大的天鹅绒窗帘轻轻摆动，月光在海面上铺出银路，片尾字幕出现时港口灯光渐亮。"
+
+msgid "A pressurised Martian rover-train crossing a rust-ochre plain under a real blue Martian sunset: dust devils fade as starlight takes the sky, arriving at a glowing domed night colony."
+msgstr "在真实火星蓝色日落下穿越铁锈色平原的加压漫游列车：尘风渐歇、星光满天，最终抵达夜晚亮灯的圆顶基地。"
+
+msgid "A retro-future cislunar passenger liner gliding silently through star-filled space: Earth shrinks astern while the cratered Moon grows ahead, ending in a gentle touchdown at the lunar Crater base."
+msgstr "在满天星海间无声滑行的复古未来地月客轮：后方地球渐小，前方环形山月球渐大，最终轻柔降落于月球环形山基地。"
 
 msgid "A canal boat's saloon at walking pace: dusk falls as reeds, willows and a brick bridge slide past the windows, a village's lights come up, and the boat ties up at a lamp-lit wharf with the credits."
 msgstr "以步行速度前行的运河船舱：暮色降临，芦苇、柳树和砖砌拱桥从窗外缓缓滑过，村庄的灯火渐次亮起，片尾字幕时船停靠在灯火映照的码头。"
@@ -3466,6 +3589,15 @@ msgstr "夜晚的哥特式中殿，银幕在圣坛里：束柱升入肋拱，铁
 msgid "A cross-Channel ferry's video lounge in 1994: reclining seats under a bracketed CRT telly, salt-streaked storm windows, a sweeping lighthouse beam and a floodlit ferry port with the credits."
 msgstr "1994 年跨海峡夜航渡轮的录像厅：高架显像管电视下方排列着可调靠背座椅，船窗沾着盐霜与雨痕，灯塔光束缓缓扫过夜海，片尾字幕时灯火通明的渡轮码头迎面而来。"
 
+msgid "A Victorian wrought-iron glasshouse sanctuary in the midnight rain: arched glazing overhead, palms, ferns and citrus trees on terracotta quarry tiles, warm brass lamps and a trickling stone basin."
+msgstr "午夜细雨中的铁艺玻璃花房：拱形玻璃屋顶、红砖陶瓦地面、棕树、绿叶与柑果树、暖黄铜灯与流水石水池。"
+
+msgid "A 1929 Art Deco marquetry sleeping compartment crossing a snowy alpine night: flakes drift past the window under the Moon, a tabletop 16 mm projector hums, and rosy dawn rises with the credits."
+msgstr "穿越高山雪夜的 1929 年装饰艺术拼花卧铺包厢：月色下雪花掠过车窗，桌上 16 毫米放映机轻声作响，玫瑰色晨光随片尾字幕升起。"
+
+msgid "A cantilevered travertine and titanium observation terrace inside a rotating space habitat cylinder: upside-down valleys, silver rivers and night cities curve overhead between Milky Way windows."
+msgstr "旋转太空圆筒生态城内的悬挑石材与合金观景露台：倒悬的山谷、银色河流与夜色灯火城邦在银河天窗间环绕头顶。"
+
 msgid "A palace of culture, 1974: board-marked concrete, two great mosaics that glitter in the screen's light, a field of glowing globes, and snow falling through the open roof."
 msgstr "1974年的文化宫：木纹清水混凝土、两幅在银幕光下闪烁的巨幅马赛克、一片发光的球形吊灯，雪花从敞开的屋顶飘落。"
 
@@ -3475,11 +3607,17 @@ msgstr "1993年卧室里的枕头堡：靠垫和床单、彩灯、窗上的雨�
 msgid "A dream palace in sugared almond colours: inside a great shell, its ribs glowing pink and blue round a sunburst dome, scalloped arches, mirrors, a buttoned balcony, a festoon with a gold fringe."
 msgstr "糖衣杏仁色调的梦幻电影宫：置身巨大的贝壳之中，贝肋围绕放射状圆顶泛着粉蓝光芒；扇贝形拱门、镜子、钉扣丝绒楼座，以及缀着金色流苏的花彩幕。"
 
+msgid "A cedar-plank and corrugated-tin canopy hideaway 14 metres up in an ancient mossy forest oak: propped shutters, glowing fairy lanterns, a rope suspension bridge, canopy rain, and fireflies."
+msgstr "建于古老青苔橡树十四米高冠层中的雪松木板与铁皮顶树屋：支起的木百叶窗、串灯暖光、悬索木桥、树冠雨声与萤火虫。"
+
 msgid "An old picture house taken back by nature: half its roof gone to the stars, ivy and ferns, rain into a puddle that gives back the film."
 msgstr "被大自然收回的老影院：半个屋顶已向星空敞开，常春藤和野草，雨水落进映着影片的水洼。"
 
 msgid "A summer cinema on an Athens roof: director's chairs on terracotta tiles, bougainvillea, strings of bulbs, the picture painted on a blind wall, a floodlit temple on its hill, the city all round."
 msgstr "雅典屋顶上的夏日露天影院：赤陶地砖上的导演椅、三角梅、一串串灯泡、画在山墙上的银幕、山上灯火通明的神庙，四周是整座城市。"
+
+msgid "A Victorian 1870 submarine salon in crimson velvet and mahogany: twin brass iris viewports spiral open to reveal swaying giant kelp, silver fish, a sunken wreck, and deep volcanic vents."
+msgstr "深红丝绒与红木装饰的 1870 年维多利亚潜艇沙龙：两侧黄铜光圈观景窗旋转开启，展现摇摆海带、银色鱼群、沉船与深海热泉。"
 
 msgid "A tired multiplex screen, 1983: plasterboard, a swirly carpet, a broken seat, smoke in the beam and a worn print."
 msgstr "1983年一间疲惫的多厅影院放映厅：石膏板墙、旋涡花纹地毯、一个坏座位、光束里的烟雾和一卷磨损的拷贝。"
@@ -3493,8 +3631,17 @@ msgstr "1906年的店面电影院：压花锡板天花板、折叠椅、煤气�
 msgid "A floating theatre drifting down a wide river: cottonwoods and a levee town slide past the tall windows at dusk, a steamer lies at anchor, and the show ties up at a lamp-lit landing with the credits."
 msgstr "一座顺着宽阔大河漂流的水上剧场：黄昏时，杨树和堤岸小镇从高窗外缓缓滑过，一艘汽船停泊在河心，片尾字幕出现时，演艺船靠上灯火通明的码头。"
 
+msgid "An orbital elevator climber car ascending from an equatorial ocean tether platform through the cloud deck into black star-filled orbit, with Earth's glowing curved limb opening out beneath you."
+msgstr "从赤道海洋基座升空的轨道电梯轿厢：穿过云层进入漆黑星空轨道，脚下逐渐展开地球明亮的蓝色弧边。"
+
+msgid "A steep alpine timber A-frame chalet snowed in on a moonlit winter night: roaring river-stone hearth, woven Nordic rug, steaming cocoa, sleeping loft, and snow-laden spruces outside."
+msgstr "冬夜大雪封门的陡顶高山木屋：熊熊燃烧的河石壁炉、编织地毯、热气腾腾的可可、木质睡阁与窗外积雪松林。"
+
 msgid "A streamline cinema, 1937: coves that glow and change colour, a stepped proscenium round a rising sun, faience bands round the hall, an organ that rises from the pit, a festoon."
 msgstr "1937年的流线型影院：发光变色的灯槽、环绕旭日的阶梯式台口、环绕大厅的釉面砖带、从乐池升起的管风琴和一道花彩幕布。"
+
+msgid "A flooded marble rotunda on the sunlit sea floor: mosaic dais, fluted colonnade under a ruined oculus, rippling canal, schooling fish, glowing jellies, a manta ray and a rare whale."
+msgstr "静立于海底微光中的浸水大理石圆殿：马赛克高台、破顶天窗下的柱廊、波光水道、游鱼、发光水母、魔鬼鱼与罕见巨鲸。"
 
 msgid "The first television, 1930: a small glowing picture in a cabinet, the chair pulled up close."
 msgstr "1930年最早的电视：柜子里一块发光的小画面，椅子拉得很近。"
@@ -3532,14 +3679,33 @@ msgstr "未来某一天一间安静空旷的房间：根本没有电视机，墙
 msgid "A living room today: a thin panel on a dark wall, a soundbar under it, a floor lamp by the sofa. The film at its best."
 msgstr "今天的起居室：深色墙上一块薄薄的屏幕，下面是条形音箱，沙发旁一盏落地灯。影片在这里最好看。"
 
+msgid "A gilded hammered-copper and brass Art Nouveau cloud gondola suspended 52 km above Venus inside sunlit golden-amber cloud canyons beneath a glowing ivory buoyant gas envelope."
+msgstr "悬停于金星五十二公里高空金色云峡中的红铜与黄铜装饰艺术吊舱，头顶是散发暖光的象牙白浮空气囊。"
+
 msgid "Nothing but black and a mirror floor that gives back the film, with a ripple where you move."
 msgstr "只有黑暗和一面映出影片的镜面地板，你移动的地方会泛起波纹。"
+
+msgid "Lounge piano"
+msgstr "休息厅钢琴"
+
+msgid "Cove glow"
+msgstr "灯槽光晕"
 
 msgid "Clouds"
 msgstr "云"
 
 msgid "Organ before the film"
 msgstr "影片开始前的管风琴"
+
+#. Rain on the window: the choices.
+msgid "Rain"
+msgstr "雨"
+
+msgid "Dash glow"
+msgstr "仪表盘微光"
+
+msgid "Car audio"
+msgstr "车内音效"
 
 msgid "Lights outside in the film"
 msgstr "放映时的外部灯光"
@@ -3548,12 +3714,57 @@ msgstr "放映时的外部灯光"
 msgid "Whale"
 msgstr "鲸鱼"
 
+msgid "Reading lamps"
+msgstr "阅读台灯"
+
+msgid "Grandfather clock"
+msgstr "落地摆钟"
+
+msgid "Sky and shaft"
+msgstr "天窗光柱"
+
+msgid "Mineral crystals"
+msgstr "矿石水晶"
+
+msgid "Water mist"
+msgstr "水面薄雾"
+
 msgid "House lights in the film"
 msgstr "放映中的场灯"
+
+msgid "Lighting"
+msgstr "照明"
+
+msgid "Sky mood"
+msgstr "天色氛围"
+
+msgid "Bronze braziers"
+msgstr "青铜火盆"
+
+msgid "Sunset shafts"
+msgstr "夕阳光束"
+
+msgid "Tape wear"
+msgstr "录像带质感"
+
+msgid "Coach speaker"
+msgstr "客车小扬声器"
+
+msgid "Night strips"
+msgstr "夜间灯带"
+
+msgid "Motorway weather"
+msgstr "高速天气"
 
 #. The Crater's setting: how fast Earth turns in the sky.
 msgid "Earth's speed"
 msgstr "地球转速"
+
+msgid "Dome coves"
+msgstr "车顶灯槽"
+
+msgid "Starlight"
+msgstr "星光"
 
 msgid "Window speaker"
 msgstr "车窗扬声器"
@@ -3561,11 +3772,53 @@ msgstr "车窗扬声器"
 msgid "Starlight ceiling"
 msgstr "星光天花"
 
+msgid "Desk lamp"
+msgstr "书桌台灯"
+
+msgid "Pocket watch"
+msgstr "黄铜怀表"
+
 msgid "Aurora"
 msgstr "极光"
 
+msgid "Film print"
+msgstr "胶片画面"
+
+msgid "Air-tube headset"
+msgstr "气管耳机"
+
+msgid "Cabin mood"
+msgstr "客舱氛围灯"
+
+msgid "Season"
+msgstr "季节"
+
+msgid "Lanterns"
+msgstr "石台灯笼"
+
+msgid "Bamboo spout"
+msgstr "竹筒水声"
+
+msgid "Fresnel beam"
+msgstr "灯塔光束"
+
+msgid "Coastal storm"
+msgstr "海上风暴"
+
+msgid "Foghorn"
+msgstr "雾号"
+
 msgid "Cove lights"
 msgstr "灯槽灯光"
+
+msgid "Cabin lighting"
+msgstr "车厢灯光"
+
+msgid "Martian sky"
+msgstr "火星夜空"
+
+msgid "Cabin light"
+msgstr "舱内灯光"
 
 msgid "Candles"
 msgstr "蜡烛"
@@ -3576,8 +3829,29 @@ msgstr "海上天气"
 msgid "Telly speaker"
 msgstr "电视扬声器"
 
-msgid "Night strips"
-msgstr "夜间灯带"
+msgid "Midnight rain"
+msgstr "午夜细雨"
+
+msgid "Conservatory lamps"
+msgstr "花房灯火"
+
+msgid "Glasshouse mist"
+msgstr "花房薄雾"
+
+msgid "Night lamp"
+msgstr "夜灯"
+
+msgid "Snowfall"
+msgstr "降雪"
+
+msgid "Habitat time"
+msgstr "环城时辰"
+
+msgid "Terrace glow"
+msgstr "露台灯带"
+
+msgid "Sky windows"
+msgstr "太空天窗"
 
 msgid "Snow"
 msgstr "雪"
@@ -3592,11 +3866,26 @@ msgstr "电视填满入口"
 msgid "The telly's own speaker"
 msgstr "电视机自带的扬声器"
 
+msgid "Canopy rain"
+msgstr "树冠雨势"
+
+msgid "Fairy lanterns"
+msgstr "暖光串灯"
+
+msgid "Fireflies"
+msgstr "萤火虫"
+
 msgid "Weather"
 msgstr "天气"
 
 msgid "Floodlights on the hill"
 msgstr "山上的泛光灯"
+
+msgid "Viewport iris"
+msgstr "观景窗光圈"
+
+msgid "Salon organ"
+msgstr "沙龙管风琴"
 
 msgid "Weave and tilt"
 msgstr "画面抖动与倾斜"
@@ -3607,8 +3896,17 @@ msgstr "影片中的壁灯"
 msgid "Player piano"
 msgstr "自动钢琴"
 
+msgid "Hearth fire"
+msgstr "壁炉炉火"
+
+msgid "Cabin glow"
+msgstr "木屋灯色"
+
 msgid "Cove colours"
 msgstr "灯槽颜色"
+
+msgid "Water light"
+msgstr "海水天光"
 
 msgid "Lines in the picture"
 msgstr "画面线数"
@@ -3649,14 +3947,38 @@ msgstr "窗外的星星"
 msgid "Floor lamp in the film"
 msgstr "影片中的落地灯"
 
+msgid "Cloud light"
+msgstr "云峡天色"
+
+msgid "Cabin coves"
+msgstr "吊舱灯槽"
+
+msgid "Sheet lightning"
+msgstr "远云微闪"
+
 msgid "Ripple"
 msgstr "波纹"
+
+msgid "The featherweight grand piano plays itself in the pre-show, interval and after the end."
+msgstr "轻质三角钢琴会在开场前、中场休息和散场后自动演奏。"
+
+msgid "Indirect light along the screen proscenium and upper deckhead coves."
+msgstr "银幕边框与上方顶棚灯槽的柔和间接照明。"
 
 msgid "How much of the open sky the clouds cover. They catch the film's light."
 msgstr "露天天空中云的多少。云会映出影片的光。"
 
 msgid "The theatre organ behind the grilles plays for a minute or so when the room opens and between films, and finishes as the film starts."
 msgstr "格栅后的剧院管风琴会在放映厅开场时和两部影片之间演奏一分钟左右，并在影片开始时收尾。"
+
+msgid "Steady motorway rain streaking sideways across the car glass, light drizzle, passing showers, or a dry night."
+msgstr "高速雨夜里横向划过车窗的细雨、小雨、阵雨，或干燥晴夜。"
+
+msgid "The glowing 2004 instrument dials, stereo faceplate and climate control rings ahead between the front seats."
+msgstr "前排座椅之间亮起的 2004 年仪表表盘、音响面板与空调旋钮光环。"
+
+msgid "Full spatial cinema sound, or the roof flip-down screen's small built-in mono speaker."
+msgstr "完整空间影院音效，或车顶翻盖屏幕内置的小单声道扬声器。"
 
 #. The Bathysphere's settings: how deep the dome lies, and the floodlights in the film.
 msgid "How deep the dome lies: sunlit shallows with shafts of light and caustics, the blue twilight, or the black abyss where only the lamps and what glows show."
@@ -3668,11 +3990,62 @@ msgstr "影片开始后，照向海底的探照灯保持的亮度。影片开始
 msgid "How often a whale swims past behind the screen in a quiet scene."
 msgstr "安静的场景中，鲸鱼从屏幕后方游过的频率。"
 
+msgid "The banker's table lamps and pediment cornice wash: warm amber, emerald banker's glass, or dim."
+msgstr "阅读台灯与拱顶书架顶部的柔和灯光：暖琥珀、复古绿玻璃，或微暗模式。"
+
+msgid "Night rain falling outside the attic roof dormers and streaking down the leaded panes."
+msgstr "落在阁楼斜顶天窗外并沿玻璃流下的夜雨。"
+
+msgid "The slow pendulum tick of the carved oak grandfather clock against the aft mezzanine wall."
+msgstr "后墙雕花橡木落地钟缓慢沉稳的钟摆滴答声。"
+
+msgid "The light pouring through the overhead jungle oculus: silver moonlight, warm tropical dusk, or quiet starlight."
+msgstr "从头顶丛林天窗洒下的天光：银色月光、温暖热带黄昏，或宁静星光。"
+
+msgid "The glow of the cavern's crystal clusters: bioluminescent cyan, amethyst crystal, or warm bronze lanterns only."
+msgstr "溶洞内矿石水晶簇的微光：青蓝荧光、紫水晶光，或只留暖色青铜灯笼。"
+
+msgid "Soft cool mist drifting low over the emerald cenote pool, or clear cavern air."
+msgstr "在碧绿地下湖面上低低飘浮的微凉薄雾，或清澈空气。"
+
 msgid "How bright the house lamps stay once the film has started."
 msgstr "影片开始后场灯保持的亮度。"
 
+msgid "The brass-hooded screen cove and cornice wash during the film and inside the railway tunnel."
+msgstr "影片放映时及穿过铁路隧道期间，黄铜银幕灯槽与顶部灯带的柔和照明。"
+
+msgid "1935 back-projection newsreel film print with gentle weave, dust and lamp hotspot, or a clean picture."
+msgstr "带有轻微抖动、微尘与光斑的 1935 年背投新闻片质感，或清晰画面。"
+
+msgid "Let golden dusk deepen into the Milky Way over the film, or hold the sky at sunset or starlight."
+msgstr "让金色暮色随影片渐入银河，或固定在黄金日落或满天星光。"
+
+msgid "How brightly the four bronze tripod braziers burn around the marble colonnade."
+msgstr "大理石柱廊四周四座青铜三足火盆的火焰亮度。"
+
+msgid "Slanting golden sunset light shafts streaming through the outer marble colonnade."
+msgstr "斜穿过外圈大理石柱廊的金色夕阳光束。"
+
+msgid "Worn 1988 rented video tape on the overhead CRT, clean CRT glass, or a modern clean picture."
+msgstr "顶挂显像管电视上的 1988 年租借旧录像带质感、清晰显像管玻璃，或现代清晰画面。"
+
+msgid "The film's sound through the overhead telly's small mono speaker."
+msgstr "通过头顶小电视的单声道扬声器播放影片声音。"
+
+msgid "Low night-travel strips along the aisle floor and overhead parcel racks."
+msgstr "过道地面与头顶行李架下方柔和的夜行灯带。"
+
+msgid "Light night motorway drizzle on the coach glass, steady rain, or a clear autumn night."
+msgstr "客车车窗上的夜间高速小雨、细雨，或晴朗秋夜。"
+
 msgid "How fast Earth turns in the sky. At 1 x it turns once in two hours, about once a film."
 msgstr "地球在天空中转动的速度。1 倍时两小时转一圈，大约一部影片转一圈。"
+
+msgid "Recessed dome valance and aisle floor-guide lighting along the observation deck."
+msgstr "观景车顶嵌入式灯槽与过道地面引导灯。"
+
+msgid "Full desert Milky Way and shooting stars overhead, quiet starlight, or faint constellation lines."
+msgstr "头顶完整的沙漠银河与流星、安静星光，或淡淡的星座连线。"
 
 msgid "The film's sound from the little speaker hung on the car's window: tinny, mono, a little rattle."
 msgstr "影片声音来自挂在车窗上的小扬声器：单薄、单声道，略带杂音。"
@@ -3680,11 +4053,62 @@ msgstr "影片声音来自挂在车窗上的小扬声器：单薄、单声道，
 msgid "Pinholes of light in the ceiling between the baffles."
 msgstr "吸音板之间的天花上点点针孔光。"
 
+msgid "The soaring banker's desk lamp over the blotter: warm brass glow, emerald green glass, or dim."
+msgstr "俯照在皮革桌垫上的高大银行家台灯：暖黄铜光、翠绿玻璃光，或微暗。"
+
+msgid "Autumn rain falling outside the tall leaded study window and beading on the glass."
+msgstr "落在高大铅框书房窗外并挂满玻璃的秋夜细雨。"
+
+msgid "The deep slow tick of the giant brass pocket watch beside the stack of books."
+msgstr "巨型书堆旁黄铜怀表低沉舒缓的滴答声。"
+
 msgid "The northern lights in the window and the skylights: lively before the film and swelling in its quiet scenes, glowing all the time, or staying away."
 msgstr "窗外和天窗里的北极光：影片开始前活跃，在安静的场景中增强；或一直发光，或不出现。"
 
+msgid "The polar aurora outside the oval windows: blooming softly in quiet scenes, glowing throughout the crossing, or off."
+msgstr "椭圆机窗外的极地极光：在安静场景中柔和绽放、全程持续闪耀，或关闭。"
+
+msgid "The 1964 ceiling 16 mm film print look and subtle projector purr, or a clean picture."
+msgstr "1964 年顶置 16 毫米胶片放映质感与轻柔运转声，或清晰画面。"
+
+msgid "Routes the film's sound through tinny 1964 pneumatic air-tube cabin headphones."
+msgstr "将影片声音改为 1964 年单薄发闷的机舱气管耳机听感。"
+
+msgid "Soft indirect cove light along the overhead hat-racks and aisle carpet guide strips."
+msgstr "头顶行李架与过道地毯引导灯带的柔和间接光。"
+
+msgid "Shifts the overhanging Kyoto cherry and maple trees between spring sakura blossoms, autumn crimson-gold maple foliage, and moonlit summer emerald with fireflies."
+msgstr "将庭院垂枝樱树与枫树在春日粉樱、秋日红金枫叶与月夜翠绿萤火之间切换。"
+
+msgid "The tone and warmth of the corner andon lanterns, granite garden lanterns, backlit shoji screens, and koi pond reflections."
+msgstr "角落木框纸灯、花岗岩石灯笼、透光障子拉门与池面倒影的色温与亮度。"
+
+msgid "The presence of the bamboo shishi-odoshi water-clack beside the port verandah."
+msgstr "左侧长廊旁竹筒流水敲石声的响度与频率。"
+
+msgid "Sweep the overhead brass Fresnel lens slowly across the night, hold the beam seaward, or keep a warm dome glow."
+msgstr "让头顶黄铜透镜缓缓扫过夜空、固定朝向海面，或仅保留柔和暖顶光。"
+
+msgid "Wind-driven Atlantic gale on the storm glass, steady coastal rain, or a clear moonlit sea."
+msgstr "拍打防风玻璃的海风骤雨、平稳海滨夜雨，或晴朗月夜海面。"
+
+msgid "How strongly the headland foghorn sounds across the dark Atlantic below."
+msgstr "下方海角远处雾号在夜海上传来的响度与频率。"
+
 msgid "The proscenium coves' colour before the film. During the film they soften towards the picture."
 msgstr "影片开始前台口灯槽的颜色。放映时会柔化并趋近画面色彩。"
+
+msgid "Indirect expedition cove strips along the overhead raceways, screen surround and aisle floor guides."
+msgstr "头顶线槽、银幕边框与过道地面的柔和间接灯带。"
+
+msgid "Authentic blue Martian sunset fading to the Milky Way, heightened clear starlight, or faint constellation lines."
+msgstr "真实火星蓝色日落渐入银河、明亮清晰星光，或淡淡的星座连线。"
+
+msgid "Recessed orbital valance, cornice and aisle floor-guide lighting along the cislunar cabin."
+msgstr "地月客舱顶部嵌入式灯槽、边线与过道地面引导照明。"
+
+msgid "Full cislunar Milky Way across the glazed canopy, quiet starlight, or faint constellation lines."
+msgstr "铺满玻璃天顶的深空银河、宁静星光，或淡淡的星座连线。"
 
 msgid "None: the church by moonlight and the film alone. A few: two candle stands either side of the screen, the coronae over the nave and the votive lights. Many: four stands a side."
 msgstr "无：只有月光下的教堂和影片。少量：银幕两侧各两座烛台，中殿上方的吊冠和许愿烛。多：每侧四座烛台。"
@@ -3701,6 +4125,33 @@ msgstr "让影片声音通过顶部电视的小型单声道扬声器播放。"
 msgid "Low night-crossing strips along the aisle and window pelmets."
 msgstr "沿过道与船窗上方的低亮度夜航灯带。"
 
+msgid "Steady midnight rain across the glass roof, soft drizzle, or a clear moonlit night."
+msgstr "敲打拱形玻璃屋顶的午夜平稳细雨、毛毛小雨，或晴朗月夜。"
+
+msgid "Warm amber brass glow, emerald botanical uplight through the leaves, or a hushed dim light."
+msgstr "暖琥珀黄铜灯光、映照枝叶的植物翠绿底光，或柔和微光。"
+
+msgid "Warm conservatory humidity mist drifting low over the terracotta tiles."
+msgstr "贴着红陶地砖缓缓飘散的温暖花房湿润水雾。"
+
+msgid "The sleeper compartment's ceiling night lamp. Keeps a soft glow once the reading sconces dim."
+msgstr "卧铺包厢顶部的夜灯。阅读壁灯调暗后仍保持柔和微光。"
+
+msgid "Winter snow drifting past the compartment window: light flurries, heavy snowfall, or clear starlight."
+msgstr "掠过包厢车窗的冬雪：轻柔小雪、漫天大雪，或晴朗星夜。"
+
+msgid "Subtle 16 mm home-projector weave, dust, lamp flicker and vignette, or a clean picture."
+msgstr "细微的 16 毫米家用放映机画面抖动、微尘、灯泡闪烁与暗角，或清晰画面。"
+
+msgid "Lighting inside the rotating cylinder: glowing night cities, sunlit golden valleys, or rose-violet twilight."
+msgstr "旋转圆筒生态城内的光景：万家灯火夜城、金色阳光山谷，或玫瑰紫暮色。"
+
+msgid "Colour of the indirect architectural cove ribbons along the terrace rim, canopy ribs and aft promenade."
+msgstr "露台边缘、弧顶肋条与后廊柔和间接灯带的颜色。"
+
+msgid "Deep space seen through the cylinder's three open window strips: bright Milky Way, constellation lines, or quiet stars."
+msgstr "透过圆筒三条敞开天窗望见的深空：明亮银河、星座连线，或宁静星空。"
+
 msgid "Snow through the open back of the roof, over the birches outside."
 msgstr "雪从屋顶敞开的后部飘进来，也落在外面的树林里。"
 
@@ -3714,11 +4165,29 @@ msgstr "电视就放在枕头堡入口外，正好填满入口；关闭时，它
 msgid "The film's sound as the telly's small speaker gives it: thin, boxy and in mono."
 msgstr "影片的声音如同电视机的小扬声器播放：单薄、发闷，且为单声道。"
 
+msgid "Warm twilight rain drumming on the corrugated tin roof and forest oak canopy, easing to drizzle or a clear starlit pause."
+msgstr "敲打铁皮屋顶与林间树冠的傍晚暖雨，可调为细雨或雨后星空。"
+
+msgid "The glow of the brass and paper fairy lanterns strung across the cedar rafters and eaves."
+msgstr "挂在雪松屋梁与屋边的黄铜纸灯串的暖光。"
+
+msgid "Golden-chartreuse fireflies drifting through the mossy oak boughs outside the propped shutter windows."
+msgstr "在支起的木百叶窗外古老橡树枝叶间飘浮的金绿色萤火虫。"
+
 msgid "Rain through the broken roof, a misty drizzle, a clear night, or each in turn."
 msgstr "雨从破屋顶落下、带雾的细雨、晴朗的夜晚，或依次轮换。"
 
 msgid "How brightly the temple on the hill is lit. At the bottom: dark."
 msgstr "山上的神庙被照亮的程度。拉到最低：熄灭。"
+
+msgid "When the riveted brass iris shutters over both circular viewports spiral open to reveal the seabed."
+msgstr "控制两侧圆形观景窗上的黄铜光圈百叶何时旋转开启以展现海底。"
+
+msgid "The aft Victorian pipe organ plays soft flute chorales in the pre-show, interval and after the end."
+msgstr "后部维多利亚管风琴在开场前、中场休息和散场后轻柔演奏笛音曲调。"
+
+msgid "Indirect glow along the gilded screen proscenium and vaulted iron hull eaves."
+msgstr "金色银幕边框与拱形铁质船体顶部边缘处的柔和间接光。"
 
 msgid "How much the worn print drifts in the gate, and how crooked the projector stands. At the bottom: steady and straight."
 msgstr "旧拷贝在片门中漂移的程度，以及放映机歪斜的程度。拉到最低：稳定且端正。"
@@ -3729,8 +4198,32 @@ msgstr "影片开始后黄铜壁灯保持的亮度。"
 msgid "A player piano by the screen plays along with the film. Off: no piano."
 msgstr "银幕旁的自动钢琴随影片弹奏。关：没有钢琴。"
 
+msgid "Recessed canopy brow coves, bulkhead wash, docking halo and floor pathway lighting."
+msgstr "嵌入式天顶灯槽、舱壁洗墙灯、对接光环与地面引导灯。"
+
+msgid "Full orbital Milky Way wrapping all round in space, quiet starlight, or faint constellation lines."
+msgstr "环绕太空四周的轨道银河、宁静星光，或淡淡的星座连线。"
+
+msgid "Winter snow falling outside the gable windows and pines: drifting blizzard, gentle flurries, or clear moonlit night."
+msgstr "飘落在山墙大窗与松树外的冬雪：大雪纷飞、轻柔小雪，或晴朗月夜。"
+
+msgid "How brightly the starboard river-stone fireplace burns and crackles across the Nordic rug."
+msgstr "右侧河石壁炉燃烧跳跃的火光与声响强弱。"
+
+msgid "Indirect uplight along the A-frame scissor trusses and screen frame: warm amber, cool frost blue, or dim."
+msgstr "沿着斜顶木屋架与银幕木框向上漫射的间接灯光：暖琥珀、清冷霜蓝，或微光。"
+
 msgid "The cove lights' colour before the film. Changing: they move through the colours. In the film they take the film's colour."
 msgstr "影片开始前灯槽灯光的颜色。变换：在各种颜色之间轮换。影片放映时它们取影片的颜色。"
+
+msgid "How brightly the ocean above shines through the ruined oculus: sunlit turquoise shallows, deep sapphire blue, or dark bioluminescent night."
+msgstr "上方海水透过残缺天窗洒下的光色：阳光浅海青绿、深海蓝宝石色，或幽暗生物荧光夜。"
+
+msgid "The colour and brightness of the waterproof bronze-and-crystal lanterns and marble coves around the sanctuary."
+msgstr "圆殿四周防水青铜水晶灯笼与大理石灯槽的颜色和亮度。"
+
+msgid "How often a whale glides beyond the far colonnade arches during quiet scenes of the film."
+msgstr "影片安静片段里，巨鲸从远处柱廊拱门外游过的频率。"
 
 msgid "The set drew its picture in 30 glowing lines. More lines show the film more clearly than it ever could."
 msgstr "这台电视用 30 条发光的线绘出画面。线数越多，影片就越清晰，远胜当年。"
@@ -3786,401 +4279,29 @@ msgstr "长窗外的夜空里有多少星星。"
 msgid "How bright the floor lamp by the sofa stays once the film has started."
 msgstr "影片开始后沙发旁落地灯保持的亮度。"
 
+msgid "Sunlit mood across the Venusian golden-amber cloud canyons and buoyant gas envelope."
+msgstr "金星琥珀云峡与上方浮空气囊之间的日照氛围。"
+
+msgid "Indirect Art Nouveau cove lighting along the screen proscenium, mezzanine cornice and skylight ring."
+msgstr "银幕边框、夹层边缘与天窗环处的柔和装饰艺术间接灯光。"
+
+msgid "Very slow, soft distant sheet lightning blooming deep inside the lower Venusian cloud deck."
+msgstr "在下方金星深云层中缓慢轻柔绽放的远方片状微闪。"
+
 msgid "A faint ring on the floor where you move. At the bottom: none."
 msgstr "你移动时地面上出现的淡淡波纹。拉到最低：无。"
-
-msgid "Sunlit shallows"
-msgstr "阳光浅海"
-
-msgid "Twilight"
-msgstr "暮光层"
-
-msgid "Abyss"
-msgstr "深渊"
-
-#. The Whale setting's choices.
-msgid "Never"
-msgstr "从不"
-
-msgid "Rarely"
-msgstr "很少"
-
-msgid "Sometimes"
-msgstr "有时"
-
-msgid "Before the film"
-msgstr "影片开始前"
-
-msgid "Always (faint in the film)"
-msgstr "始终（放映时微弱）"
-
-msgid "In quiet scenes"
-msgstr "安静场景中"
-
-msgid "Always"
-msgstr "始终"
 
 msgid "Champagne"
 msgstr "淡金色"
 
-msgid "Rose"
-msgstr "玫瑰色"
-
-msgid "Jade"
-msgstr "玉绿色"
-
-msgid "Silver blue"
-msgstr "银蓝色"
-
-msgid "None"
-msgstr "无"
-
-msgid "A few"
-msgstr "少量"
-
-msgid "Many"
-msgstr "大量"
-
-msgid "Squalls"
-msgstr "阵风阵雨"
-
-msgid "Raining"
-msgstr "下雨"
-
-msgid "Clear night"
-msgstr "晴朗夜晚"
-
-msgid "1994 CRT & tape"
-msgstr "1994 显像管与录像带"
-
-msgid "1994 CRT"
-msgstr "1994 显像管"
-
-msgid "Clean picture"
-msgstr "清晰画面"
-
-msgid "Soft amber"
-msgstr "柔和暖黄"
-
-msgid "Marine teal"
-msgstr "深海青绿"
-
-msgid "No snow"
-msgstr "无雪"
-
-msgid "Light snow"
-msgstr "小雪"
-
-msgid "Heavy snow"
-msgstr "大雪"
-
-#. Rain on the window: the choices.
-msgid "Rain"
-msgstr "雨"
-
-msgid "Drizzle"
-msgstr "毛毛雨"
-
-msgid "Coming and going"
-msgstr "时下时停"
-
-#. A colour choice: the colours change in turn.
-msgid "Changing"
-msgstr "变换"
-
-msgid "Mist"
-msgstr "薄雾"
-
-msgid "Clear"
-msgstr "晴朗"
-
-msgid "Gold"
-msgstr "金色"
-
-msgid "30 lines"
-msgstr "30 线"
-
-msgid "60 lines"
-msgstr "60 线"
-
-msgid "120 lines"
-msgstr "120 线"
-
-msgid "Fresh"
-msgstr "全新"
-
-msgid "Rented"
-msgstr "租来的"
-
-msgid "Worn out"
-msgstr "磨损的"
-
-msgid "A dry night"
-msgstr "无雨的夜晚"
-
-msgid "Showers"
-msgstr "阵雨"
-
-msgid "Airship 1931"
-msgstr "飞艇 1931"
-
-msgid "Cinema coach 1935"
-msgstr "影院车厢 1935"
-
-msgid "Dome car 1955"
-msgstr "玻璃顶观景车 1955"
-
-msgid "Jet 1964"
-msgstr "喷气客机 1964"
-
-msgid "Night sleeper 1929"
-msgstr "夜行卧铺 1929"
-
-msgid "A 1931 rigid airship's promenade lounge: leaning-out observation windows in duralumin girders, a self-playing featherweight grand piano, and an endless moonlit sea of clouds far below."
-msgstr "1931 年硬式飞艇的观景休息厅：铝制骨架间向外倾斜的观景窗、自动演奏的轻质三角钢琴，以及下方无边无际的月光云海。"
-
-msgid "A 1935 express railway cinema carriage rolling through autumn night: mahogany panelling, swaying brass lamps, telegraph poles, a dark railway tunnel mid-reel and a warm terminus with the credits."
-msgstr "驶过秋夜的 1935 年特快影院车厢：红木护墙板、轻摇的黄铜车灯、电线杆、影片中途的漆黑隧道，以及片尾字幕时抵达的温暖终点站。"
-
-msgid "An upper-deck stainless-steel observation dome car crossing moonlit Southwest canyon country: desert twilight deepens to the full Milky Way and shooting stars arching across the curved glass roof."
-msgstr "穿越月色大峡谷荒漠的上层不锈钢观景车厢：沙漠暮色渐深，满天银河与流星横跨弧形玻璃车顶。"
-
-msgid "A 1964 first-class transpolar jet cabin: oval windows over a moonlit cloud sea, a ceiling 16 mm twin-reel projector onto a pull-down screen, air-tube audio, and polar aurora in quiet scenes."
-msgstr "1964 年跨极地头等舱喷气客机客舱：望向月色云海的椭圆机窗、向拉下式银幕投映的顶置 16 毫米双盘放映机、气管耳机音效，以及安静场景中浮现的极光。"
-
-msgid "A 1929 Art Deco marquetry sleeping compartment crossing a snowy alpine night: flakes drift past the window under the Moon, a tabletop 16 mm projector hums, and rosy dawn rises with the credits."
-msgstr "穿越高山雪夜的 1929 年装饰艺术拼花卧铺包厢：月色下雪花掠过车窗，桌上 16 毫米放映机轻声作响，玫瑰色晨光随片尾字幕升起。"
-
-msgid "Lounge piano"
-msgstr "休息厅钢琴"
-
-msgid "Cove glow"
-msgstr "灯槽光晕"
-
-msgid "Lighting"
-msgstr "照明"
-
-msgid "Dome coves"
-msgstr "车顶灯槽"
-
-msgid "Starlight"
-msgstr "星光"
-
-msgid "Film print"
-msgstr "胶片画面"
-
-msgid "Air-tube headset"
-msgstr "气管耳机"
-
-msgid "Cabin mood"
-msgstr "客舱氛围灯"
-
-msgid "Night lamp"
-msgstr "夜灯"
-
-msgid "Snowfall"
-msgstr "降雪"
-
-msgid "The featherweight grand piano plays itself in the pre-show, interval and after the end."
-msgstr "轻质三角钢琴会在开场前、中场休息和散场后自动演奏。"
-
-msgid "Indirect light along the screen proscenium and upper deckhead coves."
-msgstr "银幕边框与上方顶棚灯槽的柔和间接照明。"
-
-msgid "The brass-hooded screen cove and cornice wash during the film and inside the railway tunnel."
-msgstr "影片放映时及穿过铁路隧道期间，黄铜银幕灯槽与顶部灯带的柔和照明。"
-
-msgid "1935 back-projection newsreel film print with gentle weave, dust and lamp hotspot, or a clean picture."
-msgstr "带有轻微抖动、微尘与光斑的 1935 年背投新闻片质感，或清晰画面。"
-
-msgid "Recessed dome valance and aisle floor-guide lighting along the observation deck."
-msgstr "观景车顶嵌入式灯槽与过道地面引导灯。"
-
-msgid "Full desert Milky Way and shooting stars overhead, quiet starlight, or faint constellation lines."
-msgstr "头顶完整的沙漠银河与流星、安静星光，或淡淡的星座连线。"
-
-msgid "The polar aurora outside the oval windows: blooming softly in quiet scenes, glowing throughout the crossing, or off."
-msgstr "椭圆机窗外的极地极光：在安静场景中柔和绽放、全程持续闪耀，或关闭。"
-
-msgid "The 1964 ceiling 16 mm film print look and subtle projector purr, or a clean picture."
-msgstr "1964 年顶置 16 毫米胶片放映质感与轻柔运转声，或清晰画面。"
-
-msgid "Routes the film's sound through tinny 1964 pneumatic air-tube cabin headphones."
-msgstr "将影片声音改为 1964 年单薄发闷的机舱气管耳机听感。"
-
-msgid "Soft indirect cove light along the overhead hat-racks and aisle carpet guide strips."
-msgstr "头顶行李架与过道地毯引导灯带的柔和间接光。"
-
-msgid "The sleeper compartment's ceiling night lamp. Keeps a soft glow once the reading sconces dim."
-msgstr "卧铺包厢顶部的夜灯。阅读壁灯调暗后仍保持柔和微光。"
-
-msgid "Winter snow drifting past the compartment window: light flurries, heavy snowfall, or clear starlight."
-msgstr "掠过包厢车窗的冬雪：轻柔小雪、漫天大雪，或晴朗星夜。"
-
-msgid "Subtle 16 mm home-projector weave, dust, lamp flicker and vignette, or a clean picture."
-msgstr "细微的 16 毫米家用放映机画面抖动、微尘、灯泡闪烁与暗角，或清晰画面。"
-
 msgid "Moonlight silver"
 msgstr "月光银"
 
-msgid "Warm amber"
-msgstr "暖琥珀"
-
-msgid "Ruby cove"
-msgstr "红宝石灯槽"
-
-msgid "Newsreel print"
-msgstr "新闻片质感"
-
-msgid "Turquoise"
-msgstr "松石绿"
-
-msgid "Desert coral"
-msgstr "沙漠珊瑚色"
-
-msgid "Warm chrome"
-msgstr "暖银白"
-
-msgid "Milky Way & meteors"
-msgstr "银河与流星"
-
-msgid "Quiet stars"
-msgstr "安静星空"
-
-msgid "Constellations"
-msgstr "星座连线"
-
-msgid "16 mm print"
-msgstr "16 毫米胶片"
-
-msgid "Warm ivory"
-msgstr "暖象牙白"
-
-msgid "Polar blue"
-msgstr "极地蓝"
-
-msgid "Sapphire blue"
-msgstr "宝石蓝"
-
-msgid "1929 home print"
-msgstr "1929 家用胶片"
-
-msgid "Back seat 2004"
-msgstr "后座 2004"
-
-msgid "Coach trip 1988"
-msgstr "长途客车 1988"
-
-msgid "Mars train"
-msgstr "火星列车"
-
-msgid "Moon ferry"
-msgstr "月球渡轮"
-
-msgid "The Salon 1870"
-msgstr "海底沙龙 1870"
-
-msgid "Sky lift"
-msgstr "太空电梯"
-
-msgid "The rain-streaked back seat of a 2004 family car cruising a night motorway: a flip-down roof screen, glowing dashboard dials, tartan blanket, drifting raindrops and lit services at arrival."
-msgstr "夜间高速路上的 2004 年家用车后座：车顶翻盖小屏、微亮仪表盘、格纹毛毯、车窗斜滑雨滴与终点亮灯服务区。"
-
-msgid "An overnight touring coach in 1988: swirly moquette, overhead 4:3 CRT and flashing video deck, drawn cab curtain, sodium-lit motorway night and glowing intermission services."
-msgstr "1988 年夜行长途客车：花纹绒面地毯、顶挂 4:3 显像管电视与闪烁录像机、拉上的驾驶室布帘、钠灯高速路与中场亮灯服务区。"
-
-msgid "A pressurised Martian rover-train crossing a rust-ochre plain under a real blue Martian sunset: dust devils fade as starlight takes the sky, arriving at a glowing domed night colony."
-msgstr "在真实火星蓝色日落下穿越铁锈色平原的加压漫游列车：尘风渐歇、星光满天，最终抵达夜晚亮灯的圆顶基地。"
-
-msgid "A retro-future cislunar passenger liner gliding silently through star-filled space: Earth shrinks astern while the cratered Moon grows ahead, ending in a gentle touchdown at the lunar Crater base."
-msgstr "在满天星海间无声滑行的复古未来地月客轮：后方地球渐小，前方环形山月球渐大，最终轻柔降落于月球环形山基地。"
-
-msgid "A Victorian 1870 submarine salon in crimson velvet and mahogany: twin brass iris viewports spiral open to reveal swaying giant kelp, silver fish, a sunken wreck, and deep volcanic vents."
-msgstr "深红丝绒与红木装饰的 1870 年维多利亚潜艇沙龙：两侧黄铜光圈观景窗旋转开启，展现摇摆海带、银色鱼群、沉船与深海热泉。"
-
-msgid "An orbital elevator climber car ascending from an equatorial ocean tether platform through the cloud deck into black star-filled orbit, with Earth's glowing curved limb opening out beneath you."
-msgstr "从赤道海洋基座升空的轨道电梯轿厢：穿过云层进入漆黑星空轨道，脚下逐渐展开地球明亮的蓝色弧边。"
-
-msgid "Dash glow"
-msgstr "仪表盘微光"
-
-msgid "Car audio"
-msgstr "车内音效"
-
-msgid "Tape wear"
-msgstr "录像带质感"
-
-msgid "Coach speaker"
-msgstr "客车小扬声器"
-
-msgid "Motorway weather"
-msgstr "高速天气"
-
-msgid "Cabin lighting"
-msgstr "车厢灯光"
-
-msgid "Martian sky"
-msgstr "火星夜空"
-
-msgid "Cabin light"
-msgstr "舱内灯光"
-
-msgid "Viewport iris"
-msgstr "观景窗光圈"
-
-msgid "Salon organ"
-msgstr "沙龙管风琴"
-
-msgid "Steady motorway rain streaking sideways across the car glass, light drizzle, passing showers, or a dry night."
-msgstr "高速雨夜里横向划过车窗的细雨、小雨、阵雨，或干燥晴夜。"
-
-msgid "The glowing 2004 instrument dials, stereo faceplate and climate control rings ahead between the front seats."
-msgstr "前排座椅之间亮起的 2004 年仪表表盘、音响面板与空调旋钮光环。"
-
-msgid "Full spatial cinema sound, or the roof flip-down screen's small built-in mono speaker."
-msgstr "完整空间影院音效，或车顶翻盖屏幕内置的小单声道扬声器。"
-
-msgid "Worn 1988 rented video tape on the overhead CRT, clean CRT glass, or a modern clean picture."
-msgstr "顶挂显像管电视上的 1988 年租借旧录像带质感、清晰显像管玻璃，或现代清晰画面。"
-
-msgid "The film's sound through the overhead telly's small mono speaker."
-msgstr "通过头顶小电视的单声道扬声器播放影片声音。"
-
-msgid "Low night-travel strips along the aisle floor and overhead parcel racks."
-msgstr "过道地面与头顶行李架下方柔和的夜行灯带。"
-
-msgid "Light night motorway drizzle on the coach glass, steady rain, or a clear autumn night."
-msgstr "客车车窗上的夜间高速小雨、细雨，或晴朗秋夜。"
-
-msgid "Indirect expedition cove strips along the overhead raceways, screen surround and aisle floor guides."
-msgstr "头顶线槽、银幕边框与过道地面的柔和间接灯带。"
-
-msgid "Authentic blue Martian sunset fading to the Milky Way, heightened clear starlight, or faint constellation lines."
-msgstr "真实火星蓝色日落渐入银河、明亮清晰星光，或淡淡的星座连线。"
-
-msgid "Recessed orbital valance, cornice and aisle floor-guide lighting along the cislunar cabin."
-msgstr "地月客舱顶部嵌入式灯槽、边线与过道地面引导照明。"
-
-msgid "Full cislunar Milky Way across the glazed canopy, quiet starlight, or faint constellation lines."
-msgstr "铺满玻璃天顶的深空银河、宁静星光，或淡淡的星座连线。"
-
-msgid "When the riveted brass iris shutters over both circular viewports spiral open to reveal the seabed."
-msgstr "控制两侧圆形观景窗上的黄铜光圈百叶何时旋转开启以展现海底。"
-
-msgid "The aft Victorian pipe organ plays soft flute chorales in the pre-show, interval and after the end."
-msgstr "后部维多利亚管风琴在开场前、中场休息和散场后轻柔演奏笛音曲调。"
-
-msgid "Indirect glow along the gilded screen proscenium and vaulted iron hull eaves."
-msgstr "金色银幕边框与拱形铁质船体顶部边缘处的柔和间接光。"
-
-msgid "Recessed canopy brow coves, bulkhead wash, docking halo and floor pathway lighting."
-msgstr "嵌入式天顶灯槽、舱壁洗墙灯、对接光环与地面引导灯。"
-
-msgid "Full orbital Milky Way wrapping all round in space, quiet starlight, or faint constellation lines."
-msgstr "环绕太空四周的轨道银河、宁静星光，或淡淡的星座连线。"
-
 msgid "Steady rain"
 msgstr "持续细雨"
+
+msgid "Drizzle"
+msgstr "毛毛雨"
 
 msgid "Passing showers"
 msgstr "间歇阵雨"
@@ -4203,200 +4324,42 @@ msgstr "完整影院音效"
 msgid "Small screen speaker"
 msgstr "小屏扬声器"
 
-msgid "1988 rental tape"
-msgstr "1988 租借录像带"
+msgid "Sunlit shallows"
+msgstr "阳光浅海"
 
-msgid "1988 CRT"
-msgstr "1988 显像管"
+msgid "Twilight"
+msgstr "暮光层"
 
-msgid "Retro teal"
-msgstr "复古青绿"
+msgid "Abyss"
+msgstr "深渊"
+
+#. The Whale setting's choices.
+msgid "Never"
+msgstr "从不"
+
+msgid "Rarely"
+msgstr "很少"
+
+msgid "Sometimes"
+msgstr "有时"
+
+msgid "Warm amber"
+msgstr "暖琥珀"
+
+msgid "Emerald banker"
+msgstr "复古翠绿灯罩"
 
 msgid "Light drizzle"
 msgstr "夜间小雨"
 
-msgid "Habitat amber"
-msgstr "基地琥珀色"
+msgid "Clear night"
+msgstr "晴朗夜晚"
 
-msgid "Telemetry teal"
-msgstr "仪表青色"
+msgid "Soft tick"
+msgstr "轻柔滴答"
 
-msgid "Blue sunset to stars"
-msgstr "蓝色日落入星空"
-
-msgid "Clear starlight"
-msgstr "清晰星光"
-
-msgid "Ice blue"
-msgstr "冰蓝色"
-
-msgid "Deep Milky Way"
-msgstr "深空银河"
-
-msgid "Open for the film"
-msgstr "放映时开启"
-
-msgid "Always open"
-msgstr "始终开启"
-
-msgid "Half open"
-msgstr "半开"
-
-msgid "Sea turquoise"
-msgstr "海松石绿"
-
-msgid "Orbital cyan"
-msgstr "轨道青蓝"
-
-msgid "Amber night"
-msgstr "琥珀夜色"
-
-msgid "Milky Way"
-msgstr "银河"
-
-msgid "Other worlds"
-msgstr "异界奇境"
-
-msgid "Impossible sanctuaries to watch a film: crystal caverns, orbital rings, cloud temples, floating aerostats, sunken ruins and miniature worlds."
-msgstr "不可思议的观影秘境：水晶溶洞、轨道环城、云端神殿、金星浮空艇、海底遗迹与微缩世界。"
-
-msgid "Cenote cavern"
-msgstr "溶洞天坑"
-
-msgid "Cloud temple"
-msgstr "云端神殿"
-
-msgid "Giants study"
-msgstr "巨人书房"
-
-msgid "Orbital ring"
-msgstr "轨道环城"
-
-msgid "Sunken rotunda"
-msgstr "海底圆殿"
-
-msgid "Venus aerostat"
-msgstr "金星浮空艇"
-
-msgid "An underground limestone sinkhole and crystal grotto cinema: turquoise cenote water, glowing mineral crystals, warm cave lanterns, and a jungle oculus open to the tropical night sky."
-msgstr "地下石灰岩天坑与水晶溶洞影院：碧绿地下湖、微光水晶簇、暖色岩洞灯笼，以及通向热带夜空的丛林天窗。"
-
-msgid "An open-air white-marble sanctuary suspended above an endless golden-dusk sea of clouds: sixteen fluted columns, a sky-reflecting water basin, four bronze braziers, and rising stars."
-msgstr "悬浮在无边金色暮色云海之上的露天白大理石神殿：十六根石柱、倒映天色的水池、四座青铜火盆与升起的星河。"
-
-msgid "Ten centimetres tall on a giant mahogany desk in a rainy late-night study: leather-bound books, steaming porcelain teacup, ticking brass pocket watch, banker's lamp, and a propped pocket display."
-msgstr "化作十厘米小人坐在雨夜巨人红木书桌上：巨型皮面精装书、冒热气的瓷茶杯、滴答作响的黄铜怀表、台灯与立起的掌上银幕。"
-
-msgid "A cantilevered travertine and titanium observation terrace inside a rotating space habitat cylinder: upside-down valleys, silver rivers and night cities curve overhead between Milky Way windows."
-msgstr "旋转太空圆筒生态城内的悬挑石材与合金观景露台：倒悬的山谷、银色河流与夜色灯火城邦在银河天窗间环绕头顶。"
-
-msgid "A flooded marble rotunda on the sunlit sea floor: mosaic dais, fluted colonnade under a ruined oculus, rippling canal, schooling fish, glowing jellies, a manta ray and a rare whale."
-msgstr "静立于海底微光中的浸水大理石圆殿：马赛克高台、破顶天窗下的柱廊、波光水道、游鱼、发光水母、魔鬼鱼与罕见巨鲸。"
-
-msgid "A gilded hammered-copper and brass Art Nouveau cloud gondola suspended 52 km above Venus inside sunlit golden-amber cloud canyons beneath a glowing ivory buoyant gas envelope."
-msgstr "悬停于金星五十二公里高空金色云峡中的红铜与黄铜装饰艺术吊舱，头顶是散发暖光的象牙白浮空气囊。"
-
-msgid "Sky and shaft"
-msgstr "天窗光柱"
-
-msgid "Mineral crystals"
-msgstr "矿石水晶"
-
-msgid "Water mist"
-msgstr "水面薄雾"
-
-msgid "Sky mood"
-msgstr "天色氛围"
-
-msgid "Bronze braziers"
-msgstr "青铜火盆"
-
-msgid "Sunset shafts"
-msgstr "夕阳光束"
-
-msgid "Desk lamp"
-msgstr "书桌台灯"
-
-msgid "Pocket watch"
-msgstr "黄铜怀表"
-
-msgid "Habitat time"
-msgstr "环城时辰"
-
-msgid "Terrace glow"
-msgstr "露台灯带"
-
-msgid "Sky windows"
-msgstr "太空天窗"
-
-msgid "Water light"
-msgstr "海水天光"
-
-msgid "Lanterns"
-msgstr "石台灯笼"
-
-msgid "Cloud light"
-msgstr "云峡天色"
-
-msgid "Cabin coves"
-msgstr "吊舱灯槽"
-
-msgid "Sheet lightning"
-msgstr "远云微闪"
-
-msgid "The light pouring through the overhead jungle oculus: silver moonlight, warm tropical dusk, or quiet starlight."
-msgstr "从头顶丛林天窗洒下的天光：银色月光、温暖热带黄昏，或宁静星光。"
-
-msgid "The glow of the cavern's crystal clusters: bioluminescent cyan, amethyst crystal, or warm bronze lanterns only."
-msgstr "溶洞内矿石水晶簇的微光：青蓝荧光、紫水晶光，或只留暖色青铜灯笼。"
-
-msgid "Soft cool mist drifting low over the emerald cenote pool, or clear cavern air."
-msgstr "在碧绿地下湖面上低低飘浮的微凉薄雾，或清澈空气。"
-
-msgid "Let golden dusk deepen into the Milky Way over the film, or hold the sky at sunset or starlight."
-msgstr "让金色暮色随影片渐入银河，或固定在黄金日落或满天星光。"
-
-msgid "How brightly the four bronze tripod braziers burn around the marble colonnade."
-msgstr "大理石柱廊四周四座青铜三足火盆的火焰亮度。"
-
-msgid "Slanting golden sunset light shafts streaming through the outer marble colonnade."
-msgstr "斜穿过外圈大理石柱廊的金色夕阳光束。"
-
-msgid "The soaring banker's desk lamp over the blotter: warm brass glow, emerald green glass, or dim."
-msgstr "俯照在皮革桌垫上的高大银行家台灯：暖黄铜光、翠绿玻璃光，或微暗。"
-
-msgid "Autumn rain falling outside the tall leaded study window and beading on the glass."
-msgstr "落在高大铅框书房窗外并挂满玻璃的秋夜细雨。"
-
-msgid "The deep slow tick of the giant brass pocket watch beside the stack of books."
-msgstr "巨型书堆旁黄铜怀表低沉舒缓的滴答声。"
-
-msgid "Lighting inside the rotating cylinder: glowing night cities, sunlit golden valleys, or rose-violet twilight."
-msgstr "旋转圆筒生态城内的光景：万家灯火夜城、金色阳光山谷，或玫瑰紫暮色。"
-
-msgid "Colour of the indirect architectural cove ribbons along the terrace rim, canopy ribs and aft promenade."
-msgstr "露台边缘、弧顶肋条与后廊柔和间接灯带的颜色。"
-
-msgid "Deep space seen through the cylinder's three open window strips: bright Milky Way, constellation lines, or quiet stars."
-msgstr "透过圆筒三条敞开天窗望见的深空：明亮银河、星座连线，或宁静星空。"
-
-msgid "How brightly the ocean above shines through the ruined oculus: sunlit turquoise shallows, deep sapphire blue, or dark bioluminescent night."
-msgstr "上方海水透过残缺天窗洒下的光色：阳光浅海青绿、深海蓝宝石色，或幽暗生物荧光夜。"
-
-msgid "The colour and brightness of the waterproof bronze-and-crystal lanterns and marble coves around the sanctuary."
-msgstr "圆殿四周防水青铜水晶灯笼与大理石灯槽的颜色和亮度。"
-
-msgid "How often a whale glides beyond the far colonnade arches during quiet scenes of the film."
-msgstr "影片安静片段里，巨鲸从远处柱廊拱门外游过的频率。"
-
-msgid "Sunlit mood across the Venusian golden-amber cloud canyons and buoyant gas envelope."
-msgstr "金星琥珀云峡与上方浮空气囊之间的日照氛围。"
-
-msgid "Indirect Art Nouveau cove lighting along the screen proscenium, mezzanine cornice and skylight ring."
-msgstr "银幕边框、夹层边缘与天窗环处的柔和装饰艺术间接灯光。"
-
-msgid "Very slow, soft distant sheet lightning blooming deep inside the lower Venusian cloud deck."
-msgstr "在下方金星深云层中缓慢轻柔绽放的远方片状微闪。"
+msgid "Quiet"
+msgstr "静音"
 
 msgid "Moonlight shaft"
 msgstr "月光光柱"
@@ -4422,6 +4385,15 @@ msgstr "轻柔薄雾"
 msgid "Clear air"
 msgstr "清澈空气"
 
+msgid "Ruby cove"
+msgstr "红宝石灯槽"
+
+msgid "Newsreel print"
+msgstr "新闻片质感"
+
+msgid "Clean picture"
+msgstr "清晰画面"
+
 msgid "Sunset to stars"
 msgstr "日落入星空"
 
@@ -4440,17 +4412,188 @@ msgstr "微亮余烬"
 msgid "Soft shafts"
 msgstr "柔和光束"
 
+msgid "1988 rental tape"
+msgstr "1988 租借录像带"
+
+msgid "1988 CRT"
+msgstr "1988 显像管"
+
+msgid "Retro teal"
+msgstr "复古青绿"
+
+msgid "Turquoise"
+msgstr "松石绿"
+
+msgid "Desert coral"
+msgstr "沙漠珊瑚色"
+
+msgid "Warm chrome"
+msgstr "暖银白"
+
+msgid "Milky Way & meteors"
+msgstr "银河与流星"
+
+msgid "Quiet stars"
+msgstr "安静星空"
+
+msgid "Constellations"
+msgstr "星座连线"
+
+msgid "Before the film"
+msgstr "影片开始前"
+
+msgid "Always (faint in the film)"
+msgstr "始终（放映时微弱）"
+
 msgid "Warm brass"
 msgstr "暖黄铜光"
 
 msgid "Green banker's glow"
 msgstr "翠绿台灯光"
 
-msgid "Soft tick"
-msgstr "轻柔滴答"
+msgid "In quiet scenes"
+msgstr "安静场景中"
 
-msgid "Quiet"
-msgstr "静音"
+msgid "Always"
+msgstr "始终"
+
+msgid "16 mm print"
+msgstr "16 毫米胶片"
+
+msgid "Warm ivory"
+msgstr "暖象牙白"
+
+msgid "Polar blue"
+msgstr "极地蓝"
+
+msgid "Spring sakura"
+msgstr "春日樱花"
+
+msgid "Autumn maple"
+msgstr "秋日红枫"
+
+msgid "Summer emerald"
+msgstr "夏夜翠绿"
+
+msgid "Warm washi"
+msgstr "暖光和纸"
+
+msgid "Moonlit silver"
+msgstr "清冷月银"
+
+msgid "Dim embers"
+msgstr "微暗余光"
+
+msgid "Steady clack"
+msgstr "平稳敲石"
+
+msgid "Soft and distant"
+msgstr "轻柔远闻"
+
+msgid "Sweeping beam"
+msgstr "旋转光束"
+
+msgid "Steady seaward"
+msgstr "定照海面"
+
+msgid "Warm dome glow"
+msgstr "暖色顶光"
+
+msgid "Atlantic gale"
+msgstr "海风骤雨"
+
+msgid "Clear moonlit"
+msgstr "晴朗月夜"
+
+msgid "Regular"
+msgstr "定时鸣响"
+
+msgid "Distant & rare"
+msgstr "遥远偶闻"
+
+msgid "Rose"
+msgstr "玫瑰色"
+
+msgid "Jade"
+msgstr "玉绿色"
+
+msgid "Silver blue"
+msgstr "银蓝色"
+
+msgid "Habitat amber"
+msgstr "基地琥珀色"
+
+msgid "Telemetry teal"
+msgstr "仪表青色"
+
+msgid "Blue sunset to stars"
+msgstr "蓝色日落入星空"
+
+msgid "Clear starlight"
+msgstr "清晰星光"
+
+msgid "Ice blue"
+msgstr "冰蓝色"
+
+msgid "Deep Milky Way"
+msgstr "深空银河"
+
+msgid "None"
+msgstr "无"
+
+msgid "A few"
+msgstr "少量"
+
+msgid "Many"
+msgstr "大量"
+
+msgid "Squalls"
+msgstr "阵风阵雨"
+
+msgid "Raining"
+msgstr "下雨"
+
+msgid "1994 CRT & tape"
+msgstr "1994 显像管与录像带"
+
+msgid "1994 CRT"
+msgstr "1994 显像管"
+
+msgid "Soft amber"
+msgstr "柔和暖黄"
+
+msgid "Marine teal"
+msgstr "深海青绿"
+
+msgid "Soft drizzle"
+msgstr "轻柔细雨"
+
+msgid "Clear midnight"
+msgstr "晴朗午夜"
+
+msgid "Botanical emerald"
+msgstr "植物翠绿"
+
+msgid "Midnight hush"
+msgstr "午夜微暗"
+
+msgid "Lush mist"
+msgstr "浓润水雾"
+
+msgid "Light haze"
+msgstr "轻盈薄雾"
+
+msgid "Sapphire blue"
+msgstr "宝石蓝"
+
+msgid "Light snow"
+msgstr "小雪"
+
+msgid "Heavy snow"
+msgstr "大雪"
+
+msgid "1929 home print"
+msgstr "1929 家用胶片"
 
 msgid "Night city lights"
 msgstr "灯火夜城"
@@ -4464,6 +4607,79 @@ msgstr "暮色微光"
 msgid "Warm gold"
 msgstr "暖金色"
 
+msgid "Orbital cyan"
+msgstr "轨道青蓝"
+
+msgid "Milky Way"
+msgstr "银河"
+
+msgid "No snow"
+msgstr "无雪"
+
+msgid "Coming and going"
+msgstr "时下时停"
+
+msgid "Clear after rain"
+msgstr "雨后放晴"
+
+msgid "Forest gold"
+msgstr "林间暖金"
+
+msgid "Few"
+msgstr "少量"
+
+#. A colour choice: the colours change in turn.
+msgid "Changing"
+msgstr "变换"
+
+msgid "Mist"
+msgstr "薄雾"
+
+msgid "Clear"
+msgstr "晴朗"
+
+msgid "Open for the film"
+msgstr "放映时开启"
+
+msgid "Always open"
+msgstr "始终开启"
+
+msgid "Half open"
+msgstr "半开"
+
+msgid "Sea turquoise"
+msgstr "海松石绿"
+
+msgid "Amber night"
+msgstr "琥珀夜色"
+
+msgid "Alpine blizzard"
+msgstr "高山暴雪"
+
+msgid "Gentle flurries"
+msgstr "轻柔飘雪"
+
+msgid "Clear moonlit night"
+msgstr "晴朗月夜"
+
+msgid "Roaring fire"
+msgstr "熊熊炉火"
+
+msgid "Low flames"
+msgstr "柔和火苗"
+
+msgid "Glowing embers"
+msgstr "微红余火"
+
+msgid "Frost moonlight"
+msgstr "霜冷月蓝"
+
+msgid "Dim hearthlight"
+msgstr "微暗炉光"
+
+msgid "Gold"
+msgstr "金色"
+
 msgid "Sunlit turquoise"
 msgstr "日光青绿"
 
@@ -4476,6 +4692,30 @@ msgstr "生物荧光夜"
 msgid "Sea cyan"
 msgstr "海青色"
 
+msgid "30 lines"
+msgstr "30 线"
+
+msgid "60 lines"
+msgstr "60 线"
+
+msgid "120 lines"
+msgstr "120 线"
+
+msgid "Fresh"
+msgstr "全新"
+
+msgid "Rented"
+msgstr "租来的"
+
+msgid "Worn out"
+msgstr "磨损的"
+
+msgid "A dry night"
+msgstr "无雨的夜晚"
+
+msgid "Showers"
+msgstr "阵雨"
+
 msgid "Amber noon"
 msgstr "琥珀正午"
 
@@ -4484,9 +4724,6 @@ msgstr "红铜日落"
 
 msgid "Stormy gold"
 msgstr "风暴流金"
-
-msgid "Botanical emerald"
-msgstr "植物翠绿"
 
 msgid "Distant glow"
 msgstr "远云微闪"

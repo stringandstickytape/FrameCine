@@ -81,7 +81,8 @@ const COMMON_TEXTS := ["Dim during the film", "The room's light goes down while 
 ## so a new category is a line here and nothing else. Before 2026-11-09 the list was written out in three files, and
 ## the library's copy did not follow this one.
 # i18n: begin
-const ROOM_GROUPS := {"cinema": "Cinemas", "tv": "Television", "journey": "Journeys", "world": "Other worlds"}
+const ROOM_GROUPS := {"cinema": "Cinemas", "tv": "Television", "journey": "Journeys", "world": "Other worlds",
+		"retreat": "Cozy retreats"}
 # i18n: end
 ## A room that names no category: listed with the other rooms that ship.
 const OTHER := "other"
