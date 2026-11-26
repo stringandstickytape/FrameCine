@@ -30,7 +30,8 @@ const SOUNDS: Array[String] = ["silence", "projector", "wall_rumble", "cicadas",
 		"rail_joints", "train_whistle", "diesel_horn", "airship_engines", "jet_cabin", "cabin_chime",
 		"coach_diesel", "car_motorway", "climber_hum", "rover_drive", "telegraph_bell",
 		"cavern_hum", "cloud_wind", "temple_bell", "aerostat_hum", "giant_clock",
-		"foghorn", "ocean_surf", "bamboo_clack", "rain_tin", "grand_clock"]
+		"foghorn", "ocean_surf", "bamboo_clack", "rain_tin", "grand_clock",
+		"gt_w12", "rain_roof", "rain_windscreen", "wiper_swish", "bridge_whoosh", "thunder_roll"]
 ## Each sound's designed level: dBFS RMS on Environment at the slider's default (-18 dB), full level, no film; a
 ## one-shot's loudest second. The level check's target is -38 dBFS; every bed is 12 dB or more under it.
 const LEVELS := {"projector": -51.0, "wall_rumble": -50.0, "cicadas": -54.0, "moped": -52.0, "train": -52.0,
@@ -49,7 +50,9 @@ const LEVELS := {"projector": -51.0, "wall_rumble": -50.0, "cicadas": -54.0, "mo
 		"telegraph_bell": -53.0,
 		"cavern_hum": -55.0, "cloud_wind": -56.0, "temple_bell": -54.0, "aerostat_hum": -55.0,
 		"giant_clock": -56.0,
-		"foghorn": -54.0, "ocean_surf": -55.0, "bamboo_clack": -55.0, "rain_tin": -53.0, "grand_clock": -56.0}
+		"foghorn": -54.0, "ocean_surf": -55.0, "bamboo_clack": -55.0, "rain_tin": -53.0, "grand_clock": -56.0,
+		"gt_w12": -54.0, "rain_roof": -53.0, "rain_windscreen": -54.0, "wiper_swish": -58.0,
+		"bridge_whoosh": -53.0, "thunder_roll": -52.0}
 ## The states in which the film plays: the bed sits film_db lower.
 const FILM_STATES: Array[String] = ["starting", "playing", "credits"]
 ## Under this linear gain a bed stops its players.
@@ -127,6 +130,8 @@ var _until := 0.0
 var _travel: Array = []
 var _rng := RandomNumberGenerator.new()
 var _pending_play := false
+## Live linear multiplier from another system (e.g. motorway overbridge rain occlusion); 1.0 by default.
+var external_gain := 1.0
 ## One-shots played (tests).
 var plays := 0
 
@@ -192,12 +197,12 @@ func volume_db() -> float:
 
 ## Where the bed sits now at the slider's default (dBFS RMS, no film): its level, gain, level, state and fades.
 func designed_db() -> float:
-	var g := float(params["level"]) * _on
+	var g := _gain()
 	return float(LEVELS.get(_sound(), -60.0)) + float(params["gain_db"]) + _state_db + linear_to_db(maxf(g, 1e-6))
 
 
 func _gain() -> float:
-	return float(params["level"]) * _on
+	return float(params["level"]) * _on * clampf(external_gain, 0.0, 1.0)
 
 
 func _voices() -> int:

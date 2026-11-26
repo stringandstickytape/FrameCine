@@ -24,7 +24,8 @@ const NAMES: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale
 		"rail_joints", "train_whistle", "diesel_horn", "airship_engines", "jet_cabin", "cabin_chime",
 		"coach_diesel", "car_motorway", "climber_hum", "rover_drive", "telegraph_bell",
 		"cavern_hum", "cloud_wind", "temple_bell", "aerostat_hum", "giant_clock",
-		"foghorn", "ocean_surf", "bamboo_clack", "rain_tin", "grand_clock"]
+		"foghorn", "ocean_surf", "bamboo_clack", "rain_tin", "grand_clock",
+		"gt_w12", "rain_roof", "rain_windscreen", "wiper_swish", "bridge_whoosh", "thunder_roll"]
 ## Seconds each lasts (a loop: its loop's length).
 const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise": 4.0, "whale": 5.0, "creak": 1.2,
 		"projector": 4.0, "wall_rumble": 8.0, "cicadas": 6.0, "moped": 8.0, "train": 40.0, "huskies": 7.0,
@@ -39,7 +40,9 @@ const LENGTHS := {"chime": 2.5, "gong": 4.0, "rumble": 3.0, "tick": 0.08, "noise
 		"jet_cabin": 8.0, "cabin_chime": 2.4,
 		"coach_diesel": 8.0, "car_motorway": 8.0, "climber_hum": 8.0, "rover_drive": 8.0, "telegraph_bell": 3.0,
 		"cavern_hum": 8.0, "cloud_wind": 12.0, "temple_bell": 5.5, "aerostat_hum": 8.0, "giant_clock": 4.0,
-		"foghorn": 6.0, "ocean_surf": 12.0, "bamboo_clack": 3.2, "rain_tin": 6.0, "grand_clock": 4.0}
+		"foghorn": 6.0, "ocean_surf": 12.0, "bamboo_clack": 3.2, "rain_tin": 6.0, "grand_clock": 4.0,
+		"gt_w12": 8.0, "rain_roof": 6.0, "rain_windscreen": 6.0, "wiper_swish": 6.0,
+		"bridge_whoosh": 1.4, "thunder_roll": 6.5}
 ## The sounds that loop (beds); the rest play once.
 const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "radiator", "rain_glass", "rain_leaves",
 		"gas_hiss", "crickets", "fire", "drips", "wind", "hum", "deep_hum", "fountain", "clock", "tube_whine", "bubbles",
@@ -47,7 +50,8 @@ const LOOPS: Array[String] = ["noise", "projector", "wall_rumble", "cicadas", "r
 		"rail_joints", "airship_engines", "jet_cabin",
 		"coach_diesel", "car_motorway", "climber_hum", "rover_drive",
 		"cavern_hum", "cloud_wind", "aerostat_hum", "giant_clock",
-		"ocean_surf", "rain_tin", "grand_clock"]
+		"ocean_surf", "rain_tin", "grand_clock",
+		"gt_w12", "rain_roof", "rain_windscreen", "wiper_swish"]
 ## Sample rates below RATE for the far and low sounds (less to make, nothing lost above their band).
 const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiator": 22050, "moped": 32000,
 		"hull_creak": 32000, "purr": 22050, "crickets": 32000, "fire": 32000, "drips": 32000, "wind": 22050,
@@ -61,7 +65,9 @@ const RATES := {"wall_rumble": 22050, "train": 22050, "huskies": 22050, "radiato
 		"coach_diesel": 22050, "car_motorway": 22050, "climber_hum": 22050, "rover_drive": 22050,
 		"telegraph_bell": 32000,
 		"cavern_hum": 22050, "cloud_wind": 22050, "temple_bell": 32000, "aerostat_hum": 22050, "giant_clock": 32000,
-		"foghorn": 22050, "ocean_surf": 22050, "bamboo_clack": 32000, "rain_tin": 32000, "grand_clock": 32000}
+		"foghorn": 22050, "ocean_surf": 22050, "bamboo_clack": 32000, "rain_tin": 32000, "grand_clock": 32000,
+		"gt_w12": 22050, "rain_roof": 22050, "rain_windscreen": 32000, "wiper_swish": 32000,
+		"bridge_whoosh": 22050, "thunder_roll": 22050}
 ## The new sounds' peaks stay under this (sparse clicks would clip at the reference RMS).
 const PEAK := 0.89
 ## Seconds of a loop's crossfade (its end into its start).
@@ -1744,6 +1750,150 @@ static func _render(sound: String, rate: int, total: int, lead: int) -> PackedFl
 						+ sin(TAU * (f_cab * 0.5) * dt) * 0.42 * e_cab \
 						+ sin(TAU * f_esc * dt + 0.4) * 0.18 * e_esc
 				s[i] = _lp(st, 1, room_air + beat * 0.80, a_out)
+		"gt_w12":
+			# Silky 2004 British Grand Tourer twin-turbo W12 cruising at 70 mph (~1750 rpm) inside double-glazed
+			# coachwork: turbine-smooth 87.5 Hz / 175 Hz W12 murmur, subtle 58.3 Hz burble, and velvety damped
+			# motorway asphalt tyre purr with gentle speed-coupled shimmer (8 s seamless loop).
+			var a_tyre := _a(420.0, r)
+			var a_road := _a(125.0, r)
+			var a_air := _a(1150.0, r)
+			var a_alo := _a(320.0, r)
+			var a_out := _a(1450.0, r)
+			var f_base := 58.5
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var tyre := _lp(st, 0, wn, a_tyre) * 0.54 + _lp(st, 1, wn, a_road) * 0.58
+				var slip := (_lp(st, 2, wn, a_air) - _lp(st, 3, wn, a_alo)) * 0.14
+				var drift := 1.0 + 0.008 * sin(TAU * (1.0 / 8.0) * t) + 0.005 * sin(TAU * (3.0 / 8.0) * t + 1.1)
+				var w12 := sin(TAU * f_base * t * drift) * 0.16 \
+						+ sin(TAU * (f_base * 1.5) * t * drift + 0.6) * 0.24 \
+						+ sin(TAU * (f_base * 3.0) * t * drift + 1.2) * 0.14 \
+						+ sin(TAU * (f_base * 6.0) * t * drift) * 0.04
+				var swell := 0.94 + 0.06 * sin(TAU * (2.0 / 8.0) * t + 0.4)
+				s[i] = _lp(st, 4, (tyre + slip + w12) * swell, a_out)
+		"rain_roof":
+			# Muffled motorway rain drumming overhead on an insulated steel-and-Alcantara GT saloon roof:
+			# warm low-mid wash (160-950 Hz) with soft damped roof-panel drop thuds (6 s seamless loop).
+			var a_hi := _a(960.0, r)
+			var a_lo := _a(145.0, r)
+			var a_body := _a(380.0, r)
+			var a_out := _a(1150.0, r)
+			var n_drops := 110
+			var drop_t := PackedFloat32Array()
+			var drop_f := PackedFloat32Array()
+			var drop_a := PackedFloat32Array()
+			drop_t.resize(n_drops)
+			drop_f.resize(n_drops)
+			drop_a.resize(n_drops)
+			var dur_s := float(total) / r
+			for d in n_drops:
+				drop_t[d] = rng.randf() * dur_s
+				drop_f[d] = rng.randf_range(240.0, 640.0)
+				drop_a[d] = rng.randf_range(0.16, 0.44)
+			for i in total:
+				var wn := rng.randf_range(-1.0, 1.0)
+				var wash := (_lp(st, 0, wn, a_hi) - _lp(st, 1, wn, a_lo)) * 0.56
+				var body := _lp(st, 2, wn, a_body) * 0.42
+				s[i] = wash + body
+			for d in n_drops:
+				var i0 := int(drop_t[d] * r)
+				var f := drop_f[d]
+				var amp := drop_a[d] * 0.36
+				var span := mini(int(0.045 * r), total)
+				for k in span:
+					var dt := float(k) / r
+					var env := minf(dt / 0.0025, 1.0) * exp(-dt * 85.0)
+					s[(i0 + k) % total] += sin(TAU * f * dt) * env * amp
+			for i in total:
+				s[i] = _lp(st, 3, s[i], a_out)
+		"rain_windscreen":
+			# Crisp forward motorway rain slapping raked laminated windscreen glass at 70 mph:
+			# brighter droplet spray (650-3800 Hz) over aerodynamic mist rush (6 s seamless loop).
+			var a_hi := _a(3800.0, r)
+			var a_lo := _a(580.0, r)
+			var a_mid := _a(1550.0, r)
+			var a_out := _a(4200.0, r)
+			var n_drops := 190
+			var drop_t := PackedFloat32Array()
+			var drop_f := PackedFloat32Array()
+			var drop_a := PackedFloat32Array()
+			drop_t.resize(n_drops)
+			drop_f.resize(n_drops)
+			drop_a.resize(n_drops)
+			var dur_s := float(total) / r
+			for d in n_drops:
+				drop_t[d] = rng.randf() * dur_s
+				drop_f[d] = rng.randf_range(950.0, 2900.0)
+				drop_a[d] = rng.randf_range(0.14, 0.42)
+			for i in total:
+				var wn := rng.randf_range(-1.0, 1.0)
+				var spray := (_lp(st, 0, wn, a_hi) - _lp(st, 1, wn, a_lo)) * 0.48
+				var hiss := _lp(st, 2, wn, a_mid) * 0.24
+				s[i] = spray + hiss
+			for d in n_drops:
+				var i0 := int(drop_t[d] * r)
+				var f := drop_f[d]
+				var amp := drop_a[d] * 0.40
+				var span := mini(int(0.028 * r), total)
+				for k in span:
+					var dt := float(k) / r
+					var env := minf(dt / 0.001, 1.0) * exp(-dt * 125.0)
+					s[(i0 + k) % total] += (sin(TAU * f * dt) * 0.7 + sin(TAU * f * 1.62 * dt) * 0.3) * env * amp
+			for i in total:
+				s[i] = _lp(st, 3, s[i], a_out)
+		"wiper_swish":
+			# Muted luxury front wiper blades sweeping wet glass: 4 rhythmic 1.5 s cycles per 6 s loop,
+			# combining soft wet-rubber glide on up/down strokes with a barely audible damped reversal thump.
+			var a_hi := _a(1950.0, r)
+			var a_lo := _a(320.0, r)
+			var a_out := _a(2200.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var rubber := (_lp(st, 0, wn, a_hi) - _lp(st, 1, wn, a_lo))
+				var cyc := fposmod(t, 1.5)
+				# Upstroke (0.05..0.58 s), apex pause, downstroke (0.68..1.20 s)
+				var up_env := smoothstep(0.04, 0.16, cyc) * (1.0 - smoothstep(0.46, 0.60, cyc))
+				var dn_env := smoothstep(0.66, 0.78, cyc) * (1.0 - smoothstep(1.08, 1.22, cyc)) * 0.85
+				var swish := rubber * (up_env + dn_env) * 0.62
+				# Soft damped blade-flip thump at turnaround points (0.06 s & 0.64 s)
+				var thump := 0.0
+				for flip_t: float in [0.06, 0.64]:
+					var dt := cyc - flip_t
+					if dt >= 0.0 and dt < 0.07:
+						thump += sin(TAU * 118.0 * dt) * minf(dt / 0.003, 1.0) * exp(-dt * 52.0) * 0.32
+				s[i] = _lp(st, 2, swish + thump, a_out)
+		"bridge_whoosh":
+			# Motorway overbridge acoustic pass-under (1.4 s one-shot): quick warm concrete hollow air-compression
+			# swell and Doppler pitch drop as the car flashes underneath a road or rail bridge at 70 mph.
+			var a_hi := _a(1400.0, r)
+			var a_lo := _a(95.0, r)
+			var a_sub := _a(175.0, r)
+			var a_out := _a(1500.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var air := (_lp(st, 0, wn, a_hi) - _lp(st, 1, wn, a_lo)) * 0.62
+				var sub := _lp(st, 2, wn, a_sub) * 0.74
+				var env := smoothstep(0.05, 0.42, t) * (1.0 - smoothstep(0.58, 1.32, t))
+				var deck_tone := sin(TAU * lerpf(165.0, 92.0, smoothstep(0.15, 1.05, t)) * t) * 0.16
+				s[i] = _lp(st, 3, (air + sub + deck_tone) * env, a_out)
+		"thunder_roll":
+			# Distant rolling British motorway thunderstorm rumble (6.5 s one-shot): crack-free low-passed
+			# valley-echoing cloud-sheet thunder swelling gently across the hills (35-260 Hz).
+			var a_low := _a(190.0, r)
+			var a_sub := _a(78.0, r)
+			var a_out := _a(280.0, r)
+			for i in total:
+				var t := float(i) / r
+				var wn := rng.randf_range(-1.0, 1.0)
+				var low := _lp(st, 0, wn, a_low) * 0.72
+				var sub := _lp(st, 1, wn, a_sub) * 0.92
+				var surge := smoothstep(0.15, 0.85, t) * exp(-maxf(t - 0.85, 0.0) * 0.62)
+				var echo := 0.68 + 0.32 * sin(TAU * 0.85 * t + 0.4) * exp(-t * 0.35)
+				var tail := 1.0 - smoothstep(5.2, 6.45, t)
+				s[i] = _lp(st, 2, (low + sub) * surge * echo * tail, a_out)
 	return s
 
 

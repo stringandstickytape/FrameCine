@@ -289,6 +289,8 @@ func _evaluate(b: Dictionary, delta: float) -> Variant:
 	elif raw is Color:
 		var base := RoomSchema.to_color(bd.get("base", spec.get("default")))
 		out = base.lerp(raw, float(bd.get("strength", 1.0)))
+	elif t in ["string", "enum"]:
+		out = str(raw) if raw != null else str(spec.get("default", ""))
 	else:
 		var x: float
 		if setting_name != "":

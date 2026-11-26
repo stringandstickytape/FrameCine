@@ -44,6 +44,7 @@ reads in one go). A text that says "below" or "above" of a section that is not i
 | The seats system | `docs/environments/seats.md` |
 | The motion system | `docs/environments/motion.md` |
 | The passing system (scenery that goes by; a journey as long as the film) | `docs/environments/passing.md` |
+| The motorway system (real-world streaming British motorway corridors for Real drives) | `docs/environments/motorway.md` |
 | Atmosphere and weather | `docs/environments/atmosphere.md` |
 | The audio buses, sound beds, acoustics, music | `docs/environments/sound.md` |
 | Ambient life | `docs/environments/life.md` |
@@ -86,7 +87,7 @@ still read, without change. Every key of version 3 keeps its meaning.
 | `schema` | 4 |
 | `name` | the room's name; a room that ships has its name as a translation key |
 | `room` | the room as a whole: `ambient` (0..1, its surfaces' light with a dark screen), `screen_glow` (0..2), `curtains` (the pre-show's curtains may close here), `reacts_to_film` (the film's transients may flash the light), `reflection` (the floor reflection's default here), `reflection_floor` (its height; null: none), `curtain_colour` (the pre-show's curtains' colour; null, the
-default: the app's red velvet; since 2026-11-08, the Palace of Culture's ochre) and `category` (where the Room tab lists it: `cinema` under Cinemas, `tv` under Television, `journey` under Journeys, `world` under Other worlds, `retreat` under Cozy retreats, `other` with the other rooms, the default; one table, `env_doc.gd ROOM_GROUPS`, which the Room tab and `env_library.gd category_of()` both read: a new category is a line there) and `description` (a line about the room under the Room tab's "This room", at most 200 characters; a key, so a room that ships translates it) and `author` (who built the room, usually the model's name, at most 64 characters; content, never translated. In each group the Room tab lists the rooms under their builder's heading, and "This room" says "Built by ..."; a shipped room with no author counts as `env_library.gd DEFAULT_AUTHOR`, "Opus 5.5 High") |
+default: the app's red velvet; since 2026-11-08, the Palace of Culture's ochre) and `category` (where the Room tab lists it: `cinema` under Cinemas, `tv` under Television, `journey` under Journeys, `drive` under Real drives, `world` under Other worlds, `retreat` under Cozy retreats, `other` with the other rooms, the default; one table, `env_doc.gd ROOM_GROUPS`, which the Room tab and `env_library.gd category_of()` both read: a new category is a line there) and `description` (a line about the room under the Room tab's "This room", at most 200 characters; a key, so a room that ships translates it) and `author` (who built the room, usually the model's name, at most 64 characters; content, never translated. In each group the Room tab lists the rooms under their builder's heading, and "This room" says "Built by ..."; a shipped room with no author counts as `env_library.gd DEFAULT_AUTHOR`, "Opus 5.5 High") |
 | `screen` | as version 3: the default screen's `center` and `size` |
 | `acoustics` | the room's sound for spatial audio (`get_sound_room()`, `scripts/play/spatial_audio.gd`): `box` ({min, max}; default: the builder's walls), `reflect`, `rt60`, `wet`, `late` (the late reverb against the reflections, 0..2, default 0.5), `surround_height`, `array`, `array_spacing`, `ring`, `distance`; below, "The film's room" |
 | `systems` | the systems, in build order: `{system, id, params}`. `id` defaults to the system's name; two of one system need their own ids. Cues and bindings address a parameter as `<id>.<param>` |
@@ -94,7 +95,7 @@ default: the app's red velvet; since 2026-11-08, the Palace of Culture's ochre) 
 | `cues` | sequences the timeline runs (below, "Timeline and cues") |
 | `timeline` | `starting_seconds`, `credits_minutes`, `tracks` (film-time tracks) |
 | `audio` | `level_db` (the room's sounds against the Environment bus, -24..6), `pause_rise_db` (0..6: how much the ambience rises while paused or in the pre-show) |
-| `credits` | every bundled asset the room uses that is not a library material or object: `{asset, title, source, licence}` (licence CC0 only) |
+| `credits` | every bundled asset the room uses that is not a library material or object: `{asset, title, source, licence}` (CC0 only, except bundled open-data geographic route extracts under `routes/` which may carry `CC-BY 4.0`, `ODbL 1.0` or `OGL 3.0` with full attribution in `app/environments/CREDITS.md`) |
 | `parts`, `seats`, `sky`, `light`, `lights`, `atmosphere`, `recolour`, `default_seat` | version 3, unchanged |
 
 Validation: `room_schema.gd validate()` reads a version 4 document as version 3 and hands the new sections to
@@ -194,6 +195,7 @@ system's node by either name. Tested in `test_env_kit.gd` (two kits in one room)
 | `presentation` | screen | the chain of stages from source to display: source (film, tape, broadcast), transmission (aerial noise, ghosting), display (CRT, mask, curvature, a telly's glass), the sound through a small speaker. TV-era presets | built |
 | `seats` | seats | seat models outside the builders (folding chairs, plush tip-up seats, multiplex seats and a broken one, pews, club chairs, director's chairs, a bench seat, cushions, hides, a bean bag), drawn in the builders' seat slots, in rows of its own, or as broken seats over a builder's own | built |
 | `motion` | motion | slow moves of the room's things (a curtain's sway, an organ rising, a painting sliding up, a festoon rising in swags, Earth turning), held to the comfort limits. Never the viewer | built |
+| `motorway` | journey | streaming real-world British motorway corridor driven by offline open geographic route data (`m1_route.bin`, `m1_route_meta.json`), pixel-exact baked UK TSRGD road signs, real-DEM rolling terrain, alpha-cutout trees/hedgerows, traffic, landmarks, British weather and live overbridge rain-occlusion audio (`docs/environments/motorway.md`) | built |
 
 ## Bindings and film signals
 

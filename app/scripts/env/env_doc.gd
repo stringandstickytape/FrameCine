@@ -47,7 +47,8 @@ const MATERIAL_KEYS: Array[String] = ["library", "color", "tint", "tiling", "ple
 ## The synthesised sounds a cue may play (env_synth.gd NAMES; kept here so a document is checked without it).
 const SOUNDS: Array[String] = ["chime", "gong", "rumble", "tick", "noise", "whale", "creak",
 		"moped", "train", "huskies", "hull_creak", "bird", "purr", "three_bells", "candle", "ice_creak",
-		"switch_clunk", "crt_off", "channel_clunk", "sonar"]
+		"switch_clunk", "crt_off", "channel_clunk", "sonar", "gt_w12", "rain_roof", "rain_windscreen",
+		"wiper_swish", "bridge_whoosh", "thunder_roll"]
 
 ## The common room settings (docs/environments.md, "Common settings"): every room has them, from the shared systems.
 ## "applies": when it shows (always; the room has curtains or a cue that requires it; a system of that kind; a
@@ -81,8 +82,8 @@ const COMMON_TEXTS := ["Dim during the film", "The room's light goes down while 
 ## so a new category is a line here and nothing else. Before 2026-11-09 the list was written out in three files, and
 ## the library's copy did not follow this one.
 # i18n: begin
-const ROOM_GROUPS := {"cinema": "Cinemas", "tv": "Television", "journey": "Journeys", "world": "Other worlds",
-		"retreat": "Cozy retreats"}
+const ROOM_GROUPS := {"cinema": "Cinemas", "tv": "Television", "journey": "Journeys", "drive": "Real drives",
+		"world": "Other worlds", "retreat": "Cozy retreats"}
 # i18n: end
 ## A room that names no category: listed with the other rooms that ship.
 const OTHER := "other"
@@ -762,6 +763,19 @@ static func _step(v: Variant, path: String, ctx: Dictionary, errors: Array) -> v
 				check_value({"type": "vec3", "min": -200.0, "max": 200.0}, s["at"], path + ".at", errors, {"no_bind": true})
 
 
+const OPEN_DATA_LICENCES: Array[String] = ["CC0", "CC-BY 4.0", "CC-BY-4.0", "ODbL 1.0", "ODbL-1.0", "OGL 3.0", "OGL-3.0"]
+
+
+static func _credit_licence_ok(asset: String, lic: String) -> bool:
+	if lic.begins_with("CC0"):
+		return true
+	if asset.begins_with("routes/"):
+		for ok: String in OPEN_DATA_LICENCES:
+			if lic.begins_with(ok):
+				return true
+	return false
+
+
 static func _credits(v: Variant, errors: Array) -> void:
 	if not (v is Array) or (v as Array).size() > int(LIMITS["credits"]):
 		errors.append(_e("$.credits", "a list of at most %d {asset, title, source, licence}" % LIMITS["credits"]))
@@ -775,5 +789,7 @@ static func _credits(v: Variant, errors: Array) -> void:
 		for k: String in ["asset", "title", "source", "licence"]:
 			if not ((c as Dictionary).get(k) is String) or str(c[k]).strip_edges() == "":
 				errors.append(_e("%s.%s" % [path, k], "text"))
-		if not str((c as Dictionary).get("licence", "")).begins_with("CC0"):
-			errors.append(_e(path + ".licence", "CC0 only: a room bundles nothing else"))
+		var asset := str((c as Dictionary).get("asset", ""))
+		var lic := str((c as Dictionary).get("licence", ""))
+		if not _credit_licence_ok(asset, lic):
+			errors.append(_e(path + ".licence", "CC0 only (or approved open-data licence for routes/ extracts)"))

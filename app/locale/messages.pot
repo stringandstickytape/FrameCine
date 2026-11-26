@@ -431,71 +431,75 @@ msgstr ""
 msgid "The sound and the room fade out over a minute, then the film pauses with its place kept; the room stays dim until you play again."
 msgstr ""
 
-#: scripts/env/env_doc.gd:72
+#: scripts/env/env_doc.gd:73
 msgid "Dim during the film"
 msgstr ""
 
-#: scripts/env/env_doc.gd:72
+#: scripts/env/env_doc.gd:73
 msgid "The room's light goes down while the film plays."
 msgstr ""
 
-#: scripts/env/env_doc.gd:72
+#: scripts/env/env_doc.gd:73
 msgid "Ambience"
 msgstr ""
 
-#: scripts/env/env_doc.gd:73
+#: scripts/env/env_doc.gd:74
 msgid "This room's sound against the Environment sound slider. At the bottom: off."
 msgstr ""
 
-#: scripts/env/env_doc.gd:73
+#: scripts/env/env_doc.gd:74
 msgid "Ambient life"
 msgstr ""
 
-#: scripts/env/env_doc.gd:74
+#: scripts/env/env_doc.gd:75
 msgid "Animals and other life in the room."
 msgstr ""
 
-#: scripts/env/env_doc.gd:74
+#: scripts/env/env_doc.gd:75
 msgid "Pre-show"
 msgstr ""
 
-#: scripts/env/env_doc.gd:74
+#: scripts/env/env_doc.gd:75
 msgid "Curtains before the film, and the room's start of the show."
 msgstr ""
 
-#: scripts/env/env_doc.gd:75
+#: scripts/env/env_doc.gd:76
 msgid "Flickering lights"
 msgstr ""
 
-#: scripts/env/env_doc.gd:75
+#: scripts/env/env_doc.gd:76
 msgid "Off: lights that flicker stay steady."
 msgstr ""
 
-#: scripts/env/env_doc.gd:75
+#: scripts/env/env_doc.gd:76
 msgid "Motion"
 msgstr ""
 
-#: scripts/env/env_doc.gd:76
+#: scripts/env/env_doc.gd:77
 msgid "How much things in the room move: sways, tilts, weave."
 msgstr ""
 
-#: scripts/env/env_doc.gd:84
+#: scripts/env/env_doc.gd:85
 msgid "Cinemas"
 msgstr ""
 
-#: scripts/env/env_doc.gd:84 environments/night_ferry_1994.env.json
+#: scripts/env/env_doc.gd:85 environments/night_ferry_1994.env.json
 msgid "Television"
 msgstr ""
 
-#: scripts/env/env_doc.gd:84
+#: scripts/env/env_doc.gd:85
 msgid "Journeys"
 msgstr ""
 
-#: scripts/env/env_doc.gd:84
+#: scripts/env/env_doc.gd:85
+msgid "Real drives"
+msgstr ""
+
+#: scripts/env/env_doc.gd:86
 msgid "Other worlds"
 msgstr ""
 
-#: scripts/env/env_doc.gd:85
+#: scripts/env/env_doc.gd:86
 msgid "Cozy retreats"
 msgstr ""
 
@@ -523,7 +527,7 @@ msgstr ""
 msgid "An open geodesic dome on a wide plain at dusk, the first stars coming out overhead."
 msgstr ""
 
-#: scripts/env/room_settings.gd:204 ui/room_tab.gd:298 ui/sound_tab.gd:76
+#: scripts/env/room_settings.gd:204 ui/room_tab.gd:301 ui/sound_tab.gd:76
 msgid "off"
 msgstr ""
 
@@ -537,7 +541,7 @@ msgstr ""
 msgid "%.1f s"
 msgstr ""
 
-#: scripts/env/room_settings.gd:213 ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:289
+#: scripts/env/room_settings.gd:213 ui/library_view.gd:228 ui/library_view.gd:425 ui/room_tab.gd:292
 #, c-format
 msgid "%d min"
 msgstr ""
@@ -3071,7 +3075,7 @@ msgstr ""
 msgid "Each picture"
 msgstr ""
 
-#: ui/picture_tab.gd:528 ui/room_tab.gd:286 ui/room_tab.gd:298
+#: ui/picture_tab.gd:528 ui/room_tab.gd:289 ui/room_tab.gd:301
 #, c-format
 msgid "%d s"
 msgstr ""
@@ -3280,236 +3284,240 @@ msgid "A journey is as long as the film: it leaves when the film starts and arri
 msgstr ""
 
 #: ui/room_tab.gd:140
-msgid "Impossible sanctuaries to watch a film: crystal caverns, orbital rings, cloud temples, floating aerostats, sunken ruins and miniature worlds."
+msgid "Real-world roads built from open geographic data: pick where to join and which way to head, and cruise through authentic terrain, landmarks, signage and weather."
 msgstr ""
 
 #: ui/room_tab.gd:143
+msgid "Impossible sanctuaries to watch a film: crystal caverns, orbital rings, cloud temples, floating aerostats, sunken ruins and miniature worlds."
+msgstr ""
+
+#: ui/room_tab.gd:146
 msgid "Warm, intimate hideaways sheltered from the weather: snowed-in cabins, stormy lighthouses, rainy treehouses, quiet gardens, glasshouses and late-night bookshops."
 msgstr ""
 
-#: ui/room_tab.gd:147
+#: ui/room_tab.gd:150
 msgid "Time travel"
 msgstr ""
 
-#: ui/room_tab.gd:149
+#: ui/room_tab.gd:152
 msgid "Over the film"
 msgstr ""
 
-#: ui/room_tab.gd:149
+#: ui/room_tab.gd:152
 msgid "Every 5 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:149
+#: ui/room_tab.gd:152
 msgid "Every 10 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:149
+#: ui/room_tab.gd:152
 msgid "Every 15 minutes"
 msgstr ""
 
-#: ui/room_tab.gd:152
+#: ui/room_tab.gd:155
 msgid "One film, and the room moves forward through the history of television, an era at a time while it plays."
 msgstr ""
 
-#: ui/room_tab.gd:160
+#: ui/room_tab.gd:163
 msgid "Use this picture as the room"
 msgstr ""
 
-#: ui/room_tab.gd:171
+#: ui/room_tab.gd:174
 msgid "Current"
 msgstr ""
 
-#: ui/room_tab.gd:179
+#: ui/room_tab.gd:182
 msgid "Back to defaults"
 msgstr ""
 
-#: ui/room_tab.gd:197
+#: ui/room_tab.gd:200
 msgid "Pick a seat"
 msgstr ""
 
-#: ui/room_tab.gd:201 ui/seat_plan.gd:183
+#: ui/room_tab.gd:204 ui/seat_plan.gd:183
 msgid "Default seat"
 msgstr ""
 
-#: ui/room_tab.gd:208
+#: ui/room_tab.gd:211
 msgid "Reset screen"
 msgstr ""
 
-#: ui/room_tab.gd:209
+#: ui/room_tab.gd:212
 msgid "Reset room"
 msgstr ""
 
-#: ui/room_tab.gd:210
+#: ui/room_tab.gd:213
 msgid "Reset room: back to the room's own seat, facing the screen, view recentred."
 msgstr ""
 
-#: ui/room_tab.gd:216
+#: ui/room_tab.gd:219
 msgid "Floor reflection"
 msgstr ""
 
-#: ui/room_tab.gd:218
+#: ui/room_tab.gd:221
 msgid "Reflection"
 msgstr ""
 
-#: ui/room_tab.gd:224
+#: ui/room_tab.gd:227
 msgid "Effects"
 msgstr ""
 
-#: ui/room_tab.gd:226 ui/room_tab.gd:238
+#: ui/room_tab.gd:229 ui/room_tab.gd:241
 msgid "Bias light"
 msgstr ""
 
-#: ui/room_tab.gd:230
+#: ui/room_tab.gd:233
 msgid "React to the film"
 msgstr ""
 
-#: ui/room_tab.gd:234
+#: ui/room_tab.gd:237
 msgid "Projector beam"
 msgstr ""
 
-#: ui/room_tab.gd:241
+#: ui/room_tab.gd:244
 msgid "Reaction"
 msgstr ""
 
-#: ui/room_tab.gd:255
+#: ui/room_tab.gd:258 environments/m1_grand_tour.env.json
 msgid "Time of day"
 msgstr ""
 
-#: ui/room_tab.gd:256
+#: ui/room_tab.gd:259 environments/m1_grand_tour.env.json
 msgid "Night"
 msgstr ""
 
-#: ui/room_tab.gd:256
+#: ui/room_tab.gd:259
 msgid "Now"
 msgstr ""
 
-#: ui/room_tab.gd:256
+#: ui/room_tab.gd:259 environments/m1_grand_tour.env.json
 msgid "Dusk"
 msgstr ""
 
-#: ui/room_tab.gd:256
+#: ui/room_tab.gd:259
 msgid "Day"
 msgstr ""
 
-#: ui/room_tab.gd:260
+#: ui/room_tab.gd:263
 msgid "Latitude"
 msgstr ""
 
-#: ui/room_tab.gd:263
+#: ui/room_tab.gd:266
 msgid "Room light"
 msgstr ""
 
-#: ui/room_tab.gd:267
+#: ui/room_tab.gd:270
 msgid "Dim while playing"
 msgstr ""
 
-#: ui/room_tab.gd:269
+#: ui/room_tab.gd:272
 msgid "Dimmed to"
 msgstr ""
 
-#: ui/room_tab.gd:273
+#: ui/room_tab.gd:276
 msgid "The showing"
 msgstr ""
 
-#: ui/room_tab.gd:275
+#: ui/room_tab.gd:278
 msgid "Curtains"
 msgstr ""
 
-#: ui/room_tab.gd:277
+#: ui/room_tab.gd:280
 msgid "Up next countdown"
 msgstr ""
 
-#: ui/room_tab.gd:279 ui/room_tab.gd:288
+#: ui/room_tab.gd:282 ui/room_tab.gd:291
 msgid "Intermission"
 msgstr ""
 
-#: ui/room_tab.gd:285
+#: ui/room_tab.gd:288
 msgid "Up next in"
 msgstr ""
 
-#: ui/room_tab.gd:299
+#: ui/room_tab.gd:302
 msgid "Crossfade music"
 msgstr ""
 
-#: ui/room_tab.gd:302
+#: ui/room_tab.gd:305
 msgid "Crossfade films"
 msgstr ""
 
-#: ui/room_tab.gd:306
+#: ui/room_tab.gd:309
 msgid "Sleep timer"
 msgstr ""
 
-#: ui/room_tab.gd:321
+#: ui/room_tab.gd:324
 msgid "Then"
 msgstr ""
 
-#: ui/room_tab.gd:425 ui/room_tab.gd:441
+#: ui/room_tab.gd:428 ui/room_tab.gd:444
 #, c-format
 msgid "%s (photo)"
 msgstr ""
 
-#: ui/room_tab.gd:546
+#: ui/room_tab.gd:549
 #, c-format
 msgid "Built by %s"
 msgstr ""
 
-#: ui/room_tab.gd:585
+#: ui/room_tab.gd:588
 msgid "This picture can't be a room (only local pictures)."
 msgstr ""
 
-#: ui/room_tab.gd:604
+#: ui/room_tab.gd:607
 #, c-format
 msgid "%s (moved) (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:604
+#: ui/room_tab.gd:607
 #, c-format
 msgid "%s (%d of %d)"
 msgstr ""
 
-#: ui/room_tab.gd:607
+#: ui/room_tab.gd:610
 #, c-format
 msgid "Where %s was (%d seat)"
 msgid_plural "Where %s was (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:609
+#: ui/room_tab.gd:612
 #, c-format
 msgid "The room's own spot (%d seat)"
 msgid_plural "The room's own spot (%d seats)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ui/room_tab.gd:611
+#: ui/room_tab.gd:614
 #, c-format
 msgid "Go to %s"
 msgstr ""
 
-#: ui/room_tab.gd:624
+#: ui/room_tab.gd:627
 msgid "Flashes only in rooms that react, such as the drive-in; the room pulses with the bass."
 msgstr ""
 
-#: ui/room_tab.gd:638 ui/seat_plan.gd:186
+#: ui/room_tab.gd:641 ui/seat_plan.gd:186
 #, c-format
 msgid "Seat %d"
 msgstr ""
 
-#: ui/room_tab.gd:646
+#: ui/room_tab.gd:649
 msgid "Curtains: in the cinema and the home theatre, flat screen."
-msgstr ""
-
-#: ui/room_tab.gd:656
-#, c-format
-msgid "Intermission: %s left. Play ends it."
 msgstr ""
 
 #: ui/room_tab.gd:659
 #, c-format
+msgid "Intermission: %s left. Play ends it."
+msgstr ""
+
+#: ui/room_tab.gd:662
+#, c-format
 msgid "This film stops at %s."
 msgstr ""
 
-#: ui/room_tab.gd:660
+#: ui/room_tab.gd:663
 #, c-format
 msgid "Films over %d min with chapters stop once, near the middle."
 msgstr ""
@@ -4636,6 +4644,10 @@ msgstr ""
 msgid "Liner 1936"
 msgstr ""
 
+#: environments/m1_grand_tour.env.json
+msgid "M1 Grand Tour"
+msgstr ""
+
 #: environments/mars_train.env.json
 msgid "Mars train"
 msgstr ""
@@ -4858,6 +4870,10 @@ msgstr ""
 
 #: environments/liner_1936.env.json
 msgid "An ocean liner's moderne lounge crossing at night: the ship never rolls while the tall velvet drapes sway gently, the Moon lays a road across open sea, and harbour lights rise with the credits."
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "A 2004 British grand tourer cruising the real M1 motorway from London J1 to Leeds J48: twin-wing burr walnut, live synced screens, UK road signs, real terrain and British weather."
 msgstr ""
 
 #: environments/mars_train.env.json
@@ -5173,6 +5189,26 @@ msgstr ""
 msgid "Cove lights"
 msgstr ""
 
+#: environments/m1_grand_tour.env.json
+msgid "Join motorway at"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Direction"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Cabin trim"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json environments/reclaimed.env.json
+msgid "Weather"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Traffic"
+msgstr ""
+
 #: environments/mars_train.env.json
 msgid "Cabin lighting"
 msgstr ""
@@ -5255,10 +5291,6 @@ msgstr ""
 
 #: environments/rainy_treehouse.env.json
 msgid "Fireflies"
-msgstr ""
-
-#: environments/reclaimed.env.json
-msgid "Weather"
 msgstr ""
 
 #: environments/rooftop_athens.env.json
@@ -5554,6 +5586,30 @@ msgstr ""
 msgid "The proscenium coves' colour before the film. During the film they soften towards the picture."
 msgstr ""
 
+#: environments/m1_grand_tour.env.json
+msgid "Which real M1 junction or landmark stretch to join the drive from."
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Cruise northbound from London towards Yorkshire, or southbound back towards London."
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Hand-stitched hide and book-matched walnut veneer trim for the grand tourer interior."
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Fixed lighting from crisp British morning to late night, or smooth progression across the drive."
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Organic British motorway weather along the miles, or hold clear skies, valley fog, rain or a rolling storm."
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Density of slower Lane 1 lorries and cars plus oncoming motorway traffic."
+msgstr ""
+
 #: environments/mars_train.env.json
 msgid "Indirect expedition cove strips along the overhead raceways, screen surround and aisle floor guides."
 msgstr ""
@@ -5819,7 +5875,7 @@ msgid "Moonlight silver"
 msgstr ""
 
 #: environments/back_seat_2004.env.json environments/bookshop_loft.env.json environments/coach_trip_1988.env.json environments/giants_study.env.json
-#: environments/lighthouse_watchroom.env.json environments/night_greenhouse.env.json environments/rainy_treehouse.env.json
+#: environments/lighthouse_watchroom.env.json environments/m1_grand_tour.env.json environments/night_greenhouse.env.json environments/rainy_treehouse.env.json
 msgid "Steady rain"
 msgstr ""
 
@@ -6119,6 +6175,90 @@ msgstr ""
 msgid "Silver blue"
 msgstr ""
 
+#: environments/m1_grand_tour.env.json
+msgid "London (J1)"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Chilterns (J10)"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Watford Gap (J16)"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Leicester (J21)"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Ratcliffe (J24)"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Sheffield (J33)"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Leeds (J47)"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Northbound (towards Leeds)"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Southbound (towards London)"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Saddle & Burr Walnut"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Beluga & Dark Walnut"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Oxblood & Dark Walnut"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Morning"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Afternoon"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json environments/orbital_ring.env.json
+msgid "Golden hour"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Progress with drive"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Mixed (British drive)"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json environments/reclaimed.env.json
+msgid "Clear"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Overcast"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Valley mist & fog"
+msgstr ""
+
+#: environments/m1_grand_tour.env.json
+msgid "Thunderstorm"
+msgstr ""
+
 #: environments/mars_train.env.json
 msgid "Habitat amber"
 msgstr ""
@@ -6224,10 +6364,6 @@ msgid "Night city lights"
 msgstr ""
 
 #: environments/orbital_ring.env.json
-msgid "Golden hour"
-msgstr ""
-
-#: environments/orbital_ring.env.json
 msgid "Twilight glow"
 msgstr ""
 
@@ -6269,10 +6405,6 @@ msgstr ""
 
 #: environments/reclaimed.env.json
 msgid "Mist"
-msgstr ""
-
-#: environments/reclaimed.env.json
-msgid "Clear"
 msgstr ""
 
 #: environments/salon_1870.env.json

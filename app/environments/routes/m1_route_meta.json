@@ -1,0 +1,6620 @@
+{
+  "version": 1,
+  "route": "M1",
+  "step_m": 100,
+  "sample_count": 3101,
+  "total_length_m": 310027.49833037844,
+  "lateral_offsets_m": [
+    -600,
+    -350,
+    -180,
+    -85,
+    -32,
+    0,
+    32,
+    85,
+    180,
+    350,
+    600
+  ],
+  "junctions": [
+    {
+      "Index": 0,
+      "Ref": "1",
+      "Name": "Staples Corner",
+      "SMetres": 201.5791093568784,
+      "Lat": 51.5731167,
+      "Lon": -0.2295886,
+      "NbExitDest": "The NORTH;Watford",
+      "NbExitRef": "M1",
+      "SbExitDest": "North Circular;Central London;Brent Cross",
+      "SbExitRef": "A406 (E)"
+    },
+    {
+      "Index": 1,
+      "Ref": "2",
+      "Name": "Five Ways Corner",
+      "SMetres": 3971.6122569456375,
+      "Lat": 51.6039885,
+      "Lon": -0.23957950000000003,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "Central London (The City);Holloway;North Circular;(A406 (E))",
+      "SbExitRef": "A1"
+    },
+    {
+      "Index": 2,
+      "Ref": "4",
+      "Name": "Brockley",
+      "SMetres": 10884.70861883941,
+      "Lat": 51.6366529,
+      "Lon": -0.30651470000000003,
+      "NbExitDest": "",
+      "NbExitRef": "M1",
+      "SbExitDest": "Harrow;Edgware",
+      "SbExitRef": "A41"
+    },
+    {
+      "Index": 3,
+      "Ref": "5",
+      "Name": "Berrygrove",
+      "SMetres": 17497.61712136019,
+      "Lat": 51.6757058,
+      "Lon": -0.3729253,
+      "NbExitDest": "The North;St. Albans",
+      "NbExitRef": "M1 North",
+      "SbExitDest": "C. London;Brent Cross;Harrow",
+      "SbExitRef": "M1 South"
+    },
+    {
+      "Index": 4,
+      "Ref": "6",
+      "Name": "Waterdale",
+      "SMetres": 20880.133763461938,
+      "Lat": 51.704995600000004,
+      "Lon": -0.3813559,
+      "NbExitDest": "St Albans",
+      "NbExitRef": "A405",
+      "SbExitDest": "North;Watford",
+      "SbExitRef": "A405"
+    },
+    {
+      "Index": 5,
+      "Ref": "6A",
+      "Name": "Chiswell",
+      "SMetres": 23230.088133999925,
+      "Lat": 51.725598700000006,
+      "Lon": -0.38879620000000004,
+      "NbExitDest": "The NORTH;Luton",
+      "NbExitRef": "M1",
+      "SbExitDest": "Stansted;Dartford;Heathrow",
+      "SbExitRef": "M25"
+    },
+    {
+      "Index": 6,
+      "Ref": "7",
+      "Name": "Beechtrees",
+      "SMetres": 26573.126046512116,
+      "Lat": 51.7514206,
+      "Lon": -0.4114689,
+      "NbExitDest": "The NORTH",
+      "NbExitRef": "M1",
+      "SbExitDest": "London",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 7,
+      "Ref": "8",
+      "Name": "Breakspears",
+      "SMetres": 27990.725328373363,
+      "Lat": 51.7630952,
+      "Lon": -0.41588020000000003,
+      "NbExitDest": "The NORTH",
+      "NbExitRef": "M1",
+      "SbExitDest": "Hemel Hempstead;St Albans;Hatfield",
+      "SbExitRef": "A414"
+    },
+    {
+      "Index": 8,
+      "Ref": "9",
+      "Name": "Friar's Wash",
+      "SMetres": 33870.04954035702,
+      "Lat": 51.8155541,
+      "Lon": -0.416435,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "London",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 9,
+      "Ref": "10",
+      "Name": "Pepperstock",
+      "SMetres": 38872.5282619639,
+      "Lat": 51.859345700000006,
+      "Lon": -0.4289876,
+      "NbExitDest": "The North",
+      "NbExitRef": "M1",
+      "SbExitDest": "Luton",
+      "SbExitRef": "A1081"
+    },
+    {
+      "Index": 10,
+      "Ref": "11",
+      "Name": "Leagrave Interchange",
+      "SMetres": 44168.251414152226,
+      "Lat": 51.8978802,
+      "Lon": -0.47088260000000004,
+      "NbExitDest": "",
+      "NbExitRef": "M1",
+      "SbExitDest": "Luton;Dunstable",
+      "SbExitRef": "A505"
+    },
+    {
+      "Index": 11,
+      "Ref": "11A",
+      "Name": "Chalton Interchange",
+      "SMetres": 46377.86898520754,
+      "Lat": 51.915107500000005,
+      "Lon": -0.4867404,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 12,
+      "Ref": "12",
+      "Name": "Toddington",
+      "SMetres": 51512.492204631766,
+      "Lat": 51.956602700000005,
+      "Lon": -0.5150618,
+      "NbExitDest": "",
+      "NbExitRef": "A5120;B5120",
+      "SbExitDest": "",
+      "SbExitRef": "A5120;B5120"
+    },
+    {
+      "Index": 13,
+      "Ref": "13",
+      "Name": "Ridgmont Interchange",
+      "SMetres": 62632.96608567266,
+      "Lat": 52.028487500000004,
+      "Lon": -0.6108931000000001,
+      "NbExitDest": "The North",
+      "NbExitRef": "M1",
+      "SbExitDest": "Bedford;Woburn;Ampthill",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 14,
+      "Ref": "14",
+      "Name": "",
+      "SMetres": 69099.73284189902,
+      "Lat": 52.056198,
+      "Lon": -0.6934536,
+      "NbExitDest": "Milton Keynes;Newport Pagnell",
+      "NbExitRef": "A509",
+      "SbExitDest": "London:Luton",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 15,
+      "Ref": "15",
+      "Name": "",
+      "SMetres": 89778.02770022563,
+      "Lat": 52.18895800000001,
+      "Lon": -0.9009064000000001,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 16,
+      "Ref": "15A",
+      "Name": "Rothersthorpe",
+      "SMetres": 94115.72973459926,
+      "Lat": 52.211769600000004,
+      "Lon": -0.9514335,
+      "NbExitDest": "",
+      "NbExitRef": "M1",
+      "SbExitDest": "Oxford",
+      "SbExitRef": "A43"
+    },
+    {
+      "Index": 17,
+      "Ref": "16",
+      "Name": "",
+      "SMetres": 99554.37530386326,
+      "Lat": 52.2320512,
+      "Lon": -1.0235758000000001,
+      "NbExitDest": "Coventry;Leicester;Birmingham",
+      "NbExitRef": "M1",
+      "SbExitDest": "Northampton",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 18,
+      "Ref": "17",
+      "Name": "Kilsby",
+      "SMetres": 113052.80725196184,
+      "Lat": 52.3247663,
+      "Lon": -1.1409181000000002,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 19,
+      "Ref": "18",
+      "Name": "Crick Interchange",
+      "SMetres": 115630.39654661382,
+      "Lat": 52.3464655,
+      "Lon": -1.1537249,
+      "NbExitDest": "Leicester",
+      "NbExitRef": "M1",
+      "SbExitDest": "Daventry;Rail Freight Terminal",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 20,
+      "Ref": "19",
+      "Name": "Catthorpe",
+      "SMetres": 121304.41078736162,
+      "Lat": 52.3959082,
+      "Lon": -1.1734552,
+      "NbExitDest": "The N. WEST;Birmingham;Coventry",
+      "NbExitRef": "M6",
+      "SbExitDest": "",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 21,
+      "Ref": "20",
+      "Name": "Misterton Interchange",
+      "SMetres": 127104.94374548216,
+      "Lat": 52.4458214,
+      "Lon": -1.1927065000000001,
+      "NbExitDest": "Lutterworth;Rugby",
+      "NbExitRef": "M1",
+      "SbExitDest": "London;Northampton",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 22,
+      "Ref": "21",
+      "Name": "",
+      "SMetres": 144265.54054845482,
+      "Lat": 52.5956963,
+      "Lon": -1.194965,
+      "NbExitDest": "Leicester",
+      "NbExitRef": "A5460",
+      "SbExitDest": "",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 23,
+      "Ref": "21A",
+      "Name": "",
+      "SMetres": 148810.9157505569,
+      "Lat": 52.6339747,
+      "Lon": -1.2166399,
+      "NbExitDest": "",
+      "NbExitRef": "B5380",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 24,
+      "Ref": "22",
+      "Name": "",
+      "SMetres": 158761.46089959066,
+      "Lat": 52.7042201,
+      "Lon": -1.2919655,
+      "NbExitDest": "The NORTH",
+      "NbExitRef": "M1",
+      "SbExitDest": "Leicester;Coalville",
+      "SbExitRef": "A50;A511"
+    },
+    {
+      "Index": 25,
+      "Ref": "23",
+      "Name": "",
+      "SMetres": 164694.6874929957,
+      "Lat": 52.755826600000006,
+      "Lon": -1.2742315000000002,
+      "NbExitDest": "",
+      "NbExitRef": "A512",
+      "SbExitDest": "The SOUTH;London;Leicester;Coventry",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 26,
+      "Ref": "23A",
+      "Name": "",
+      "SMetres": 171444.7445483951,
+      "Lat": 52.812180700000006,
+      "Lon": -1.3063748000000002,
+      "NbExitDest": "East Midlands Airport",
+      "NbExitRef": "A453",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 27,
+      "Ref": "24",
+      "Name": "",
+      "SMetres": 174481.58319104175,
+      "Lat": 52.8386414,
+      "Lon": -1.2962522,
+      "NbExitDest": "Derby;Stoke;Nottingham",
+      "NbExitRef": "A50;A453",
+      "SbExitDest": "The SOUTH",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 28,
+      "Ref": "24A",
+      "Name": "",
+      "SMetres": 176789.9993424217,
+      "Lat": 52.858965500000004,
+      "Lon": -1.3013754000000002,
+      "NbExitDest": "Derby;Stoke",
+      "NbExitRef": "A50",
+      "SbExitDest": "Derby;Stoke",
+      "SbExitRef": "A50"
+    },
+    {
+      "Index": 29,
+      "Ref": "25",
+      "Name": "Sandiacre Interchange",
+      "SMetres": 182759.2271794903,
+      "Lat": 52.90999720000001,
+      "Lon": -1.3003839000000001,
+      "NbExitDest": "Derby;Nottingham",
+      "NbExitRef": "A52",
+      "SbExitDest": "",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 30,
+      "Ref": "26",
+      "Name": "Nuthall Interchange",
+      "SMetres": 192419.25021132783,
+      "Lat": 52.9848548,
+      "Lon": -1.2412558,
+      "NbExitDest": "Ripley;Nottingham",
+      "NbExitRef": "A610",
+      "SbExitDest": "The SOUTH",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 31,
+      "Ref": "27",
+      "Name": "",
+      "SMetres": 201443.14643798725,
+      "Lat": 53.0597378,
+      "Lon": -1.2649704000000002,
+      "NbExitDest": "Kirby-in-Ashfield",
+      "NbExitRef": "A608",
+      "SbExitDest": "The SOUTH",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 32,
+      "Ref": "28",
+      "Name": "Pinxton Interchange",
+      "SMetres": 206718.6770269735,
+      "Lat": 53.096686000000005,
+      "Lon": -1.3138177,
+      "NbExitDest": "Mansfield",
+      "NbExitRef": "A38",
+      "SbExitDest": "The SOUTH",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 33,
+      "Ref": "29",
+      "Name": "Heath",
+      "SMetres": 219231.51452325264,
+      "Lat": 53.2036437,
+      "Lon": -1.3216180000000002,
+      "NbExitDest": "The North",
+      "NbExitRef": "M1",
+      "SbExitDest": "Mansfield;Matlock",
+      "SbExitRef": "A617;A632"
+    },
+    {
+      "Index": 34,
+      "Ref": "29A",
+      "Name": "",
+      "SMetres": 224643.5134125891,
+      "Lat": 53.2507163,
+      "Lon": -1.3276103000000001,
+      "NbExitDest": "",
+      "NbExitRef": "M1",
+      "SbExitDest": "Markham Vale;Bolsover",
+      "SbExitRef": "A6192;A632"
+    },
+    {
+      "Index": 35,
+      "Ref": "30",
+      "Name": "Barlborough Interchange",
+      "SMetres": 229658.7912203972,
+      "Lat": 53.290082000000005,
+      "Lon": -1.2945302,
+      "NbExitDest": "The NORTH M1;Sheffield M1;Leeds M1",
+      "NbExitRef": "",
+      "SbExitDest": "Chesterfield A616;Newark A616;Sheffield A6135",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 36,
+      "Ref": "31",
+      "Name": "Aston",
+      "SMetres": 237429.49290233775,
+      "Lat": 53.3572824,
+      "Lon": -1.2848024,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 37,
+      "Ref": "32",
+      "Name": "Thurcroft",
+      "SMetres": 240092.98081659805,
+      "Lat": 53.380855200000006,
+      "Lon": -1.2784778,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 38,
+      "Ref": "33",
+      "Name": "Catcliffe",
+      "SMetres": 245557.54272285735,
+      "Lat": 53.398732900000006,
+      "Lon": -1.3423765,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 39,
+      "Ref": "34",
+      "Name": "Tinsley",
+      "SMetres": 249530.28511484468,
+      "Lat": 53.4080925,
+      "Lon": -1.3955395000000002,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 40,
+      "Ref": "35",
+      "Name": "",
+      "SMetres": 255214.81685920994,
+      "Lat": 53.4493954,
+      "Lon": -1.444476,
+      "NbExitDest": "Rotherham (North)",
+      "NbExitRef": "A629",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 41,
+      "Ref": "35A",
+      "Name": "Tankersley",
+      "SMetres": 258136.77391964602,
+      "Lat": 53.474103500000005,
+      "Lon": -1.4579846,
+      "NbExitDest": "Manchester",
+      "NbExitRef": "A616",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 42,
+      "Ref": "36",
+      "Name": "Tankersley",
+      "SMetres": 261434.75380543622,
+      "Lat": 53.50003950000001,
+      "Lon": -1.4808418,
+      "NbExitDest": "The SOUTH",
+      "NbExitRef": "M1",
+      "SbExitDest": "The NORTH",
+      "SbExitRef": "M1"
+    },
+    {
+      "Index": 43,
+      "Ref": "37",
+      "Name": "Dodworth",
+      "SMetres": 266417.3944237466,
+      "Lat": 53.5394999,
+      "Lon": -1.5081978,
+      "NbExitDest": "Barnsley;Manchester",
+      "NbExitRef": "A628",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 44,
+      "Ref": "38",
+      "Name": "Haigh",
+      "SMetres": 275138.10595107,
+      "Lat": 53.607958700000005,
+      "Lon": -1.5522089000000001,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "Huddersfield",
+      "SbExitRef": "A637"
+    },
+    {
+      "Index": 45,
+      "Ref": "39",
+      "Name": "Durkar Interchange",
+      "SMetres": 280734.51721265516,
+      "Lat": 53.655080500000004,
+      "Lon": -1.5280844,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "Denby Dale",
+      "SbExitRef": "A636"
+    },
+    {
+      "Index": 46,
+      "Ref": "40",
+      "Name": "Flushdyke Interchange",
+      "SMetres": 284948.435349598,
+      "Lat": 53.6879848,
+      "Lon": -1.5560511000000001,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "Wakefield;Dewsbury",
+      "SbExitRef": "A638"
+    },
+    {
+      "Index": 47,
+      "Ref": "41",
+      "Name": "Carrgate",
+      "SMetres": 289160.3845941709,
+      "Lat": 53.718839800000005,
+      "Lon": -1.52868,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "Wakefield",
+      "SbExitRef": "A650"
+    },
+    {
+      "Index": 48,
+      "Ref": "42",
+      "Name": "Lofthouse",
+      "SMetres": 292168.14092362986,
+      "Lat": 53.741844400000005,
+      "Lon": -1.514175,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "Hull;Pontefract;Manchester;Bradford",
+      "SbExitRef": "M62"
+    },
+    {
+      "Index": 49,
+      "Ref": "43",
+      "Name": "Belle Isle",
+      "SMetres": 293111.0433112388,
+      "Lat": 53.7499667,
+      "Lon": -1.517335,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 50,
+      "Ref": "44",
+      "Name": "Rothwell Haigh",
+      "SMetres": 295067.1669704016,
+      "Lat": 53.7618899,
+      "Lon": -1.4990993000000001,
+      "NbExitDest": "Leeds (South)",
+      "NbExitRef": "A639",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    },
+    {
+      "Index": 51,
+      "Ref": "45",
+      "Name": "East Leeds Link Interchange",
+      "SMetres": 297059.32695728634,
+      "Lat": 53.7722835,
+      "Lon": -1.4777674,
+      "NbExitDest": "Leeds;Skelton Lake Services",
+      "NbExitRef": "A63",
+      "SbExitDest": "",
+      "SbExitRef": "M1(S)"
+    },
+    {
+      "Index": 52,
+      "Ref": "46",
+      "Name": "Austhorpe",
+      "SMetres": 303331.55649409216,
+      "Lat": 53.7995475,
+      "Lon": -1.4144888,
+      "NbExitDest": "",
+      "NbExitRef": "",
+      "SbExitDest": "Leeds (East)",
+      "SbExitRef": "A6120"
+    },
+    {
+      "Index": 53,
+      "Ref": "47",
+      "Name": "Parlington",
+      "SMetres": 306406.194042266,
+      "Lat": 53.8063629,
+      "Lon": -1.3694078,
+      "NbExitDest": "Garforth",
+      "NbExitRef": "A642",
+      "SbExitDest": "",
+      "SbExitRef": ""
+    }
+  ],
+  "services": [
+    {
+      "Name": "London Gateway Services",
+      "SMetres": 7026.80996904913,
+      "Side": "west",
+      "BridgeCafe": false
+    },
+    {
+      "Name": "Toddington Services",
+      "SMetres": 50041.0624122483,
+      "Side": "both",
+      "BridgeCafe": false
+    },
+    {
+      "Name": "Newport Pagnell Services",
+      "SMetres": 73902.6646875015,
+      "Side": "both",
+      "BridgeCafe": true
+    },
+    {
+      "Name": "Watford Gap Services",
+      "SMetres": 110784.10997605787,
+      "Side": "both",
+      "BridgeCafe": false
+    },
+    {
+      "Name": "Leicester Forest East Services",
+      "SMetres": 147046.38933519216,
+      "Side": "both",
+      "BridgeCafe": true
+    },
+    {
+      "Name": "Donington Park Services",
+      "SMetres": 172877.32837575374,
+      "Side": "west",
+      "BridgeCafe": false
+    },
+    {
+      "Name": "Trowell Services",
+      "SMetres": 189125.88035019237,
+      "Side": "both",
+      "BridgeCafe": false
+    },
+    {
+      "Name": "Tibshelf Services",
+      "SMetres": 211353.51712615,
+      "Side": "both",
+      "BridgeCafe": false
+    },
+    {
+      "Name": "Woodall Services",
+      "SMetres": 232880.69496805622,
+      "Side": "both",
+      "BridgeCafe": false
+    },
+    {
+      "Name": "Woolley Edge Services",
+      "SMetres": 276536.9436437147,
+      "Side": "both",
+      "BridgeCafe": false
+    }
+  ],
+  "overbridges": [
+    {
+      "SMetres": 217.7604848307791,
+      "WidthM": 5.5,
+      "SkewDeg": -35,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 865.0972344767515,
+      "WidthM": 16.300001,
+      "SkewDeg": -18.77433,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 1169.0801110219782,
+      "WidthM": 27.099998,
+      "SkewDeg": -35,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 1257.9291007490135,
+      "WidthM": 5.5,
+      "SkewDeg": -3.0293403,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 2026.5324251368575,
+      "WidthM": 5.5,
+      "SkewDeg": -19.856419,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 4104.3128252717715,
+      "WidthM": 5.5,
+      "SkewDeg": -30.904045,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 5784.978899235207,
+      "WidthM": 5.5,
+      "SkewDeg": -24.86777,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 6126.951969913287,
+      "WidthM": 18,
+      "SkewDeg": -3.1979377,
+      "Kind": "road",
+      "Name": "Selvage Lane"
+    },
+    {
+      "SMetres": 6247.321413091747,
+      "WidthM": 28,
+      "SkewDeg": -33.472126,
+      "Kind": "road",
+      "Name": "Edgware Way"
+    },
+    {
+      "SMetres": 9463.12037087894,
+      "WidthM": 5.5,
+      "SkewDeg": -7.3810353,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 10553.47709310199,
+      "WidthM": 28,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Watford By-Pass"
+    },
+    {
+      "SMetres": 10740.04580180333,
+      "WidthM": 18,
+      "SkewDeg": -1.3930838,
+      "Kind": "road",
+      "Name": "Brockley Hill"
+    },
+    {
+      "SMetres": 13053.253967072835,
+      "WidthM": 5.5,
+      "SkewDeg": -3.1282213,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 14115.960279407183,
+      "WidthM": 19.6,
+      "SkewDeg": -35,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 15012.837566264989,
+      "WidthM": 12.5,
+      "SkewDeg": -7.5771346,
+      "Kind": "road",
+      "Name": "Sandy Lane"
+    },
+    {
+      "SMetres": 15655.411779992695,
+      "WidthM": 5.5,
+      "SkewDeg": -15.236947,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 16892.059916288446,
+      "WidthM": 18,
+      "SkewDeg": -2.6520436,
+      "Kind": "road",
+      "Name": "Berrygrove Interchange"
+    },
+    {
+      "SMetres": 17016.953885522616,
+      "WidthM": 18,
+      "SkewDeg": -1.3047314,
+      "Kind": "road",
+      "Name": "Berrygrove Interchange"
+    },
+    {
+      "SMetres": 17728.633280232156,
+      "WidthM": 12.5,
+      "SkewDeg": -11.293044,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 20090.686002363294,
+      "WidthM": 12.5,
+      "SkewDeg": -4.6795664,
+      "Kind": "road",
+      "Name": "Bucknalls Lane"
+    },
+    {
+      "SMetres": 22807.090383660125,
+      "WidthM": 12.5,
+      "SkewDeg": -0.31641418,
+      "Kind": "road",
+      "Name": "Blunts Lane"
+    },
+    {
+      "SMetres": 25175.007278190795,
+      "WidthM": 28,
+      "SkewDeg": -30.289442,
+      "Kind": "road",
+      "Name": "Hemel Hempstead Road"
+    },
+    {
+      "SMetres": 25438.698630472856,
+      "WidthM": 18,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "A414"
+    },
+    {
+      "SMetres": 27283.057119416015,
+      "WidthM": 16.3,
+      "SkewDeg": -0.53934276,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 31842.827826622553,
+      "WidthM": 12.5,
+      "SkewDeg": -15.619434,
+      "Kind": "road",
+      "Name": "Flamsteadbury Lane"
+    },
+    {
+      "SMetres": 32441.585635996787,
+      "WidthM": 12.5,
+      "SkewDeg": -0.21044543,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 33646.06858058885,
+      "WidthM": 12.5,
+      "SkewDeg": -17.74405,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 35003.55938154684,
+      "WidthM": 12.5,
+      "SkewDeg": -29.597813,
+      "Kind": "road",
+      "Name": "Watery Lane"
+    },
+    {
+      "SMetres": 37795.78088167498,
+      "WidthM": 12.5,
+      "SkewDeg": -22.95805,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 38072.23031013074,
+      "WidthM": 18,
+      "SkewDeg": -0.24865663,
+      "Kind": "road",
+      "Name": "Pepperstock"
+    },
+    {
+      "SMetres": 38247.20056174584,
+      "WidthM": 18,
+      "SkewDeg": -0.8966186,
+      "Kind": "road",
+      "Name": "Pepperstock"
+    },
+    {
+      "SMetres": 39189.613707942975,
+      "WidthM": 5.5,
+      "SkewDeg": -2.1334958,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 42609.07888501094,
+      "WidthM": 5.5,
+      "SkewDeg": -0.325027,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 43001.14424848606,
+      "WidthM": 28,
+      "SkewDeg": -28.617579,
+      "Kind": "road",
+      "Name": "Hatters Way"
+    },
+    {
+      "SMetres": 43117.655683087556,
+      "WidthM": 12.5,
+      "SkewDeg": -33.998875,
+      "Kind": "road",
+      "Name": "Bradley Road"
+    },
+    {
+      "SMetres": 44623.860389207446,
+      "WidthM": 5.5,
+      "SkewDeg": -35,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 45606.50085504312,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 47132.17884334504,
+      "WidthM": 28,
+      "SkewDeg": -0.27345374,
+      "Kind": "road",
+      "Name": "Chalton Interchange"
+    },
+    {
+      "SMetres": 47397.759178511464,
+      "WidthM": 15.8,
+      "SkewDeg": -4.297465,
+      "Kind": "road",
+      "Name": "Sundon Road"
+    },
+    {
+      "SMetres": 48260.17916542045,
+      "WidthM": 12.5,
+      "SkewDeg": -1.5155337,
+      "Kind": "road",
+      "Name": "Common Farm Bridge"
+    },
+    {
+      "SMetres": 49158.69214685319,
+      "WidthM": 12.5,
+      "SkewDeg": -0.6511566,
+      "Kind": "road",
+      "Name": "Woodcock Farm Bridge"
+    },
+    {
+      "SMetres": 50196.02433073233,
+      "WidthM": 5.5,
+      "SkewDeg": -0.7669921,
+      "Kind": "foot",
+      "Name": "Toddington MSA Footbridge"
+    },
+    {
+      "SMetres": 51078.4281042785,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Old Park Farm Bridge"
+    },
+    {
+      "SMetres": 51668.997977795356,
+      "WidthM": 28,
+      "SkewDeg": -24.795416,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 53688.03184242405,
+      "WidthM": 5.5,
+      "SkewDeg": -0.427057,
+      "Kind": "foot",
+      "Name": "Harlington Footbridge"
+    },
+    {
+      "SMetres": 56045.86693384923,
+      "WidthM": 12.5,
+      "SkewDeg": -0.799611,
+      "Kind": "road",
+      "Name": "Town Mead Bridge"
+    },
+    {
+      "SMetres": 56738.96558874692,
+      "WidthM": 12.5,
+      "SkewDeg": -10.175736,
+      "Kind": "road",
+      "Name": "Eversholt Road"
+    },
+    {
+      "SMetres": 58431.73035903205,
+      "WidthM": 12.5,
+      "SkewDeg": -1.4454571,
+      "Kind": "road",
+      "Name": "Lodge Farm Bridge"
+    },
+    {
+      "SMetres": 59074.876940192866,
+      "WidthM": 5.5,
+      "SkewDeg": -0.9342335,
+      "Kind": "foot",
+      "Name": "Lodge Farm Bridge"
+    },
+    {
+      "SMetres": 59636.326545710835,
+      "WidthM": 12.5,
+      "SkewDeg": -22.052837,
+      "Kind": "road",
+      "Name": "Ridgmont Road"
+    },
+    {
+      "SMetres": 60243.93595883963,
+      "WidthM": 5.5,
+      "SkewDeg": -1.0866609,
+      "Kind": "foot",
+      "Name": "Charity Farm Bridge"
+    },
+    {
+      "SMetres": 62074.37601130525,
+      "WidthM": 18,
+      "SkewDeg": -6.0190544,
+      "Kind": "road",
+      "Name": "Ridgmont Interchange"
+    },
+    {
+      "SMetres": 62420.49245716276,
+      "WidthM": 28,
+      "SkewDeg": -1.5926806,
+      "Kind": "road",
+      "Name": "A421"
+    },
+    {
+      "SMetres": 62973.29187501687,
+      "WidthM": 12.5,
+      "SkewDeg": -0.5395779,
+      "Kind": "road",
+      "Name": "Brook Farm Bridge"
+    },
+    {
+      "SMetres": 64063.751570563094,
+      "WidthM": 12.5,
+      "SkewDeg": -1.3258799,
+      "Kind": "road",
+      "Name": "Aspley Hall Bridge"
+    },
+    {
+      "SMetres": 64509.57644348952,
+      "WidthM": 5.5,
+      "SkewDeg": -1.2096125,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 65003.48303737765,
+      "WidthM": 20,
+      "SkewDeg": -15.531354,
+      "Kind": "road",
+      "Name": "Cranfield Road"
+    },
+    {
+      "SMetres": 66852.80588179422,
+      "WidthM": 12.5,
+      "SkewDeg": -33.84075,
+      "Kind": "road",
+      "Name": "Broughton Road"
+    },
+    {
+      "SMetres": 68182.97465329255,
+      "WidthM": 12.5,
+      "SkewDeg": -10.9097595,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 69601.85288696461,
+      "WidthM": 18,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "A509"
+    },
+    {
+      "SMetres": 69687.88134606156,
+      "WidthM": 18,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "A509"
+    },
+    {
+      "SMetres": 71009.02500508116,
+      "WidthM": 12.5,
+      "SkewDeg": -1.2522465,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 71352.2148029384,
+      "WidthM": 13,
+      "SkewDeg": -35,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 72134.07656635212,
+      "WidthM": 28,
+      "SkewDeg": -4.0625606,
+      "Kind": "road",
+      "Name": "H3 Monks Way"
+    },
+    {
+      "SMetres": 72299.46841655622,
+      "WidthM": 12.5,
+      "SkewDeg": -0.016968336,
+      "Kind": "road",
+      "Name": "Tongwell Lane"
+    },
+    {
+      "SMetres": 72859.32316113965,
+      "WidthM": 5.5,
+      "SkewDeg": -1.3498015,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 73218.55976108866,
+      "WidthM": 5.5,
+      "SkewDeg": -1.3761373,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 73942.63132722625,
+      "WidthM": 5.5,
+      "SkewDeg": -0.2668022,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 74116.00874595522,
+      "WidthM": 12.5,
+      "SkewDeg": -31.122847,
+      "Kind": "road",
+      "Name": "Little Linford Lane"
+    },
+    {
+      "SMetres": 74706.47193204272,
+      "WidthM": 12.5,
+      "SkewDeg": -0.90460014,
+      "Kind": "road",
+      "Name": "Portsfields Farm Bridge"
+    },
+    {
+      "SMetres": 75851.74694747393,
+      "WidthM": 12.5,
+      "SkewDeg": -30.16753,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 77720.5881894467,
+      "WidthM": 12.5,
+      "SkewDeg": -0.09293065,
+      "Kind": "road",
+      "Name": "Gayhurst Wood Bridge"
+    },
+    {
+      "SMetres": 78908.55059021115,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 81398.56702232365,
+      "WidthM": 5.5,
+      "SkewDeg": -0.5436563,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 81896.68407689013,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 84109.8797342927,
+      "WidthM": 12.5,
+      "SkewDeg": -19.787016,
+      "Kind": "road",
+      "Name": "Forest Road"
+    },
+    {
+      "SMetres": 86320.58921356253,
+      "WidthM": 5.5,
+      "SkewDeg": -0.5171913,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 87297.37465407146,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 89264.535302423,
+      "WidthM": 28,
+      "SkewDeg": -15.196295,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 90123.78999474962,
+      "WidthM": 12.5,
+      "SkewDeg": -1.4876727,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 90230.54182975637,
+      "WidthM": 12.5,
+      "SkewDeg": -0.2093486,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 90517.02047648898,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Collingtree Road"
+    },
+    {
+      "SMetres": 90713.82389455495,
+      "WidthM": 12.5,
+      "SkewDeg": -0.11853643,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 91526.91851838407,
+      "WidthM": 12.5,
+      "SkewDeg": -1.8597085,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 91855.73783595474,
+      "WidthM": 17.6,
+      "SkewDeg": -35,
+      "Kind": "rail",
+      "Name": "Northampton Loop Line"
+    },
+    {
+      "SMetres": 92176.77078538321,
+      "WidthM": 12.5,
+      "SkewDeg": -6.689364,
+      "Kind": "road",
+      "Name": "Towcester Road"
+    },
+    {
+      "SMetres": 93546.38478988069,
+      "WidthM": 5.5,
+      "SkewDeg": -0.42132273,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 94140.21480480248,
+      "WidthM": 12.5,
+      "SkewDeg": -13.610963,
+      "Kind": "road",
+      "Name": "Banbury Lane"
+    },
+    {
+      "SMetres": 95210.5520319043,
+      "WidthM": 5.5,
+      "SkewDeg": -1.1820976,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 96115.17982022346,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Rothersthorpe Road"
+    },
+    {
+      "SMetres": 96851.36497491926,
+      "WidthM": 12.5,
+      "SkewDeg": -18.85172,
+      "Kind": "road",
+      "Name": "Bugbrooke Road"
+    },
+    {
+      "SMetres": 98936.88260255943,
+      "WidthM": 18,
+      "SkewDeg": -0.5175301,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 99062.22476050162,
+      "WidthM": 21.3,
+      "SkewDeg": -0.4499875,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 99682.32692415064,
+      "WidthM": 12.5,
+      "SkewDeg": -0.80616677,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 99981.9704757831,
+      "WidthM": 12.5,
+      "SkewDeg": -16.021898,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 101702.36301893041,
+      "WidthM": 12.5,
+      "SkewDeg": -26.828573,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 102463.2528771593,
+      "WidthM": 12.5,
+      "SkewDeg": -21.50475,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 103692.09479839899,
+      "WidthM": 12.5,
+      "SkewDeg": -17.520012,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 104697.21828066067,
+      "WidthM": 12.5,
+      "SkewDeg": -0.123532556,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 105326.87955358149,
+      "WidthM": 12.5,
+      "SkewDeg": -5.6757402,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 106611.27700327395,
+      "WidthM": 12.5,
+      "SkewDeg": -21.534292,
+      "Kind": "road",
+      "Name": "Roman Road"
+    },
+    {
+      "SMetres": 108627.30687103188,
+      "WidthM": 12.5,
+      "SkewDeg": -1.4695456,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 109330.70625757807,
+      "WidthM": 5.5,
+      "SkewDeg": -1.3815997,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 109861.98928878721,
+      "WidthM": 12.5,
+      "SkewDeg": -3.2669308,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 110706.01662492272,
+      "WidthM": 5.5,
+      "SkewDeg": -1.0768032,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 110948.23661152073,
+      "WidthM": 12.5,
+      "SkewDeg": -10.96572,
+      "Kind": "road",
+      "Name": "Station Road"
+    },
+    {
+      "SMetres": 112765.28081181241,
+      "WidthM": 12.5,
+      "SkewDeg": -1.0803608,
+      "Kind": "road",
+      "Name": "Kilsby Road"
+    },
+    {
+      "SMetres": 113775.82459405994,
+      "WidthM": 12.5,
+      "SkewDeg": -28.824062,
+      "Kind": "road",
+      "Name": "Kilsby Road"
+    },
+    {
+      "SMetres": 118059.62539812489,
+      "WidthM": 12.5,
+      "SkewDeg": -6.5408597,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 120236.82076497747,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Yelvertoft Road"
+    },
+    {
+      "SMetres": 122995.77029491296,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Shawell Road"
+    },
+    {
+      "SMetres": 123718.21393345026,
+      "WidthM": 12.5,
+      "SkewDeg": -0.08277162,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 124352.00466998553,
+      "WidthM": 12.5,
+      "SkewDeg": -0.47536945,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 126669.79982374771,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 127133.2364363287,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 127543.65032955531,
+      "WidthM": 18,
+      "SkewDeg": -2.2835417,
+      "Kind": "road",
+      "Name": "Misterton Interchange"
+    },
+    {
+      "SMetres": 127637.57724971608,
+      "WidthM": 21.3,
+      "SkewDeg": -0.14535983,
+      "Kind": "road",
+      "Name": "Misterton Interchange"
+    },
+    {
+      "SMetres": 128241.11340688294,
+      "WidthM": 5.5,
+      "SkewDeg": -1.3584273,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 128830.38727892403,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Gilmorton Road"
+    },
+    {
+      "SMetres": 130624.85113398774,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Boneham's Lane"
+    },
+    {
+      "SMetres": 131533.08030742386,
+      "WidthM": 12.5,
+      "SkewDeg": -0.11201947,
+      "Kind": "road",
+      "Name": "Ullesthorpe Road"
+    },
+    {
+      "SMetres": 132209.23030982455,
+      "WidthM": 12.5,
+      "SkewDeg": -0.0010609363,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 133745.24048705443,
+      "WidthM": 12.5,
+      "SkewDeg": -4.4402614,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 134606.82438868235,
+      "WidthM": 12.5,
+      "SkewDeg": -14.276802,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 135622.38682907022,
+      "WidthM": 5.5,
+      "SkewDeg": -0.5221333,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 136429.62794170933,
+      "WidthM": 12.5,
+      "SkewDeg": -29.922314,
+      "Kind": "road",
+      "Name": "Cosby Lane"
+    },
+    {
+      "SMetres": 136897.63459533613,
+      "WidthM": 12.5,
+      "SkewDeg": -0.5409478,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 137372.22039633748,
+      "WidthM": 18,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "A426"
+    },
+    {
+      "SMetres": 142714.24032593708,
+      "WidthM": 5.5,
+      "SkewDeg": -0.52647936,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 143149.43674085016,
+      "WidthM": 13,
+      "SkewDeg": -2.265302,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 145680.82321218878,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "M69"
+    },
+    {
+      "SMetres": 146053.96954936782,
+      "WidthM": 5.5,
+      "SkewDeg": -0.48732316,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 146279.59293870153,
+      "WidthM": 15.8,
+      "SkewDeg": -0.07790041,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 147545.4151449676,
+      "WidthM": 12.5,
+      "SkewDeg": -0.4856072,
+      "Kind": "road",
+      "Name": "Baines Lane"
+    },
+    {
+      "SMetres": 147772.4683196327,
+      "WidthM": 28,
+      "SkewDeg": -16.325289,
+      "Kind": "road",
+      "Name": "Hinckley Road"
+    },
+    {
+      "SMetres": 149028.60548119945,
+      "WidthM": 12.5,
+      "SkewDeg": -15.872816,
+      "Kind": "road",
+      "Name": "Ratby Lane"
+    },
+    {
+      "SMetres": 150991.6594124842,
+      "WidthM": 5.5,
+      "SkewDeg": -0.07662101,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 151355.56505230427,
+      "WidthM": 12.5,
+      "SkewDeg": -9.944549,
+      "Kind": "road",
+      "Name": "Groby Road"
+    },
+    {
+      "SMetres": 152034.85496524608,
+      "WidthM": 5.5,
+      "SkewDeg": -0.87351304,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 154125.06319363564,
+      "WidthM": 12.5,
+      "SkewDeg": -0.003622987,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 155127.01038287574,
+      "WidthM": 12.5,
+      "SkewDeg": -9.376385,
+      "Kind": "road",
+      "Name": "Thornton Lane"
+    },
+    {
+      "SMetres": 156719.05329736808,
+      "WidthM": 12.5,
+      "SkewDeg": -0.8373929,
+      "Kind": "road",
+      "Name": "Forest Road"
+    },
+    {
+      "SMetres": 156949.84097613528,
+      "WidthM": 5.5,
+      "SkewDeg": -0.5135137,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 158759.2980057526,
+      "WidthM": 12.5,
+      "SkewDeg": -26.828348,
+      "Kind": "road",
+      "Name": "Old House Lane"
+    },
+    {
+      "SMetres": 159340.69816981882,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Copt Oak Road"
+    },
+    {
+      "SMetres": 159823.65170302332,
+      "WidthM": 12.5,
+      "SkewDeg": -22.533232,
+      "Kind": "road",
+      "Name": "Warren Hills Road"
+    },
+    {
+      "SMetres": 165136.7683119264,
+      "WidthM": 18,
+      "SkewDeg": -5.58743,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 165236.53401414596,
+      "WidthM": 21.3,
+      "SkewDeg": -4.4332805,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 167035.68017240873,
+      "WidthM": 5.5,
+      "SkewDeg": -0.31496194,
+      "Kind": "foot",
+      "Name": "Butthole Lane"
+    },
+    {
+      "SMetres": 168823.29161147057,
+      "WidthM": 5.5,
+      "SkewDeg": -0.6684906,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 170090.5040973075,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Smithy Lane"
+    },
+    {
+      "SMetres": 171834.56387872726,
+      "WidthM": 18,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "A42"
+    },
+    {
+      "SMetres": 172586.0822398494,
+      "WidthM": 18,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "A42"
+    },
+    {
+      "SMetres": 173834.2359730791,
+      "WidthM": 24.599998,
+      "SkewDeg": -3.7026303,
+      "Kind": "road",
+      "Name": "Kegworth Bypass"
+    },
+    {
+      "SMetres": 173903.65715241162,
+      "WidthM": 8.8,
+      "SkewDeg": -35,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 174954.30003858986,
+      "WidthM": 18,
+      "SkewDeg": -1.2769437,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 175191.6748315889,
+      "WidthM": 21.3,
+      "SkewDeg": -2.1364653,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 176401.40736179237,
+      "WidthM": 21.3,
+      "SkewDeg": -27.299952,
+      "Kind": "road",
+      "Name": "A50"
+    },
+    {
+      "SMetres": 179366.5868780188,
+      "WidthM": 12.5,
+      "SkewDeg": -1.6665621,
+      "Kind": "road",
+      "Name": "Wilne Lane"
+    },
+    {
+      "SMetres": 181187.0801833303,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 181497.5583588055,
+      "WidthM": 18,
+      "SkewDeg": -19.884407,
+      "Kind": "road",
+      "Name": "Derby Road"
+    },
+    {
+      "SMetres": 182887.48562761772,
+      "WidthM": 12.5,
+      "SkewDeg": -0.2553919,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 183337.04544713645,
+      "WidthM": 28,
+      "SkewDeg": -26.492645,
+      "Kind": "road",
+      "Name": "Sandiacre Interchange"
+    },
+    {
+      "SMetres": 183411.32358078976,
+      "WidthM": 28,
+      "SkewDeg": -25.450819,
+      "Kind": "road",
+      "Name": "Brian Clough Way"
+    },
+    {
+      "SMetres": 183493.19245977103,
+      "WidthM": 24.599998,
+      "SkewDeg": -24.513927,
+      "Kind": "road",
+      "Name": "Sandiacre Interchange"
+    },
+    {
+      "SMetres": 183922.0491114823,
+      "WidthM": 12.5,
+      "SkewDeg": -16.744835,
+      "Kind": "road",
+      "Name": "Derby Road"
+    },
+    {
+      "SMetres": 184763.03641747512,
+      "WidthM": 12.5,
+      "SkewDeg": -28.331295,
+      "Kind": "road",
+      "Name": "Stanton Road"
+    },
+    {
+      "SMetres": 185361.0653171605,
+      "WidthM": 12.5,
+      "SkewDeg": -0.7721118,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 187604.79608104372,
+      "WidthM": 18,
+      "SkewDeg": -29.622534,
+      "Kind": "road",
+      "Name": "Stapleford Road"
+    },
+    {
+      "SMetres": 187714.94398058325,
+      "WidthM": 17.6,
+      "SkewDeg": -17.583536,
+      "Kind": "rail",
+      "Name": "Mansfield Junction to Trowell Junction Line"
+    },
+    {
+      "SMetres": 189204.98070969293,
+      "WidthM": 5.5,
+      "SkewDeg": -0.7299755,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 189538.332018662,
+      "WidthM": 12.5,
+      "SkewDeg": -1.697085,
+      "Kind": "road",
+      "Name": "Waterloo Lane"
+    },
+    {
+      "SMetres": 191091.99593404683,
+      "WidthM": 12.5,
+      "SkewDeg": -14.520282,
+      "Kind": "road",
+      "Name": "Robinettes Lane"
+    },
+    {
+      "SMetres": 191718.32433986105,
+      "WidthM": 12.5,
+      "SkewDeg": -1.225155,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 192075.40101001246,
+      "WidthM": 12.5,
+      "SkewDeg": -0.21018586,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 195009.7544980016,
+      "WidthM": 12.5,
+      "SkewDeg": -0.51894087,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 195348.690447897,
+      "WidthM": 12.5,
+      "SkewDeg": -2.808328,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 196152.38484484758,
+      "WidthM": 12.5,
+      "SkewDeg": -13.724846,
+      "Kind": "road",
+      "Name": "Long Lane"
+    },
+    {
+      "SMetres": 197590.6648249742,
+      "WidthM": 12.5,
+      "SkewDeg": -6.9221783,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 197983.7431466874,
+      "WidthM": 12.5,
+      "SkewDeg": -0.263609,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 198796.3214023948,
+      "WidthM": 5.5,
+      "SkewDeg": -0.15328912,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 200995.6884182812,
+      "WidthM": 12.5,
+      "SkewDeg": -20.516825,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 201873.30394424647,
+      "WidthM": 18,
+      "SkewDeg": -18.18672,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 201991.7808757849,
+      "WidthM": 18,
+      "SkewDeg": -18.690434,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 202725.8549475619,
+      "WidthM": 12.5,
+      "SkewDeg": -0.80845654,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 203340.2373401801,
+      "WidthM": 12.5,
+      "SkewDeg": -20.4859,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 204536.61816326756,
+      "WidthM": 12.5,
+      "SkewDeg": -19.74831,
+      "Kind": "road",
+      "Name": "Park Lane"
+    },
+    {
+      "SMetres": 207490.38791006294,
+      "WidthM": 18,
+      "SkewDeg": -3.8482025,
+      "Kind": "road",
+      "Name": "Pinxton Interchange"
+    },
+    {
+      "SMetres": 207661.0335132424,
+      "WidthM": 18,
+      "SkewDeg": -1.9742755,
+      "Kind": "road",
+      "Name": "Pinxton Interchange"
+    },
+    {
+      "SMetres": 207894.213223088,
+      "WidthM": 5.5,
+      "SkewDeg": -1.0817882,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 208228.22156295954,
+      "WidthM": 12.5,
+      "SkewDeg": -1.9573828,
+      "Kind": "road",
+      "Name": "Ball Hill"
+    },
+    {
+      "SMetres": 208550.25128153883,
+      "WidthM": 5.5,
+      "SkewDeg": -4.606862,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 208913.0173607854,
+      "WidthM": 12.5,
+      "SkewDeg": -0.5894732,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 210942.8299790398,
+      "WidthM": 12.5,
+      "SkewDeg": -1.8410856,
+      "Kind": "road",
+      "Name": "Red Barn Lane"
+    },
+    {
+      "SMetres": 211595.70814597825,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Newtonwood Lane"
+    },
+    {
+      "SMetres": 212016.44404590674,
+      "WidthM": 12.5,
+      "SkewDeg": -10.058634,
+      "Kind": "road",
+      "Name": "Saw Pit Lane"
+    },
+    {
+      "SMetres": 212855.51557030863,
+      "WidthM": 12.5,
+      "SkewDeg": -0.5303239,
+      "Kind": "road",
+      "Name": "Mansfield Road"
+    },
+    {
+      "SMetres": 214868.40917427503,
+      "WidthM": 12.5,
+      "SkewDeg": -2.8390858,
+      "Kind": "road",
+      "Name": "Deep Lane"
+    },
+    {
+      "SMetres": 218484.36734224882,
+      "WidthM": 21.3,
+      "SkewDeg": -25.664867,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 218641.00720685694,
+      "WidthM": 16.3,
+      "SkewDeg": -26.009712,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 220636.65761166552,
+      "WidthM": 12.5,
+      "SkewDeg": -17.190119,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 222996.04114333648,
+      "WidthM": 18,
+      "SkewDeg": -1.9862098,
+      "Kind": "road",
+      "Name": "Chesterfield Road"
+    },
+    {
+      "SMetres": 225495.4036029618,
+      "WidthM": 12.5,
+      "SkewDeg": -1.2260349,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 226117.37118741707,
+      "WidthM": 12.5,
+      "SkewDeg": -2.80984,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 228072.37790568842,
+      "WidthM": 5.5,
+      "SkewDeg": -0.1341995,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 228552.3948690451,
+      "WidthM": 28,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Worksop Road"
+    },
+    {
+      "SMetres": 229199.07292640986,
+      "WidthM": 18,
+      "SkewDeg": -0.24497098,
+      "Kind": "road",
+      "Name": "Barlborough Interchange"
+    },
+    {
+      "SMetres": 229294.3606782752,
+      "WidthM": 18,
+      "SkewDeg": -0.41300008,
+      "Kind": "road",
+      "Name": "Barlborough Interchange"
+    },
+    {
+      "SMetres": 229604.39880192943,
+      "WidthM": 12.5,
+      "SkewDeg": -1.130083,
+      "Kind": "road",
+      "Name": "Sheffield Road"
+    },
+    {
+      "SMetres": 231402.56122613113,
+      "WidthM": 5.5,
+      "SkewDeg": -0.7419717,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 232608.16915980494,
+      "WidthM": 5.5,
+      "SkewDeg": -0.41255707,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 235568.4470138755,
+      "WidthM": 12.5,
+      "SkewDeg": -10.646516,
+      "Kind": "road",
+      "Name": "School Road"
+    },
+    {
+      "SMetres": 236822.1814774408,
+      "WidthM": 12.5,
+      "SkewDeg": -0.6218482,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 237899.0794728159,
+      "WidthM": 18,
+      "SkewDeg": -1.8009224,
+      "Kind": "road",
+      "Name": "Aston Interchange"
+    },
+    {
+      "SMetres": 238054.0037315119,
+      "WidthM": 21.3,
+      "SkewDeg": -1.4089601,
+      "Kind": "road",
+      "Name": "Aston Interchange"
+    },
+    {
+      "SMetres": 239151.80190697932,
+      "WidthM": 12.5,
+      "SkewDeg": -1.1613379,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 240618.51844399216,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "M18"
+    },
+    {
+      "SMetres": 240921.91556085963,
+      "WidthM": 12.5,
+      "SkewDeg": -5.852975,
+      "Kind": "road",
+      "Name": "Brampton Lane"
+    },
+    {
+      "SMetres": 242213.30771427983,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Field Lane"
+    },
+    {
+      "SMetres": 243365.39790718653,
+      "WidthM": 12.5,
+      "SkewDeg": -0.39203873,
+      "Kind": "road",
+      "Name": "Doles Lane"
+    },
+    {
+      "SMetres": 244400.79966272417,
+      "WidthM": 21.3,
+      "SkewDeg": -27.507877,
+      "Kind": "road",
+      "Name": "Pleasley Road"
+    },
+    {
+      "SMetres": 245974.67368077397,
+      "WidthM": 18,
+      "SkewDeg": -1.0131831,
+      "Kind": "road",
+      "Name": "Catcliffe Roundabout"
+    },
+    {
+      "SMetres": 246113.2526999569,
+      "WidthM": 18,
+      "SkewDeg": -0.305114,
+      "Kind": "road",
+      "Name": "Catcliffe Roundabout"
+    },
+    {
+      "SMetres": 252058.236294187,
+      "WidthM": 5.5,
+      "SkewDeg": -0.6109011,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 254891.47074205434,
+      "WidthM": 12.5,
+      "SkewDeg": -0.7881785,
+      "Kind": "road",
+      "Name": "Jumble Lane"
+    },
+    {
+      "SMetres": 255259.78428201706,
+      "WidthM": 5.5,
+      "SkewDeg": -0.41065642,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 255869.15741676293,
+      "WidthM": 18,
+      "SkewDeg": -0.599175,
+      "Kind": "road",
+      "Name": "Thorpe Hesley Interchange"
+    },
+    {
+      "SMetres": 255988.51367897273,
+      "WidthM": 21.3,
+      "SkewDeg": -0.08202632,
+      "Kind": "road",
+      "Name": "Thorpe Hesley Interchange"
+    },
+    {
+      "SMetres": 258045.19660245974,
+      "WidthM": 18,
+      "SkewDeg": -22.580494,
+      "Kind": "road",
+      "Name": "White Lane"
+    },
+    {
+      "SMetres": 260675.4005917208,
+      "WidthM": 12.5,
+      "SkewDeg": -8.287741,
+      "Kind": "road",
+      "Name": "Tankersley Lane"
+    },
+    {
+      "SMetres": 260834.43261270405,
+      "WidthM": 18,
+      "SkewDeg": -1.3161943,
+      "Kind": "road",
+      "Name": "Birdwell Interchange"
+    },
+    {
+      "SMetres": 260940.2792726518,
+      "WidthM": 18,
+      "SkewDeg": -1.8945726,
+      "Kind": "road",
+      "Name": "Birdwell Interchange"
+    },
+    {
+      "SMetres": 261132.91422290457,
+      "WidthM": 5.5,
+      "SkewDeg": -0.7382049,
+      "Kind": "foot",
+      "Name": "Tank Top Bridge"
+    },
+    {
+      "SMetres": 262108.34988304257,
+      "WidthM": 12.5,
+      "SkewDeg": -11.349725,
+      "Kind": "road",
+      "Name": "Pilley Lane"
+    },
+    {
+      "SMetres": 262225.51115002873,
+      "WidthM": 5.5,
+      "SkewDeg": -35,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 264094.228298475,
+      "WidthM": 12.5,
+      "SkewDeg": -0.017265577,
+      "Kind": "road",
+      "Name": "Old Hall Road"
+    },
+    {
+      "SMetres": 265555.0454729589,
+      "WidthM": 5.5,
+      "SkewDeg": -3.0994048,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 265926.7860929911,
+      "WidthM": 5.5,
+      "SkewDeg": -35,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 266333.94280432945,
+      "WidthM": 12.5,
+      "SkewDeg": -2.24659,
+      "Kind": "road",
+      "Name": "Keresforth Hill Road"
+    },
+    {
+      "SMetres": 266559.3302533568,
+      "WidthM": 5.5,
+      "SkewDeg": -1.0382708,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 267504.06705711415,
+      "WidthM": 18,
+      "SkewDeg": -2.4279187,
+      "Kind": "road",
+      "Name": "Dodworth Interchange"
+    },
+    {
+      "SMetres": 267604.8279741076,
+      "WidthM": 18,
+      "SkewDeg": -4.415537,
+      "Kind": "road",
+      "Name": "Dodworth Interchange"
+    },
+    {
+      "SMetres": 267703.8506243852,
+      "WidthM": 11,
+      "SkewDeg": -6.754241,
+      "Kind": "rail",
+      "Name": "Penistone Line"
+    },
+    {
+      "SMetres": 268647.33307071263,
+      "WidthM": 12.5,
+      "SkewDeg": -33.868774,
+      "Kind": "road",
+      "Name": "Higham Common Road"
+    },
+    {
+      "SMetres": 271692.3170714293,
+      "WidthM": 12.5,
+      "SkewDeg": -7.0195,
+      "Kind": "road",
+      "Name": "Bence Lane"
+    },
+    {
+      "SMetres": 272163.5463842322,
+      "WidthM": 12.5,
+      "SkewDeg": -28.523834,
+      "Kind": "road",
+      "Name": "Churchfield Lane"
+    },
+    {
+      "SMetres": 272399.6275110352,
+      "WidthM": 18,
+      "SkewDeg": -34.528473,
+      "Kind": "road",
+      "Name": "Huddersfield Road"
+    },
+    {
+      "SMetres": 276504.3907706924,
+      "WidthM": 12.5,
+      "SkewDeg": -6.904941,
+      "Kind": "road",
+      "Name": "Bramley Lane"
+    },
+    {
+      "SMetres": 277726.67552234844,
+      "WidthM": 12.5,
+      "SkewDeg": -33.97614,
+      "Kind": "road",
+      "Name": "Dennington Lane"
+    },
+    {
+      "SMetres": 278909.04526940716,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Cliff Road"
+    },
+    {
+      "SMetres": 282472.9525130265,
+      "WidthM": 5.5,
+      "SkewDeg": -0.19707988,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 284391.93074431387,
+      "WidthM": 18,
+      "SkewDeg": -10.360277,
+      "Kind": "road",
+      "Name": "Flushdyke Interchange"
+    },
+    {
+      "SMetres": 284518.7853704537,
+      "WidthM": 18,
+      "SkewDeg": -10.3560915,
+      "Kind": "road",
+      "Name": "Flushdyke Interchange"
+    },
+    {
+      "SMetres": 285151.46737991227,
+      "WidthM": 12.5,
+      "SkewDeg": -0.7383099,
+      "Kind": "road",
+      "Name": "Park Mill Lane"
+    },
+    {
+      "SMetres": 286650.51556634053,
+      "WidthM": 12.5,
+      "SkewDeg": -26.518377,
+      "Kind": "road",
+      "Name": "Batley Road"
+    },
+    {
+      "SMetres": 286815.9081825761,
+      "WidthM": 5.5,
+      "SkewDeg": -0.19991907,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 288532.2853464687,
+      "WidthM": 18,
+      "SkewDeg": -0.82392186,
+      "Kind": "road",
+      "Name": "Carrgate Interchange"
+    },
+    {
+      "SMetres": 288651.3554251195,
+      "WidthM": 21.3,
+      "SkewDeg": -0.34586287,
+      "Kind": "road",
+      "Name": "Carrgate Interchange"
+    },
+    {
+      "SMetres": 289198.53017093614,
+      "WidthM": 5.5,
+      "SkewDeg": -1.1252706,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 290801.7598626349,
+      "WidthM": 12.5,
+      "SkewDeg": -2.1283004,
+      "Kind": "road",
+      "Name": "Lofthouse Interchange"
+    },
+    {
+      "SMetres": 290908.7783089323,
+      "WidthM": 20,
+      "SkewDeg": -4.9849987,
+      "Kind": "road",
+      "Name": "M62"
+    },
+    {
+      "SMetres": 291034.26839168847,
+      "WidthM": 20,
+      "SkewDeg": -2.0906825,
+      "Kind": "road",
+      "Name": "Lofthouse Interchange"
+    },
+    {
+      "SMetres": 292454.93311611144,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Sharp Lane"
+    },
+    {
+      "SMetres": 294589.0670413982,
+      "WidthM": 18,
+      "SkewDeg": -2.1842406,
+      "Kind": "road",
+      "Name": "Wakefield Road"
+    },
+    {
+      "SMetres": 295563.4749408818,
+      "WidthM": 28,
+      "SkewDeg": -2.4846272,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 297667.2038808414,
+      "WidthM": 18,
+      "SkewDeg": -1.0937165,
+      "Kind": "road",
+      "Name": "East Leeds Link Interchange"
+    },
+    {
+      "SMetres": 297763.72787859535,
+      "WidthM": 16.3,
+      "SkewDeg": -1.7554188,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 299758.8348027113,
+      "WidthM": 12.5,
+      "SkewDeg": -1.8398485,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 300367.29335398995,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "Bullerthorpe Lane"
+    },
+    {
+      "SMetres": 300841.2919007909,
+      "WidthM": 12.5,
+      "SkewDeg": -1.8973645,
+      "Kind": "road",
+      "Name": ""
+    },
+    {
+      "SMetres": 302053.3730615686,
+      "WidthM": 16.3,
+      "SkewDeg": -13.671876,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 302197.2028527508,
+      "WidthM": 21.3,
+      "SkewDeg": -9.055266,
+      "Kind": "road",
+      "Name": "Austhorpe Interchange"
+    },
+    {
+      "SMetres": 303387.0805348535,
+      "WidthM": 5.5,
+      "SkewDeg": -0.19316857,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 305060.71872497635,
+      "WidthM": 12.5,
+      "SkewDeg": -20.23188,
+      "Kind": "road",
+      "Name": "Barwick Road"
+    },
+    {
+      "SMetres": 305437.0071871345,
+      "WidthM": 5.5,
+      "SkewDeg": -0.27225396,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 306857.3801547083,
+      "WidthM": 16.3,
+      "SkewDeg": -0.14927593,
+      "Kind": "foot",
+      "Name": ""
+    },
+    {
+      "SMetres": 306999.9355028995,
+      "WidthM": 21.3,
+      "SkewDeg": -0.585299,
+      "Kind": "road",
+      "Name": "Parlington Interchange"
+    },
+    {
+      "SMetres": 308256.2698347348,
+      "WidthM": 12.5,
+      "SkewDeg": -3.7721379,
+      "Kind": "road",
+      "Name": "Great North Road"
+    },
+    {
+      "SMetres": 308424.96052997233,
+      "WidthM": 12.5,
+      "SkewDeg": -35,
+      "Kind": "road",
+      "Name": "A1(M)"
+    }
+  ],
+  "skyline": [
+    {
+      "SMetres": 0,
+      "LateralM": 373.73392,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 437.66995,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 438.26495,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 426.66046,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 253.80247,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 317.11578,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 321.6101,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 264.92245,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 294.03128,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 363.77444,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 333.15887,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 474.1765,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 421.16748,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 369.59583,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 470.99445,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 363.54398,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 429.3263,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 513.7529,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 390.09277,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 324.1366,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 292.51364,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 272.92194,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 242.38144,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 268.9474,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 618.6415,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 116.4627,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 467.29465,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 0,
+      "LateralM": 314.74142,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 3481.99979612416,
+      "LateralM": 2133.8086,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 3832.2382251317676,
+      "LateralM": -102.29563,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 6370.2912341851725,
+      "LateralM": -1420.9866,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 6736.739384473742,
+      "LateralM": -797.2788,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 7040.743565820359,
+      "LateralM": -794.89874,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 7755.955178800173,
+      "LateralM": 55.6682,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 7833.9847315820125,
+      "LateralM": -60.9596,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 7900.417568622742,
+      "LateralM": -118.144585,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 7965.918897440139,
+      "LateralM": -63.041924,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 8013.661894146573,
+      "LateralM": -237.92583,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 8039.957719543019,
+      "LateralM": 50.145046,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 8414.124414756177,
+      "LateralM": -315.5713,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 8925.51284977311,
+      "LateralM": -227.78152,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 9293.624546489342,
+      "LateralM": -147.31741,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 9586.126388179262,
+      "LateralM": -83.48875,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 9892.931990410438,
+      "LateralM": -49.02276,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 10224.72274985198,
+      "LateralM": 219.54572,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 10611.923995816154,
+      "LateralM": 356.50995,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 11016.68776065887,
+      "LateralM": 439.60745,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 11457.981340121323,
+      "LateralM": 415.22986,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 11861.185461525938,
+      "LateralM": 171.24164,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 12000.039418583223,
+      "LateralM": -2276.066,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 12178.032288704773,
+      "LateralM": 193.33186,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 12203.301088061942,
+      "LateralM": -1006.4628,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 12641.24249763544,
+      "LateralM": 250.35045,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 12941.21447995984,
+      "LateralM": 153.06494,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 13230.052066642733,
+      "LateralM": 260.50262,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 13265.170911278636,
+      "LateralM": -668.47876,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 13568.669335381543,
+      "LateralM": 280.6038,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 13877.446420756976,
+      "LateralM": 314.43787,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 14335.448168493305,
+      "LateralM": 207.10448,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 14622.406991466918,
+      "LateralM": 796.7266,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 15050.792279123436,
+      "LateralM": 113.08914,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 15308.558841604156,
+      "LateralM": -53.03747,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 15454.123083934279,
+      "LateralM": 1080.7786,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 15613.08162614957,
+      "LateralM": -44.912296,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 15811.7899650841,
+      "LateralM": 1453.0087,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 16073.995565055764,
+      "LateralM": -88.82945,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 16535.143840206,
+      "LateralM": -797.9508,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 16845.940057434545,
+      "LateralM": -106.32758,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 17247.74544655514,
+      "LateralM": -609.3848,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 17559.223815601938,
+      "LateralM": -575.9224,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 17807.89845543389,
+      "LateralM": -1109.883,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 18013.250310489617,
+      "LateralM": -391.10654,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 18041.526359977168,
+      "LateralM": -878.14075,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 18456.98920901215,
+      "LateralM": -228.58223,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 18950.694445459965,
+      "LateralM": -201.17465,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 19429.56598289182,
+      "LateralM": -228.40285,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 19937.327341340482,
+      "LateralM": -131.77155,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 20778.628291624562,
+      "LateralM": -43.57771,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 20815.97225074974,
+      "LateralM": 1086.1759,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 21099.534926605313,
+      "LateralM": -70.72937,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 22078.201741974808,
+      "LateralM": -128.94196,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 22138.827871198133,
+      "LateralM": 918.4852,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 22452.884874215724,
+      "LateralM": -315.3997,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 22601.737852243616,
+      "LateralM": -845.12366,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 22739.813791374072,
+      "LateralM": -197.70447,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 22817.92862767173,
+      "LateralM": 631.7183,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 23337.606950732694,
+      "LateralM": -91.6124,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 23528.31685450173,
+      "LateralM": 375.71417,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 23852.37211660138,
+      "LateralM": -117.31516,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 23854.11833316294,
+      "LateralM": 252.25537,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 23886.95503953916,
+      "LateralM": 590.52814,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 24145.104782540282,
+      "LateralM": 123.60015,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 24149.766602470467,
+      "LateralM": -150.0119,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 24594.346120054593,
+      "LateralM": 51.179058,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 24715.451131728016,
+      "LateralM": -129.75107,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 25006.13516892097,
+      "LateralM": -57.278965,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 25049.635861000006,
+      "LateralM": 139.26935,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 25334.503181344724,
+      "LateralM": 174.872,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 25349.509879130565,
+      "LateralM": -2358.436,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 25687.94426422575,
+      "LateralM": 407.83823,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 25831.809520293406,
+      "LateralM": -636.3833,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 26015.503624484852,
+      "LateralM": 506.30157,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 26330.458527966995,
+      "LateralM": 718.7381,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 26642.269049671566,
+      "LateralM": 857.1352,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 26898.745171954328,
+      "LateralM": -1373.823,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 27010.208489069515,
+      "LateralM": 654.8553,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 27382.251161448956,
+      "LateralM": 924.53534,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 27384.18254598657,
+      "LateralM": -1431.6951,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 27405.68156355488,
+      "LateralM": -1434.456,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 27664.092478083458,
+      "LateralM": -541.1393,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 27677.326393037896,
+      "LateralM": 537.4109,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 27968.181043231187,
+      "LateralM": 389.7552,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 28163.95759842389,
+      "LateralM": -1536.0948,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 28338.44276734602,
+      "LateralM": 116.81017,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 28584.208711125437,
+      "LateralM": -69.66491,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 28761.93903131422,
+      "LateralM": 133.90178,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 28771.830625791907,
+      "LateralM": 568.1916,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 28874.06169761585,
+      "LateralM": -288.33566,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 29247.845384257835,
+      "LateralM": 405.30997,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 29407.85201719487,
+      "LateralM": -686.2288,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 30005.47095171907,
+      "LateralM": 185.75346,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 30734.554855741128,
+      "LateralM": 62.917187,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 31285.26848112778,
+      "LateralM": 70.485985,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 31418.491046321997,
+      "LateralM": -780.4298,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 31701.86774976735,
+      "LateralM": 62.438156,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 32163.647081700223,
+      "LateralM": 69.00081,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 32163.88147962047,
+      "LateralM": -120.44859,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 32632.826902880344,
+      "LateralM": 73.67716,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 33157.95861806813,
+      "LateralM": 81.479576,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 33666.21163176788,
+      "LateralM": 83.40416,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 34187.33501379734,
+      "LateralM": 77.61127,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 34521.785626109835,
+      "LateralM": 74.018005,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 34782.9940337149,
+      "LateralM": 1678.195,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 35071.122537067924,
+      "LateralM": 70.31783,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 35403.45885033194,
+      "LateralM": 68.31294,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 36176.733835637795,
+      "LateralM": 60.034187,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 36687.99412481841,
+      "LateralM": 56.987198,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 37189.48827601022,
+      "LateralM": 72.0256,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 37502.853098774955,
+      "LateralM": 83.70778,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 37808.33711802302,
+      "LateralM": 93.33108,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 38200.370529119486,
+      "LateralM": 322.01138,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 38492.23331923113,
+      "LateralM": 106.288315,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 38549.79411373464,
+      "LateralM": 1374.1404,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 38579.73255961778,
+      "LateralM": -74.50083,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 38592.77564390006,
+      "LateralM": 1364.3645,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 38833.598460089495,
+      "LateralM": 60.830368,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 38862.1984653308,
+      "LateralM": -437.9342,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 39131.036723579266,
+      "LateralM": 54.873806,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 39142.47780046601,
+      "LateralM": -839.3146,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 39922.952167360105,
+      "LateralM": 1542.0793,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 39946.02965748584,
+      "LateralM": 681.0536,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 40008.113182447094,
+      "LateralM": -81.25999,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 40133.29078471274,
+      "LateralM": 1802.8693,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 40296.6340209425,
+      "LateralM": -123.633835,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 40380.38455482609,
+      "LateralM": 2020.6646,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 40422.122373881844,
+      "LateralM": 1764.942,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 40463.00731131659,
+      "LateralM": 169.68504,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 40602.90632711773,
+      "LateralM": 1622.7306,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 40631.01624130672,
+      "LateralM": 996.51196,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 40718.1737512578,
+      "LateralM": -51.403896,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 40956.00404754693,
+      "LateralM": 648.39655,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 41033.7829097222,
+      "LateralM": -652.9852,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 41356.52480262038,
+      "LateralM": -180.84991,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 41831.00447671767,
+      "LateralM": -139.53185,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 42356.89126975715,
+      "LateralM": -72.13743,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 42901.26324998689,
+      "LateralM": -1586.7615,
+      "Kind": "mast",
+      "HeightM": 69
+    },
+    {
+      "SMetres": 43078.11019974145,
+      "LateralM": -67.28004,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 43736.69092572496,
+      "LateralM": -93.39834,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 44090.31971402156,
+      "LateralM": -192.22496,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 44745.03828552189,
+      "LateralM": -121.39703,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 45491.6596458063,
+      "LateralM": -314.2427,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 45842.706288835434,
+      "LateralM": -923.29596,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 46210.60873032592,
+      "LateralM": -880.05914,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 46591.6336084251,
+      "LateralM": -831.595,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 46912.2450800792,
+      "LateralM": -791.56415,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 47274.27363045621,
+      "LateralM": -747.8995,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 47581.58147088899,
+      "LateralM": -709.8513,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 48143.036518718545,
+      "LateralM": -725.80273,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 48308.59214081728,
+      "LateralM": 249.93925,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 48469.54971016226,
+      "LateralM": -201.7929,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 48712.36162980077,
+      "LateralM": 183.1462,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 48832.854240066896,
+      "LateralM": -262.12357,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 49029.44512282715,
+      "LateralM": 67.42296,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 49334.13254106092,
+      "LateralM": -344.6221,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 49388.881075910875,
+      "LateralM": 144.3124,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 49783.16257634435,
+      "LateralM": 48.158146,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 49968.95756472,
+      "LateralM": -352.86063,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 50068.87858037669,
+      "LateralM": 137.7635,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 50295.79192066213,
+      "LateralM": -309.77863,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 50339.74128052714,
+      "LateralM": -93.94215,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 50415.78521023465,
+      "LateralM": 676.65643,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 50596.3107197272,
+      "LateralM": -238.45071,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 50759.47172672385,
+      "LateralM": 1043.5854,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 50888.43856406027,
+      "LateralM": -134.43094,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 51248.352537538274,
+      "LateralM": 912.13556,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 51444.57147487634,
+      "LateralM": -2213.0928,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 51632.35371871244,
+      "LateralM": 203.9342,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 52175.623905132816,
+      "LateralM": 335.64047,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 52732.22109902886,
+      "LateralM": 375.00745,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 53021.70581895206,
+      "LateralM": 356.8111,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 53324.713241229474,
+      "LateralM": 315.11057,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 53350.67867858258,
+      "LateralM": -361.6662,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 53774.59003130847,
+      "LateralM": 1075.0371,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 54057.50810457641,
+      "LateralM": 917.1216,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 54131.74379607829,
+      "LateralM": 58.517048,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 54395.331200953246,
+      "LateralM": 118.07949,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 54777.03090687399,
+      "LateralM": 758.21045,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 55070.23479767513,
+      "LateralM": 174.41014,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 55425.50672158608,
+      "LateralM": 795.1116,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 55742.864241553594,
+      "LateralM": 1023.13715,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 56268.60989306611,
+      "LateralM": 72.84893,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 56582.93116043867,
+      "LateralM": 64.7259,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 56873.01630722586,
+      "LateralM": 57.85232,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 57196.53038784742,
+      "LateralM": 51.87203,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 57474.157966861385,
+      "LateralM": 105.78976,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 57793.30927678332,
+      "LateralM": 62.65069,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 58221.3822897778,
+      "LateralM": 147.0147,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 58651.022190539254,
+      "LateralM": 296.7221,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 58758.56006829229,
+      "LateralM": 101.18453,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 58971.09350714909,
+      "LateralM": 2268.2034,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 59024.95085246123,
+      "LateralM": 502.71384,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 59408.009478434724,
+      "LateralM": 808.18097,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 62036.6327642995,
+      "LateralM": 1484.7814,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 62081.525795042966,
+      "LateralM": -238.38683,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 63715.61677861487,
+      "LateralM": 54.86412,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 66712.38006905289,
+      "LateralM": -1763.4106,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 66850.64958001908,
+      "LateralM": -1806.4764,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 67869.80043782471,
+      "LateralM": -2077.5034,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 68184.72256658922,
+      "LateralM": -44.412323,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 68195.07985898509,
+      "LateralM": -64.622215,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 68244.98034562262,
+      "LateralM": -1672.8406,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 68632.94588162018,
+      "LateralM": -1994.55,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 68636.1584049062,
+      "LateralM": 1440.5695,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 68782.72151049845,
+      "LateralM": -598.1263,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 73005.34788682144,
+      "LateralM": 49.841305,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 73755.28939490675,
+      "LateralM": -77.59017,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 77069.8457619002,
+      "LateralM": 49.538857,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 77118.23264727925,
+      "LateralM": 47.931644,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 77138.51715498799,
+      "LateralM": 46.108814,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 78657.64597579962,
+      "LateralM": -1312.631,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 81368.95947956611,
+      "LateralM": 111.32758,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 85337.09084650555,
+      "LateralM": -747.4142,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 85631.06841998533,
+      "LateralM": -457.414,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 86000.49249419951,
+      "LateralM": -162.10434,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 86339.44470001844,
+      "LateralM": -60.11981,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 88848.31739033207,
+      "LateralM": -1821.2717,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 89084.79787328375,
+      "LateralM": 319.3762,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 90178.11301126475,
+      "LateralM": 1216.5486,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 90749.16254378439,
+      "LateralM": 61.895603,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 100541.18468388374,
+      "LateralM": -909.6343,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 100846.40620284645,
+      "LateralM": -430.2364,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 101325.6628517504,
+      "LateralM": 186.7461,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 101777.47155477639,
+      "LateralM": 47.25162,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 101870.81464284913,
+      "LateralM": 793.622,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 106992.52083773185,
+      "LateralM": 46.26388,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 108627.92656073863,
+      "LateralM": 696.39526,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 109566.09962979045,
+      "LateralM": 1490.6586,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 109949.91096833032,
+      "LateralM": -190.06378,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 110079.83412728673,
+      "LateralM": 1441.9238,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 110597.88266819362,
+      "LateralM": 60.48101,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 110707.64964567064,
+      "LateralM": 923.5268,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 110834.08036399756,
+      "LateralM": 107.15165,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 112002.24947046835,
+      "LateralM": -957.3521,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 112487.04765766792,
+      "LateralM": -674.44995,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 113034.79577337259,
+      "LateralM": -387.91467,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 113606.01830876629,
+      "LateralM": -150.4586,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 113720.94529996114,
+      "LateralM": -48.781536,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 114157.97015041289,
+      "LateralM": 89.5316,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 114707.4871668135,
+      "LateralM": 328.97504,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 115031.61711063725,
+      "LateralM": 454.2384,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 115604.45019325713,
+      "LateralM": 604.75385,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 115617.002064373,
+      "LateralM": -195.07361,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 115929.86081221966,
+      "LateralM": 639.67896,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 116231.20604142846,
+      "LateralM": 659.37885,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 116501.93586449987,
+      "LateralM": -256.6296,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 116741.73929769754,
+      "LateralM": 717.5212,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 116938.20127971782,
+      "LateralM": -916.1945,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 117287.39591698168,
+      "LateralM": 828.2599,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 117787.26122936804,
+      "LateralM": 956.3646,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 118054.28702726812,
+      "LateralM": 81.482605,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 118332.1066774221,
+      "LateralM": 668.5355,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 118370.15185070444,
+      "LateralM": 983.3559,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 118626.12060538378,
+      "LateralM": 782.9818,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 118675.4264169321,
+      "LateralM": 944.22217,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 118988.60725254273,
+      "LateralM": 905.4787,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 119003.19778457706,
+      "LateralM": 759.1089,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 119286.90321703668,
+      "LateralM": 867.7097,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 119403.43375500002,
+      "LateralM": 642.9842,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 119574.76730801238,
+      "LateralM": 844.86127,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 119867.53447021056,
+      "LateralM": 839.4277,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 120387.37450953935,
+      "LateralM": 588.26385,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 120802.4577408845,
+      "LateralM": 73.163765,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 120832.11445261567,
+      "LateralM": 750.6775,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 120981.14707663746,
+      "LateralM": -148.56348,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 121284.16518580866,
+      "LateralM": -968.8505,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 123258.10474206237,
+      "LateralM": 1498.6782,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 127966.7257973253,
+      "LateralM": 986.6768,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 128573.68006405787,
+      "LateralM": 804.7762,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 129033.91863869077,
+      "LateralM": 624.7884,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 129385.98300544465,
+      "LateralM": 427.7297,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 129880.20139411486,
+      "LateralM": 132.72424,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 130252.81380120675,
+      "LateralM": -65.36033,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 130870.72143651161,
+      "LateralM": -189.68805,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 131259.97939846953,
+      "LateralM": -167.93025,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 131561.4257611695,
+      "LateralM": -151.67953,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 132220.52677342354,
+      "LateralM": -132.8716,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 132583.04070262043,
+      "LateralM": -154.06406,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 132846.00829504797,
+      "LateralM": 716.1221,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 133040.39097485098,
+      "LateralM": -428.80267,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 133337.48569654766,
+      "LateralM": -1033.6553,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 135302.8624712613,
+      "LateralM": -112.31692,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 144767.16466464035,
+      "LateralM": 1044.5812,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 144904.80130976788,
+      "LateralM": -94.04763,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 145191.69875589284,
+      "LateralM": -772.19855,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 146118.21784401347,
+      "LateralM": 1807.9916,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 147019.85549690458,
+      "LateralM": -138.31999,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 148102.44284524815,
+      "LateralM": 2106.3413,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 149525.3806647819,
+      "LateralM": 2174.7566,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 150101.80114537012,
+      "LateralM": 760.1918,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 150239.32183844893,
+      "LateralM": -244.14563,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 155247.75945566103,
+      "LateralM": 698.40857,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 159294.4940508488,
+      "LateralM": 597.80865,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 159499.26557714885,
+      "LateralM": -1893.6375,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 159507.38232803487,
+      "LateralM": 434.23718,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 159724.5294147136,
+      "LateralM": -729.6105,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 159876.96245095794,
+      "LateralM": -43.306644,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 160427.1885981171,
+      "LateralM": -702.6902,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 160825.9960323123,
+      "LateralM": -622.6788,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 161213.89056874285,
+      "LateralM": -495.8776,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 161527.94772931273,
+      "LateralM": -287.9245,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 162070.56882069603,
+      "LateralM": -120.01385,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 162391.21982219134,
+      "LateralM": -180.3086,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 162880.41410836176,
+      "LateralM": -364.41968,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 163391.71957135707,
+      "LateralM": -557.2587,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 163763.8031264319,
+      "LateralM": -666.6003,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 164110.75210420726,
+      "LateralM": -748.97943,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 164491.45776840206,
+      "LateralM": -805.5216,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 164877.37781056738,
+      "LateralM": -852.4438,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 165147.7323315077,
+      "LateralM": 1966.5581,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 165202.35029523564,
+      "LateralM": -717.8426,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 165748.82400355217,
+      "LateralM": -433.6585,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 166294.23508223647,
+      "LateralM": -61.653397,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 166461.60642806947,
+      "LateralM": 85.38529,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 167020.78959499724,
+      "LateralM": 399.05258,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 167544.2201170158,
+      "LateralM": 744.4843,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 167960.05119980656,
+      "LateralM": 1061.1078,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 169243.89265309536,
+      "LateralM": -309.2983,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172489.09005137216,
+      "LateralM": -2111.7395,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172497.54442178682,
+      "LateralM": -530.133,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172517.9734853282,
+      "LateralM": -2028.3469,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172566.95285582688,
+      "LateralM": -1879.3375,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172574.72649561442,
+      "LateralM": -2127.683,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172582.23966461417,
+      "LateralM": -1767.5941,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172612.99149329698,
+      "LateralM": -1676.7349,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172627.4326255684,
+      "LateralM": -2132.3247,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172632.62141977606,
+      "LateralM": -2171.2454,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172653.11141300955,
+      "LateralM": -2034.5199,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172683.45148836865,
+      "LateralM": -1940.2279,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172719.77426431657,
+      "LateralM": -1669.1558,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172729.30517176556,
+      "LateralM": -1807.5193,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172788.57934278387,
+      "LateralM": -1337.8552,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172797.55714427974,
+      "LateralM": -1439.5385,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172801.4095143513,
+      "LateralM": -1716.7821,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172816.99364230933,
+      "LateralM": -1258.2458,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172846.84205713292,
+      "LateralM": -1175.3167,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172852.9863480385,
+      "LateralM": -1456.4912,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172875.45387358993,
+      "LateralM": -1090.526,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172905.2300028219,
+      "LateralM": -1006.5953,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 172935.26307397775,
+      "LateralM": -922.15356,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 173066.2074034861,
+      "LateralM": -942.2096,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 174937.9118433661,
+      "LateralM": 926.064,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 175757.09589235918,
+      "LateralM": 832.38434,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 176103.7272427498,
+      "LateralM": 753.6239,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 176323.43457601964,
+      "LateralM": -44.109608,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 176453.3411023594,
+      "LateralM": 113.71761,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 176754.73827177886,
+      "LateralM": -440.17035,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 180313.74070028114,
+      "LateralM": 1866.8757,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 181131.88161581315,
+      "LateralM": 559.57526,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 181428.41875144004,
+      "LateralM": -149.18181,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 181641.30230223504,
+      "LateralM": 2062.1692,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 181887.27808723782,
+      "LateralM": 1330.2192,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 182430.30841596075,
+      "LateralM": -897.7282,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 182449.1486284815,
+      "LateralM": -890.9138,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 182945.34364016342,
+      "LateralM": -59.073154,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 183031.07695109872,
+      "LateralM": -56.889507,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 183464.4936647519,
+      "LateralM": 2321.838,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 183832.91987083855,
+      "LateralM": 1364.8069,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 183860.69349606705,
+      "LateralM": 1474.5153,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 184156.7103109824,
+      "LateralM": 827.0354,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 184311.76527740137,
+      "LateralM": 874.2098,
+      "Kind": "chimney",
+      "HeightM": 65
+    },
+    {
+      "SMetres": 184979.83577480356,
+      "LateralM": -1616.6827,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 185049.691216046,
+      "LateralM": -328.33936,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 185901.58254473537,
+      "LateralM": 59.016098,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 186410.15903336706,
+      "LateralM": 1740.6927,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 187002.86141810167,
+      "LateralM": 1250.1768,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 187010.88691145467,
+      "LateralM": 2247.8154,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 187108.8899749254,
+      "LateralM": 1424.3363,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 187742.86567696437,
+      "LateralM": -1154.3663,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 187969.92128992334,
+      "LateralM": 1416.2539,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 189311.9707035752,
+      "LateralM": 1607.279,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 189374.49442554193,
+      "LateralM": 1661.9813,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 189506.64775023673,
+      "LateralM": 75.72178,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 189572.1382245911,
+      "LateralM": -43.852623,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 189633.53195860804,
+      "LateralM": 1575.1699,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 191844.7237498604,
+      "LateralM": -850.7854,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 192065.53515693016,
+      "LateralM": -594.60144,
+      "Kind": "mast",
+      "HeightM": 45.7
+    },
+    {
+      "SMetres": 192950.6308062332,
+      "LateralM": 412.2609,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 192984.8810236189,
+      "LateralM": 1950.4537,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 193578.57153176508,
+      "LateralM": 2153.8796,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 194661.33748838372,
+      "LateralM": 1314.8104,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 195625.47619964104,
+      "LateralM": -946.26294,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 196209.139221159,
+      "LateralM": 157.98605,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 196892.28296554644,
+      "LateralM": 1430.0981,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 197489.8825104213,
+      "LateralM": -1730.7845,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 198351.98042441925,
+      "LateralM": 657.09814,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 199581.5899083114,
+      "LateralM": 114.58712,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 201790.8303573816,
+      "LateralM": 266.46045,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 202777.90488187698,
+      "LateralM": -254.75562,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 202836.50509281715,
+      "LateralM": 238.30869,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 203247.9960627749,
+      "LateralM": 1010.7781,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 204481.07101857086,
+      "LateralM": -43.20102,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 206512.46614069567,
+      "LateralM": -865.74243,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 206548.69861504677,
+      "LateralM": 1031.8121,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 206593.22449248694,
+      "LateralM": -933.8138,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 206605.28186703182,
+      "LateralM": -855.31195,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 206688.73862831475,
+      "LateralM": -921.8212,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 206697.48633898923,
+      "LateralM": -841.4435,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 206724.18193628208,
+      "LateralM": -907.1721,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 210230.80666500475,
+      "LateralM": 351.78577,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 210512.83154134743,
+      "LateralM": 912.7387,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 210929.9397801048,
+      "LateralM": 631.9311,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 211388.53637449146,
+      "LateralM": 705.7361,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 211761.28509700607,
+      "LateralM": 148.60391,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 211977.17550681753,
+      "LateralM": 794.2814,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 212273.1962811966,
+      "LateralM": 809.83234,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 212287.31581749447,
+      "LateralM": 625.7695,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 212599.59762234788,
+      "LateralM": 801.2955,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 213004.45601514666,
+      "LateralM": 755.4987,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 213394.19295908112,
+      "LateralM": 426.62875,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 213611.19205957543,
+      "LateralM": -251.03554,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 213861.14043334866,
+      "LateralM": -148.00151,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 214871.97987930753,
+      "LateralM": -115.59924,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 217395.99989932915,
+      "LateralM": 997.9449,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 217589.03453859926,
+      "LateralM": -1856.6216,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 217829.3877220104,
+      "LateralM": 285.7641,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 218094.8324872033,
+      "LateralM": -105.94256,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 218559.30668563722,
+      "LateralM": -353.7417,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 218865.29033963196,
+      "LateralM": -500.03134,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 219552.8528115136,
+      "LateralM": 1064.5679,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 219793.57787963518,
+      "LateralM": -65.38687,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 220091.37656267235,
+      "LateralM": -830.4192,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 221647.18013968633,
+      "LateralM": -1099.475,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 222067.20625034507,
+      "LateralM": -128.2852,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 222200.4998204534,
+      "LateralM": 86.69727,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 222491.30574010618,
+      "LateralM": 108.27209,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 222838.93395474946,
+      "LateralM": 103.697845,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 222919.44061389664,
+      "LateralM": 68.48155,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 223130.21916368787,
+      "LateralM": 90.061195,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 223472.24325502067,
+      "LateralM": 73.5962,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 223787.09144317431,
+      "LateralM": 80.238235,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 224132.38522321315,
+      "LateralM": 74.57624,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 224414.6056663479,
+      "LateralM": 81.43258,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 224991.32769324296,
+      "LateralM": 124.73329,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 225056.8219058866,
+      "LateralM": -2012.8982,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 225374.0626682297,
+      "LateralM": 161.01544,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 225690.87497026,
+      "LateralM": 156.83426,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 225767.9770133004,
+      "LateralM": 95.6395,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 226000.48570601194,
+      "LateralM": 127.87869,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 226320.65153398557,
+      "LateralM": 102.66855,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 226519.00019683287,
+      "LateralM": 112.66732,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 226992.21442084748,
+      "LateralM": 551.38617,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 227343.59496222532,
+      "LateralM": 1094.8707,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 232156.74416399014,
+      "LateralM": -297.47955,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 232176.95816973542,
+      "LateralM": -357.73697,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 233170.0725199831,
+      "LateralM": -53.409992,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 237228.3969489974,
+      "LateralM": 1447.9576,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 238493.3598490453,
+      "LateralM": -597.29535,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 238851.89059632175,
+      "LateralM": -2076.476,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 239012.31405972413,
+      "LateralM": -602.5408,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 239201.1962811764,
+      "LateralM": -748.3589,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 239429.89066467658,
+      "LateralM": -679.3995,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 239831.76722039268,
+      "LateralM": -353.54492,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 240231.649379492,
+      "LateralM": -706.4955,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 240662.17501425758,
+      "LateralM": -222.12656,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 240984.10797296272,
+      "LateralM": -654.6735,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 241874.55404897622,
+      "LateralM": 948.5003,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 242249.30669725908,
+      "LateralM": 509.60193,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 242747.531697145,
+      "LateralM": 230.91983,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 243166.58921894408,
+      "LateralM": 58.538544,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 243530.0325974947,
+      "LateralM": 119.73671,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 243550.82501203968,
+      "LateralM": 1824.6195,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 243620.09999773538,
+      "LateralM": -125.56859,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 243827.14009193657,
+      "LateralM": 55.28854,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 244050.40664821092,
+      "LateralM": -922.2402,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 244153.76584328647,
+      "LateralM": 75.643234,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 244475.58106186788,
+      "LateralM": 207.47678,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 244789.65559214307,
+      "LateralM": -1028.2072,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 244818.99273211925,
+      "LateralM": 370.27322,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 245123.2113799641,
+      "LateralM": 362.72418,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 245147.5118381508,
+      "LateralM": -353.42502,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 245418.45754721356,
+      "LateralM": 353.59842,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 245670.12321344818,
+      "LateralM": -888.15234,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 245731.68962957925,
+      "LateralM": 344.11972,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 245883.6206209666,
+      "LateralM": 2057.7131,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 245899.97745808898,
+      "LateralM": 2051.2224,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 246025.13912830278,
+      "LateralM": -174.29146,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 246034.98229521568,
+      "LateralM": 415.34674,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 246350.2094130388,
+      "LateralM": 113.16925,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 246628.90545270854,
+      "LateralM": -62.82412,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 247010.69276653824,
+      "LateralM": -62.23775,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 247623.4130155873,
+      "LateralM": -169.82913,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 248186.43060093487,
+      "LateralM": -349.76465,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 248470.29117282052,
+      "LateralM": -354.03436,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 248961.58826287603,
+      "LateralM": -488.9537,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 249370.74426043016,
+      "LateralM": 889.5825,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 249734.3739412228,
+      "LateralM": -1012.63513,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 249851.38783592315,
+      "LateralM": -1096.0009,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 250085.91284810344,
+      "LateralM": 1246.0743,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 250097.83955080342,
+      "LateralM": -279.14432,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 250594.5697142821,
+      "LateralM": -2026.2109,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 250917.0162241722,
+      "LateralM": 436.44455,
+      "Kind": "chimney",
+      "HeightM": 65
+    },
+    {
+      "SMetres": 250932.9629040541,
+      "LateralM": 135.32675,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 251198.42126642514,
+      "LateralM": -46.250683,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 251358.337919336,
+      "LateralM": 444.90366,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 251558.97887911228,
+      "LateralM": -266.27637,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 251639.8112338297,
+      "LateralM": 810.1592,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 252056.28977951585,
+      "LateralM": 954.3081,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 252276.80972236916,
+      "LateralM": 159.9697,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 252344.28662614626,
+      "LateralM": 679.9435,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 257141.643571167,
+      "LateralM": -434.36005,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 260090.82675456486,
+      "LateralM": -510.6404,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 260146.1603009457,
+      "LateralM": 888.5342,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 260291.3410469693,
+      "LateralM": -1121.1161,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 260325.0327354413,
+      "LateralM": -1125.0629,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 260676.6642461792,
+      "LateralM": -59.750626,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 260688.36802449502,
+      "LateralM": 1713.9069,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 261371.6745361475,
+      "LateralM": 152.4736,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 262245.5885334418,
+      "LateralM": 401.18356,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 262438.9924583918,
+      "LateralM": 476.4138,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 263815.2837607655,
+      "LateralM": -387.03424,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 264138.61493961455,
+      "LateralM": 1252.912,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 264146.5923349605,
+      "LateralM": 1224.8298,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 264174.6103100563,
+      "LateralM": 1236.7388,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 264179.4818557391,
+      "LateralM": 1210.4355,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 264839.52516786475,
+      "LateralM": 1820.1835,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 264866.1028703587,
+      "LateralM": 1812.164,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 264901.4948699325,
+      "LateralM": -273.4137,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 266483.39657096035,
+      "LateralM": 2009.4056,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 266907.68833426834,
+      "LateralM": 862.5119,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 267114.4511233806,
+      "LateralM": -842.1137,
+      "Kind": "chimney",
+      "HeightM": 65
+    },
+    {
+      "SMetres": 267340.90828808566,
+      "LateralM": 1829.44,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 268614.7981189803,
+      "LateralM": -2230.14,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 268688.603813737,
+      "LateralM": -2235.1357,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 268691.84348738525,
+      "LateralM": -2235.4465,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 269832.9804687837,
+      "LateralM": -1057.3911,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 270178.24020466144,
+      "LateralM": 73.264244,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 270246.1039110197,
+      "LateralM": -54.33568,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 270490.8096127419,
+      "LateralM": 397.6846,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 270837.842166129,
+      "LateralM": 567.9466,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 271215.98476230976,
+      "LateralM": 739.5638,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 271595.7888473878,
+      "LateralM": 850.7562,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 277160.7984451733,
+      "LateralM": 1160.5381,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 277163.960815562,
+      "LateralM": 1158.2644,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 277190.7551768778,
+      "LateralM": 1158.8019,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 279074.8339789847,
+      "LateralM": -981.0327,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 279465.4558874106,
+      "LateralM": -1655.4348,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 279537.5838104926,
+      "LateralM": -223.1397,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 279775.42743009713,
+      "LateralM": 71.862915,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 280144.1546934235,
+      "LateralM": 776.1802,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 280522.6582986474,
+      "LateralM": 882.6923,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 283258.15215335885,
+      "LateralM": -624.86884,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 283468.0223075971,
+      "LateralM": 70.36171,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 283850.0991381598,
+      "LateralM": 523.51013,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 284317.9105744879,
+      "LateralM": 886.12256,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 284602.8708637247,
+      "LateralM": 1071.7517,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 285466.950545455,
+      "LateralM": -856.1786,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 285698.4760340683,
+      "LateralM": 1034.2933,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 286295.1060589635,
+      "LateralM": 1092.3783,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 286589.707289918,
+      "LateralM": 1090.4875,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 286772.8312377837,
+      "LateralM": 943.11475,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 287330.7481650393,
+      "LateralM": -985.7846,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 287632.1146584184,
+      "LateralM": -478.87732,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 288128.41974129743,
+      "LateralM": -1994.9633,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 288485.19033073547,
+      "LateralM": 1091.7415,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 288885.8176290308,
+      "LateralM": 1034.4928,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 289312.2767859038,
+      "LateralM": 94.28878,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 289646.1355760911,
+      "LateralM": 122.49671,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 290016.8619875724,
+      "LateralM": 153.08267,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 290038.7188179987,
+      "LateralM": -961.74493,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 290383.6106572236,
+      "LateralM": -443.46414,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 290552.9649099296,
+      "LateralM": 1010.4652,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 290672.62386540865,
+      "LateralM": -143.40161,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 291124.4835481782,
+      "LateralM": -171.98082,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 291431.5612836961,
+      "LateralM": 675.7943,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 291654.493010852,
+      "LateralM": -129.94429,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 291954.24321382237,
+      "LateralM": -84.44759,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 292271.87377440504,
+      "LateralM": -961.79407,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 292320.34956143366,
+      "LateralM": 55.07478,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 292605.86194393376,
+      "LateralM": -73.769035,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 292662.8804228518,
+      "LateralM": 68.04365,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 292962.0038774201,
+      "LateralM": 86.11622,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 293397.643135982,
+      "LateralM": 125.41449,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 293727.548346631,
+      "LateralM": 141.78345,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 294198.3216342932,
+      "LateralM": 899.99695,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 294494.534648603,
+      "LateralM": 404.32687,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 294582.16260074556,
+      "LateralM": -273.06302,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 294782.3088151176,
+      "LateralM": 584.8911,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 294810.3693377943,
+      "LateralM": 184.70633,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 294911.58132456744,
+      "LateralM": -748.49304,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 295148.4751002681,
+      "LateralM": 111.80145,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 295261.27242193517,
+      "LateralM": -114.82854,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 295585.52960802306,
+      "LateralM": -249.90518,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 296291.6968175704,
+      "LateralM": -607.85974,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 296573.2640276645,
+      "LateralM": -761.931,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 297030.46504828625,
+      "LateralM": 52.77611,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 297408.82019577234,
+      "LateralM": 157.67456,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 297810.90453090216,
+      "LateralM": 466.1293,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 298384.3326410675,
+      "LateralM": 578.97363,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 298879.19023796305,
+      "LateralM": 519.2859,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 299248.8412100523,
+      "LateralM": 398.75424,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 299756.40030537394,
+      "LateralM": 716.7513,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 301493.6735543503,
+      "LateralM": 971.7289,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 301917.32885827875,
+      "LateralM": 970.3911,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 302466.91812712187,
+      "LateralM": -2152.3357,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 302489.7029893035,
+      "LateralM": -2169.1338,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 302506.38894818234,
+      "LateralM": 916.465,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 302806.39739072754,
+      "LateralM": 141.32886,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 302858.8481830129,
+      "LateralM": -1148.4146,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 303138.2389741555,
+      "LateralM": -832.6309,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 303185.1480227144,
+      "LateralM": -1142.0348,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 303529.248968236,
+      "LateralM": -1043.9954,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 303911.4294582643,
+      "LateralM": -695.11975,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 304230.1210273969,
+      "LateralM": -455.2879,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 304595.7935114248,
+      "LateralM": -252.40614,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 305085.471437596,
+      "LateralM": 69.3284,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 305582.15844209696,
+      "LateralM": -1841.766,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 305664.73182755226,
+      "LateralM": 370.89072,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 306002.8950484913,
+      "LateralM": 474.74518,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 306312.1315787532,
+      "LateralM": 551.3625,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 306626.1970467808,
+      "LateralM": 596.4815,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 307140.2037555413,
+      "LateralM": 1391.1962,
+      "Kind": "mast",
+      "HeightM": 45
+    },
+    {
+      "SMetres": 307894.49706963537,
+      "LateralM": 984.636,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 308224.60954089445,
+      "LateralM": 592.8424,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 308443.8137161415,
+      "LateralM": 1019.70984,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 308635.0470175919,
+      "LateralM": 450.2252,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 308783.80563271634,
+      "LateralM": 673.7531,
+      "Kind": "turbine",
+      "HeightM": 85
+    },
+    {
+      "SMetres": 309140.1281106985,
+      "LateralM": 552.2554,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 309458.9432504891,
+      "LateralM": 489.51102,
+      "Kind": "pylon",
+      "HeightM": 46
+    },
+    {
+      "SMetres": 309762.57410358713,
+      "LateralM": 429.463,
+      "Kind": "pylon",
+      "HeightM": 46
+    }
+  ],
+  "landmarks": [
+    {
+      "Id": "chiltern_chalk",
+      "Name": "Chiltern Chalk Cuttings",
+      "SMetres": 41560.905985135854,
+      "LateralM": 794.9255,
+      "Kind": "chalk_cutting"
+    },
+    {
+      "Id": "leicester_forest_east",
+      "Name": "Leicester Forest East Bridge Cafe",
+      "SMetres": 147046.38933519216,
+      "LateralM": -16.623297,
+      "Kind": "bridge_cafe"
+    },
+    {
+      "Id": "ratcliffe_towers",
+      "Name": "Ratcliffe-on-Soar Power Station",
+      "SMetres": 177800.0,
+      "LateralM": 240.0,
+      "Kind": "cooling_towers_8"
+    },
+    {
+      "Id": "tinsley_viaduct",
+      "Name": "Tinsley Viaduct",
+      "SMetres": 250101.70019509157,
+      "LateralM": -313.3879,
+      "Kind": "viaduct"
+    },
+    {
+      "Id": "emley_moor",
+      "Name": "Emley Moor Transmitting Station",
+      "SMetres": 275400.0,
+      "LateralM": -480.0,
+      "Kind": "emley_mast"
+    }
+  ]
+}

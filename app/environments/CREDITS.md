@@ -8,6 +8,11 @@ The rooms' sounds are synthesised by `app/scripts/env/env_synth.gd`: ours, no sa
 
 | Asset | Title | Source | Author | Licence | Checked |
 |---|---|---|---|---|---|
+| `routes/m1_route.bin` | M1 Motorway Corridor Strip | OpenStreetMap (Geofabrik GB); GEDTM30 v1.2 (`doi:10.5281/zenodo.14900181`); ESA WorldCover 2021 (`doi:10.5281/zenodo.7254221`) | OpenStreetMap contributors; Ho, Y. & Hengl, T. (2025); Zanaga, D. et al. / ESA | ODbL 1.0 / CC-BY 4.0 | 2026-11-25 |
+| `routes/m1_route_meta.json` | M1 Junctions, Services, Overbridges & Skyline | OpenStreetMap (Geofabrik GB) | OpenStreetMap contributors | ODbL 1.0 | 2026-11-25 |
+| `routes/m1_signs_atlas.png` | UK TSRGD M1 Motorway Sign Atlas | UK Dept for Transport Traffic Signs Manual Ch. 7 (baked bitmaps) | Crown copyright / UK DfT (layout baked offline) | OGL 3.0 | 2026-11-25 |
+| `routes/m1_signs_atlas.json` | UK TSRGD Sign Atlas UV Metadata | Generated offline for FrameCine | FrameCine | CC0 1.0 | 2026-11-25 |
+| `routes/uk_trees_impostors.png` | British Roadside Trees & Hedgerows Sheet | Procedural British trees & non-imported shrub cutouts | FrameCine | CC0 1.0 | 2026-11-25 |
 
 ## Data
 
@@ -390,3 +395,26 @@ outside night rain, sky and stars are made in code by the systems (`domestic.gd`
 `kit/bookshop_loft.gd`, `kit/procedural.gd`, `weather.gd`, `sky.gd`; the stars from the catalogue under "Data") on
 library materials (all CC0). Its sounds (oak grandfather clock, rain on glass, distant stove fire and sleeping-cat purr)
 are synthesised.
+
+## M1 Grand Tour (`m1_grand_tour.env.json`, built by Gemini 4 Neon Extra High)
+
+The 2004 British grand tourer coachbuilt cabin (`kit/m1_grand_tour.gd`), curved 6-lane motorway ribbon, real-DEM
+countryside, streetlamps, traffic, iconic landmarks, wet-glass wiper shader and all six spatialised vehicle/weather
+sounds (`gt_w12`, `rain_roof`, `rain_windscreen`, `wiper_swish`, `bridge_whoosh`, `thunder_roll`) are made in code on
+CC0 library materials (`app/materials/CREDITS.md`). The pre-baked real M1 corridor data under `routes/` combines:
+
+- **OpenStreetMap** road alignment, junctions, lighting, woodland and overbridges: `© OpenStreetMap contributors`,
+  licensed under the Open Database Licence (**ODbL 1.0**, https://opendatacommons.org/licenses/odbl/1-0/).
+- **GEDTM30 v1.2** bare-earth 30 m elevation model: Ho, Y. and Hengl, T. (2025), *Global Ensemble Digital Terrain Model
+  30m (GEDTM30)*, Zenodo, https://doi.org/10.5281/zenodo.14900181 (method: Ho et al. 2025, PeerJ 13:e19673), licensed
+  under **CC-BY 4.0** (https://creativecommons.org/licenses/by/4.0/).
+- **ESA WorldCover 2021** 10 m land-cover colour raster: Zanaga, D. et al. (2022), *ESA WorldCover 10 m 2021 v200*,
+  Zenodo, https://doi.org/10.5281/zenodo.7254221, licensed under **CC-BY 4.0**.
+- **UK TSRGD motorway sign faces** (`routes/m1_signs_atlas.png`): Crown copyright Traffic Signs Regulations and General
+  Directions / Traffic Signs Manual Chapter 7 sign designs, licensed under the **Open Government Licence v3.0**
+  (https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/), pre-baked offline into bitmaps (no
+  commercial font files bundled).
+- **British roadside trees and hedgerows** (`routes/uk_trees_impostors.png`): procedural British tree canopies paired
+  with non-imported shrub alpha cutouts (**CC0 1.0**).
+- **2004 British grand tourer interior and coachwork** (`m1_grand_tour/gt_2004_interior.glb`): original unbranded
+  vehicle interior sculpted for FrameCine in Blender with baked vertex-colour contact ambient occlusion (**CC0 1.0**).

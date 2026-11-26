@@ -94,6 +94,11 @@ func _run() -> void:
 	var byline := _doc([], {"credits": [{"asset": "x.ogg", "title": "X", "source": "a site", "licence": "CC-BY 4.0"}]})
 	_check("licences: CC-BY refused (%s)" % [EnvChecks.licences(byline)], EnvChecks.licences(byline).any(
 			func(s: String) -> bool: return s.contains("not CC0")))
+	var route_open := _doc([], {"credits": [{"asset": "routes/test.bin", "title": "T", "source": "OSM",
+			"licence": "ODbL 1.0"}]})
+	_check("licences: open-data route licence accepted (only missing file/credit reported: %s)"
+			% [EnvChecks.licences(route_open)], not EnvChecks.licences(route_open).any(
+			func(s: String) -> bool: return s.contains("not CC0")))
 	# Names.
 	_check("names: a real mark caught", EnvChecks.names(_doc([], {"name": "The Odeon"})).size() == 1)
 	var marks := ["Nickelodeon", "Regal", "Omnimax", "Atmos", "Compton", "Tron", "Quality Street", "Kia-Ora",

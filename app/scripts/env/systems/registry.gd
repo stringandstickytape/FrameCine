@@ -34,6 +34,7 @@ const SYSTEMS := {
 	"sky": "res://scripts/env/systems/sky.gd",
 	"vista": "res://scripts/env/systems/vista.gd",
 	"passing": "res://scripts/env/systems/passing.gd",
+	"motorway": "res://scripts/env/systems/motorway.gd",
 	"sound_bed": "res://scripts/env/systems/sound_bed.gd",
 	"acoustics": "res://scripts/env/systems/acoustics.gd",
 	"music": "res://scripts/env/systems/music.gd",

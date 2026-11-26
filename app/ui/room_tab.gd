@@ -137,6 +137,9 @@ func bind(p_app: Node) -> void:
 	(_groups[EnvDoc.ROOM_GROUPS["journey"]]["body"] as VBoxContainer).add_child(W.help(
 			"A journey is as long as the film: it leaves when the film starts and arrives with the credits. "
 			+ "Pause, and it waits."))
+	(_groups[EnvDoc.ROOM_GROUPS["drive"]]["body"] as VBoxContainer).add_child(W.help(
+			"Real-world roads built from open geographic data: pick where to join and which way to head, and "
+			+ "cruise through authentic terrain, landmarks, signage and weather."))
 	(_groups[EnvDoc.ROOM_GROUPS["world"]]["body"] as VBoxContainer).add_child(W.help(
 			"Impossible sanctuaries to watch a film: crystal caverns, orbital rings, cloud temples, "
 			+ "floating aerostats, sunken ruins and miniature worlds."))

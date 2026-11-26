@@ -381,6 +381,9 @@ msgstr "电视"
 msgid "Journeys"
 msgstr "旅程"
 
+msgid "Real drives"
+msgstr "真实公路自驾"
+
 msgid "Other worlds"
 msgstr "异界奇境"
 
@@ -2415,6 +2418,9 @@ msgstr "环境"
 msgid "A journey is as long as the film: it leaves when the film starts and arrives with the credits. Pause, and it waits."
 msgstr "旅程与影片一样长：影片开始时出发，片尾字幕时到达。暂停时，它会等待。"
 
+msgid "Real-world roads built from open geographic data: pick where to join and which way to head, and cruise through authentic terrain, landmarks, signage and weather."
+msgstr "基于开放地理数据打造的真实公路：选择起点路口与行驶方向，穿行于真实地形、地标、路牌与天气之中。"
+
 msgid "Impossible sanctuaries to watch a film: crystal caverns, orbital rings, cloud temples, floating aerostats, sunken ruins and miniature worlds."
 msgstr "不可思议的观影秘境：水晶溶洞、轨道环城、云端神殿、金星浮空艇、海底遗迹与微缩世界。"
 
@@ -3396,6 +3402,9 @@ msgstr "灯塔守望室"
 msgid "Liner 1936"
 msgstr "邮轮 1936"
 
+msgid "M1 Grand Tour"
+msgstr "M1 高速公路壮游"
+
 msgid "Mars train"
 msgstr "火星列车"
 
@@ -3573,6 +3582,9 @@ msgstr "矗立于风暴海角高处的圆形白石铸铁灯塔守望室，头顶
 
 msgid "An ocean liner's moderne lounge crossing at night: the ship never rolls while the tall velvet drapes sway gently, the Moon lays a road across open sea, and harbour lights rise with the credits."
 msgstr "夜航远洋邮轮的摩登休息厅：船身平稳不晃，高大的天鹅绒窗帘轻轻摆动，月光在海面上铺出银路，片尾字幕出现时港口灯光渐亮。"
+
+msgid "A 2004 British grand tourer cruising the real M1 motorway from London J1 to Leeds J48: twin-wing burr walnut, live synced screens, UK road signs, real terrain and British weather."
+msgstr "2004 年英伦豪华轿跑驰骋真实英国 M1 高速（伦敦 J1 至利兹 J48）：双翼胡桃木仪表、双屏同步、真实英国路牌、实景地形与英伦天气。"
 
 msgid "A pressurised Martian rover-train crossing a rust-ochre plain under a real blue Martian sunset: dust devils fade as starlight takes the sky, arriving at a glowing domed night colony."
 msgstr "在真实火星蓝色日落下穿越铁锈色平原的加压漫游列车：尘风渐歇、星光满天，最终抵达夜晚亮灯的圆顶基地。"
@@ -3811,6 +3823,21 @@ msgstr "雾号"
 msgid "Cove lights"
 msgstr "灯槽灯光"
 
+msgid "Join motorway at"
+msgstr "驶入高速路口"
+
+msgid "Direction"
+msgstr "行驶方向"
+
+msgid "Cabin trim"
+msgstr "座舱内饰"
+
+msgid "Weather"
+msgstr "天气"
+
+msgid "Traffic"
+msgstr "车流密度"
+
 msgid "Cabin lighting"
 msgstr "车厢灯光"
 
@@ -3874,9 +3901,6 @@ msgstr "暖光串灯"
 
 msgid "Fireflies"
 msgstr "萤火虫"
-
-msgid "Weather"
-msgstr "天气"
 
 msgid "Floodlights on the hill"
 msgstr "山上的泛光灯"
@@ -4097,6 +4121,24 @@ msgstr "下方海角远处雾号在夜海上传来的响度与频率。"
 
 msgid "The proscenium coves' colour before the film. During the film they soften towards the picture."
 msgstr "影片开始前台口灯槽的颜色。放映时会柔化并趋近画面色彩。"
+
+msgid "Which real M1 junction or landmark stretch to join the drive from."
+msgstr "选择从哪一处真实的 M1 高速路口或地标路段开始行驶。"
+
+msgid "Cruise northbound from London towards Yorkshire, or southbound back towards London."
+msgstr "从伦敦北上前往约克郡，或自北向南驶回伦敦。"
+
+msgid "Hand-stitched hide and book-matched walnut veneer trim for the grand tourer interior."
+msgstr "豪华轿跑座舱的手工缝线真皮与对称纹胡桃木饰面风格。"
+
+msgid "Fixed lighting from crisp British morning to late night, or smooth progression across the drive."
+msgstr "固定为清晨至深夜的某一英伦光影时段，或随车程自然过渡。"
+
+msgid "Organic British motorway weather along the miles, or hold clear skies, valley fog, rain or a rolling storm."
+msgstr "随里程自然演变的英国高速天气，或保持晴朗、河谷晨雾、细雨或雷雨。"
+
+msgid "Density of slower Lane 1 lorries and cars plus oncoming motorway traffic."
+msgstr "外侧慢车道货车与轿车以及对向高速公路车流的密度。"
 
 msgid "Indirect expedition cove strips along the overhead raceways, screen surround and aisle floor guides."
 msgstr "头顶线槽、银幕边框与过道地面的柔和间接灯带。"
@@ -4520,6 +4562,69 @@ msgstr "玉绿色"
 msgid "Silver blue"
 msgstr "银蓝色"
 
+msgid "London (J1)"
+msgstr "伦敦（J1）"
+
+msgid "Chilterns (J10)"
+msgstr "奇尔顿丘陵（J10）"
+
+msgid "Watford Gap (J16)"
+msgstr "沃特福德山口（J16）"
+
+msgid "Leicester (J21)"
+msgstr "莱斯特（J21）"
+
+msgid "Ratcliffe (J24)"
+msgstr "拉特克利夫（J24）"
+
+msgid "Sheffield (J33)"
+msgstr "谢菲尔德（J33）"
+
+msgid "Leeds (J47)"
+msgstr "利兹（J47）"
+
+msgid "Northbound (towards Leeds)"
+msgstr "北行（前往利兹）"
+
+msgid "Southbound (towards London)"
+msgstr "南行（前往伦敦）"
+
+msgid "Saddle & Burr Walnut"
+msgstr "马鞍棕皮与胡桃木"
+
+msgid "Beluga & Dark Walnut"
+msgstr "深炭黑皮与暗胡桃木"
+
+msgid "Oxblood & Dark Walnut"
+msgstr "暗红真皮与暗胡桃木"
+
+msgid "Morning"
+msgstr "清晨"
+
+msgid "Afternoon"
+msgstr "午后"
+
+msgid "Golden hour"
+msgstr "金色时光"
+
+msgid "Progress with drive"
+msgstr "随行驶进程变化"
+
+msgid "Mixed (British drive)"
+msgstr "多变（英伦行程）"
+
+msgid "Clear"
+msgstr "晴朗"
+
+msgid "Overcast"
+msgstr "阴天"
+
+msgid "Valley mist & fog"
+msgstr "河谷薄雾与浓雾"
+
+msgid "Thunderstorm"
+msgstr "雷雨"
+
 msgid "Habitat amber"
 msgstr "基地琥珀色"
 
@@ -4598,9 +4703,6 @@ msgstr "1929 家用胶片"
 msgid "Night city lights"
 msgstr "灯火夜城"
 
-msgid "Golden hour"
-msgstr "金色时光"
-
 msgid "Twilight glow"
 msgstr "暮色微光"
 
@@ -4634,9 +4736,6 @@ msgstr "变换"
 
 msgid "Mist"
 msgstr "薄雾"
-
-msgid "Clear"
-msgstr "晴朗"
 
 msgid "Open for the film"
 msgstr "放映时开启"

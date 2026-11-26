@@ -37,6 +37,8 @@ static func spec() -> Dictionary:
 
 
 const PARAMS := {
+	"shell": {"type": "enum", "values": ["cabin", "kit"], "default": "cabin",
+			"description": "cabin: build the standard vehicle shell; kit: leave shell geometry to a bespoke kit piece while keeping seating, screen and acoustics"},
 	"width": {"type": "float", "min": 1.6, "max": 12.0, "default": 2.6, "description": "the inside width at the floor"},
 	"wall_height": {"type": "float", "min": 1.2, "max": 3.5, "default": 1.9,
 			"description": "the height at which the side walls end and the roof begins"},
@@ -47,6 +49,10 @@ const PARAMS := {
 			"description": "how far an arched roof rises over the walls' tops at its middle"},
 	"glazed_roof": {"type": "bool", "default": false,
 			"description": "open panoramic glass roof canopy (a dome observation car) with steel mullions"},
+	"front_window": {"type": "bool", "default": false,
+			"description": "open panoramic front windscreen above dado_height (for driving cabins)"},
+	"rear_window": {"type": "bool", "default": false,
+			"description": "open panoramic rear saloon window above dado_height"},
 	"front_z": {"type": "float", "min": -30.0, "max": -1.5, "default": -3.0,
 			"description": "z of the front bulkhead (the screen's)"},
 	"back_z": {"type": "float", "min": 0.6, "max": 30.0, "default": 2.4, "description": "z of the rear bulkhead"},
@@ -100,8 +106,8 @@ const PARAMS := {
 	"screen_frame": {"type": "bool", "default": true, "description": "a narrow frame round the picture"},
 	"window_glass": {"type": "bool", "default": true,
 			"description": "plain glass in the windows (false when a weather system draws rain panes there)"},
-	"seating": {"type": "enum", "values": ["none", "rows"], "default": "none",
-			"description": "none: the viewer's own seat alone; rows: seats in rows either side of an aisle"},
+	"seating": {"type": "enum", "values": ["none", "rows", "bench"], "default": "none",
+			"description": "none: the viewer's own seat alone; rows: seats either side of an aisle; bench: odd 3-across rear bench centred on origin"},
 	"rows_front": {"type": "int", "min": 0, "max": 30, "default": 2, "description": "rows in front of the viewer's"},
 	"rows_back": {"type": "int", "min": 0, "max": 30, "default": 1, "description": "rows behind the viewer's"},
 	"row_pitch": {"type": "float", "min": 0.7, "max": 2.0, "default": 0.9, "description": "metres a row"},
@@ -347,7 +353,15 @@ static func _box(p: Dictionary) -> AABB:
 static func seat_slots_for(p: Dictionary) -> Array:
 	var q := resolved(p)
 	var out: Array = []
-	if str(q["seating"]) != "rows":
+	var seating := str(q["seating"])
+	if seating == "bench":
+		var pitch := float(q["seat_pitch"])
+		var cx := float(q["cx"])
+		# Odd 3-across bench with dead-centre head-on seat at (cx, 0, 0) — zero centre aisle!
+		for idx: int in [-1, 0, 1]:
+			out.append(U.slot(Transform3D(Basis(), Vector3(cx + float(idx) * pitch, 0.0, 0.0)), 0, "club", pitch))
+		return out
+	if seating != "rows":
 		out.append(U.slot(Transform3D(), 0, "club", 0.7))
 		return out
 	var cx := float(q["cx"])
@@ -471,6 +485,8 @@ var _door_glow: ShaderMaterial
 
 
 func build() -> void:
+	if str(params.get("shell", "cabin")) == "kit":
+		return
 	var q := resolved(params)
 	var cx := float(q["cx"])
 	var hw := float(q["hw"])
@@ -565,11 +581,15 @@ func _build_lining(q: Dictionary) -> void:
 				back.append(Vector3(pts[i].x, pts[i].y, bz))
 				n3.append(Vector3(normals[i].x, normals[i].y, 0.0))
 			lin.strip(front, back, n3)
-	# The bulkheads: the section's outline (the roof's points begin and end at the walls' tops).
+	# The bulkheads: the section's outline (skipped when front_window / rear_window leaves a panoramic view open).
 	lin.surface(_mat("bulkhead"))
 	var cx := float(q["cx"])
 	var hw := float(q["hw"])
-	for end: Array in [[fz, Vector3.BACK], [bz, Vector3.FORWARD]]:
+	var open_front := bool(params.get("front_window", false))
+	var open_rear := bool(params.get("rear_window", false))
+	for end: Array in [[fz, Vector3.BACK, open_front], [bz, Vector3.FORWARD, open_rear]]:
+		if bool(end[2]):
+			continue
 		var z: float = end[0]
 		var outline := PackedVector3Array([Vector3(cx - hw, 0.0, z)])
 		for p: Vector2 in pts:

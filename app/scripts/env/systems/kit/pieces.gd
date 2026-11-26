@@ -52,6 +52,7 @@ const RainyTreehouse := preload("res://scripts/env/systems/kit/rainy_treehouse.g
 const KyotoPavilion := preload("res://scripts/env/systems/kit/kyoto_pavilion.gd")
 const NightGreenhouse := preload("res://scripts/env/systems/kit/night_greenhouse.gd")
 const BookshopLoft := preload("res://scripts/env/systems/kit/bookshop_loft.gd")
+const M1GrandTour := preload("res://scripts/env/systems/kit/m1_grand_tour.gd")
 
 const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk", "column", "facade", "castle_gate",
 		"booth", "snack_bar", "screen_tower", "bougainvillea", "ivy", "ferns", "carpet", "partition", "curves",
@@ -89,7 +90,8 @@ const PIECES: Array[String] = ["balcony_front", "niche", "urn", "lion", "obelisk
 		"treehouse_canopy", "treehouse_deck",
 		"kyoto_engawa", "kyoto_garden",
 		"greenhouse_vault", "greenhouse_flora",
-		"bookshop_mezzanine", "bookshop_shelves"]
+		"bookshop_mezzanine", "bookshop_shelves",
+		"gt_2004_cabin", "gt_2004_dash"]
 ## Each piece's size when neither the entry nor its slot gives one: [width, height, depth].
 const SIZES := {
 	"balcony_front": [6.0, 1.0, 0.25], "niche": [1.3, 2.6, 0.4], "urn": [0.5, 1.0, 0.5], "lion": [0.55, 0.9, 1.0],
@@ -143,6 +145,7 @@ const SIZES := {
 	"kyoto_engawa": [0.0, 0.0, 0.0], "kyoto_garden": [0.0, 0.0, 0.0],
 	"greenhouse_vault": [0.0, 0.0, 0.0], "greenhouse_flora": [0.0, 0.0, 0.0],
 	"bookshop_mezzanine": [0.0, 0.0, 0.0], "bookshop_shelves": [0.0, 0.0, 0.0],
+	"gt_2004_cabin": [0.0, 0.0, 0.0], "gt_2004_dash": [0.0, 0.0, 0.0],
 }
 ## The pieces that stand on a floor (their slot's origin is a floor point); the others hang on a wall.
 const STANDING: Array[String] = ["urn", "lion", "obelisk", "column", "booth", "snack_bar", "ferns", "partition",
@@ -272,6 +275,8 @@ static func build(piece: String, c: Object, xf: Transform3D, size: Vector3, e: D
 			NightGreenhouse.build(piece, c, xf, size, e)
 		"bookshop_mezzanine", "bookshop_shelves":
 			BookshopLoft.build(piece, c, xf, size, e)
+		"gt_2004_cabin", "gt_2004_dash":
+			M1GrandTour.build(piece, c, xf, size, e)
 
 
 # --- Furniture (furniture.gd draws it) -----------------------------------------------------------------------------

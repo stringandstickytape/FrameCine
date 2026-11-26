@@ -585,8 +585,24 @@ static func _max_value(v: Variant) -> float:
 
 # --- Licences ------------------------------------------------------------------------------------------------------------
 
+## Open-data licences permitted for bundled geographic route extracts (under environments/routes/) when fully
+## credited in app/environments/CREDITS.md; all other bundled media and library materials remain strictly CC0.
+const OPEN_DATA_LICENCES: Array[String] = ["CC0", "CC-BY 4.0", "CC-BY-4.0", "ODbL 1.0", "ODbL-1.0", "OGL 3.0", "OGL-3.0"]
+
+
+static func _licence_allowed(asset: String, lic: String) -> bool:
+	if lic.begins_with("CC0"):
+		return true
+	if asset.begins_with("routes/"):
+		for ok: String in OPEN_DATA_LICENCES:
+			if lic.begins_with(ok):
+				return true
+	return false
+
+
 ## Every library material the room uses (its systems' material parameters, defaults included) is CC0 and credited;
-## every asset in its credits is CC0, exists, and is in app/environments/CREDITS.md. Synthesised sounds are ours.
+## every asset in its credits is CC0 (or an approved open-data licence for routes/ extracts), exists, and is in
+## app/environments/CREDITS.md. Synthesised sounds are ours.
 static func licences(doc: Dictionary, credits_file := "res://environments/CREDITS.md",
 		materials_credits := "res://materials/CREDITS.md") -> Array:
 	var out: Array = []
@@ -601,7 +617,8 @@ static func licences(doc: Dictionary, credits_file := "res://environments/CREDIT
 	var credits := FileAccess.get_file_as_string(credits_file)
 	for c: Dictionary in doc.get("credits", []):
 		var asset := str(c.get("asset", ""))
-		if not str(c.get("licence", "")).begins_with("CC0"):
+		var lic := str(c.get("licence", ""))
+		if not _licence_allowed(asset, lic):
 			out.append("%s: licence %s, not CC0" % [asset, c.get("licence")])
 		if not FileAccess.file_exists("res://environments/" + asset):
 			out.append("%s: not bundled under environments/" % asset)
