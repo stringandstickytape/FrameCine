@@ -410,10 +410,10 @@ CC0 library materials (`app/materials/CREDITS.md`). The pre-baked real M1 corrid
   under **CC-BY 4.0** (https://creativecommons.org/licenses/by/4.0/).
 - **ESA WorldCover 2021** 10 m land-cover colour raster: Zanaga, D. et al. (2022), *ESA WorldCover 10 m 2021 v200*,
   Zenodo, https://doi.org/10.5281/zenodo.7254221, licensed under **CC-BY 4.0**.
-- **UK TSRGD motorway sign faces** (`routes/m1_signs_atlas.png`): Crown copyright Traffic Signs Regulations and General
-  Directions / Traffic Signs Manual Chapter 7 sign designs, licensed under the **Open Government Licence v3.0**
-  (https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/), pre-baked offline into bitmaps (no
-  commercial font files bundled).
+- **UK TSRGD motorway sign faces** (`routes/m1_signs_atlas.png`): Contains public sector information licensed under
+  the **Open Government Licence v3.0** (https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/),
+  based on UK Department for Transport Traffic Signs Regulations and General Directions / Traffic Signs Manual
+  Chapter 7 sign designs, pre-baked offline into bitmaps (no commercial font files bundled).
 - **British roadside trees and hedgerows** (`routes/uk_trees_impostors.png`): procedural British tree canopies paired
   with non-imported shrub alpha cutouts (**CC0 1.0**).
 - **2004 British grand tourer interior and coachwork** (`m1_grand_tour/gt_2004_interior.glb`): original unbranded

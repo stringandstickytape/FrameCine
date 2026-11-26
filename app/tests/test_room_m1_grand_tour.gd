@@ -225,14 +225,14 @@ func _render(doc: Dictionary) -> void:
 	cam.fov = 76.0
 	await RoomRender.shot(self, vc, Vector3(0.0, 1.20, 0.0), Vector3(0.0, 1.24, -40.0), "m1_08_storm_wipers_lfe_cafe")
 
-	# 9. Trim 2: Beluga & Dark Walnut cockpit close-up
-	room.host.set_setting("trim", "beluga")
+	# 9. Trim 2: Charcoal & Dark Walnut cockpit close-up
+	room.host.set_setting("trim", "charcoal")
 	room.host.set_setting("time_of_day", "afternoon")
 	room.host.set_setting("weather", "clear")
 	mw.call("act", "jump_km", {"km": 37.448})
 	await settle.call(3, 0.02)
 	cam.fov = 66.0
-	await RoomRender.shot(self, vc, Vector3(-0.46, 1.08, -1.16), Vector3(0.24, 0.80, -1.74), "m1_09_trim_beluga")
+	await RoomRender.shot(self, vc, Vector3(-0.46, 1.08, -1.16), Vector3(0.24, 0.80, -1.74), "m1_09_trim_charcoal")
 
 	# 10. Trim 3: Oxblood & Dark Walnut cockpit close-up
 	room.host.set_setting("trim", "oxblood")

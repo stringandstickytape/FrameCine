@@ -11,13 +11,13 @@ extends RefCounted
 ##   - Four gleaming knurled-chrome bullseye vents + turned-chrome organ-stop pull plungers
 ##   - Central chrome-bezel analogue clock (`PieceClock`, live system time, zero watch branding)
 ##   - Hooded RHD 4-gauge chrome-ringed instrument binnacle with live animated speedo/tacho needles & 4-spoke
-##     Beluga leather steering wheel (unbranded hub!), alloy shift paddles & drilled sport pedals
+##     charcoal leather steering wheel (unbranded hub!), alloy shift paddles & drilled sport pedals
 ##   - Sloping burr-walnut centre waterfall with 4+4 chrome-rimmed soft keys framing a LIVE SYNCED auxiliary
 ##     `DashScreen` (mirrors `Flat.material_override` directly — 1 quad, 2 tris, 1 draw, zero extra SubViewports!)
 ##   - Natural automotive-position reclined cobra front bucket seats (strictly empty!) + plush 3-across rear bench
-##     (dead-centre seat at (0, 0, 0)) + cantilevered walnut-and-alloy rear cinema screen stanchion
+##     (dead-centre seat at (0, 0, 0)) + seatback-mounted walnut-backed rear cinema screen
 ##   - Animated twin front wipers + wet laminated windscreen with live swept clear-arc mask
-##   - Three instant live-switchable Crewe trims: Saddle & Burr Walnut, Beluga & Dark Walnut, Oxblood & Dark Walnut
+##   - Three instant live-switchable coachbuilt trims: Saddle & Burr Walnut, Charcoal & Dark Walnut, Oxblood & Dark Walnut
 ##   - Zero trademarks/logos, zero people, static tinted mirrors only, zero live lights.
 
 const MaterialLibrary := preload("res://scripts/env/material_library.gd")
@@ -31,11 +31,11 @@ const DOME_WARM := Color(1.0, 0.88, 0.68)
 const COVE_COOL := Color(0.86, 0.92, 1.0)
 const PAINT_TEMPEST := Color(0.11, 0.145, 0.185)
 
-## Three Crewe coachbuilt trims (live-applied to GT_mat_hide and GT_mat_walnut without rebuilding!).
+## Three British coachbuilt trims (live-applied to GT_mat_hide and GT_mat_walnut without rebuilding!).
 const TRIMS := {
-	"saddle":  {"hide": Color(0.77, 0.67, 0.53), "walnut": Color(0.28, 0.125, 0.055)},
-	"beluga":  {"hide": Color(0.14, 0.16, 0.21), "walnut": Color(0.18, 0.092, 0.055)},
-	"oxblood": {"hide": Color(0.46, 0.10, 0.12), "walnut": Color(0.20, 0.095, 0.058)},
+	"saddle":   {"hide": Color(0.77, 0.67, 0.53), "walnut": Color(0.28, 0.125, 0.055)},
+	"charcoal": {"hide": Color(0.14, 0.16, 0.21), "walnut": Color(0.18, 0.092, 0.055)},
+	"oxblood":  {"hide": Color(0.46, 0.10, 0.12), "walnut": Color(0.20, 0.095, 0.058)},
 }
 
 ## Static immutable geometry & anchor cache parsed once from the CC0 .glb so room rebuilds take < 2 ms!
@@ -335,7 +335,7 @@ class GtLiveRig extends Node3D:
 		_time += delta
 		var host: Node = _room.get("host") if is_instance_valid(_room) else null
 
-		# A. Instant Crewe Trim tinting (saddle / beluga / oxblood)
+		# A. Instant coachbuilt trim tinting (saddle / charcoal / oxblood)
 		var trim := "saddle"
 		if host != null and host.get("settings") is Dictionary:
 			trim = str((host.settings as Dictionary).get("trim", "saddle"))

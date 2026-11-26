@@ -6216,7 +6216,7 @@ msgid "Saddle & Burr Walnut"
 msgstr ""
 
 #: environments/m1_grand_tour.env.json
-msgid "Beluga & Dark Walnut"
+msgid "Charcoal & Dark Walnut"
 msgstr ""
 
 #: environments/m1_grand_tour.env.json

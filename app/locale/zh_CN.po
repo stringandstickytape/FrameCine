@@ -4592,7 +4592,7 @@ msgstr "南行（前往伦敦）"
 msgid "Saddle & Burr Walnut"
 msgstr "马鞍棕皮与胡桃木"
 
-msgid "Beluga & Dark Walnut"
+msgid "Charcoal & Dark Walnut"
 msgstr "深炭黑皮与暗胡桃木"
 
 msgid "Oxblood & Dark Walnut"
